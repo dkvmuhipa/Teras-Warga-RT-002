@@ -9,7 +9,8 @@ import {
   onSnapshot,
   query,
   getDocs,
-  setDoc
+  setDoc,
+  orderBy
 } from "firebase/firestore";
 
 // Collection References
@@ -18,9 +19,10 @@ const ANNOUNCEMENTS_COL = "announcements";
 const CASHFLOW_COL = "cashFlow";
 const OFFICIALS_COL = "officials";
 const RONDA_COL = "ronda";
+const REPORTS_COL = "reports"; // Koleksi Laporan Warga
+const LETTERS_COL = "letters"; // Koleksi Arsip Surat
 
 // --- UTILS ---
-// Firestore throws error if a field is undefined. We must sanitize it.
 const sanitize = (data: any) => {
   const clean: any = {};
   Object.keys(data).forEach(key => {
@@ -31,10 +33,11 @@ const sanitize = (data: any) => {
   return clean;
 };
 
-// --- GENERIC SUBSCRIBE FUNCTION ---
+// --- GENERIC SUBSCRIBE ---
 export const subscribeToCollection = (colName: string, callback: (data: any[]) => void) => {
-  if (!isFirebaseConfigured) return () => {}; // Do nothing in Demo Mode
+  if (!isFirebaseConfigured) return () => {};
 
+  // Default sort by specific logic can be handled in UI, but here we fetch all
   const q = query(collection(db, colName));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => ({
@@ -47,9 +50,7 @@ export const subscribeToCollection = (colName: string, callback: (data: any[]) =
   });
 };
 
-// --- CRUD OPERATIONS ---
-
-// 1. HOUSES (WARGA)
+// --- 1. HOUSES (WARGA) ---
 export const addHouse = async (houseData: any) => {
   if (!isFirebaseConfigured) return;
   try {
@@ -59,9 +60,7 @@ export const addHouse = async (houseData: any) => {
     } else {
        await addDoc(collection(db, HOUSES_COL), cleanData);
     }
-  } catch (e) {
-    console.error("Error adding house: ", e);
-  }
+  } catch (e) { console.error("Error adding house: ", e); }
 };
 
 export const updateHouseStatus = async (id: string, updates: any) => {
@@ -69,109 +68,120 @@ export const updateHouseStatus = async (id: string, updates: any) => {
     try {
       const houseRef = doc(db, HOUSES_COL, id);
       await updateDoc(houseRef, sanitize(updates));
-    } catch (e) {
-      console.error("Error updating house:", e);
-    }
+    } catch (e) { console.error("Error updating house:", e); }
 };
 
-// 2. ANNOUNCEMENTS
+// --- 2. ANNOUNCEMENTS ---
 export const addAnnouncementToDb = async (announcement: any) => {
-  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan ke database."); return; }
+  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan."); return; }
   try {
     const { id, ...data } = announcement; 
     await addDoc(collection(db, ANNOUNCEMENTS_COL), sanitize(data));
-  } catch (e) {
-    console.error("Error adding announcement:", e);
-  }
+  } catch (e) { console.error("Error adding announcement:", e); }
 };
 
 export const deleteAnnouncementFromDb = async (id: string) => {
   if (!isFirebaseConfigured) return;
-  try {
-    await deleteDoc(doc(db, ANNOUNCEMENTS_COL, id));
-  } catch (e) {
-    console.error("Error deleting announcement:", e);
-  }
+  try { await deleteDoc(doc(db, ANNOUNCEMENTS_COL, id)); } catch (e) { console.error("Error deleting announcement:", e); }
 };
 
-// 3. CASHFLOW (KEUANGAN)
+// --- 3. CASHFLOW ---
 export const addTransactionToDb = async (transaction: any) => {
-  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan ke database."); return; }
+  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan."); return; }
   try {
     const { id, ...data } = transaction;
     await addDoc(collection(db, CASHFLOW_COL), sanitize(data));
-  } catch (e) {
-    console.error("Error adding transaction:", e);
-  }
+  } catch (e) { console.error("Error adding transaction:", e); }
 };
 
 export const deleteTransactionFromDb = async (id: string) => {
   if (!isFirebaseConfigured) return;
-  try {
-    await deleteDoc(doc(db, CASHFLOW_COL, id));
-  } catch (e) {
-    console.error("Error deleting transaction:", e);
-  }
+  try { await deleteDoc(doc(db, CASHFLOW_COL, id)); } catch (e) { console.error("Error deleting transaction:", e); }
 };
 
-// 4. OFFICIALS (PENGURUS)
+// --- 4. OFFICIALS ---
 export const addOfficialToDb = async (official: any) => {
-  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan ke database."); return; }
+  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan."); return; }
   try {
     const { id, ...data } = official;
     await addDoc(collection(db, OFFICIALS_COL), sanitize(data));
-  } catch (e) {
-    console.error("Error adding official:", e);
-  }
+  } catch (e) { console.error("Error adding official:", e); }
 };
 
 export const updateOfficialInDb = async (id: string, updates: any) => {
-  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan ke database."); return; }
-  try {
-    await updateDoc(doc(db, OFFICIALS_COL, id), sanitize(updates));
-  } catch (e) {
-    console.error("Error updating official:", e);
-  }
+  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan."); return; }
+  try { await updateDoc(doc(db, OFFICIALS_COL, id), sanitize(updates)); } catch (e) { console.error("Error updating official:", e); }
 };
 
 export const deleteOfficialFromDb = async (id: string) => {
   if (!isFirebaseConfigured) return;
-  try {
-    await deleteDoc(doc(db, OFFICIALS_COL, id));
-  } catch (e) {
-    console.error("Error deleting official:", e);
-  }
+  try { await deleteDoc(doc(db, OFFICIALS_COL, id)); } catch (e) { console.error("Error deleting official:", e); }
 };
 
-// 5. SEEDING (Digunakan sekali untuk mengisi database awal jika kosong)
+// --- 5. REPORTS (LAPORAN WARGA) ---
+export const addReportToDb = async (report: any) => {
+  if (!isFirebaseConfigured) { alert("Demo Mode: Laporan tidak terkirim ke database."); return; }
+  try {
+    const { id, ...data } = report;
+    await addDoc(collection(db, REPORTS_COL), sanitize(data));
+  } catch (e) { console.error("Error adding report:", e); }
+};
+
+export const updateReportStatus = async (id: string, status: string) => {
+  if (!isFirebaseConfigured) return;
+  try {
+    await updateDoc(doc(db, REPORTS_COL, id), { status });
+  } catch (e) { console.error("Error updating report:", e); }
+};
+
+export const deleteReportFromDb = async (id: string) => {
+  if (!isFirebaseConfigured) return;
+  try { await deleteDoc(doc(db, REPORTS_COL, id)); } catch (e) { console.error("Error deleting report:", e); }
+};
+
+// --- 6. LETTERS (ARSIP SURAT) ---
+export const addLetterToDb = async (letter: any) => {
+  if (!isFirebaseConfigured) return; // Silent return for letters in demo
+  try {
+    const { id, ...data } = letter;
+    await addDoc(collection(db, LETTERS_COL), sanitize(data));
+  } catch (e) { console.error("Error adding letter:", e); }
+};
+
+export const updateLetterStatus = async (id: string, status: string) => {
+  if (!isFirebaseConfigured) return;
+  try { await updateDoc(doc(db, LETTERS_COL, id), { status }); } catch (e) { console.error("Error updating letter:", e); }
+};
+
+export const deleteLetterFromDb = async (id: string) => {
+  if (!isFirebaseConfigured) return;
+  try { await deleteDoc(doc(db, LETTERS_COL, id)); } catch (e) { console.error("Error deleting letter:", e); }
+};
+
+
+// --- SEEDING ---
 export const seedDatabase = async (initialData: any) => {
-    if (!isFirebaseConfigured) return; // Skip seeding in demo mode
+    if (!isFirebaseConfigured) return;
 
     try {
       const housesSnap = await getDocs(collection(db, HOUSES_COL));
       if (housesSnap.empty && initialData.houses.length > 0) {
           console.log("Seeding Houses...");
-          for (const h of initialData.houses) {
-            await addHouse(h);
-          }
+          for (const h of initialData.houses) await addHouse(h);
       }
 
       const officialsSnap = await getDocs(collection(db, OFFICIALS_COL));
       if (officialsSnap.empty && initialData.officials.length > 0) {
           console.log("Seeding Officials...");
-          for (const o of initialData.officials) {
-            await addOfficialToDb(o);
-          }
+          for (const o of initialData.officials) await addOfficialToDb(o);
       }
       
       const rondaSnap = await getDocs(collection(db, RONDA_COL));
       if (rondaSnap.empty && initialData.ronda.length > 0) {
           console.log("Seeding Ronda...");
-          for (const r of initialData.ronda) {
-            await addDoc(collection(db, RONDA_COL), sanitize(r));
-          }
+          for (const r of initialData.ronda) await addDoc(collection(db, RONDA_COL), sanitize(r));
       }
     } catch (e) {
-      console.error("Seeding failed (Check your Firebase Config / Permission):", e);
+      console.error("Seeding failed:", e);
     }
 };

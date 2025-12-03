@@ -6,7 +6,7 @@ import {
   LayoutDashboard, CreditCard, Send, Bot, Check, Trash2, Clock, CheckCircle, XCircle, Search, Edit2, Plus,
   Shield, Phone, TrendingUp, TrendingDown, Wallet, Calendar, ChevronRight, Moon, Sun, CloudRain, 
   MoreVertical, LogOut, ChevronDown, Filter, Download, Save, RefreshCw, Image as ImageIcon, Printer,
-  DollarSign, Briefcase, MapPin, Sparkles, Loader2, Store
+  DollarSign, Briefcase, MapPin, Sparkles, Loader2, Store, Archive
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 
@@ -30,7 +30,12 @@ import {
   addOfficialToDb,
   updateOfficialInDb,
   deleteOfficialFromDb,
-  updateHouseStatus,
+  addReportToDb,
+  updateReportStatus,
+  deleteReportFromDb,
+  addLetterToDb,
+  updateLetterStatus,
+  deleteLetterFromDb,
   seedDatabase
 } from './services/databaseService';
 
@@ -59,17 +64,6 @@ const Card: React.FC<{ children: React.ReactNode, className?: string, title?: st
     {children}
   </div>
 );
-
-const Badge: React.FC<{ children: React.ReactNode, type?: 'success' | 'warning' | 'danger' | 'info' | 'default' }> = ({ children, type = 'default' }) => {
-  const styles = {
-    success: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    warning: 'bg-amber-100 text-amber-700 border-amber-200',
-    danger: 'bg-rose-100 text-rose-700 border-rose-200',
-    info: 'bg-sky-100 text-sky-700 border-sky-200',
-    default: 'bg-slate-100 text-slate-700 border-slate-200'
-  };
-  return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${styles[type]}`}>{children}</span>;
-};
 
 // --- Modal Component ---
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => {
@@ -328,16 +322,16 @@ const PublicServices = () => {
   const [reportDesc, setReportDesc] = useState('');
   const [reporterName, setReporterName] = useState('');
 
-  const handleSubmitSurat = (e: React.FormEvent) => {
+  const handleSubmitSurat = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Construct request object for PDF
+    // Construct request object for PDF & DB
     const letterData: LetterRequest = {
         id: Date.now().toString(),
         type: requestType,
         applicantName: applicantName,
         houseId: houseId,
-        nik: '7271xxxxxxxxxxxx', // Placeholder for demo purposes
+        nik: '7271xxxxxxxxxxxx', 
         birthPlace: 'Palu',
         birthDate: '1990-01-01',
         religion: 'Islam',
@@ -349,13 +343,30 @@ const PublicServices = () => {
         date: new Date().toISOString().split('T')[0]
     };
     
+    // 1. Generate PDF for User
     generateSuratPengantar(letterData);
-    alert("Permohonan berhasil! Surat pengantar telah diunduh otomatis.");
+    
+    // 2. Save to Database for Admin
+    await addLetterToDb(letterData);
+
+    alert("Permohonan berhasil! Surat telah diunduh dan notifikasi dikirim ke RT.");
+    setApplicantName(''); setHouseId('');
   };
 
-  const handleSubmitLapor = (e: React.FormEvent) => {
+  const handleSubmitLapor = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const newReport: any = {
+      type: reportType,
+      description: reportDesc,
+      reporterName: reporterName || "Anonim",
+      date: new Date().toISOString().split('T')[0],
+      status: 'Baru'
+    };
+
+    await addReportToDb(newReport);
     alert("Laporan berhasil dikirim! Akan segera ditindaklanjuti.");
+    setReportDesc(''); setReporterName('');
   };
 
   return (
@@ -708,12 +719,16 @@ const AdminDashboard = ({
   houses, 
   announcements, 
   cashFlow,
-  officials
+  officials,
+  reports,
+  letters
 }: { 
   houses: House[], 
   announcements: Announcement[],
   cashFlow: CashFlow[],
-  officials: Official[]
+  officials: Official[],
+  reports: Report[],
+  letters: LetterRequest[]
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -830,6 +845,20 @@ const AdminDashboard = ({
       setIsModalOpen(true);
   };
 
+  // Report & Letter Actions
+  const handleUpdateReport = async (id: string, status: string) => {
+      await updateReportStatus(id, status);
+  }
+  const handleDeleteReport = async (id: string) => {
+      if(confirm("Hapus laporan ini?")) await deleteReportFromDb(id);
+  }
+  const handleUpdateLetter = async (id: string, status: string) => {
+      await updateLetterStatus(id, status);
+  }
+  const handleDeleteLetter = async (id: string) => {
+      if(confirm("Hapus arsip surat ini?")) await deleteLetterFromDb(id);
+  }
+
   const resetForms = () => {
       setAnnTitle(''); setAnnContent(''); setDraftTopic('');
       setCashDesc(''); setCashAmount(''); setCashType('Income');
@@ -839,7 +868,7 @@ const AdminDashboard = ({
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 text-white fixed h-full hidden md:flex flex-col">
+      <div className="w-64 bg-slate-900 text-white fixed h-full hidden md:flex flex-col overflow-y-auto">
          <div className="p-6 border-b border-slate-800">
             <h2 className="text-xl font-bold flex items-center gap-2"><Shield className="text-brand-blue"/> Admin Panel</h2>
             <p className="text-xs text-slate-400 mt-1">Manage RT 002/020</p>
@@ -847,6 +876,7 @@ const AdminDashboard = ({
          <nav className="flex-1 p-4 space-y-1">
             {[
                 {id: 'overview', icon: LayoutDashboard, label: 'Overview'},
+                {id: 'services', icon: Archive, label: 'Layanan'},
                 {id: 'residents', icon: Users, label: 'Data Warga'},
                 {id: 'finance', icon: DollarSign, label: 'Keuangan'},
                 {id: 'announcements', icon: Megaphone, label: 'Pengumuman'},
@@ -875,7 +905,8 @@ const AdminDashboard = ({
                  {activeTab === 'overview' ? 'Dashboard Overview' : 
                   activeTab === 'finance' ? 'Laporan Keuangan' : 
                   activeTab === 'residents' ? 'Database Warga' : 
-                  activeTab === 'officials' ? 'Struktur Pengurus' : 'Manajemen Pengumuman'}
+                  activeTab === 'officials' ? 'Struktur Pengurus' : 
+                  activeTab === 'services' ? 'Layanan & Laporan' : 'Manajemen Pengumuman'}
              </h1>
              <div className="flex items-center gap-3">
                  <div className="bg-white p-2 rounded-full shadow-sm border border-slate-200"><User size={20}/></div>
@@ -901,28 +932,33 @@ const AdminDashboard = ({
                           </div>
                       </div>
                       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                          <div className="p-4 bg-purple-50 text-purple-600 rounded-xl"><Store size={28}/></div>
+                          <div className="p-4 bg-rose-50 text-rose-600 rounded-xl"><AlertTriangle size={28}/></div>
                           <div>
-                              <p className="text-slate-500 text-sm font-medium">Total UMKM</p>
-                              <h3 className="text-2xl font-bold text-slate-800">{MOCK_UMKM.length} Unit</h3>
+                              <p className="text-slate-500 text-sm font-medium">Laporan Baru</p>
+                              <h3 className="text-2xl font-bold text-slate-800">{reports.filter(r => r.status === 'Baru').length}</h3>
                           </div>
                       </div>
                   </div>
                   
-                  {/* Latest Activities / Logs (Dummy) */}
+                  {/* Latest Activities / Logs (Real Data) */}
                   <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                      <h3 className="font-bold text-slate-800 mb-4">Aktivitas Terkini</h3>
+                      <h3 className="font-bold text-slate-800 mb-4">Aktivitas Terkini (Layanan)</h3>
                       <div className="space-y-4">
-                          <div className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors">
-                              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                              <p className="text-sm text-slate-600">Bpk. Budi (C5-12) baru saja mengajukan <span className="font-bold">Surat Pengantar KTP</span>.</p>
-                              <span className="ml-auto text-xs text-slate-400">2 menit lalu</span>
-                          </div>
-                          <div className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors">
-                              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                              <p className="text-sm text-slate-600">Sistem mendeteksi pembayaran iuran dari <span className="font-bold">Blok C2-01</span>.</p>
-                              <span className="ml-auto text-xs text-slate-400">1 jam lalu</span>
-                          </div>
+                          {letters.slice(0, 3).map(l => (
+                              <div key={l.id} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors border-b border-slate-50">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                  <p className="text-sm text-slate-600"><span className="font-bold">{l.applicantName}</span> mengajukan <span className="font-bold">{l.type}</span>.</p>
+                                  <span className="ml-auto text-xs text-slate-400">{l.date}</span>
+                              </div>
+                          ))}
+                          {reports.slice(0, 3).map(r => (
+                              <div key={r.id} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors border-b border-slate-50">
+                                  <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+                                  <p className="text-sm text-slate-600">Laporan <span className="font-bold">{r.type}</span> dari {r.reporterName}.</p>
+                                  <span className="ml-auto text-xs text-slate-400">{r.date}</span>
+                              </div>
+                          ))}
+                          {letters.length === 0 && reports.length === 0 && <p className="text-slate-400 text-sm italic">Belum ada aktivitas.</p>}
                       </div>
                   </div>
               </div>
@@ -931,6 +967,61 @@ const AdminDashboard = ({
           {activeTab === 'residents' && (
               <div className="animate-fade-in">
                   <HouseMap houses={houses} isAdmin={true} />
+              </div>
+          )}
+
+          {activeTab === 'services' && (
+              <div className="animate-fade-in space-y-8">
+                  {/* Laporan Warga */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                      <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 flex justify-between">
+                          <span>Laporan Masuk ({reports.length})</span>
+                      </div>
+                      <div className="divide-y divide-slate-100">
+                          {reports.map(report => (
+                              <div key={report.id} className="p-4 hover:bg-slate-50 flex justify-between items-start gap-4">
+                                  <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                          <span className={`px-2 py-0.5 text-xs font-bold rounded uppercase bg-slate-100 text-slate-600`}>{report.type}</span>
+                                          <span className="text-xs text-slate-400">{report.date}</span>
+                                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${report.status === 'Baru' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>{report.status}</span>
+                                      </div>
+                                      <p className="text-sm text-slate-700 font-medium">{report.description}</p>
+                                      <p className="text-xs text-slate-500 mt-1">Pelapor: {report.reporterName}</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                      {report.status !== 'Selesai' && (
+                                          <button onClick={() => handleUpdateReport(report.id, 'Selesai')} className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 text-xs font-bold">Selesai</button>
+                                      )}
+                                      <button onClick={() => handleDeleteReport(report.id)} className="p-2 text-rose-400 hover:text-rose-600"><Trash2 size={16}/></button>
+                                  </div>
+                              </div>
+                          ))}
+                          {reports.length === 0 && <div className="p-8 text-center text-slate-400 text-sm">Belum ada laporan.</div>}
+                      </div>
+                  </div>
+
+                  {/* Arsip Surat */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                      <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700">
+                          <span>Arsip Permohonan Surat ({letters.length})</span>
+                      </div>
+                      <div className="divide-y divide-slate-100">
+                          {letters.map(letter => (
+                              <div key={letter.id} className="p-4 hover:bg-slate-50 flex justify-between items-center">
+                                  <div>
+                                      <p className="font-bold text-slate-800 text-sm">{letter.type}</p>
+                                      <p className="text-xs text-slate-500">{letter.applicantName} ({letter.houseId}) - {letter.date}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                      <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded">PDF Generated</span>
+                                      <button onClick={() => handleDeleteLetter(letter.id)} className="p-2 text-slate-300 hover:text-rose-500"><Trash2 size={16}/></button>
+                                  </div>
+                              </div>
+                          ))}
+                          {letters.length === 0 && <div className="p-8 text-center text-slate-400 text-sm">Belum ada surat keluar.</div>}
+                      </div>
+                  </div>
               </div>
           )}
 
@@ -1169,6 +1260,8 @@ const App = () => {
   const [cashFlow, setCashFlow] = useState<CashFlow[]>([]);
   const [officials, setOfficials] = useState<Official[]>([]);
   const [ronda, setRonda] = useState<RondaSchedule[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [letters, setLetters] = useState<LetterRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Subscribe to Firestore Collections
@@ -1176,22 +1269,23 @@ const App = () => {
     // Check if Firebase is configured (Demo Mode vs Real Mode)
     if (!isFirebaseConfigured) {
       // Load MOCK Data instantly for Demo
-      setHouses(generateHouses().sort((a,b) => a.id.localeCompare(b.id)));
+      setHouses(generateHouses().sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true})));
       setAnnouncements(MOCK_ANNOUNCEMENTS);
       setCashFlow(MOCK_CASHFLOW);
       setOfficials(INITIAL_OFFICIALS);
       setRonda(MOCK_RONDA);
+      setReports(INITIAL_REPORTS);
+      setLetters(INITIAL_LETTERS);
       return; // Do not proceed to subscriptions
     }
 
     // 1. Subscribe Houses
     const unsubHouses = subscribeToCollection('houses', (data) => {
-        setHouses(data.sort((a,b) => a.id.localeCompare(b.id)));
+        setHouses(data.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true})));
     });
 
     // 2. Subscribe Announcements
     const unsubAnnouncements = subscribeToCollection('announcements', (data) => {
-        // Sort newest first
         setAnnouncements(data.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     });
 
@@ -1210,10 +1304,17 @@ const App = () => {
         setRonda(data);
     });
 
+    // 6. Subscribe Reports
+    const unsubReports = subscribeToCollection('reports', (data) => {
+        setReports(data.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    });
+
+    // 7. Subscribe Letters
+    const unsubLetters = subscribeToCollection('letters', (data) => {
+        setLetters(data.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    });
+
     // Trigger Initial Seeding if Empty
-    // Note: In a real app, you might want a specific admin button for this to avoid race conditions
-    // But for this demo, we check if houses are empty on load.
-    // We add a small timeout to allow Firestore to connect first.
     setTimeout(() => {
         seedDatabase({
             houses: generateHouses(),
@@ -1230,6 +1331,8 @@ const App = () => {
         unsubCashFlow();
         unsubOfficials();
         unsubRonda();
+        unsubReports();
+        unsubLetters();
     };
   }, []);
 
@@ -1279,6 +1382,8 @@ const App = () => {
                   announcements={announcements}
                   cashFlow={cashFlow}
                   officials={officials}
+                  reports={reports}
+                  letters={letters}
                />
             </AdminRouteWrapper>
           } />
