@@ -19,6 +19,21 @@ import { generateSuratPengantar } from './services/pdfService';
 import { AdminRouteWrapper, AdminLogin } from './components/AdminComponents'; 
 import { ChatBot } from './components/ChatBot';
 
+// Firebase Services
+import { isFirebaseConfigured } from './services/firebaseConfig';
+import { 
+  subscribeToCollection, 
+  addAnnouncementToDb, 
+  deleteAnnouncementFromDb, 
+  addTransactionToDb, 
+  deleteTransactionFromDb,
+  addOfficialToDb,
+  updateOfficialInDb,
+  deleteOfficialFromDb,
+  updateHouseStatus,
+  seedDatabase
+} from './services/databaseService';
+
 // --- Shared Components ---
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'outline' | 'ghost' | 'danger' | 'success' }> = ({ children, variant = 'primary', className, ...props }) => {
@@ -288,7 +303,7 @@ const PublicHome = ({ houses, announcements, ronda }: { houses: House[], announc
              <div className="grid grid-cols-2 gap-2">
                 {MOCK_GALLERY.slice(0,4).map(item => (
                    <div key={item.id} className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer">
-                      <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
                          <span className="text-[10px] text-white font-medium line-clamp-1">{item.title}</span>
                       </div>
@@ -350,92 +365,126 @@ const PublicServices = () => {
           <p className="text-slate-500">Urus surat dan laporan warga tanpa perlu antri.</p>
        </div>
 
-       <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
-          <div className="flex border-b border-slate-100">
-             <button onClick={() => setActiveTab('surat')} className={`flex-1 py-4 text-center font-bold text-sm transition-colors flex items-center justify-center gap-2 ${activeTab === 'surat' ? 'text-brand-blue bg-blue-50 border-b-2 border-brand-blue' : 'text-slate-500 hover:bg-slate-50'}`}>
-                <FileText size={18}/> Buat Surat Pengantar
+       <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 overflow-hidden border border-slate-100 flex flex-col md:flex-row min-h-[500px]">
+          {/* Tabs Sidebar */}
+          <div className="w-full md:w-64 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-100 p-6 flex flex-row md:flex-col gap-2">
+             <button 
+                onClick={() => setActiveTab('surat')}
+                className={`flex-1 md:flex-none p-4 rounded-xl text-left flex flex-col gap-2 transition-all ${activeTab === 'surat' ? 'bg-white text-brand-blue shadow-md shadow-blue-100 ring-1 ring-blue-100' : 'hover:bg-white hover:shadow-sm text-slate-500'}`}
+             >
+                <FileText size={24} />
+                <div>
+                   <span className="font-bold block">Surat Pengantar</span>
+                   <span className="text-xs opacity-70">KTP, KK, Domisili, dll</span>
+                </div>
              </button>
-             <button onClick={() => setActiveTab('lapor')} className={`flex-1 py-4 text-center font-bold text-sm transition-colors flex items-center justify-center gap-2 ${activeTab === 'lapor' ? 'text-rose-500 bg-rose-50 border-b-2 border-rose-500' : 'text-slate-500 hover:bg-slate-50'}`}>
-                <AlertTriangle size={18}/> Lapor Masalah
+             <button 
+                onClick={() => setActiveTab('lapor')}
+                className={`flex-1 md:flex-none p-4 rounded-xl text-left flex flex-col gap-2 transition-all ${activeTab === 'lapor' ? 'bg-white text-rose-600 shadow-md shadow-rose-100 ring-1 ring-rose-100' : 'hover:bg-white hover:shadow-sm text-slate-500'}`}
+             >
+                <AlertTriangle size={24} />
+                <div>
+                   <span className="font-bold block">Lapor Pak RT</span>
+                   <span className="text-xs opacity-70">Keamanan & Fasilitas</span>
+                </div>
              </button>
           </div>
 
-          <div className="p-6 md:p-10">
+          {/* Content Area */}
+          <div className="flex-1 p-8">
              {activeTab === 'surat' ? (
-                <form onSubmit={handleSubmitSurat} className="space-y-6 animate-fade-in">
-                   <div className="bg-blue-50 p-4 rounded-xl flex gap-3 text-sm text-blue-800 mb-6">
-                      <div className="bg-blue-100 p-2 rounded-lg h-fit"><FileText size={16}/></div>
-                      <div>
-                         <p className="font-bold mb-1">Syarat Pengajuan:</p>
-                         <ul className="list-disc pl-4 space-y-1 text-xs opacity-90">
-                            <li>Lunas iuran bulanan berjalan.</li>
-                            <li>Foto KTP & KK Asli (dibawa saat pengambilan).</li>
-                            <li>Surat akan diunduh otomatis dalam format PDF.</li>
-                         </ul>
+                <form onSubmit={handleSubmitSurat} className="space-y-6 max-w-lg animate-fade-in">
+                   <div>
+                      <h3 className="text-xl font-bold text-slate-800 mb-4">Buat Surat Pengantar</h3>
+                      <div className="space-y-4">
+                         <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Jenis Surat</label>
+                            <select 
+                              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/20 outline-none"
+                              value={requestType}
+                              onChange={(e) => setRequestType(e.target.value as any)}
+                            >
+                               <option>Pengantar KTP</option>
+                               <option>Pengantar KK</option>
+                               <option>Domisili</option>
+                               <option>Kematian</option>
+                               <option>Kelahiran</option>
+                               <option>Surat Keterangan Usaha (SKU)</option>
+                            </select>
+                         </div>
+                         <div className="grid grid-cols-2 gap-4">
+                            <div>
+                               <label className="block text-sm font-medium text-slate-700 mb-1">Nama Pemohon</label>
+                               <input 
+                                  required
+                                  type="text" 
+                                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/20 outline-none"
+                                  placeholder="Sesuai KTP"
+                                  value={applicantName}
+                                  onChange={(e) => setApplicantName(e.target.value)}
+                               />
+                            </div>
+                            <div>
+                               <label className="block text-sm font-medium text-slate-700 mb-1">Blok / No. Rumah</label>
+                               <input 
+                                  required
+                                  type="text" 
+                                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/20 outline-none"
+                                  placeholder="Contoh: C5-10"
+                                  value={houseId}
+                                  onChange={(e) => setHouseId(e.target.value)}
+                               />
+                            </div>
+                         </div>
+                         <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 flex gap-3 text-sm text-yellow-800">
+                             <Printer size={20} className="shrink-0" />
+                             <p>Sistem akan otomatis mengunduh file PDF Surat Pengantar yang sudah ditandatangani secara digital. Silakan cetak dan bawa ke Kantor Kelurahan.</p>
+                         </div>
                       </div>
                    </div>
-
-                   <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                         <label className="text-xs font-bold text-slate-700 uppercase">Jenis Surat</label>
-                         <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/20 outline-none" value={requestType} onChange={(e) => setRequestType(e.target.value as any)}>
-                            <option>Pengantar KTP</option>
-                            <option>Pengantar KK</option>
-                            <option>Domisili</option>
-                            <option>Kematian</option>
-                            <option>Kelahiran</option>
-                            <option>Surat Keterangan Usaha (SKU)</option>
-                         </select>
-                      </div>
-                      <div className="space-y-2">
-                         <label className="text-xs font-bold text-slate-700 uppercase">Nama Pemohon</label>
-                         <input type="text" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/20 outline-none" placeholder="Sesuai KTP" value={applicantName} onChange={e => setApplicantName(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                         <label className="text-xs font-bold text-slate-700 uppercase">Blok / No. Rumah</label>
-                         <input type="text" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/20 outline-none" placeholder="Contoh: C5-12" value={houseId} onChange={e => setHouseId(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                         <label className="text-xs font-bold text-slate-700 uppercase">No. WhatsApp</label>
-                         <input type="tel" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/20 outline-none" placeholder="08..." />
-                      </div>
-                   </div>
-                   
-                   <div className="pt-4">
-                      <Button type="submit" className="w-full py-4 text-base shadow-lg shadow-blue-200 hover:-translate-y-1"><Download size={20}/> Unduh Surat Pengantar</Button>
-                   </div>
+                   <Button type="submit" className="w-full py-3">Unduh Surat Pengantar</Button>
                 </form>
              ) : (
-                <form onSubmit={handleSubmitLapor} className="space-y-6 animate-fade-in">
-                   <div className="bg-rose-50 p-4 rounded-xl flex gap-3 text-sm text-rose-800 mb-6">
-                      <div className="bg-rose-100 p-2 rounded-lg h-fit"><Shield size={16}/></div>
-                      <p>Identitas pelapor akan dirahasiakan jika Anda memilih opsi anonim.</p>
-                   </div>
-                   
-                   <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-700 uppercase">Jenis Laporan</label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                         {['Keamanan', 'Kebersihan', 'Fasilitas', 'Lainnya'].map((type) => (
-                            <button key={type} type="button" onClick={() => setReportType(type as any)} className={`p-3 rounded-xl border text-sm font-medium transition-all ${reportType === type ? 'bg-rose-500 text-white border-rose-500 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>
-                               {type}
-                            </button>
-                         ))}
+                <form onSubmit={handleSubmitLapor} className="space-y-6 max-w-lg animate-fade-in">
+                   <div>
+                      <h3 className="text-xl font-bold text-slate-800 mb-4">Layanan Lapor Warga</h3>
+                      <div className="space-y-4">
+                         <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Jenis Laporan</label>
+                            <select 
+                              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 outline-none"
+                              value={reportType}
+                              onChange={(e) => setReportType(e.target.value as any)}
+                            >
+                               <option>Keamanan</option>
+                               <option>Kebersihan</option>
+                               <option>Fasilitas</option>
+                               <option>Lainnya</option>
+                            </select>
+                         </div>
+                         <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Deskripsi Laporan</label>
+                            <textarea 
+                               required
+                               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 outline-none h-32 resize-none"
+                               placeholder="Jelaskan detail kejadian, lokasi, dan waktu..."
+                               value={reportDesc}
+                               onChange={(e) => setReportDesc(e.target.value)}
+                            ></textarea>
+                         </div>
+                         <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Nama Pelapor (Opsional)</label>
+                            <input 
+                               type="text" 
+                               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 outline-none"
+                               placeholder="Boleh dikosongkan jika ingin anonim"
+                               value={reporterName}
+                               onChange={(e) => setReporterName(e.target.value)}
+                            />
+                         </div>
                       </div>
                    </div>
-
-                   <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-700 uppercase">Deskripsi Masalah</label>
-                      <textarea required rows={4} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none" placeholder="Ceritakan kronologi atau detail masalah..." value={reportDesc} onChange={e => setReportDesc(e.target.value)}></textarea>
-                   </div>
-
-                   <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-700 uppercase">Nama Pelapor (Opsional)</label>
-                      <input type="text" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none" placeholder="Kosongkan jika ingin anonim" value={reporterName} onChange={e => setReporterName(e.target.value)} />
-                   </div>
-
-                   <div className="pt-4">
-                      <Button type="submit" variant="danger" className="w-full py-4 text-base shadow-lg shadow-rose-200 hover:-translate-y-1">Kirim Laporan</Button>
-                   </div>
+                   <Button type="submit" className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200">Kirim Laporan</Button>
                 </form>
              )}
           </div>
@@ -445,713 +494,798 @@ const PublicServices = () => {
 };
 
 const PublicUMKM = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [category, setCategory] = useState('All');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterCategory, setFilterCategory] = useState('All');
+    
+    // Derived categories
+    const categories = ['All', ...Array.from(new Set(MOCK_UMKM.map(u => u.category)))];
+    
+    // Filter Logic
+    const filteredUMKM = MOCK_UMKM.filter(umkm => {
+        const matchesSearch = umkm.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              umkm.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = filterCategory === 'All' || umkm.category === filterCategory;
+        return matchesSearch && matchesCategory;
+    });
 
-  const categories = ['All', ...Array.from(new Set(MOCK_UMKM.map(u => u.category)))];
-  const filteredUMKM = MOCK_UMKM.filter(u => 
-    (category === 'All' || u.category === category) &&
-    (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-8 mb-20">
-      <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
-         <div>
-            <h1 className="text-3xl font-extrabold text-slate-800 mb-2">UMKM Warga</h1>
-            <p className="text-slate-500">Dukung ekonomi tetangga dengan berbelanja di lingkungan sendiri.</p>
-         </div>
-         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-             <div className="relative">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                <input 
-                  type="text" 
-                  placeholder="Cari produk..." 
-                  className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-brand-blue w-full sm:w-64"
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                />
+    return (
+        <div className="max-w-7xl mx-auto px-4 py-8 mb-20">
+             <div className="text-center mb-10">
+                <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-600 text-xs font-bold uppercase tracking-wider mb-2 inline-block">Ekonomi Warga</span>
+                <h1 className="text-3xl font-extrabold text-slate-800 mb-2">UMKM & Jasa Tetangga</h1>
+                <p className="text-slate-500">Dukung usaha lokal RT 002. Dari warga, oleh warga, untuk warga.</p>
              </div>
-             <select 
-                className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-brand-blue"
-                value={category}
-                onChange={e => setCategory(e.target.value)}
-             >
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-             </select>
-         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-         {filteredUMKM.map(umkm => (
-            <div key={umkm.id} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group flex flex-col h-full animate-fade-in">
-               <div className="h-48 overflow-hidden relative">
-                  <img src={umkm.image} alt={umkm.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
-                  <span className="absolute top-3 right-3 bg-white/90 backdrop-blur text-slate-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                     {umkm.category}
-                  </span>
-               </div>
-               <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-bold text-slate-800 mb-1">{umkm.name}</h3>
-                  <p className="text-slate-500 text-xs mb-3 flex items-center gap-1"><User size={12}/> {umkm.owner}</p>
-                  <p className="text-slate-600 text-sm leading-relaxed mb-4 flex-1">{umkm.description}</p>
-                  <a 
-                    href={`https://wa.me/${umkm.contact}`} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="mt-auto w-full py-3 bg-emerald-50 text-emerald-600 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-500 hover:text-white transition-all"
-                  >
-                     <Phone size={18}/> Pesan via WhatsApp
-                  </a>
-               </div>
-            </div>
-         ))}
-         {filteredUMKM.length === 0 && (
-            <div className="col-span-full py-20 text-center text-slate-400 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
-               <Store size={48} className="mx-auto mb-4 opacity-20"/>
-               <p>Tidak ada UMKM yang ditemukan.</p>
-            </div>
-         )}
-      </div>
-    </div>
-  );
+             {/* Search & Filter Toolbar */}
+             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between sticky top-20 z-30">
+                 <div className="relative w-full md:w-96">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                        type="text" 
+                        placeholder="Cari nasi kuning, laundry, pulsa..." 
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                 </div>
+                 <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 no-scrollbar">
+                    {categories.map(cat => (
+                        <button 
+                            key={cat}
+                            onClick={() => setFilterCategory(cat)}
+                            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+                                filterCategory === cat 
+                                ? 'bg-purple-600 text-white border-purple-600 shadow-md shadow-purple-200' 
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                            }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                 </div>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up">
+                {filteredUMKM.map(umkm => (
+                    <div key={umkm.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 hover:-translate-y-1 group">
+                        <div className="h-48 overflow-hidden relative">
+                            <img src={umkm.image} alt={umkm.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+                            <div className="absolute top-4 left-4">
+                                <span className="px-3 py-1 bg-white/90 backdrop-blur text-purple-700 text-xs font-bold rounded-lg shadow-sm">
+                                    {umkm.category}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="p-6">
+                            <h3 className="text-lg font-bold text-slate-800 mb-1">{umkm.name}</h3>
+                            <p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1">
+                                <User size={12}/> {umkm.owner}
+                            </p>
+                            <p className="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-2">
+                                {umkm.description}
+                            </p>
+                            <a 
+                                href={`https://wa.me/${umkm.contact}`} 
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block w-full py-2.5 bg-slate-800 text-white text-center rounded-xl font-bold text-sm hover:bg-slate-700 transition-colors"
+                            >
+                                Hubungi Penjual
+                            </a>
+                        </div>
+                    </div>
+                ))}
+                {filteredUMKM.length === 0 && (
+                    <div className="col-span-full py-12 text-center text-slate-400">
+                        <Store size={48} className="mx-auto mb-4 opacity-20" />
+                        <p>Tidak ada UMKM yang ditemukan.</p>
+                    </div>
+                )}
+             </div>
+        </div>
+    );
 };
 
-const PublicInfo = ({ officials, announcements, ronda }: { officials: Official[], announcements: Announcement[], ronda: RondaSchedule[] }) => {
-  return (
-    <div className="max-w-5xl mx-auto px-4 py-8 mb-20">
-       <div className="text-center mb-10">
-          <h1 className="text-3xl font-extrabold text-slate-800 mb-2">Informasi RT</h1>
-          <p className="text-slate-500">Transparansi data dan struktur organisasi lingkungan.</p>
-       </div>
+const PublicInfo = ({ officials, cashFlow, ronda }: { officials: Official[], cashFlow: CashFlow[], ronda: RondaSchedule[] }) => {
+    // Calculate simple stats
+    const totalIncome = cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0);
+    const totalExpense = cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0);
+    const currentBalance = totalIncome - totalExpense;
 
-       <div className="grid md:grid-cols-3 gap-8">
-          {/* Main Info */}
-          <div className="md:col-span-2 space-y-8">
-             <Card title="Struktur Pengurus RT" className="overflow-hidden">
-                <div className="grid sm:grid-cols-2 gap-4">
-                   {officials.map(official => (
-                      <div key={official.id} className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-brand-blue/30 transition-colors">
-                         <div className="w-12 h-12 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center text-slate-400 shadow-sm shrink-0 overflow-hidden">
-                            {official.photo ? (
-                                <img src={official.photo} alt={official.name} className="w-full h-full object-cover"/>
-                            ) : (
-                                <User size={24}/>
-                            )}
-                         </div>
-                         <div>
-                            <p className="text-[10px] font-bold text-brand-blue uppercase tracking-wider mb-0.5">{official.role}</p>
-                            <h4 className="font-bold text-slate-800">{official.name}</h4>
-                            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><Home size={10}/> {official.houseId}</p>
-                         </div>
-                      </div>
-                   ))}
-                </div>
-             </Card>
+    return (
+        <div className="max-w-7xl mx-auto px-4 py-8 mb-20 space-y-10">
+            {/* Header */}
+            <div className="text-center">
+                <h1 className="text-3xl font-extrabold text-slate-800 mb-2">Transparansi RT</h1>
+                <p className="text-slate-500">Informasi pengurus, keuangan, dan jadwal kegiatan yang terbuka.</p>
+            </div>
 
-             <Card title="Informasi Lingkungan">
-                <div className="space-y-4">
-                   <div className="flex gap-4 items-start">
-                      <div className="bg-blue-100 p-2 rounded-lg text-blue-600 shrink-0"><MapPin size={20}/></div>
-                      <div>
-                         <h4 className="font-bold text-slate-800 text-sm">Alamat Sekretariat</h4>
-                         <p className="text-slate-600 text-sm mt-1">{RT_ADDRESS}</p>
-                      </div>
-                   </div>
-                   <div className="flex gap-4 items-start">
-                      <div className="bg-emerald-100 p-2 rounded-lg text-emerald-600 shrink-0"><DollarSign size={20}/></div>
-                      <div>
-                         <h4 className="font-bold text-slate-800 text-sm">Iuran Wajib</h4>
-                         <p className="text-slate-600 text-sm mt-1">Rp 25.000 / Bulan (Keamanan + Sampah)</p>
-                         <p className="text-xs text-slate-400 mt-1">*Pembayaran paling lambat tanggal 10 setiap bulan.</p>
-                      </div>
-                   </div>
-                   <div className="flex gap-4 items-start">
-                      <div className="bg-amber-100 p-2 rounded-lg text-amber-600 shrink-0"><Trash2 size={20}/></div>
-                      <div>
-                         <h4 className="font-bold text-slate-800 text-sm">Jadwal Pengangkutan Sampah</h4>
-                         <p className="text-slate-600 text-sm mt-1">Senin & Kamis (Pagi, Pukul 07.00 - 09.00 WITA)</p>
-                      </div>
-                   </div>
+            {/* Officials Section */}
+            <section className="animate-slide-up">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-brand-blue/10 p-2 rounded-lg text-brand-blue"><Users size={24}/></div>
+                    <h2 className="text-2xl font-bold text-slate-800">Struktur Pengurus</h2>
                 </div>
-             </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-8">
-             <Card title="Jadwal Ronda">
-                <div className="space-y-2">
-                   {ronda.map(r => (
-                      <div key={r.day} className="text-sm">
-                         <div className="flex justify-between font-medium text-slate-700 mb-1">
-                            <span>{r.day}</span>
-                            <span className="text-slate-400 text-xs">{r.members.length} Orang</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {officials.map(official => (
+                         <div key={official.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:shadow-md transition-all relative overflow-hidden">
+                             <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-slate-50 to-transparent z-0"></div>
+                             <div className="w-20 h-20 rounded-full bg-slate-200 mb-4 overflow-hidden border-4 border-white shadow-lg relative z-10">
+                                 <img src={official.photo || `https://ui-avatars.com/api/?name=${official.name}&background=0F172A&color=fff`} alt={official.name} className="w-full h-full object-cover"/>
+                             </div>
+                             <div className="relative z-10">
+                                <h3 className="font-bold text-slate-800 text-lg">{official.name}</h3>
+                                <p className="text-brand-blue text-sm font-bold uppercase tracking-wider mb-2">{official.role}</p>
+                                <div className="text-xs text-slate-500 space-y-1 bg-slate-50 p-2 rounded-lg inline-block w-full">
+                                    <p className="flex items-center justify-center gap-1.5"><Home size={10}/> {official.houseId}</p>
+                                    <p className="flex items-center justify-center gap-1.5"><Phone size={10}/> {official.phone}</p>
+                                </div>
+                             </div>
                          </div>
-                         <p className="text-xs text-slate-500 truncate">{r.members.join(', ')}</p>
-                         <div className="h-px bg-slate-100 my-2"></div>
-                      </div>
-                   ))}
+                    ))}
                 </div>
-             </Card>
-          </div>
-       </div>
-    </div>
-  );
+            </section>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                 {/* Financial Report */}
+                 <section className="animate-slide-up" style={{animationDelay: '0.1s'}}>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="bg-emerald-100 p-2 rounded-lg text-emerald-600"><TrendingUp size={24}/></div>
+                        <h2 className="text-2xl font-bold text-slate-800">Laporan Kas</h2>
+                    </div>
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="p-6 bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+                             <p className="text-emerald-100 text-sm font-medium mb-1">Saldo Kas Saat Ini</p>
+                             <h3 className="text-3xl font-bold">Rp {currentBalance.toLocaleString('id-ID')}</h3>
+                             <div className="mt-4 flex gap-4 text-xs font-medium">
+                                 <div className="bg-white/20 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                                     <div className="w-2 h-2 rounded-full bg-white"></div> Masuk: Rp {totalIncome.toLocaleString()}
+                                 </div>
+                                 <div className="bg-white/20 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                                     <div className="w-2 h-2 rounded-full bg-rose-300"></div> Keluar: Rp {totalExpense.toLocaleString()}
+                                 </div>
+                             </div>
+                        </div>
+                        <div className="p-0">
+                            {cashFlow.slice(0, 5).map((flow, i) => (
+                                <div key={flow.id} className={`flex justify-between items-center p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-full ${flow.type === 'Income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                                            {flow.type === 'Income' ? <TrendingUp size={16}/> : <TrendingDown size={16}/>}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-sm text-slate-700">{flow.description}</p>
+                                            <p className="text-xs text-slate-400">{flow.date}</p>
+                                        </div>
+                                    </div>
+                                    <span className={`font-bold text-sm ${flow.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                        {flow.type === 'Income' ? '+' : '-'} Rp {flow.amount.toLocaleString()}
+                                    </span>
+                                </div>
+                            ))}
+                            {cashFlow.length === 0 && <div className="p-6 text-center text-slate-400 text-sm">Belum ada data transaksi.</div>}
+                        </div>
+                    </div>
+                 </section>
+
+                 {/* Ronda Schedule */}
+                 <section className="animate-slide-up" style={{animationDelay: '0.2s'}}>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="bg-slate-800 p-2 rounded-lg text-white"><Shield size={24}/></div>
+                        <h2 className="text-2xl font-bold text-slate-800">Jadwal Ronda</h2>
+                    </div>
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <div className="space-y-4">
+                            {ronda.map((r, idx) => {
+                                const isToday = r.day === new Date().toLocaleDateString('id-ID', {weekday: 'long'});
+                                return (
+                                    <div key={idx} className={`p-4 rounded-xl border transition-all ${isToday ? 'bg-slate-800 text-white border-slate-800 shadow-lg transform scale-105' : 'bg-white border-slate-100 hover:border-slate-300'}`}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-bold text-lg">{r.day}</h4>
+                                            {isToday && <span className="px-2 py-0.5 rounded bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider">Hari Ini</span>}
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {r.members.map((m, i) => (
+                                                <span key={i} className={`text-xs px-2 py-1 rounded-md font-medium ${isToday ? 'bg-white/20 text-blue-50' : 'bg-slate-100 text-slate-600'}`}>
+                                                    {m}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                 </section>
+            </div>
+        </div>
+    );
 };
 
-// --- Admin Views ---
+// --- Admin Components ---
 
 const AdminDashboard = ({ 
-  houses, setHouses, 
-  announcements, setAnnouncements,
-  cashFlow, setCashFlow,
-  officials, setOfficials
-}: any) => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [letters, setLetters] = useState(INITIAL_LETTERS);
-  const [reports, setReports] = useState(INITIAL_REPORTS);
-  
-  // States for CRUD
+  houses, 
+  announcements, 
+  cashFlow,
+  officials
+}: { 
+  houses: House[], 
+  announcements: Announcement[],
+  cashFlow: CashFlow[],
+  officials: Official[]
+}) => {
+  const [activeTab, setActiveTab] = useState('overview');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'add'|'edit'>('add');
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-
-  // Form states for Officials
-  const [formOfficial, setFormOfficial] = useState<Partial<Official>>({});
+  const [modalType, setModalType] = useState<'announcement' | 'cash' | 'official'>('announcement');
   
-  // Finance Form
-  const [financeForm, setFinanceForm] = useState({ description: '', amount: '', type: 'Income', category: 'Lainnya' });
-
-  // Announcement Form
-  const [announcementForm, setAnnouncementForm] = useState<Partial<Announcement>>({ title: '', content: '', type: 'General' });
+  // State Inputs
+  const [annTitle, setAnnTitle] = useState('');
+  const [annContent, setAnnContent] = useState('');
+  const [annType, setAnnType] = useState<Announcement['type']>('General');
+  
+  // AI Draft State
   const [isGenerating, setIsGenerating] = useState(false);
+  const [draftTopic, setDraftTopic] = useState('');
+  
+  // Cashflow Inputs
+  const [cashDesc, setCashDesc] = useState('');
+  const [cashAmount, setCashAmount] = useState('');
+  const [cashType, setCashType] = useState<'Income' | 'Expense'>('Income');
+  const [cashCategory, setCashCategory] = useState('Iuran');
 
-  // Stats
-  const totalWarga = houses.reduce((acc: number, curr: House) => acc + curr.occupants, 0);
-  const kasMasuk = cashFlow.filter((c: CashFlow) => c.type === 'Income').reduce((acc: number, curr: CashFlow) => acc + curr.amount, 0);
-  const kasKeluar = cashFlow.filter((c: CashFlow) => c.type === 'Expense').reduce((acc: number, curr: CashFlow) => acc + curr.amount, 0);
-  const saldo = kasMasuk - kasKeluar;
+  // Official Inputs
+  const [offId, setOffId] = useState<string | null>(null); // For Edit
+  const [offName, setOffName] = useState('');
+  const [offRole, setOffRole] = useState('');
+  const [offPhone, setOffPhone] = useState('');
+  const [offHouse, setOffHouse] = useState('');
+  const [offPhoto, setOffPhoto] = useState('');
 
-  const handleAddOfficial = () => {
-    setFormOfficial({});
-    setModalMode('add');
-    setIsModalOpen(true);
-  };
+  // Logout Logic
+  const navigate = useNavigate();
 
-  const handleEditOfficial = (official: Official) => {
-    setFormOfficial(official);
-    setSelectedItem(official);
-    setModalMode('edit');
-    setIsModalOpen(true);
-  };
-
-  const deleteOfficial = (id: string) => {
-      if(confirm("Apakah Anda yakin ingin menghapus data pengurus ini?")) {
-          setOfficials(officials.filter((o: Official) => o.id !== id));
-      }
-  };
-
-  const saveOfficial = () => {
-    if (!formOfficial.name || !formOfficial.role) {
-        alert("Nama dan Jabatan wajib diisi!");
-        return;
-    }
-    
-    if (modalMode === 'add') {
-        const newOfficial = {
-            ...formOfficial,
-            id: Date.now().toString(),
-            // Ensure photo is valid or undefined
-            photo: formOfficial.photo || undefined 
-        } as Official;
-        setOfficials([...officials, newOfficial]);
-    } else {
-        const updated = officials.map((o: Official) => 
-            o.id === selectedItem.id ? { ...o, ...formOfficial } : o
-        );
-        setOfficials(updated);
-    }
-    setIsModalOpen(false);
-  };
-
-  const addTransaction = () => {
-    if (!financeForm.description || !financeForm.amount) return;
-    const newTx = {
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0],
-      description: financeForm.description,
-      amount: parseInt(financeForm.amount),
-      type: financeForm.type,
-      category: financeForm.category
+  // Handlers
+  const handleCreateAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newAnn: any = {
+      title: annTitle,
+      content: annContent,
+      type: annType,
+      date: new Date().toISOString()
     };
-    setCashFlow([newTx, ...cashFlow]);
-    setFinanceForm({ description: '', amount: '', type: 'Income', category: 'Lainnya' });
+    await addAnnouncementToDb(newAnn);
+    setIsModalOpen(false);
+    resetForms();
   };
 
-  const deleteTransaction = (id: string) => {
-    if (confirm('Yakin ingin menghapus transaksi ini?')) {
-      setCashFlow(cashFlow.filter((c: CashFlow) => c.id !== id));
+  const handleDeleteAnnouncement = async (id: string) => {
+    if (confirm("Hapus pengumuman ini?")) {
+       await deleteAnnouncementFromDb(id);
     }
   };
 
-  const handleDraftAI = async () => {
-    if(!announcementForm.title) {
-        alert("Mohon isi judul topik terlebih dahulu untuk dibuatkan drafnya.");
-        return;
-    }
+  const handleGenerateDraft = async () => {
+    if(!draftTopic) return;
     setIsGenerating(true);
-    const draft = await generateAnnouncementDraft(announcementForm.title, "Formal");
-    setAnnouncementForm(prev => ({...prev, content: draft}));
+    const draft = await generateAnnouncementDraft(draftTopic);
+    setAnnContent(draft);
+    setAnnTitle(draftTopic); // Simple default
     setIsGenerating(false);
   };
 
-  const addAnnouncement = () => {
-    if (!announcementForm.title || !announcementForm.content) return;
-    const newAnn = {
-      id: Date.now().toString(),
-      title: announcementForm.title,
-      content: announcementForm.content,
-      type: announcementForm.type,
-      date: new Date().toISOString().split('T')[0]
-    };
-    setAnnouncements([newAnn, ...announcements]);
-    setAnnouncementForm({ title: '', content: '', type: 'General' });
-    alert('Pengumuman berhasil diterbitkan!');
+  const handleAddTransaction = async (e: React.FormEvent) => {
+     e.preventDefault();
+     const newTx: any = {
+         description: cashDesc,
+         amount: parseInt(cashAmount),
+         type: cashType,
+         category: cashCategory,
+         date: new Date().toISOString().split('T')[0] // Simple YYYY-MM-DD
+     };
+     await addTransactionToDb(newTx);
+     setIsModalOpen(false);
+     resetForms();
   };
 
-  const deleteAnnouncement = (id: string) => {
-    if (confirm('Hapus pengumuman ini?')) {
-      setAnnouncements(announcements.filter((a: Announcement) => a.id !== id));
-    }
+  const handleDeleteTransaction = async (id: string) => {
+      if (confirm("Hapus transaksi ini? Saldo akan dihitung ulang.")) {
+          await deleteTransactionFromDb(id);
+      }
   };
 
-  const renderContent = () => {
-    switch(activeTab) {
-      case 'dashboard':
-        return (
-          <div className="space-y-6 animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="bg-white border-slate-100">
-                 <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-blue-50 text-brand-blue"><Users size={24}/></div>
-                    <div><p className="text-slate-500 text-xs font-bold uppercase">Total Warga</p><p className="text-2xl font-black text-slate-800">{totalWarga}</p></div>
-                 </div>
-              </Card>
-              <Card className="bg-white border-slate-100">
-                 <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600"><Wallet size={24}/></div>
-                    <div><p className="text-slate-500 text-xs font-bold uppercase">Saldo Kas</p><p className="text-2xl font-black text-slate-800">Rp {(saldo/1000).toFixed(0)}k</p></div>
-                 </div>
-              </Card>
-              <Card className="bg-white border-slate-100">
-                 <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-purple-50 text-purple-600"><FileText size={24}/></div>
-                    <div><p className="text-slate-500 text-xs font-bold uppercase">Surat Pending</p><p className="text-2xl font-black text-slate-800">{letters.filter((l:any) => l.status === 'Pending').length}</p></div>
-                 </div>
-              </Card>
-              <Card className="bg-white border-slate-100">
-                 <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-rose-50 text-rose-600"><AlertTriangle size={24}/></div>
-                    <div><p className="text-slate-500 text-xs font-bold uppercase">Laporan Baru</p><p className="text-2xl font-black text-slate-800">{reports.filter((r:any) => r.status === 'Baru').length}</p></div>
-                 </div>
-              </Card>
-            </div>
+  const handleSaveOfficial = async (e: React.FormEvent) => {
+      e.preventDefault();
+      const officialData = {
+          name: offName,
+          role: offRole,
+          phone: offPhone,
+          houseId: offHouse,
+          photo: offPhoto || undefined
+      };
 
-            <div className="grid lg:grid-cols-3 gap-6">
-               <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                  <h3 className="font-bold text-slate-800 mb-4">Statistik Keuangan (Bulan Ini)</h3>
-                  <div className="h-64">
-                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={cashFlow.slice(0, 7).reverse()}>
-                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9"/>
-                           <XAxis dataKey="date" tick={{fontSize: 10}} tickLine={false} axisLine={false}/>
-                           <YAxis tick={{fontSize: 10}} tickLine={false} axisLine={false} tickFormatter={(value) => `${value/1000}k`}/>
-                           <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}}/>
-                           <Bar dataKey="amount" fill="#0EA5E9" radius={[4, 4, 0, 0]} barSize={40}/>
-                        </BarChart>
-                     </ResponsiveContainer>
-                  </div>
-               </div>
-               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                  <h3 className="font-bold text-slate-800 mb-4">Status Hunian</h3>
-                  <div className="h-64">
-                     <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                           <Pie 
-                              data={[
-                                 {name: 'Dihuni', value: houses.filter((h: House) => h.status === 'Occupied').length},
-                                 {name: 'Kosong', value: houses.filter((h: House) => h.status === 'Empty').length},
-                                 {name: 'Usaha', value: houses.filter((h: House) => h.status === 'Business').length},
-                              ]}
-                              innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value"
-                           >
-                              <Cell fill="#0EA5E9"/>
-                              <Cell fill="#CBD5E1"/>
-                              <Cell fill="#A855F7"/>
-                           </Pie>
-                           <RechartsTooltip />
-                        </PieChart>
-                     </ResponsiveContainer>
-                  </div>
-                  <div className="flex justify-center gap-4 text-xs font-bold text-slate-500">
-                     <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-brand-blue"></div> Dihuni</div>
-                     <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-slate-300"></div> Kosong</div>
-                     <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-purple-500"></div> Usaha</div>
-                  </div>
-               </div>
-            </div>
-          </div>
-        );
-      
-      case 'warga':
-         return (
-            <div className="space-y-6 animate-fade-in">
-               <HouseMap houses={houses} isAdmin={true} onHouseClick={(h) => alert(`Detail warga: ${h.headOfFamily}`)} />
-            </div>
-         );
+      if (offId) {
+          await updateOfficialInDb(offId, officialData);
+      } else {
+          await addOfficialToDb(officialData);
+      }
+      setIsModalOpen(false);
+      resetForms();
+  };
 
-      case 'keuangan':
-         return (
-            <div className="space-y-6 animate-fade-in">
-               {/* Add Transaction Form */}
-               <Card title="Input Transaksi Baru" className="border-l-4 border-l-brand-blue">
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                     <div className="md:col-span-2">
-                        <label className="text-xs font-bold text-slate-500 uppercase">Keterangan</label>
-                        <input type="text" className="w-full p-2 border border-slate-200 rounded-lg" value={financeForm.description} onChange={e => setFinanceForm({...financeForm, description: e.target.value})} placeholder="Contoh: Iuran Bapak Budi"/>
-                     </div>
-                     <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase">Nominal (Rp)</label>
-                        <input type="number" className="w-full p-2 border border-slate-200 rounded-lg" value={financeForm.amount} onChange={e => setFinanceForm({...financeForm, amount: e.target.value})}/>
-                     </div>
-                     <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase">Tipe</label>
-                        <select className="w-full p-2 border border-slate-200 rounded-lg" value={financeForm.type} onChange={e => setFinanceForm({...financeForm, type: e.target.value})}>
-                           <option value="Income">Pemasukan (+)</option>
-                           <option value="Expense">Pengeluaran (-)</option>
-                        </select>
-                     </div>
-                     <Button onClick={addTransaction} className="h-[42px]"><Plus size={18}/> Tambah</Button>
-                  </div>
-               </Card>
+  const handleDeleteOfficial = async (id: string) => {
+      if (confirm("Hapus pengurus ini?")) {
+          await deleteOfficialFromDb(id);
+      }
+  };
 
-               <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                  <table className="w-full text-left">
-                     <thead className="bg-slate-50 border-b border-slate-100">
-                        <tr>
-                           <th className="p-4 text-xs font-bold text-slate-500 uppercase">Tanggal</th>
-                           <th className="p-4 text-xs font-bold text-slate-500 uppercase">Keterangan</th>
-                           <th className="p-4 text-xs font-bold text-slate-500 uppercase">Kategori</th>
-                           <th className="p-4 text-xs font-bold text-slate-500 uppercase text-right">Nominal</th>
-                           <th className="p-4 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y divide-slate-100">
-                        {cashFlow.map((flow: CashFlow) => (
-                           <tr key={flow.id} className="hover:bg-slate-50">
-                              <td className="p-4 text-sm text-slate-600">{flow.date}</td>
-                              <td className="p-4 text-sm font-medium text-slate-800">{flow.description}</td>
-                              <td className="p-4 text-xs"><span className="bg-slate-100 px-2 py-1 rounded text-slate-600">{flow.category}</span></td>
-                              <td className={`p-4 text-sm font-bold text-right ${flow.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                 {flow.type === 'Income' ? '+' : '-'} Rp {flow.amount.toLocaleString('id-ID')}
-                              </td>
-                              <td className="p-4 text-center">
-                                 <button onClick={() => deleteTransaction(flow.id)} className="p-1 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded"><Trash2 size={16}/></button>
-                              </td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </table>
-               </div>
-            </div>
-         );
-      
-      case 'pengurus':
-         return (
-            <div className="space-y-6 animate-fade-in">
-               <Card title="Manajemen Pengurus & Struktur Organisasi" action={
-                  <Button onClick={handleAddOfficial} className="text-xs h-9"><Plus size={16}/> Tambah Pengurus</Button>
-               }>
-                  <div className="overflow-x-auto">
-                     <table className="w-full text-left">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                           <tr>
-                              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Foto</th>
-                              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Jabatan</th>
-                              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Nama Lengkap</th>
-                              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Rumah</th>
-                              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Kontak</th>
-                              <th className="p-4 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
-                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                           {officials.map((official: Official) => (
-                              <tr key={official.id} className="hover:bg-slate-50">
-                                 <td className="p-4">
-                                     <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-                                        {official.photo ? (
-                                            <img src={official.photo} alt={official.name} className="w-full h-full object-cover"/>
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-slate-400"><User size={20}/></div>
-                                        )}
-                                     </div>
-                                 </td>
-                                 <td className="p-4 font-bold text-brand-blue text-sm">{official.role}</td>
-                                 <td className="p-4 text-sm font-medium text-slate-800">{official.name}</td>
-                                 <td className="p-4 text-sm text-slate-600">{official.houseId}</td>
-                                 <td className="p-4 text-sm text-slate-600">{official.phone}</td>
-                                 <td className="p-4 text-center">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <button onClick={() => handleEditOfficial(official)} className="p-2 bg-slate-100 hover:bg-brand-blue hover:text-white rounded-lg transition-colors">
-                                            <Edit2 size={16}/>
-                                        </button>
-                                        <button onClick={() => deleteOfficial(official.id)} className="p-2 bg-slate-100 hover:bg-rose-500 hover:text-white rounded-lg transition-colors">
-                                            <Trash2 size={16}/>
-                                        </button>
-                                    </div>
-                                 </td>
-                              </tr>
-                           ))}
-                           {officials.length === 0 && (
-                               <tr>
-                                   <td colSpan={6} className="p-8 text-center text-slate-400 italic">Belum ada data pengurus. Silakan tambah data baru.</td>
-                               </tr>
-                           )}
-                        </tbody>
-                     </table>
-                  </div>
-               </Card>
-            </div>
-         );
+  const handleEditOfficial = (o: Official) => {
+      setOffId(o.id);
+      setOffName(o.name);
+      setOffRole(o.role);
+      setOffPhone(o.phone);
+      setOffHouse(o.houseId);
+      setOffPhoto(o.photo || '');
+      setModalType('official');
+      setIsModalOpen(true);
+  };
 
-      case 'pengumuman':
-        return (
-          <div className="space-y-6 animate-fade-in">
-            <Card title="Buat Pengumuman Baru" className="border-l-4 border-l-brand-blue">
-               <div className="space-y-4">
-                 <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">Judul Topik</label>
-                    <input type="text" className="w-full p-2 border border-slate-200 rounded-lg" value={announcementForm.title} onChange={e => setAnnouncementForm({...announcementForm, title: e.target.value})} placeholder="Contoh: Kerja Bakti Minggu Ini"/>
-                 </div>
-                 
-                 <div>
-                    <div className="flex justify-between items-center mb-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase">Isi Pengumuman</label>
-                        <button 
-                            onClick={handleDraftAI} 
-                            disabled={isGenerating}
-                            className="text-[10px] flex items-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded-full hover:bg-purple-200 disabled:opacity-50 transition-colors"
-                        >
-                            {isGenerating ? <Loader2 size={10} className="animate-spin"/> : <Sparkles size={10}/>}
-                            {isGenerating ? "Sedang Menulis..." : "Buat Draf dengan AI"}
-                        </button>
-                    </div>
-                    <textarea rows={4} className="w-full p-2 border border-slate-200 rounded-lg" value={announcementForm.content} onChange={e => setAnnouncementForm({...announcementForm, content: e.target.value})} placeholder="Ketik isi pengumuman atau gunakan tombol AI untuk membuat draf otomatis..."/>
-                 </div>
-
-                 <div className="flex gap-4">
-                    <div className="flex-1">
-                       <label className="text-xs font-bold text-slate-500 uppercase">Tipe</label>
-                       <select className="w-full p-2 border border-slate-200 rounded-lg" value={announcementForm.type} onChange={e => setAnnouncementForm({...announcementForm, type: e.target.value as any})}>
-                          <option value="General">General (Umum)</option>
-                          <option value="Urgent">Urgent (Penting)</option>
-                          <option value="Event">Event (Kegiatan)</option>
-                       </select>
-                    </div>
-                    <div className="flex items-end">
-                       <Button onClick={addAnnouncement} className="h-[42px]"><Send size={18}/> Terbitkan</Button>
-                    </div>
-                 </div>
-               </div>
-            </Card>
-
-            <div className="grid gap-4">
-              {announcements.map((ann: Announcement) => (
-                <div key={ann.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ann.type === 'Urgent' ? 'bg-rose-100 text-rose-600' : ann.type === 'Event' ? 'bg-purple-100 text-purple-600' : 'bg-slate-100 text-slate-600'}`}>{ann.type}</span>
-                      <span className="text-xs text-slate-400">{ann.date}</span>
-                    </div>
-                    <h4 className="font-bold text-slate-800">{ann.title}</h4>
-                    <p className="text-sm text-slate-600 mt-1 line-clamp-2">{ann.content}</p>
-                  </div>
-                  <button onClick={() => deleteAnnouncement(ann.id)} className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
-      default:
-        return <div>Halaman belum tersedia</div>;
-    }
+  const resetForms = () => {
+      setAnnTitle(''); setAnnContent(''); setDraftTopic('');
+      setCashDesc(''); setCashAmount(''); setCashType('Income');
+      setOffName(''); setOffRole(''); setOffPhone(''); setOffHouse(''); setOffPhoto(''); setOffId(null);
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 text-slate-300 fixed h-full z-30 hidden lg:block">
-         <div className="p-6">
-            <div className="flex items-center gap-2 font-bold text-white mb-8">
-               <div className="bg-brand-blue p-1.5 rounded-lg"><Shield size={20}/></div>
-               Admin Panel
-            </div>
-            <nav className="space-y-1">
-               <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-brand-blue text-white shadow-lg shadow-blue-900/20' : 'hover:bg-white/5'}`}>
-                  <LayoutDashboard size={18}/> Dashboard
-               </button>
-               <button onClick={() => setActiveTab('warga')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'warga' ? 'bg-brand-blue text-white shadow-lg shadow-blue-900/20' : 'hover:bg-white/5'}`}>
-                  <Home size={18}/> Data Warga
-               </button>
-               <button onClick={() => setActiveTab('keuangan')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'keuangan' ? 'bg-brand-blue text-white shadow-lg shadow-blue-900/20' : 'hover:bg-white/5'}`}>
-                  <DollarSign size={18}/> Keuangan
-               </button>
-               <button onClick={() => setActiveTab('pengumuman')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'pengumuman' ? 'bg-brand-blue text-white shadow-lg shadow-blue-900/20' : 'hover:bg-white/5'}`}>
-                  <Megaphone size={18}/> Pengumuman
-               </button>
-               <button onClick={() => setActiveTab('pengurus')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'pengurus' ? 'bg-brand-blue text-white shadow-lg shadow-blue-900/20' : 'hover:bg-white/5'}`}>
-                  <User size={18}/> Pengurus (Info)
-               </button>
-            </nav>
+      <div className="w-64 bg-slate-900 text-white fixed h-full hidden md:flex flex-col">
+         <div className="p-6 border-b border-slate-800">
+            <h2 className="text-xl font-bold flex items-center gap-2"><Shield className="text-brand-blue"/> Admin Panel</h2>
+            <p className="text-xs text-slate-400 mt-1">Manage RT 002/020</p>
+         </div>
+         <nav className="flex-1 p-4 space-y-1">
+            {[
+                {id: 'overview', icon: LayoutDashboard, label: 'Overview'},
+                {id: 'residents', icon: Users, label: 'Data Warga'},
+                {id: 'finance', icon: DollarSign, label: 'Keuangan'},
+                {id: 'announcements', icon: Megaphone, label: 'Pengumuman'},
+                {id: 'officials', icon: Briefcase, label: 'Pengurus'},
+            ].map(item => (
+                <button 
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id ? 'bg-brand-blue text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+                >
+                    <item.icon size={18} /> <span className="font-medium text-sm">{item.label}</span>
+                </button>
+            ))}
+         </nav>
+         <div className="p-4 border-t border-slate-800">
+            <button onClick={() => navigate('/')} className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all">
+                <LogOut size={18} /> <span className="font-medium text-sm">Keluar</span>
+            </button>
          </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
-         <header className="bg-white border-b border-slate-100 px-8 py-4 sticky top-0 z-20 flex justify-between items-center shadow-sm">
-            <h2 className="text-xl font-bold text-slate-800 capitalize">{activeTab.replace('-', ' ')}</h2>
-            <div className="flex items-center gap-4">
-               <span className="text-sm font-medium text-slate-500">Hi, Pak RT</span>
-               <div className="w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold">RT</div>
-            </div>
-         </header>
-         <main className="p-8">
-            {renderContent()}
-         </main>
+      <div className="flex-1 md:ml-64 p-8">
+          <div className="flex justify-between items-center mb-8">
+             <h1 className="text-2xl font-bold text-slate-800 uppercase tracking-tight">
+                 {activeTab === 'overview' ? 'Dashboard Overview' : 
+                  activeTab === 'finance' ? 'Laporan Keuangan' : 
+                  activeTab === 'residents' ? 'Database Warga' : 
+                  activeTab === 'officials' ? 'Struktur Pengurus' : 'Manajemen Pengumuman'}
+             </h1>
+             <div className="flex items-center gap-3">
+                 <div className="bg-white p-2 rounded-full shadow-sm border border-slate-200"><User size={20}/></div>
+                 <span className="font-bold text-sm text-slate-700">Ketua RT</span>
+             </div>
+          </div>
+
+          {activeTab === 'overview' && (
+              <div className="space-y-6 animate-fade-in">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                          <div className="p-4 bg-sky-50 text-sky-600 rounded-xl"><Users size={28}/></div>
+                          <div>
+                              <p className="text-slate-500 text-sm font-medium">Total Warga</p>
+                              <h3 className="text-2xl font-bold text-slate-800">{houses.filter(h => h.status === 'Occupied').length} KK</h3>
+                          </div>
+                      </div>
+                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                          <div className="p-4 bg-emerald-50 text-emerald-600 rounded-xl"><Wallet size={28}/></div>
+                          <div>
+                              <p className="text-slate-500 text-sm font-medium">Saldo Kas</p>
+                              <h3 className="text-2xl font-bold text-slate-800">Rp {(cashFlow.reduce((acc, c) => c.type === 'Income' ? acc + c.amount : acc - c.amount, 0)).toLocaleString()}</h3>
+                          </div>
+                      </div>
+                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                          <div className="p-4 bg-purple-50 text-purple-600 rounded-xl"><Store size={28}/></div>
+                          <div>
+                              <p className="text-slate-500 text-sm font-medium">Total UMKM</p>
+                              <h3 className="text-2xl font-bold text-slate-800">{MOCK_UMKM.length} Unit</h3>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  {/* Latest Activities / Logs (Dummy) */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                      <h3 className="font-bold text-slate-800 mb-4">Aktivitas Terkini</h3>
+                      <div className="space-y-4">
+                          <div className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors">
+                              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                              <p className="text-sm text-slate-600">Bpk. Budi (C5-12) baru saja mengajukan <span className="font-bold">Surat Pengantar KTP</span>.</p>
+                              <span className="ml-auto text-xs text-slate-400">2 menit lalu</span>
+                          </div>
+                          <div className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors">
+                              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                              <p className="text-sm text-slate-600">Sistem mendeteksi pembayaran iuran dari <span className="font-bold">Blok C2-01</span>.</p>
+                              <span className="ml-auto text-xs text-slate-400">1 jam lalu</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          )}
+
+          {activeTab === 'residents' && (
+              <div className="animate-fade-in">
+                  <HouseMap houses={houses} isAdmin={true} />
+              </div>
+          )}
+
+          {activeTab === 'announcements' && (
+              <div className="animate-fade-in space-y-6">
+                  <div className="flex justify-end">
+                      <Button onClick={() => { resetForms(); setModalType('announcement'); setIsModalOpen(true); }}>
+                          <Plus size={18}/> Buat Pengumuman Baru
+                      </Button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                      {announcements.map(ann => (
+                          <div key={ann.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-start">
+                              <div>
+                                  <div className="flex items-center gap-2 mb-2">
+                                     <span className={`px-2 py-0.5 text-xs font-bold rounded uppercase ${ann.type === 'Urgent' ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600'}`}>{ann.type}</span>
+                                     <span className="text-xs text-slate-400">{new Date(ann.date).toLocaleDateString()}</span>
+                                  </div>
+                                  <h3 className="font-bold text-lg text-slate-800">{ann.title}</h3>
+                                  <p className="text-slate-600 text-sm mt-1 line-clamp-2">{ann.content}</p>
+                              </div>
+                              <button onClick={() => handleDeleteAnnouncement(ann.id)} className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                                  <Trash2 size={18} />
+                              </button>
+                          </div>
+                      ))}
+                      {announcements.length === 0 && <div className="text-center text-slate-400 py-10">Belum ada pengumuman dibuat.</div>}
+                  </div>
+              </div>
+          )}
+
+          {activeTab === 'finance' && (
+              <div className="animate-fade-in space-y-6">
+                  <div className="flex justify-end">
+                      <Button onClick={() => { resetForms(); setModalType('cash'); setIsModalOpen(true); }} variant="success">
+                          <Plus size={18}/> Catat Transaksi
+                      </Button>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                      <table className="w-full text-sm text-left">
+                          <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-xs">
+                              <tr>
+                                  <th className="p-4">Tanggal</th>
+                                  <th className="p-4">Keterangan</th>
+                                  <th className="p-4">Kategori</th>
+                                  <th className="p-4 text-right">Jumlah</th>
+                                  <th className="p-4 text-center">Aksi</th>
+                              </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                              {cashFlow.map(cf => (
+                                  <tr key={cf.id} className="hover:bg-slate-50 transition-colors">
+                                      <td className="p-4 text-slate-500">{cf.date}</td>
+                                      <td className="p-4 font-medium text-slate-800">{cf.description}</td>
+                                      <td className="p-4"><span className="px-2 py-1 bg-slate-100 rounded text-xs text-slate-600">{cf.category}</span></td>
+                                      <td className={`p-4 text-right font-bold ${cf.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                          {cf.type === 'Income' ? '+' : '-'} Rp {cf.amount.toLocaleString()}
+                                      </td>
+                                      <td className="p-4 text-center">
+                                          <button onClick={() => handleDeleteTransaction(cf.id)} className="text-slate-400 hover:text-rose-500 transition-colors">
+                                              <Trash2 size={16} />
+                                          </button>
+                                      </td>
+                                  </tr>
+                              ))}
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          )}
+
+          {activeTab === 'officials' && (
+              <div className="animate-fade-in space-y-6">
+                  <div className="flex justify-end">
+                      <Button onClick={() => { resetForms(); setModalType('official'); setIsModalOpen(true); }}>
+                          <Plus size={18}/> Tambah Pengurus
+                      </Button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {officials.map(off => (
+                          <div key={off.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 relative group">
+                              <img 
+                                src={off.photo || `https://ui-avatars.com/api/?name=${off.name}&background=random`} 
+                                className="w-16 h-16 rounded-full object-cover border-2 border-slate-100"
+                              />
+                              <div>
+                                  <h3 className="font-bold text-slate-800">{off.name}</h3>
+                                  <p className="text-brand-blue text-xs font-bold uppercase">{off.role}</p>
+                                  <p className="text-slate-400 text-xs mt-1">{off.phone}</p>
+                              </div>
+                              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => handleEditOfficial(off)} className="p-1.5 bg-sky-50 text-sky-600 rounded-lg hover:bg-sky-100"><Edit2 size={14}/></button>
+                                  <button onClick={() => handleDeleteOfficial(off.id)} className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100"><Trash2 size={14}/></button>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+          )}
       </div>
 
-      {/* Edit Modal for Officials */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalMode === 'add' ? 'Tambah Pengurus Baru' : 'Edit Data Pengurus'}>
-         <div className="space-y-4">
-            <div>
-               <label className="block text-xs font-bold uppercase mb-1">Nama Lengkap</label>
-               <input type="text" className="w-full p-2 border rounded-lg" value={formOfficial.name || ''} onChange={e => setFormOfficial({...formOfficial, name: e.target.value})}/>
-            </div>
-            <div>
-               <label className="block text-xs font-bold uppercase mb-1">Jabatan</label>
-               <input type="text" className="w-full p-2 border rounded-lg" placeholder="Contoh: Ketua RT, Sekretaris, Seksi Keamanan" value={formOfficial.role || ''} onChange={e => setFormOfficial({...formOfficial, role: e.target.value})}/>
-            </div>
-            <div>
-               <label className="block text-xs font-bold uppercase mb-1">Alamat Rumah (Blok/No)</label>
-               <input type="text" className="w-full p-2 border rounded-lg" value={formOfficial.houseId || ''} onChange={e => setFormOfficial({...formOfficial, houseId: e.target.value})}/>
-            </div>
-            <div>
-               <label className="block text-xs font-bold uppercase mb-1">Nomor Telepon</label>
-               <input type="text" className="w-full p-2 border rounded-lg" value={formOfficial.phone || ''} onChange={e => setFormOfficial({...formOfficial, phone: e.target.value})}/>
-            </div>
-             <div>
-               <label className="block text-xs font-bold uppercase mb-1">Link Foto (Opsional)</label>
-               <input type="text" className="w-full p-2 border rounded-lg" placeholder="https://..." value={formOfficial.photo || ''} onChange={e => setFormOfficial({...formOfficial, photo: e.target.value})}/>
-               <p className="text-[10px] text-slate-400 mt-1">Kosongkan jika tidak ada foto.</p>
-            </div>
-            <div className="pt-4 flex justify-end gap-2">
-               <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Batal</Button>
-               <Button onClick={saveOfficial}>Simpan Perubahan</Button>
-            </div>
-         </div>
+      {/* Unified Modal */}
+      <Modal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          title={
+              modalType === 'announcement' ? 'Buat Pengumuman Baru' : 
+              modalType === 'cash' ? 'Catat Transaksi Kas' : 
+              offId ? 'Edit Data Pengurus' : 'Tambah Pengurus Baru'
+          }
+      >
+          {modalType === 'announcement' && (
+             <form onSubmit={handleCreateAnnouncement} className="space-y-4">
+                 {/* AI Draft Feature */}
+                 <div className="bg-gradient-to-r from-violet-50 to-fuchsia-50 p-4 rounded-xl border border-violet-100 mb-4">
+                     <label className="text-xs font-bold text-violet-700 uppercase mb-2 flex items-center gap-2">
+                        <Sparkles size={14} /> AI Magic Draft
+                     </label>
+                     <div className="flex gap-2">
+                        <input 
+                           type="text" 
+                           placeholder="Topik: Kerja Bakti, Lomba 17an..." 
+                           className="flex-1 px-3 py-2 bg-white border border-violet-200 rounded-lg text-sm"
+                           value={draftTopic}
+                           onChange={(e) => setDraftTopic(e.target.value)}
+                        />
+                        <button 
+                           type="button" 
+                           disabled={isGenerating}
+                           onClick={handleGenerateDraft}
+                           className="bg-violet-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-violet-700 disabled:opacity-50"
+                        >
+                           {isGenerating ? 'Drafting...' : 'Buat Draft'}
+                        </button>
+                     </div>
+                 </div>
+
+                 <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Judul</label>
+                    <input required type="text" className="w-full p-2 border rounded-lg" value={annTitle} onChange={(e) => setAnnTitle(e.target.value)} />
+                 </div>
+                 <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Tipe</label>
+                    <select className="w-full p-2 border rounded-lg" value={annType} onChange={(e) => setAnnType(e.target.value as any)}>
+                        <option value="General">General Info</option>
+                        <option value="Urgent">Penting / Darurat</option>
+                        <option value="Event">Kegiatan / Acara</option>
+                    </select>
+                 </div>
+                 <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Isi Pengumuman</label>
+                    <textarea required className="w-full p-2 border rounded-lg h-32" value={annContent} onChange={(e) => setAnnContent(e.target.value)} />
+                 </div>
+                 <Button type="submit" className="w-full">Terbitkan</Button>
+             </form>
+          )}
+
+          {modalType === 'cash' && (
+              <form onSubmit={handleAddTransaction} className="space-y-4">
+                  <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Jenis Transaksi</label>
+                      <div className="flex gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name="type" checked={cashType === 'Income'} onChange={() => setCashType('Income')} /> 
+                              <span className="text-emerald-600 font-bold">Pemasukan</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name="type" checked={cashType === 'Expense'} onChange={() => setCashType('Expense')} /> 
+                              <span className="text-rose-600 font-bold">Pengeluaran</span>
+                          </label>
+                      </div>
+                  </div>
+                  <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Deskripsi</label>
+                      <input required type="text" placeholder="Contoh: Iuran Bapak Budi" className="w-full p-2 border rounded-lg" value={cashDesc} onChange={(e) => setCashDesc(e.target.value)} />
+                  </div>
+                  <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Jumlah (Rp)</label>
+                      <input required type="number" placeholder="50000" className="w-full p-2 border rounded-lg" value={cashAmount} onChange={(e) => setCashAmount(e.target.value)} />
+                  </div>
+                  <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Kategori</label>
+                      <select className="w-full p-2 border rounded-lg" value={cashCategory} onChange={(e) => setCashCategory(e.target.value)}>
+                          <option>Iuran Warga</option>
+                          <option>Sumbangan</option>
+                          <option>Operasional</option>
+                          <option>Pembangunan</option>
+                          <option>Kegiatan</option>
+                          <option>Lain-lain</option>
+                      </select>
+                  </div>
+                  <Button type="submit" className="w-full" variant={cashType === 'Income' ? 'success' : 'danger'}>Simpan Transaksi</Button>
+              </form>
+          )}
+
+          {modalType === 'official' && (
+              <form onSubmit={handleSaveOfficial} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                      <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                          <input required type="text" className="w-full p-2 border rounded-lg" value={offName} onChange={(e) => setOffName(e.target.value)} />
+                      </div>
+                      <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Jabatan</label>
+                          <input required type="text" placeholder="Ketua RT, Sekretaris..." className="w-full p-2 border rounded-lg" value={offRole} onChange={(e) => setOffRole(e.target.value)} />
+                      </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                      <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">No. HP / WA</label>
+                          <input required type="text" className="w-full p-2 border rounded-lg" value={offPhone} onChange={(e) => setOffPhone(e.target.value)} />
+                      </div>
+                      <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Blok Rumah</label>
+                          <input required type="text" placeholder="C5-01" className="w-full p-2 border rounded-lg" value={offHouse} onChange={(e) => setOffHouse(e.target.value)} />
+                      </div>
+                  </div>
+                  <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Link Foto Profil (URL)</label>
+                      <input type="text" placeholder="https://..." className="w-full p-2 border rounded-lg" value={offPhoto} onChange={(e) => setOffPhoto(e.target.value)} />
+                      <p className="text-[10px] text-slate-400 mt-1">*Kosongkan untuk pakai avatar default</p>
+                  </div>
+                  <Button type="submit" className="w-full">{offId ? 'Update Data' : 'Tambah Pengurus'}</Button>
+              </form>
+          )}
       </Modal>
     </div>
   );
 };
 
-
 // --- Main App Component ---
 
 const App = () => {
-  // State Initialization with LocalStorage Persistence
-  const [houses, setHouses] = useState<House[]>(() => {
-    const saved = localStorage.getItem('houses');
-    return saved ? JSON.parse(saved) : generateHouses();
-  });
+  const [houses, setHouses] = useState<House[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [cashFlow, setCashFlow] = useState<CashFlow[]>([]);
+  const [officials, setOfficials] = useState<Official[]>([]);
+  const [ronda, setRonda] = useState<RondaSchedule[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
-    const saved = localStorage.getItem('announcements');
-    return saved ? JSON.parse(saved) : MOCK_ANNOUNCEMENTS;
-  });
+  // Subscribe to Firestore Collections
+  useEffect(() => {
+    // Check if Firebase is configured (Demo Mode vs Real Mode)
+    if (!isFirebaseConfigured) {
+      // Load MOCK Data instantly for Demo
+      setHouses(generateHouses().sort((a,b) => a.id.localeCompare(b.id)));
+      setAnnouncements(MOCK_ANNOUNCEMENTS);
+      setCashFlow(MOCK_CASHFLOW);
+      setOfficials(INITIAL_OFFICIALS);
+      setRonda(MOCK_RONDA);
+      return; // Do not proceed to subscriptions
+    }
 
-  const [cashFlow, setCashFlow] = useState<CashFlow[]>(() => {
-    const saved = localStorage.getItem('cashFlow');
-    return saved ? JSON.parse(saved) : MOCK_CASHFLOW;
-  });
+    // 1. Subscribe Houses
+    const unsubHouses = subscribeToCollection('houses', (data) => {
+        setHouses(data.sort((a,b) => a.id.localeCompare(b.id)));
+    });
 
-  const [officials, setOfficials] = useState<Official[]>(() => {
-    const saved = localStorage.getItem('officials');
-    return saved ? JSON.parse(saved) : INITIAL_OFFICIALS;
-  });
-  
-  const [ronda, setRonda] = useState<RondaSchedule[]>(() => {
-     const saved = localStorage.getItem('ronda');
-     return saved ? JSON.parse(saved) : MOCK_RONDA;
-  });
+    // 2. Subscribe Announcements
+    const unsubAnnouncements = subscribeToCollection('announcements', (data) => {
+        // Sort newest first
+        setAnnouncements(data.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    });
 
-  // Persist Data Effects
-  useEffect(() => { localStorage.setItem('houses', JSON.stringify(houses)); }, [houses]);
-  useEffect(() => { localStorage.setItem('announcements', JSON.stringify(announcements)); }, [announcements]);
-  useEffect(() => { localStorage.setItem('cashFlow', JSON.stringify(cashFlow)); }, [cashFlow]);
-  useEffect(() => { localStorage.setItem('officials', JSON.stringify(officials)); }, [officials]);
-  useEffect(() => { localStorage.setItem('ronda', JSON.stringify(ronda)); }, [ronda]);
+    // 3. Subscribe CashFlow
+    const unsubCashFlow = subscribeToCollection('cashFlow', (data) => {
+        setCashFlow(data.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    });
 
-  const navigate = useNavigate();
+    // 4. Subscribe Officials
+    const unsubOfficials = subscribeToCollection('officials', (data) => {
+        setOfficials(data);
+    });
+
+    // 5. Subscribe Ronda
+    const unsubRonda = subscribeToCollection('ronda', (data) => {
+        setRonda(data);
+    });
+
+    // Trigger Initial Seeding if Empty
+    // Note: In a real app, you might want a specific admin button for this to avoid race conditions
+    // But for this demo, we check if houses are empty on load.
+    // We add a small timeout to allow Firestore to connect first.
+    setTimeout(() => {
+        seedDatabase({
+            houses: generateHouses(),
+            announcements: MOCK_ANNOUNCEMENTS,
+            cashFlow: MOCK_CASHFLOW,
+            officials: INITIAL_OFFICIALS,
+            ronda: MOCK_RONDA
+        });
+    }, 2000);
+
+    return () => {
+        unsubHouses();
+        unsubAnnouncements();
+        unsubCashFlow();
+        unsubOfficials();
+        unsubRonda();
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-brand-blue/20">
-      <Routes>
-        <Route path="/admin/*" element={
-          <AdminRouteWrapper isAdmin={true} onLogin={() => {}}>
-             <AdminDashboard 
-                houses={houses} setHouses={setHouses}
-                announcements={announcements} setAnnouncements={setAnnouncements}
-                cashFlow={cashFlow} setCashFlow={setCashFlow}
-                officials={officials} setOfficials={setOfficials}
-             />
-          </AdminRouteWrapper>
-        }/>
-        <Route path="*" element={
-          <>
-            <PublicHeader />
-            <Routes>
-              <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} />} />
-              <Route path="/services" element={<PublicServices />} />
-              <Route path="/umkm" element={<PublicUMKM />} />
-              <Route path="/info" element={<PublicInfo officials={officials} announcements={announcements} ronda={ronda} />} />
-            </Routes>
-            
-            {/* Footer */}
-            <footer className="bg-white border-t border-slate-100 py-12 mt-auto">
-               <div className="max-w-7xl mx-auto px-6 text-center">
-                  <Logo />
-                  <p className="mt-4 text-slate-500 text-sm">
-                    &copy; 2024 RT 002 RW 020 Kelurahan Tondo. <br/>
-                    Dikembangkan dengan ❤️ untuk warga.
-                  </p>
-               </div>
-            </footer>
-            
-            {/* Global Floating Elements */}
-            <PanicButton />
-            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-          </>
-        }/>
-      </Routes>
-    </div>
+    <HashRouter>
+      <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-safe-area-pb">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={
+            <>
+              <PublicHeader />
+              <PublicHome houses={houses} announcements={announcements} ronda={ronda} />
+              <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+              <PanicButton />
+            </>
+          } />
+          
+          <Route path="/services" element={
+            <>
+              <PublicHeader />
+              <PublicServices />
+              <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+            </>
+          } />
+
+          <Route path="/umkm" element={
+            <>
+              <PublicHeader />
+              <PublicUMKM />
+              <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+            </>
+          } />
+
+          <Route path="/info" element={
+            <>
+              <PublicHeader />
+              <PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} />
+              <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+            </>
+          } />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
+               <AdminDashboard 
+                  houses={houses} 
+                  announcements={announcements}
+                  cashFlow={cashFlow}
+                  officials={officials}
+               />
+            </AdminRouteWrapper>
+          } />
+        </Routes>
+      </div>
+    </HashRouter>
   );
 };
 
-export default () => (
-  <HashRouter>
-    <App />
-  </HashRouter>
-);
+export default App;
