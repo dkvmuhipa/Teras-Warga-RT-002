@@ -1,4 +1,5 @@
 
+
 export enum PaymentStatus {
   PAID = 'Lunas',
   PENDING = 'Belum Lunas',
@@ -31,6 +32,7 @@ export interface Report {
   reporterName: string;
   date: string;
   status: 'Baru' | 'Diproses' | 'Selesai';
+  houseId?: string; // Optional: Link report to specific house (e.g., "Rumah C1-05 kotor")
 }
 
 export interface UMKM {
@@ -65,6 +67,7 @@ export interface LetterRequest {
 
 // New Types
 export interface RondaSchedule {
+  id?: string; // Optional for seeding, required for edit
   day: string;
   members: string[]; // Nama warga
 }
@@ -85,4 +88,21 @@ export interface Official {
   houseId: string;
   phone: string;
   photo?: string;
+}
+
+export interface PdfConfig {
+  logo: string;      // Base64 string
+  stamp: string;     // Base64 string
+  signature: string; // Base64 string
+  rtName: string;
+  rtAddress: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  total: number;
+  available: number;
+  condition: 'Baik' | 'Perlu Perbaikan' | 'Rusak';
+  notes?: string;
 }

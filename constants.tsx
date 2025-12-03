@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official } from './types';
+import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TerasWarga";
@@ -18,30 +18,43 @@ export const Logo = () => (
 
 // --- DATA DUMMY (MOCK DATA) ---
 
+// Updated Officials to match valid blocks (C5, C7-C12)
 export const INITIAL_OFFICIALS: Official[] = [
     { id: '1', role: 'Ketua RT', name: 'Bpk. Irfan Arianto', houseId: 'C10-08', phone: '0812-3456-7890' },
     { id: '2', role: 'Sekretaris', name: 'Ibu Siti Aminah', houseId: 'C5-02', phone: '0812-9876-5432' },
-    { id: '3', role: 'Bendahara', name: 'Bpk. Rudi Hartono', houseId: 'C2-11', phone: '0813-4567-8901' },
-    { id: '4', role: 'Koord. Keamanan', name: 'Bpk. Joko Susilo', houseId: 'C1-05', phone: '0813-1122-3344' },
+    { id: '3', role: 'Bendahara', name: 'Bpk. Rudi Hartono', houseId: 'C11-12', phone: '0813-4567-8901' },
+    { id: '4', role: 'Koord. Keamanan', name: 'Bpk. Joko Susilo', houseId: 'C8-05', phone: '0813-1122-3344' },
 ];
 
 export const generateHouses = (): House[] => {
-  const blocks = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10'];
+  // Konfigurasi Wilayah RT 002 (Data Terbaru Sesuai Instruksi)
+  const blockConfig = [
+    { code: 'C5', start: 1, end: 26 },
+    { code: 'C7', start: 1, end: 18 },
+    { code: 'C8', start: 1, end: 18 },
+    { code: 'C9', start: 1, end: 18 },
+    { code: 'C10', start: 1, end: 16 },
+    { code: 'C11', start: 1, end: 18 },
+    { code: 'C12', start: 1, end: 15 },
+  ];
+
   const houses: House[] = [];
   
-  blocks.forEach(block => {
-    for (let i = 1; i <= 20; i++) {
+  blockConfig.forEach(config => {
+    for (let i = config.start; i <= config.end; i++) {
       const number = i < 10 ? `0${i}` : `${i}`;
       const statusRandom = Math.random();
       let status: House['status'] = 'Occupied';
+      
+      // Simulasi status hunian
       if (statusRandom > 0.85) status = 'Empty';
       else if (statusRandom > 0.95) status = 'Business';
 
       houses.push({
-        id: `${block}-${number}`,
-        block,
-        number,
-        headOfFamily: status === 'Empty' ? '-' : `Warga ${block}-${number}`,
+        id: `${config.code}-${number}`,
+        block: config.code,
+        number: number,
+        headOfFamily: status === 'Empty' ? '-' : `Warga ${config.code}-${number}`,
         occupants: status === 'Empty' ? 0 : Math.floor(Math.random() * 4) + 1,
         status,
         paymentStatus: Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID),
@@ -56,7 +69,7 @@ export const MOCK_ANNOUNCEMENTS: Announcement[] = [
   {
     id: '1',
     title: 'Kerja Bakti Lingkungan',
-    content: 'Minggu ini akan diadakan kerja bakti membersihkan saluran air. Diharapkan kehadiran bapak-bapak membawa alat kebersihan.',
+    content: 'Minggu ini akan diadakan kerja bakti membersihkan saluran air di area Blok C7 dan C8. Diharapkan kehadiran bapak-bapak.',
     date: '2023-10-25',
     type: 'General'
   },
@@ -102,21 +115,29 @@ export const MOCK_UMKM: UMKM[] = [
 export const INITIAL_REPORTS: Report[] = [];
 export const INITIAL_LETTERS: LetterRequest[] = [];
 
+// Updated Ronda Schedule to match valid blocks
 export const MOCK_RONDA: RondaSchedule[] = [
-  { day: 'Senin', members: ['Bpk. Asep (C1-01)', 'Bpk. Budi (C1-02)', 'Bpk. Cecep (C1-03)'] },
-  { day: 'Selasa', members: ['Bpk. Dedi (C2-01)', 'Bpk. Eko (C2-02)', 'Bpk. Fajar (C2-03)'] },
-  { day: 'Rabu', members: ['Bpk. Gilang (C3-01)', 'Bpk. Hadi (C3-02)', 'Bpk. Indra (C3-03)'] },
-  { day: 'Kamis', members: ['Bpk. Joko (C4-01)', 'Bpk. Kiki (C4-02)', 'Bpk. Lukman (C4-03)'] },
-  { day: 'Jumat', members: ['Bpk. Maman (C5-01)', 'Bpk. Nanda (C5-02)', 'Bpk. Opik (C5-03)'] },
-  { day: 'Sabtu', members: ['Bpk. Purnomo (C6-01)', 'Bpk. Qodir (C6-02)', 'Bpk. Rahmat (C6-03)'] },
-  { day: 'Minggu', members: ['Bpk. Syaiful (C7-01)', 'Bpk. Tono (C7-02)', 'Bpk. Ujang (C7-03)'] },
+  { day: 'Senin', members: ['Bpk. Asep (C5-01)', 'Bpk. Budi (C5-02)', 'Bpk. Cecep (C5-03)'] },
+  { day: 'Selasa', members: ['Bpk. Dedi (C7-01)', 'Bpk. Eko (C7-02)', 'Bpk. Fajar (C7-03)'] },
+  { day: 'Rabu', members: ['Bpk. Gilang (C8-01)', 'Bpk. Hadi (C8-02)', 'Bpk. Indra (C8-03)'] },
+  { day: 'Kamis', members: ['Bpk. Joko (C9-01)', 'Bpk. Kiki (C9-02)', 'Bpk. Lukman (C9-03)'] },
+  { day: 'Jumat', members: ['Bpk. Maman (C10-01)', 'Bpk. Nanda (C10-02)', 'Bpk. Opik (C10-03)'] },
+  { day: 'Sabtu', members: ['Bpk. Purnomo (C11-01)', 'Bpk. Qodir (C11-02)', 'Bpk. Rahmat (C11-03)'] },
+  { day: 'Minggu', members: ['Bpk. Syaiful (C12-01)', 'Bpk. Tono (C12-02)', 'Bpk. Ujang (C12-03)'] },
 ];
 
 export const MOCK_CASHFLOW: CashFlow[] = [
-    { id: '1', date: '2023-10-01', description: 'Iuran Warga Blok C1', amount: 500000, type: 'Income', category: 'Iuran Warga' },
-    { id: '2', date: '2023-10-02', description: 'Perbaikan Lampu Jalan', amount: 150000, type: 'Expense', category: 'Fasilitas' },
-    { id: '3', date: '2023-10-05', description: 'Iuran Warga Blok C2', amount: 450000, type: 'Income', category: 'Iuran Warga' },
+    { id: '1', date: '2023-10-01', description: 'Iuran Warga Blok C5', amount: 500000, type: 'Income', category: 'Iuran Warga' },
+    { id: '2', date: '2023-10-02', description: 'Perbaikan Lampu Jalan C10', amount: 150000, type: 'Expense', category: 'Fasilitas' },
+    { id: '3', date: '2023-10-05', description: 'Iuran Warga Blok C7', amount: 450000, type: 'Income', category: 'Iuran Warga' },
     { id: '4', date: '2023-10-10', description: 'Konsumsi Kerja Bakti', amount: 200000, type: 'Expense', category: 'Kegiatan' },
+];
+
+export const MOCK_INVENTORY: InventoryItem[] = [
+    { id: '1', name: 'Tenda Terpal 4x6', total: 2, available: 2, condition: 'Baik' },
+    { id: '2', name: 'Kursi Plastik', total: 50, available: 45, condition: 'Baik', notes: '5 kursi dipinjam Pak Budi' },
+    { id: '3', name: 'Wireless Sound System', total: 1, available: 1, condition: 'Baik' },
+    { id: '4', name: 'Mesin Potong Rumput', total: 1, available: 0, condition: 'Perlu Perbaikan', notes: 'Sedang diservis' },
 ];
 
 export const MOCK_GALLERY = [
@@ -126,17 +147,11 @@ export const MOCK_GALLERY = [
     { id: 4, title: "Posyandu", image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&q=80&w=300&h=300" },
 ];
 
-// --- KONFIGURASI GAMBAR PDF ---
-// String Base64 di bawah ini adalah placeholder valid 1x1 pixel transparan agar tidak error.
-// Untuk menggunakan Logo Kota Palu asli, pastikan string Base64-nya dalam SATU BARIS (tanpa enter) atau gunakan URL.
-
-export const PDF_ASSETS = {
-  // Placeholder Logo (Blue Dot) - Ganti dengan Base64 Logo Kota Palu yang valid jika perlu
-  LOGO: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", 
-  
-  // Placeholder Stempel (Red Circle)
-  STAMP: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFBQHAAX881AAAAABJRU5ErkJggg==",
-  
-  // Placeholder TTD
-  SIGNATURE: "" 
+// --- KONFIGURASI DEFAULT (Fallback) ---
+export const DEFAULT_PDF_CONFIG: PdfConfig = {
+  logo: "", // Kosongkan agar menggunakan Vector Fallback (Gambar Garuda)
+  stamp: "", // Kosongkan agar menggunakan Vector Fallback (Stempel Merah)
+  signature: "", // Kosongkan
+  rtName: "RT.02 / RW.20",
+  rtAddress: "Jl. Pue Lombe Blok C10-08, Kode Pos 94119"
 };
