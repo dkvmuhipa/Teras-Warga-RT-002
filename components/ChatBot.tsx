@@ -83,7 +83,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
       {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center border-2 border-white ${
+        className={`fixed bottom-20 right-4 md:bottom-10 md:right-10 z-50 p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center border-2 border-white ${
           isOpen ? 'bg-slate-800 text-white rotate-90' : 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:shadow-cyan-500/50'
         }`}
         aria-label="Chat dengan AI"
@@ -93,7 +93,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
 
       {/* Chat Window */}
       <div 
-        className={`fixed bottom-24 right-4 md:bottom-28 md:right-10 z-[55] w-[90vw] md:w-[350px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col transition-all duration-300 origin-bottom-right ${
+        className={`fixed bottom-36 right-4 md:bottom-28 md:right-10 z-[55] w-[90vw] md:w-[350px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col transition-all duration-300 origin-bottom-right ${
           isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-10 pointer-events-none'
         }`}
         style={{ height: '500px', maxHeight: '70vh' }}
