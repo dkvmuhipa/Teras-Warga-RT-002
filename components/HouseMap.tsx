@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { House, PaymentStatus, Report } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info } from 'lucide-react';
 
 interface HouseMapProps {
   houses: House[];
@@ -12,8 +12,18 @@ interface HouseMapProps {
   onReportHouse?: (house: House) => void;
 }
 
-// --- Extracted Modal Component to prevent re-renders and logic issues ---
-const HouseDetailModal = ({ 
+interface HouseDetailModalProps {
+    house: House;
+    onClose: () => void;
+    reports: Report[];
+    isAdmin: boolean;
+    onEditHouse?: (house: House) => void;
+    onPayDues?: (house: House) => void;
+    onReportHouse?: (house: House) => void;
+}
+
+// --- Detail Modal Component ---
+const HouseDetailModal: React.FC<HouseDetailModalProps> = ({ 
     house, 
     onClose, 
     reports, 
@@ -21,25 +31,13 @@ const HouseDetailModal = ({
     onEditHouse, 
     onPayDues, 
     onReportHouse 
-}: { 
-    house: House; 
-    onClose: () => void;
-    reports: Report[];
-    isAdmin: boolean;
-    onEditHouse?: (house: House) => void;
-    onPayDues?: (house: House) => void;
-    onReportHouse?: (house: House) => void;
 }) => {
     const activeReports = reports.filter(r => r.houseId === house.id && r.status !== 'Selesai');
     
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            
-            {/* Main Modal Container */}
             <div className="bg-white w-full max-w-sm md:max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden animate-slide-up ring-1 ring-slate-200 flex flex-col max-h-[85vh]">
-                
-                {/* Close Button - Fixed Top Right */}
                 <button 
                     onClick={onClose} 
                     className="absolute top-3 right-3 z-20 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors backdrop-blur-sm"
@@ -47,23 +45,16 @@ const HouseDetailModal = ({
                     <X size={18}/>
                 </button>
 
-                {/* Scrollable Content */}
                 <div className="overflow-y-auto custom-scrollbar flex-1">
-                    
-                    {/* Header Section - No Fixed Height, Use Padding */}
                     <div className={`relative px-6 py-8 flex flex-col items-center justify-center text-center ${activeReports.length > 0 ? 'bg-rose-500' : 'bg-brand-blue'}`}>
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none"></div>
-                        
                         <div className="relative text-white space-y-1 mt-2">
                             <h2 className="text-4xl md:text-5xl font-black tracking-tighter">{house.block}-{house.number}</h2>
                             <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-80">Kavling Rumah</p>
                         </div>
                     </div>
 
-                    {/* Body Section */}
                     <div className="p-6 space-y-6 bg-white relative">
-                        
-                        {/* Status Tags - Clean Layout (No Negative Margin Overlap) */}
                         <div className="flex flex-wrap gap-2 justify-center pb-2 border-b border-slate-100">
                             <span className={`px-4 py-1.5 rounded-full text-xs font-bold border shadow-sm ${
                                 house.status === 'Occupied' ? 'bg-blue-50 text-blue-600 border-blue-100' : 
@@ -83,7 +74,6 @@ const HouseDetailModal = ({
                             )}
                         </div>
 
-                        {/* Active Issues Warning */}
                         {activeReports.length > 0 && (
                             <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-3">
                                 <div className="bg-rose-100 p-2 rounded-full">
@@ -100,7 +90,6 @@ const HouseDetailModal = ({
                             </div>
                         )}
 
-                        {/* Info Details */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
                                 <div className="bg-white p-3 rounded-xl text-slate-400 shadow-sm border border-slate-100"><User size={24}/></div>
@@ -122,7 +111,6 @@ const HouseDetailModal = ({
                             </div>
                         </div>
 
-                        {/* Actions */}
                         <div className="pt-2 pb-2">
                             {isAdmin ? (
                                 <div className="grid grid-cols-2 gap-3">
@@ -146,6 +134,96 @@ const HouseDetailModal = ({
     );
 };
 
+interface HouseCardProps {
+    house: House;
+    hasIssue: boolean;
+    isAdmin: boolean;
+    onClick: () => void;
+}
+
+// --- House Card Component (Tiny) ---
+const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, isAdmin, onClick }) => {
+    const getHouseColor = () => {
+        if (hasIssue) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_10px_rgba(244,63,94,0.3)] animate-pulse ring-1 ring-rose-400";
+        if (house.status === 'Empty') return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
+        if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
+        return "bg-white border-slate-300 text-slate-700 hover:border-blue-400 hover:text-blue-600";
+    };
+
+    return (
+        <button
+            onClick={onClick}
+            className={`
+                relative flex flex-col items-center justify-center p-2 rounded-lg border transition-all duration-200
+                min-h-[50px] w-full
+                hover:scale-105 hover:shadow-md hover:z-10
+                ${getHouseColor()}
+            `}
+        >
+            <span className="text-sm font-black leading-none">{house.number}</span>
+            <div className="flex items-center justify-center mt-1">
+                {house.status === 'Business' ? <Store size={12} className="opacity-70"/> : <Home size={12} className="opacity-70"/>}
+            </div>
+            
+            {/* Admin Indicator */}
+            {isAdmin && (
+                <div className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${
+                    house.paymentStatus === PaymentStatus.PAID ? 'bg-emerald-500' :
+                    house.paymentStatus === PaymentStatus.PENDING ? 'bg-amber-500' : 'bg-rose-500'
+                }`}></div>
+            )}
+            
+            {/* Issue Indicator */}
+            {hasIssue && (
+                <div className="absolute -top-1 -left-1 text-rose-600 bg-white rounded-full"><AlertTriangle size={10} fill="currentColor"/></div>
+            )}
+        </button>
+    );
+};
+
+interface BlockRendererProps {
+    blockCode: string;
+    houses: House[];
+    reports: Report[];
+    isAdmin: boolean;
+    onSelect: (h: House) => void;
+}
+
+// --- Block Component ---
+const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, isAdmin, onSelect }) => {
+    // Sort houses numerically
+    const sortedHouses = [...houses].sort((a, b) => parseInt(a.number, 10) - parseInt(b.number, 10));
+
+    return (
+        <div className="flex flex-col h-full bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg overflow-hidden">
+            {/* Red Header */}
+            <div className="bg-rose-600 text-white text-center py-1.5 border-b-2 border-slate-800 relative overflow-hidden">
+                 <div className="absolute inset-0 bg-black/10 skew-x-12 scale-150 pointer-events-none"></div>
+                 <h3 className="text-xl font-black tracking-tighter relative z-10 drop-shadow-md">{blockCode}</h3>
+            </div>
+            
+            {/* Street Content */}
+            <div className="flex-1 bg-slate-100 p-2 relative">
+                 {/* Dashed Center Line (Street) */}
+                 <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-300 z-0"></div>
+                 
+                 <div className="grid grid-cols-2 gap-x-6 gap-y-2 relative z-10">
+                     {sortedHouses.map(house => (
+                         <HouseCard 
+                            key={house.id} 
+                            house={house} 
+                            isAdmin={isAdmin} 
+                            hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')}
+                            onClick={() => onSelect(house)}
+                         />
+                     ))}
+                 </div>
+            </div>
+        </div>
+    );
+};
+
+
 export const HouseMap: React.FC<HouseMapProps> = ({ 
   houses, 
   isAdmin, 
@@ -155,27 +233,6 @@ export const HouseMap: React.FC<HouseMapProps> = ({
   onReportHouse
 }) => {
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
-  const [activeBlock, setActiveBlock] = useState<string>(''); 
-  
-  // Sort blocks numerically: Fix logic to handle duplicates and sort
-  const allBlocks: string[] = Array.from(new Set(houses.map(h => h.block)) as Set<string>).sort((a, b) => 
-    a.localeCompare(b, 'en', { numeric: true, sensitivity: 'base' })
-  );
-
-  // Set default block using effect to avoid render loop
-  useEffect(() => {
-    if (!activeBlock && allBlocks.length > 0) {
-        setActiveBlock(allBlocks[0]);
-    }
-  }, [allBlocks, activeBlock]);
-
-  const scrollToBlock = (blockId: string) => {
-    setActiveBlock(blockId);
-    const element = document.getElementById(`block-${blockId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
 
   // --- STATS ---
   const totalOccupied = houses.filter(h => h.status === 'Occupied').length;
@@ -183,128 +240,83 @@ export const HouseMap: React.FC<HouseMapProps> = ({
   const totalEmpty = houses.filter(h => h.status === 'Empty').length;
   const totalIssues = reports.filter(r => r.status !== 'Selesai').length;
 
-  const getHouseColor = (house: House, hasIssue: boolean) => {
-      if (hasIssue) return "bg-rose-100 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.4)] animate-pulse";
-      if (house.status === 'Empty') return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-80";
-      if (house.status === 'Business') return "bg-purple-50 border-purple-400 text-purple-700 shadow-sm";
-      return "bg-white border-blue-300 text-slate-700 shadow-sm";
-  };
+  // Helper to filter houses by block
+  const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[600px] md:h-[700px]">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-100 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-20 shadow-sm relative">
+    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[700px]">
+      {/* Header Info */}
+      <div className="bg-white border-b border-slate-100 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-20 shadow-sm">
         <div>
            <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2">
-              <MapPin className="text-brand-blue" size={24}/> Denah Digital Warga
+              <MapPin className="text-brand-blue" size={24}/> Denah Digital RT 002
            </h3>
            <p className="text-xs text-slate-500 font-medium">Klik nomor rumah untuk melihat detail informasi.</p>
         </div>
         
         <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar max-w-full">
-           <div className="flex items-center gap-1.5 px-2 whitespace-nowrap"><span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span> {totalOccupied} Dihuni</div>
+           <div className="flex items-center gap-1.5 px-2 whitespace-nowrap"><span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span> {totalOccupied} Warga</div>
            <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-sm"></span> {totalBusiness} Usaha</div>
            <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><span className="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm"></span> {totalEmpty} Kosong</div>
            {totalIssues > 0 && <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 text-rose-600 animate-pulse whitespace-nowrap"><AlertTriangle size={12}/> {totalIssues} Laporan</div>}
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden relative">
-          {/* Sidebar Nav */}
-          <div className="w-16 md:w-20 bg-slate-50 border-r border-slate-200 flex flex-col items-center py-6 gap-3 overflow-y-auto no-scrollbar z-10 shadow-inner">
-             {allBlocks.map(block => (
-                 <button
-                    key={block}
-                    onClick={() => scrollToBlock(block)}
-                    className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-xs md:text-sm font-black transition-all duration-300 ${
-                        activeBlock === block 
-                        ? 'bg-brand-blue text-white shadow-lg shadow-blue-300 scale-110' 
-                        : 'bg-white text-slate-400 border border-slate-200 hover:border-brand-blue hover:text-brand-blue'
-                    }`}
-                 >
-                     {block}
-                 </button>
-             ))}
-          </div>
+      {/* Map Area */}
+      <div className="flex-1 overflow-auto bg-slate-50 relative custom-scrollbar">
+           {/* Blueprint Background */}
+           <div className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none" style={{
+               backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`,
+               backgroundSize: '20px 20px'
+           }}></div>
+           
+           {/* Map Container - Dashed Border (Physical Map Look) */}
+           <div className="min-w-[900px] p-8">
+               <div className="border-[6px] border-dashed border-amber-400 bg-amber-50/50 p-6 rounded-3xl relative">
+                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-amber-400 text-amber-900 px-4 py-1 rounded-full font-bold text-xs shadow-sm uppercase tracking-widest border border-amber-500">
+                       Batas Wilayah RT 002 / RW 020
+                   </div>
 
-          {/* Map Area - Blueprint Style */}
-          <div className="flex-1 overflow-y-auto bg-slate-50 relative custom-scrollbar scroll-smooth">
-               {/* Blueprint Grid Background */}
-               <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{
-                   backgroundImage: `radial-gradient(#000 1px, transparent 1px)`,
-                   backgroundSize: '20px 20px'
-               }}></div>
+                   {/* Grid Layout based on Image */}
+                   <div className="grid grid-cols-4 gap-6">
+                       
+                       {/* Column 1: Block C5 (Spans Full Height) */}
+                       <div className="col-span-1 row-span-2">
+                           <BlockRenderer blockCode="C5" houses={getBlockHouses('C5')} reports={reports} isAdmin={isAdmin} onSelect={setSelectedHouse} />
+                       </div>
 
-               <div className="p-6 md:p-10 pb-32 space-y-12">
-                   {allBlocks.map(block => {
-                       const blockHouses = houses
-                           .filter(h => h.block === block)
-                           .sort((a, b) => parseInt(a.number, 10) - parseInt(b.number, 10));
+                       {/* Column 2: C7 & C8 */}
+                       <div className="col-span-1 flex flex-col gap-6">
+                           <BlockRenderer blockCode="C7" houses={getBlockHouses('C7')} reports={reports} isAdmin={isAdmin} onSelect={setSelectedHouse} />
+                           <BlockRenderer blockCode="C8" houses={getBlockHouses('C8')} reports={reports} isAdmin={isAdmin} onSelect={setSelectedHouse} />
+                       </div>
 
-                       return (
-                           <div key={block} id={`block-${block}`} className="relative">
-                               {/* Block Label */}
-                               <div className="flex items-center gap-4 mb-6">
-                                   <div className="bg-slate-800 text-white px-4 py-1.5 rounded-lg shadow-lg font-black text-sm tracking-wide z-10">
-                                       BLOK {block} <span className="text-slate-400 font-normal ml-1 text-xs">({blockHouses.length} Unit)</span>
-                                   </div>
-                                   <div className="h-px flex-1 bg-slate-300 border-b border-dashed border-slate-200"></div>
-                               </div>
+                       {/* Column 3: C9 & C10 */}
+                       <div className="col-span-1 flex flex-col gap-6">
+                           <BlockRenderer blockCode="C9" houses={getBlockHouses('C9')} reports={reports} isAdmin={isAdmin} onSelect={setSelectedHouse} />
+                           <BlockRenderer blockCode="C10" houses={getBlockHouses('C10')} reports={reports} isAdmin={isAdmin} onSelect={setSelectedHouse} />
+                       </div>
 
-                               {/* Grid Layout */}
-                               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
-                                   {blockHouses.map(house => {
-                                       const hasIssue = reports.some(r => r.houseId === house.id && r.status !== 'Selesai');
-                                       
-                                       return (
-                                           <button
-                                               key={house.id}
-                                               onClick={() => setSelectedHouse(house)}
-                                               className={`
-                                                   relative group flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-300
-                                                   hover:-translate-y-1 hover:shadow-lg
-                                                   ${getHouseColor(house, hasIssue)}
-                                               `}
-                                           >
-                                               {/* Roof Icon */}
-                                               <div className={`mb-1 opacity-80 transition-transform group-hover:scale-110 ${house.status === 'Empty' ? 'opacity-30' : ''}`}>
-                                                   {house.status === 'Business' ? <Store size={24}/> : <Home size={24}/>}
-                                               </div>
-                                               
-                                               {/* Number */}
-                                               <span className="text-lg font-black tracking-tighter leading-none">{house.number}</span>
-                                               
-                                               {/* Label Status (Optional small text) */}
-                                               <span className="text-[9px] font-bold uppercase mt-1 opacity-60">
-                                                   {hasIssue ? 'Masalah' : (house.status === 'Business' ? 'Usaha' : house.status === 'Empty' ? 'Kosong' : 'Warga')}
-                                               </span>
-
-                                               {/* Status Dot (Admin: Payment, Public: Occupancy) */}
-                                               {isAdmin && (
-                                                   <div className={`absolute top-2 right-2 w-2.5 h-2.5 rounded-full border border-white shadow-sm ${
-                                                       house.paymentStatus === PaymentStatus.PAID ? 'bg-emerald-500' :
-                                                       house.paymentStatus === PaymentStatus.PENDING ? 'bg-amber-500' : 'bg-rose-500'
-                                                   }`}></div>
-                                               )}
-
-                                               {/* Alert Badge */}
-                                               {hasIssue && (
-                                                   <div className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white p-1 rounded-full shadow-sm animate-bounce">
-                                                       <AlertTriangle size={10} fill="currentColor"/>
-                                                   </div>
-                                               )}
-                                           </button>
-                                       )
-                                   })}
-                               </div>
-                           </div>
-                       )
-                   })}
+                       {/* Column 4: C11 & C12 */}
+                       <div className="col-span-1 flex flex-col gap-6">
+                           <BlockRenderer blockCode="C11" houses={getBlockHouses('C11')} reports={reports} isAdmin={isAdmin} onSelect={setSelectedHouse} />
+                           <BlockRenderer blockCode="C12" houses={getBlockHouses('C12')} reports={reports} isAdmin={isAdmin} onSelect={setSelectedHouse} />
+                       </div>
+                   </div>
+                   
+                   {/* Legend / Compass */}
+                   <div className="absolute bottom-4 right-4 opacity-20 pointer-events-none">
+                       <div className="w-16 h-16 border-4 border-slate-800 rounded-full flex items-center justify-center relative">
+                           <div className="absolute -top-3 bg-slate-800 text-white text-[10px] px-1 font-bold">U</div>
+                           <div className="w-1 h-12 bg-slate-800"></div>
+                           <div className="w-12 h-1 bg-slate-800 absolute"></div>
+                       </div>
+                   </div>
                </div>
-          </div>
+           </div>
       </div>
 
-      {/* Detail Modal - Rendered Conditionally */}
+      {/* Detail Modal */}
       {selectedHouse && (
           <HouseDetailModal 
             house={selectedHouse} 

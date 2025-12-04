@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { 
@@ -261,16 +260,19 @@ const PublicHome = ({ houses, announcements, ronda, reports }: { houses: House[]
         ))}
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-        <div className="lg:col-span-2 space-y-6 md:space-y-8">
-          {/* House Map - Pass Reports for highlighting issues */}
-          <HouseMap 
+      {/* Full Width Map */}
+      <div className="w-full">
+         <HouseMap 
             houses={houses} 
             isAdmin={false} 
             reports={reports}
             onReportHouse={(house) => navigate(`/services?tab=lapor&houseId=${house.id}`)} 
-          />
-
+         />
+      </div>
+      
+      {/* Bottom Info Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="lg:col-span-2 space-y-6 md:space-y-8">
           {/* Announcements */}
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <div className="flex items-center justify-between mb-4 md:mb-6">
@@ -306,7 +308,7 @@ const PublicHome = ({ houses, announcements, ronda, reports }: { houses: House[]
           </div>
         </div>
 
-        {/* Sidebar Info */}
+        {/* Sidebar Info (Moved Here) */}
         <div className="space-y-6 md:space-y-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
           <Card title="Ronda Malam Ini" className="bg-gradient-to-b from-slate-800 to-slate-900 text-white border-0 shadow-lg shadow-slate-300">
              <div className="space-y-3">
@@ -589,7 +591,12 @@ const AdminDashboard = ({
   const [residentView, setResidentView] = useState<'grid' | 'table'>('table');
   const [searchResident, setSearchResident] = useState('');
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
-  const [editHouseForm, setEditHouseForm] = useState({ headOfFamily: '', occupants: 0, phone: '', paymentStatus: '' });
+  const [editHouseForm, setEditHouseForm] = useState<{
+    headOfFamily: string;
+    occupants: number;
+    phone: string;
+    paymentStatus: string;
+  }>({ headOfFamily: '', occupants: 0, phone: '', paymentStatus: '' });
 
   // -- Service Management State --
   const [serviceTab, setServiceTab] = useState<'surat' | 'laporan'>('surat');
@@ -1276,128 +1283,117 @@ const AdminDashboard = ({
   );
 };
 
-const App = () => {
+export const App = () => {
   const [houses, setHouses] = useState<House[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [reports, setReports] = useState<Report[]>([]);
-  const [umkm, setUmkm] = useState<UMKM[]>([]);
-  const [officials, setOfficials] = useState<Official[]>([]);
-  const [ronda, setRonda] = useState<RondaSchedule[]>([]);
   const [cashFlow, setCashFlow] = useState<CashFlow[]>([]);
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [officials, setOfficials] = useState<Official[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [letters, setLetters] = useState<LetterRequest[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [ronda, setRonda] = useState<RondaSchedule[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [umkm, setUmkm] = useState<UMKM[]>([]);
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(DEFAULT_PDF_CONFIG);
+  
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Load PDF Config from LocalStorage
   useEffect(() => {
-    const savedConfig = localStorage.getItem('pdf_config');
-    if (savedConfig) {
-      try { setPdfConfig(JSON.parse(savedConfig)); } catch (e) { console.error("Error parsing saved config", e); }
-    }
-  }, []);
-
-  // Subscribe to collections
-  useEffect(() => {
+    // Initial Seed & Subscriptions
     if (!isFirebaseConfigured) {
-      // Load Mock Data
-      setHouses(generateHouses());
-      setAnnouncements(MOCK_ANNOUNCEMENTS);
-      setOfficials(INITIAL_OFFICIALS);
-      setRonda(MOCK_RONDA);
-      setCashFlow(MOCK_CASHFLOW);
-      setInventory(MOCK_INVENTORY);
-      setUmkm(MOCK_UMKM);
-      return;
+       setHouses(generateHouses());
+       setAnnouncements(MOCK_ANNOUNCEMENTS);
+       setOfficials(INITIAL_OFFICIALS);
+       setRonda(MOCK_RONDA);
+       setCashFlow(MOCK_CASHFLOW);
+       setInventory(MOCK_INVENTORY);
+       setUmkm(MOCK_UMKM);
+    } else {
+       // Seeding logic for demo consistency (Only if empty)
+       seedDatabase({
+           houses: generateHouses(),
+           announcements: MOCK_ANNOUNCEMENTS,
+           officials: INITIAL_OFFICIALS,
+           ronda: MOCK_RONDA,
+           inventory: MOCK_INVENTORY,
+           umkm: MOCK_UMKM
+       });
+
+       const unsubs = [
+           subscribeToCollection('houses', (d) => setHouses(d as House[])),
+           subscribeToCollection('announcements', (d) => setAnnouncements(d as Announcement[])),
+           subscribeToCollection('cashFlow', (d) => setCashFlow(d as CashFlow[])),
+           subscribeToCollection('officials', (d) => setOfficials(d as Official[])),
+           subscribeToCollection('reports', (d) => setReports(d as Report[])),
+           subscribeToCollection('letters', (d) => setLetters(d as LetterRequest[])),
+           subscribeToCollection('ronda', (d) => setRonda(d as RondaSchedule[])),
+           subscribeToCollection('inventory', (d) => setInventory(d as InventoryItem[])),
+           subscribeToCollection('umkm', (d) => setUmkm(d as UMKM[])),
+       ];
+       return () => unsubs.forEach(u => u());
     }
-
-    const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data as House[]));
-    const unsubAnnouncements = subscribeToCollection('announcements', (data) => setAnnouncements(data as Announcement[]));
-    const unsubReports = subscribeToCollection('reports', (data) => setReports(data as Report[]));
-    const unsubUMKM = subscribeToCollection('umkm', (data) => setUmkm(data as UMKM[]));
-    const unsubOfficials = subscribeToCollection('officials', (data) => setOfficials(data as Official[]));
-    const unsubRonda = subscribeToCollection('ronda', (data) => setRonda(data as RondaSchedule[]));
-    const unsubCashFlow = subscribeToCollection('cashFlow', (data) => setCashFlow(data as CashFlow[]));
-    const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data as InventoryItem[]));
-    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data as LetterRequest[]));
-
-    return () => {
-      unsubHouses(); unsubAnnouncements(); unsubReports(); unsubUMKM();
-      unsubOfficials(); unsubRonda(); unsubCashFlow(); unsubInventory(); unsubLetters();
-    };
   }, []);
 
-  // Seeding Check (Only if Firebase is configured and empty)
+  // Load config from local storage
   useEffect(() => {
-     if(isFirebaseConfigured && houses.length === 0) {
-         // Logic to seed if strictly empty could be here, but usually triggered manually or via service check
-         // For now relying on manual seed via console or service logic
-         seedDatabase({ 
-             houses: generateHouses(), 
-             announcements: MOCK_ANNOUNCEMENTS, 
-             umkm: MOCK_UMKM,
-             officials: INITIAL_OFFICIALS,
-             ronda: MOCK_RONDA,
-             inventory: MOCK_INVENTORY
-         });
-     }
-  }, [houses]);
+      const saved = localStorage.getItem('pdf_config');
+      if (saved) {
+          try { setPdfConfig(JSON.parse(saved)); } catch (e) { console.error(e); }
+      }
+  }, []);
 
   return (
     <HashRouter>
-       <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={
-            <>
-               <PublicHeader />
-               <PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} />
-               <PanicButton />
-               <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            </>
-          } />
-          <Route path="/services" element={
-            <>
-               <PublicHeader />
-               <PublicServices pdfConfig={pdfConfig} />
-               <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            </>
-          } />
-          <Route path="/umkm" element={
-            <>
-               <PublicHeader />
-               <PublicUMKM umkmData={umkm} />
-               <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            </>
-          } />
-           <Route path="/info" element={
-            <>
-               <PublicHeader />
-               <PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} />
-               <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            </>
-          } />
-
-          {/* Admin Routes */}
-          <Route path="/admin" element={
-            <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-               <AdminDashboard 
-                  houses={houses} 
-                  announcements={announcements} 
-                  cashFlow={cashFlow} 
-                  officials={officials} 
-                  reports={reports} 
-                  letters={letters} 
-                  ronda={ronda} 
-                  inventory={inventory}
-                  umkm={umkm}
-                  pdfConfig={pdfConfig}
-                  setPdfConfig={setPdfConfig}
-               />
-            </AdminRouteWrapper>
-          } />
-       </Routes>
+      <Routes>
+        <Route path="/" element={
+           <>
+             <PublicHeader />
+             <PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} />
+             <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+             <PanicButton />
+           </>
+        } />
+        <Route path="/services" element={
+           <>
+             <PublicHeader />
+             <PublicServices pdfConfig={pdfConfig} />
+             <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+             <PanicButton />
+           </>
+        } />
+        <Route path="/umkm" element={
+           <>
+             <PublicHeader />
+             <PublicUMKM umkmData={umkm} />
+             <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+             <PanicButton />
+           </>
+        } />
+        <Route path="/info" element={
+           <>
+             <PublicHeader />
+             <PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} />
+             <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+             <PanicButton />
+           </>
+        } />
+        <Route path="/admin" element={
+           <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
+             <AdminDashboard 
+               houses={houses} 
+               announcements={announcements}
+               cashFlow={cashFlow}
+               officials={officials}
+               reports={reports}
+               letters={letters}
+               ronda={ronda}
+               inventory={inventory}
+               umkm={umkm}
+               pdfConfig={pdfConfig}
+               setPdfConfig={setPdfConfig}
+             />
+           </AdminRouteWrapper>
+        } />
+      </Routes>
     </HashRouter>
   );
 };
-
-export default App;
