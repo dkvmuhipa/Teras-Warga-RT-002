@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
@@ -18,16 +19,9 @@ export const Logo = () => (
 
 // --- DATA DUMMY (MOCK DATA) ---
 
-// Updated Officials to match valid blocks (C5, C7-C12)
-export const INITIAL_OFFICIALS: Official[] = [
-    { id: '1', role: 'Ketua RT', name: 'Bpk. Irfan Arianto', houseId: 'C10-08', phone: '0812-3456-7890' },
-    { id: '2', role: 'Sekretaris', name: 'Ibu Siti Aminah', houseId: 'C5-02', phone: '0812-9876-5432' },
-    { id: '3', role: 'Bendahara', name: 'Bpk. Rudi Hartono', houseId: 'C11-12', phone: '0813-4567-8901' },
-    { id: '4', role: 'Koord. Keamanan', name: 'Bpk. Joko Susilo', houseId: 'C8-05', phone: '0813-1122-3344' },
-];
-
 export const generateHouses = (): House[] => {
-  // Konfigurasi Wilayah RT 002 (Data Terbaru Sesuai Instruksi)
+  // Konfigurasi Wilayah RT 002 (Fix Update)
+  // C5 (1-26), C7 (1-18), C8 (1-18), C9 (1-18), C10 (1-16), C11 (1-18), C12 (1-15)
   const blockConfig = [
     { code: 'C5', start: 1, end: 26 },
     { code: 'C7', start: 1, end: 18 },
@@ -64,6 +58,14 @@ export const generateHouses = (): House[] => {
   });
   return houses;
 };
+
+// Updated Officials to match valid blocks (C5, C7-C12)
+export const INITIAL_OFFICIALS: Official[] = [
+    { id: '1', role: 'Ketua RT', name: 'Bpk. Irfan Arianto', houseId: 'C10-08', phone: '0812-3456-7890' },
+    { id: '2', role: 'Sekretaris', name: 'Ibu Siti Aminah', houseId: 'C5-02', phone: '0812-9876-5432' },
+    { id: '3', role: 'Bendahara', name: 'Bpk. Rudi Hartono', houseId: 'C11-12', phone: '0813-4567-8901' },
+    { id: '4', role: 'Koord. Keamanan', name: 'Bpk. Joko Susilo', houseId: 'C8-05', phone: '0813-1122-3344' },
+];
 
 export const MOCK_ANNOUNCEMENTS: Announcement[] = [
   {
@@ -115,7 +117,7 @@ export const MOCK_UMKM: UMKM[] = [
 export const INITIAL_REPORTS: Report[] = [];
 export const INITIAL_LETTERS: LetterRequest[] = [];
 
-// Updated Ronda Schedule to match valid blocks
+// Updated Ronda Schedule to match valid blocks (C5, C7, etc)
 export const MOCK_RONDA: RondaSchedule[] = [
   { day: 'Senin', members: ['Bpk. Asep (C5-01)', 'Bpk. Budi (C5-02)', 'Bpk. Cecep (C5-03)'] },
   { day: 'Selasa', members: ['Bpk. Dedi (C7-01)', 'Bpk. Eko (C7-02)', 'Bpk. Fajar (C7-03)'] },

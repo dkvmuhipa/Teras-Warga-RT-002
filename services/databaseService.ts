@@ -26,8 +26,8 @@ const UMKM_COL = "umkm";
 // --- UTILS ---
 
 /**
- * Membersihkan objek secara rekursif agar aman untuk disimpan ke Firestore/JSON.
- * Menghapus fungsi, DOM nodes, dan menangani referensi circular.
+ * Membersihkan objek secara rekursif agar aman untuk disimpan ke Firestore.
+ * Mencegah error "Converting circular structure to JSON".
  */
 const deepSanitize = (data: any, seen = new WeakSet()): any => {
   // 1. Handle Primitive / Null / Undefined
@@ -51,7 +51,7 @@ const deepSanitize = (data: any, seen = new WeakSet()): any => {
     return data.map(item => deepSanitize(item, seen));
   }
 
-  // 5. Block DOM Nodes / React Events (Common source of "circular structure" errors)
+  // 5. Block DOM Nodes / React Events (Common source of errors)
   if (data.nodeType || (data.nativeEvent && data.target)) {
     return undefined;
   }
@@ -108,44 +108,59 @@ export const updateHouseData = async (id: string, updates: any) => {
     } catch (e) { console.error("Error updating house:", e); }
 };
 
+/**
+ * Fungsi Reset Database Warga yang Dioptimalkan (Batch Write).
+ * Menghapus data lama dan menulis data baru dalam satu proses batch.
+ * Jauh lebih cepat dan stabil.
+ */
 export const resetHouseData = async (newHouses: any[]) => {
   if (!isFirebaseConfigured) return;
+
   try {
-    console.log("Starting database reset...");
+    console.log("Mulai migrasi data warga...");
     
-    // 1. Get all existing house documents
+    // 1. Ambil semua data lama
     const snapshot = await getDocs(collection(db, HOUSES_COL));
     
-    // 2. Delete in batches (Firestore batch limit is 500)
-    const batchSize = 400; 
+    // 2. Inisialisasi Batch (Firestore limit 500 ops/batch)
+    const MAX_BATCH_SIZE = 400; 
     let batch = writeBatch(db);
-    let count = 0;
+    let operationCount = 0;
 
-    for (const doc of snapshot.docs) {
-      batch.delete(doc.ref);
-      count++;
-      if (count >= batchSize) {
+    const commitBatch = async () => {
         await batch.commit();
         batch = writeBatch(db);
-        count = 0;
-      }
+        operationCount = 0;
+    };
+
+    // 3. Queue Delete Operations (Hapus data lama)
+    for (const doc of snapshot.docs) {
+      batch.delete(doc.ref);
+      operationCount++;
+      if (operationCount >= MAX_BATCH_SIZE) await commitBatch();
     }
-    if (count > 0) {
+
+    // 4. Queue Create Operations (Tambah data baru)
+    for (const house of newHouses) {
+       const cleanData = deepSanitize(house);
+       if (!cleanData) continue;
+       
+       const ref = doc(db, HOUSES_COL, house.id); // Gunakan ID Blok (misal C5-01) sebagai Doc ID
+       batch.set(ref, cleanData);
+       
+       operationCount++;
+       if (operationCount >= MAX_BATCH_SIZE) await commitBatch();
+    }
+
+    // 5. Commit sisa operasi
+    if (operationCount > 0) {
       await batch.commit();
     }
-    console.log("Old data cleared.");
-
-    // 3. Add new houses
-    let addedCount = 0;
-    for (const house of newHouses) {
-       // We use deepSanitize here to ensure safety
-       await addHouse(house);
-       addedCount++;
-    }
-    console.log(`Successfully re-seeded ${addedCount} houses.`);
+    
+    console.log("Migrasi data warga selesai.");
     
   } catch (e) {
-    console.error("Error resetting house data:", e);
+    console.error("Gagal melakukan reset data:", e);
     throw e;
   }
 };
@@ -284,17 +299,27 @@ export const deleteUMKMFromDb = async (id: string) => {
 };
 
 
-// --- SEEDING ---
+// --- SEEDING & AUTO-MIGRATION ---
 export const seedDatabase = async (initialData: any) => {
     if (!isFirebaseConfigured) return;
 
     try {
       const housesSnap = await getDocs(collection(db, HOUSES_COL));
-      if (housesSnap.empty && initialData.houses.length > 0) {
-          console.log("Seeding Houses...");
-          for (const h of initialData.houses) await addHouse(h);
+      
+      // LOGIKA MIGRASI OTOMATIS:
+      // Cek apakah data di database masih menggunakan Blok lama (C1/C2/C3/C4)
+      // Jika ya, berarti perlu di-reset ke format baru (C5, C7, dll).
+      const hasOldData = housesSnap.docs.some(doc => {
+          const data = doc.data();
+          return ['C1', 'C2', 'C3', 'C4'].includes(data.block);
+      });
+
+      if (housesSnap.empty || hasOldData) {
+          console.log("Mendeteksi skema data lama atau kosong. Melakukan migrasi otomatis ke RT 002 (C5-C12)...");
+          await resetHouseData(initialData.houses);
       }
 
+      // Seeding koleksi lain jika kosong
       const officialsSnap = await getDocs(collection(db, OFFICIALS_COL));
       if (officialsSnap.empty && initialData.officials.length > 0) {
           console.log("Seeding Officials...");
@@ -313,7 +338,6 @@ export const seedDatabase = async (initialData: any) => {
           for (const i of initialData.inventory) await addDoc(collection(db, INVENTORY_COL), deepSanitize(i));
       }
 
-      // Seed UMKM if empty
       const umkmSnap = await getDocs(collection(db, UMKM_COL));
       if (umkmSnap.empty && initialData.umkm && initialData.umkm.length > 0) {
           console.log("Seeding UMKM...");
@@ -321,6 +345,6 @@ export const seedDatabase = async (initialData: any) => {
       }
 
     } catch (e) {
-      console.error("Seeding failed:", e);
+      console.error("Seeding/Migration failed:", e);
     }
 };

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { 
   Home, FileText, Megaphone, AlertTriangle, User, Users, LogIn, Menu, X, 
   LayoutDashboard, CreditCard, Send, Bot, Check, Trash2, Clock, CheckCircle, XCircle, Search, Edit2, Plus,
@@ -46,7 +47,7 @@ import {
   addUMKMToDb,
   updateUMKMInDb,
   deleteUMKMFromDb,
-  resetHouseData // Import reset function
+  resetHouseData
 } from './services/databaseService';
 
 // --- Shared Components ---
@@ -263,7 +264,12 @@ const PublicHome = ({ houses, announcements, ronda, reports }: { houses: House[]
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
           {/* House Map - Pass Reports for highlighting issues */}
-          <HouseMap houses={houses} isAdmin={false} reports={reports} />
+          <HouseMap 
+            houses={houses} 
+            isAdmin={false} 
+            reports={reports}
+            onReportHouse={(house) => navigate(`/services?tab=lapor&houseId=${house.id}`)} 
+          />
 
           {/* Announcements */}
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -336,7 +342,9 @@ const PublicHome = ({ houses, announcements, ronda, reports }: { houses: House[]
 
 const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
   const location = useLocation();
-  const initialTab = new URLSearchParams(location.search).get('tab') === 'lapor' ? 'lapor' : 'surat';
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'lapor' ? 'lapor' : 'surat';
+  const initialHouseId = searchParams.get('houseId') || '';
   
   const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'history'>(initialTab as any);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
@@ -347,6 +355,14 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
       if (stored) setLocalHistory(JSON.parse(stored));
     } catch (e) { console.error("Error reading history", e); }
   }, []);
+
+  // Update HouseID if passed from URL
+  useEffect(() => {
+      if(initialHouseId) {
+          if (activeTab === 'lapor') setReportHouseId(initialHouseId);
+          if (activeTab === 'surat') setHouseId(initialHouseId);
+      }
+  }, [initialHouseId, activeTab]);
 
   const saveToHistory = (item: any) => {
       try {
@@ -359,7 +375,7 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
   const [reportType, setReportType] = useState<Report['type']>('Fasilitas');
   const [reportDesc, setReportDesc] = useState('');
   const [reporterName, setReporterName] = useState('');
-  const [reportHouseId, setReportHouseId] = useState(''); // New input for House ID
+  const [reportHouseId, setReportHouseId] = useState(initialHouseId); 
 
   const [requestType, setRequestType] = useState<LetterRequest['type']>('Pengantar KTP');
   const [applicantName, setApplicantName] = useState('');
@@ -371,7 +387,7 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
   const [job, setJob] = useState('');
   const [maritalStatus, setMaritalStatus] = useState<LetterRequest['maritalStatus']>('KAWIN');
   const [addressKtp, setAddressKtp] = useState('');
-  const [houseId, setHouseId] = useState('');
+  const [houseId, setHouseId] = useState(initialHouseId);
 
   const handleSubmitSurat = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -684,21 +700,6 @@ const AdminDashboard = ({
     setIsModalOpen(false); resetForms();
   };
 
-  const handleResetDatabase = async () => {
-    if (confirm("PERHATIAN: Tindakan ini akan MENGHAPUS SEMUA DATA WARGA yang ada dan menggantinya dengan data default sesuai konfigurasi wilayah terbaru (C5, C7-C12). Data iuran dan status hunian akan di-reset. Lanjutkan?")) {
-        setIsGenerating(true);
-        try {
-            await resetHouseData(generateHouses());
-            alert("Database warga berhasil diperbarui! Silakan refresh halaman jika data belum berubah.");
-            window.location.reload(); 
-        } catch (e) {
-            alert("Gagal mereset database. Cek konsol untuk detail.");
-        } finally {
-            setIsGenerating(false);
-        }
-    }
-  };
-
   const handleExportCSV = () => {
       const headers = ["Blok", "Nomor", "Kepala Keluarga", "Jumlah Penghuni", "Status Hunian", "Status Iuran", "No. HP"];
       const rows = houses.map(h => [
@@ -796,7 +797,22 @@ const AdminDashboard = ({
   };
   const handleDeleteOfficial = async (id: string) => { if (confirm("Hapus?")) await deleteOfficialFromDb(id); };
   const handleEditOfficial = (o: Official) => { setOffId(o.id); setOffName(o.name); setOffRole(o.role); setOffPhone(o.phone); setOffHouse(o.houseId); setOffPhoto(o.photo||''); setModalType('official'); setIsModalOpen(true); };
-  const openEditHouse = (h: House) => { setSelectedHouse(h); setEditHouseForm({ headOfFamily: h.headOfFamily, occupants: h.occupants, phone: h.phone || '', paymentStatus: h.paymentStatus }); setModalType('editHouse'); setIsModalOpen(true); }
+  
+  // -- HOUSE MAP HANDLERS --
+  const openEditHouse = (h: House) => { 
+      setSelectedHouse(h); 
+      setEditHouseForm({ headOfFamily: h.headOfFamily, occupants: h.occupants, phone: h.phone || '', paymentStatus: h.paymentStatus }); 
+      setModalType('editHouse'); 
+      setIsModalOpen(true); 
+  };
+
+  const openDuesModal = (h: House) => {
+      setDuesHouseId(h.id);
+      setDuesStatus(PaymentStatus.PAID);
+      setModalType('dues');
+      setIsModalOpen(true);
+  };
+
   const handleSaveHouse = async (e: React.FormEvent) => { e.preventDefault(); if(selectedHouse) await updateHouseData(selectedHouse.id, { headOfFamily: editHouseForm.headOfFamily, occupants: parseInt(editHouseForm.occupants as any), phone: editHouseForm.phone, paymentStatus: editHouseForm.paymentStatus }); setIsModalOpen(false); }
   const handleUpdateReport = async (id: string, s: string) => await updateReportStatus(id, s);
   const handleDeleteReport = async (id: string) => await deleteReportFromDb(id);
@@ -973,7 +989,13 @@ const AdminDashboard = ({
                   </div>
                   {residentView === 'grid' ? (
                       // Pass reports to HouseMap in Admin view as well
-                      <HouseMap houses={houses} isAdmin={true} onHouseClick={openEditHouse} reports={reports} />
+                      <HouseMap 
+                        houses={houses} 
+                        isAdmin={true} 
+                        onEditHouse={openEditHouse} 
+                        onPayDues={openDuesModal}
+                        reports={reports} 
+                      />
                   ) : (
                       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
                           <table className="w-full text-sm text-left">
@@ -1066,17 +1088,6 @@ const AdminDashboard = ({
                         <div className="border border-dashed p-4 bg-slate-50"><label className="text-sm font-bold">Tanda Tangan</label><input type="file" onChange={(e) => handleFileChange(e, 'signature')} className="mt-2 text-xs"/></div>
                         <Button onClick={handleSaveConfig} className="w-full">Simpan Pengaturan</Button>
                     </div>
-                 </div>
-
-                 {/* Manajemen Database */}
-                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><RefreshCw size={20}/> Manajemen Database</h2>
-                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl mb-4">
-                        <p className="text-sm text-amber-800 font-medium flex gap-2"><AlertTriangle size={16} className="shrink-0 mt-0.5"/> Perhatian: Fitur ini digunakan jika denah digital tidak sesuai dengan konfigurasi wilayah terbaru.</p>
-                    </div>
-                    <Button onClick={handleResetDatabase} variant="danger" className="w-full bg-rose-600 hover:bg-rose-700 text-white" disabled={isGenerating}>
-                        {isGenerating ? <Loader2 className="animate-spin" size={18}/> : <RefreshCw size={18}/>} Reset & Update Data Warga
-                    </Button>
                  </div>
               </div>
           )}
@@ -1269,27 +1280,27 @@ const App = () => {
   const [houses, setHouses] = useState<House[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
-  const [letters, setLetters] = useState<LetterRequest[]>([]);
+  const [umkm, setUmkm] = useState<UMKM[]>([]);
   const [officials, setOfficials] = useState<Official[]>([]);
   const [ronda, setRonda] = useState<RondaSchedule[]>([]);
   const [cashFlow, setCashFlow] = useState<CashFlow[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [umkm, setUmkm] = useState<UMKM[]>([]);
-
+  const [letters, setLetters] = useState<LetterRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [pdfConfig, setPdfConfig] = useState<PdfConfig>(DEFAULT_PDF_CONFIG);
 
-  const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => {
-    try {
-      const saved = localStorage.getItem('pdf_config');
-      return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG;
-    } catch {
-      return DEFAULT_PDF_CONFIG;
+  // Load PDF Config from LocalStorage
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('pdf_config');
+    if (savedConfig) {
+      try { setPdfConfig(JSON.parse(savedConfig)); } catch (e) { console.error("Error parsing saved config", e); }
     }
-  });
+  }, []);
 
+  // Subscribe to collections
   useEffect(() => {
     if (!isFirebaseConfigured) {
+      // Load Mock Data
       setHouses(generateHouses());
       setAnnouncements(MOCK_ANNOUNCEMENTS);
       setOfficials(INITIAL_OFFICIALS);
@@ -1297,101 +1308,94 @@ const App = () => {
       setCashFlow(MOCK_CASHFLOW);
       setInventory(MOCK_INVENTORY);
       setUmkm(MOCK_UMKM);
-      setReports(INITIAL_REPORTS);
-      setLetters(INITIAL_LETTERS);
-      setIsLoading(false);
       return;
     }
 
-    seedDatabase({
-      houses: generateHouses(),
-      announcements: MOCK_ANNOUNCEMENTS,
-      officials: INITIAL_OFFICIALS,
-      ronda: MOCK_RONDA,
-      inventory: MOCK_INVENTORY,
-      umkm: MOCK_UMKM,
-    });
+    const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data as House[]));
+    const unsubAnnouncements = subscribeToCollection('announcements', (data) => setAnnouncements(data as Announcement[]));
+    const unsubReports = subscribeToCollection('reports', (data) => setReports(data as Report[]));
+    const unsubUMKM = subscribeToCollection('umkm', (data) => setUmkm(data as UMKM[]));
+    const unsubOfficials = subscribeToCollection('officials', (data) => setOfficials(data as Official[]));
+    const unsubRonda = subscribeToCollection('ronda', (data) => setRonda(data as RondaSchedule[]));
+    const unsubCashFlow = subscribeToCollection('cashFlow', (data) => setCashFlow(data as CashFlow[]));
+    const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data as InventoryItem[]));
+    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data as LetterRequest[]));
 
-    const unsubs = [
-      subscribeToCollection('houses', (data) => setHouses(data as House[])),
-      subscribeToCollection('announcements', (data) => setAnnouncements(data as Announcement[])),
-      subscribeToCollection('reports', (data) => setReports(data as Report[])),
-      subscribeToCollection('letters', (data) => setLetters(data as LetterRequest[])),
-      subscribeToCollection('officials', (data) => setOfficials(data as Official[])),
-      subscribeToCollection('ronda', (data) => setRonda(data as RondaSchedule[])),
-      subscribeToCollection('cashFlow', (data) => setCashFlow(data as CashFlow[])),
-      subscribeToCollection('inventory', (data) => setInventory(data as InventoryItem[])),
-      subscribeToCollection('umkm', (data) => setUmkm(data as UMKM[])),
-    ];
-
-    setIsLoading(false);
-
-    return () => unsubs.forEach(unsub => unsub());
+    return () => {
+      unsubHouses(); unsubAnnouncements(); unsubReports(); unsubUMKM();
+      unsubOfficials(); unsubRonda(); unsubCashFlow(); unsubInventory(); unsubLetters();
+    };
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400 flex-col gap-4">
-        <Loader2 className="animate-spin text-brand-blue" size={48} />
-        <p className="font-bold text-sm">Memuat Data RT...</p>
-      </div>
-    );
-  }
+  // Seeding Check (Only if Firebase is configured and empty)
+  useEffect(() => {
+     if(isFirebaseConfigured && houses.length === 0) {
+         // Logic to seed if strictly empty could be here, but usually triggered manually or via service check
+         // For now relying on manual seed via console or service logic
+         seedDatabase({ 
+             houses: generateHouses(), 
+             announcements: MOCK_ANNOUNCEMENTS, 
+             umkm: MOCK_UMKM,
+             officials: INITIAL_OFFICIALS,
+             ronda: MOCK_RONDA,
+             inventory: MOCK_INVENTORY
+         });
+     }
+  }, [houses]);
 
   return (
     <HashRouter>
-      <Routes>
-        <Route path="/" element={
-          <>
-            <PublicHeader />
-            <PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} />
-            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            <PanicButton />
-          </>
-        } />
-        <Route path="/services" element={
-          <>
-            <PublicHeader />
-            <PublicServices pdfConfig={pdfConfig} />
-            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            <PanicButton />
-          </>
-        } />
-        <Route path="/umkm" element={
-          <>
-            <PublicHeader />
-            <PublicUMKM umkmData={umkm} />
-            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            <PanicButton />
-          </>
-        } />
-        <Route path="/info" element={
-          <>
-            <PublicHeader />
-            <PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} />
-            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            <PanicButton />
-          </>
-        } />
+       <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={
+            <>
+               <PublicHeader />
+               <PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} />
+               <PanicButton />
+               <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+            </>
+          } />
+          <Route path="/services" element={
+            <>
+               <PublicHeader />
+               <PublicServices pdfConfig={pdfConfig} />
+               <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+            </>
+          } />
+          <Route path="/umkm" element={
+            <>
+               <PublicHeader />
+               <PublicUMKM umkmData={umkm} />
+               <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+            </>
+          } />
+           <Route path="/info" element={
+            <>
+               <PublicHeader />
+               <PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} />
+               <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+            </>
+          } />
 
-        <Route path="/admin" element={
-          <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-            <AdminDashboard
-              houses={houses}
-              announcements={announcements}
-              cashFlow={cashFlow}
-              officials={officials}
-              reports={reports}
-              letters={letters}
-              ronda={ronda}
-              inventory={inventory}
-              umkm={umkm}
-              pdfConfig={pdfConfig}
-              setPdfConfig={setPdfConfig}
-            />
-          </AdminRouteWrapper>
-        } />
-      </Routes>
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
+               <AdminDashboard 
+                  houses={houses} 
+                  announcements={announcements} 
+                  cashFlow={cashFlow} 
+                  officials={officials} 
+                  reports={reports} 
+                  letters={letters} 
+                  ronda={ronda} 
+                  inventory={inventory}
+                  umkm={umkm}
+                  pdfConfig={pdfConfig}
+                  setPdfConfig={setPdfConfig}
+               />
+            </AdminRouteWrapper>
+          } />
+       </Routes>
     </HashRouter>
   );
 };
