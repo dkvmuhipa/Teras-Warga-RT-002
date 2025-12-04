@@ -191,33 +191,64 @@ interface BlockRendererProps {
 
 // --- Block Component ---
 const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, isAdmin, onSelect }) => {
-    // Sort houses numerically
-    const sortedHouses = [...houses].sort((a, b) => parseInt(a.number, 10) - parseInt(b.number, 10));
+    // Basic numerical sort helper
+    const sortByNumber = (a: House, b: House) => parseInt(a.number, 10) - parseInt(b.number, 10);
+    const sortByNumberDesc = (a: House, b: House) => parseInt(b.number, 10) - parseInt(a.number, 10);
+
+    // --- LOGIKA U-SHAPE GENERIK UNTUK SEMUA BLOK ---
+    // 1. Urutkan semua rumah (01, 02, 03... 26)
+    const sortedHouses = [...houses].sort(sortByNumber);
+
+    // 2. Tentukan titik potong (Split point)
+    // Misal 26 rumah -> mid 13. Kiri 13, Kanan 13.
+    // Misal 15 rumah -> mid 8. Kiri 8, Kanan 7.
+    const splitIndex = Math.ceil(sortedHouses.length / 2);
+
+    // 3. Bagi Array
+    // Left: 01 s/d 13 (Ascending)
+    const leftSide = sortedHouses.slice(0, splitIndex); 
+    
+    // Right: 26 s/d 14 (Descending - agar 14 berada di bawah, sejajar dengan 13)
+    const rightSide = sortedHouses.slice(splitIndex).sort(sortByNumberDesc); 
 
     return (
         <div className="flex flex-col h-full bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg overflow-hidden">
             {/* Red Header */}
-            <div className="bg-rose-600 text-white text-center py-1.5 border-b-2 border-slate-800 relative overflow-hidden">
+            <div className="bg-rose-600 text-white text-center py-1.5 border-b-2 border-slate-800 relative overflow-hidden shrink-0">
                  <div className="absolute inset-0 bg-black/10 skew-x-12 scale-150 pointer-events-none"></div>
                  <h3 className="text-xl font-black tracking-tighter relative z-10 drop-shadow-md">{blockCode}</h3>
+                 <p className="text-[9px] relative z-10 font-medium opacity-90">
+                     {houses.length > 0 ? `${parseInt(sortedHouses[0].number)} - ${parseInt(sortedHouses[sortedHouses.length-1].number)}` : ''}
+                 </p>
             </div>
             
             {/* Street Content */}
-            <div className="flex-1 bg-slate-100 p-2 relative">
+            <div className="flex-1 bg-slate-100 p-2 relative overflow-y-auto custom-scrollbar">
                  {/* Dashed Center Line (Street) */}
                  <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-300 z-0"></div>
                  
-                 <div className="grid grid-cols-2 gap-x-6 gap-y-2 relative z-10">
-                     {sortedHouses.map(house => (
-                         <HouseCard 
-                            key={house.id} 
-                            house={house} 
-                            isAdmin={isAdmin} 
-                            hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')}
-                            onClick={() => onSelect(house)}
-                         />
-                     ))}
-                 </div>
+                 <div className="flex gap-4 relative z-10 h-full">
+                    {/* Column 1 (Left) */}
+                    <div className="flex-1 flex flex-col gap-2">
+                        {leftSide.map(house => (
+                            <HouseCard 
+                                key={house.id} house={house} isAdmin={isAdmin} 
+                                hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')}
+                                onClick={() => onSelect(house)}
+                            />
+                        ))}
+                    </div>
+                     {/* Column 2 (Right) */}
+                     <div className="flex-1 flex flex-col gap-2">
+                        {rightSide.map(house => (
+                            <HouseCard 
+                                key={house.id} house={house} isAdmin={isAdmin} 
+                                hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')}
+                                onClick={() => onSelect(house)}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
