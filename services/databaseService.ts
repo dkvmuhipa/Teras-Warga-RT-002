@@ -76,8 +76,8 @@ export const subscribeToCollection = (colName: string, callback: (data: any[]) =
   const q = query(collection(db, colName));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
+      ...doc.data(), // Spread data first
+      id: doc.id // Overwrite with Firestore ID to ensure validity
     }));
     callback(data);
   }, (error) => {
@@ -323,25 +323,37 @@ export const seedDatabase = async (initialData: any) => {
       const officialsSnap = await getDocs(collection(db, OFFICIALS_COL));
       if (officialsSnap.empty && initialData.officials.length > 0) {
           console.log("Seeding Officials...");
-          for (const o of initialData.officials) await addOfficialToDb(o);
+          for (const o of initialData.officials) {
+            const { id, ...data } = o;
+            await addDoc(collection(db, OFFICIALS_COL), deepSanitize(data));
+          }
       }
       
       const rondaSnap = await getDocs(collection(db, RONDA_COL));
       if (rondaSnap.empty && initialData.ronda.length > 0) {
           console.log("Seeding Ronda...");
-          for (const r of initialData.ronda) await addDoc(collection(db, RONDA_COL), deepSanitize(r));
+          for (const r of initialData.ronda) {
+             const { id, ...data } = r;
+             await addDoc(collection(db, RONDA_COL), deepSanitize(data));
+          }
       }
       
       const inventorySnap = await getDocs(collection(db, INVENTORY_COL));
       if (inventorySnap.empty && initialData.inventory.length > 0) {
           console.log("Seeding Inventory...");
-          for (const i of initialData.inventory) await addDoc(collection(db, INVENTORY_COL), deepSanitize(i));
+          for (const i of initialData.inventory) {
+             const { id, ...data } = i;
+             await addDoc(collection(db, INVENTORY_COL), deepSanitize(data));
+          }
       }
 
       const umkmSnap = await getDocs(collection(db, UMKM_COL));
       if (umkmSnap.empty && initialData.umkm && initialData.umkm.length > 0) {
           console.log("Seeding UMKM...");
-          for (const u of initialData.umkm) await addDoc(collection(db, UMKM_COL), deepSanitize(u));
+          for (const u of initialData.umkm) {
+             const { id, ...data } = u;
+             await addDoc(collection(db, UMKM_COL), deepSanitize(data));
+          }
       }
 
     } catch (e) {
