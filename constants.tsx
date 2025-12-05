@@ -1,11 +1,11 @@
 
-
 import React from 'react';
 import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TerasWarga";
-export const RT_ADDRESS = "Huntap 2 Tondo, Kel. Tondo, Kec. Mantikulore, Kota Palu";
+// Updated Address per Letter Reference
+export const RT_ADDRESS = "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu";
 
 // --- LOGO COMPONENT ---
 export const Logo = () => (
@@ -13,7 +13,9 @@ export const Logo = () => (
     <div className="bg-brand-blue text-white p-1.5 rounded-lg">
       <Home size={24} />
     </div>
-    <span>{APP_NAME}</span>
+    <span className="flex items-center gap-1">
+        {APP_NAME} <span className="text-brand-blue">RT 002</span>
+    </span>
   </div>
 );
 
@@ -61,10 +63,12 @@ export const generateHouses = (): House[] => {
 
 // Updated Officials to match valid blocks (C5, C7-C12)
 export const INITIAL_OFFICIALS: Official[] = [
-    { id: '1', role: 'Ketua RT', name: 'Bpk. Irfan Arianto', houseId: 'C10-08', phone: '0812-3456-7890' },
+    // Updated Name per Letter Reference (IRFAN ARIANTO)
+    { id: '1', role: 'Ketua RT', name: 'Bpk. IRFAN ARIANTO', houseId: 'C10-08', phone: '0859-6119-4621' }, 
     { id: '2', role: 'Sekretaris', name: 'Ibu Siti Aminah', houseId: 'C5-02', phone: '0812-9876-5432' },
     { id: '3', role: 'Bendahara', name: 'Bpk. Rudi Hartono', houseId: 'C11-12', phone: '0813-4567-8901' },
     { id: '4', role: 'Koord. Keamanan', name: 'Bpk. Joko Susilo', houseId: 'C8-05', phone: '0813-1122-3344' },
+    { id: '5', role: 'Bendahara RW', name: 'Ibu Haryati', houseId: 'C9-10', phone: '0813-9988-7766' },
 ];
 
 export const MOCK_ANNOUNCEMENTS: Announcement[] = [
@@ -151,9 +155,10 @@ export const MOCK_GALLERY = [
 
 // --- KONFIGURASI DEFAULT (Fallback) ---
 export const DEFAULT_PDF_CONFIG: PdfConfig = {
-  logo: "", // Kosongkan agar menggunakan Vector Fallback (Gambar Garuda)
-  stamp: "", // Kosongkan agar menggunakan Vector Fallback (Stempel Merah)
-  signature: "", // Kosongkan
-  rtName: "RT.02 / RW.20",
-  rtAddress: "Jl. Pue Lombe Blok C10-08, Kode Pos 94119"
+  logo: "", 
+  stamp: "",
+  signature: "",
+  rtName: "RT.002 / RW.020",
+  // Updated default address
+  rtAddress: "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Telp. 085961194621" 
 };

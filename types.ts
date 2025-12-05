@@ -15,6 +15,12 @@ export interface House {
   status: 'Occupied' | 'Empty' | 'Business';
   paymentStatus: PaymentStatus;
   phone?: string;
+  
+  // Data Demografi (Optional)
+  hasPregnant?: boolean; // Ibu Hamil
+  hasBaby?: boolean;     // Bayi
+  hasToddler?: boolean;  // Balita
+  hasElderly?: boolean;  // Lansia
 }
 
 export interface Announcement {
@@ -47,19 +53,22 @@ export interface UMKM {
 
 export interface LetterRequest {
   id: string;
-  type: 'Pengantar KTP' | 'Pengantar KK' | 'Domisili' | 'Kematian' | 'Kelahiran' | 'Surat Keterangan Usaha (SKU)';
+  type: 'Pengantar KTP' | 'Pengantar KK' | 'Domisili' | 'Kematian' | 'Kelahiran' | 'Surat Keterangan Usaha (SKU)' | 'Surat Izin Keramaian';
   applicantName: string;
   houseId: string; // Alamat Domisili di RT (Blok)
   
-  // Data Tambahan Sesuai PDF
+  // Data Tambahan Sesuai PDF Baru (1-11)
   nik: string;
+  familyHeadName: string; // 3. Kepala Keluarga
   birthPlace: string;
   birthDate: string;
   religion: string;
-  gender: 'LAKI-LAKI' | 'PEREMPUAN';
+  gender: 'Laki-laki' | 'Perempuan'; // Sesuai format PDF "Laki-laki" (Sentence case)
   job: string;
-  maritalStatus: 'KAWIN' | 'BELUM KAWIN' | 'CERAI HIDUP' | 'CERAI MATI';
-  addressKtp: string; // Alamat sesuai KTP (bisa beda dengan domisili)
+  maritalStatus: 'Kawin' | 'Belum Kawin' | 'Cerai Hidup' | 'Cerai Mati'; // Sesuai format PDF
+  nationality: string; // 10. Kewarganegaraan
+  addressKtp: string; 
+  purposeDetail: string; // 11. Keperluan (Deskripsi Panjang)
   
   status: 'Pending' | 'Approved' | 'Rejected';
   date: string;
