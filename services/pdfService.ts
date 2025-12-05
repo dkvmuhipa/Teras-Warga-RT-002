@@ -40,7 +40,7 @@ const getImageData = (source: string): Promise<string> => {
   });
 };
 
-export const generateSuratPengantar = async (letter: LetterRequest, customConfig?: PdfConfig) => {
+export const generateSuratPengantar = async (letter: LetterRequest, customConfig?: PdfConfig, isDraft: boolean = true) => {
   const config = customConfig || DEFAULT_PDF_CONFIG;
   
   const doc = new jsPDF({
@@ -55,6 +55,21 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   const marginX = 20;
   const contentWidth = pageWidth - (marginX * 2);
   const centerX = pageWidth / 2;
+
+  // --- 0. WATERMARK (SECURITY) ---
+  if (isDraft) {
+      doc.saveGraphicsState();
+      doc.setTextColor(220, 220, 220); // Light Grey
+      doc.setFontSize(50);
+      doc.setFont("helvetica", "bold");
+      
+      // Rotate context for diagonal text
+      // Note: jsPDF rotation happens around a point.
+      doc.text("DRAFT / MENUNGGU VALIDASI", centerX, pageHeight / 2, { align: "center", angle: 45 });
+      
+      doc.restoreGraphicsState();
+      doc.setTextColor(0, 0, 0); // Reset color
+  }
 
   // --- 1. KOP SURAT (OFFICIAL GOVERNMENT STYLE) ---
   
@@ -81,7 +96,6 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.text("PEMERINTAH KOTA PALU", centerX, 14, { align: "center" });
   doc.text("KECAMATAN MANTIKULORE", centerX, 20, { align: "center" });
   doc.text("KELURAHAN TONDO", centerX, 26, { align: "center" });
-  // UPDATED: RT.002/RW.020
   doc.text("PENGURUS RT.002/RW.020", centerX, 32, { align: "center" });
 
   doc.setFontSize(11);
@@ -104,7 +118,6 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.setFontSize(11);
   const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
   const currentYear = new Date().getFullYear();
-  // UPDATE: Format nomor surat RT. 002/RW. 020
   const nomorSurat = `003/RT. 002/RW. 020/${currentMonthRoman}/${currentYear}`;
   doc.text(`Nomor : ${nomorSurat}`, centerX, 57, { align: "center" });
 
@@ -113,7 +126,6 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   const lineHeight = 6;
 
   // Intro
-  // UPDATED: RT 002 RW 020
   const introText = "Yang bertanda tangan di bawah ini Ketua RT 002 RW 020 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :";
   doc.text(introText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
   cursorY += 12;
@@ -129,12 +141,12 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
       { label: "Kepala Keluarga", value: letter.familyHeadName.toUpperCase() },
       { label: "Tempat/Tanggal Lahir", value: `${letter.birthPlace.toUpperCase()}, ${letter.birthDate.split('-').reverse().join('-')}` }, // DD-MM-YYYY
       { label: "Jenis Kelamin", value: letter.gender },
-      { label: "Alamat/Tempat Tinggal", value: `${letter.addressKtp}, Kel. Tondo, Kec. Mantikulore, Kota Palu` }, // Assuming Address matches context or use addressKtp
+      { label: "Alamat/Tempat Tinggal", value: `${letter.addressKtp}, Kel. Tondo, Kec. Mantikulore, Kota Palu` }, 
       { label: "Agama", value: letter.religion },
       { label: "Status", value: letter.maritalStatus },
       { label: "Pekerjaan", value: letter.job },
       { label: "Kewarganegaraan", value: letter.nationality || "Indonesia" },
-      { label: "Keperluan", value: letter.purposeDetail || letter.type } // Use Detail or Type
+      { label: "Keperluan", value: letter.purposeDetail || letter.type } 
   ];
 
   fields.forEach((field, index) => {
@@ -147,14 +159,12 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
       doc.text(splitValue, valueX, cursorY);
       
       cursorY += (lineHeight * splitValue.length); 
-      // Add slight extra spacing if multi-line
       if(splitValue.length > 1) cursorY += 2;
   });
 
   cursorY += 4;
 
   // Closing
-  // UPDATED: RT 002 RW 020
   const closingText = "Orang tersebut adalah benar-benar warga RT 002 RW 020 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu dengan data seperti di atas.";
   doc.text(closingText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
   
@@ -173,7 +183,6 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   const rightSignX = 150;
   doc.text(`Palu, ${dateString}`, rightSignX, cursorY, { align: "center" });
   cursorY += 6;
-  // UPDATED: Ketua RT 002 RW 020
   doc.text("Ketua RT 002 RW 020", rightSignX, cursorY, { align: "center" });
 
   // Sign Space
@@ -182,26 +191,28 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   // Nama Terang
   doc.text(letter.applicantName, leftSignX, cursorY, { align: "center" });
-  // UPDATE: Nama penanda tangan menjadi IRFAN ARIANTO
   doc.text("IRFAN ARIANTO", rightSignX, cursorY, { align: "center" });
 
-  // --- 5. RENDER STEMPEL & TTD ---
-  if (config.stamp) {
-      try {
-         const stampImg = await getImageData(config.stamp);
-         if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 20, signSpaceY - 5, 35, 35);
-      } catch(e) {}
-  }
+  // --- 5. RENDER STEMPEL & TTD (SECURE: ONLY IF NOT DRAFT) ---
+  if (!isDraft) {
+      if (config.stamp) {
+          try {
+             const stampImg = await getImageData(config.stamp);
+             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 20, signSpaceY - 5, 35, 35);
+          } catch(e) {}
+      }
 
-  if (config.signature) {
-      try {
-        const signImg = await getImageData(config.signature);
-        if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY, 30, 20);
-      } catch(e) {}
+      if (config.signature) {
+          try {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY, 30, 20);
+          } catch(e) {}
+      }
   }
 
   // Save PDF
-  doc.save(`Surat_${title.replace(/\s/g, '_')}_${letter.applicantName}.pdf`);
+  const filenamePrefix = isDraft ? "DRAFT_" : "RESMI_";
+  doc.save(`${filenamePrefix}Surat_${title.replace(/\s/g, '_')}_${letter.applicantName}.pdf`);
 };
 
 export const generateResidentReportPDF = async (houses: House[], customConfig?: PdfConfig) => {
@@ -329,6 +340,8 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         const notes = [];
         if(house.hasPregnant) notes.push("Hamil");
         if(house.hasBaby) notes.push("Bayi");
+        if(house.hasToddler) notes.push("Balita");
+        if(house.hasTeenager) notes.push("Remaja");
         if(house.hasElderly) notes.push("Lansia");
         const ket = notes.join(', ');
 
@@ -374,7 +387,6 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     doc.text("REKAPITULASI:", margin, currentY);
     currentY += 5;
     doc.setFont("times", "normal");
-    // NEW: Total Unit Rumah
     doc.text(`Total Unit Rumah: ${houses.length} Unit`, margin, currentY);
     doc.text(`Total Kepala Keluarga: ${houses.length}`, margin + 70, currentY);
     currentY += 5;

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { House, PaymentStatus, Report, Official } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap } from 'lucide-react';
 
 interface HouseMapProps {
   houses: House[];
@@ -148,7 +148,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                         )}
 
                         {/* Demographics Badge (Only if available) */}
-                        {(house.hasPregnant || house.hasBaby || house.hasToddler || house.hasElderly) && (
+                        {(house.hasPregnant || house.hasBaby || house.hasToddler || house.hasTeenager || house.hasElderly) && (
                             <div className="space-y-3 pt-2">
                                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Demografi & Kesehatan</h4>
                                 <div className="flex flex-wrap gap-2">
@@ -165,6 +165,11 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                     {house.hasToddler && (
                                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 border border-orange-100 text-orange-700 text-xs font-bold">
                                             <Smile size={14} /> Balita
+                                        </div>
+                                    )}
+                                    {house.hasTeenager && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-lime-50 border border-lime-100 text-lime-700 text-xs font-bold">
+                                            <GraduationCap size={14} /> Remaja
                                         </div>
                                     )}
                                     {house.hasElderly && (
@@ -251,7 +256,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
     };
 
     // Demographic Icons check
-    const hasDemographics = house.hasPregnant || house.hasBaby || house.hasToddler || house.hasElderly;
+    const hasDemographics = house.hasPregnant || house.hasBaby || house.hasToddler || house.hasTeenager || house.hasElderly;
 
     return (
         <button
@@ -288,6 +293,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                     {house.hasPregnant && <div className="text-pink-600" title="Ibu Hamil"><Heart size={8} fill="currentColor"/></div>}
                     {house.hasBaby && <div className="text-cyan-600" title="Bayi"><Baby size={8} /></div>}
                     {house.hasToddler && <div className="text-orange-600" title="Balita"><Smile size={8} /></div>}
+                    {house.hasTeenager && <div className="text-lime-600" title="Remaja"><GraduationCap size={8} /></div>}
                     {house.hasElderly && <div className="text-purple-600" title="Lansia"><Accessibility size={8} /></div>}
                 </div>
             )}
@@ -416,6 +422,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({
   const totalPregnant = houses.filter(h => h.hasPregnant).length;
   const totalBabies = houses.filter(h => h.hasBaby).length;
   const totalToddlers = houses.filter(h => h.hasToddler).length;
+  const totalTeenagers = houses.filter(h => h.hasTeenager).length;
   const totalElderly = houses.filter(h => h.hasElderly).length;
 
   // Helper to filter houses by block
@@ -447,7 +454,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({
         </div>
 
         {/* Row 2: Demographic Stats (UPDATED with Total Houses) */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
              <div className="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-center gap-3">
                  <div className="bg-white p-2 rounded-full text-indigo-500 shadow-sm"><Home size={16}/></div>
                  <div><p className="text-[10px] text-indigo-600 font-bold uppercase">Total Rumah</p><p className="text-lg font-black text-slate-700 leading-none">{totalHouses}</p></div>
@@ -467,6 +474,10 @@ export const HouseMap: React.FC<HouseMapProps> = ({
              <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 flex items-center gap-3">
                  <div className="bg-white p-2 rounded-full text-orange-500 shadow-sm"><Smile size={16}/></div>
                  <div><p className="text-[10px] text-orange-600 font-bold uppercase">Balita</p><p className="text-lg font-black text-slate-700 leading-none">{totalToddlers}</p></div>
+             </div>
+             <div className="bg-lime-50 p-3 rounded-xl border border-lime-100 flex items-center gap-3">
+                 <div className="bg-white p-2 rounded-full text-lime-600 shadow-sm"><GraduationCap size={16}/></div>
+                 <div><p className="text-[10px] text-lime-600 font-bold uppercase">Remaja</p><p className="text-lg font-black text-slate-700 leading-none">{totalTeenagers}</p></div>
              </div>
              <div className="bg-purple-50 p-3 rounded-xl border border-purple-100 flex items-center gap-3">
                  <div className="bg-white p-2 rounded-full text-purple-500 shadow-sm"><Accessibility size={16}/></div>

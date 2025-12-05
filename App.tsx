@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { 
@@ -8,7 +10,7 @@ import {
   DollarSign, Briefcase, MapPin, Sparkles, Loader2, Store, Archive, History, BarChart3, List, Grid, Eye,
   Contact, CalendarDays, Map, Settings, Upload, FileImage, Package, PenTool, ShoppingBag, Coins,
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
-  Heart, Baby, Accessibility, Smile
+  Heart, Baby, Accessibility, Smile, GraduationCap
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { jsPDF } from "jspdf";
@@ -385,17 +387,17 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
   const [requestType, setRequestType] = useState<LetterRequest['type']>('Surat Izin Keramaian');
   const [applicantName, setApplicantName] = useState('');
   const [nik, setNik] = useState('');
-  const [familyHeadName, setFamilyHeadName] = useState(''); // New State
+  const [familyHeadName, setFamilyHeadName] = useState(''); 
   const [birthPlace, setBirthPlace] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState<'Laki-laki' | 'Perempuan'>('Laki-laki');
   const [religion, setReligion] = useState('Islam');
   const [job, setJob] = useState('');
   const [maritalStatus, setMaritalStatus] = useState<LetterRequest['maritalStatus']>('Kawin');
-  const [nationality, setNationality] = useState('Indonesia'); // New State
+  const [nationality, setNationality] = useState('Indonesia'); 
   const [addressKtp, setAddressKtp] = useState('');
   const [houseId, setHouseId] = useState(initialHouseId);
-  const [purposeDetail, setPurposeDetail] = useState(''); // New State
+  const [purposeDetail, setPurposeDetail] = useState(''); 
 
   const handleSubmitSurat = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -403,18 +405,20 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
         id: Date.now().toString(),
         type: requestType,
         applicantName, nik, 
-        familyHeadName, // New Field
+        familyHeadName, 
         birthPlace, birthDate, gender, religion, job, maritalStatus, 
-        nationality, // New Field
+        nationality, 
         addressKtp, houseId,
-        purposeDetail, // New Field
+        purposeDetail, 
         status: 'Pending',
         date: new Date().toISOString().split('T')[0]
     };
-    generateSuratPengantar(letterData, pdfConfig);
+    // GENERATE DRAFT PDF (Watermark, No Sig)
+    generateSuratPengantar(letterData, pdfConfig, true);
+    
     await addLetterToDb(letterData);
     saveToHistory({...letterData, category: 'Surat', title: `Surat ${requestType}`});
-    alert("Permohonan berhasil! Surat telah diunduh.");
+    alert("Permohonan berhasil dikirim! Bukti DRAFT surat telah diunduh. Silakan hubungi Ketua RT untuk validasi.");
     // Reset Form
     setApplicantName(''); setNik(''); setFamilyHeadName(''); setBirthPlace(''); 
     setBirthDate(''); setJob(''); setAddressKtp(''); setHouseId(''); setPurposeDetail('');
@@ -428,7 +432,7 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
       reporterName: reporterName || "Anonim",
       date: new Date().toISOString().split('T')[0],
       status: 'Baru',
-      houseId: reportHouseId ? reportHouseId.toUpperCase() : undefined, // Add House ID to Report
+      houseId: reportHouseId ? reportHouseId.toUpperCase() : undefined, 
     };
     await addReportToDb(newReport);
     saveToHistory({...newReport, category: 'Laporan', title: `Laporan ${newReport.type}`});
@@ -487,8 +491,8 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
                            <p className="font-bold mb-1">Panduan Pengajuan:</p>
                            <ul className="list-disc ml-4 space-y-1 text-xs">
                                <li>Isi formulir dengan data yang <strong>valid</strong> sesuai KTP.</li>
-                               <li>Surat akan otomatis terunduh dalam format PDF.</li>
-                               <li>Bawa hasil cetak (print) PDF ke Ketua RT untuk ditandatangani dan distempel.</li>
+                               <li>Sistem akan mengunduh bukti <strong>DRAFT (Format PDF)</strong>.</li>
+                               <li>Surat DRAFT <strong>belum sah</strong> (tanpa TTD/Stempel). Hubungi Ketua RT untuk validasi dan mendapatkan surat resmi.</li>
                            </ul>
                        </div>
                    </div>
@@ -596,7 +600,7 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
 
                        <div className="pt-4">
                            <Button type="submit" className="w-full py-3.5 text-base shadow-lg shadow-blue-200">
-                               <Download size={20}/> Unduh Surat (PDF)
+                               <Download size={20}/> Ajukan Permohonan & Unduh Draft
                            </Button>
                        </div>
                    </form>
@@ -1071,10 +1075,11 @@ const AdminDashboard = ({
     hasPregnant: boolean;
     hasBaby: boolean;
     hasToddler: boolean;
+    hasTeenager: boolean; // New
     hasElderly: boolean;
   }>({ 
       headOfFamily: '', occupants: 0, phone: '', paymentStatus: '', 
-      hasPregnant: false, hasBaby: false, hasToddler: false, hasElderly: false 
+      hasPregnant: false, hasBaby: false, hasToddler: false, hasTeenager: false, hasElderly: false 
   });
 
   // -- Service Management State --
@@ -1296,6 +1301,7 @@ const AdminDashboard = ({
           hasPregnant: h.hasPregnant || false,
           hasBaby: h.hasBaby || false,
           hasToddler: h.hasToddler || false,
+          hasTeenager: h.hasTeenager || false,
           hasElderly: h.hasElderly || false,
       }); 
       setModalType('editHouse'); 
@@ -1320,6 +1326,7 @@ const AdminDashboard = ({
           hasPregnant: editHouseForm.hasPregnant,
           hasBaby: editHouseForm.hasBaby,
           hasToddler: editHouseForm.hasToddler,
+          hasTeenager: editHouseForm.hasTeenager,
           hasElderly: editHouseForm.hasElderly,
       }); 
       setIsModalOpen(false); 
@@ -1650,7 +1657,9 @@ const AdminDashboard = ({
           {activeTab === 'services' && (
               <div className="animate-fade-in space-y-6">
                   <div className="flex border-b"><button onClick={()=>setServiceTab('surat')} className={`px-6 py-3 border-b-2 ${serviceTab==='surat'?'border-brand-blue':'border-transparent'}`}>Surat</button><button onClick={()=>setServiceTab('laporan')} className={`px-6 py-3 border-b-2 ${serviceTab==='laporan'?'border-brand-blue':'border-transparent'}`}>Laporan</button></div>
-                  {serviceTab==='surat' && <div className="bg-white rounded-2xl border divide-y">{letters.map(l=><div key={l.id} className="p-6 flex justify-between"><div><p className="font-bold">{l.applicantName}</p><p className="text-xs">{l.type}</p></div><div className="flex gap-2">{l.status==='Pending'&&(<> <button onClick={()=>handleUpdateLetter(l.id,'Approved')} className="text-emerald-600 font-bold text-xs">Setuju</button><button onClick={()=>handleUpdateLetter(l.id,'Rejected')} className="text-rose-600 font-bold text-xs">Tolak</button></>)}<button onClick={()=>handleDeleteLetter(l.id)}><Trash2 size={16}/></button></div></div>)}</div>}
+                  {serviceTab==='surat' && <div className="bg-white rounded-2xl border divide-y">{letters.map(l=><div key={l.id} className="p-6 flex justify-between"><div><p className="font-bold">{l.applicantName}</p><p className="text-xs">{l.type}</p></div><div className="flex gap-2">
+                  <Button onClick={() => generateSuratPengantar(l, pdfConfig, false)} className="text-xs h-8 bg-blue-100 text-blue-700 hover:bg-blue-200 border-transparent px-2"><Printer size={14}/> Unduh Resmi</Button>
+                  {l.status==='Pending'&&(<> <button onClick={()=>handleUpdateLetter(l.id,'Approved')} className="text-emerald-600 font-bold text-xs">Setuju</button><button onClick={()=>handleUpdateLetter(l.id,'Rejected')} className="text-rose-600 font-bold text-xs">Tolak</button></>)}<button onClick={()=>handleDeleteLetter(l.id)}><Trash2 size={16}/></button></div></div>)}</div>}
                   {serviceTab==='laporan' && <div className="bg-white rounded-2xl border divide-y">{reports.map(r=><div key={r.id} className="p-6 flex justify-between"><div><p className="text-sm">{r.description}</p><p className="text-xs text-slate-500">{r.reporterName}</p><p className="text-[10px] text-slate-400">Lokasi: {r.houseId || '-'}</p></div><div className="flex gap-2">{r.status==='Baru'&&<button onClick={()=>handleUpdateReport(r.id,'Diproses')} className="text-blue-600 font-bold text-xs">Proses</button>}<button onClick={()=>handleDeleteReport(r.id)}><Trash2 size={16}/></button></div></div>)}</div>}
               </div>
           )}
@@ -1825,6 +1834,10 @@ const AdminDashboard = ({
                           <label className="flex items-center gap-2 p-2 bg-white rounded-lg border shadow-sm cursor-pointer hover:border-orange-300 transition-colors">
                               <input type="checkbox" className="w-4 h-4 text-orange-500 rounded focus:ring-orange-500" checked={editHouseForm.hasToddler} onChange={e=>setEditHouseForm({...editHouseForm, hasToddler: e.target.checked})}/>
                               <span className="text-sm font-medium text-slate-700">Balita</span>
+                          </label>
+                          <label className="flex items-center gap-2 p-2 bg-white rounded-lg border shadow-sm cursor-pointer hover:border-lime-300 transition-colors">
+                              <input type="checkbox" className="w-4 h-4 text-lime-500 rounded focus:ring-lime-500" checked={editHouseForm.hasTeenager} onChange={e=>setEditHouseForm({...editHouseForm, hasTeenager: e.target.checked})}/>
+                              <span className="text-sm font-medium text-slate-700">Remaja</span>
                           </label>
                           <label className="flex items-center gap-2 p-2 bg-white rounded-lg border shadow-sm cursor-pointer hover:border-purple-300 transition-colors">
                               <input type="checkbox" className="w-4 h-4 text-purple-500 rounded focus:ring-purple-500" checked={editHouseForm.hasElderly} onChange={e=>setEditHouseForm({...editHouseForm, hasElderly: e.target.checked})}/>

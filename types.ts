@@ -20,6 +20,7 @@ export interface House {
   hasPregnant?: boolean; // Ibu Hamil
   hasBaby?: boolean;     // Bayi
   hasToddler?: boolean;  // Balita
+  hasTeenager?: boolean; // Remaja (NEW)
   hasElderly?: boolean;  // Lansia
 }
 
