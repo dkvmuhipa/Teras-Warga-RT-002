@@ -1,24 +1,23 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(), '');
+  const cwd = (process as any).cwd();
+  const env = loadEnv(mode, cwd, '');
   return {
     plugins: [react()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './'),
+        '@': path.resolve(cwd, './'),
       },
     },
     define: {
       'process.env': env
     },
     build: {
+      // Prevent chunk size warnings
       chunkSizeWarningLimit: 1600,
       rollupOptions: {
         output: {
