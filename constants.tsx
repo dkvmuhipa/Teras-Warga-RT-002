@@ -47,19 +47,41 @@ export const generateHouses = (): House[] => {
       if (statusRandom > 0.85) status = 'Empty';
       else if (statusRandom > 0.95) status = 'Business';
 
-      // Simulasi Kontrak vs Tetap (20% Kontrak)
-      const isRenter = Math.random() > 0.8;
+      // Simulasi residenceType: Tetap, Kontrak, atau Kost (New)
+      const typeRandom = Math.random();
+      let residenceType: House['residenceType'] = 'Tetap';
+      if (status === 'Occupied') {
+          if (typeRandom > 0.7 && typeRandom <= 0.9) residenceType = 'Kontrak';
+          else if (typeRandom > 0.9) residenceType = 'Kost'; // 10% chance for Kost
+      }
+
+      // Generate Random Demographics Counts
+      const hasPregnant = Math.random() > 0.9;
+      const hasBaby = Math.random() > 0.85;
+      const hasToddler = Math.random() > 0.85;
+      const hasTeenager = Math.random() > 0.8;
+      const hasElderly = Math.random() > 0.9;
 
       houses.push({
         id: `${config.code}-${number}`,
         block: config.code,
         number: number,
-        headOfFamily: status === 'Empty' ? '-' : `Warga ${config.code}-${number}`,
+        headOfFamily: status === 'Empty' ? '-' : (residenceType === 'Kost' ? `Mahasiswa ${config.code}-${number}` : `Warga ${config.code}-${number}`),
         occupants: status === 'Empty' ? 0 : Math.floor(Math.random() * 4) + 1,
         status,
-        residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
+        residenceType: status === 'Occupied' ? residenceType : 'Tetap',
         paymentStatus: Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID),
-        phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined
+        phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
+        
+        // Count Data
+        pregnantCount: hasPregnant ? 1 : 0,
+        babyCount: hasBaby ? 1 : 0,
+        toddlerCount: hasToddler ? Math.floor(Math.random() * 2) + 1 : 0,
+        teenagerCount: hasTeenager ? Math.floor(Math.random() * 2) + 1 : 0,
+        elderlyCount: hasElderly ? 1 : 0,
+
+        // Boolean Flags (for backward compatibility if needed)
+        hasPregnant, hasBaby, hasToddler, hasTeenager, hasElderly
       });
     }
   });

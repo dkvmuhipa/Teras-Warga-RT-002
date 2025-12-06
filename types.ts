@@ -10,10 +10,10 @@ export interface House {
   id: string;
   block: string;
   number: string;
-  headOfFamily: string; // Nama Kepala Keluarga / Penanggung Jawab
+  headOfFamily: string; // Nama Kepala Keluarga
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
-  residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // Added 'Kost'
+  residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan (Added Kost)
   paymentStatus: PaymentStatus;
   phone?: string;
   
@@ -23,6 +23,13 @@ export interface House {
   hasToddler?: boolean;  // Balita
   hasTeenager?: boolean; // Remaja
   hasElderly?: boolean;  // Lansia
+  
+  // Numeric Counts
+  pregnantCount?: number;
+  babyCount?: number;
+  toddlerCount?: number;
+  teenagerCount?: number;
+  elderlyCount?: number;
 }
 
 export interface Announcement {

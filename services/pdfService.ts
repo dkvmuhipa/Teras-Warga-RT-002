@@ -1,6 +1,5 @@
 
 
-
 import { jsPDF } from "jspdf";
 import { LetterRequest, PdfConfig, House, PaymentStatus } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
@@ -274,7 +273,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const cols = [
         { header: "No", width: 10, x: margin },
         { header: "Blok/Rumah", width: 30, x: margin + 10 },
-        { header: "KK / Penanggung Jawab", width: 80, x: margin + 40 }, // Updated Header
+        { header: "Kepala Keluarga", width: 80, x: margin + 40 },
         { header: "Jml", width: 15, x: margin + 120 },
         { header: "Status Hunian", width: 35, x: margin + 135 },
         { header: "Status Iuran", width: 35, x: margin + 170 },
@@ -338,7 +337,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         let status = house.status === 'Occupied' ? 'Dihuni' : (house.status === 'Business' ? 'Usaha' : 'Kosong');
         if (house.status === 'Occupied') {
              if (house.residenceType === 'Kost') status += " (Kost)";
-             else if (house.residenceType === 'Kontrak') status += " (Sewa)";
+             else if (house.residenceType === 'Kontrak') status += " (Kontrak)";
         }
 
         const payment = house.paymentStatus;
@@ -401,7 +400,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     currentY += 5;
     doc.setFont("times", "normal");
     doc.text(`Total Unit Rumah: ${houses.length} Unit`, margin, currentY);
-    doc.text(`Total KK / Unit Terisi: ${totalOccupied}`, margin + 70, currentY);
+    doc.text(`Total Kepala Keluarga: ${houses.length}`, margin + 70, currentY);
     currentY += 5;
     doc.text(`Dihuni Tetap: ${totalPermanent}`, margin, currentY);
     doc.text(`Dihuni Kontrak/Sewa: ${totalRenter}`, margin + 70, currentY);
