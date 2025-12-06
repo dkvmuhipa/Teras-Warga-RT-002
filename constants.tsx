@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
@@ -46,6 +47,9 @@ export const generateHouses = (): House[] => {
       if (statusRandom > 0.85) status = 'Empty';
       else if (statusRandom > 0.95) status = 'Business';
 
+      // Simulasi Kontrak vs Tetap (20% Kontrak)
+      const isRenter = Math.random() > 0.8;
+
       houses.push({
         id: `${config.code}-${number}`,
         block: config.code,
@@ -53,6 +57,7 @@ export const generateHouses = (): House[] => {
         headOfFamily: status === 'Empty' ? '-' : `Warga ${config.code}-${number}`,
         occupants: status === 'Empty' ? 0 : Math.floor(Math.random() * 4) + 1,
         status,
+        residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
         paymentStatus: Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID),
         phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined
       });

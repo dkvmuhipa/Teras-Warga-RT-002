@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { House, PaymentStatus, Report, Official } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon } from 'lucide-react';
 
 interface HouseMapProps {
   houses: House[];
@@ -109,6 +109,19 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             }`}>
                                 {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Business' ? 'Tempat Usaha' : 'Rumah Kosong'}
                             </span>
+                            
+                            {/* Residence Type Badge */}
+                            {house.status === 'Occupied' && (
+                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1 ${
+                                    house.residenceType === 'Kontrak' 
+                                    ? 'bg-amber-50 text-amber-600 border-amber-200' 
+                                    : 'bg-indigo-50 text-indigo-600 border-indigo-200'
+                                }`}>
+                                    {house.residenceType === 'Kontrak' ? <Key size={12}/> : <Home size={12}/>}
+                                    {house.residenceType === 'Kontrak' ? 'Kontrak/Sewa' : 'Milik Sendiri'}
+                                </span>
+                            )}
+
                             {isAdmin && (
                                 <span className={`px-4 py-1.5 rounded-full text-xs font-bold border shadow-sm ${
                                     house.paymentStatus === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
@@ -283,7 +296,8 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 ) : house.status === 'Business' ? (
                     <Store size={12} className="opacity-80"/>
                 ) : (
-                    <Home size={12} className="opacity-80"/>
+                    // Show Key icon for Renters, Home for Permanent
+                    house.residenceType === 'Kontrak' ? <Key size={12} className="opacity-80 text-amber-700" /> : <Home size={12} className="opacity-80"/>
                 )}
             </div>
 
@@ -413,9 +427,13 @@ export const HouseMap: React.FC<HouseMapProps> = ({
   // --- STATS ---
   const totalHouses = houses.length;
   const totalOccupied = houses.filter(h => h.status === 'Occupied').length;
-  const totalBusiness = houses.filter(h => h.status === 'Business').length;
-  const totalEmpty = houses.filter(h => h.status === 'Empty').length;
+  // const totalBusiness = houses.filter(h => h.status === 'Business').length; // Removed to make space
+  const totalEmpty = houses.filter(h => h.status === 'Empty').length; // Re-enabled
   const totalIssues = reports.filter(r => r.status !== 'Selesai').length;
+
+  // Ownership Stats
+  const totalPermanent = houses.filter(h => h.status === 'Occupied' && (h.residenceType === 'Tetap' || !h.residenceType)).length;
+  const totalRenter = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kontrak').length;
 
   // --- DEMOGRAPHIC STATS ---
   const totalResidents = houses.reduce((sum, h) => sum + (h.occupants || 0), 0);
@@ -446,15 +464,18 @@ export const HouseMap: React.FC<HouseMapProps> = ({
             </div>
             
             <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar max-w-full">
-               <div className="flex items-center gap-1.5 px-2 whitespace-nowrap"><span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span> {totalOccupied} Warga</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-sm"></span> {totalBusiness} Usaha</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><span className="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm"></span> {totalEmpty} Kosong</div>
+               <div className="flex items-center gap-1.5 px-2 whitespace-nowrap"><span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span> {totalOccupied} Dihuni</div>
+               
+               {/* New Ownership Legend */}
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap text-indigo-600"><Home size={12}/> {totalPermanent} Tetap</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap text-amber-600"><Key size={12}/> {totalRenter} Kontrak</div>
+
                {totalIssues > 0 && <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 text-rose-600 animate-pulse whitespace-nowrap"><AlertTriangle size={12}/> {totalIssues} Laporan</div>}
             </div>
         </div>
 
         {/* Row 2: Demographic Stats (UPDATED with Total Houses) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
              <div className="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-center gap-3">
                  <div className="bg-white p-2 rounded-full text-indigo-500 shadow-sm"><Home size={16}/></div>
                  <div><p className="text-[10px] text-indigo-600 font-bold uppercase">Total Rumah</p><p className="text-lg font-black text-slate-700 leading-none">{totalHouses}</p></div>
@@ -463,6 +484,13 @@ export const HouseMap: React.FC<HouseMapProps> = ({
                  <div className="bg-white p-2 rounded-full text-blue-600 shadow-sm"><Users size={16}/></div>
                  <div><p className="text-[10px] text-blue-600 font-bold uppercase">Total Warga</p><p className="text-lg font-black text-slate-700 leading-none">{totalResidents}</p></div>
              </div>
+             
+             {/* New Empty House Stat */}
+             <div className="bg-slate-100 p-3 rounded-xl border border-slate-200 flex items-center gap-3">
+                 <div className="bg-white p-2 rounded-full text-slate-500 shadow-sm"><Home size={16}/></div>
+                 <div><p className="text-[10px] text-slate-500 font-bold uppercase">Rumah Kosong</p><p className="text-lg font-black text-slate-700 leading-none">{totalEmpty}</p></div>
+             </div>
+
              <div className="bg-pink-50 p-3 rounded-xl border border-pink-100 flex items-center gap-3">
                  <div className="bg-white p-2 rounded-full text-pink-500 shadow-sm"><Heart size={16} fill="currentColor"/></div>
                  <div><p className="text-[10px] text-pink-600 font-bold uppercase">Ibu Hamil</p><p className="text-lg font-black text-slate-700 leading-none">{totalPregnant}</p></div>
@@ -568,3 +596,4 @@ export const HouseMap: React.FC<HouseMapProps> = ({
     </div>
   );
 };
+

@@ -13,6 +13,7 @@ export interface House {
   headOfFamily: string; // Nama Kepala Keluarga
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
+  residenceType?: 'Tetap' | 'Kontrak'; // NEW: Status Kepemilikan
   paymentStatus: PaymentStatus;
   phone?: string;
   
@@ -20,7 +21,7 @@ export interface House {
   hasPregnant?: boolean; // Ibu Hamil
   hasBaby?: boolean;     // Bayi
   hasToddler?: boolean;  // Balita
-  hasTeenager?: boolean; // Remaja (NEW)
+  hasTeenager?: boolean; // Remaja
   hasElderly?: boolean;  // Lansia
 }
 
