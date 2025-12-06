@@ -1,3 +1,5 @@
+
+
 import { db, isFirebaseConfigured } from "./firebaseConfig";
 import { 
   collection, 
@@ -106,6 +108,52 @@ export const updateHouseData = async (id: string, updates: any) => {
       const houseRef = doc(db, HOUSES_COL, id);
       await updateDoc(houseRef, deepSanitize(updates));
     } catch (e) { console.error("Error updating house:", e); }
+};
+
+/**
+ * Fungsi Batch Update untuk Import CSV.
+ * Mengupdate banyak dokumen sekaligus tanpa menghapus data yang tidak ada di CSV.
+ */
+export const batchUpdateHouses = async (housesData: any[]) => {
+  if (!isFirebaseConfigured) return;
+
+  try {
+    console.log(`Mulai import ${housesData.length} data warga...`);
+    
+    // Firestore batch limit is 500 operations. We set to 400 to be safe.
+    const MAX_BATCH_SIZE = 400; 
+    let batch = writeBatch(db);
+    let operationCount = 0;
+
+    const commitBatch = async () => {
+        await batch.commit();
+        batch = writeBatch(db);
+        operationCount = 0;
+    };
+
+    for (const house of housesData) {
+       const cleanData = deepSanitize(house);
+       if (!cleanData || !cleanData.id) continue;
+       
+       const ref = doc(db, HOUSES_COL, cleanData.id);
+       // Gunakan { merge: true } agar field yang tidak ada di CSV tidak hilang (opsional),
+       // Tapi untuk import CSV biasanya kita ingin overwrite field yang ada.
+       batch.set(ref, cleanData, { merge: true });
+       
+       operationCount++;
+       if (operationCount >= MAX_BATCH_SIZE) await commitBatch();
+    }
+
+    if (operationCount > 0) {
+      await batch.commit();
+    }
+    
+    console.log("Import data warga selesai.");
+    return true;
+  } catch (e) {
+    console.error("Gagal melakukan batch update:", e);
+    throw e;
+  }
 };
 
 /**

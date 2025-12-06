@@ -10,10 +10,10 @@ export interface House {
   id: string;
   block: string;
   number: string;
-  headOfFamily: string; // Nama Kepala Keluarga
+  headOfFamily: string; // Nama Kepala Keluarga / Penanggung Jawab
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
-  residenceType?: 'Tetap' | 'Kontrak'; // NEW: Status Kepemilikan
+  residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // Added 'Kost'
   paymentStatus: PaymentStatus;
   phone?: string;
   

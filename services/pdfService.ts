@@ -1,5 +1,6 @@
 
 
+
 import { jsPDF } from "jspdf";
 import { LetterRequest, PdfConfig, House, PaymentStatus } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
@@ -273,7 +274,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const cols = [
         { header: "No", width: 10, x: margin },
         { header: "Blok/Rumah", width: 30, x: margin + 10 },
-        { header: "Kepala Keluarga", width: 80, x: margin + 40 },
+        { header: "KK / Penanggung Jawab", width: 80, x: margin + 40 }, // Updated Header
         { header: "Jml", width: 15, x: margin + 120 },
         { header: "Status Hunian", width: 35, x: margin + 135 },
         { header: "Status Iuran", width: 35, x: margin + 170 },
@@ -333,10 +334,11 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         const name = house.headOfFamily;
         const count = house.occupants.toString();
         
-        // Format Status (Includes Rent info)
+        // Format Status (Includes Rent/Kost info)
         let status = house.status === 'Occupied' ? 'Dihuni' : (house.status === 'Business' ? 'Usaha' : 'Kosong');
-        if (house.status === 'Occupied' && house.residenceType === 'Kontrak') {
-             status += " (Kontrak)";
+        if (house.status === 'Occupied') {
+             if (house.residenceType === 'Kost') status += " (Kost)";
+             else if (house.residenceType === 'Kontrak') status += " (Sewa)";
         }
 
         const payment = house.paymentStatus;
@@ -390,6 +392,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const totalOccupied = houses.filter(h => h.status !== 'Empty').length;
     const totalPermanent = houses.filter(h => h.status === 'Occupied' && (h.residenceType === 'Tetap' || !h.residenceType)).length;
     const totalRenter = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kontrak').length;
+    const totalKost = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kost').length;
     const totalEmpty = houses.filter(h => h.status === 'Empty').length;
     const totalPeople = houses.reduce((acc, h) => acc + h.occupants, 0);
 
@@ -398,13 +401,14 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     currentY += 5;
     doc.setFont("times", "normal");
     doc.text(`Total Unit Rumah: ${houses.length} Unit`, margin, currentY);
-    doc.text(`Total Kepala Keluarga: ${houses.length}`, margin + 70, currentY);
+    doc.text(`Total KK / Unit Terisi: ${totalOccupied}`, margin + 70, currentY);
     currentY += 5;
     doc.text(`Dihuni Tetap: ${totalPermanent}`, margin, currentY);
     doc.text(`Dihuni Kontrak/Sewa: ${totalRenter}`, margin + 70, currentY);
-    doc.text(`Rumah Kosong: ${totalEmpty}`, margin + 140, currentY);
+    doc.text(`Dihuni Kost/Mhs: ${totalKost}`, margin + 140, currentY);
     currentY += 5;
-    doc.text(`Estimasi Total Penduduk: ${totalPeople} Jiwa`, margin, currentY);
+    doc.text(`Rumah Kosong: ${totalEmpty}`, margin, currentY);
+    doc.text(`Estimasi Total Penduduk: ${totalPeople} Jiwa`, margin + 70, currentY);
 
     // --- SIGNATURE ---
     const signY = currentY + 10;
