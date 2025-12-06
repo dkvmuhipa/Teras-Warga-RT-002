@@ -4,7 +4,7 @@ import React from 'react';
 import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
-export const APP_NAME = "TerasWarga";
+export const APP_NAME = "TERAS";
 // Updated Address per Letter Reference
 export const RT_ADDRESS = "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu";
 

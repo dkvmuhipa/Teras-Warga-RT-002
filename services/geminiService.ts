@@ -1,3 +1,5 @@
+
+
 import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
@@ -63,7 +65,8 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     // Dynamic Officials Context
     const officialsContext = contextData.officials.map(o => `- ${o.role}: ${o.name} (Rumah: ${o.houseId}, HP: ${o.phone})`).join('\n');
 
-    const systemInstruction = `Anda adalah "Rit", Asisten Virtual Cerdas untuk RT 002 RW 020.
+    const systemInstruction = `Anda adalah "Rit", Asisten Virtual Cerdas untuk RT 002 RW 020 (Aplikasi: TERAS RT 002).
+    Slogan Aplikasi: "Teknologi | Ekraf | Rukun | Aman | Sinergi".
     
     INFORMASI WAKTU SAAT INI: ${today}
 

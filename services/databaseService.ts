@@ -1,4 +1,3 @@
-
 import { db, isFirebaseConfigured } from "./firebaseConfig";
 import { 
   collection, 
@@ -175,11 +174,6 @@ export const addAnnouncementToDb = async (announcement: any) => {
   } catch (e) { console.error("Error adding announcement:", e); }
 };
 
-export const updateAnnouncementInDb = async (id: string, updates: any) => {
-  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan."); return; }
-  try { await updateDoc(doc(db, ANNOUNCEMENTS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating announcement:", e); }
-};
-
 export const deleteAnnouncementFromDb = async (id: string) => {
   if (!isFirebaseConfigured) return;
   try { await deleteDoc(doc(db, ANNOUNCEMENTS_COL, id)); } catch (e) { console.error("Error deleting announcement:", e); }
@@ -192,11 +186,6 @@ export const addTransactionToDb = async (transaction: any) => {
     const { id, ...data } = transaction;
     await addDoc(collection(db, CASHFLOW_COL), deepSanitize(data));
   } catch (e) { console.error("Error adding transaction:", e); }
-};
-
-export const updateTransactionInDb = async (id: string, updates: any) => {
-  if (!isFirebaseConfigured) { alert("Demo Mode: Data tidak disimpan."); return; }
-  try { await updateDoc(doc(db, CASHFLOW_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating transaction:", e); }
 };
 
 export const deleteTransactionFromDb = async (id: string) => {
