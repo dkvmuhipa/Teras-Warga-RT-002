@@ -1,5 +1,4 @@
 
-
 export enum PaymentStatus {
   PAID = 'Lunas',
   PENDING = 'Belum Lunas',
@@ -13,7 +12,7 @@ export interface House {
   headOfFamily: string; // Nama Kepala Keluarga
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
-  residenceType?: 'Tetap' | 'Kontrak'; // NEW: Status Kepemilikan
+  residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan including Kost
   paymentStatus: PaymentStatus;
   phone?: string;
   
@@ -23,6 +22,13 @@ export interface House {
   hasToddler?: boolean;  // Balita
   hasTeenager?: boolean; // Remaja
   hasElderly?: boolean;  // Lansia
+
+  // Data Demografi Counts
+  pregnantCount?: number;
+  babyCount?: number;
+  toddlerCount?: number;
+  teenagerCount?: number;
+  elderlyCount?: number;
 }
 
 export interface Announcement {
