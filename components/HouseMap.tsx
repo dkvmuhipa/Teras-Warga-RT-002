@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { House, PaymentStatus, Report, Official } from '../types';
 import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon } from 'lucide-react';
@@ -110,15 +109,17 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                 {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Business' ? 'Tempat Usaha' : 'Rumah Kosong'}
                             </span>
                             
-                            {/* Residence Type Badge */}
+                            {/* Residence Type Badge (Fixed to include Kost) */}
                             {house.status === 'Occupied' && (
                                 <span className={`px-4 py-1.5 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1 ${
-                                    house.residenceType === 'Kontrak' 
+                                    house.residenceType === 'Kost'
+                                    ? 'bg-cyan-50 text-cyan-600 border-cyan-200'
+                                    : house.residenceType === 'Kontrak' 
                                     ? 'bg-amber-50 text-amber-600 border-amber-200' 
                                     : 'bg-indigo-50 text-indigo-600 border-indigo-200'
                                 }`}>
-                                    {house.residenceType === 'Kontrak' ? <Key size={12}/> : <Home size={12}/>}
-                                    {house.residenceType === 'Kontrak' ? 'Kontrak/Sewa' : 'Milik Sendiri'}
+                                    {house.residenceType === 'Kost' ? <GraduationCap size={12}/> : house.residenceType === 'Kontrak' ? <Key size={12}/> : <Home size={12}/>}
+                                    {house.residenceType === 'Kost' ? 'Kost' : house.residenceType === 'Kontrak' ? 'Kontrak/Sewa' : 'Milik Sendiri'}
                                 </span>
                             )}
 
@@ -265,6 +266,10 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
         if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
         
         // 4. Safe / Occupied (Vibrant Green)
+        // Check for Kost specifically
+        if (house.residenceType === 'Kost') return "bg-gradient-to-br from-cyan-100 to-blue-200 border-cyan-500 text-cyan-900 shadow-sm hover:shadow-cyan-300/50 hover:border-cyan-600";
+        if (house.residenceType === 'Kontrak') return "bg-gradient-to-br from-amber-100 to-orange-200 border-amber-500 text-amber-900 shadow-sm hover:shadow-amber-300/50 hover:border-amber-600";
+        
         return "bg-gradient-to-br from-emerald-100 to-teal-200 border-emerald-500 text-emerald-900 shadow-sm hover:shadow-emerald-300/50 hover:border-emerald-600";
     };
 
@@ -296,8 +301,10 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 ) : house.status === 'Business' ? (
                     <Store size={12} className="opacity-80"/>
                 ) : (
-                    // Show Key icon for Renters, Home for Permanent
-                    house.residenceType === 'Kontrak' ? <Key size={12} className="opacity-80 text-amber-700" /> : <Home size={12} className="opacity-80"/>
+                    // Show Key icon for Renters, Home for Permanent, Cap for Kost
+                    house.residenceType === 'Kost' ? <GraduationCap size={12} className="opacity-80 text-cyan-800" /> :
+                    house.residenceType === 'Kontrak' ? <Key size={12} className="opacity-80 text-amber-800" /> : 
+                    <Home size={12} className="opacity-80"/>
                 )}
             </div>
 
@@ -434,6 +441,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({
   // Ownership Stats
   const totalPermanent = houses.filter(h => h.status === 'Occupied' && (h.residenceType === 'Tetap' || !h.residenceType)).length;
   const totalRenter = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kontrak').length;
+  const totalKost = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kost').length; // Add Kost stats
 
   // --- DEMOGRAPHIC STATS ---
   const totalResidents = houses.reduce((sum, h) => sum + (h.occupants || 0), 0);
@@ -469,6 +477,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({
                {/* New Ownership Legend */}
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap text-indigo-600"><Home size={12}/> {totalPermanent} Tetap</div>
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap text-amber-600"><Key size={12}/> {totalRenter} Kontrak</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap text-cyan-600"><GraduationCap size={12}/> {totalKost} Kost</div>
 
                {totalIssues > 0 && <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 text-rose-600 animate-pulse whitespace-nowrap"><AlertTriangle size={12}/> {totalIssues} Laporan</div>}
             </div>
@@ -596,4 +605,3 @@ export const HouseMap: React.FC<HouseMapProps> = ({
     </div>
   );
 };
-

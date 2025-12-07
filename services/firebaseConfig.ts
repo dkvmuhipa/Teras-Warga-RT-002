@@ -13,17 +13,10 @@ const firebaseConfig = {
   appId: "1:710981295516:web:97bee73b641bf9d247bc59"
 };
 
-// Logika Deteksi: Jika projectId masih default/paste, berarti belum disetting
-const isPlaceholder = (value: string | undefined) => 
-  !value || value.includes("PASTE_") || value.includes("ISI_");
+// Mode Produksi Aktif
+export const isFirebaseConfigured = true;
 
-export const isFirebaseConfigured = !isPlaceholder(firebaseConfig.projectId);
-
-if (!isFirebaseConfigured) {
-  console.warn("⚠️ Firebase belum dikonfigurasi. Aplikasi berjalan dalam DEMO MODE (Data statis).");
-} else {
-  console.log("✅ Firebase Terhubung:", firebaseConfig.projectId);
-}
+console.log("✅ Aplikasi Online: Terhubung ke", firebaseConfig.projectId);
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
