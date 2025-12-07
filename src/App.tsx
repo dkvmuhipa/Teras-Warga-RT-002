@@ -15,7 +15,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 import { jsPDF } from "jspdf";
 
 // Components & Services
-import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY } from '../constants';
+import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, INITIAL_LETTERS } from '../constants';
 import { House, Announcement, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem } from '../types';
 import { HouseMap } from './components/HouseMap';
 import { generateAnnouncementDraft } from './services/geminiService';
@@ -372,7 +372,6 @@ const AdminDashboard = ({
   const openEditHouse = (h: House) => { 
       setSelectedHouse(h);
       
-      // Determine unified status for the form
       let unified: any = 'Tetap';
       if (h.status === 'Empty') unified = 'Empty';
       else if (h.status === 'Business') unified = 'Business';
@@ -382,12 +381,20 @@ const AdminDashboard = ({
           else unified = 'Tetap';
       }
 
+      // Smart clean-up for empty/placeholder data
+      const isNamePlaceholder = !h.headOfFamily || h.headOfFamily === '-' || h.headOfFamily.trim() === '';
+      const isPhonePlaceholder = !h.phone || h.phone === '-' || h.phone.trim() === '';
+      const currentOccupants = Number(h.occupants) || 0;
+
       setEditHouseForm({ 
-          headOfFamily: h.headOfFamily, 
-          occupants: h.occupants, 
-          phone: h.phone || '', 
+          // Auto-clear name if house was empty or had placeholder
+          headOfFamily: (h.status === 'Empty' || isNamePlaceholder) ? '' : h.headOfFamily, 
+          // Default to 1 occupant if currently 0 or Empty (so user doesn't have to manually set 1 for new resident)
+          occupants: (h.status === 'Empty' || currentOccupants === 0) ? 1 : currentOccupants, 
+          // Auto-clear phone
+          phone: (h.status === 'Empty' || isPhonePlaceholder) ? '' : h.phone, 
           paymentStatus: h.paymentStatus, 
-          unifiedStatus: unified, // Use unified field
+          unifiedStatus: unified, 
           
           pregnantCount: h.pregnantCount || (h.hasPregnant ? 1 : 0),
           babyCount: h.babyCount || (h.hasBaby ? 1 : 0),
@@ -406,29 +413,29 @@ const AdminDashboard = ({
       e.preventDefault(); 
       if (!selectedHouse) return;
 
-      // Logic to split unified status back to separate fields
       let finalStatus: 'Occupied' | 'Empty' | 'Business' = 'Occupied';
       let finalResidenceType: 'Tetap' | 'Kontrak' | 'Kost' = 'Tetap';
 
       if (editHouseForm.unifiedStatus === 'Empty') {
           finalStatus = 'Empty';
-          finalResidenceType = 'Tetap'; // Default value, won't be used
       } else if (editHouseForm.unifiedStatus === 'Business') {
           finalStatus = 'Business';
-          finalResidenceType = 'Tetap'; // Default value
       } else {
           finalStatus = 'Occupied';
-          // Need to cast here because unifiedStatus contains more keys than residenceType
           finalResidenceType = editHouseForm.unifiedStatus as 'Tetap' | 'Kontrak' | 'Kost'; 
       }
 
+      // Enforce data consistency
+      let finalOccupants = parseInt(editHouseForm.occupants as any) || 0;
+      if (finalStatus === 'Occupied' && finalOccupants < 1) finalOccupants = 1;
+      if (finalStatus === 'Empty') finalOccupants = 0;
+
       await updateHouseData(selectedHouse.id, { 
           headOfFamily: finalStatus === 'Empty' ? '-' : editHouseForm.headOfFamily, 
-          occupants: finalStatus === 'Empty' ? 0 : parseInt(editHouseForm.occupants as any), 
+          occupants: finalOccupants,
           phone: finalStatus === 'Empty' ? '' : editHouseForm.phone, 
           paymentStatus: editHouseForm.paymentStatus, 
           
-          // Apply computed values
           status: finalStatus,
           residenceType: finalResidenceType,
           
@@ -459,26 +466,20 @@ const AdminDashboard = ({
 
   return (
     <div className="min-h-screen bg-slate-50 flex relative">
-      {/* ... (Menu & Sidebar - No Change) */}
       {isMobileMenuOpen && (<div className="fixed inset-0 z-50 bg-slate-900/20 backdrop-blur-sm md:hidden" onClick={() => setIsMobileMenuOpen(false)}><div className="w-72 bg-white h-full shadow-2xl animate-slide-in-right flex flex-col border-r border-slate-200" onClick={e => e.stopPropagation()}><div className="p-6 border-b border-slate-100 flex justify-between items-center"><div><h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 tracking-tight"><Shield className="text-brand-blue" size={20}/> TERAS Admin</h2><p className="text-xs text-slate-500">RT 002 / RW 020</p></div><button onClick={() => setIsMobileMenuOpen(false)} className="bg-slate-50 p-1.5 rounded-full text-slate-400 hover:text-slate-800"><X size={18}/></button></div>{renderNavItems()}<div className="p-4 border-t border-slate-100 bg-slate-50"><button onClick={() => navigate('/')} className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><LogOut size={18} /> <span className="font-medium text-sm">Keluar / Ke Beranda</span></button></div></div></div>)}<div className="w-64 bg-white border-r border-slate-200 fixed h-full hidden md:flex flex-col z-30 shadow-sm"><div className="p-6 border-b border-slate-100"><h2 className="text-xl font-black flex items-center gap-2 tracking-tight text-slate-800"><div className="bg-brand-blue p-1 rounded-lg"><Shield size={20} className="text-white"/></div> TERAS Admin</h2><p className="text-xs text-slate-400 mt-2 pl-1">Management Dashboard v1.0</p></div>{renderNavItems()}<div className="p-4 border-t border-slate-100 bg-slate-50"><button onClick={() => navigate('/')} className="w-full flex items-center justify-center gap-2 px-4 py-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all text-xs font-bold border border-slate-200 hover:border-rose-200"><LogOut size={14} /> Keluar Aplikasi</button></div></div>
 
       <div className="flex-1 md:ml-64 p-4 md:p-8 pb-safe-area-pb md:pb-8 max-w-full overflow-hidden">
-          {/* ... (Header - No Change) */}
           <div className="flex justify-between items-center mb-6 md:mb-8 sticky top-0 bg-slate-50/90 backdrop-blur-md z-20 py-3 border-b border-slate-200/50 md:border-none md:bg-transparent md:backdrop-blur-none"><div className="flex items-center gap-3"><button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-white rounded-lg border border-slate-200 shadow-sm active:scale-95"><Menu size={24} /></button><h1 className="text-lg md:text-2xl font-black text-slate-800 uppercase tracking-tight line-clamp-1">{activeTab}</h1></div><div className="flex items-center gap-3"><div className="bg-white p-2 rounded-full shadow-sm border border-slate-200"><User size={20} className="text-slate-700"/></div><span className="font-bold text-sm text-slate-700 hidden md:block">Ketua RT 002</span></div></div>
 
-          {/* ... (Tab Contents - Overview, UMKM - No Change) */}
-          {activeTab === 'overview' && (<div className="space-y-6 animate-fade-in"><div className="grid grid-cols-1 md:grid-cols-3 gap-6"><div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow"><div className="p-4 bg-sky-50 text-sky-600 rounded-2xl"><Users size={28}/></div><div><p className="text-slate-500 text-sm font-medium">Total Warga</p><h3 className="text-2xl font-black text-slate-800">{houses.filter((h:House) => h.status === 'Occupied').length} KK</h3></div></div><div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow"><div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><Wallet size={28}/></div><div><p className="text-slate-500 text-sm font-medium">Saldo Kas</p><h3 className="text-2xl font-black text-slate-800">Rp {(cashFlow.reduce((acc, c) => c.type === 'Income' ? acc + c.amount : acc - c.amount, 0)).toLocaleString()}</h3></div></div><div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow"><div className="p-4 bg-rose-50 text-rose-600 rounded-2xl"><AlertTriangle size={28}/></div><div><p className="text-slate-500 text-sm font-medium">Laporan Baru</p><h3 className="text-2xl font-black text-slate-800">{reports.filter((r:Report) => r.status === 'Baru').length}</h3></div></div></div></div>)}
+          {activeTab === 'overview' && (<div className="space-y-6 animate-fade-in"><div className="grid grid-cols-1 md:grid-cols-3 gap-6"><div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow"><div className="p-4 bg-sky-50 text-sky-600 rounded-2xl"><Users size={28}/></div><div><p className="text-slate-500 text-sm font-medium">Total Warga</p><h3 className="text-2xl font-black text-slate-800">{houses.filter((h:House) => h.status === 'Occupied').length} KK</h3></div></div><div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow"><div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><Wallet size={28}/></div><div><p className="text-slate-500 text-sm font-medium">Saldo Kas</p><h3 className="text-2xl font-black text-slate-800">Rp {(cashFlow.reduce((acc: number, c: CashFlow) => c.type === 'Income' ? acc + c.amount : acc - c.amount, 0)).toLocaleString()}</h3></div></div><div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow"><div className="p-4 bg-rose-50 text-rose-600 rounded-2xl"><AlertTriangle size={28}/></div><div><p className="text-slate-500 text-sm font-medium">Laporan Baru</p><h3 className="text-2xl font-black text-slate-800">{reports.filter((r:Report) => r.status === 'Baru').length}</h3></div></div></div></div>)}
           {activeTab === 'umkm' && (<div className="animate-fade-in space-y-6"><div className="flex justify-between items-center bg-white p-4 rounded-xl border"><h2 className="font-bold text-lg">Daftar Usaha Warga</h2><Button onClick={() => { resetForms(); setModalType('umkm'); setIsModalOpen(true); }}><Plus size={18}/> Tambah</Button></div><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{umkm.map((u:UMKM) => (<div key={u.id} className="bg-white rounded-xl shadow-sm border overflow-hidden group"><div className="h-32 bg-slate-200 relative"><img src={u.image} className="w-full h-full object-cover" onError={(e)=>{(e.target as HTMLImageElement).src='https://via.placeholder.com/300x200?text=No+Image'}} /><div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={() => openEditUMKM(u)} className="p-1.5 bg-white rounded-lg shadow text-slate-700 hover:text-blue-600"><Edit2 size={14}/></button><button onClick={() => handleDeleteUMKM(u.id)} className="p-1.5 bg-white rounded-lg shadow text-slate-700 hover:text-rose-600"><Trash2 size={14}/></button></div></div><div className="p-4"><div className="flex justify-between items-start"><h3 className="font-bold text-slate-800">{u.name}</h3><span className="text-[10px] bg-purple-50 text-purple-600 px-2 py-1 rounded font-bold">{u.category}</span></div><p className="text-xs text-slate-500 mt-1">Pemilik: {u.owner}</p></div></div>))}</div></div>)}
           
-          {/* UPDATED RESIDENTS TAB UI */}
           {activeTab === 'residents' && (
               <div className="animate-fade-in space-y-6">
-                  {/* Stats Cards */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3"><div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg"><Users size={20}/></div><div><p className="text-[10px] uppercase text-slate-400 font-bold">Total Jiwa</p><h4 className="text-xl font-black text-slate-800">{houses.reduce((acc: number, h: House) => acc + (h.occupants || 0), 0)}</h4></div></div>
                       <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3"><div className="p-3 bg-blue-50 text-blue-600 rounded-lg"><Home size={20}/></div><div><p className="text-[10px] uppercase text-slate-400 font-bold">Total KK</p><h4 className="text-xl font-black text-slate-800">{houses.filter((h:House) => h.status === 'Occupied').length}</h4></div></div>
                   </div>
-                  {/* Toolbar */}
                   <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                       <div className="relative w-full md:w-96"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} /><input type="text" placeholder="Cari warga, blok..." className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" value={searchResident} onChange={(e) => setSearchResident(e.target.value)} /></div>
                       <div className="flex gap-2 items-center flex-wrap">
@@ -489,11 +490,9 @@ const AdminDashboard = ({
                           <div className="flex bg-slate-100 p-1 rounded-xl"><button onClick={() => setResidentView('grid')} className={`p-2 rounded-lg transition-all ${residentView === 'grid' ? 'bg-white shadow text-brand-blue' : 'text-slate-400'}`}><Grid size={18} /></button><button onClick={() => setResidentView('table')} className={`p-2 rounded-lg transition-all ${residentView === 'table' ? 'bg-white shadow text-brand-blue' : 'text-slate-400'}`}><List size={18} /></button></div>
                       </div>
                   </div>
-                  {/* Table/Grid View */}
                   {residentView === 'grid' ? (<div className="overflow-x-auto rounded-3xl border border-slate-200 shadow-sm"><HouseMap houses={houses} isAdmin={true} onEditHouse={openEditHouse} onPayDues={openDuesModal} reports={reports} officials={officials} /></div>) : (
                       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-sm text-left whitespace-nowrap"><thead className="bg-slate-50 text-slate-600 font-bold uppercase text-xs"><tr><th className="p-4">No</th><th className="p-4">Blok</th><th className="p-4">Nomor</th><th className="p-4">Kepala Keluarga / P.J.</th><th className="p-4">Status & Kontak</th><th className="p-4">Iuran</th><th className="p-4 text-center">Aksi</th></tr></thead><tbody className="divide-y divide-slate-50">{houses.filter((h:House) => h.headOfFamily.toLowerCase().includes(searchResident.toLowerCase()) || h.block.toLowerCase().includes(searchResident.toLowerCase()) || h.number.includes(searchResident)).map((h:House, i:number) => (<tr key={h.id} className="hover:bg-slate-50 transition-colors"><td className="p-4 text-slate-500">{i+1}</td><td className="p-4 font-bold">{h.block}</td><td className="p-4 font-bold">{h.number}</td><td className="p-4">{h.headOfFamily}</td><td className="p-4"><div className="flex flex-col gap-1.5 items-start"><span className={`px-2 py-1 rounded-full text-xs font-bold border ${h.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' : h.status === 'Business' ? 'bg-purple-50 text-purple-600 border-purple-200' : h.residenceType === 'Kost' ? 'bg-cyan-50 text-cyan-600 border-cyan-200' : h.residenceType === 'Kontrak' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200'}`}>{h.status === 'Empty' ? 'Kosong' : h.status === 'Business' ? 'Usaha' : h.residenceType === 'Kost' ? 'Kost' : h.residenceType === 'Kontrak' ? 'Kontrak' : 'Tetap'}</span>{h.phone ? (<a href={`https://wa.me/${h.phone.replace(/^0/, '62').replace(/-/g, '')}`} target="_blank" className="text-xs text-slate-500 flex items-center gap-1 hover:text-green-600 font-medium"><Phone size={12}/> {h.phone}</a>) : (<span className="text-xs text-slate-400 italic pl-1">-</span>)}</div></td><td className="p-4"><span className={`px-2 py-1 rounded-full text-xs font-bold ${h.paymentStatus===PaymentStatus.PAID?'bg-blue-100 text-blue-700':h.paymentStatus===PaymentStatus.PENDING?'bg-amber-100 text-amber-700':'bg-rose-100 text-rose-700'}`}>{h.paymentStatus}</span></td><td className="p-4 flex justify-center gap-2"><button onClick={() => openEditHouse(h)} className="p-2 text-slate-500 hover:text-blue-600 bg-white border rounded-lg shadow-sm"><Edit2 size={16}/></button><button onClick={() => openDuesModal(h)} className="p-2 text-slate-500 hover:text-emerald-600 bg-white border rounded-lg shadow-sm"><DollarSign size={16}/></button></td></tr>))}</tbody></table></div></div>)}</div>)}
 
-          {/* ... (Other Tabs - Services, Finance, Facilities, Announcements, Officials, Settings - No Change) */}
           {activeTab === 'services' && (<div className="animate-fade-in space-y-6"><div className="flex gap-4 border-b border-slate-200"><button onClick={() => setServiceTab('surat')} className={`pb-3 px-1 font-bold text-sm border-b-2 transition-all ${serviceTab === 'surat' ? 'border-brand-blue text-brand-blue' : 'border-transparent text-slate-400'}`}>Permohonan Surat</button><button onClick={() => setServiceTab('laporan')} className={`pb-3 px-1 font-bold text-sm border-b-2 transition-all ${serviceTab === 'laporan' ? 'border-rose-500 text-rose-600' : 'border-transparent text-slate-400'}`}>Laporan Warga</button></div>{serviceTab === 'surat' ? (<div className="space-y-4">{letters.map((l:LetterRequest) => (<div key={l.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4"><div><div className="flex items-center gap-2 mb-1"><span className="font-bold text-slate-800">{l.type}</span><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${l.status==='Approved'?'bg-emerald-100 text-emerald-600':l.status==='Rejected'?'bg-rose-100 text-rose-600':'bg-amber-100 text-amber-600'}`}>{l.status}</span></div><p className="text-sm text-slate-600">Pemohon: <b>{l.applicantName}</b></p><p className="text-xs text-slate-400">{l.date}</p></div><div className="flex gap-2">{l.status === 'Pending' && <><Button variant="success" className="h-9 text-xs" onClick={() => handleUpdateLetter(l.id, 'Approved')}>Setujui</Button><Button variant="danger" className="h-9 text-xs" onClick={() => handleUpdateLetter(l.id, 'Rejected')}>Tolak</Button></>} {l.status === 'Approved' && <Button onClick={() => generateSuratPengantar(l, pdfConfig, false)} className="h-9 text-xs"><Printer size={16}/> Cetak</Button>}<button onClick={() => handleDeleteLetter(l.id)} className="p-2 text-slate-400 hover:text-rose-600"><Trash2 size={18}/></button></div></div>))}</div>) : (<div className="space-y-4">{reports.map((r:Report) => (<div key={r.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4"><div className="flex-1"><div className="flex items-center gap-2 mb-1"><span className={`font-bold ${r.type==='Keamanan'?'text-rose-600':'text-slate-800'}`}>{r.type}</span><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${r.status==='Selesai'?'bg-emerald-100 text-emerald-600':r.status==='Diproses'?'bg-blue-100 text-blue-600':'bg-rose-100 text-rose-600'}`}>{r.status}</span></div><p className="text-sm text-slate-600 line-clamp-2">{r.description}</p><p className="text-xs text-slate-400 mt-1">Pelapor: {r.reporterName} • {r.date}</p></div><div className="flex gap-2 shrink-0"><select className="bg-slate-50 border rounded-lg text-xs p-2 font-bold" value={r.status} onChange={(e) => handleUpdateReport(r.id, e.target.value)}><option>Baru</option><option>Diproses</option><option>Selesai</option></select><button onClick={() => handleDeleteReport(r.id)} className="p-2 text-slate-400 hover:text-rose-600"><Trash2 size={18}/></button></div></div>))}</div>)}</div>)}
           {activeTab === 'finance' && (<div className="animate-fade-in space-y-6"><div className="flex justify-between items-center bg-white p-4 rounded-xl border"><h2 className="font-bold text-lg">Arus Kas & Keuangan</h2><Button onClick={() => { resetForms(); setModalType('cash'); setIsModalOpen(true); }}><Plus size={18}/> Catat Transaksi</Button></div><div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"><table className="w-full text-sm text-left"><thead className="bg-slate-50 text-slate-600 font-bold uppercase text-xs"><tr><th className="p-4">Tanggal</th><th className="p-4">Kategori</th><th className="p-4">Keterangan</th><th className="p-4 text-right">Nominal</th><th className="p-4 text-center">Aksi</th></tr></thead><tbody>{cashFlow.map((c:CashFlow) => (<tr key={c.id} className="border-b last:border-0 hover:bg-slate-50"><td className="p-4">{c.date}</td><td className="p-4"><span className="bg-slate-100 px-2 py-1 rounded text-xs font-bold">{c.category}</span></td><td className="p-4 font-medium">{c.description}</td><td className={`p-4 text-right font-bold ${c.type==='Income'?'text-emerald-600':'text-rose-600'}`}>{c.type==='Income'?'+':'-'} {c.amount.toLocaleString()}</td><td className="p-4 text-center"><button onClick={() => handleDeleteTransaction(c.id)} className="text-slate-400 hover:text-rose-600"><Trash2 size={16}/></button></td></tr>))}</tbody></table></div></div>)}
           {activeTab === 'facilities' && (<div className="animate-fade-in space-y-8"><div className="space-y-4"><div className="flex justify-between items-center bg-white p-4 rounded-xl border"><h2 className="font-bold text-lg">Inventaris & Aset RT</h2><Button onClick={() => { resetForms(); setModalType('inventory'); setIsModalOpen(true); }}><Plus size={18}/> Tambah Aset</Button></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4">{inventory.map((item:InventoryItem) => (<div key={item.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex justify-between items-start"><div><h4 className="font-bold text-slate-800">{item.name}</h4><p className="text-sm text-slate-500">Total: {item.total} | Tersedia: {item.available}</p><span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase mt-2 inline-block ${item.condition==='Baik'?'bg-emerald-100 text-emerald-600':item.condition==='Rusak'?'bg-rose-100 text-rose-600':'bg-amber-100 text-amber-600'}`}>{item.condition}</span></div><div className="flex gap-1"><button onClick={() => openEditInventory(item)} className="p-2 text-blue-500 bg-blue-50 rounded-lg"><Edit2 size={16}/></button><button onClick={() => handleDeleteInventory(item.id)} className="p-2 text-rose-500 bg-rose-50 rounded-lg"><Trash2 size={16}/></button></div></div>))}</div></div><div className="space-y-4"><div className="flex justify-between items-center bg-white p-4 rounded-xl border"><h2 className="font-bold text-lg">Jadwal Ronda Mingguan</h2></div><div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{ronda.map((r:RondaSchedule) => (<div key={r.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm relative group"><button onClick={() => openEditRonda(r)} className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><Edit2 size={14}/></button><h4 className="font-bold text-brand-blue mb-2">{r.day}</h4><ul className="text-sm text-slate-600 space-y-1">{r.members.map((m, i) => <li key={i}>• {m}</li>)}</ul></div>))}</div></div></div>)}
@@ -511,7 +510,6 @@ const AdminDashboard = ({
           modalType === 'umkm' ? 'Data UMKM' : 
           modalType === 'import' ? 'Preview Import CSV' : 'Catat Iuran'
       }>
-          {/* ... (Existing Modals: Announcement, Cash, Official, Inventory, Ronda, UMKM, Import - No Change) */}
           {modalType === 'announcement' && (
               <form onSubmit={handleCreateAnnouncement} className="space-y-4">
                   <div><label className="block text-xs font-bold mb-1">Judul</label><input className="w-full p-2 border rounded" value={annTitle} onChange={e=>setAnnTitle(e.target.value)} required/></div>
@@ -638,6 +636,7 @@ const AdminDashboard = ({
                                 value={editHouseForm.headOfFamily} 
                                 onChange={e=>setEditHouseForm({...editHouseForm, headOfFamily: e.target.value})}
                                 placeholder="Masukkan Nama Lengkap..."
+                                required
                              />
                           </div>
 
@@ -646,7 +645,7 @@ const AdminDashboard = ({
                                   <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Total Penghuni</label>
                                   <div className="relative">
                                       <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                                      <input type="number" className="w-full pl-9 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" value={editHouseForm.occupants} onChange={e=>setEditHouseForm({...editHouseForm, occupants: parseInt(e.target.value)||0})}/>
+                                      <input type="number" min="1" className="w-full pl-9 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" value={editHouseForm.occupants} onChange={e=>setEditHouseForm({...editHouseForm, occupants: parseInt(e.target.value)||0})}/>
                                   </div>
                               </div>
                               <div>
@@ -711,7 +710,7 @@ const AdminDashboard = ({
   );
 };
 
-export const App = () => {
+const App = () => {
   const [houses, setHouses] = useState<House[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [cashFlow, setCashFlow] = useState<CashFlow[]>([]);
@@ -726,84 +725,84 @@ export const App = () => {
 
   useEffect(() => {
     if (isFirebaseConfigured) {
-       const unsubs = [
-          subscribeToCollection('houses', (data) => setHouses(data.length > 0 ? data : generateHouses())),
-          subscribeToCollection('announcements', (data) => setAnnouncements(data)),
-          subscribeToCollection('cashFlow', (data) => setCashFlow(data)),
-          subscribeToCollection('officials', (data) => setOfficials(data)),
-          subscribeToCollection('reports', (data) => setReports(data)),
-          subscribeToCollection('letters', (data) => setLetters(data)),
-          subscribeToCollection('ronda', (data) => setRonda(data)),
-          subscribeToCollection('inventory', (data) => setInventory(data)),
-          subscribeToCollection('umkm', (data) => setUmkm(data))
-       ];
-       return () => unsubs.forEach(u => u());
+      const unsubs = [
+        subscribeToCollection('houses', (data) => setHouses(data.length > 0 ? data : generateHouses())),
+        subscribeToCollection('announcements', (data) => setAnnouncements(data)),
+        subscribeToCollection('cashFlow', (data) => setCashFlow(data)),
+        subscribeToCollection('officials', (data) => setOfficials(data)),
+        subscribeToCollection('reports', (data) => setReports(data)),
+        subscribeToCollection('letters', (data) => setLetters(data)),
+        subscribeToCollection('ronda', (data) => setRonda(data)),
+        subscribeToCollection('inventory', (data) => setInventory(data)),
+        subscribeToCollection('umkm', (data) => setUmkm(data))
+      ];
+      return () => unsubs.forEach(u => u());
     } else {
-       setHouses(generateHouses());
-       setAnnouncements(MOCK_ANNOUNCEMENTS);
-       setCashFlow(MOCK_CASHFLOW);
-       setOfficials(INITIAL_OFFICIALS);
-       setReports(INITIAL_REPORTS);
-       setLetters(INITIAL_LETTERS);
-       setRonda(MOCK_RONDA);
-       setInventory(MOCK_INVENTORY);
-       setUmkm(MOCK_UMKM);
+      setHouses(generateHouses());
+      setAnnouncements(MOCK_ANNOUNCEMENTS);
+      setCashFlow(MOCK_CASHFLOW);
+      setOfficials(INITIAL_OFFICIALS);
+      setReports(INITIAL_REPORTS);
+      setLetters(INITIAL_LETTERS);
+      setRonda(MOCK_RONDA);
+      setInventory(MOCK_INVENTORY);
+      setUmkm(MOCK_UMKM);
     }
   }, []);
 
   useEffect(() => {
-     const savedConfig = localStorage.getItem('pdf_config');
-     if (savedConfig) {
-        try { setPdfConfig(JSON.parse(savedConfig)); } catch (e) {}
-     }
+    const savedConfig = localStorage.getItem('pdf_config');
+    if (savedConfig) {
+      try { setPdfConfig(JSON.parse(savedConfig)); } catch (e) {}
+    }
   }, []);
 
   return (
     <HashRouter>
       <Routes>
         <Route path="/" element={
-           <>
-             <PublicHeader />
-             <PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} />
-             <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-             <PanicButton />
-           </>
+          <>
+            <PublicHeader />
+            <PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} />
+            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+            <PanicButton />
+          </>
         } />
         <Route path="/services" element={
-            <>
-             <PublicHeader />
-             <PublicServices pdfConfig={pdfConfig} />
-             <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            </>
+          <>
+            <PublicHeader />
+            <PublicServices pdfConfig={pdfConfig} />
+            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+          </>
         } />
         <Route path="/umkm" element={
-            <>
-             <PublicHeader />
-             <PublicUMKM umkm={umkm} />
-             <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            </>
+          <>
+            <PublicHeader />
+            <PublicUMKM umkm={umkm} />
+            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+          </>
         } />
         <Route path="/info" element={
-            <>
-             <PublicHeader />
-             <PublicInfo announcements={announcements} ronda={ronda} officials={officials} cashFlow={cashFlow} />
-             <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-            </>
+          <>
+            <PublicHeader />
+            <PublicInfo announcements={announcements} ronda={ronda} officials={officials} cashFlow={cashFlow} />
+            <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+          </>
         } />
         <Route path="/admin" element={
           <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
             <AdminDashboard 
-               houses={houses} 
-               announcements={announcements}
-               cashFlow={cashFlow}
-               officials={officials}
-               reports={reports}
-               letters={letters}
-               ronda={ronda}
-               inventory={inventory}
-               umkm={umkm}
-               pdfConfig={pdfConfig}
-               setPdfConfig={setPdfConfig}
+              houses={houses} 
+              announcements={announcements}
+              cashFlow={cashFlow}
+              officials={officials}
+              reports={reports}
+              letters={letters}
+              ronda={ronda}
+              inventory={inventory}
+              umkm={umkm}
+              pdfConfig={pdfConfig}
+              setPdfConfig={setPdfConfig}
             />
           </AdminRouteWrapper>
         } />
