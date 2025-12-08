@@ -1,9 +1,7 @@
 
-
 import React, { useState } from 'react';
-import { Shield, Lock, Mail, Loader2, Bell } from 'lucide-react';
-import { loginAdmin, resolvePanicAlert } from '../services/databaseService';
-import { PanicAlert } from '../types';
+import { Shield, Lock, Mail, Loader2 } from 'lucide-react';
+import { loginAdmin } from '../services/databaseService';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -100,33 +98,4 @@ export const AdminRouteWrapper: React.FC<AdminRouteWrapperProps> = ({ isAdmin, c
     return <AdminLogin onLogin={onLogin} />;
   }
   return <>{children}</>;
-};
-
-export const PanicMonitor: React.FC<{ alerts: PanicAlert[] }> = ({ alerts }) => {
-  const activeAlerts = alerts.filter(a => a.status === 'Active');
-  
-  if (activeAlerts.length === 0) return null;
-
-  return (
-    <div className="fixed top-4 right-4 z-[100] w-full max-w-sm space-y-2 pointer-events-none">
-      {activeAlerts.map(alert => (
-        <div key={alert.id} className="pointer-events-auto bg-red-600 text-white p-4 rounded-xl shadow-2xl animate-pulse flex items-center justify-between gap-4 border-2 border-red-400">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-full"><Bell size={24} className="animate-bounce"/></div>
-            <div>
-              <h4 className="font-bold text-lg leading-none">SINYAL DARURAT!</h4>
-              <p className="text-xs font-medium opacity-90 mt-1">{alert.location}</p>
-              <p className="text-[10px] opacity-75">{new Date(alert.timestamp).toLocaleTimeString()}</p>
-            </div>
-          </div>
-          <button 
-            onClick={() => resolvePanicAlert(alert.id)}
-            className="bg-white text-red-600 px-3 py-2 rounded-lg text-xs font-bold hover:bg-red-50 shadow-sm"
-          >
-            SELESAI
-          </button>
-        </div>
-      ))}
-    </div>
-  );
 };

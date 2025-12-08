@@ -1,5 +1,4 @@
 
-
 export enum PaymentStatus {
   PAID = 'Lunas',
   PENDING = 'Belum Lunas',
@@ -123,34 +122,4 @@ export interface InventoryItem {
   available: number;
   condition: 'Baik' | 'Perlu Perbaikan' | 'Rusak';
   notes?: string;
-}
-
-export interface PanicAlert {
-  id: string;
-  location: string;
-  timestamp: string;
-  status: 'Active' | 'Resolved';
-}
-
-export interface PollOption {
-  id: string;
-  text: string;
-  votes: number;
-}
-
-export interface Poll {
-  id: string;
-  question: string;
-  options: PollOption[];
-  createdAt: string;
-  isActive: boolean;
-  totalVotes: number;
-}
-
-export interface Comment {
-  id: string;
-  announcementId: string;
-  user: string;
-  text: string;
-  createdAt: string;
 }

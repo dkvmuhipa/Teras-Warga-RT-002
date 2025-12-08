@@ -1,5 +1,17 @@
+
 import { db, auth, isFirebaseConfigured } from "./firebaseConfig";
-import * as Firestore from "firebase/firestore";
+import { 
+  collection, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  onSnapshot,
+  query,
+  getDocs,
+  setDoc,
+  writeBatch
+} from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 // Collection References
@@ -12,9 +24,6 @@ const REPORTS_COL = "reports";
 const LETTERS_COL = "letters"; 
 const INVENTORY_COL = "inventory";
 const UMKM_COL = "umkm"; 
-const PANIC_COL = "panic_alerts";
-const POLLS_COL = "polls";
-const COMMENTS_COL = "comments";
 
 // --- AUTH SERVICES ---
 export const loginAdmin = (email: string, pass: string) => {
@@ -56,8 +65,8 @@ const deepSanitize = (data: any, seen = new WeakSet()): any => {
 
 // --- GENERIC SUBSCRIBE ---
 export const subscribeToCollection = (colName: string, callback: (data: any[]) => void) => {
-  const q = Firestore.query(Firestore.collection(db, colName));
-  return Firestore.onSnapshot(q, (snapshot) => {
+  const q = query(collection(db, colName));
+  return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => ({
       ...doc.data(), 
       id: doc.id 
@@ -75,17 +84,17 @@ export const addHouse = async (houseData: any) => {
     if (!cleanData) return;
 
     if (cleanData.id) {
-       await Firestore.setDoc(Firestore.doc(db, HOUSES_COL, cleanData.id), cleanData);
+       await setDoc(doc(db, HOUSES_COL, cleanData.id), cleanData);
     } else {
-       await Firestore.addDoc(Firestore.collection(db, HOUSES_COL), cleanData);
+       await addDoc(collection(db, HOUSES_COL), cleanData);
     }
   } catch (e) { console.error("Error adding house: ", e); }
 };
 
 export const updateHouseData = async (id: string, updates: any) => {
     try {
-      const houseRef = Firestore.doc(db, HOUSES_COL, id);
-      await Firestore.updateDoc(houseRef, deepSanitize(updates));
+      const houseRef = doc(db, HOUSES_COL, id);
+      await updateDoc(houseRef, deepSanitize(updates));
     } catch (e) { console.error("Error updating house:", e); }
 };
 
@@ -93,12 +102,12 @@ export const batchUpdateHouses = async (housesData: any[]) => {
   try {
     console.log(`Mulai import ${housesData.length} data warga...`);
     const MAX_BATCH_SIZE = 400; 
-    let batch = Firestore.writeBatch(db);
+    let batch = writeBatch(db);
     let operationCount = 0;
 
     const commitBatch = async () => {
         await batch.commit();
-        batch = Firestore.writeBatch(db);
+        batch = writeBatch(db);
         operationCount = 0;
     };
 
@@ -106,7 +115,7 @@ export const batchUpdateHouses = async (housesData: any[]) => {
        const cleanData = deepSanitize(house);
        if (!cleanData || !cleanData.id) continue;
        
-       const ref = Firestore.doc(db, HOUSES_COL, cleanData.id);
+       const ref = doc(db, HOUSES_COL, cleanData.id);
        batch.set(ref, cleanData, { merge: true });
        
        operationCount++;
@@ -127,15 +136,15 @@ export const batchUpdateHouses = async (housesData: any[]) => {
 export const resetHouseData = async (newHouses: any[]) => {
   try {
     console.log("Mulai migrasi data warga...");
-    const snapshot = await Firestore.getDocs(Firestore.collection(db, HOUSES_COL));
+    const snapshot = await getDocs(collection(db, HOUSES_COL));
     
     const MAX_BATCH_SIZE = 400; 
-    let batch = Firestore.writeBatch(db);
+    let batch = writeBatch(db);
     let operationCount = 0;
 
     const commitBatch = async () => {
         await batch.commit();
-        batch = Firestore.writeBatch(db);
+        batch = writeBatch(db);
         operationCount = 0;
     };
 
@@ -149,7 +158,7 @@ export const resetHouseData = async (newHouses: any[]) => {
        const cleanData = deepSanitize(house);
        if (!cleanData) continue;
        
-       const ref = Firestore.doc(db, HOUSES_COL, house.id); 
+       const ref = doc(db, HOUSES_COL, house.id); 
        batch.set(ref, cleanData);
        
        operationCount++;
@@ -170,96 +179,96 @@ export const resetHouseData = async (newHouses: any[]) => {
 export const addAnnouncementToDb = async (announcement: any) => {
   try {
     const { id, ...data } = announcement; 
-    await Firestore.addDoc(Firestore.collection(db, ANNOUNCEMENTS_COL), deepSanitize(data));
+    await addDoc(collection(db, ANNOUNCEMENTS_COL), deepSanitize(data));
   } catch (e) { console.error("Error adding announcement:", e); }
 };
 
 export const deleteAnnouncementFromDb = async (id: string) => {
-  try { await Firestore.deleteDoc(Firestore.doc(db, ANNOUNCEMENTS_COL, id)); } catch (e) { console.error("Error deleting announcement:", e); }
+  try { await deleteDoc(doc(db, ANNOUNCEMENTS_COL, id)); } catch (e) { console.error("Error deleting announcement:", e); }
 };
 
 // --- 3. CASHFLOW ---
 export const addTransactionToDb = async (transaction: any) => {
   try {
     const { id, ...data } = transaction;
-    await Firestore.addDoc(Firestore.collection(db, CASHFLOW_COL), deepSanitize(data));
+    await addDoc(collection(db, CASHFLOW_COL), deepSanitize(data));
   } catch (e) { console.error("Error adding transaction:", e); }
 };
 
 export const deleteTransactionFromDb = async (id: string) => {
-  try { await Firestore.deleteDoc(Firestore.doc(db, CASHFLOW_COL, id)); } catch (e) { console.error("Error deleting transaction:", e); }
+  try { await deleteDoc(doc(db, CASHFLOW_COL, id)); } catch (e) { console.error("Error deleting transaction:", e); }
 };
 
 // --- 4. OFFICIALS ---
 export const addOfficialToDb = async (official: any) => {
   try {
     const { id, ...data } = official;
-    await Firestore.addDoc(Firestore.collection(db, OFFICIALS_COL), deepSanitize(data));
+    await addDoc(collection(db, OFFICIALS_COL), deepSanitize(data));
   } catch (e) { console.error("Error adding official:", e); }
 };
 
 export const updateOfficialInDb = async (id: string, updates: any) => {
-  try { await Firestore.updateDoc(Firestore.doc(db, OFFICIALS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating official:", e); }
+  try { await updateDoc(doc(db, OFFICIALS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating official:", e); }
 };
 
 export const deleteOfficialFromDb = async (id: string) => {
-  try { await Firestore.deleteDoc(Firestore.doc(db, OFFICIALS_COL, id)); } catch (e) { console.error("Error deleting official:", e); }
+  try { await deleteDoc(doc(db, OFFICIALS_COL, id)); } catch (e) { console.error("Error deleting official:", e); }
 };
 
 // --- 5. REPORTS ---
 export const addReportToDb = async (report: any) => {
   try {
     const { id, ...data } = report;
-    await Firestore.addDoc(Firestore.collection(db, REPORTS_COL), deepSanitize(data));
+    await addDoc(collection(db, REPORTS_COL), deepSanitize(data));
   } catch (e) { console.error("Error adding report:", e); }
 };
 
 export const updateReportStatus = async (id: string, status: string) => {
   try {
-    await Firestore.updateDoc(Firestore.doc(db, REPORTS_COL, id), { status });
+    await updateDoc(doc(db, REPORTS_COL, id), { status });
   } catch (e) { console.error("Error updating report:", e); }
 };
 
 export const deleteReportFromDb = async (id: string) => {
-  try { await Firestore.deleteDoc(Firestore.doc(db, REPORTS_COL, id)); } catch (e) { console.error("Error deleting report:", e); }
+  try { await deleteDoc(doc(db, REPORTS_COL, id)); } catch (e) { console.error("Error deleting report:", e); }
 };
 
 // --- 6. LETTERS ---
 export const addLetterToDb = async (letter: any) => {
   try {
     const { id, ...data } = letter;
-    await Firestore.addDoc(Firestore.collection(db, LETTERS_COL), deepSanitize(data));
+    await addDoc(collection(db, LETTERS_COL), deepSanitize(data));
   } catch (e) { console.error("Error adding letter:", e); }
 };
 
 export const updateLetterStatus = async (id: string, status: string) => {
-  try { await Firestore.updateDoc(Firestore.doc(db, LETTERS_COL, id), { status }); } catch (e) { console.error("Error updating letter:", e); }
+  try { await updateDoc(doc(db, LETTERS_COL, id), { status }); } catch (e) { console.error("Error updating letter:", e); }
 };
 
 export const deleteLetterFromDb = async (id: string) => {
-  try { await Firestore.deleteDoc(Firestore.doc(db, LETTERS_COL, id)); } catch (e) { console.error("Error deleting letter:", e); }
+  try { await deleteDoc(doc(db, LETTERS_COL, id)); } catch (e) { console.error("Error deleting letter:", e); }
 };
 
 // --- 7. INVENTORY ---
 export const addInventoryToDb = async (item: any) => {
     try {
         const { id, ...data } = item;
-        await Firestore.addDoc(Firestore.collection(db, INVENTORY_COL), deepSanitize(data));
+        await addDoc(collection(db, INVENTORY_COL), deepSanitize(data));
     } catch (e) { console.error("Error adding inventory:", e); }
 };
 
 export const updateInventoryInDb = async (id: string, updates: any) => {
-    try { await Firestore.updateDoc(Firestore.doc(db, INVENTORY_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating inventory:", e); }
+    try { await updateDoc(doc(db, INVENTORY_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating inventory:", e); }
 };
 
 export const deleteInventoryFromDb = async (id: string) => {
-    try { await Firestore.deleteDoc(Firestore.doc(db, INVENTORY_COL, id)); } catch (e) { console.error("Error deleting inventory:", e); }
+    try { await deleteDoc(doc(db, INVENTORY_COL, id)); } catch (e) { console.error("Error deleting inventory:", e); }
 };
 
 // --- 8. RONDA ---
 export const updateRondaSchedule = async (id: string, members: string[]) => {
     try {
-        await Firestore.updateDoc(Firestore.doc(db, RONDA_COL, id), { members });
+        await updateDoc(doc(db, RONDA_COL, id), { members });
     } catch (e) { console.error("Error updating ronda:", e); }
 };
 
@@ -267,80 +276,23 @@ export const updateRondaSchedule = async (id: string, members: string[]) => {
 export const addUMKMToDb = async (umkm: any) => {
   try {
     const { id, ...data } = umkm;
-    await Firestore.addDoc(Firestore.collection(db, UMKM_COL), deepSanitize(data));
+    await addDoc(collection(db, UMKM_COL), deepSanitize(data));
   } catch (e) { console.error("Error adding UMKM:", e); }
 };
 
 export const updateUMKMInDb = async (id: string, updates: any) => {
-  try { await Firestore.updateDoc(Firestore.doc(db, UMKM_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating UMKM:", e); }
+  try { await updateDoc(doc(db, UMKM_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating UMKM:", e); }
 };
 
 export const deleteUMKMFromDb = async (id: string) => {
-  try { await Firestore.deleteDoc(Firestore.doc(db, UMKM_COL, id)); } catch (e) { console.error("Error deleting UMKM:", e); }
-};
-
-// --- 10. PANIC BUTTON & ALERTS ---
-export const sendPanicAlert = async (location: string) => {
-  try {
-      await Firestore.addDoc(Firestore.collection(db, PANIC_COL), {
-          location,
-          timestamp: new Date().toISOString(),
-          status: 'Active'
-      });
-  } catch (e) { console.error("Error sending panic alert:", e); }
-};
-
-export const resolvePanicAlert = async (id: string) => {
-  try {
-      await Firestore.updateDoc(Firestore.doc(db, PANIC_COL, id), { status: 'Resolved' });
-  } catch (e) { console.error("Error resolving panic alert:", e); }
-};
-
-// --- 11. POLLING (E-VOTING) ---
-export const addPoll = async (poll: any) => {
-  try {
-      const { id, ...data } = poll;
-      await Firestore.addDoc(Firestore.collection(db, POLLS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding poll:", e); }
-};
-
-export const votePoll = async (pollId: string, optionId: string) => {
-  try {
-    await Firestore.runTransaction(db, async (transaction) => {
-        const pollRef = Firestore.doc(db, POLLS_COL, pollId);
-        const pollDoc = await transaction.get(pollRef);
-        if (!pollDoc.exists()) throw "Document does not exist!";
-        
-        const data = pollDoc.data();
-        const options = data.options.map((opt: any) => {
-            if (opt.id === optionId) {
-                return { ...opt, votes: opt.votes + 1 };
-            }
-            return opt;
-        });
-        const totalVotes = (data.totalVotes || 0) + 1;
-        transaction.update(pollRef, { options, totalVotes });
-    });
-  } catch (e) { console.error("Error voting:", e); }
-};
-
-export const deletePoll = async (id: string) => {
-  try { await Firestore.deleteDoc(Firestore.doc(db, POLLS_COL, id)); } catch (e) { console.error("Error deleting poll:", e); }
-};
-
-// --- 12. COMMENTS ---
-export const addComment = async (comment: any) => {
-  try {
-      const { id, ...data } = comment;
-      await Firestore.addDoc(Firestore.collection(db, COMMENTS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding comment:", e); }
+  try { await deleteDoc(doc(db, UMKM_COL, id)); } catch (e) { console.error("Error deleting UMKM:", e); }
 };
 
 
 // --- SEEDING & AUTO-MIGRATION ---
 export const seedDatabase = async (initialData: any) => {
     try {
-      const housesSnap = await Firestore.getDocs(Firestore.collection(db, HOUSES_COL));
+      const housesSnap = await getDocs(collection(db, HOUSES_COL));
       
       const hasOldData = housesSnap.docs.some(doc => {
           const data = doc.data();
@@ -352,52 +304,52 @@ export const seedDatabase = async (initialData: any) => {
           await resetHouseData(initialData.houses);
       }
 
-      const officialsSnap = await Firestore.getDocs(Firestore.collection(db, OFFICIALS_COL));
+      const officialsSnap = await getDocs(collection(db, OFFICIALS_COL));
       if (officialsSnap.empty && initialData.officials.length > 0) {
           for (const o of initialData.officials) {
             const { id, ...data } = o;
-            await Firestore.addDoc(Firestore.collection(db, OFFICIALS_COL), deepSanitize(data));
+            await addDoc(collection(db, OFFICIALS_COL), deepSanitize(data));
           }
       }
       
-      const rondaSnap = await Firestore.getDocs(Firestore.collection(db, RONDA_COL));
+      const rondaSnap = await getDocs(collection(db, RONDA_COL));
       if (rondaSnap.empty && initialData.ronda.length > 0) {
           for (const r of initialData.ronda) {
              const { id, ...data } = r;
-             await Firestore.addDoc(Firestore.collection(db, RONDA_COL), deepSanitize(data));
+             await addDoc(collection(db, RONDA_COL), deepSanitize(data));
           }
       }
       
-      const inventorySnap = await Firestore.getDocs(Firestore.collection(db, INVENTORY_COL));
+      const inventorySnap = await getDocs(collection(db, INVENTORY_COL));
       if (inventorySnap.empty && initialData.inventory.length > 0) {
           for (const i of initialData.inventory) {
              const { id, ...data } = i;
-             await Firestore.addDoc(Firestore.collection(db, INVENTORY_COL), deepSanitize(data));
+             await addDoc(collection(db, INVENTORY_COL), deepSanitize(data));
           }
       }
 
-      const umkmSnap = await Firestore.getDocs(Firestore.collection(db, UMKM_COL));
+      const umkmSnap = await getDocs(collection(db, UMKM_COL));
       if (umkmSnap.empty && initialData.umkm && initialData.umkm.length > 0) {
           for (const u of initialData.umkm) {
              const { id, ...data } = u;
-             await Firestore.addDoc(Firestore.collection(db, UMKM_COL), deepSanitize(data));
+             await addDoc(collection(db, UMKM_COL), deepSanitize(data));
           }
       }
       
       // Seed Data Dummy untuk Laporan & Transaksi agar tidak kosong
-      const reportsSnap = await Firestore.getDocs(Firestore.collection(db, REPORTS_COL));
+      const reportsSnap = await getDocs(collection(db, REPORTS_COL));
       if (reportsSnap.empty && initialData.reports && initialData.reports.length > 0) {
           for (const r of initialData.reports) {
               const { id, ...data } = r;
-              await Firestore.addDoc(Firestore.collection(db, REPORTS_COL), deepSanitize(data));
+              await addDoc(collection(db, REPORTS_COL), deepSanitize(data));
           }
       }
 
-      const cashSnap = await Firestore.getDocs(Firestore.collection(db, CASHFLOW_COL));
+      const cashSnap = await getDocs(collection(db, CASHFLOW_COL));
       if (cashSnap.empty && initialData.cashFlow && initialData.cashFlow.length > 0) {
           for (const c of initialData.cashFlow) {
               const { id, ...data } = c;
-              await Firestore.addDoc(Firestore.collection(db, CASHFLOW_COL), deepSanitize(data));
+              await addDoc(collection(db, CASHFLOW_COL), deepSanitize(data));
           }
       }
 
