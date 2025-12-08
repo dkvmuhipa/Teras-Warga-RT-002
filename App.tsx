@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { 
@@ -7,7 +8,7 @@ import {
   LogOut, Download, Package, ShoppingBag,
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
-  RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle
+  RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle, ImageIcon, Link as LinkIcon
 } from 'lucide-react';
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from 'recharts';
 
@@ -341,27 +342,162 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
 };
 
 const PublicUMKM = ({ umkmData }: { umkmData: UMKM[] }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterCategory, setFilterCategory] = useState('All');
-    const dataToShow = umkmData.length > 0 ? umkmData : []; 
-    const categories = ['All', ...Array.from(new Set(dataToShow.map(u => u.category)))];
-    const filteredUMKM = dataToShow.filter(u => (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.description.toLowerCase().includes(searchTerm.toLowerCase())) && (filterCategory === 'All' || u.category === filterCategory));
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('All');
 
-    return (
-        <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 mb-20 md:mb-20">
-             <div className="text-center mb-6"><h1 className="text-2xl font-bold">UMKM & Jasa Tetangga</h1></div>
-             <div className="sticky top-20 z-30 bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-sm border mb-6 flex flex-col md:flex-row gap-3"><input type="text" placeholder="Cari..." className="w-full p-2 bg-slate-50 border rounded-xl text-sm" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)}/><div className="flex gap-2 overflow-x-auto no-scrollbar">{categories.map(cat => <button key={cat} onClick={()=>setFilterCategory(cat)} className={`px-3 py-1 rounded-full text-xs font-bold border ${filterCategory===cat?'bg-purple-600 text-white':'bg-white text-slate-600'}`}>{cat}</button>)}</div></div>
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredUMKM.map(u => (
-                    <div key={u.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border hover:shadow-md transition-all">
-                        <div className="h-40 bg-slate-200 relative"><img src={u.image} className="w-full h-full object-cover" onError={(e)=>{(e.target as HTMLImageElement).src='https://via.placeholder.com/300x200?text=No+Image'}}/><span className="absolute top-2 left-2 bg-white/90 px-2 py-1 text-[10px] font-bold rounded">{u.category}</span></div>
-                        <div className="p-4"><h3 className="font-bold">{u.name}</h3><p className="text-xs text-slate-500 mb-2">{u.owner}</p><p className="text-sm line-clamp-2 text-slate-600 mb-4">{u.description}</p><a href={`https://wa.me/${u.contact}`} className="block w-full py-2 bg-slate-800 text-white text-center rounded-xl text-xs font-bold">Hubungi</a></div>
-                    </div>
-                ))}
-                {filteredUMKM.length === 0 && <div className="col-span-full text-center py-10 text-slate-400">Belum ada data UMKM.</div>}
-             </div>
+  const dataToShow = umkmData.length > 0 ? umkmData : [];
+  const categories = ['All', ...Array.from(new Set(dataToShow.map(u => u.category)))];
+  const filteredUMKM = dataToShow.filter(u => (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.description.toLowerCase().includes(searchTerm.toLowerCase())) && (filterCategory === 'All' || u.category === filterCategory));
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 mb-24 md:mb-24 space-y-8 animate-fade-in font-sans">
+      
+      {/* 1. HERO SECTION: Modern & Inviting */}
+      <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl shadow-indigo-200 min-h-[280px] flex items-center justify-center text-center px-6 py-12">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600 via-purple-600 to-violet-500 opacity-90"></div>
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/food.png')] opacity-10"></div>
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-yellow-400/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        
+        <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-yellow-300 text-[10px] md:text-xs font-bold uppercase tracking-widest shadow-lg">
+              <Store size={14} className="animate-bounce-slow" /> Ekonomi Warga RT 002
+           </div>
+           <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+              Belanja Dekat, <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-amber-400">Rezeki Merapat</span>
+           </h1>
+           <p className="text-indigo-100 text-sm md:text-lg font-medium leading-relaxed">
+              Temukan kuliner lezat, jasa terpercaya, dan produk kreatif karya tetangga sendiri. 
+           </p>
         </div>
-    );
+      </div>
+
+      {/* 2. STICKY SEARCH BAR: Glassmorphism */}
+      <div className="sticky top-20 z-40 -mt-12 px-2">
+         <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-3 shadow-xl shadow-slate-200/50 border border-white/60 ring-1 ring-slate-200/50 flex flex-col md:flex-row gap-3 transition-all">
+            <div className="relative flex-1 group">
+               <div className="absolute left-4 top-1/2 -translate-y-1/2 bg-slate-100 p-1.5 rounded-lg text-slate-400 group-focus-within:bg-indigo-50 group-focus-within:text-indigo-500 transition-colors">
+                  <Search size={16} />
+               </div>
+               <input 
+                  type="text" 
+                  placeholder="Cari nasi kuning, laundry, atau jasa..." 
+                  className="w-full pl-14 pr-4 py-3 bg-slate-50 hover:bg-white focus:bg-white border-2 border-transparent focus:border-indigo-100 rounded-xl outline-none text-sm font-bold text-slate-700 transition-all placeholder:font-medium placeholder:text-slate-400"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+               />
+            </div>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar items-center pb-1 md:pb-0">
+               {categories.map(cat => (
+                  <button
+                     key={cat}
+                     onClick={() => setFilterCategory(cat)}
+                     className={`whitespace-nowrap px-5 py-3 rounded-xl text-xs font-bold transition-all border-b-4 active:scale-95 active:border-b-0 active:translate-y-1 ${
+                        filterCategory === cat 
+                        ? 'bg-slate-800 text-white border-slate-950 shadow-lg shadow-slate-300' 
+                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700'
+                     }`}
+                  >
+                     {cat}
+                  </button>
+               ))}
+            </div>
+         </div>
+      </div>
+
+      {/* 3. CARDS: Clean & Info-Rich */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-12">
+         {filteredUMKM.map(u => (
+            <div key={u.id} className="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-100/50 hover:-translate-y-1.5 transition-all duration-300 flex flex-col overflow-hidden relative isolate">
+               {/* Image Header */}
+               <div className="h-60 relative overflow-hidden bg-slate-100">
+                  <img 
+                     src={u.image} 
+                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                     alt={u.name}
+                     onError={(e)=>{(e.target as HTMLImageElement).src='https://placehold.co/600x400/f1f5f9/94a3b8?text=No+Image'}} 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
+                  
+                  {/* Top Badges */}
+                  <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+                     <span className="bg-white/95 backdrop-blur-md text-indigo-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide flex items-center gap-1.5 shadow-sm">
+                        <ShoppingBag size={12} className="text-indigo-500" /> {u.category}
+                     </span>
+                  </div>
+
+                  {/* Title Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 pt-12 bg-gradient-to-t from-black/90 to-transparent">
+                     <h3 className="font-black text-xl text-white leading-tight mb-1 group-hover:text-yellow-300 transition-colors">{u.name}</h3>
+                     <div className="flex items-center gap-2">
+                         <div className="w-5 h-5 rounded-full border border-white/30 bg-white/10 overflow-hidden">
+                            <img src={`https://ui-avatars.com/api/?name=${u.owner}&background=random`} alt={u.owner} />
+                         </div>
+                         <span className="text-xs font-medium text-slate-300">{u.owner}</span>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Body */}
+               <div className="p-6 flex-1 flex flex-col bg-white relative">
+                  {/* Decorative Quote Icon */}
+                  <div className="absolute top-4 right-6 text-indigo-50 transform rotate-12 group-hover:rotate-0 transition-transform">
+                     <MessageCircle size={40} fill="currentColor" />
+                  </div>
+
+                  <div className="relative z-10 mb-6 flex-1">
+                     <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">
+                        {u.description}
+                     </p>
+                  </div>
+
+                  {/* Action Button */}
+                  <a 
+                     href={`https://wa.me/${u.contact.replace(/^0/, '62').replace(/\D/g, '')}`}
+                     target="_blank"
+                     rel="noreferrer"
+                     className="flex items-center justify-center gap-2.5 w-full py-3.5 bg-emerald-500 text-white rounded-2xl font-bold text-sm shadow-lg shadow-emerald-200 hover:bg-emerald-600 hover:shadow-xl hover:shadow-emerald-300 transition-all active:scale-95 group/btn"
+                  >
+                     <MessageCircle size={18} className="group-hover/btn:rotate-12 transition-transform"/>
+                     Hubungi Penjual
+                  </a>
+               </div>
+            </div>
+         ))}
+
+         {/* Empty State */}
+         {filteredUMKM.length === 0 && (
+            <div className="col-span-full py-20 text-center flex flex-col items-center justify-center bg-slate-50 rounded-3xl border border-dashed border-slate-200 animate-slide-up">
+              <div className="bg-white p-6 rounded-full shadow-lg shadow-indigo-100 mb-4 relative">
+                 <div className="absolute inset-0 bg-indigo-50 rounded-full animate-ping opacity-75"></div>
+                 <Store size={48} className="text-indigo-400 relative z-10" />
+              </div>
+              <h3 className="text-xl font-black text-slate-800 mb-2">Yah, belum ketemu...</h3>
+              <p className="text-slate-500 max-w-sm mx-auto mb-6 text-sm">Coba cari dengan kata kunci lain atau kategori berbeda.</p>
+              <button 
+                onClick={() => {setSearchTerm(''); setFilterCategory('All')}}
+                className="px-6 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-700 transition-all shadow-lg"
+              >
+                Reset Filter
+              </button>
+            </div>
+         )}
+      </div>
+
+      {/* Call to Action Footer */}
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+          <div className="relative z-10">
+             <h3 className="text-2xl font-black mb-2">Punya Usaha di RT 002?</h3>
+             <p className="text-indigo-100 mb-6 max-w-lg mx-auto text-sm">Ayo daftarkan usaha Anda agar makin dikenal tetangga dan laris manis! Hubungi pengurus RT untuk pendaftaran gratis.</p>
+             <a href="https://wa.me/?text=Halo%20Pak%20RT,%20saya%20warga%20ingin%20mendaftarkan%20UMKM%20saya..." target="_blank" rel="noreferrer" className="inline-block px-8 py-3 bg-white text-indigo-600 rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-50 transition-colors">
+                Daftar Sekarang
+             </a>
+          </div>
+      </div>
+    </div>
+  );
 };
 
 const PublicInfo = ({ officials, cashFlow, ronda }: { officials: Official[], cashFlow: CashFlow[], ronda: RondaSchedule[] }) => {
@@ -377,7 +513,7 @@ const PublicInfo = ({ officials, cashFlow, ronda }: { officials: Official[], cas
     
     return (
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 mb-20 md:mb-20 space-y-8 animate-fade-in">
-            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 to-slate-800 p-8 md:p-12 text-center text-white shadow-2xl shadow-slate-200"><div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div><div className="relative z-10"><span className="inline-block bg-brand-blue/20 text-brand-blue border border-brand-blue/30 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-4">Transparansi Publik</span><h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">Pusat Informasi RT 002</h1><p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">Akses data kepengurusan, laporan keuangan, dan jadwal kegiatan lingkungan secara terbuka dan akuntabel.</p></div></div>
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 to-slate-800 p-8 md:p-12 text-center text-white shadow-2xl shadow-slate-200"><div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"><span className="inline-block bg-brand-blue/20 text-brand-blue border border-brand-blue/30 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-4">Transparansi Publik</span><h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">Pusat Informasi RT 002</h1><p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">Akses data kepengurusan, laporan keuangan, dan jadwal kegiatan lingkungan secara terbuka dan akuntabel.</p></div></div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-6 text-white shadow-xl shadow-emerald-200 relative overflow-hidden group hover:scale-[1.02] transition-transform"><div className="absolute -right-6 -top-6 p-4 opacity-10 group-hover:rotate-12 transition-transform"><Wallet size={140}/></div><div className="relative z-10"><p className="text-emerald-100 font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2"><ShieldCheck size={14}/> Keuangan Warga</p><h2 className="text-3xl md:text-4xl font-black tracking-tight mb-6">Rp {currentBalance.toLocaleString()}</h2><div className="flex gap-3 text-xs font-bold"><div className="bg-white/10 backdrop-blur-sm px-3 py-2 rounded-xl flex items-center gap-1.5 border border-white/10"><div className="bg-white/20 p-1 rounded-full"><ArrowUpRight size={10} className="text-emerald-200"/></div>+{totalIncome.toLocaleString()}</div><div className="bg-white/10 backdrop-blur-sm px-3 py-2 rounded-xl flex items-center gap-1.5 border border-white/10"><div className="bg-white/20 p-1 rounded-full"><ArrowDownRight size={10} className="text-rose-200"/></div>-{totalExpense.toLocaleString()}</div></div></div></div>
                  <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100 flex flex-col justify-between group hover:border-brand-blue/30 transition-colors"><div className="flex justify-between items-start"><div><p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Struktur Organisasi</p><h2 className="text-4xl font-black text-slate-800 mt-2">{officials.length} <span className="text-lg font-medium text-slate-400">Personil</span></h2></div><div className="bg-brand-blue/5 p-4 rounded-2xl text-brand-blue group-hover:bg-brand-blue group-hover:text-white transition-colors"><Briefcase size={28}/></div></div><p className="text-xs text-slate-400 mt-4 leading-relaxed">Siap melayani kebutuhan administrasi, keamanan, dan sosial warga RT 002.</p></div>
@@ -417,6 +553,7 @@ const AdminDashboard = ({
   // State Management
   const [residentView, setResidentView] = useState<'grid' | 'table'>('table');
   const [searchResident, setSearchResident] = useState('');
+  const [searchUmkm, setSearchUmkm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterPayment, setFilterPayment] = useState('All');
   const [filterBlock, setFilterBlock] = useState('All');
@@ -962,8 +1099,61 @@ const AdminDashboard = ({
           
           {activeTab === 'umkm' && (
              <div className="space-y-6">
-                <div className="flex justify-between items-center"><h2 className="font-black text-2xl text-slate-800">UMKM Warga</h2><Button onClick={() => { resetForms(); setModalType('umkm'); setIsModalOpen(true); }}><Plus size={16}/> Tambah</Button></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{umkm.length > 0 ? umkm.map((u:UMKM) => (<div key={u.id} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm group"><div className="h-40 bg-slate-100 relative"><img src={u.image} className="w-full h-full object-cover" onError={(e)=>{(e.target as HTMLImageElement).src='https://via.placeholder.com/300x200?text=No+Image'}} /><div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={() => openEditUMKM(u)} className="p-2 bg-white/90 rounded-lg shadow-sm text-slate-700 hover:text-blue-600"><Edit2 size={14}/></button><button onClick={() => handleDeleteUMKM(u.id)} className="p-2 bg-white/90 rounded-lg shadow-sm text-slate-700 hover:text-rose-600"><Trash2 size={14}/></button></div></div><div className="p-4"><h3 className="font-bold text-slate-800">{u.name}</h3><p className="text-xs text-slate-500 mt-1">{u.owner} • {u.category}</p></div></div>)) : <div className="col-span-full py-12 text-center text-slate-400 italic bg-white rounded-2xl border border-dashed border-slate-200">Belum ada data UMKM.</div>}</div>
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h2 className="font-black text-2xl text-slate-800">UMKM Warga</h2>
+                    <div className="flex w-full md:w-auto gap-3">
+                         <div className="relative flex-1 md:w-64">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                              <input 
+                                  type="text" 
+                                  placeholder="Cari UMKM..." 
+                                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-slate-900 focus:outline-none transition-all" 
+                                  value={searchUmkm} 
+                                  onChange={(e) => setSearchUmkm(e.target.value)} 
+                              />
+                         </div>
+                         <Button onClick={() => { resetForms(); setModalType('umkm'); setIsModalOpen(true); }}><Plus size={16}/> Tambah</Button>
+                    </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {umkm.filter((u: UMKM) => u.name.toLowerCase().includes(searchUmkm.toLowerCase()) || u.owner.toLowerCase().includes(searchUmkm.toLowerCase())).length > 0 ? (
+                        umkm.filter((u: UMKM) => u.name.toLowerCase().includes(searchUmkm.toLowerCase()) || u.owner.toLowerCase().includes(searchUmkm.toLowerCase())).map((u:UMKM) => (
+                            <div key={u.id} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm group hover:shadow-lg transition-all">
+                                <div className="h-40 bg-slate-100 relative overflow-hidden">
+                                    <img src={u.image} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" onError={(e)=>{(e.target as HTMLImageElement).src='https://via.placeholder.com/300x200?text=No+Image'}} />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <button onClick={() => openEditUMKM(u)} className="p-2 bg-white/90 rounded-xl shadow-sm text-slate-700 hover:text-blue-600 hover:scale-110 transition-all"><Edit2 size={16}/></button>
+                                        <button onClick={() => handleDeleteUMKM(u.id)} className="p-2 bg-white/90 rounded-xl shadow-sm text-slate-700 hover:text-rose-600 hover:scale-110 transition-all"><Trash2 size={16}/></button>
+                                    </div>
+                                    <div className="absolute top-3 left-3">
+                                        <span className="bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
+                                            {u.category}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="p-5">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h3 className="font-bold text-slate-800 text-lg leading-tight">{u.name}</h3>
+                                    </div>
+                                    <p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1.5">
+                                        <User size={12}/> {u.owner}
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-50">
+                                        <div className="bg-green-50 text-green-600 p-1.5 rounded-lg">
+                                            <MessageCircle size={14}/>
+                                        </div>
+                                        <span className="text-xs font-bold text-slate-600">{u.contact}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full py-12 text-center text-slate-400 italic bg-white rounded-2xl border border-dashed border-slate-200">
+                            {searchUmkm ? 'Tidak ada UMKM yang cocok dengan pencarian.' : 'Belum ada data UMKM.'}
+                        </div>
+                    )}
+                </div>
              </div>
           )}
 
@@ -1025,12 +1215,94 @@ const AdminDashboard = ({
                  )}
                  {modalType === 'umkm' && (
                      <form onSubmit={handleSaveUMKM} className="space-y-4">
-                         <div><label className="block text-xs font-bold mb-1.5">Nama Usaha</label><input className="w-full p-3 border rounded-xl" value={umkmName} onChange={e=>setUmkmName(e.target.value)} required/></div>
-                         <div><label className="block text-xs font-bold mb-1.5">Pemilik</label><input className="w-full p-3 border rounded-xl" value={umkmOwner} onChange={e=>setUmkmOwner(e.target.value)} required/></div>
-                         <div><label className="block text-xs font-bold mb-1.5">Kategori</label><input className="w-full p-3 border rounded-xl" value={umkmCategory} onChange={e=>setUmkmCategory(e.target.value)} placeholder="Kuliner, Jasa, dll" required/></div>
-                         <div><label className="block text-xs font-bold mb-1.5">Kontak</label><input className="w-full p-3 border rounded-xl" value={umkmContact} onChange={e=>setUmkmContact(e.target.value)} required/></div>
-                         <div><label className="block text-xs font-bold mb-1.5">URL Gambar</label><input className="w-full p-3 border rounded-xl" value={umkmImage} onChange={e=>setUmkmImage(e.target.value)}/></div>
-                         <Button type="submit" className="w-full">Simpan</Button>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Usaha</label>
+                                <input 
+                                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all" 
+                                    value={umkmName} 
+                                    onChange={e=>setUmkmName(e.target.value)} 
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold mb-1.5 text-slate-700">Pemilik</label>
+                                <input 
+                                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all" 
+                                    value={umkmOwner} 
+                                    onChange={e=>setUmkmOwner(e.target.value)} 
+                                    required
+                                />
+                            </div>
+                         </div>
+                         
+                         <div>
+                             <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori</label>
+                             <select 
+                                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all"
+                                value={umkmCategory}
+                                onChange={e=>setUmkmCategory(e.target.value)}
+                                required
+                             >
+                                <option value="">Pilih Kategori...</option>
+                                <option value="Kuliner">Kuliner (Makanan & Minuman)</option>
+                                <option value="Jasa">Jasa (Service, Laundry, dll)</option>
+                                <option value="Fashion">Fashion & Pakaian</option>
+                                <option value="Retail">Retail & Toko Kelontong</option>
+                                <option value="Kerajinan">Kerajinan & Kriya</option>
+                                <option value="Lainnya">Lainnya</option>
+                             </select>
+                         </div>
+                         
+                         <div>
+                             <label className="block text-xs font-bold mb-1.5 text-slate-700">Deskripsi</label>
+                             <textarea 
+                                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all h-24" 
+                                value={umkmDesc} 
+                                onChange={e=>setUmkmDesc(e.target.value)} 
+                                placeholder="Jelaskan produk atau jasa yang ditawarkan..."
+                             />
+                         </div>
+
+                         <div>
+                             <label className="block text-xs font-bold mb-1.5 text-slate-700">Kontak (WhatsApp)</label>
+                             <div className="relative">
+                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
+                                 <input 
+                                     className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all" 
+                                     value={umkmContact} 
+                                     onChange={e=>setUmkmContact(e.target.value)} 
+                                     placeholder="Contoh: 081234567890"
+                                     required
+                                 />
+                             </div>
+                             <p className="text-[10px] text-slate-400 mt-1 ml-1">Pastikan nomor aktif dan terhubung WhatsApp.</p>
+                         </div>
+                         
+                         <div>
+                             <label className="block text-xs font-bold mb-1.5 text-slate-700">URL Gambar Produk/Logo</label>
+                             <div className="relative">
+                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
+                                <input 
+                                    className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all" 
+                                    value={umkmImage} 
+                                    onChange={e=>setUmkmImage(e.target.value)}
+                                    placeholder="https://..."
+                                />
+                             </div>
+                             
+                             {/* Image Preview */}
+                             {umkmImage && (
+                                 <div className="mt-2 relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50 h-32 w-full group">
+                                     <img src={umkmImage} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                         <span className="text-xs text-slate-400 font-medium">Preview Gambar</span>
+                                     </div>
+                                 </div>
+                             )}
+                         </div>
+                         
+                         <Button type="submit" className="w-full py-3">Simpan Data UMKM</Button>
                      </form>
                  )}
                  {modalType === 'dues' && (
