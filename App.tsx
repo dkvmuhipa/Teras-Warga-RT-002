@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import { 
   Home, FileText, Megaphone, AlertTriangle, User, Users, Menu, X, 
   LayoutDashboard, Send, Bot, Trash2, Clock, CheckCircle, XCircle, Search, Edit2, Plus,
@@ -8,9 +7,12 @@ import {
   LogOut, Download, Package, ShoppingBag,
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
-  RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle, ImageIcon, Link as LinkIcon, AlertCircle
+  RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle, ImageIcon, Link as LinkIcon, AlertCircle, Wrench, Battery, BatteryMedium, BatteryWarning, ChevronRight
 } from 'lucide-react';
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from 'recharts';
+
+// Destructure React Router DOM components
+const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } = ReactRouterDOM;
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, INITIAL_LETTERS } from './constants';
@@ -325,7 +327,7 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
              )}
              {activeTab === 'lapor' && (
                 <div className="animate-fade-in max-w-lg mx-auto md:mx-0 space-y-6">
-                    <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-6"><h3 className="font-bold text-rose-700 text-lg mb-1 flex items-center gap-2"><AlertTriangle size={20}/> Form Laporan Warga</h3><p className="text-xs text-rose-600">Laporan Anda akan masuk ke dashboard Ketua RT & Keamanan. Gunakan fitur ini secara bijak.</p></div>
+                    <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-6"><h3 className="font-bold text-rose-700 text-lg mb-1 flex items-center gap-2"><AlertTriangle size={20}/> Form Laporan Larga</h3><p className="text-xs text-rose-600">Laporan Anda akan masuk ke dashboard Ketua RT & Keamanan. Gunakan fitur ini secara bijak.</p></div>
                     <form onSubmit={handleSubmitLapor} className="space-y-6">
                         <div className="space-y-4"><div><label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Kategori Masalah</label><select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" value={reportType} onChange={e=>setReportType(e.target.value as any)}><option>Keamanan</option><option>Kebersihan</option><option>Fasilitas</option><option>Lainnya</option></select></div><div><label className="block text-xs font-bold text-slate-700 mb-2 ml-1">Pilih Masalah Cepat (Klik untuk isi)</label><div className="flex flex-wrap gap-2">{reportTags.map((tag, idx) => (<button type="button" key={idx} onClick={() => setReportDesc(tag.label)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 hover:border-slate-300 active:scale-95 transition-all"><tag.icon size={12} /> {tag.label}</button>))}</div></div><div><label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Lokasi Kejadian / Blok Rumah</label><input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="Cth: C5-05 (Wajib diisi)" value={reportHouseId} onChange={e=>setReportHouseId(e.target.value)} required /></div><div><label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Deskripsi Lengkap</label><textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl h-32 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="Jelaskan detail kejadian..." value={reportDesc} onChange={e=>setReportDesc(e.target.value)} required></textarea></div><div><label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Nama Pelapor (Opsional)</label><input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="Boleh dikosongkan jika ingin anonim" value={reporterName} onChange={e=>setReporterName(e.target.value)} /></div></div><Button type="submit" className="w-full py-3.5 bg-rose-600 text-white shadow-lg shadow-rose-200 hover:bg-rose-700 border-transparent"><Send size={18}/> Kirim Laporan</Button>
                     </form>
@@ -562,6 +564,10 @@ const AdminDashboard = ({
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterPayment, setFilterPayment] = useState('All');
   const [filterBlock, setFilterBlock] = useState('All');
+  
+  // New States for Inventory Filter
+  const [searchInventory, setSearchInventory] = useState('');
+  const [filterInventoryCondition, setFilterInventoryCondition] = useState('All');
   
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [serviceTab, setServiceTab] = useState<'surat' | 'laporan'>('surat');
@@ -1066,12 +1072,180 @@ const AdminDashboard = ({
           )}
 
           {activeTab === 'facilities' && (
-              <div className="space-y-6">
-                <Card title="Inventaris & Aset" icon={Package} action={<Button onClick={() => { resetForms(); setModalType('inventory'); setIsModalOpen(true); }} size="sm"><Plus size={16}/> Tambah</Button>}>
-                   <div className="overflow-x-auto"><table className="w-full text-sm text-left"><thead className="bg-slate-50 uppercase text-[10px] text-slate-500 font-bold"><tr><th className="px-4 py-3">Nama Barang</th><th className="px-4 py-3">Stok</th><th className="px-4 py-3">Kondisi</th><th className="px-4 py-3 text-right">Aksi</th></tr></thead><tbody className="divide-y divide-slate-50">{inventory.length > 0 ? inventory.map((item:InventoryItem) => (<tr key={item.id}><td className="px-4 py-3 font-medium">{item.name}</td><td className="px-4 py-3">{item.available} / {item.total}</td><td className="px-4 py-3">{item.condition}</td><td className="px-4 py-3 text-right"><button onClick={() => openEditInventory(item)} className="text-blue-600 mx-1"><Edit2 size={14}/></button><button onClick={() => handleDeleteInventory(item.id)} className="text-red-600 mx-1"><Trash2 size={14}/></button></td></tr>)) : <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-400 italic">Belum ada inventaris</td></tr>}</tbody></table></div>
-                </Card>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   {ronda.length > 0 ? ronda.map((r:RondaSchedule) => (<div key={r.id || r.day} className="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center hover:shadow-sm transition-shadow"><div><h4 className="font-bold text-slate-800">{r.day}</h4><p className="text-xs text-slate-500 mt-1">{r.members.length > 0 ? r.members.join(', ') : 'Belum ada petugas'}</p></div><button onClick={() => openEditRonda(r)} className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 text-slate-600"><Edit2 size={16}/></button></div>)) : <div className="text-center text-slate-400 italic col-span-2">Jadwal ronda belum dikonfigurasi.</div>}
+              <div className="space-y-8 animate-fade-in">
+                
+                {/* 1. SECTION: Jadwal Ronda (SHIFT CARDS) */}
+                <div>
+                   <h2 className="font-black text-2xl text-slate-800 mb-4 flex items-center gap-2">
+                       <Moon size={24} className="text-indigo-600"/> Jadwal Siskamling
+                   </h2>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                       {ronda.length > 0 ? ronda.map((r:RondaSchedule) => {
+                           const isToday = r.day === new Date().toLocaleDateString('id-ID', {weekday:'long'});
+                           return (
+                               <div key={r.id || r.day} className={`relative p-5 rounded-3xl border transition-all duration-300 group ${
+                                   isToday 
+                                   ? 'bg-gradient-to-br from-indigo-900 to-indigo-700 border-indigo-500 shadow-xl shadow-indigo-200 ring-2 ring-indigo-300 transform scale-[1.02]' 
+                                   : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg'
+                               }`}>
+                                   {isToday && (
+                                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm animate-bounce-slow">
+                                           Hari Ini
+                                       </div>
+                                   )}
+                                   <div className="flex justify-between items-start mb-4">
+                                       <div>
+                                           <h4 className={`font-black text-lg ${isToday ? 'text-white' : 'text-slate-700'}`}>{r.day}</h4>
+                                           <p className={`text-xs font-medium ${isToday ? 'text-indigo-200' : 'text-slate-400'}`}>{r.members.length} Personil</p>
+                                       </div>
+                                       <button onClick={() => openEditRonda(r)} className={`p-2 rounded-xl transition-colors ${
+                                           isToday ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-50 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600'
+                                       }`}>
+                                           <Edit2 size={16}/>
+                                       </button>
+                                   </div>
+                                   
+                                   <div className="space-y-2">
+                                       {r.members.length > 0 ? r.members.map((m, idx) => (
+                                           <div key={idx} className={`flex items-center gap-2 text-sm p-2 rounded-xl ${
+                                               isToday ? 'bg-white/10 text-indigo-50 border border-white/5' : 'bg-slate-50 text-slate-600'
+                                           }`}>
+                                               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                                                   isToday ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-600'
+                                               }`}>
+                                                   {m.charAt(0)}
+                                               </div>
+                                               <span className="truncate">{m}</span>
+                                           </div>
+                                       )) : (
+                                           <div className={`text-center py-4 italic text-xs ${isToday ? 'text-indigo-300' : 'text-slate-400'}`}>Belum ada jadwal</div>
+                                       )}
+                                   </div>
+                               </div>
+                           );
+                       }) : (
+                           <div className="col-span-full text-center py-8 text-slate-400 italic bg-slate-50 rounded-2xl border-dashed border-2 border-slate-200">
+                               Jadwal ronda belum dikonfigurasi.
+                           </div>
+                       )}
+                   </div>
+                </div>
+
+                {/* 2. SECTION: Inventaris & Aset (GRID CARDS WITH SEARCH) */}
+                <div>
+                    <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4">
+                        <div>
+                            <h2 className="font-black text-2xl text-slate-800 flex items-center gap-2">
+                                <Package size={24} className="text-emerald-600"/> Inventaris & Aset
+                            </h2>
+                            <p className="text-slate-500 text-sm mt-1">Kelola barang milik warga dan status kondisinya.</p>
+                        </div>
+                        <Button onClick={() => { resetForms(); setModalType('inventory'); setIsModalOpen(true); }} className="shadow-emerald-200 bg-emerald-600 hover:bg-emerald-700">
+                            <Plus size={18}/> Tambah Barang
+                        </Button>
+                    </div>
+
+                    {/* Filter Bar */}
+                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-col md:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <input 
+                                type="text" 
+                                placeholder="Cari barang (cth: Tenda, Kursi)..." 
+                                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
+                                value={searchInventory}
+                                onChange={(e) => setSearchInventory(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                            <div className="px-3 text-xs font-bold text-slate-500 uppercase">Kondisi:</div>
+                            {['All', 'Baik', 'Rusak', 'Perlu Perbaikan'].map(cond => (
+                                <button 
+                                    key={cond}
+                                    onClick={() => setFilterInventoryCondition(cond)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                        filterInventoryCondition === cond 
+                                        ? 'bg-white text-slate-800 shadow-sm ring-1 ring-slate-200' 
+                                        : 'text-slate-400 hover:text-slate-600'
+                                    }`}
+                                >
+                                    {cond === 'All' ? 'Semua' : cond}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Inventory Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {inventory.filter(item => 
+                            item.name.toLowerCase().includes(searchInventory.toLowerCase()) && 
+                            (filterInventoryCondition === 'All' || item.condition === filterInventoryCondition)
+                        ).length > 0 ? (
+                            inventory.filter(item => 
+                                item.name.toLowerCase().includes(searchInventory.toLowerCase()) && 
+                                (filterInventoryCondition === 'All' || item.condition === filterInventoryCondition)
+                            ).map((item: InventoryItem) => {
+                                const percentage = item.total > 0 ? Math.round((item.available / item.total) * 100) : 0;
+                                const isCritical = percentage < 20;
+                                const isGood = item.condition === 'Baik';
+
+                                return (
+                                    <div key={item.id} className="bg-white rounded-3xl p-6 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group relative overflow-hidden">
+                                        {/* Background Decoration */}
+                                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] transform rotate-12 group-hover:scale-110 transition-transform">
+                                            <Package size={120} />
+                                        </div>
+
+                                        <div className="flex justify-between items-start mb-4 relative z-10">
+                                            <div className={`p-3 rounded-2xl ${isGood ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                                                {isGood ? <CheckCircle size={24} /> : <Wrench size={24} />}
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide border shadow-sm ${
+                                                isGood 
+                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                                                : 'bg-rose-50 text-rose-600 border-rose-100'
+                                            }`}>
+                                                {item.condition}
+                                            </span>
+                                        </div>
+
+                                        <h3 className="font-black text-xl text-slate-800 mb-1 relative z-10">{item.name}</h3>
+                                        {item.notes && <p className="text-xs text-slate-400 mb-4 line-clamp-1 relative z-10">{item.notes}</p>}
+
+                                        {/* Stock Progress Bar */}
+                                        <div className="mt-6 mb-2 relative z-10">
+                                            <div className="flex justify-between text-xs font-bold mb-1.5">
+                                                <span className="text-slate-500">Ketersediaan</span>
+                                                <span className={`${isCritical ? 'text-rose-500' : 'text-slate-700'}`}>{item.available} / {item.total} Unit</span>
+                                            </div>
+                                            <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                                <div 
+                                                    className={`h-full rounded-full transition-all duration-1000 ${
+                                                        isCritical ? 'bg-rose-500' : 'bg-emerald-500'
+                                                    }`} 
+                                                    style={{ width: `${percentage}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-2 mt-6 pt-4 border-t border-slate-50 relative z-10">
+                                            <button onClick={() => openEditInventory(item)} className="flex-1 py-2.5 rounded-xl bg-slate-50 text-slate-600 text-xs font-bold hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center gap-2">
+                                                <Edit2 size={14}/> Edit
+                                            </button>
+                                            <button onClick={() => handleDeleteInventory(item.id)} className="flex-1 py-2.5 rounded-xl bg-slate-50 text-slate-600 text-xs font-bold hover:bg-rose-50 hover:text-rose-600 transition-colors flex items-center justify-center gap-2">
+                                                <Trash2 size={14}/> Hapus
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className="col-span-full py-12 text-center text-slate-400 italic bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                                Tidak ada barang yang cocok dengan filter.
+                            </div>
+                        )}
+                    </div>
                 </div>
               </div>
           )}
@@ -1099,9 +1273,120 @@ const AdminDashboard = ({
           )}
           
           {activeTab === 'officials' && (
-             <div className="space-y-6">
-                <div className="flex justify-between items-center"><h2 className="font-black text-2xl text-slate-800">Pengurus RT</h2><Button onClick={() => { resetForms(); setModalType('official'); setIsModalOpen(true); }}><Plus size={16}/> Tambah</Button></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{officials.length > 0 ? officials.map((o:Official) => (<div key={o.id} className="bg-white p-5 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm"><div><h4 className="font-bold text-lg text-slate-800">{o.name}</h4><p className="text-sm text-slate-500 font-medium bg-slate-50 inline-block px-2 py-0.5 rounded mt-1">{o.role}</p></div><div className="flex gap-2"><button onClick={() => handleEditOfficial(o)} className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors"><Edit2 size={16}/></button><button onClick={() => handleDeleteOfficial(o.id)} className="p-2 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors"><Trash2 size={16}/></button></div></div>)) : <div className="col-span-full py-8 text-center text-slate-400 italic bg-white rounded-2xl border border-dashed border-slate-200">Belum ada data pengurus.</div>}</div>
+             <div className="space-y-8 animate-fade-in">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h2 className="font-black text-2xl text-slate-800">Pengurus RT 002</h2>
+                        <p className="text-sm text-slate-500 mt-1">Kelola data struktur organisasi Rukun Tetangga.</p>
+                    </div>
+                    <Button onClick={() => { resetForms(); setModalType('official'); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700">
+                        <Plus size={16}/> Tambah Personil
+                    </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {officials.length > 0 ? officials.map((o:Official) => {
+                        // Role-based Styling
+                        const isChairman = o.role.toLowerCase().includes('ketua');
+                        const isSecretary = o.role.toLowerCase().includes('sekretaris');
+                        const isTreasurer = o.role.toLowerCase().includes('bendahara');
+                        
+                        let gradientClass = 'bg-gradient-to-r from-slate-700 to-slate-600';
+                        let ringClass = 'ring-slate-100';
+                        if (isChairman) { 
+                            gradientClass = 'bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600'; 
+                            ringClass = 'ring-indigo-100';
+                        }
+                        else if (isSecretary) { 
+                            gradientClass = 'bg-gradient-to-r from-cyan-500 to-blue-500';
+                            ringClass = 'ring-cyan-100'; 
+                        }
+                        else if (isTreasurer) { 
+                            gradientClass = 'bg-gradient-to-r from-emerald-500 to-teal-500'; 
+                            ringClass = 'ring-emerald-100';
+                        }
+
+                        return (
+                            <div key={o.id} className={`group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative`}>
+                                {/* Header Gradient */}
+                                <div className={`h-24 relative ${gradientClass}`}>
+                                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                                    <div className="absolute top-3 right-3 opacity-50 text-white">
+                                        <Shield size={20} />
+                                    </div>
+                                    
+                                    {/* Role Badge */}
+                                    <div className="absolute top-3 left-3">
+                                        <span className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider border border-white/20">
+                                            {o.role}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Avatar */}
+                                <div className="absolute top-12 left-1/2 -translate-x-1/2">
+                                    <div className={`p-1.5 bg-white rounded-full shadow-lg ring-4 ${ringClass}`}>
+                                        <img 
+                                            src={o.photo||`https://ui-avatars.com/api/?name=${o.name}&background=random&size=128`} 
+                                            className="w-20 h-20 rounded-full object-cover bg-slate-100" 
+                                            alt={o.name}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Body Content */}
+                                <div className="pt-14 pb-6 px-6 text-center mt-2">
+                                    <h3 className="font-bold text-slate-800 text-lg leading-tight mb-1">{o.name}</h3>
+                                    <p className="text-xs text-slate-400 font-medium mb-4">{o.houseId ? `Warga Blok ${o.houseId}` : 'Warga RT 002'}</p>
+
+                                    {/* Info Grid */}
+                                    <div className="bg-slate-50 rounded-2xl p-3 mb-6 grid grid-cols-2 gap-2 border border-slate-100">
+                                        <div className="text-center">
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Rumah</p>
+                                            <p className="text-xs font-bold text-slate-700">{o.houseId || '-'}</p>
+                                        </div>
+                                        <div className="text-center border-l border-slate-200">
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Kontak</p>
+                                            <p className="text-xs font-bold text-slate-700">{o.phone ? 'Ada' : '-'}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Quick Actions (Floating Circles) */}
+                                    <div className="flex justify-center gap-3">
+                                        <button 
+                                            onClick={() => handleEditOfficial(o)} 
+                                            className="w-10 h-10 rounded-full bg-slate-50 text-slate-600 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-all shadow-sm hover:shadow-blue-200 hover:scale-110"
+                                            title="Edit Data"
+                                        >
+                                            <Edit2 size={16}/>
+                                        </button>
+                                        <a 
+                                            href={`https://wa.me/${o.phone?.replace(/[^0-9]/g, '')}`} 
+                                            target="_blank" 
+                                            rel="noreferrer"
+                                            className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white flex items-center justify-center transition-all shadow-sm hover:shadow-emerald-200 hover:scale-110"
+                                            title="Chat WhatsApp"
+                                        >
+                                            <MessageCircle size={16}/>
+                                        </a>
+                                        <button 
+                                            onClick={() => handleDeleteOfficial(o.id)} 
+                                            className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all shadow-sm hover:shadow-rose-200 hover:scale-110"
+                                            title="Hapus"
+                                        >
+                                            <Trash2 size={16}/>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    }) : (
+                        <div className="col-span-full py-16 text-center bg-white rounded-3xl border border-dashed border-slate-200">
+                            <Briefcase size={48} className="mx-auto text-slate-300 mb-3"/>
+                            <p className="text-slate-400 italic">Belum ada data pengurus.</p>
+                        </div>
+                    )}
+                </div>
              </div>
           )}
 
@@ -1218,6 +1503,7 @@ const AdminDashboard = ({
                          <div><label className="block text-xs font-bold mb-1.5">Nama Barang</label><input className="w-full p-3 border rounded-xl" value={invName} onChange={e=>setInvName(e.target.value)} required/></div>
                          <div className="grid grid-cols-2 gap-3"><div><label className="block text-xs font-bold mb-1.5">Total</label><input type="number" className="w-full p-3 border rounded-xl" value={invTotal} onChange={e=>setInvTotal(e.target.value)} required/></div><div><label className="block text-xs font-bold mb-1.5">Tersedia</label><input type="number" className="w-full p-3 border rounded-xl" value={invAvailable} onChange={e=>setInvAvailable(e.target.value)} required/></div></div>
                          <div><label className="block text-xs font-bold mb-1.5">Kondisi</label><select className="w-full p-3 border rounded-xl" value={invCondition} onChange={e=>setInvCondition(e.target.value as any)}><option>Baik</option><option>Perlu Perbaikan</option><option>Rusak</option></select></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Catatan (Opsional)</label><input className="w-full p-3 border rounded-xl" value={invNotes} onChange={e=>setInvNotes(e.target.value)} placeholder="Cth: Dipinjam Pak Budi"/></div>
                          <Button type="submit" className="w-full">Simpan</Button>
                      </form>
                  )}
