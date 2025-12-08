@@ -1,6 +1,6 @@
-
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import * as firebaseApp from "firebase/app";
+import * as firebaseFirestore from "firebase/firestore";
+import * as firebaseAuth from "firebase/auth";
 
 // --- KONFIGURASI FIREBASE ---
 // Project: TerasWarga (teras-warga)
@@ -19,7 +19,10 @@ export const isFirebaseConfigured = true;
 console.log("✅ Aplikasi Online: Terhubung ke", firebaseConfig.projectId);
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = firebaseApp.initializeApp(firebaseConfig);
 
 // Initialize Firestore
-export const db = getFirestore(app);
+export const db = firebaseFirestore.getFirestore(app);
+
+// Initialize Auth
+export const auth = firebaseAuth.getAuth(app);

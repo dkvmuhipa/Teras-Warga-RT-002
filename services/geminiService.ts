@@ -1,14 +1,12 @@
-
-
 import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
 // Safe Initialization
-const apiKey = process.env.API_KEY || "";
-const ai = new GoogleGenAI({ apiKey: apiKey });
+// guideline: Always use const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
-  if (!apiKey) return "API Key AI belum dikonfigurasi.";
+  if (!process.env.API_KEY) return "API Key AI belum dikonfigurasi.";
   
   try {
     const prompt = `Buatkan draf pengumuman untuk warga RT (Rukun Tetangga) dengan topik: "${topic}".
@@ -29,7 +27,7 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
 };
 
 export const analyzeReports = async (reports: string[]): Promise<string> => {
-   if (!apiKey) return "Fitur AI belum aktif.";
+   if (!process.env.API_KEY) return "Fitur AI belum aktif.";
 
    try {
      const prompt = `Berikut adalah daftar laporan warga minggu ini:
@@ -50,7 +48,7 @@ export const analyzeReports = async (reports: string[]): Promise<string> => {
 }
 
 export const askRit = async (question: string, contextData: { announcements: Announcement[], ronda: RondaSchedule[], officials: Official[] }): Promise<string> => {
-  if (!apiKey) return "Maaf, fitur Chatbot sedang non-aktif (Missing API Key).";
+  if (!process.env.API_KEY) return "Maaf, fitur Chatbot sedang non-aktif (Missing API Key).";
 
   try {
     const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
