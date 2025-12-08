@@ -1,4 +1,5 @@
 
+
 import { jsPDF } from "jspdf";
 import { LetterRequest, PdfConfig, House, PaymentStatus } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
@@ -39,12 +40,7 @@ const getImageData = (source: string): Promise<string> => {
   });
 };
 
-export const generateSuratPengantar = async (
-    letter: LetterRequest, 
-    customConfig?: PdfConfig, 
-    isDraft: boolean = true,
-    returnBlob: boolean = false // New Parameter
-): Promise<string | void> => {
+export const generateSuratPengantar = async (letter: LetterRequest, customConfig?: PdfConfig, isDraft: boolean = true) => {
   const config = customConfig || DEFAULT_PDF_CONFIG;
   
   const doc = new jsPDF({
@@ -68,6 +64,7 @@ export const generateSuratPengantar = async (
       doc.setFont("helvetica", "bold");
       
       // Rotate context for diagonal text
+      // Note: jsPDF rotation happens around a point.
       doc.text("DRAFT / MENUNGGU VALIDASI", centerX, pageHeight / 2, { align: "center", angle: 45 });
       
       doc.restoreGraphicsState();
@@ -121,9 +118,7 @@ export const generateSuratPengantar = async (
   doc.setFontSize(11);
   const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
   const currentYear = new Date().getFullYear();
-  // Generate Number based on ID timestamp (simple hash) to keep it somewhat consistent
-  const shortId = letter.id.substring(letter.id.length - 3);
-  const nomorSurat = `003/${shortId}/RT. 002/RW. 020/${currentMonthRoman}/${currentYear}`;
+  const nomorSurat = `003/RT. 002/RW. 020/${currentMonthRoman}/${currentYear}`;
   doc.text(`Nomor : ${nomorSurat}`, centerX, 57, { align: "center" });
 
   // --- 3. ISI SURAT ---
@@ -215,13 +210,9 @@ export const generateSuratPengantar = async (
       }
   }
 
-  // RETURN BLOB URL OR SAVE
-  if (returnBlob) {
-      return doc.output('datauristring'); // Return as Data URI string for iframe
-  } else {
-      const filenamePrefix = isDraft ? "DRAFT_" : "RESMI_";
-      doc.save(`${filenamePrefix}Surat_${title.replace(/\s/g, '_')}_${letter.applicantName}.pdf`);
-  }
+  // Save PDF
+  const filenamePrefix = isDraft ? "DRAFT_" : "RESMI_";
+  doc.save(`${filenamePrefix}Surat_${title.replace(/\s/g, '_')}_${letter.applicantName}.pdf`);
 };
 
 export const generateResidentReportPDF = async (houses: House[], customConfig?: PdfConfig) => {
