@@ -31,6 +31,7 @@ import {
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
+  updateTransactionInDb,
   deleteTransactionFromDb,
   addOfficialToDb,
   updateOfficialInDb,
@@ -575,7 +576,14 @@ const AdminDashboard = ({
   
   // Forms
   const [annTitle, setAnnTitle] = useState(''); const [annContent, setAnnContent] = useState(''); const [annType, setAnnType] = useState<Announcement['type']>('General');
-  const [cashDesc, setCashDesc] = useState(''); const [cashAmount, setCashAmount] = useState(''); const [cashType, setCashType] = useState<'Income' | 'Expense'>('Income'); const [cashCategory, setCashCategory] = useState('Iuran');
+  
+  // Cash Flow Form with Editing Support
+  const [cashDesc, setCashDesc] = useState(''); 
+  const [cashAmount, setCashAmount] = useState(''); 
+  const [cashType, setCashType] = useState<'Income' | 'Expense'>('Income'); 
+  const [cashCategory, setCashCategory] = useState('Iuran');
+  const [editingCashId, setEditingCashId] = useState<string | null>(null);
+
   const [offName, setOffName] = useState(''); const [offRole, setOffRole] = useState(''); const [offPhone, setOffPhone] = useState(''); const [offHouse, setOffHouse] = useState(''); const [offPhoto, setOffPhoto] = useState(''); const [offId, setOffId] = useState<string|null>(null);
   const [invName, setInvName] = useState(''); const [invTotal, setInvTotal] = useState(''); const [invAvailable, setInvAvailable] = useState(''); const [invCondition, setInvCondition] = useState<'Baik'|'Perlu Perbaikan'|'Rusak'>('Baik'); const [invNotes, setInvNotes] = useState(''); const [invId, setInvId] = useState<string|null>(null);
   const [umkmName, setUmkmName] = useState(''); const [umkmOwner, setUmkmOwner] = useState(''); const [umkmCategory, setUmkmCategory] = useState('Kuliner'); const [umkmDesc, setUmkmDesc] = useState(''); const [umkmContact, setUmkmContact] = useState(''); const [umkmImage, setUmkmImage] = useState(''); const [umkmId, setUmkmId] = useState<string|null>(null);
@@ -623,7 +631,8 @@ const AdminDashboard = ({
 
   // Handlers
   const resetForms = () => {
-      setAnnTitle(''); setAnnContent(''); setDraftTopic(''); setCashDesc(''); setCashAmount(''); setCashType('Income'); 
+      setAnnTitle(''); setAnnContent(''); setDraftTopic(''); 
+      setCashDesc(''); setCashAmount(''); setCashType('Income'); setCashCategory('Iuran'); setEditingCashId(null);
       setOffName(''); setOffRole(''); setOffPhone(''); setOffHouse(''); setOffPhoto(''); setOffId(null);
       setInvName(''); setInvTotal(''); setInvAvailable(''); setInvNotes(''); setInvId(null);
       setUmkmName(''); setUmkmOwner(''); setUmkmCategory('Kuliner'); setUmkmDesc(''); setUmkmContact(''); setUmkmImage(''); setUmkmId(null);
@@ -731,7 +740,30 @@ const AdminDashboard = ({
   const handleCreateAnnouncement = async (e: React.FormEvent) => { e.preventDefault(); await addAnnouncementToDb({ title: annTitle, content: annContent, type: annType, date: new Date().toISOString() }); setIsModalOpen(false); resetForms(); };
   const handleDeleteAnnouncement = async (id: string) => { if (confirm("Hapus pengumuman ini?")) await deleteAnnouncementFromDb(id); };
   const handleGenerateDraft = async () => { if(!draftTopic) return; setIsGenerating(true); const draft = await generateAnnouncementDraft(draftTopic); setAnnContent(draft); setAnnTitle(draftTopic); setIsGenerating(false); };
-  const handleAddTransaction = async (e: React.FormEvent) => { e.preventDefault(); await addTransactionToDb({ description: cashDesc, amount: parseInt(cashAmount), type: cashType, category: cashCategory, date: new Date().toISOString().split('T')[0] }); setIsModalOpen(false); resetForms(); };
+  
+  // Finance Handlers
+  const handleSaveTransaction = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    const transactionData = { description: cashDesc, amount: parseInt(cashAmount), type: cashType, category: cashCategory, date: new Date().toISOString().split('T')[0] };
+    if (editingCashId) {
+       await updateTransactionInDb(editingCashId, transactionData);
+    } else {
+       await addTransactionToDb(transactionData);
+    }
+    setIsModalOpen(false); 
+    resetForms(); 
+  };
+  
+  const openEditCash = (cf: CashFlow) => {
+    setEditingCashId(cf.id);
+    setCashDesc(cf.description);
+    setCashAmount(cf.amount.toString());
+    setCashType(cf.type);
+    setCashCategory(cf.category);
+    setModalType('cash');
+    setIsModalOpen(true);
+  };
+
   const handleDeleteTransaction = async (id: string) => { if (confirm("Hapus transaksi ini?")) await deleteTransactionFromDb(id); };
   const handleSaveDues = async (e: React.FormEvent) => { e.preventDefault(); if (!duesHouseId) return; await updateHouseData(duesHouseId, { paymentStatus: duesStatus }); if (duesStatus === PaymentStatus.PAID) { const house = houses.find((h:House) => h.id === duesHouseId); await addTransactionToDb({ description: `Iuran Warga ${duesHouseId} (${house?.headOfFamily || 'Warga'})`, amount: parseInt(duesAmount), type: 'Income', category: 'Iuran Warga', date: new Date().toISOString().split('T')[0] }); } setIsModalOpen(false); resetForms(); };
   const handleSaveInventory = async (e: React.FormEvent) => { e.preventDefault(); const itemData = { name: invName, total: parseInt(invTotal), available: parseInt(invAvailable), condition: invCondition, notes: invNotes }; if (invId) await updateInventoryInDb(invId, itemData); else await addInventoryToDb(itemData); setIsModalOpen(false); resetForms(); };
@@ -1266,7 +1298,27 @@ const AdminDashboard = ({
           {activeTab === 'finance' && (
             <div className="space-y-6">
                <Card title="Arus Kas & Transaksi" icon={DollarSign} action={<Button onClick={() => { resetForms(); setModalType('cash'); setIsModalOpen(true); }} size="sm"><Plus size={16}/> Transaksi</Button>}>
-                  <div className="space-y-2">{cashFlow.length > 0 ? cashFlow.map((cf:CashFlow) => (<div key={cf.id} className="flex justify-between items-center p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-xl transition-colors"><div><p className="font-bold text-sm text-slate-800">{cf.description}</p><p className="text-xs text-slate-400">{cf.date} • {cf.category}</p></div><span className={`font-bold text-sm ${cf.type==='Income'?'text-emerald-600':'text-rose-600'}`}>{cf.type==='Income'?'+':'-'} {cf.amount.toLocaleString()}</span></div>)) : <div className="py-8 text-center text-slate-400 italic">Belum ada transaksi.</div>}</div>
+                  <div className="space-y-2">
+                    {cashFlow.length > 0 ? cashFlow.map((cf:CashFlow) => (
+                      <div key={cf.id} className="flex justify-between items-center p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-xl transition-colors group">
+                        <div>
+                          <p className="font-bold text-sm text-slate-800">{cf.description}</p>
+                          <p className="text-xs text-slate-400">{cf.date} • {cf.category}</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                           <span className={`font-bold text-sm ${cf.type==='Income'?'text-emerald-600':'text-rose-600'}`}>{cf.type==='Income'?'+':'-'} {cf.amount.toLocaleString()}</span>
+                           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => openEditCash(cf)} className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm">
+                                <Edit2 size={14}/>
+                              </button>
+                              <button onClick={() => handleDeleteTransaction(cf.id)} className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm">
+                                <Trash2 size={14}/>
+                              </button>
+                           </div>
+                        </div>
+                      </div>
+                    )) : <div className="py-8 text-center text-slate-400 italic">Belum ada transaksi.</div>}
+                  </div>
                </Card>
             </div>
           )}
@@ -1484,7 +1536,7 @@ const AdminDashboard = ({
 
           {/* Modals */}
           {isModalOpen && (
-             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalType === 'announcement' ? "Buat Pengumuman" : modalType === 'cash' ? "Catat Transaksi" : modalType === 'official' ? "Data Pengurus" : modalType === 'inventory' ? "Data Inventaris" : modalType === 'ronda' ? "Jadwal Ronda" : modalType === 'umkm' ? "Kelola Data UMKM" : modalType === 'dues' ? "Catat Iuran" : modalType === 'import' ? "Import Data Warga" : "Edit Data Warga"}>
+             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalType === 'announcement' ? "Buat Pengumuman" : modalType === 'cash' ? (editingCashId ? "Edit Transaksi" : "Catat Transaksi") : modalType === 'official' ? "Data Pengurus" : modalType === 'inventory' ? "Data Inventaris" : modalType === 'ronda' ? "Jadwal Ronda" : modalType === 'umkm' ? "Kelola Data UMKM" : modalType === 'dues' ? "Catat Iuran" : modalType === 'import' ? "Import Data Warga" : "Edit Data Warga"}>
                  {modalType === 'announcement' && (
                      <form onSubmit={handleCreateAnnouncement} className="space-y-4">
                          <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Judul</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={annTitle} onChange={e=>setAnnTitle(e.target.value)} required/></div>
@@ -1494,11 +1546,11 @@ const AdminDashboard = ({
                      </form>
                  )}
                  {modalType === 'cash' && (
-                     <form onSubmit={handleAddTransaction} className="space-y-4">
+                     <form onSubmit={handleSaveTransaction} className="space-y-4">
                          <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Keterangan</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashDesc} onChange={e=>setCashDesc(e.target.value)} required/></div>
                          <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp)</label><input type="number" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashAmount} onChange={e=>setCashAmount(e.target.value)} required/></div>
                          <div className="grid grid-cols-2 gap-3"><div><label className="block text-xs font-bold mb-1.5 text-slate-700">Tipe</label><select className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashType} onChange={e=>setCashType(e.target.value as any)}><option value="Income">Pemasukan</option><option value="Expense">Pengeluaran</option></select></div><div><label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashCategory} onChange={e=>setCashCategory(e.target.value)}/></div></div>
-                         <Button type="submit" className="w-full py-3">Simpan</Button>
+                         <Button type="submit" className="w-full py-3">{editingCashId ? 'Simpan Perubahan' : 'Catat Transaksi'}</Button>
                      </form>
                  )}
                  {modalType === 'official' && (

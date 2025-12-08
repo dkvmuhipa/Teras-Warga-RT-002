@@ -202,6 +202,10 @@ export const addTransactionToDb = async (transaction: any) => {
   } catch (e) { console.error("Error adding transaction:", e); }
 };
 
+export const updateTransactionInDb = async (id: string, updates: any) => {
+  try { await updateDoc(doc(db, CASHFLOW_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating transaction:", e); }
+};
+
 export const deleteTransactionFromDb = async (id: string) => {
   try { await deleteDoc(doc(db, CASHFLOW_COL, id)); } catch (e) { console.error("Error deleting transaction:", e); }
 };
