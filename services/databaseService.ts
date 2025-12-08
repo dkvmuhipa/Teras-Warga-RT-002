@@ -15,7 +15,7 @@ const {
   writeBatch
 } = Firestore;
 
-const { signInWithEmailAndPassword, signOut } = Auth;
+const { signInWithEmailAndPassword, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } = Auth;
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -35,6 +35,14 @@ export const loginAdmin = (email: string, pass: string) => {
 
 export const logoutAdmin = () => {
   return signOut(auth);
+};
+
+export const updateAdminPassword = async (newPass: string) => {
+    if (auth.currentUser) {
+        await updatePassword(auth.currentUser, newPass);
+    } else {
+        throw new Error("No user logged in");
+    }
 };
 
 // --- UTILS ---
@@ -366,5 +374,6 @@ export const seedDatabase = async (initialData: any) => {
 
     } catch (e) {
       console.error("Seeding/Migration failed:", e);
+      throw e;
     }
 };
