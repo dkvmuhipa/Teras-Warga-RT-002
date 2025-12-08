@@ -42,6 +42,7 @@ import {
   updateLetterStatus,
   deleteLetterFromDb,
   updateHouseData,
+  deleteHouseFromDb,
   addInventoryToDb,
   updateInventoryInDb,
   deleteInventoryFromDb,
@@ -631,6 +632,13 @@ const AdminDashboard = ({
       setImportFile(null);
   };
 
+  // --- DELETE HANDLER (NEW) ---
+  const handleDeleteHouse = async (id: string) => {
+      if(confirm("Apakah anda yakin ingin menghapus data warga ini? Data yang dihapus tidak dapat dikembalikan.")) {
+          await deleteHouseFromDb(id);
+      }
+  };
+
   // --- IMPORT HANDLERS ---
   const handleDownloadTemplate = () => {
       const headers = "Block,Number,HeadOfFamily,Occupants,Phone,Status,ResidenceType,PaymentStatus\n";
@@ -1054,9 +1062,14 @@ const AdminDashboard = ({
                                                       </span>
                                                   </td>
                                                   <td className="px-6 py-4 text-center">
-                                                      <button onClick={() => openEditHouse(h)} className="p-2 bg-white border border-slate-200 hover:bg-slate-800 hover:text-white hover:border-slate-800 rounded-xl text-slate-500 transition-all shadow-sm active:scale-95">
-                                                          <Edit2 size={16} />
-                                                      </button>
+                                                      <div className="flex items-center justify-center gap-2">
+                                                          <button onClick={() => openEditHouse(h)} className="p-2 bg-white border border-slate-200 hover:bg-slate-800 hover:text-white hover:border-slate-800 rounded-xl text-slate-500 transition-all shadow-sm active:scale-95" title="Edit Data">
+                                                              <Edit2 size={16} />
+                                                          </button>
+                                                          <button onClick={() => handleDeleteHouse(h.id)} className="p-2 bg-white border border-rose-100 hover:bg-rose-500 hover:text-white hover:border-rose-500 rounded-xl text-rose-400 transition-all shadow-sm active:scale-95" title="Hapus Permanen">
+                                                              <Trash2 size={16} />
+                                                          </button>
+                                                      </div>
                                                   </td>
                                               </tr>
                                           )})

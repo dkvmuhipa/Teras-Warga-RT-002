@@ -101,6 +101,10 @@ export const updateHouseData = async (id: string, updates: any) => {
     } catch (e) { console.error("Error updating house:", e); }
 };
 
+export const deleteHouseFromDb = async (id: string) => {
+  try { await deleteDoc(doc(db, HOUSES_COL, id)); } catch (e) { console.error("Error deleting house:", e); }
+};
+
 export const batchUpdateHouses = async (housesData: any[]) => {
   try {
     console.log(`Mulai import ${housesData.length} data warga...`);
