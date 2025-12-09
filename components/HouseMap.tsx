@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { House, PaymentStatus, Report, Official } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle } from 'lucide-react';
 
 interface HouseMapProps {
   houses: House[];
@@ -18,6 +18,7 @@ interface HouseDetailModalProps {
     onClose: () => void;
     reports: Report[];
     isAdmin: boolean;
+    officials?: Official[];
     onEditHouse?: (house: House) => void;
     onPayDues?: (house: House) => void;
     onReportHouse?: (house: House) => void;
@@ -65,12 +66,14 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     onClose, 
     reports, 
     isAdmin, 
+    officials,
     onEditHouse, 
     onPayDues, 
     onReportHouse 
 }) => {
     const activeReports = reports.filter(r => r.houseId === house.id && r.status !== 'Selesai');
     const isSafe = activeReports.length === 0;
+    const officialData = officials?.find(o => o.houseId === house.id);
     
     // Shorten the head of family name for display
     const displayName = shortenName(house.headOfFamily);
@@ -80,7 +83,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
             <div className="bg-white w-full max-w-sm md:max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden animate-slide-up ring-1 ring-slate-200 flex flex-col max-h-[85vh]">
                 {/* Header Section (Fixed) */}
-                <div className={`relative px-6 py-8 flex flex-col items-center justify-center text-center shrink-0 transition-colors duration-300 ${isSafe ? 'bg-emerald-600' : 'bg-rose-600'}`}>
+                <div className={`relative px-6 py-8 flex flex-col items-center justify-center text-center shrink-0 transition-colors duration-300 ${isSafe ? (officialData ? 'bg-slate-800' : 'bg-emerald-600') : 'bg-rose-600'}`}>
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none"></div>
                     <button 
                         onClick={onClose} 
@@ -98,6 +101,48 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 {/* Content Section (Scrollable) */}
                 <div className="overflow-y-auto custom-scrollbar flex-1 bg-white">
                     <div className="p-6 space-y-6">
+
+                         {/* OFFICIAL CARD SECTION (NEW) */}
+                         {officialData && (
+                            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 text-white p-5 shadow-lg shadow-slate-300 ring-4 ring-slate-50 transform transition-all hover:scale-[1.02] border border-slate-700">
+                                <div className="absolute top-0 right-0 p-4 opacity-10 transform rotate-12 pointer-events-none">
+                                    <Star size={100} fill="currentColor" />
+                                </div>
+                                <div className="relative z-10 flex items-center gap-5">
+                                     <div className="relative shrink-0">
+                                         <div className="w-16 h-16 rounded-full p-1 bg-gradient-to-br from-amber-300 to-yellow-600 shadow-lg">
+                                             <img 
+                                                src={officialData.photo || `https://ui-avatars.com/api/?name=${officialData.name}&background=random`} 
+                                                alt={officialData.name}
+                                                className="w-full h-full rounded-full border-2 border-white object-cover bg-white"
+                                             />
+                                         </div>
+                                         <div className="absolute -bottom-1 -right-1 bg-amber-400 text-amber-900 p-1 rounded-full border-2 border-slate-800 shadow-sm">
+                                            <Star size={12} fill="currentColor"/>
+                                         </div>
+                                     </div>
+                                     <div className="flex-1 min-w-0">
+                                         <div className="flex items-center gap-2 mb-1">
+                                            <span className="inline-block px-2 py-0.5 rounded-md bg-white/10 border border-white/20 text-[10px] font-bold text-amber-300 uppercase tracking-widest">
+                                                Pengurus RT 002
+                                            </span>
+                                         </div>
+                                         <h3 className="font-black text-xl leading-tight text-white truncate">{officialData.role}</h3>
+                                         <p className="text-sm text-slate-300 font-medium mt-0.5 truncate">{officialData.name}</p>
+
+                                         <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center gap-3">
+                                             <div className="flex items-center gap-1.5 text-xs text-slate-300">
+                                                <Phone size={12} className="text-amber-400"/>
+                                                <span className="font-mono tracking-tight">{officialData.phone}</span>
+                                             </div>
+                                             <a href={`https://wa.me/${officialData.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-500 transition-colors shadow-sm ring-1 ring-emerald-400/50 ml-auto md:ml-0">
+                                                <MessageCircle size={12}/> Hubungi
+                                             </a>
+                                         </div>
+                                     </div>
+                                </div>
+                            </div>
+                        )}
                         
                         {/* Badges */}
                         <div className="flex flex-wrap gap-2 justify-center pb-2 border-b border-slate-100">
@@ -597,6 +642,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({
             onClose={() => setSelectedHouse(null)}
             reports={reports}
             isAdmin={isAdmin}
+            officials={officials}
             onEditHouse={onEditHouse}
             onPayDues={onPayDues}
             onReportHouse={onReportHouse}

@@ -61,7 +61,7 @@ export const generateDashboardSummary = async (data: {
      const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
      Analisis data realtime dashboard RT 002 berikut:
      - Jumlah Penduduk: ${data.totalResidents} jiwa
-     - Kas Keuangan: Rp ${data.cashBalance.toLocaleString()}
+     - Kas Keuangan: Rp ${data.cashBalance.toLocaleString('id-ID')}
      - Laporan Masalah Baru (Aktif): ${data.reportsCount}
      - Warga Menunggak Iuran: ${data.unpaidCount} KK
      

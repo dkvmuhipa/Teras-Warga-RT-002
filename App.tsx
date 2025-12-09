@@ -8,7 +8,7 @@ import {
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
   RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle, ImageIcon, Link as LinkIcon, AlertCircle, Wrench, Battery, BatteryMedium, BatteryWarning, ChevronRight,
-  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2
+  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare
 } from 'lucide-react';
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from 'recharts';
 
@@ -216,7 +216,9 @@ const HeroSection = () => {
 
 const PublicHome = ({ houses, announcements, ronda, reports, officials }: { houses: House[], announcements: Announcement[], ronda: RondaSchedule[], reports: Report[], officials: Official[] }) => {
   const navigate = useNavigate();
-  const today = new Date().toLocaleDateString('id-ID', {weekday:'long'});
+  const dateObj = new Date();
+  const today = dateObj.toLocaleDateString('id-ID', {weekday:'long'});
+  const fullDate = dateObj.toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
   const todayRonda = ronda.find(r => r.day === today);
 
   return (
@@ -253,11 +255,36 @@ const PublicHome = ({ houses, announcements, ronda, reports, officials }: { hous
           </div>
         </div>
         <div className="space-y-6 md:space-y-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <Card title="Ronda Malam Ini" className="bg-gradient-to-b from-slate-800 to-slate-900 text-white border-0 shadow-lg shadow-slate-300">
-             <div className="space-y-3">
-               {todayRonda && todayRonda.members.length > 0 ? todayRonda.members.map((member, i) => (<div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">{i+1}</div><span className="font-medium text-sm">{member}</span></div>)) : <p className="text-slate-400 text-sm italic py-4 text-center">Jadwal belum diatur.</p>}
+          <Card title="Ronda Malam Ini" className="bg-gradient-to-b from-slate-800 to-slate-900 text-white border-0 shadow-lg shadow-slate-300 relative overflow-hidden">
+             {/* Decorative Background */}
+             <div className="absolute top-0 right-0 p-8 opacity-10">
+                <Moon size={120} />
              </div>
-             <div className="mt-6 pt-4 border-t border-white/10 text-center"><button onClick={() => navigate('/info')} className="text-xs font-bold text-blue-200 hover:text-white transition-colors">Lihat Jadwal Lengkap →</button></div>
+             
+             {/* Day & Date Header */}
+             <div className="mb-4 pb-4 border-b border-white/10 relative z-10 flex justify-between items-end">
+                <div>
+                   <p className="text-3xl font-black text-emerald-400 leading-none mb-1">{today}</p>
+                   <p className="text-xs text-slate-400 font-medium flex items-center gap-1"><Calendar size={12}/> {fullDate}</p>
+                </div>
+                <div className="bg-white/10 px-3 py-1 rounded-lg">
+                   <span className="text-[10px] font-bold uppercase tracking-wider text-blue-200">Shift</span>
+                </div>
+             </div>
+
+             <div className="space-y-3 relative z-10">
+               {todayRonda && todayRonda.members.length > 0 ? todayRonda.members.map((member, i) => (
+                   <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                       <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/30">{i+1}</div>
+                       <span className="font-medium text-sm">{member}</span>
+                   </div>
+               )) : <p className="text-slate-400 text-sm italic py-4 text-center border border-dashed border-slate-700 rounded-xl">Jadwal belum diatur.</p>}
+             </div>
+             <div className="mt-6 pt-4 border-t border-white/10 text-center relative z-10">
+                <button onClick={() => navigate('/info')} className="text-xs font-bold text-blue-200 hover:text-white transition-colors flex items-center justify-center gap-1 mx-auto">
+                    Lihat Jadwal Lengkap <ChevronRight size={12}/>
+                </button>
+             </div>
           </Card>
           <Card title="Galeri Kegiatan">
              {MOCK_GALLERY.length > 0 ? (
@@ -471,7 +498,7 @@ const AdminDashboard = ({
 }: any) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<'announcement' | 'cash' | 'official' | 'editHouse' | 'inventory' | 'ronda' | 'umkm' | 'dues' | 'import'>('announcement');
+  const [modalType, setModalType] = useState<'announcement' | 'cash' | 'official' | 'editHouse' | 'inventory' | 'ronda' | 'umkm' | 'dues' | 'import' | 'bulkDues'>('announcement');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -482,7 +509,8 @@ const AdminDashboard = ({
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterPayment, setFilterPayment] = useState('All');
   const [filterBlock, setFilterBlock] = useState('All');
-  
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   // New States for Inventory Filter
   const [searchInventory, setSearchInventory] = useState('');
   const [filterInventoryCondition, setFilterInventoryCondition] = useState('All');
@@ -509,6 +537,9 @@ const AdminDashboard = ({
   const [rondaDay, setRondaDay] = useState(''); const [rondaMembers, setRondaMembers] = useState(''); const [selectedRondaId, setSelectedRondaId] = useState<string|null>(null);
   const [duesHouseId, setDuesHouseId] = useState(''); const [duesAmount, setDuesAmount] = useState('25000'); const [duesStatus, setDuesStatus] = useState<PaymentStatus>(PaymentStatus.PAID);
   
+  // Bulk Dues State
+  const [bulkStatus, setBulkStatus] = useState<PaymentStatus>(PaymentStatus.PAID);
+
   // Import State
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -603,9 +634,56 @@ const AdminDashboard = ({
       setUmkmName(''); setUmkmOwner(''); setUmkmCategory('Kuliner'); setUmkmDesc(''); setUmkmContact(''); setUmkmImage(''); setUmkmId(null);
       setRondaMembers(''); setSelectedRondaId(null);
       setDuesHouseId(''); setDuesAmount('25000'); setDuesStatus(PaymentStatus.PAID);
+      setBulkStatus(PaymentStatus.PAID);
       setImportFile(null);
       setFormErrors({});
   };
+
+  // --- SELECTION HANDLERS ---
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.checked) {
+          const allIds = filteredHouses.map(h => h.id);
+          setSelectedIds(new Set(allIds));
+      } else {
+          setSelectedIds(new Set());
+      }
+  };
+
+  const handleSelectOne = (id: string) => {
+      const newSet = new Set(selectedIds);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      setSelectedIds(newSet);
+  };
+  
+  const handleBulkDuesUpdate = () => {
+      if (selectedIds.size === 0) return;
+      setBulkStatus(PaymentStatus.PAID);
+      setModalType('bulkDues');
+      setIsModalOpen(true);
+  };
+
+  const handleSaveBulkDues = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (selectedIds.size === 0) return;
+
+      const updates = Array.from(selectedIds).map(id => ({
+          id,
+          paymentStatus: bulkStatus
+      }));
+
+      try {
+          await batchUpdateHouses(updates);
+          alert(`Berhasil memperbarui status ${updates.length} warga.`);
+          setIsModalOpen(false);
+          setSelectedIds(new Set());
+          resetForms();
+      } catch (e) {
+          console.error(e);
+          alert("Gagal melakukan update massal.");
+      }
+  };
+
 
   // --- DELETE HANDLER (NEW) ---
   const handleDeleteHouse = async (id: string) => {
@@ -1132,34 +1210,44 @@ const AdminDashboard = ({
                               </div>
                           </div>
                           
-                          {/* Filters */}
-                          <div className="flex flex-wrap gap-2 items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                              <div className="flex items-center gap-2 mr-2">
-                                  <Filter size={14} className="text-slate-400" />
-                                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filter:</span>
-                              </div>
-                              <select className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 cursor-pointer hover:border-slate-400 outline-none shadow-sm" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-                                  <option value="All">Semua Status Hunian</option>
-                                  <option value="Occupied">Dihuni (Tetap)</option>
-                                  <option value="Kontrak">Dihuni (Kontrak)</option>
-                                  <option value="Empty">Rumah Kosong</option>
-                                  <option value="Business">Tempat Usaha</option>
-                              </select>
-                              <select className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 cursor-pointer hover:border-slate-400 outline-none shadow-sm" value={filterPayment} onChange={e => setFilterPayment(e.target.value)}>
-                                  <option value="All">Semua Status Iuran</option>
-                                  <option value="Lunas">Lunas</option>
-                                  <option value="Belum Lunas">Belum Lunas</option>
-                                  <option value="Menunggak">Menunggak</option>
-                              </select>
-                              <select className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 cursor-pointer hover:border-slate-400 outline-none shadow-sm" value={filterBlock} onChange={e => setFilterBlock(e.target.value)}>
-                                  <option value="All">Semua Blok</option>
-                                  {availableBlocks.map((b: string) => <option key={b} value={b}>Blok {b}</option>)}
-                              </select>
+                          {/* Filters & Bulk Action */}
+                          <div className="flex flex-col md:flex-row gap-3 items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
+                                    <div className="flex items-center gap-2 mr-2">
+                                        <Filter size={14} className="text-slate-400" />
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filter:</span>
+                                    </div>
+                                    <select className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 cursor-pointer hover:border-slate-400 outline-none shadow-sm" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                                        <option value="All">Semua Status Hunian</option>
+                                        <option value="Occupied">Dihuni (Tetap)</option>
+                                        <option value="Kontrak">Dihuni (Kontrak)</option>
+                                        <option value="Empty">Rumah Kosong</option>
+                                        <option value="Business">Tempat Usaha</option>
+                                    </select>
+                                    <select className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 cursor-pointer hover:border-slate-400 outline-none shadow-sm" value={filterPayment} onChange={e => setFilterPayment(e.target.value)}>
+                                        <option value="All">Semua Status Iuran</option>
+                                        <option value="Lunas">Lunas</option>
+                                        <option value="Belum Lunas">Belum Lunas</option>
+                                        <option value="Menunggak">Menunggak</option>
+                                    </select>
+                                    <select className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 cursor-pointer hover:border-slate-400 outline-none shadow-sm" value={filterBlock} onChange={e => setFilterBlock(e.target.value)}>
+                                        <option value="All">Semua Blok</option>
+                                        {availableBlocks.map((b: string) => <option key={b} value={b}>Blok {b}</option>)}
+                                    </select>
+                                </div>
                               
-                              <div className="ml-auto flex gap-2">
-                                  <Button onClick={() => { resetForms(); setModalType('import'); setIsModalOpen(true); }} size="sm" variant="outline" className="h-8 bg-white border-blue-200 text-blue-600 hover:bg-blue-50"><Upload size={14}/> Import CSV</Button>
-                                  <Button onClick={() => generateResidentReportPDF(houses, pdfConfig)} size="sm" variant="outline" className="h-8 bg-white"><Printer size={14}/> PDF</Button>
-                              </div>
+                                <div className="flex gap-2 w-full md:w-auto justify-end">
+                                    {selectedIds.size > 0 ? (
+                                        <Button onClick={handleBulkDuesUpdate} size="sm" className="h-8 bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 animate-fade-in">
+                                            <CheckSquare size={14}/> Update Iuran ({selectedIds.size})
+                                        </Button>
+                                    ) : (
+                                        <>
+                                            <Button onClick={() => { resetForms(); setModalType('import'); setIsModalOpen(true); }} size="sm" variant="outline" className="h-8 bg-white border-blue-200 text-blue-600 hover:bg-blue-50"><Upload size={14}/> Import CSV</Button>
+                                            <Button onClick={() => generateResidentReportPDF(houses, pdfConfig)} size="sm" variant="outline" className="h-8 bg-white"><Printer size={14}/> PDF</Button>
+                                        </>
+                                    )}
+                                </div>
                           </div>
                       </div>
                       
@@ -1170,6 +1258,14 @@ const AdminDashboard = ({
                               <table className="w-full text-sm text-left">
                                   <thead className="bg-slate-50 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
                                       <tr>
+                                          <th className="px-6 py-4 w-10">
+                                              <input 
+                                                type="checkbox" 
+                                                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                                checked={filteredHouses.length > 0 && selectedIds.size === filteredHouses.length}
+                                                onChange={handleSelectAll}
+                                              />
+                                          </th>
                                           <th className="px-6 py-4">Kavling Rumah</th>
                                           <th className="px-6 py-4">Kepala Keluarga</th>
                                           <th className="px-6 py-4">Status & Kontak</th>
@@ -1186,7 +1282,15 @@ const AdminDashboard = ({
                                               const avatarColor = ['bg-red-100 text-red-600', 'bg-blue-100 text-blue-600', 'bg-green-100 text-green-600', 'bg-purple-100 text-purple-600', 'bg-amber-100 text-amber-600'][h.headOfFamily.length % 5];
                                               
                                               return (
-                                              <tr key={h.id} className="hover:bg-slate-50/80 transition-colors group">
+                                              <tr key={h.id} className={`transition-colors group ${selectedIds.has(h.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50/80'}`}>
+                                                  <td className="px-6 py-4">
+                                                      <input 
+                                                        type="checkbox" 
+                                                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                                        checked={selectedIds.has(h.id)}
+                                                        onChange={() => handleSelectOne(h.id)}
+                                                      />
+                                                  </td>
                                                   <td className="px-6 py-4">
                                                       <div className="flex flex-col">
                                                           <span className="font-black text-slate-800 text-base">{h.block}-{h.number}</span>
@@ -1278,7 +1382,7 @@ const AdminDashboard = ({
                                               </tr>
                                           )})
                                       ) : (
-                                          <tr><td colSpan={6} className="text-center py-12 text-slate-400 italic bg-slate-50/30">Data tidak ditemukan untuk filter ini.</td></tr>
+                                          <tr><td colSpan={7} className="text-center py-12 text-slate-400 italic bg-slate-50/30">Data tidak ditemukan untuk filter ini.</td></tr>
                                       )}
                                   </tbody>
                               </table>
@@ -1852,7 +1956,7 @@ const AdminDashboard = ({
 
           {/* Modals */}
           {isModalOpen && (
-             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalType === 'announcement' ? "Buat Pengumuman" : modalType === 'cash' ? (editingCashId ? "Edit Transaksi" : "Catat Transaksi") : modalType === 'official' ? "Data Pengurus" : modalType === 'inventory' ? "Data Inventaris" : modalType === 'ronda' ? "Jadwal Ronda" : modalType === 'umkm' ? "Kelola Data UMKM" : modalType === 'dues' ? "Catat Iuran" : modalType === 'import' ? "Import Data Warga" : "Edit Data Warga"}>
+             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalType === 'announcement' ? "Buat Pengumuman" : modalType === 'cash' ? (editingCashId ? "Edit Transaksi" : "Catat Transaksi") : modalType === 'official' ? "Data Pengurus" : modalType === 'inventory' ? "Data Inventaris" : modalType === 'ronda' ? "Jadwal Ronda" : modalType === 'umkm' ? "Kelola Data UMKM" : modalType === 'dues' ? "Catat Iuran" : modalType === 'bulkDues' ? "Update Iuran Massal" : modalType === 'import' ? "Import Data Warga" : "Edit Data Warga"}>
                  {modalType === 'announcement' && (
                      <form onSubmit={handleCreateAnnouncement} className="space-y-4">
                          <div>
@@ -2066,6 +2170,39 @@ const AdminDashboard = ({
                          </div>
                          <div><label className="block text-xs font-bold mb-1.5">Status</label><select className="w-full p-3 border rounded-xl" value={duesStatus} onChange={e=>setDuesStatus(e.target.value as any)}><option value={PaymentStatus.PAID}>Lunas</option><option value={PaymentStatus.PENDING}>Belum Lunas</option><option value={PaymentStatus.UNPAID}>Menunggak</option></select></div>
                          <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">Simpan Pembayaran</Button>
+                     </form>
+                 )}
+                 {modalType === 'bulkDues' && (
+                     <form onSubmit={handleSaveBulkDues} className="space-y-4">
+                         <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                             <h4 className="text-sm font-bold text-indigo-800 mb-1">Update Status Iuran</h4>
+                             <p className="text-xs text-indigo-700">Anda akan mengubah status iuran untuk <strong>{selectedIds.size} warga</strong> yang dipilih.</p>
+                         </div>
+                         
+                         <div>
+                             <label className="block text-xs font-bold mb-1.5 text-slate-700">Pilih Status Baru</label>
+                             <div className="grid grid-cols-1 gap-2">
+                                 {[PaymentStatus.PAID, PaymentStatus.PENDING, PaymentStatus.UNPAID].map(status => (
+                                     <button
+                                         key={status}
+                                         type="button"
+                                         onClick={() => setBulkStatus(status)}
+                                         className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                             bulkStatus === status
+                                             ? 'bg-slate-800 text-white border-slate-800 shadow-md'
+                                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                         }`}
+                                     >
+                                         <span className="text-sm font-bold">{status}</span>
+                                         {bulkStatus === status && <CheckCircle size={16}/>}
+                                     </button>
+                                 ))}
+                             </div>
+                         </div>
+                         
+                         <Button type="submit" className="w-full py-3.5 mt-2 bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200">
+                             Simpan Perubahan
+                         </Button>
                      </form>
                  )}
                  {modalType === 'editHouse' && (

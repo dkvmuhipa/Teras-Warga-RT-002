@@ -10,19 +10,23 @@ const firebaseConfig = {
   projectId: "teras-warga",
   storageBucket: "teras-warga.firebasestorage.app",
   messagingSenderId: "710981295516",
-  appId: "1:710981295516:web:97bee73b641bf9d247bc59"
+  appId: "1:710981295516:web:97bee73b"
 };
 
-// Mode Produksi Aktif
-export const isFirebaseConfigured = true;
-
-console.log("✅ Aplikasi Online: Terhubung ke", firebaseConfig.projectId);
-
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app: any;
+let db: any;
+let auth: any;
+let isFirebaseConfigured = false;
 
-// Initialize Firestore
-export const db = getFirestore(app);
+try {
+  // Using modular imports directly
+  app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  auth = getAuth(app);
+  isFirebaseConfigured = true;
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+}
 
-// Initialize Auth
-export const auth = getAuth(app);
+export { app, db, auth, isFirebaseConfigured };

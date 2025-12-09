@@ -1,8 +1,5 @@
 import { db, auth, isFirebaseConfigured } from "./firebaseConfig";
-import * as Firestore from "firebase/firestore";
-import * as Auth from "firebase/auth";
-
-const { 
+import { 
   collection, 
   addDoc, 
   updateDoc, 
@@ -13,9 +10,12 @@ const {
   getDocs,
   setDoc,
   writeBatch
-} = Firestore;
-
-const { signInWithEmailAndPassword, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } = Auth;
+} from "firebase/firestore";
+import { 
+  signInWithEmailAndPassword, 
+  signOut, 
+  updatePassword
+} from "firebase/auth";
 
 // Collection References
 const HOUSES_COL = "houses";
