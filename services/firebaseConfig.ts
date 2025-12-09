@@ -1,16 +1,6 @@
-import { initializeApp as _initializeApp } from "firebase/app";
-import * as firebaseApp from "firebase/app";
-
-import { getFirestore as _getFirestore } from "firebase/firestore";
-import * as firebaseFirestore from "firebase/firestore";
-
-import { getAuth as _getAuth } from "firebase/auth";
-import * as firebaseAuth from "firebase/auth";
-
-// Use destructuring from namespace imports to ensure compatibility
-const { initializeApp } = firebaseApp;
-const { getFirestore } = firebaseFirestore;
-const { getAuth } = firebaseAuth;
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // --- KONFIGURASI FIREBASE ---
 // Project: TerasWarga (teras-warga)

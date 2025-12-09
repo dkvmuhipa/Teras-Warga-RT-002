@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { 
@@ -9,7 +8,7 @@ import {
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
   RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle, ImageIcon, Link as LinkIcon, AlertCircle, Wrench, Battery, BatteryMedium, BatteryWarning, ChevronRight,
-  Database, Lock, Eye, EyeOff, Save, Trash
+  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2
 } from 'lucide-react';
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from 'recharts';
 
@@ -20,7 +19,7 @@ const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } =
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, INITIAL_LETTERS } from './constants';
 import { House, Announcement, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem } from './types';
 import { HouseMap } from './components/HouseMap';
-import { generateAnnouncementDraft } from './services/geminiService';
+import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
 import { generateSuratPengantar, generateResidentReportPDF } from './services/pdfService';
 import { AdminRouteWrapper } from './components/AdminComponents'; 
 import { ChatBot } from './components/ChatBot';
@@ -531,6 +530,29 @@ const AdminDashboard = ({
   const [draftTopic, setDraftTopic] = useState('');
   const [localConfig, setLocalConfig] = useState<PdfConfig>(pdfConfig);
 
+  // --- AI ANALYSIS STATE ---
+  const [aiAnalysis, setAiAnalysis] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleAiAnalysis = async () => {
+      setIsAnalyzing(true);
+      const totalResidents = houses.reduce((acc:any, h:any) => acc + (h.occupants || 0), 0);
+      const income = cashFlow.filter((c:any) => c.type === 'Income').reduce((acc:any, c:any) => acc + c.amount, 0);
+      const expense = cashFlow.filter((c:any) => c.type === 'Expense').reduce((acc:any, c:any) => acc + c.amount, 0);
+      const balance = income - expense;
+      const newReports = reports.filter((r:any) => r.status === 'Baru').length;
+      const unpaid = houses.filter((h:any) => h.paymentStatus !== 'Lunas').length;
+
+      const result = await generateDashboardSummary({
+          totalResidents,
+          cashBalance: balance,
+          reportsCount: newReports,
+          unpaidCount: unpaid
+      });
+      setAiAnalysis(result);
+      setIsAnalyzing(false);
+  };
+
   // --- VALIDATION HELPERS ---
   const validatePhone = (phone: string) => {
     // 08xx or 62xx, digits only, 10-14 chars
@@ -1014,6 +1036,50 @@ const AdminDashboard = ({
                           <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl"><AlertTriangle size={28}/></div>
                           <div><p className="text-slate-500 text-xs font-bold uppercase">Laporan Baru</p><h3 className="text-3xl font-black text-slate-800">{reports.filter((r:Report) => r.status === 'Baru').length}</h3></div>
                       </Card>
+                   </div>
+                   
+                   {/* NEW AI CARD */}
+                   <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-8 opacity-5">
+                            <Bot size={100} className="text-indigo-600"/>
+                        </div>
+                        <div className="relative z-10">
+                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                                <div>
+                                    <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                                        <Sparkles className="text-indigo-500" size={20}/> AI Smart Analysis
+                                    </h3>
+                                    <p className="text-sm text-slate-500 max-w-xl">
+                                        Analisis otomatis kondisi lingkungan, keuangan, dan laporan warga menggunakan kecerdasan buatan Gemini AI.
+                                    </p>
+                                </div>
+                                <button 
+                                    onClick={handleAiAnalysis} 
+                                    disabled={isAnalyzing}
+                                    className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                    {isAnalyzing ? <Loader2 size={18} className="animate-spin"/> : <Bot size={18}/>}
+                                    {isAnalyzing ? 'Sedang Menganalisis...' : 'Minta Analisis AI'}
+                                </button>
+                             </div>
+                             
+                             {aiAnalysis && (
+                                 <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 animate-slide-up">
+                                     <div className="flex items-start gap-3">
+                                         <div className="bg-white p-2 rounded-lg shadow-sm text-indigo-600 border border-slate-100">
+                                             <FileText size={20}/>
+                                         </div>
+                                         <div className="flex-1">
+                                             <h4 className="font-bold text-slate-800 mb-2">Laporan Eksekutif</h4>
+                                             <div className="prose prose-sm text-slate-600 leading-relaxed whitespace-pre-wrap font-medium">
+                                                 {aiAnalysis}
+                                             </div>
+                                             <p className="text-[10px] text-slate-400 mt-4 text-right">Generated by Google Gemini AI</p>
+                                         </div>
+                                     </div>
+                                 </div>
+                             )}
+                        </div>
                    </div>
               </div>
           )}

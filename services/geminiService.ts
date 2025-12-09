@@ -49,6 +49,41 @@ export const analyzeReports = async (reports: string[]): Promise<string> => {
    }
 }
 
+export const generateDashboardSummary = async (data: {
+  totalResidents: number,
+  cashBalance: number,
+  reportsCount: number,
+  unpaidCount: number
+}): Promise<string> => {
+   if (!apiKey) return "Fitur AI belum aktif (API Key belum diset).";
+
+   try {
+     const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
+     Analisis data realtime dashboard RT 002 berikut:
+     - Jumlah Penduduk: ${data.totalResidents} jiwa
+     - Kas Keuangan: Rp ${data.cashBalance.toLocaleString()}
+     - Laporan Masalah Baru (Aktif): ${data.reportsCount}
+     - Warga Menunggak Iuran: ${data.unpaidCount} KK
+     
+     Berikan laporan singkat dan padat (maksimal 150 kata) yang mencakup:
+     1. 💰 Status Kesehatan Keuangan (Aman/Waspada)
+     2. 🛡️ Tingkat Keresahan Warga (berdasarkan jumlah laporan)
+     3. 💡 Satu rekomendasi aksi prioritas untuk pengurus RT minggu ini.
+
+     Format output menggunakan Markdown bold/list agar mudah dibaca. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
+     
+     const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+     });
+     
+     return response.text || "Tidak ada analisis yang dihasilkan.";
+   } catch (error) {
+      console.error(error);
+      return "Gagal melakukan analisis data. Cek koneksi internet.";
+   }
+}
+
 export const askRit = async (question: string, contextData: { announcements: Announcement[], ronda: RondaSchedule[], officials: Official[] }): Promise<string> => {
   if (!apiKey) return "Maaf, fitur Chatbot sedang non-aktif (Missing API Key).";
 
