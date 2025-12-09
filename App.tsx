@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { 
@@ -487,6 +488,9 @@ const AdminDashboard = ({
   const [searchInventory, setSearchInventory] = useState('');
   const [filterInventoryCondition, setFilterInventoryCondition] = useState('All');
   
+  // Validation Errors State
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [serviceTab, setServiceTab] = useState<'surat' | 'laporan'>('surat');
   
@@ -527,6 +531,23 @@ const AdminDashboard = ({
   const [draftTopic, setDraftTopic] = useState('');
   const [localConfig, setLocalConfig] = useState<PdfConfig>(pdfConfig);
 
+  // --- VALIDATION HELPERS ---
+  const validatePhone = (phone: string) => {
+    // 08xx or 62xx, digits only, 10-14 chars
+    const clean = phone.replace(/\D/g, '');
+    return (clean.startsWith('08') || clean.startsWith('62')) && clean.length >= 10 && clean.length <= 14;
+  };
+
+  const validateAmount = (amount: string) => {
+    const val = parseInt(amount);
+    return !isNaN(val) && val > 0;
+  };
+
+  const validateText = (text: string, minLength = 3) => {
+      return text && text.trim().length >= minLength;
+  };
+
+
   // Computed Values for Residents Tab
   const getFilteredHouses = () => {
       return houses.filter((h: House) => {
@@ -561,6 +582,7 @@ const AdminDashboard = ({
       setRondaMembers(''); setSelectedRondaId(null);
       setDuesHouseId(''); setDuesAmount('25000'); setDuesStatus(PaymentStatus.PAID);
       setImportFile(null);
+      setFormErrors({});
   };
 
   // --- DELETE HANDLER (NEW) ---
@@ -732,13 +754,26 @@ const AdminDashboard = ({
   };
 
   // --- CRUD HANDLERS ---
-  const handleCreateAnnouncement = async (e: React.FormEvent) => { e.preventDefault(); await addAnnouncementToDb({ title: annTitle, content: annContent, type: annType, date: new Date().toISOString() }); setIsModalOpen(false); resetForms(); };
+  const handleCreateAnnouncement = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    if(!validateText(annTitle, 3)) { setFormErrors({title: "Judul minimal 3 karakter"}); return; }
+    if(!validateText(annContent, 5)) { setFormErrors({content: "Isi pengumuman minimal 5 karakter"}); return; }
+    
+    await addAnnouncementToDb({ title: annTitle, content: annContent, type: annType, date: new Date().toISOString() }); 
+    setIsModalOpen(false); 
+    resetForms(); 
+  };
   const handleDeleteAnnouncement = async (id: string) => { if (confirm("Hapus pengumuman ini?")) await deleteAnnouncementFromDb(id); };
   const handleGenerateDraft = async () => { if(!draftTopic) return; setIsGenerating(true); const draft = await generateAnnouncementDraft(draftTopic); setAnnContent(draft); setAnnTitle(draftTopic); setIsGenerating(false); };
   
   // Finance Handlers
   const handleSaveTransaction = async (e: React.FormEvent) => { 
     e.preventDefault(); 
+    const errors: any = {};
+    if(!validateText(cashDesc, 3)) errors.desc = "Deskripsi minimal 3 karakter";
+    if(!validateAmount(cashAmount)) errors.amount = "Nominal harus berupa angka positif";
+    if(Object.keys(errors).length > 0) { setFormErrors(errors); return; }
+
     const transactionData = { description: cashDesc, amount: parseInt(cashAmount), type: cashType, category: cashCategory, date: new Date().toISOString().split('T')[0] };
     if (editingCashId) {
        await updateTransactionInDb(editingCashId, transactionData);
@@ -760,16 +795,82 @@ const AdminDashboard = ({
   };
 
   const handleDeleteTransaction = async (id: string) => { if (confirm("Hapus transaksi ini?")) await deleteTransactionFromDb(id); };
-  const handleSaveDues = async (e: React.FormEvent) => { e.preventDefault(); if (!duesHouseId) return; await updateHouseData(duesHouseId, { paymentStatus: duesStatus }); if (duesStatus === PaymentStatus.PAID) { const house = houses.find((h:House) => h.id === duesHouseId); await addTransactionToDb({ description: `Iuran Warga ${duesHouseId} (${house?.headOfFamily || 'Warga'})`, amount: parseInt(duesAmount), type: 'Income', category: 'Iuran Warga', date: new Date().toISOString().split('T')[0] }); } setIsModalOpen(false); resetForms(); };
-  const handleSaveInventory = async (e: React.FormEvent) => { e.preventDefault(); const itemData = { name: invName, total: parseInt(invTotal), available: parseInt(invAvailable), condition: invCondition, notes: invNotes }; if (invId) await updateInventoryInDb(invId, itemData); else await addInventoryToDb(itemData); setIsModalOpen(false); resetForms(); };
+  const handleSaveDues = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    if (!duesHouseId) return; 
+    if(!validateAmount(duesAmount)) { setFormErrors({amount: "Nominal harus angka positif"}); return; }
+
+    await updateHouseData(duesHouseId, { paymentStatus: duesStatus }); 
+    if (duesStatus === PaymentStatus.PAID) { 
+        const house = houses.find((h:House) => h.id === duesHouseId); 
+        await addTransactionToDb({ description: `Iuran Warga ${duesHouseId} (${house?.headOfFamily || 'Warga'})`, amount: parseInt(duesAmount), type: 'Income', category: 'Iuran Warga', date: new Date().toISOString().split('T')[0] }); 
+    } 
+    setIsModalOpen(false); 
+    resetForms(); 
+  };
+  const handleSaveInventory = async (e: React.FormEvent) => { 
+      e.preventDefault(); 
+      const errors: any = {};
+      if(!validateText(invName, 3)) errors.name = "Nama barang terlalu pendek";
+      if(parseInt(invTotal) < 0) errors.total = "Total tidak boleh negatif";
+      if(parseInt(invAvailable) < 0) errors.available = "Stok tidak boleh negatif";
+      if(parseInt(invAvailable) > parseInt(invTotal)) errors.available = "Stok tersedia tidak boleh melebihi total";
+      
+      if(Object.keys(errors).length > 0) { setFormErrors(errors); return; }
+
+      const itemData = { name: invName, total: parseInt(invTotal), available: parseInt(invAvailable), condition: invCondition, notes: invNotes }; 
+      if (invId) await updateInventoryInDb(invId, itemData); 
+      else await addInventoryToDb(itemData); 
+      setIsModalOpen(false); 
+      resetForms(); 
+  };
   const openEditInventory = (item: InventoryItem) => { setInvId(item.id); setInvName(item.name); setInvTotal(item.total.toString()); setInvAvailable(item.available.toString()); setInvCondition(item.condition); setInvNotes(item.notes || ''); setModalType('inventory'); setIsModalOpen(true); };
   const handleDeleteInventory = async (id: string) => { if(confirm("Hapus?")) await deleteInventoryFromDb(id); };
-  const handleSaveUMKM = async (e: React.FormEvent) => { e.preventDefault(); const umkmData = { name: umkmName, owner: umkmOwner, category: umkmCategory, description: umkmDesc, contact: umkmContact, image: umkmImage }; if (umkmId) await updateUMKMInDb(umkmId, umkmData); else await addUMKMToDb(umkmData); setIsModalOpen(false); resetForms(); };
+  const handleSaveUMKM = async (e: React.FormEvent) => { 
+      e.preventDefault(); 
+      const errors: any = {};
+      if(!validateText(umkmName, 3)) errors.name = "Nama usaha minimal 3 karakter";
+      if(!validateText(umkmOwner, 3)) errors.owner = "Nama pemilik minimal 3 karakter";
+      if(!validatePhone(umkmContact)) errors.contact = "Format nomor HP salah (08xx/62xx, 10-14 digit)";
+      
+      if(Object.keys(errors).length > 0) { setFormErrors(errors); return; }
+
+      const umkmData = { name: umkmName, owner: umkmOwner, category: umkmCategory, description: umkmDesc, contact: umkmContact, image: umkmImage }; 
+      if (umkmId) await updateUMKMInDb(umkmId, umkmData); 
+      else await addUMKMToDb(umkmData); 
+      setIsModalOpen(false); 
+      resetForms(); 
+  };
   const openEditUMKM = (u: UMKM) => { setUmkmId(u.id); setUmkmName(u.name); setUmkmOwner(u.owner); setUmkmCategory(u.category); setUmkmDesc(u.description); setUmkmContact(u.contact); setUmkmImage(u.image); setModalType('umkm'); setIsModalOpen(true); };
   const handleDeleteUMKM = async (id: string) => { if (confirm("Hapus?")) await deleteUMKMFromDb(id); };
   const openEditRonda = (schedule: RondaSchedule) => { if (!schedule.id) return; setSelectedRondaId(schedule.id); setRondaDay(schedule.day); setRondaMembers(schedule.members.join(', ')); setModalType('ronda'); setIsModalOpen(true); };
-  const handleSaveRonda = async (e: React.FormEvent) => { e.preventDefault(); if (!selectedRondaId) return; const membersArray = rondaMembers.split(',').map(m => m.trim()).filter(m => m !== ''); await updateRondaSchedule(selectedRondaId, membersArray); setIsModalOpen(false); resetForms(); };
-  const handleSaveOfficial = async (e: React.FormEvent) => { e.preventDefault(); const officialData = { name: offName, role: offRole, phone: offPhone, houseId: offHouse, photo: offPhoto || undefined }; if (offId) await updateOfficialInDb(offId, officialData); else await addOfficialToDb(officialData); setIsModalOpen(false); resetForms(); };
+  const handleSaveRonda = async (e: React.FormEvent) => { 
+      e.preventDefault(); 
+      if (!selectedRondaId) return; 
+      const membersArray = rondaMembers.split(',').map(m => m.trim()).filter(m => m !== ''); 
+      if (membersArray.length === 0 && rondaMembers.trim().length > 0) {
+           setFormErrors({members: "Format salah. Gunakan koma untuk pemisah nama."});
+           return;
+      }
+      await updateRondaSchedule(selectedRondaId, membersArray); 
+      setIsModalOpen(false); 
+      resetForms(); 
+  };
+  const handleSaveOfficial = async (e: React.FormEvent) => { 
+      e.preventDefault(); 
+      const errors: any = {};
+      if(!validateText(offName, 3)) errors.name = "Nama terlalu pendek";
+      if(!validateText(offRole, 3)) errors.role = "Jabatan terlalu pendek";
+      if(offPhone && !validatePhone(offPhone)) errors.phone = "Format nomor HP salah";
+      
+      if(Object.keys(errors).length > 0) { setFormErrors(errors); return; }
+
+      const officialData = { name: offName, role: offRole, phone: offPhone, houseId: offHouse, photo: offPhoto || undefined }; 
+      if (offId) await updateOfficialInDb(offId, officialData); 
+      else await addOfficialToDb(officialData); 
+      setIsModalOpen(false); 
+      resetForms(); 
+  };
   const handleDeleteOfficial = async (id: string) => { if (confirm("Hapus?")) await deleteOfficialFromDb(id); };
   const handleEditOfficial = (o: Official) => { setOffId(o.id); setOffName(o.name); setOffRole(o.role); setOffPhone(o.phone); setOffHouse(o.houseId); setOffPhoto(o.photo||''); setModalType('official'); setIsModalOpen(true); };
   const openDuesModal = (h: House) => { setDuesHouseId(h.id); setDuesStatus(PaymentStatus.PAID); setModalType('dues'); setIsModalOpen(true); };
@@ -810,12 +911,22 @@ const AdminDashboard = ({
   const handleSaveHouse = async (e: React.FormEvent) => {
       e.preventDefault(); if(!selectedHouse) return;
       
+      const errors: any = {};
       let status: House['status'] = 'Occupied';
       let residenceType: House['residenceType'] = 'Tetap';
 
       if(editHouseForm.unifiedStatus === 'Empty') status = 'Empty'; 
       else if(editHouseForm.unifiedStatus === 'Business') status = 'Business'; 
       else residenceType = editHouseForm.unifiedStatus as any;
+      
+      // Validate Logic based on Status
+      if(status !== 'Empty') {
+          if(!validateText(editHouseForm.headOfFamily, 3)) errors.headOfFamily = "Nama KK terlalu pendek";
+          if(editHouseForm.phone && !validatePhone(editHouseForm.phone)) errors.phone = "Format nomor HP salah (08xx/62xx)";
+          if(editHouseForm.occupants < 1) errors.occupants = "Minimal 1 penghuni jika rumah dihuni";
+      }
+
+      if(Object.keys(errors).length > 0) { setFormErrors(errors); return; }
       
       // Auto-formatting based on status
       const payload = {
@@ -1678,25 +1789,54 @@ const AdminDashboard = ({
              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalType === 'announcement' ? "Buat Pengumuman" : modalType === 'cash' ? (editingCashId ? "Edit Transaksi" : "Catat Transaksi") : modalType === 'official' ? "Data Pengurus" : modalType === 'inventory' ? "Data Inventaris" : modalType === 'ronda' ? "Jadwal Ronda" : modalType === 'umkm' ? "Kelola Data UMKM" : modalType === 'dues' ? "Catat Iuran" : modalType === 'import' ? "Import Data Warga" : "Edit Data Warga"}>
                  {modalType === 'announcement' && (
                      <form onSubmit={handleCreateAnnouncement} className="space-y-4">
-                         <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Judul</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={annTitle} onChange={e=>setAnnTitle(e.target.value)} required/></div>
-                         <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Isi Pengumuman (Gunakan AI)</label><div className="flex gap-2 mb-2"><input className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-sm" placeholder="Topik..." value={draftTopic} onChange={e=>setDraftTopic(e.target.value)}/><button type="button" onClick={handleGenerateDraft} disabled={isGenerating} className="bg-purple-600 text-white px-4 rounded-xl text-xs font-bold shadow-sm hover:bg-purple-700 disabled:opacity-50">{isGenerating ? 'Generating...' : '✨ Buat Draf'}</button></div><textarea className="w-full p-3 bg-white border border-slate-200 rounded-xl h-32 text-sm" value={annContent} onChange={e=>setAnnContent(e.target.value)} required/></div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5 text-slate-700">Judul</label>
+                            <input className={`w-full p-3 bg-white border rounded-xl text-sm ${formErrors.title ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`} value={annTitle} onChange={e=>setAnnTitle(e.target.value)} required/>
+                            {formErrors.title && <p className="text-xs text-rose-500 mt-1">{formErrors.title}</p>}
+                         </div>
+                         <div>
+                             <label className="block text-xs font-bold mb-1.5 text-slate-700">Isi Pengumuman (Gunakan AI)</label>
+                             <div className="flex gap-2 mb-2"><input className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-sm" placeholder="Topik..." value={draftTopic} onChange={e=>setDraftTopic(e.target.value)}/><button type="button" onClick={handleGenerateDraft} disabled={isGenerating} className="bg-purple-600 text-white px-4 rounded-xl text-xs font-bold shadow-sm hover:bg-purple-700 disabled:opacity-50">{isGenerating ? 'Generating...' : '✨ Buat Draf'}</button></div>
+                             <textarea className={`w-full p-3 bg-white border rounded-xl h-32 text-sm ${formErrors.content ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`} value={annContent} onChange={e=>setAnnContent(e.target.value)} required/>
+                             {formErrors.content && <p className="text-xs text-rose-500 mt-1">{formErrors.content}</p>}
+                         </div>
                          <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Tipe</label><select className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={annType} onChange={e=>setAnnType(e.target.value as any)}><option>General</option><option>Urgent</option><option>Event</option></select></div>
                          <Button type="submit" className="w-full py-3">Terbitkan</Button>
                      </form>
                  )}
                  {modalType === 'cash' && (
                      <form onSubmit={handleSaveTransaction} className="space-y-4">
-                         <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Keterangan</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashDesc} onChange={e=>setCashDesc(e.target.value)} required/></div>
-                         <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp)</label><input type="number" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashAmount} onChange={e=>setCashAmount(e.target.value)} required/></div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5 text-slate-700">Keterangan</label>
+                            <input className={`w-full p-3 bg-white border rounded-xl text-sm ${formErrors.desc ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`} value={cashDesc} onChange={e=>setCashDesc(e.target.value)} required/>
+                            {formErrors.desc && <p className="text-xs text-rose-500 mt-1">{formErrors.desc}</p>}
+                         </div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp)</label>
+                            <input type="number" className={`w-full p-3 bg-white border rounded-xl text-sm ${formErrors.amount ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`} value={cashAmount} onChange={e=>setCashAmount(e.target.value)} required/>
+                            {formErrors.amount && <p className="text-xs text-rose-500 mt-1">{formErrors.amount}</p>}
+                         </div>
                          <div className="grid grid-cols-2 gap-3"><div><label className="block text-xs font-bold mb-1.5 text-slate-700">Tipe</label><select className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashType} onChange={e=>setCashType(e.target.value as any)}><option value="Income">Pemasukan</option><option value="Expense">Pengeluaran</option></select></div><div><label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashCategory} onChange={e=>setCashCategory(e.target.value)}/></div></div>
                          <Button type="submit" className="w-full py-3">{editingCashId ? 'Simpan Perubahan' : 'Catat Transaksi'}</Button>
                      </form>
                  )}
                  {modalType === 'official' && (
                      <form onSubmit={handleSaveOfficial} className="space-y-4">
-                         <div><label className="block text-xs font-bold mb-1.5">Nama</label><input className="w-full p-3 border rounded-xl" value={offName} onChange={e=>setOffName(e.target.value)} required/></div>
-                         <div><label className="block text-xs font-bold mb-1.5">Jabatan</label><input className="w-full p-3 border rounded-xl" value={offRole} onChange={e=>setOffRole(e.target.value)} required/></div>
-                         <div><label className="block text-xs font-bold mb-1.5">No HP</label><input className="w-full p-3 border rounded-xl" value={offPhone} onChange={e=>setOffPhone(e.target.value)}/></div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5">Nama</label>
+                            <input className={`w-full p-3 border rounded-xl ${formErrors.name ? 'border-rose-500' : ''}`} value={offName} onChange={e=>setOffName(e.target.value)} required/>
+                            {formErrors.name && <p className="text-xs text-rose-500 mt-1">{formErrors.name}</p>}
+                         </div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5">Jabatan</label>
+                            <input className={`w-full p-3 border rounded-xl ${formErrors.role ? 'border-rose-500' : ''}`} value={offRole} onChange={e=>setOffRole(e.target.value)} required/>
+                            {formErrors.role && <p className="text-xs text-rose-500 mt-1">{formErrors.role}</p>}
+                         </div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5">No HP</label>
+                            <input className={`w-full p-3 border rounded-xl ${formErrors.phone ? 'border-rose-500' : ''}`} value={offPhone} onChange={e=>setOffPhone(e.target.value)} placeholder="08xxxxxxxxxx"/>
+                            {formErrors.phone && <p className="text-xs text-rose-500 mt-1">{formErrors.phone}</p>}
+                         </div>
                          <div><label className="block text-xs font-bold mb-1.5">Rumah</label><input className="w-full p-3 border rounded-xl" value={offHouse} onChange={e=>setOffHouse(e.target.value)}/></div>
                          <div><label className="block text-xs font-bold mb-1.5">URL Foto</label><input className="w-full p-3 border rounded-xl" value={offPhoto} onChange={e=>setOffPhoto(e.target.value)}/></div>
                          <Button type="submit" className="w-full">Simpan</Button>
@@ -1704,8 +1844,23 @@ const AdminDashboard = ({
                  )}
                  {modalType === 'inventory' && (
                      <form onSubmit={handleSaveInventory} className="space-y-4">
-                         <div><label className="block text-xs font-bold mb-1.5">Nama Barang</label><input className="w-full p-3 border rounded-xl" value={invName} onChange={e=>setInvName(e.target.value)} required/></div>
-                         <div className="grid grid-cols-2 gap-3"><div><label className="block text-xs font-bold mb-1.5">Total</label><input type="number" className="w-full p-3 border rounded-xl" value={invTotal} onChange={e=>setInvTotal(e.target.value)} required/></div><div><label className="block text-xs font-bold mb-1.5">Tersedia</label><input type="number" className="w-full p-3 border rounded-xl" value={invAvailable} onChange={e=>setInvAvailable(e.target.value)} required/></div></div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5">Nama Barang</label>
+                            <input className={`w-full p-3 border rounded-xl ${formErrors.name ? 'border-rose-500' : ''}`} value={invName} onChange={e=>setInvName(e.target.value)} required/>
+                            {formErrors.name && <p className="text-xs text-rose-500 mt-1">{formErrors.name}</p>}
+                         </div>
+                         <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-bold mb-1.5">Total</label>
+                                <input type="number" className={`w-full p-3 border rounded-xl ${formErrors.total ? 'border-rose-500' : ''}`} value={invTotal} onChange={e=>setInvTotal(e.target.value)} required/>
+                                {formErrors.total && <p className="text-xs text-rose-500 mt-1">{formErrors.total}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold mb-1.5">Tersedia</label>
+                                <input type="number" className={`w-full p-3 border rounded-xl ${formErrors.available ? 'border-rose-500' : ''}`} value={invAvailable} onChange={e=>setInvAvailable(e.target.value)} required/>
+                                {formErrors.available && <p className="text-xs text-rose-500 mt-1">{formErrors.available}</p>}
+                            </div>
+                         </div>
                          <div><label className="block text-xs font-bold mb-1.5">Kondisi</label><select className="w-full p-3 border rounded-xl" value={invCondition} onChange={e=>setInvCondition(e.target.value as any)}><option>Baik</option><option>Perlu Perbaikan</option><option>Rusak</option></select></div>
                          <div><label className="block text-xs font-bold mb-1.5">Catatan (Opsional)</label><input className="w-full p-3 border rounded-xl" value={invNotes} onChange={e=>setInvNotes(e.target.value)} placeholder="Cth: Dipinjam Pak Budi"/></div>
                          <Button type="submit" className="w-full">Simpan</Button>
@@ -1714,7 +1869,11 @@ const AdminDashboard = ({
                  {modalType === 'ronda' && (
                      <form onSubmit={handleSaveRonda} className="space-y-4">
                          <div><label className="block text-xs font-bold mb-1.5">Hari</label><input className="w-full p-3 border rounded-xl bg-slate-100" value={rondaDay} disabled/></div>
-                         <div><label className="block text-xs font-bold mb-1.5">Anggota (Pisahkan Koma)</label><textarea className="w-full p-3 border rounded-xl h-24" value={rondaMembers} onChange={e=>setRondaMembers(e.target.value)}/></div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5">Anggota (Pisahkan Koma)</label>
+                            <textarea className={`w-full p-3 border rounded-xl h-24 ${formErrors.members ? 'border-rose-500' : ''}`} value={rondaMembers} onChange={e=>setRondaMembers(e.target.value)}/>
+                            {formErrors.members && <p className="text-xs text-rose-500 mt-1">{formErrors.members}</p>}
+                         </div>
                          <Button type="submit" className="w-full">Update Jadwal</Button>
                      </form>
                  )}
@@ -1735,22 +1894,24 @@ const AdminDashboard = ({
                             <div>
                                 <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Usaha</label>
                                 <input 
-                                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all placeholder:text-slate-300" 
+                                    className={`w-full p-3 bg-white border rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all placeholder:text-slate-300 ${formErrors.name ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`}
                                     value={umkmName} 
                                     onChange={e=>setUmkmName(e.target.value)} 
                                     placeholder="Cth: Dapur Bu Ani"
                                     required
                                 />
+                                {formErrors.name && <p className="text-xs text-rose-500 mt-1">{formErrors.name}</p>}
                             </div>
                             <div>
                                 <label className="block text-xs font-bold mb-1.5 text-slate-700">Pemilik</label>
                                 <input 
-                                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all placeholder:text-slate-300" 
+                                    className={`w-full p-3 bg-white border rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all placeholder:text-slate-300 ${formErrors.owner ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`}
                                     value={umkmOwner} 
                                     onChange={e=>setUmkmOwner(e.target.value)} 
                                     placeholder="Nama Warga"
                                     required
                                 />
+                                {formErrors.owner && <p className="text-xs text-rose-500 mt-1">{formErrors.owner}</p>}
                             </div>
                          </div>
                          
@@ -1791,7 +1952,7 @@ const AdminDashboard = ({
                              <div className="relative">
                                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
                                  <input 
-                                     className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all placeholder:text-slate-300" 
+                                     className={`w-full pl-10 pr-4 py-3 bg-white border rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all placeholder:text-slate-300 ${formErrors.contact ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`}
                                      value={umkmContact} 
                                      onChange={e=>setUmkmContact(e.target.value)} 
                                      placeholder="08xxxxxxxxxx"
@@ -1799,6 +1960,7 @@ const AdminDashboard = ({
                                      required
                                  />
                              </div>
+                             {formErrors.contact && <p className="text-xs text-rose-500 mt-1">{formErrors.contact}</p>}
                              <p className="text-[10px] text-slate-400 mt-1 ml-1 flex items-center gap-1"><AlertCircle size={10}/> Format 08... atau 62... (Sistem otomatis menyesuaikan)</p>
                          </div>
                          
@@ -1831,7 +1993,11 @@ const AdminDashboard = ({
                  {modalType === 'dues' && (
                      <form onSubmit={handleSaveDues} className="space-y-4">
                          <div><label className="block text-xs font-bold mb-1.5">Rumah</label><input className="w-full p-3 border rounded-xl bg-slate-100" value={duesHouseId} disabled/></div>
-                         <div><label className="block text-xs font-bold mb-1.5">Nominal (Rp)</label><input type="number" className="w-full p-3 border rounded-xl" value={duesAmount} onChange={e=>setDuesAmount(e.target.value)}/></div>
+                         <div>
+                             <label className="block text-xs font-bold mb-1.5">Nominal (Rp)</label>
+                             <input type="number" className={`w-full p-3 border rounded-xl ${formErrors.amount ? 'border-rose-500' : ''}`} value={duesAmount} onChange={e=>setDuesAmount(e.target.value)}/>
+                             {formErrors.amount && <p className="text-xs text-rose-500 mt-1">{formErrors.amount}</p>}
+                         </div>
                          <div><label className="block text-xs font-bold mb-1.5">Status</label><select className="w-full p-3 border rounded-xl" value={duesStatus} onChange={e=>setDuesStatus(e.target.value as any)}><option value={PaymentStatus.PAID}>Lunas</option><option value={PaymentStatus.PENDING}>Belum Lunas</option><option value={PaymentStatus.UNPAID}>Menunggak</option></select></div>
                          <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">Simpan Pembayaran</Button>
                      </form>
@@ -1839,10 +2005,22 @@ const AdminDashboard = ({
                  {modalType === 'editHouse' && (
                      <form onSubmit={handleSaveHouse} className="space-y-4">
                         <div className="bg-slate-100 p-3 rounded-xl mb-4 text-center font-bold text-slate-600">{selectedHouse?.block}-{selectedHouse?.number}</div>
-                        <div><label className="block text-xs font-bold mb-1.5">Kepala Keluarga</label><input className="w-full p-3 border rounded-xl" value={editHouseForm.headOfFamily} onChange={e=>setEditHouseForm({...editHouseForm, headOfFamily: e.target.value})}/></div>
+                        <div>
+                            <label className="block text-xs font-bold mb-1.5">Kepala Keluarga</label>
+                            <input className={`w-full p-3 border rounded-xl ${formErrors.headOfFamily ? 'border-rose-500' : ''}`} value={editHouseForm.headOfFamily} onChange={e=>setEditHouseForm({...editHouseForm, headOfFamily: e.target.value})}/>
+                            {formErrors.headOfFamily && <p className="text-xs text-rose-500 mt-1">{formErrors.headOfFamily}</p>}
+                        </div>
                         <div className="grid grid-cols-2 gap-3">
-                           <div><label className="block text-xs font-bold mb-1.5">Jml Penghuni</label><input type="number" className="w-full p-3 border rounded-xl" value={editHouseForm.occupants} onChange={e=>setEditHouseForm({...editHouseForm, occupants: e.target.value as any})}/></div>
-                           <div><label className="block text-xs font-bold mb-1.5">No HP</label><input className="w-full p-3 border rounded-xl" value={editHouseForm.phone} onChange={e=>setEditHouseForm({...editHouseForm, phone: e.target.value})}/></div>
+                           <div>
+                               <label className="block text-xs font-bold mb-1.5">Jml Penghuni</label>
+                               <input type="number" className={`w-full p-3 border rounded-xl ${formErrors.occupants ? 'border-rose-500' : ''}`} value={editHouseForm.occupants} onChange={e=>setEditHouseForm({...editHouseForm, occupants: e.target.value as any})}/>
+                               {formErrors.occupants && <p className="text-xs text-rose-500 mt-1">{formErrors.occupants}</p>}
+                           </div>
+                           <div>
+                               <label className="block text-xs font-bold mb-1.5">No HP</label>
+                               <input className={`w-full p-3 border rounded-xl ${formErrors.phone ? 'border-rose-500' : ''}`} value={editHouseForm.phone} onChange={e=>setEditHouseForm({...editHouseForm, phone: e.target.value})}/>
+                               {formErrors.phone && <p className="text-xs text-rose-500 mt-1">{formErrors.phone}</p>}
+                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div><label className="block text-xs font-bold mb-1.5">Status Hunian</label><select className="w-full p-3 border rounded-xl" value={editHouseForm.unifiedStatus} onChange={e=>setEditHouseForm({...editHouseForm, unifiedStatus: e.target.value})}><option value="Tetap">Tetap (Milik)</option><option value="Kontrak">Kontrak/Sewa</option><option value="Kost">Kost</option><option value="Empty">Rumah Kosong</option><option value="Business">Tempat Usaha</option></select></div>
