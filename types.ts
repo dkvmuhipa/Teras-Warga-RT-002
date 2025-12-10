@@ -39,6 +39,17 @@ export interface Announcement {
   type: 'General' | 'Urgent' | 'Event';
 }
 
+// New Notification Interface
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  type: 'Info' | 'Alert' | 'Success';
+  target?: string; // 'All' or specific User/House ID (for future use)
+  isRead?: boolean; // Local state handling
+}
+
 export interface Report {
   id: string;
   type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Lainnya';

@@ -9,7 +9,10 @@ import {
   query,
   getDocs,
   setDoc,
-  writeBatch
+  writeBatch,
+  orderBy,
+  limit,
+  where
 } from "firebase/firestore";
 import { 
   signInWithEmailAndPassword, 
@@ -27,6 +30,7 @@ const REPORTS_COL = "reports";
 const LETTERS_COL = "letters"; 
 const INVENTORY_COL = "inventory";
 const UMKM_COL = "umkm"; 
+const NOTIFICATIONS_COL = "notifications";
 
 // --- AUTH SERVICES ---
 export const loginAdmin = (email: string, pass: string) => {
@@ -87,6 +91,52 @@ export const subscribeToCollection = (colName: string, callback: (data: any[]) =
     console.error(`Error subscribing to ${colName}:`, error);
   });
 };
+
+// --- OPTIMIZED REPORT SUBSCRIBE ---
+export const subscribeToActiveReports = (callback: (data: any[]) => void) => {
+  // Query only 'Baru' or 'Diproses' status
+  const q = query(collection(db, REPORTS_COL), where('status', 'in', ['Baru', 'Diproses']));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      ...doc.data(),
+      id: doc.id
+    }));
+    callback(data);
+  }, (error) => {
+    console.error("Error subscribing to active reports:", error);
+  });
+};
+
+// --- NOTIFICATIONS (NEW) ---
+export const subscribeToNotifications = (callback: (data: any[]) => void) => {
+  // Order by date descending, limit to last 20 to avoid overload
+  const q = query(collection(db, NOTIFICATIONS_COL), orderBy("date", "desc"), limit(20));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      ...doc.data(), 
+      id: doc.id 
+    }));
+    callback(data);
+  }, (error) => {
+    // Fallback if index missing or error
+    console.log("Notification index missing or query error, falling back to simple query");
+    const qSimple = query(collection(db, NOTIFICATIONS_COL));
+    onSnapshot(qSimple, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        // Manual Sort
+        data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        callback(data.slice(0, 20));
+    });
+  });
+};
+
+export const addNotificationToDb = async (notification: any) => {
+    try {
+        const { id, ...data } = notification;
+        await addDoc(collection(db, NOTIFICATIONS_COL), deepSanitize(data));
+    } catch (e) { console.error("Error adding notification:", e); }
+};
+
 
 // --- 1. HOUSES (WARGA) ---
 export const addHouse = async (houseData: any) => {
