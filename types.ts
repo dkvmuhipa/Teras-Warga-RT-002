@@ -1,4 +1,5 @@
 
+
 export enum PaymentStatus {
   PAID = 'Lunas',
   PENDING = 'Belum Lunas',
@@ -100,6 +101,16 @@ export interface RondaSchedule {
   members: string[]; // Nama warga
 }
 
+// Digitalisasi Ronda (New Interface)
+export interface RondaCheckLog {
+  id: string;
+  timestamp: string; // ISO String
+  officerName: string;
+  location: string; // "Gerbang", "Blok C5", "C5-02"
+  status: 'Aman' | 'Mencurigakan' | 'Insiden';
+  note?: string;
+}
+
 export interface CashFlow {
   id: string;
   date: string;
@@ -133,4 +144,23 @@ export interface InventoryItem {
   available: number;
   condition: 'Baik' | 'Perlu Perbaikan' | 'Rusak';
   notes?: string;
+}
+
+// E-Voting Types
+export interface PollOption {
+  id: string;
+  text: string;
+  votes: number;
+}
+
+export interface Poll {
+  id: string;
+  title: string;
+  description: string;
+  date: string; // Creation date
+  deadline: string;
+  status: 'Open' | 'Closed';
+  options: PollOption[];
+  totalVotes: number;
+  createdBy?: string; // Admin email/id
 }

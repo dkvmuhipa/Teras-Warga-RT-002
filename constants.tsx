@@ -1,7 +1,11 @@
 
 
+
+
+
+
 import React from 'react';
-import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem } from './types';
+import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TERAS";
@@ -149,6 +153,40 @@ export const MOCK_INVENTORY: InventoryItem[] = [
     { id: '2', name: 'Kursi Plastik', total: 50, available: 45, condition: 'Baik', notes: '5 kursi dipinjam Pak Budi' },
     { id: '3', name: 'Wireless Sound System', total: 1, available: 1, condition: 'Baik' },
     { id: '4', name: 'Mesin Potong Rumput', total: 1, available: 0, condition: 'Perlu Perbaikan', notes: 'Sedang diservis' },
+];
+
+export const MOCK_POLLS: Poll[] = [
+  {
+    id: '1',
+    title: 'Pemilihan Ketua Panitia 17 Agustus',
+    description: 'Siapa yang menurut Anda paling cocok menjadi ketua panitia acara kemerdekaan tahun ini? Mari berpartisipasi dalam demokrasi warga.',
+    date: '2023-10-25',
+    deadline: '2023-11-01',
+    status: 'Closed',
+    totalVotes: 45,
+    options: [
+      { id: 'opt1', text: 'Bpk. Budi (C5-02)', votes: 25 },
+      { id: 'opt2', text: 'Ibu Siti (C7-10)', votes: 20 }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Prioritas Pembangunan Fasilitas 2024',
+    description: 'Fasilitas umum apa yang paling mendesak untuk diperbaiki atau dibangun menggunakan Kas RT periode depan?',
+    date: '2023-11-01',
+    deadline: '2023-12-31',
+    status: 'Open',
+    totalVotes: 12,
+    options: [
+      { id: 'opt1', text: 'Perbaikan Jalan Utama', votes: 5 },
+      { id: 'opt2', text: 'Penerangan Jalan (PJU)', votes: 4 },
+      { id: 'opt3', text: 'Taman Bermain Anak', votes: 3 }
+    ]
+  }
+];
+
+export const MOCK_RONDA_LOGS: RondaCheckLog[] = [
+  { id: '1', timestamp: new Date().toISOString(), officerName: 'Bpk. Asep', location: 'Gerbang Utama', status: 'Aman', note: 'Situasi kondusif.' }
 ];
 
 export const MOCK_GALLERY = [

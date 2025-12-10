@@ -20,7 +20,7 @@ let auth: any;
 let isFirebaseConfigured = false;
 
 try {
-  // Using modular imports directly
+  // Using modular imports directly via namespace to avoid export errors
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);

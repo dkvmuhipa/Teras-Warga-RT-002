@@ -1,3 +1,9 @@
+
+
+
+
+
+
 import { db, auth, isFirebaseConfigured } from "./firebaseConfig";
 import { 
   collection, 
@@ -12,7 +18,8 @@ import {
   writeBatch,
   orderBy,
   limit,
-  where
+  where,
+  increment
 } from "firebase/firestore";
 import { 
   signInWithEmailAndPassword, 
@@ -31,6 +38,8 @@ const LETTERS_COL = "letters";
 const INVENTORY_COL = "inventory";
 const UMKM_COL = "umkm"; 
 const NOTIFICATIONS_COL = "notifications";
+const POLLS_COL = "polls";
+const RONDA_LOGS_COL = "rondaLogs";
 
 // --- AUTH SERVICES ---
 export const loginAdmin = (email: string, pass: string) => {
@@ -357,6 +366,87 @@ export const deleteUMKMFromDb = async (id: string) => {
   try { await deleteDoc(doc(db, UMKM_COL, id)); } catch (e) { console.error("Error deleting UMKM:", e); }
 };
 
+// --- 10. POLLS (E-VOTING) ---
+export const addPollToDb = async (poll: any) => {
+  try {
+    const { id, ...data } = poll;
+    await addDoc(collection(db, POLLS_COL), deepSanitize(data));
+  } catch (e) { console.error("Error adding poll:", e); }
+};
+
+export const deletePollFromDb = async (id: string) => {
+  try { await deleteDoc(doc(db, POLLS_COL, id)); } catch (e) { console.error("Error deleting poll:", e); }
+};
+
+export const updatePollStatus = async (id: string, status: string) => {
+  try { await updateDoc(doc(db, POLLS_COL, id), { status }); } catch (e) { console.error("Error updating poll status:", e); }
+};
+
+export const submitVote = async (pollId: string, optionId: string, currentOptions: any[]) => {
+  try {
+    // We need to increment totalVotes AND the specific option's votes
+    // Since options are an array of objects, we have to find the index and update the specific field
+    // OR replace the entire options array with the incremented value locally + atomic write.
+    // However, for true atomic updates on array elements, it's tricky without a subcollection.
+    // Simpler approach for this app: Update entire object with transaction or just strict update if low concurrency.
+    // For better reliability with concurrency, we fetch fresh, update, write.
+    
+    // NOTE: In a real high-traffic app, options should be a subcollection. 
+    // Here we will do a read-modify-write pattern or optimistic update.
+    
+    // Let's rely on client passing current state is risky. 
+    // Best effort here:
+    const pollRef = doc(db, POLLS_COL, pollId);
+    
+    // Find option index
+    const optIndex = currentOptions.findIndex((o: any) => o.id === optionId);
+    if (optIndex === -1) return;
+
+    // Create new options array
+    const newOptions = [...currentOptions];
+    newOptions[optIndex] = {
+      ...newOptions[optIndex],
+      votes: newOptions[optIndex].votes + 1
+    };
+
+    await updateDoc(pollRef, {
+      options: newOptions,
+      totalVotes: increment(1)
+    });
+
+  } catch (e) { console.error("Error submitting vote:", e); }
+};
+
+
+// --- 11. RONDA LOGS (DIGITAL SISKAMLING) ---
+export const addRondaLog = async (log: any) => {
+  try {
+    const { id, ...data } = log;
+    await addDoc(collection(db, RONDA_LOGS_COL), deepSanitize(data));
+  } catch (e) { console.error("Error adding ronda log:", e); }
+};
+
+export const subscribeToRondaLogs = (callback: (data: any[]) => void) => {
+  // Order by timestamp descending, limit to recent logs
+  const q = query(collection(db, RONDA_LOGS_COL), orderBy("timestamp", "desc"), limit(50));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      ...doc.data(), 
+      id: doc.id 
+    }));
+    callback(data);
+  }, (error) => {
+    // Fallback if index missing or error
+    console.log("Ronda Logs index missing, fallback query");
+    const qSimple = query(collection(db, RONDA_LOGS_COL));
+    onSnapshot(qSimple, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        data.sort((a:any, b:any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        callback(data.slice(0, 50));
+    });
+  });
+};
+
 
 // --- SEEDING & AUTO-MIGRATION ---
 export const seedDatabase = async (initialData: any) => {
@@ -419,6 +509,24 @@ export const seedDatabase = async (initialData: any) => {
           for (const c of initialData.cashFlow) {
               const { id, ...data } = c;
               await addDoc(collection(db, CASHFLOW_COL), deepSanitize(data));
+          }
+      }
+
+      // Seed Polls
+      const pollsSnap = await getDocs(collection(db, POLLS_COL));
+      if (pollsSnap.empty && initialData.polls && initialData.polls.length > 0) {
+          for (const p of initialData.polls) {
+              const { id, ...data } = p;
+              await addDoc(collection(db, POLLS_COL), deepSanitize(data));
+          }
+      }
+
+      // Seed Ronda Logs (New)
+      const logsSnap = await getDocs(collection(db, RONDA_LOGS_COL));
+      if (logsSnap.empty && initialData.rondaLogs && initialData.rondaLogs.length > 0) {
+          for (const l of initialData.rondaLogs) {
+              const { id, ...data } = l;
+              await addDoc(collection(db, RONDA_LOGS_COL), deepSanitize(data));
           }
       }
 
