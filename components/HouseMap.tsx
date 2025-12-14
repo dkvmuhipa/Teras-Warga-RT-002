@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { House, PaymentStatus, Report, Official } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Crown, Flame } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle } from 'lucide-react';
 
 interface HouseMapProps {
   houses: House[];
@@ -101,7 +102,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 <div className="overflow-y-auto custom-scrollbar flex-1 bg-white">
                     <div className="p-6 space-y-6">
 
-                         {/* OFFICIAL CARD SECTION */}
+                         {/* OFFICIAL CARD SECTION (NEW) */}
                          {officialData && (
                             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 text-white p-5 shadow-lg shadow-slate-300 ring-4 ring-slate-50 transform transition-all hover:scale-[1.02] border border-slate-700">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 transform rotate-12 pointer-events-none">
@@ -139,29 +140,6 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                              </a>
                                          </div>
                                      </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* GAMIFICATION BADGE (NEW) */}
-                        {house.isExemplary && (
-                            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-50 to-amber-50 border border-amber-200 p-4 shadow-sm">
-                                <div className="absolute top-0 right-0 p-3 opacity-10">
-                                    <Crown size={80} className="text-amber-500" fill="currentColor"/>
-                                </div>
-                                <div className="flex items-center gap-4 relative z-10">
-                                    <div className="p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full text-white shadow-lg shadow-amber-200 ring-4 ring-white">
-                                        <Crown size={24} fill="currentColor"/>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-amber-800 text-base">Badge Warga Teladan</h4>
-                                        <div className="flex items-center gap-1.5 mt-1">
-                                            <Flame size={14} className="text-orange-500 fill-orange-500 animate-pulse"/>
-                                            <p className="text-xs font-bold text-amber-700">
-                                                {house.paymentStreak} Bulan Lunas Berturut-turut!
-                                            </p>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         )}
@@ -337,9 +315,6 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
         if (house.residenceType === 'Kost') return "bg-gradient-to-br from-cyan-100 to-blue-200 border-cyan-500 text-cyan-900 shadow-sm hover:shadow-cyan-300/50 hover:border-cyan-600";
         if (house.residenceType === 'Kontrak') return "bg-gradient-to-br from-amber-100 to-orange-200 border-amber-500 text-amber-900 shadow-sm hover:shadow-amber-300/50 hover:border-amber-600";
         
-        // Gamification: Add Golden Glow if Exemplary
-        if (house.isExemplary) return "bg-gradient-to-br from-emerald-100 to-teal-200 border-amber-400 text-emerald-900 shadow-md shadow-amber-200/50 ring-2 ring-amber-200/50";
-
         return "bg-gradient-to-br from-emerald-100 to-teal-200 border-emerald-500 text-emerald-900 shadow-sm hover:shadow-emerald-300/50 hover:border-emerald-600";
     };
 
@@ -386,15 +361,6 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                     {house.hasToddler && <div className="text-orange-600" title="Balita"><Smile size={8} /></div>}
                     {house.hasTeenager && <div className="text-lime-600" title="Remaja"><GraduationCap size={8} /></div>}
                     {house.hasElderly && <div className="text-purple-600" title="Lansia"><Accessibility size={8} /></div>}
-                </div>
-            )}
-
-            {/* GAMIFICATION CROWN: Only for Exemplary Residents */}
-            {house.isExemplary && (
-                <div className="absolute -top-3 -left-2 z-30 filter drop-shadow-md animate-bounce-slow">
-                    <div className="bg-gradient-to-b from-yellow-300 to-amber-500 text-white p-1 rounded-full border-2 border-white">
-                        <Crown size={12} fill="currentColor" />
-                    </div>
                 </div>
             )}
 
@@ -601,6 +567,72 @@ export const HouseMap: React.FC<HouseMapProps> = ({
              </div>
         </div>
 
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+          {/* Map Area */}
+          <div className="flex-1 overflow-auto bg-slate-50 relative custom-scrollbar p-4 md:p-8 scroll-smooth" id="map-container">
+               {/* Blueprint Background Pattern */}
+               <div className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none" style={{
+                   backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`,
+                   backgroundSize: '20px 20px'
+               }}></div>
+               
+               {/* Map Layout Container */}
+               <div className="min-w-[900px]">
+                   <div className="border-[6px] border-dashed border-amber-400 bg-amber-50/50 p-6 rounded-3xl relative">
+                       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-amber-400 text-amber-900 px-4 py-1 rounded-full font-bold text-xs shadow-sm uppercase tracking-widest border border-amber-500 z-10">
+                           Batas Wilayah RT 002 / RW 020
+                       </div>
+
+                       {/* Grid Layout based on Physical Map */}
+                       <div className="grid grid-cols-4 gap-6">
+                           
+                           {/* Column 1: Block C5 (Single Block) */}
+                           <div className="col-span-1 flex flex-col gap-6">
+                               <div id="block-C5">
+                                    <BlockRenderer 
+                                        blockCode="C5" 
+                                        houses={c5Houses} 
+                                        reports={reports} 
+                                        officials={officials} 
+                                        isAdmin={isAdmin} 
+                                        onSelect={setSelectedHouse} 
+                                        className="h-fit"
+                                    />
+                               </div>
+                           </div>
+
+                           {/* Column 2: C7 & C8 */}
+                           <div className="col-span-1 flex flex-col gap-6">
+                               <div id="block-C7"><BlockRenderer blockCode="C7" houses={getBlockHouses('C7')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
+                               <div id="block-C8"><BlockRenderer blockCode="C8" houses={getBlockHouses('C8')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
+                           </div>
+
+                           {/* Column 3: C9 & C10 */}
+                           <div className="col-span-1 flex flex-col gap-6">
+                               <div id="block-C9"><BlockRenderer blockCode="C9" houses={getBlockHouses('C9')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
+                               <div id="block-C10"><BlockRenderer blockCode="C10" houses={getBlockHouses('C10')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
+                           </div>
+
+                           {/* Column 4: C11 & C12 */}
+                           <div className="col-span-1 flex flex-col gap-6">
+                               <div id="block-C11"><BlockRenderer blockCode="C11" houses={getBlockHouses('C11')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
+                               <div id="block-C12"><BlockRenderer blockCode="C12" houses={getBlockHouses('C12')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
+                           </div>
+                       </div>
+                       
+                       {/* Legend / Compass */}
+                       <div className="absolute bottom-4 right-4 opacity-20 pointer-events-none">
+                           <div className="w-20 h-20 border-4 border-slate-800 rounded-full flex items-center justify-center relative">
+                               <div className="absolute -top-3 bg-slate-800 text-white text-[10px] px-1 font-bold">U</div>
+                               <div className="w-1 h-16 bg-slate-800"></div>
+                               <div className="w-12 h-1 bg-slate-800 absolute"></div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+          </div>
       </div>
 
       {/* Detail Modal */}

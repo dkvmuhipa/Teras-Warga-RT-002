@@ -408,8 +408,130 @@ const PublicHome = ({ houses, announcements, ronda, reports, officials }: any) =
   );
 };
 
+interface PollCardProps {
+    poll: Poll;
+    votedPolls: Set<string>;
+    submittingId: string | null;
+    onVote: (pollId: string, optionId: string, options: PollOption[]) => void;
+}
+
+const PollCard: React.FC<PollCardProps> = ({ poll, votedPolls, submittingId, onVote }) => {
+    const hasVoted = votedPolls.has(poll.id);
+    const isClosed = poll.status === 'Closed';
+    const total = poll.totalVotes || 0;
+    const isSubmitting = submittingId === poll.id;
+    
+    // Find winner if closed or voted
+    const maxVotes = Math.max(...poll.options.map(o => o.votes), 0);
+    
+    // Days left calc
+    const daysLeft = Math.ceil((new Date(poll.deadline).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+    const isUrgent = daysLeft <= 2 && daysLeft >= 0;
+
+    return (
+        <div className={`bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-xl shadow-slate-200/50 transition-all duration-300 relative overflow-hidden ${isClosed ? 'opacity-90 grayscale-[0.3] hover:grayscale-0' : 'hover:scale-[1.01]'}`}>
+            {/* Background Decoration */}
+            <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none transform translate-x-1/3 -translate-y-1/3">
+                <Vote size={300} className="text-indigo-900"/>
+            </div>
+
+            <div className="relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide flex items-center gap-1.5 ${isClosed ? 'bg-slate-100 text-slate-500' : 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200'}`}>
+                                {isClosed ? <Lock size={12}/> : <Activity size={12} className={isUrgent ? "animate-pulse" : ""}/>}
+                                {isClosed ? 'Voting Selesai' : 'Sedang Berlangsung'}
+                            </span>
+                            {!isClosed && isUrgent && (
+                                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-rose-100 text-rose-600 animate-pulse">
+                                    Segera Berakhir!
+                                </span>
+                            )}
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-800 leading-tight mb-2">{poll.title}</h3>
+                        <p className="text-sm text-slate-500 leading-relaxed max-w-2xl">{poll.description}</p>
+                    </div>
+                    <div className="text-right hidden md:block">
+                        <div className="text-3xl font-black text-slate-800">{total}</div>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Suara</div>
+                    </div>
+                </div>
+
+                {/* Progress / Options Area */}
+                <div className="space-y-4">
+                    {poll.options.map((opt) => {
+                        const percent = total > 0 ? Math.round((opt.votes / total) * 100) : 0;
+                        const isWinner = (hasVoted || isClosed) && opt.votes === maxVotes && total > 0;
+                        
+                        return (
+                            <div key={opt.id} className="relative group">
+                                {(!hasVoted && !isClosed) ? (
+                                    <button 
+                                        onClick={() => onVote(poll.id, opt.id, poll.options)}
+                                        disabled={isSubmitting}
+                                        className="w-full p-5 rounded-2xl border-2 border-slate-100 bg-white hover:border-indigo-500 hover:bg-indigo-50/50 hover:shadow-lg hover:shadow-indigo-100 text-left transition-all active:scale-[0.98] flex justify-between items-center group/btn relative overflow-hidden"
+                                    >
+                                        {isSubmitting && <div className="absolute inset-0 bg-white/50 z-20 flex items-center justify-center backdrop-blur-sm"><Loader2 className="animate-spin text-indigo-600"/></div>}
+                                        <span className="font-bold text-slate-700 group-hover/btn:text-indigo-800 transition-colors text-base relative z-10">{opt.text}</span>
+                                        <div className="w-6 h-6 rounded-full border-2 border-slate-300 group-hover/btn:border-indigo-500 flex items-center justify-center relative z-10 transition-colors">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
+                                        </div>
+                                    </button>
+                                ) : (
+                                    // Result View
+                                    <div className={`relative w-full p-4 rounded-2xl border overflow-hidden transition-all duration-700 ${isWinner ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-200' : 'bg-slate-50 border-slate-100'}`}>
+                                        {/* Progress Bar Background */}
+                                        <div 
+                                            className={`absolute inset-0 h-full opacity-20 transition-all duration-1000 ease-out ${isWinner ? 'bg-gradient-to-r from-indigo-400 to-violet-500' : 'bg-slate-300'}`} 
+                                            style={{ width: `${percent}%` }}
+                                        ></div>
+                                        
+                                        <div className="relative flex justify-between items-center z-10">
+                                            <div className="flex items-center gap-3">
+                                                <span className={`font-bold text-base ${isWinner ? 'text-indigo-900' : 'text-slate-600'}`}>{opt.text}</span>
+                                                {isWinner && <Trophy size={16} className="text-amber-500 fill-amber-400 animate-bounce-slow"/>}
+                                            </div>
+                                            <div className="text-right">
+                                                <span className={`block font-black text-sm ${isWinner ? 'text-indigo-700' : 'text-slate-700'}`}>{percent}%</span>
+                                                <span className="text-[10px] text-slate-400 font-medium">{opt.votes} Suara</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Footer Info */}
+                <div className="mt-6 pt-6 border-t border-slate-50 flex justify-between items-center text-xs text-slate-400 font-medium">
+                    <div className="flex items-center gap-2">
+                        {hasVoted ? (
+                            <span className="text-emerald-600 flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                                <CheckCircle size={12}/> Suara Anda Telah Direkam
+                            </span>
+                        ) : !isClosed ? (
+                            <span className="text-indigo-600 flex items-center gap-1.5 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                                <ThumbsUp size={12}/> Silakan Pilih Satu Opsi
+                            </span>
+                        ) : (
+                            <span>Voting Ditutup</span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Clock size={12}/> Deadline: {new Date(poll.deadline).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const PublicVoting = ({ polls }: { polls: Poll[] }) => {
     const [votedPolls, setVotedPolls] = useState<Set<string>>(new Set());
+    const [activeTab, setActiveTab] = useState<'Active' | 'History'>('Active');
+    const [submittingId, setSubmittingId] = useState<string | null>(null);
     
     useEffect(() => {
         const loaded = new Set<string>();
@@ -424,104 +546,114 @@ const PublicVoting = ({ polls }: { polls: Poll[] }) => {
     const handleVote = async (pollId: string, optionId: string, options: PollOption[]) => {
         if (votedPolls.has(pollId)) return;
         
-        if (confirm("Apakah Anda yakin dengan pilihan Anda? Pilihan tidak dapat diubah.")) {
+        if (confirm("Konfirmasi pilihan Anda? Suara yang sudah masuk tidak dapat diubah.")) {
+            setSubmittingId(pollId);
             await submitVote(pollId, optionId, options);
             localStorage.setItem(`voted_poll_${pollId}`, 'true');
             setVotedPolls(prev => new Set(prev).add(pollId));
-            alert("Terima kasih! Suara Anda telah direkam.");
+            setTimeout(() => setSubmittingId(null), 800); // UI feel delay
         }
     };
 
     const activePolls = polls.filter(p => p.status === 'Open');
     const closedPolls = polls.filter(p => p.status === 'Closed');
-
-    const renderPollCard = (poll: Poll) => {
-        const hasVoted = votedPolls.has(poll.id);
-        const isClosed = poll.status === 'Closed';
-        const total = poll.totalVotes || 1;
-
-        return (
-            <div key={poll.id} className={`bg-white rounded-3xl p-6 border shadow-sm transition-all ${isClosed ? 'border-slate-100 opacity-90' : 'border-indigo-100 shadow-indigo-100 ring-1 ring-indigo-50'}`}>
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${isClosed ? 'bg-slate-100 text-slate-500' : 'bg-indigo-100 text-indigo-600 animate-pulse'}`}>
-                                 {isClosed ? 'Selesai' : 'Sedang Berlangsung'}
-                             </span>
-                             <span className="text-xs text-slate-400">Berakhir: {new Date(poll.deadline).toLocaleDateString()}</span>
-                        </div>
-                        <h3 className="text-xl font-black text-slate-800 leading-tight">{poll.title}</h3>
-                    </div>
-                    {hasVoted && <div className="bg-emerald-50 text-emerald-600 p-2 rounded-full"><CheckCircle size={20}/></div>}
-                </div>
-                
-                <p className="text-sm text-slate-600 mb-6">{poll.description}</p>
-                
-                <div className="space-y-3">
-                    {poll.options.map((opt) => {
-                        const percent = Math.round((opt.votes / total) * 100) || 0;
-                        return (
-                            <div key={opt.id} className="relative group">
-                                {(!hasVoted && !isClosed) ? (
-                                    <button 
-                                        onClick={() => handleVote(poll.id, opt.id, poll.options)}
-                                        className="w-full p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 text-left transition-all active:scale-95 flex justify-between items-center group-hover:shadow-md"
-                                    >
-                                        <span className="font-bold text-slate-700 text-sm group-hover:text-indigo-700">{opt.text}</span>
-                                        <div className="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-500"></div>
-                                    </button>
-                                ) : (
-                                    <div className="relative w-full p-4 rounded-xl border border-slate-100 bg-slate-50 overflow-hidden">
-                                        <div className="absolute inset-0 bg-indigo-100 origin-left transition-all duration-1000" style={{ width: `${percent}%` }}></div>
-                                        <div className="relative flex justify-between items-center z-10">
-                                            <span className="font-bold text-slate-800 text-sm">{opt.text}</span>
-                                            <span className="text-xs font-bold text-slate-600">{opt.votes} Suara ({percent}%)</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-                <div className="mt-4 pt-4 border-t border-slate-50 text-right">
-                    <p className="text-xs text-slate-400 font-bold">{poll.totalVotes} Total Suara Masuk</p>
-                </div>
-            </div>
-        );
-    };
+    
+    // Sort active polls by priority (e.g. deadline soonest first)
+    const sortedActivePolls = [...activePolls].sort((a,b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8 mb-24 animate-fade-in">
-             <div className="text-center mb-10">
-                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold uppercase tracking-widest mb-4 border border-indigo-100">
-                     <Vote size={16}/> Demokrasi Digital
-                 </div>
-                 <h1 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tight mb-4">Suara Warga RT 002</h1>
-                 <p className="text-slate-500 max-w-xl mx-auto">
-                     Salurkan aspirasi Anda dalam pengambilan keputusan lingkungan. Satu suara Anda sangat berarti untuk kemajuan bersama.
-                 </p>
+        <div className="max-w-5xl mx-auto px-4 py-8 mb-24 animate-fade-in font-sans">
+             {/* New Hero Section */}
+             <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-fuchsia-900 shadow-2xl shadow-indigo-200 min-h-[300px] flex items-center justify-center text-center px-6 py-12 mb-10 group">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 group-hover:scale-105 transition-transform duration-1000"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                
+                {/* Floating Elements */}
+                <div className="absolute top-10 left-10 p-4 bg-white/5 rounded-full backdrop-blur-sm animate-bounce-slow border border-white/10 hidden md:block">
+                    <Vote size={32} className="text-indigo-300"/>
+                </div>
+                <div className="absolute bottom-10 right-10 p-4 bg-white/5 rounded-full backdrop-blur-sm animate-bounce-slow border border-white/10 hidden md:block" style={{animationDelay: '1s'}}>
+                    <PieChart size={32} className="text-fuchsia-300"/>
+                </div>
+                
+                {/* Center Content */}
+                <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-indigo-100 text-[10px] font-bold uppercase tracking-widest shadow-lg">
+                        <Vote size={14} /> E-Voting System v2.0
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight drop-shadow-xl leading-tight">
+                        Suara Warga <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-fuchsia-300">RT 002</span>
+                    </h1>
+                    <p className="text-indigo-100 text-sm md:text-lg font-medium leading-relaxed max-w-lg mx-auto">
+                        Salurkan aspirasi Anda secara langsung, jujur, dan transparan. Masa depan lingkungan ada di tangan Anda.
+                    </p>
+                </div>
              </div>
 
-             <div className="space-y-8">
-                 <div>
-                     <h2 className="text-xl font-black text-slate-800 mb-4 flex items-center gap-2"><PieChart className="text-indigo-500"/> Voting Aktif</h2>
-                     {activePolls.length > 0 ? (
-                         <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-                             {activePolls.map(renderPollCard)}
-                         </div>
-                     ) : (
-                         <div className="p-8 text-center bg-white rounded-3xl border border-dashed border-slate-200 text-slate-400 italic">
-                             Tidak ada voting yang sedang berlangsung saat ini.
-                         </div>
-                     )}
+             {/* Tab Navigation */}
+             <div className="flex justify-center mb-10">
+                 <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1 shadow-inner ring-1 ring-slate-200">
+                     <button 
+                        onClick={() => setActiveTab('Active')} 
+                        className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'Active' ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-indigo-100 scale-105' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                     >
+                         <Activity size={16}/> Sedang Berlangsung
+                         {sortedActivePolls.length > 0 && <span className="bg-indigo-600 text-white text-[10px] px-1.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm">{sortedActivePolls.length}</span>}
+                     </button>
+                     <button 
+                        onClick={() => setActiveTab('History')} 
+                        className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'History' ? 'bg-white text-slate-800 shadow-sm scale-105' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                     >
+                         <History size={16}/> Riwayat Voting
+                     </button>
                  </div>
+             </div>
 
-                 {closedPolls.length > 0 && (
-                     <div className="opacity-80 hover:opacity-100 transition-opacity">
-                         <h2 className="text-xl font-black text-slate-500 mb-4 flex items-center gap-2"><History className="text-slate-400"/> Riwayat Voting</h2>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             {closedPolls.map(renderPollCard)}
-                         </div>
+             {/* Content Area */}
+             <div className="space-y-8 min-h-[400px]">
+                 {activeTab === 'Active' ? (
+                     <div className="animate-slide-up">
+                         {sortedActivePolls.length > 0 ? (
+                             <div className="grid grid-cols-1 gap-8">
+                                 {sortedActivePolls.map(poll => (
+                                     <PollCard 
+                                        key={poll.id} 
+                                        poll={poll} 
+                                        votedPolls={votedPolls} 
+                                        submittingId={submittingId} 
+                                        onVote={handleVote} 
+                                     />
+                                 ))}
+                             </div>
+                         ) : (
+                             <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-center">
+                                 <div className="bg-slate-50 p-6 rounded-full mb-4 ring-1 ring-slate-100">
+                                     <Vote size={48} className="text-slate-300"/>
+                                 </div>
+                                 <h3 className="text-xl font-bold text-slate-800">Tidak ada voting aktif</h3>
+                                 <p className="text-slate-500 max-w-sm mt-2 text-sm">Saat ini belum ada jajak pendapat yang sedang berlangsung. Cek kembali nanti atau lihat riwayat voting.</p>
+                             </div>
+                         )}
+                     </div>
+                 ) : (
+                     <div className="animate-slide-up">
+                         {closedPolls.length > 0 ? (
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 {closedPolls.map(poll => (
+                                     <PollCard 
+                                        key={poll.id} 
+                                        poll={poll} 
+                                        votedPolls={votedPolls} 
+                                        submittingId={submittingId} 
+                                        onVote={handleVote} 
+                                     />
+                                 ))}
+                             </div>
+                         ) : (
+                             <div className="text-center py-24 text-slate-400 italic bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                                 Belum ada riwayat voting yang selesai.
+                             </div>
+                         )}
                      </div>
                  )}
              </div>
@@ -959,7 +1091,14 @@ const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs, houses }: { officia
     const totalIncome = cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0);
     const totalExpense = cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0);
     const currentBalance = totalIncome - totalExpense;
-    const chartData = cashFlow.slice().reverse().map(c => ({ date: new Date(c.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}), amount: c.amount, type: c.type }));
+    
+    // Explicitly define chartData for PublicInfo scope
+    const chartData = (cashFlow || []).slice().reverse().map(c => ({ 
+        date: new Date(c.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}), 
+        amount: c.amount, 
+        type: c.type 
+    }));
+
     const dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
     const sortedRonda = [...ronda].sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
     const roleHierarchy = ['Ketua RT', 'Sekretaris', 'Bendahara', 'Bendahara RW', 'Koord. Keamanan', 'Seksi'];
@@ -1228,13 +1367,20 @@ const AdminDashboard = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Sort Ronda for Admin View (FIXED: Moved calculation inside render or memoized)
+  // Sort Ronda for Admin View
   const dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
   const sortedRonda = Array.isArray(ronda) 
     ? [...ronda].sort((a: any, b: any) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day))
     : [];
 
-  // ... (State declarations same as before)
+  // Chart Data Preparation (Explicitly Defined)
+  const chartData = (cashFlow || []).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()).map((c: any) => ({
+    date: new Date(c.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
+    amount: c.amount,
+    type: c.type
+  }));
+
+  // State Management
   const [residentView, setResidentView] = useState<'grid' | 'table'>('table');
   const [searchResident, setSearchResident] = useState('');
   const [searchUmkm, setSearchUmkm] = useState('');
@@ -1242,58 +1388,385 @@ const AdminDashboard = ({
   const [filterPayment, setFilterPayment] = useState('All');
   const [filterBlock, setFilterBlock] = useState('All');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // New States for Inventory Filter
   const [searchInventory, setSearchInventory] = useState('');
   const [filterInventoryCondition, setFilterInventoryCondition] = useState('All');
+  
+  // Validation Errors State
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [serviceTab, setServiceTab] = useState<'surat' | 'laporan'>('surat');
   
   // Forms
   const [annTitle, setAnnTitle] = useState(''); const [annContent, setAnnContent] = useState(''); const [annType, setAnnType] = useState<Announcement['type']>('General');
   const [annNotify, setAnnNotify] = useState(false); 
-  const [cashDesc, setCashDesc] = useState(''); const [cashAmount, setCashAmount] = useState(''); const [cashType, setCashType] = useState<'Income' | 'Expense'>('Income'); const [cashCategory, setCashCategory] = useState('Iuran'); const [editingCashId, setEditingCashId] = useState<string | null>(null);
-  const [pollTitle, setPollTitle] = useState(''); const [pollDesc, setPollDesc] = useState(''); const [pollDeadline, setPollDeadline] = useState(''); const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
+  
+  // Cash Flow Form
+  const [cashDesc, setCashDesc] = useState(''); 
+  const [cashAmount, setCashAmount] = useState(''); 
+  const [cashType, setCashType] = useState<'Income' | 'Expense'>('Income'); 
+  const [cashCategory, setCashCategory] = useState('Iuran');
+  const [editingCashId, setEditingCashId] = useState<string | null>(null);
+
+  // Poll Form
+  const [pollTitle, setPollTitle] = useState('');
+  const [pollDesc, setPollDesc] = useState('');
+  const [pollDeadline, setPollDeadline] = useState('');
+  const [pollOptions, setPollOptions] = useState<string[]>(['', '']); // Start with 2 options
+
   const [offName, setOffName] = useState(''); const [offRole, setOffRole] = useState(''); const [offPhone, setOffPhone] = useState(''); const [offHouse, setOffHouse] = useState(''); const [offPhoto, setOffPhoto] = useState(''); const [offId, setOffId] = useState<string|null>(null);
   const [invName, setInvName] = useState(''); const [invTotal, setInvTotal] = useState(''); const [invAvailable, setInvAvailable] = useState(''); const [invCondition, setInvCondition] = useState<'Baik'|'Perlu Perbaikan'|'Rusak'>('Baik'); const [invNotes, setInvNotes] = useState(''); const [invId, setInvId] = useState<string|null>(null);
   const [umkmName, setUmkmName] = useState(''); const [umkmOwner, setUmkmOwner] = useState(''); const [umkmCategory, setUmkmCategory] = useState('Kuliner'); const [umkmDesc, setUmkmDesc] = useState(''); const [umkmContact, setUmkmContact] = useState(''); const [umkmImage, setUmkmImage] = useState(''); const [umkmId, setUmkmId] = useState<string|null>(null);
   const [rondaDay, setRondaDay] = useState(''); const [rondaMembers, setRondaMembers] = useState(''); const [selectedRondaId, setSelectedRondaId] = useState<string|null>(null);
   const [duesHouseId, setDuesHouseId] = useState(''); const [duesAmount, setDuesAmount] = useState('25000'); const [duesStatus, setDuesStatus] = useState<PaymentStatus>(PaymentStatus.PAID);
+  
+  // Bulk Dues State
   const [bulkStatus, setBulkStatus] = useState<PaymentStatus>(PaymentStatus.PAID);
+
+  // Import State
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [newPassword, setNewPassword] = useState(''); const [confirmPassword, setConfirmPassword] = useState(''); const [isChangingPassword, setIsChangingPassword] = useState(false); const [showPassword, setShowPassword] = useState(false);
-  const [editHouseForm, setEditHouseForm] = useState({ headOfFamily: '', occupants: 0, phone: '', paymentStatus: '', unifiedStatus: 'Tetap', hasPregnant: false, hasBaby: false, hasToddler: false, hasTeenager: false, hasElderly: false, accessCode: '' });
-  const [isGenerating, setIsGenerating] = useState(false); const [draftTopic, setDraftTopic] = useState(''); const [localConfig, setLocalConfig] = useState<PdfConfig>(pdfConfig);
-  const [aiAnalysis, setAiAnalysis] = useState(''); const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // ... (All Validation Helpers and Handlers like resetForms, handleSelectAll, handleCreateAnnouncement, etc. retained)
-  const validateText = (text: string, minLength = 3) => text && text.trim().length >= minLength;
-  const validateAmount = (amount: string) => { const val = parseInt(amount); return !isNaN(val) && val > 0; };
-  const resetForms = () => { /* ... existing reset logic ... */ setAnnTitle(''); setAnnContent(''); setFormErrors({}); };
+  // Settings / Profile State
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Enhanced Edit House Form
+  const [editHouseForm, setEditHouseForm] = useState({
+      headOfFamily: '', occupants: 0, phone: '', paymentStatus: '', unifiedStatus: 'Tetap',
+      hasPregnant: false, hasBaby: false, hasToddler: false, hasTeenager: false, hasElderly: false,
+      accessCode: '' // New Field
+  });
+
+  // Helpers
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [draftTopic, setDraftTopic] = useState('');
+  const [localConfig, setLocalConfig] = useState<PdfConfig>(pdfConfig);
+
+  // --- AI ANALYSIS STATE ---
+  const [aiAnalysis, setAiAnalysis] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // ... (Keeping validation helpers)
+  const validatePhone = (phone: string) => {
+    const clean = phone.replace(/\D/g, '');
+    return (clean.startsWith('08') || clean.startsWith('62')) && clean.length >= 10 && clean.length <= 14;
+  };
+
+  const validateAmount = (amount: string) => {
+    const val = parseInt(amount);
+    return !isNaN(val) && val > 0;
+  };
+
+  const validateText = (text: string, minLength = 3) => {
+      return text && text.trim().length >= minLength;
+  };
+
+
+  // Computed Values for Residents Tab
+  const getFilteredHouses = () => {
+      return houses.filter((h: House) => {
+          const matchSearch = h.headOfFamily.toLowerCase().includes(searchResident.toLowerCase()) || h.id.toLowerCase().includes(searchResident.toLowerCase());
+          let matchStatus = true;
+          if (filterStatus === 'Occupied') matchStatus = h.status === 'Occupied';
+          else if (filterStatus === 'Empty') matchStatus = h.status === 'Empty';
+          else if (filterStatus === 'Business') matchStatus = h.status === 'Business';
+          else if (filterStatus === 'Kontrak') matchStatus = h.status === 'Occupied' && h.residenceType === 'Kontrak';
+          let matchPayment = true;
+          if (filterPayment !== 'All') matchPayment = h.paymentStatus === filterPayment;
+          let matchBlock = true;
+          if (filterBlock !== 'All') matchBlock = h.block === filterBlock;
+          return matchSearch && matchStatus && matchPayment && matchBlock;
+      });
+  };
+
+  const filteredHouses = getFilteredHouses();
+  const availableBlocks = (Array.from(new Set(houses.map((h: House) => h.block))) as string[]).sort();
+
+  // Handlers
+  const resetForms = () => {
+      setAnnTitle(''); setAnnContent(''); setDraftTopic(''); setAnnNotify(false);
+      setCashDesc(''); setCashAmount(''); setCashType('Income'); setCashCategory('Iuran'); setEditingCashId(null);
+      setOffName(''); setOffRole(''); setOffPhone(''); setOffHouse(''); setOffPhoto(''); setOffId(null);
+      setInvName(''); setInvTotal(''); setInvAvailable(''); setInvNotes(''); setInvId(null);
+      setUmkmName(''); setUmkmOwner(''); setUmkmCategory('Kuliner'); setUmkmDesc(''); setUmkmContact(''); setUmkmImage(''); setUmkmId(null);
+      setRondaMembers(''); setSelectedRondaId(null);
+      setDuesHouseId(''); setDuesAmount('25000'); setDuesStatus(PaymentStatus.PAID);
+      setBulkStatus(PaymentStatus.PAID);
+      setPollTitle(''); setPollDesc(''); setPollDeadline(''); setPollOptions(['','']);
+      setImportFile(null);
+      setFormErrors({});
+  };
+
+  // ... (Selection Handlers same as before)
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.checked) {
+          const allIds = filteredHouses.map(h => h.id);
+          setSelectedIds(new Set(allIds));
+      } else {
+          setSelectedIds(new Set());
+      }
+  };
+
+  const handleSelectOne = (id: string) => {
+      const newSet = new Set(selectedIds);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      setSelectedIds(newSet);
+  };
   
-  // Handlers (Simplified for brevity, assuming existing logic)
-  const handleCreateAnnouncement = async (e: React.FormEvent) => { e.preventDefault(); if(!validateText(annTitle)) return; await addAnnouncementToDb({title: annTitle, content: annContent, type: annType, date: new Date().toISOString()}); setIsModalOpen(false); resetForms(); };
-  const handleDeleteAnnouncement = async (id: string) => await deleteAnnouncementFromDb(id);
-  // ... other handlers ...
-  const handleLogout = async () => { await logoutAdmin(); navigate('/'); };
+  const handleBulkDuesUpdate = () => {
+      if (selectedIds.size === 0) return;
+      setBulkStatus(PaymentStatus.PAID);
+      setModalType('bulkDues');
+      setIsModalOpen(true);
+  };
+
+  const handleSaveBulkDues = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (selectedIds.size === 0) return;
+      const updates = Array.from(selectedIds).map(id => ({ id, paymentStatus: bulkStatus }));
+      try {
+          await batchUpdateHouses(updates);
+          alert(`Berhasil memperbarui status ${updates.length} warga.`);
+          setIsModalOpen(false);
+          setSelectedIds(new Set());
+          resetForms();
+      } catch (e) {
+          console.error(e);
+          alert("Gagal melakukan update massal.");
+      }
+  };
+
+  // ... (Other handlers same as before)
+  const handleDeleteHouse = async (id: string) => { if(confirm("Hapus warga?")) await deleteHouseFromDb(id); };
+  const handlePasswordChange = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (newPassword !== confirmPassword) { alert("Password tidak cocok!"); return; }
+      setIsChangingPassword(true);
+      try { await updateAdminPassword(newPassword); alert("Password diubah!"); setNewPassword(''); setConfirmPassword(''); } 
+      catch (err) { alert("Gagal. Login ulang diperlukan."); } 
+      finally { setIsChangingPassword(false); }
+  };
+  const handleResetSystem = async () => {
+      if (confirm("Reset sistem ke awal? Data akan hilang.")) {
+          if (prompt("Ketik 'RESET'") === 'RESET') {
+              try {
+                  const initialData = { houses: generateHouses(), announcements: MOCK_ANNOUNCEMENTS, cashFlow: MOCK_CASHFLOW, officials: INITIAL_OFFICIALS, reports: INITIAL_REPORTS, ronda: MOCK_RONDA, inventory: MOCK_INVENTORY, umkm: MOCK_UMKM, polls: MOCK_POLLS, rondaLogs: MOCK_RONDA_LOGS };
+                  await seedDatabase(initialData);
+                  alert("Reset berhasil."); window.location.reload();
+              } catch (e) { alert("Gagal reset."); }
+          }
+      }
+  };
+  const handleExportData = () => {
+      const data = { houses, announcements, cashFlow, officials, reports, letters, ronda, inventory, umkm, polls };
+      const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", jsonString);
+      downloadAnchorNode.setAttribute("download", `backup_rt002_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+  };
+
+  const handleAiAnalysis = async () => {
+      setIsAnalyzing(true);
+      const totalResidents = houses.reduce((acc:any, h:any) => acc + (h.occupants || 0), 0);
+      const income = cashFlow.filter((c:any) => c.type === 'Income').reduce((acc:any, c:any) => acc + c.amount, 0);
+      const expense = cashFlow.filter((c:any) => c.type === 'Expense').reduce((acc:any, c:any) => acc + c.amount, 0);
+      const balance = income - expense;
+      const newReports = reports.filter((r:any) => r.status === 'Baru').length;
+      const unpaid = houses.filter((h:any) => h.paymentStatus !== 'Lunas').length;
+      const result = await generateDashboardSummary({ totalResidents, cashBalance: balance, reportsCount: newReports, unpaidCount: unpaid });
+      setAiAnalysis(result);
+      setIsAnalyzing(false);
+  };
+
+  // ... (Import Handlers)
+  const handleDownloadTemplate = () => { /* ... */ };
+  const handleProcessImport = async (e: React.FormEvent) => { /* ... */ };
+
+  // ... (CRUD Handlers)
+  const handleCreateAnnouncement = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    if(!validateText(annTitle, 3)) { setFormErrors({title: "Judul minimal 3 karakter"}); return; }
+    if(!validateText(annContent, 5)) { setFormErrors({content: "Isi pengumuman minimal 5 karakter"}); return; }
+    await addAnnouncementToDb({ title: annTitle, content: annContent, type: annType, date: new Date().toISOString() }); 
+    if (annNotify) await addNotificationToDb({ title: `Pengumuman: ${annTitle}`, message: annContent, date: new Date().toISOString(), type: annType === 'Urgent' ? 'Alert' : 'Info', target: 'All', isRead: false });
+    setIsModalOpen(false); resetForms(); 
+  };
+  const handleDeleteAnnouncement = async (id: string) => { if (confirm("Hapus?")) await deleteAnnouncementFromDb(id); };
+  const handleGenerateDraft = async () => { if(!draftTopic) return; setIsGenerating(true); const draft = await generateAnnouncementDraft(draftTopic); setAnnContent(draft); setAnnTitle(draftTopic); setIsGenerating(false); };
   
-  // (Navigation Render Logic)
+  // Finance
+  const handleSaveTransaction = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    const errors: any = {};
+    if(!validateText(cashDesc, 3)) errors.desc = "Deskripsi minimal 3 karakter";
+    if(!validateAmount(cashAmount)) errors.amount = "Nominal angka positif";
+    if(Object.keys(errors).length > 0) { setFormErrors(errors); return; }
+    const transactionData = { description: cashDesc, amount: parseInt(cashAmount), type: cashType, category: cashCategory, date: new Date().toISOString().split('T')[0] };
+    if (editingCashId) await updateTransactionInDb(editingCashId, transactionData); else await addTransactionToDb(transactionData);
+    setIsModalOpen(false); resetForms(); 
+  };
+  const openEditCash = (cf: CashFlow) => { setEditingCashId(cf.id); setCashDesc(cf.description); setCashAmount(cf.amount.toString()); setCashType(cf.type); setCashCategory(cf.category); setModalType('cash'); setIsModalOpen(true); };
+  const handleDeleteTransaction = async (id: string) => { if (confirm("Hapus?")) await deleteTransactionFromDb(id); };
+  const handleSaveDues = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    if (!duesHouseId) return; 
+    await updateHouseData(duesHouseId, { paymentStatus: duesStatus }); 
+    if (duesStatus === PaymentStatus.PAID) { const house = houses.find((h:House) => h.id === duesHouseId); await addTransactionToDb({ description: `Iuran Warga ${duesHouseId} (${house?.headOfFamily || 'Warga'})`, amount: parseInt(duesAmount), type: 'Income', category: 'Iuran Warga', date: new Date().toISOString().split('T')[0] }); } 
+    setIsModalOpen(false); resetForms(); 
+  };
+  
+  // Inventory
+  const handleSaveInventory = async (e: React.FormEvent) => { e.preventDefault(); /* ... validation ... */ const itemData = { name: invName, total: parseInt(invTotal), available: parseInt(invAvailable), condition: invCondition, notes: invNotes }; if (invId) await updateInventoryInDb(invId, itemData); else await addInventoryToDb(itemData); setIsModalOpen(false); resetForms(); };
+  const openEditInventory = (item: InventoryItem) => { setInvId(item.id); setInvName(item.name); setInvTotal(item.total.toString()); setInvAvailable(item.available.toString()); setInvCondition(item.condition); setInvNotes(item.notes || ''); setModalType('inventory'); setIsModalOpen(true); };
+  const handleDeleteInventory = async (id: string) => { if(confirm("Hapus?")) await deleteInventoryFromDb(id); };
+  
+  // UMKM
+  const handleSaveUMKM = async (e: React.FormEvent) => { e.preventDefault(); /* ... */ const umkmData = { name: umkmName, owner: umkmOwner, category: umkmCategory, description: umkmDesc, contact: umkmContact, image: umkmImage }; if (umkmId) await updateUMKMInDb(umkmId, umkmData); else await addUMKMToDb(umkmData); setIsModalOpen(false); resetForms(); };
+  const openEditUMKM = (u: UMKM) => { setUmkmId(u.id); setUmkmName(u.name); setUmkmOwner(u.owner); setUmkmCategory(u.category); setUmkmDesc(u.description); setUmkmContact(u.contact); setUmkmImage(u.image); setModalType('umkm'); setIsModalOpen(true); };
+  const handleDeleteUMKM = async (id: string) => { if (confirm("Hapus?")) await deleteUMKMFromDb(id); };
+  
+  // Ronda
+  const openEditRonda = (schedule: RondaSchedule) => { if (!schedule.id) return; setSelectedRondaId(schedule.id); setRondaDay(schedule.day); setRondaMembers(schedule.members.join(', ')); setModalType('ronda'); setIsModalOpen(true); };
+  const handleSaveRonda = async (e: React.FormEvent) => { e.preventDefault(); if (!selectedRondaId) return; const membersArray = rondaMembers.split(',').map(m => m.trim()).filter(m => m !== ''); await updateRondaSchedule(selectedRondaId, membersArray); setIsModalOpen(false); resetForms(); };
+  
+  // Officials
+  const handleSaveOfficial = async (e: React.FormEvent) => { e.preventDefault(); /* ... */ const officialData = { name: offName, role: offRole, phone: offPhone, houseId: offHouse, photo: offPhoto || undefined }; if (offId) await updateOfficialInDb(offId, officialData); else await addOfficialToDb(officialData); setIsModalOpen(false); resetForms(); };
+  const handleDeleteOfficial = async (id: string) => { if (confirm("Hapus?")) await deleteOfficialFromDb(id); };
+  const handleEditOfficial = (o: Official) => { setOffId(o.id); setOffName(o.name); setOffRole(o.role); setOffPhone(o.phone); setOffHouse(o.houseId); setOffPhoto(o.photo||''); setModalType('official'); setIsModalOpen(true); };
+  const openDuesModal = (h: House) => { setDuesHouseId(h.id); setDuesStatus(PaymentStatus.PAID); setModalType('dues'); setIsModalOpen(true); };
+  
+  // Reports & Letters
+  const handleUpdateReport = async (id: string, s: string) => { await updateReportStatus(id, s); if (s === 'Selesai') await addNotificationToDb({ title: "Laporan Ditindaklanjuti", message: "Laporan Anda telah ditandai selesai oleh Admin.", date: new Date().toISOString(), type: 'Success', target: 'All' }); };
+  const handleDeleteReport = async (id: string) => await deleteReportFromDb(id);
+  const handleUpdateLetter = async (id: string, s: string) => await updateLetterStatus(id, s);
+  const handleDeleteLetter = async (id: string) => await deleteLetterFromDb(id);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof PdfConfig) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setLocalConfig(prev => ({ ...prev, [field]: reader.result as string })); reader.readAsDataURL(file); } };
+  const handleSaveConfig = () => { try { setPdfConfig(localConfig); localStorage.setItem('pdf_config', JSON.stringify(localConfig)); alert("Konfigurasi tersimpan!"); } catch (e) { alert("Gagal menyimpan."); } };
+
+  // Market Items (Admin)
+  const handleDeleteMarketItem = async (id: string) => { if(confirm("Hapus iklan ini?")) await deleteMarketItem(id); };
+  const handleMarkSold = async (id: string) => { if(confirm("Tandai terjual?")) await updateMarketItemStatus(id, 'Sold'); };
+
+  // Edit House
+  const openEditHouse = (h: House) => { 
+      setSelectedHouse(h); 
+      let unified = 'Tetap'; 
+      if(h.status === 'Empty') unified = 'Empty'; 
+      else if(h.status === 'Business') unified = 'Business'; 
+      else if(h.residenceType === 'Kost') unified = 'Kost'; 
+      else if(h.residenceType === 'Kontrak') unified = 'Kontrak'; 
+      
+      setEditHouseForm({ 
+          headOfFamily: h.status === 'Empty' || h.headOfFamily === '-' ? '' : h.headOfFamily, 
+          occupants: h.status === 'Empty' ? 1 : h.occupants || 1, 
+          phone: h.status === 'Empty' || h.phone === '-' ? '' : h.phone, 
+          paymentStatus: h.paymentStatus, 
+          unifiedStatus: unified, 
+          hasPregnant: h.hasPregnant||false, 
+          hasBaby: h.hasBaby||false, 
+          hasToddler: h.hasToddler||false, 
+          hasTeenager: h.hasTeenager||false, 
+          hasElderly: h.hasElderly||false,
+          accessCode: h.accessCode || ''
+      }); 
+      setModalType('editHouse'); 
+      setIsModalOpen(true); 
+  };
+
+  const handleSaveHouse = async (e: React.FormEvent) => { 
+      e.preventDefault(); 
+      if(!selectedHouse) return; 
+      
+      let status: House['status'] = 'Occupied'; 
+      let residenceType: House['residenceType'] = 'Tetap'; 
+      if(editHouseForm.unifiedStatus === 'Empty') status = 'Empty'; 
+      else if(editHouseForm.unifiedStatus === 'Business') status = 'Business'; 
+      else residenceType = editHouseForm.unifiedStatus as any; 
+      
+      const payload = { 
+          headOfFamily: status === 'Empty' ? '-' : editHouseForm.headOfFamily, 
+          occupants: status === 'Empty' ? 0 : parseInt(editHouseForm.occupants as any), 
+          phone: status === 'Empty' ? '' : editHouseForm.phone, 
+          status, 
+          residenceType: status === 'Occupied' ? residenceType : undefined, 
+          paymentStatus: editHouseForm.paymentStatus, 
+          hasPregnant: editHouseForm.hasPregnant, 
+          hasBaby: editHouseForm.hasBaby, 
+          hasToddler: editHouseForm.hasToddler, 
+          hasTeenager: editHouseForm.hasTeenager, 
+          hasElderly: editHouseForm.hasElderly,
+          accessCode: editHouseForm.accessCode // Save Access Code
+      }; 
+      
+      await updateHouseData(selectedHouse.id, payload); 
+      setIsModalOpen(false); 
+  };
+
+  // POLL Handlers
+  const handleCreatePoll = async (e: React.FormEvent) => {
+      e.preventDefault();
+      const validOptions = pollOptions.filter(o => o.trim() !== '');
+      if (validOptions.length < 2) { alert("Minimal 2 opsi polling."); return; }
+      
+      const newPoll = {
+          title: pollTitle,
+          description: pollDesc,
+          deadline: pollDeadline,
+          date: new Date().toISOString(),
+          status: 'Open',
+          totalVotes: 0,
+          options: validOptions.map((text, idx) => ({ id: `opt${idx}`, text, votes: 0 }))
+      };
+      
+      await addPollToDb(newPoll);
+      await addNotificationToDb({ title: `Voting Baru: ${pollTitle}`, message: "Ayo berpartisipasi dalam voting warga terbaru!", date: new Date().toISOString(), type: 'Info', target: 'All', isRead: false });
+      setIsModalOpen(false);
+      resetForms();
+  };
+  
+  const handleClosePoll = async (id: string) => { if(confirm("Tutup voting ini? Warga tidak akan bisa memilih lagi.")) await updatePollStatus(id, 'Closed'); };
+  const handleDeletePoll = async (id: string) => { if(confirm("Hapus voting ini selamanya?")) await deletePollFromDb(id); };
+
+  // Nav Configuration
+  const navGroups = [
+      { title: "Menu Utama", items: [{ id: 'overview', icon: LayoutDashboard, label: 'Dashboard' }] },
+      { title: "Administrasi", items: [{ id: 'residents', icon: Users, label: 'Data Warga' }, { id: 'services', icon: Archive, label: 'Layanan & Laporan' }, { id: 'finance', icon: DollarSign, label: 'Keuangan & Kas' }] },
+      { title: "Lingkungan", items: [{ id: 'facilities', icon: Package, label: 'Fasilitas & Jadwal' }, { id: 'market', icon: ShoppingCart, label: 'Bursa Warga' }, { id: 'umkm', icon: ShoppingBag, label: 'UMKM' }, { id: 'announcements', icon: Megaphone, label: 'Pengumuman' }, { id: 'polls', icon: Vote, label: 'E-Voting' }, { id: 'officials', icon: Briefcase, label: 'Pengurus' }] },
+      { title: "Sistem", items: [{ id: 'settings', icon: Settings, label: 'Pengaturan' }] }
+  ];
+
+  const handleLogout = async () => { try { await logoutAdmin(); setIsMobileMenuOpen(false); navigate('/'); } catch (e) { console.error(e); } };
+
   const renderNav = () => (
       <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto custom-scrollbar">
-          {/* ... */}
-          <div className="space-y-1">
-              <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${activeTab==='overview'?'bg-slate-900 text-white':'text-slate-500 hover:bg-slate-100'}`}><LayoutDashboard size={18}/> <span className="text-sm">Dashboard</span></button>
-              <button onClick={() => setActiveTab('residents')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${activeTab==='residents'?'bg-slate-900 text-white':'text-slate-500 hover:bg-slate-100'}`}><Users size={18}/> <span className="text-sm">Data Warga</span></button>
-              <button onClick={() => setActiveTab('facilities')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${activeTab==='facilities'?'bg-slate-900 text-white':'text-slate-500 hover:bg-slate-100'}`}><Package size={18}/> <span className="text-sm">Fasilitas & Jadwal</span></button>
-              {/* ... other nav items ... */}
-          </div>
+          {navGroups.map((group, idx) => (
+              <div key={idx}>
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-3">{group.title}</h3>
+                  <div className="space-y-1">
+                      {group.items.map(item => (
+                          <button key={item.id} onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 font-bold group relative overflow-hidden ${activeTab === item.id ? 'bg-slate-900 text-white shadow-lg shadow-slate-300' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}>
+                              <item.icon size={18} className={activeTab === item.id ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'} /> <span className="text-sm">{item.label}</span>
+                          </button>
+                      ))}
+                  </div>
+              </div>
+          ))}
       </nav>
   );
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
+      {/* Sidebar Desktop */}
       <div className="hidden md:flex flex-col w-72 bg-white border-r border-slate-200 fixed h-full z-30">
-          {/* Sidebar Header */}
           <div className="p-6 border-b border-slate-100 flex items-center gap-3"><div className="bg-slate-900 text-white p-2 rounded-xl"><Shield size={24}/></div><div><h1 className="font-black text-xl text-slate-900 tracking-tight">TERAS Admin</h1><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dashboard v2.0</p></div></div>
           {renderNav()}
       </div>
@@ -1315,7 +1788,7 @@ const AdminDashboard = ({
 
           {activeTab === 'facilities' && (
               <div className="space-y-8 animate-fade-in">
-                {/* 1. SECTION: Jadwal Ronda (FIXED using sortedRonda) */}
+                {/* 1. SECTION: Jadwal Ronda */}
                 <div>
                    <h2 className="font-black text-2xl text-slate-800 mb-4 flex items-center gap-2"><Moon size={24} className="text-indigo-600"/> Jadwal Siskamling</h2>
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1325,7 +1798,32 @@ const AdminDashboard = ({
                        }) : (<div className="col-span-full text-center py-8 text-slate-400 italic bg-slate-50 rounded-2xl border-dashed border-2 border-slate-200">Jadwal ronda belum dikonfigurasi.</div>)}
                    </div>
                 </div>
-                {/* ... (Other facility sections) ... */}
+                
+                {/* 2. SECTION: Fasilitas & Keuangan (With Chart) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-sm">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                            <div>
+                                <h3 className="font-bold text-lg flex items-center gap-2 text-slate-800"><BarChart3 className="text-emerald-500" size={20}/> Laporan Arus Kas</h3>
+                                <p className="text-sm text-slate-500 mt-1">Grafik pemasukan dan pengeluaran kas operasional RT.</p>
+                            </div>
+                            <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-colors"><FileDown size={16}/> Unduh Laporan PDF</button>
+                        </div>
+                        <div className="h-72 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData}>
+                                    <defs><linearGradient id="colorInc" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/><stop offset="95%" stopColor="#10B981" stopOpacity={0}/></linearGradient></defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9"/>
+                                    <XAxis dataKey="date" tick={{fontSize: 10, fill: '#94a3b8'}} axisLine={false} tickLine={false} dy={10} />
+                                    <YAxis tick={{fontSize: 10, fill: '#94a3b8'}} axisLine={false} tickLine={false} tickFormatter={(value) => `${value/1000}k`}/>
+                                    <RechartsTooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px'}} itemStyle={{fontSize: '12px', fontWeight: 'bold'}} formatter={(value: number) => [`Rp ${value.toLocaleString()}`, 'Jumlah']} labelStyle={{color: '#64748b', marginBottom: '4px', fontSize: '10px'}} />
+                                    <Area type="monotone" dataKey="amount" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorInc)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                    {/* ... other facility content ... */}
+                </div>
               </div>
           )}
           
@@ -1383,7 +1881,17 @@ export const App = () => {
         try { setPdfConfig(JSON.parse(storedConfig)); } catch(e) {}
     }
 
-    if (!isFirebaseConfigured) { setLoading(false); return unsubscribeAuth; }
+    if (!isFirebaseConfigured) { 
+        // If firebase not configured, we might want to load mock data or keep loading false
+        setLoading(false); 
+        // Optional: Initialize with mock data here if needed
+        setHouses(generateHouses());
+        setAnnouncements(MOCK_ANNOUNCEMENTS);
+        setCashFlow(MOCK_CASHFLOW);
+        setOfficials(INITIAL_OFFICIALS);
+        setRonda(MOCK_RONDA);
+        return unsubscribeAuth; 
+    }
 
     // Data Subscriptions
     const unsubs = [

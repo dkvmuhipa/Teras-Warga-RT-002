@@ -1,3 +1,13 @@
+
+
+
+
+
+
+
+
+
+
 import React from 'react';
 import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
@@ -48,14 +58,10 @@ export const generateHouses = (): House[] => {
       // Simulasi Kontrak vs Tetap (20% Kontrak)
       const isRenter = Math.random() > 0.8;
 
-      // Generate Access Code
+      // Generate Access Code: HOUSEID-RANDOM4CHAR
+      // Example: C5-01-AX92
       const randomSuffix = Array(4).fill(0).map(() => Math.floor(Math.random()*36).toString(36).toUpperCase()).join('');
       const accessCode = `${config.code}-${number}-${randomSuffix}`;
-
-      // Gamification Data (Mock)
-      const paymentStreak = status === 'Occupied' ? Math.floor(Math.random() * 24) : 0; // 0-24 months
-      const isExemplary = paymentStreak >= 12;
-      const paymentStatus = Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID);
 
       houses.push({
         id: `${config.code}-${number}`,
@@ -65,11 +71,9 @@ export const generateHouses = (): House[] => {
         occupants: status === 'Empty' ? 0 : Math.floor(Math.random() * 4) + 1,
         status,
         residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
-        paymentStatus: status === 'Occupied' ? paymentStatus : PaymentStatus.PAID, // Empty usually considered paid/na
+        paymentStatus: Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID),
         phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
-        accessCode: accessCode,
-        paymentStreak: paymentStreak,
-        isExemplary: isExemplary && paymentStatus === PaymentStatus.PAID
+        accessCode: accessCode
       });
     }
   });

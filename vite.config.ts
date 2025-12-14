@@ -17,12 +17,11 @@ export default defineConfig(({ mode }) => {
       'process.env': env
     },
     build: {
-      chunkSizeWarningLimit: 1000, // Increase limit slightly
+      chunkSizeWarningLimit: 1000, 
       rollupOptions: {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              // Split vendor chunks to avoid huge files
               if (id.includes('firebase')) return 'firebase';
               if (id.includes('react')) return 'react-vendor';
               if (id.includes('recharts')) return 'charts';
