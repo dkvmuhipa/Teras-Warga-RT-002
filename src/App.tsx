@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import { 
   Home, FileText, Megaphone, AlertTriangle, User, Users, Menu, X, 
   LayoutDashboard, Send, Bot, Trash2, Clock, CheckCircle, XCircle, Search, Edit2, Plus,
@@ -9,9 +9,12 @@ import {
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
   RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle, ImageIcon, Link as LinkIcon, AlertCircle, Wrench, Battery, BatteryMedium, BatteryWarning, ChevronRight,
-  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, BarChart2, PieChart, LocateFixed, Navigation, ShoppingCart, Repeat, Trophy, Medal, Flame, ThumbsUp, Activity, Crown
+  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, BarChart2, PieChart, LocateFixed, Navigation, ShoppingCart, Repeat
 } from 'lucide-react';
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, BarChart, Bar, Cell, Legend } from 'recharts';
+
+// Destructure React Router DOM components
+const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } = ReactRouterDOM;
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, INITIAL_LETTERS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_MARKET_ITEMS } from './constants';
@@ -28,7 +31,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { 
   subscribeToCollection, 
   subscribeToNotifications,
-  subscribeToActiveReports, 
+  subscribeToActiveReports, // New Optimized Service
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
@@ -122,7 +125,7 @@ const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; chi
   );
 };
 
-// --- Notification Components ---
+// --- NOTIFICATION COMPONENTS ---
 const NotificationToast = ({ notification, onClose }: { notification: AppNotification, onClose: () => void }) => {
     useEffect(() => {
         if ("Notification" in window && Notification.permission === "granted") {
@@ -409,130 +412,9 @@ const PublicHome = ({ houses, announcements, ronda, reports, officials }: any) =
   );
 };
 
-interface PollCardProps {
-    poll: Poll;
-    votedPolls: Set<string>;
-    submittingId: string | null;
-    onVote: (pollId: string, optionId: string, options: PollOption[]) => void;
-}
-
-const PollCard: React.FC<PollCardProps> = ({ poll, votedPolls, submittingId, onVote }) => {
-    const hasVoted = votedPolls.has(poll.id);
-    const isClosed = poll.status === 'Closed';
-    const total = poll.totalVotes || 0;
-    const isSubmitting = submittingId === poll.id;
-    
-    // Find winner if closed or voted
-    const maxVotes = Math.max(...poll.options.map(o => o.votes), 0);
-    
-    // Days left calc
-    const daysLeft = Math.ceil((new Date(poll.deadline).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-    const isUrgent = daysLeft <= 2 && daysLeft >= 0;
-
-    return (
-        <div className={`bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-xl shadow-slate-200/50 transition-all duration-300 relative overflow-hidden ${isClosed ? 'opacity-90 grayscale-[0.3] hover:grayscale-0' : 'hover:scale-[1.01]'}`}>
-            {/* Background Decoration */}
-            <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none transform translate-x-1/3 -translate-y-1/3">
-                <Vote size={300} className="text-indigo-900"/>
-            </div>
-
-            <div className="relative z-10">
-                <div className="flex justify-between items-start mb-6">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide flex items-center gap-1.5 ${isClosed ? 'bg-slate-100 text-slate-500' : 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200'}`}>
-                                {isClosed ? <Lock size={12}/> : <Activity size={12} className={isUrgent ? "animate-pulse" : ""}/>}
-                                {isClosed ? 'Voting Selesai' : 'Sedang Berlangsung'}
-                            </span>
-                            {!isClosed && isUrgent && (
-                                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-rose-100 text-rose-600 animate-pulse">
-                                    Segera Berakhir!
-                                </span>
-                            )}
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-800 leading-tight mb-2">{poll.title}</h3>
-                        <p className="text-sm text-slate-500 leading-relaxed max-w-2xl">{poll.description}</p>
-                    </div>
-                    <div className="text-right hidden md:block">
-                        <div className="text-3xl font-black text-slate-800">{total}</div>
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Suara</div>
-                    </div>
-                </div>
-
-                {/* Progress / Options Area */}
-                <div className="space-y-4">
-                    {poll.options.map((opt) => {
-                        const percent = total > 0 ? Math.round((opt.votes / total) * 100) : 0;
-                        const isWinner = (hasVoted || isClosed) && opt.votes === maxVotes && total > 0;
-                        
-                        return (
-                            <div key={opt.id} className="relative group">
-                                {(!hasVoted && !isClosed) ? (
-                                    <button 
-                                        onClick={() => onVote(poll.id, opt.id, poll.options)}
-                                        disabled={isSubmitting}
-                                        className="w-full p-5 rounded-2xl border-2 border-slate-100 bg-white hover:border-indigo-500 hover:bg-indigo-50/50 hover:shadow-lg hover:shadow-indigo-100 text-left transition-all active:scale-[0.98] flex justify-between items-center group/btn relative overflow-hidden"
-                                    >
-                                        {isSubmitting && <div className="absolute inset-0 bg-white/50 z-20 flex items-center justify-center backdrop-blur-sm"><Loader2 className="animate-spin text-indigo-600"/></div>}
-                                        <span className="font-bold text-slate-700 group-hover/btn:text-indigo-800 transition-colors text-base relative z-10">{opt.text}</span>
-                                        <div className="w-6 h-6 rounded-full border-2 border-slate-300 group-hover/btn:border-indigo-500 flex items-center justify-center relative z-10 transition-colors">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
-                                        </div>
-                                    </button>
-                                ) : (
-                                    // Result View
-                                    <div className={`relative w-full p-4 rounded-2xl border overflow-hidden transition-all duration-700 ${isWinner ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-200' : 'bg-slate-50 border-slate-100'}`}>
-                                        {/* Progress Bar Background */}
-                                        <div 
-                                            className={`absolute inset-0 h-full opacity-20 transition-all duration-1000 ease-out ${isWinner ? 'bg-gradient-to-r from-indigo-400 to-violet-500' : 'bg-slate-300'}`} 
-                                            style={{ width: `${percent}%` }}
-                                        ></div>
-                                        
-                                        <div className="relative flex justify-between items-center z-10">
-                                            <div className="flex items-center gap-3">
-                                                <span className={`font-bold text-base ${isWinner ? 'text-indigo-900' : 'text-slate-600'}`}>{opt.text}</span>
-                                                {isWinner && <Trophy size={16} className="text-amber-500 fill-amber-400 animate-bounce-slow"/>}
-                                            </div>
-                                            <div className="text-right">
-                                                <span className={`block font-black text-sm ${isWinner ? 'text-indigo-700' : 'text-slate-700'}`}>{percent}%</span>
-                                                <span className="text-[10px] text-slate-400 font-medium">{opt.votes} Suara</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Footer Info */}
-                <div className="mt-6 pt-6 border-t border-slate-50 flex justify-between items-center text-xs text-slate-400 font-medium">
-                    <div className="flex items-center gap-2">
-                        {hasVoted ? (
-                            <span className="text-emerald-600 flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-                                <CheckCircle size={12}/> Suara Anda Telah Direkam
-                            </span>
-                        ) : !isClosed ? (
-                            <span className="text-indigo-600 flex items-center gap-1.5 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-                                <ThumbsUp size={12}/> Silakan Pilih Satu Opsi
-                            </span>
-                        ) : (
-                            <span>Voting Ditutup</span>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <Clock size={12}/> Deadline: {new Date(poll.deadline).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
+// ... PublicVoting, PublicServices, PublicUMKM (Keep as is)
 const PublicVoting = ({ polls }: { polls: Poll[] }) => {
     const [votedPolls, setVotedPolls] = useState<Set<string>>(new Set());
-    const [activeTab, setActiveTab] = useState<'Active' | 'History'>('Active');
-    const [submittingId, setSubmittingId] = useState<string | null>(null);
     
     useEffect(() => {
         const loaded = new Set<string>();
@@ -547,114 +429,104 @@ const PublicVoting = ({ polls }: { polls: Poll[] }) => {
     const handleVote = async (pollId: string, optionId: string, options: PollOption[]) => {
         if (votedPolls.has(pollId)) return;
         
-        if (confirm("Konfirmasi pilihan Anda? Suara yang sudah masuk tidak dapat diubah.")) {
-            setSubmittingId(pollId);
+        if (confirm("Apakah Anda yakin dengan pilihan Anda? Pilihan tidak dapat diubah.")) {
             await submitVote(pollId, optionId, options);
             localStorage.setItem(`voted_poll_${pollId}`, 'true');
             setVotedPolls(prev => new Set(prev).add(pollId));
-            setTimeout(() => setSubmittingId(null), 800); // UI feel delay
+            alert("Terima kasih! Suara Anda telah direkam.");
         }
     };
 
     const activePolls = polls.filter(p => p.status === 'Open');
     const closedPolls = polls.filter(p => p.status === 'Closed');
-    
-    // Sort active polls by priority (e.g. deadline soonest first)
-    const sortedActivePolls = [...activePolls].sort((a,b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
+
+    const renderPollCard = (poll: Poll) => {
+        const hasVoted = votedPolls.has(poll.id);
+        const isClosed = poll.status === 'Closed';
+        const total = poll.totalVotes || 1;
+
+        return (
+            <div key={poll.id} className={`bg-white rounded-3xl p-6 border shadow-sm transition-all ${isClosed ? 'border-slate-100 opacity-90' : 'border-indigo-100 shadow-indigo-100 ring-1 ring-indigo-50'}`}>
+                <div className="flex justify-between items-start mb-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${isClosed ? 'bg-slate-100 text-slate-500' : 'bg-indigo-100 text-indigo-600 animate-pulse'}`}>
+                                 {isClosed ? 'Selesai' : 'Sedang Berlangsung'}
+                             </span>
+                             <span className="text-xs text-slate-400">Berakhir: {new Date(poll.deadline).toLocaleDateString()}</span>
+                        </div>
+                        <h3 className="text-xl font-black text-slate-800 leading-tight">{poll.title}</h3>
+                    </div>
+                    {hasVoted && <div className="bg-emerald-50 text-emerald-600 p-2 rounded-full"><CheckCircle size={20}/></div>}
+                </div>
+                
+                <p className="text-sm text-slate-600 mb-6">{poll.description}</p>
+                
+                <div className="space-y-3">
+                    {poll.options.map((opt) => {
+                        const percent = Math.round((opt.votes / total) * 100) || 0;
+                        return (
+                            <div key={opt.id} className="relative group">
+                                {(!hasVoted && !isClosed) ? (
+                                    <button 
+                                        onClick={() => handleVote(poll.id, opt.id, poll.options)}
+                                        className="w-full p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 text-left transition-all active:scale-95 flex justify-between items-center group-hover:shadow-md"
+                                    >
+                                        <span className="font-bold text-slate-700 text-sm group-hover:text-indigo-700">{opt.text}</span>
+                                        <div className="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-500"></div>
+                                    </button>
+                                ) : (
+                                    <div className="relative w-full p-4 rounded-xl border border-slate-100 bg-slate-50 overflow-hidden">
+                                        <div className="absolute inset-0 bg-indigo-100 origin-left transition-all duration-1000" style={{ width: `${percent}%` }}></div>
+                                        <div className="relative flex justify-between items-center z-10">
+                                            <span className="font-bold text-slate-800 text-sm">{opt.text}</span>
+                                            <span className="text-xs font-bold text-slate-600">{opt.votes} Suara ({percent}%)</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+                <div className="mt-4 pt-4 border-t border-slate-50 text-right">
+                    <p className="text-xs text-slate-400 font-bold">{poll.totalVotes} Total Suara Masuk</p>
+                </div>
+            </div>
+        );
+    };
 
     return (
-        <div className="max-w-5xl mx-auto px-4 py-8 mb-24 animate-fade-in font-sans">
-             {/* New Hero Section */}
-             <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-fuchsia-900 shadow-2xl shadow-indigo-200 min-h-[300px] flex items-center justify-center text-center px-6 py-12 mb-10 group">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 group-hover:scale-105 transition-transform duration-1000"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                
-                {/* Floating Elements */}
-                <div className="absolute top-10 left-10 p-4 bg-white/5 rounded-full backdrop-blur-sm animate-bounce-slow border border-white/10 hidden md:block">
-                    <Vote size={32} className="text-indigo-300"/>
-                </div>
-                <div className="absolute bottom-10 right-10 p-4 bg-white/5 rounded-full backdrop-blur-sm animate-bounce-slow border border-white/10 hidden md:block" style={{animationDelay: '1s'}}>
-                    <PieChart size={32} className="text-fuchsia-300"/>
-                </div>
-                
-                {/* Center Content */}
-                <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-indigo-100 text-[10px] font-bold uppercase tracking-widest shadow-lg">
-                        <Vote size={14} /> E-Voting System v2.0
-                    </div>
-                    <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight drop-shadow-xl leading-tight">
-                        Suara Warga <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-fuchsia-300">RT 002</span>
-                    </h1>
-                    <p className="text-indigo-100 text-sm md:text-lg font-medium leading-relaxed max-w-lg mx-auto">
-                        Salurkan aspirasi Anda secara langsung, jujur, dan transparan. Masa depan lingkungan ada di tangan Anda.
-                    </p>
-                </div>
-             </div>
-
-             {/* Tab Navigation */}
-             <div className="flex justify-center mb-10">
-                 <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1 shadow-inner ring-1 ring-slate-200">
-                     <button 
-                        onClick={() => setActiveTab('Active')} 
-                        className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'Active' ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-indigo-100 scale-105' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-                     >
-                         <Activity size={16}/> Sedang Berlangsung
-                         {sortedActivePolls.length > 0 && <span className="bg-indigo-600 text-white text-[10px] px-1.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm">{sortedActivePolls.length}</span>}
-                     </button>
-                     <button 
-                        onClick={() => setActiveTab('History')} 
-                        className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'History' ? 'bg-white text-slate-800 shadow-sm scale-105' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-                     >
-                         <History size={16}/> Riwayat Voting
-                     </button>
+        <div className="max-w-4xl mx-auto px-4 py-8 mb-24 animate-fade-in">
+             <div className="text-center mb-10">
+                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold uppercase tracking-widest mb-4 border border-indigo-100">
+                     <Vote size={16}/> Demokrasi Digital
                  </div>
+                 <h1 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tight mb-4">Suara Warga RT 002</h1>
+                 <p className="text-slate-500 max-w-xl mx-auto">
+                     Salurkan aspirasi Anda dalam pengambilan keputusan lingkungan. Satu suara Anda sangat berarti untuk kemajuan bersama.
+                 </p>
              </div>
 
-             {/* Content Area */}
-             <div className="space-y-8 min-h-[400px]">
-                 {activeTab === 'Active' ? (
-                     <div className="animate-slide-up">
-                         {sortedActivePolls.length > 0 ? (
-                             <div className="grid grid-cols-1 gap-8">
-                                 {sortedActivePolls.map(poll => (
-                                     <PollCard 
-                                        key={poll.id} 
-                                        poll={poll} 
-                                        votedPolls={votedPolls} 
-                                        submittingId={submittingId} 
-                                        onVote={handleVote} 
-                                     />
-                                 ))}
-                             </div>
-                         ) : (
-                             <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-center">
-                                 <div className="bg-slate-50 p-6 rounded-full mb-4 ring-1 ring-slate-100">
-                                     <Vote size={48} className="text-slate-300"/>
-                                 </div>
-                                 <h3 className="text-xl font-bold text-slate-800">Tidak ada voting aktif</h3>
-                                 <p className="text-slate-500 max-w-sm mt-2 text-sm">Saat ini belum ada jajak pendapat yang sedang berlangsung. Cek kembali nanti atau lihat riwayat voting.</p>
-                             </div>
-                         )}
-                     </div>
-                 ) : (
-                     <div className="animate-slide-up">
-                         {closedPolls.length > 0 ? (
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                 {closedPolls.map(poll => (
-                                     <PollCard 
-                                        key={poll.id} 
-                                        poll={poll} 
-                                        votedPolls={votedPolls} 
-                                        submittingId={submittingId} 
-                                        onVote={handleVote} 
-                                     />
-                                 ))}
-                             </div>
-                         ) : (
-                             <div className="text-center py-24 text-slate-400 italic bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                                 Belum ada riwayat voting yang selesai.
-                             </div>
-                         )}
+             <div className="space-y-8">
+                 <div>
+                     <h2 className="text-xl font-black text-slate-800 mb-4 flex items-center gap-2"><PieChart className="text-indigo-500"/> Voting Aktif</h2>
+                     {activePolls.length > 0 ? (
+                         <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                             {activePolls.map(renderPollCard)}
+                         </div>
+                     ) : (
+                         <div className="p-8 text-center bg-white rounded-3xl border border-dashed border-slate-200 text-slate-400 italic">
+                             Tidak ada voting yang sedang berlangsung saat ini.
+                         </div>
+                     )}
+                 </div>
+
+                 {closedPolls.length > 0 && (
+                     <div className="opacity-80 hover:opacity-100 transition-opacity">
+                         <h2 className="text-xl font-black text-slate-500 mb-4 flex items-center gap-2"><History className="text-slate-400"/> Riwayat Voting</h2>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             {closedPolls.map(renderPollCard)}
+                         </div>
                      </div>
                  )}
              </div>
@@ -1088,7 +960,7 @@ const PublicUMKM = ({ umkmData }: { umkmData: UMKM[] }) => {
   );
 };
 
-const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs, houses }: { officials: Official[], cashFlow: CashFlow[], ronda: RondaSchedule[], rondaLogs: RondaCheckLog[], houses: House[] }) => {
+const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs }: { officials: Official[], cashFlow: CashFlow[], ronda: RondaSchedule[], rondaLogs: RondaCheckLog[] }) => {
     const totalIncome = cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0);
     const totalExpense = cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0);
     const currentBalance = totalIncome - totalExpense;
@@ -1118,17 +990,6 @@ const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs, houses }: { officia
         setIsCheckModalOpen(false);
         setCheckLocation('');
     };
-
-    // Calculate Leaderboard
-    const blocks = ['C5', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12'];
-    const leaderboard = blocks.map(block => {
-        const blockHouses = houses ? houses.filter(h => h.block === block) : [];
-        const occupiedHouses = blockHouses.filter(h => h.status === 'Occupied');
-        const total = occupiedHouses.length;
-        const paid = occupiedHouses.filter(h => h.paymentStatus === PaymentStatus.PAID).length;
-        const percentage = total > 0 ? Math.round((paid / total) * 100) : 0;
-        return { block, percentage, paid, total };
-    }).sort((a, b) => b.percentage - a.percentage || b.paid - a.paid);
     
     return (
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 mb-20 md:mb-20 space-y-8 animate-fade-in">
@@ -1177,112 +1038,7 @@ const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs, houses }: { officia
                 </div>
             </div>
 
-            {/* LEADERBOARD SECTION (NEW) */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-6 border border-amber-100 shadow-xl shadow-amber-100/50 overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                    <Trophy size={140} className="text-amber-600"/>
-                </div>
-                
-                <div className="relative z-10">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold uppercase tracking-wide mb-2">
-                                <Flame size={12} fill="currentColor"/> Kompetisi Warga
-                            </div>
-                            <h2 className="text-2xl font-black text-slate-800">Klasemen Kerukunan Blok</h2>
-                            <p className="text-sm text-slate-600 mt-1 max-w-lg">
-                                Peringkat blok berdasarkan persentase pelunasan iuran warga. Blok teratas adalah blok paling rukun dan peduli lingkungan!
-                            </p>
-                        </div>
-                        <div className="text-right hidden md:block">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Update Realtime</p>
-                            <p className="text-2xl font-black text-slate-800">{new Date().toLocaleDateString()}</p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Podium Section */}
-                        <div className="lg:col-span-2 flex items-end justify-center gap-2 md:gap-4 min-h-[250px] pb-6">
-                            {/* 2nd Place */}
-                            {leaderboard[1] && (
-                                <div className="flex flex-col items-center w-1/3 max-w-[140px]">
-                                    <div className="mb-2 text-center">
-                                        <div className="text-2xl font-black text-slate-400">#2</div>
-                                        <div className="text-sm font-bold text-slate-600">Blok {leaderboard[1].block}</div>
-                                        <div className="text-xs font-medium text-slate-500">{leaderboard[1].percentage}% Lunas</div>
-                                    </div>
-                                    <div className="w-full h-32 bg-gradient-to-t from-slate-300 to-slate-200 rounded-t-2xl border-t-4 border-slate-400 shadow-lg flex items-end justify-center p-4 relative group">
-                                        <Medal size={40} className="text-slate-500 mb-4 drop-shadow-sm group-hover:scale-110 transition-transform"/>
-                                    </div>
-                                </div>
-                            )}
-                            
-                            {/* 1st Place */}
-                            {leaderboard[0] && (
-                                <div className="flex flex-col items-center w-1/3 max-w-[160px] -mt-8 relative z-10">
-                                    <div className="absolute -top-12 animate-bounce-slow">
-                                        <Trophy size={48} className="text-yellow-500 fill-yellow-400 drop-shadow-lg"/>
-                                    </div>
-                                    <div className="mb-2 text-center pt-6">
-                                        <div className="text-3xl font-black text-yellow-600">#1</div>
-                                        <div className="text-lg font-bold text-slate-800">Blok {leaderboard[0].block}</div>
-                                        <div className="text-sm font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">{leaderboard[0].percentage}% Lunas</div>
-                                    </div>
-                                    <div className="w-full h-48 bg-gradient-to-t from-yellow-400 to-yellow-300 rounded-t-2xl border-t-4 border-yellow-500 shadow-xl flex items-end justify-center p-4 relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
-                                        <div className="text-5xl font-black text-yellow-600 opacity-20 absolute bottom-2">1</div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* 3rd Place */}
-                            {leaderboard[2] && (
-                                <div className="flex flex-col items-center w-1/3 max-w-[140px]">
-                                    <div className="mb-2 text-center">
-                                        <div className="text-2xl font-black text-amber-700">#3</div>
-                                        <div className="text-sm font-bold text-slate-600">Blok {leaderboard[2].block}</div>
-                                        <div className="text-xs font-medium text-slate-500">{leaderboard[2].percentage}% Lunas</div>
-                                    </div>
-                                    <div className="w-full h-24 bg-gradient-to-t from-amber-700 to-amber-600 rounded-t-2xl border-t-4 border-amber-800 shadow-lg flex items-end justify-center p-4 relative group">
-                                        <Medal size={32} className="text-amber-200 mb-2 drop-shadow-sm group-hover:scale-110 transition-transform"/>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* List Section */}
-                        <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-white p-4 overflow-y-auto max-h-[300px] custom-scrollbar">
-                            <h4 className="font-bold text-slate-700 mb-4 text-sm flex items-center gap-2">
-                                <List size={16}/> Peringkat Selanjutnya
-                            </h4>
-                            <div className="space-y-3">
-                                {leaderboard.slice(3).map((item, idx) => (
-                                    <div key={item.block} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
-                                        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-sm">
-                                            {idx + 4}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="font-bold text-sm text-slate-800">Blok {item.block}</span>
-                                                <span className="text-xs font-bold text-slate-600">{item.percentage}%</span>
-                                            </div>
-                                            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                                                <div 
-                                                    className="h-full bg-slate-400 rounded-full" 
-                                                    style={{ width: `${item.percentage}%` }}
-                                                ></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 {/* ... (Existing Info Cards) ... */}
                  <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-6 text-white shadow-xl shadow-emerald-200 relative overflow-hidden group hover:scale-[1.02] transition-transform"><div className="absolute -right-6 -top-6 p-4 opacity-10 group-hover:rotate-12 transition-transform"><Wallet size={140}/></div><div className="relative z-10"><p className="text-emerald-100 font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2"><ShieldCheck size={14}/> Keuangan Warga</p><h2 className="text-3xl md:text-4xl font-black tracking-tight mb-6">Rp {currentBalance.toLocaleString()}</h2><div className="flex gap-3 text-xs font-bold"><div className="bg-white/10 backdrop-blur-sm px-3 py-2 rounded-xl flex items-center gap-1.5 border border-white/10"><div className="bg-white/20 p-1 rounded-full"><ArrowUpRight size={10} className="text-emerald-200"/></div>+{totalIncome.toLocaleString()}</div><div className="bg-white/10 backdrop-blur-sm px-3 py-2 rounded-xl flex items-center gap-1.5 border border-white/10"><div className="bg-white/20 p-1 rounded-full"><ArrowDownRight size={10} className="text-rose-200"/></div>-{totalExpense.toLocaleString()}</div></div></div></div>
                  <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100 flex flex-col justify-between group hover:border-brand-blue/30 transition-colors"><div className="flex justify-between items-start"><div><p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Struktur Organisasi</p><h2 className="text-4xl font-black text-slate-800 mt-2">{officials.length} <span className="text-lg font-medium text-slate-400">Personil</span></h2></div><div className="bg-brand-blue/5 p-4 rounded-2xl text-brand-blue group-hover:bg-brand-blue group-hover:text-white transition-colors"><Briefcase size={28}/></div></div><p className="text-xs text-slate-400 mt-4 leading-relaxed">Siap melayani kebutuhan administrasi, keamanan, dan sosial warga RT 002.</p></div>
                  <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100 flex flex-col justify-between group hover:border-indigo-200 transition-colors"><div className="flex justify-between items-start"><div><p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Jadwal Keamanan</p><h2 className="text-xl font-black text-slate-800 mt-2 capitalize">{new Date().toLocaleDateString('id-ID', {weekday:'long'})}</h2></div><div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors"><Moon size={28}/></div></div><div className="mt-4"><div className="flex -space-x-2 overflow-hidden py-1">{ronda.find(r => r.day === new Date().toLocaleDateString('id-ID', {weekday:'long'}))?.members.slice(0,4).map((m,i) => (<div key={i} className="w-9 h-9 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-700 shadow-sm" title={m}>{m.charAt(0)}</div>)) || <span className="text-sm text-slate-400 italic">Tidak ada jadwal</span>}</div><p className="text-[10px] text-slate-400 mt-2">*Tim Siskamling Malam Ini</p></div></div>
@@ -1350,6 +1106,14 @@ const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs, houses }: { officia
         </div>
     );
 };
+
+const DEMOGRAPHIC_OPTIONS = [
+  { label: 'Ibu Hamil', key: 'hasPregnant' },
+  { label: 'Bayi', key: 'hasBaby' },
+  { label: 'Balita', key: 'hasToddler' },
+  { label: 'Remaja', key: 'hasTeenager' },
+  { label: 'Lansia', key: 'hasElderly' },
+];
 
 // --- Admin Dashboard (RECONSTRUCTED) ---
 
@@ -1432,6 +1196,10 @@ const AdminDashboard = ({
   // --- AI ANALYSIS STATE ---
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Define sortedRonda here to fix scope issue
+  const dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+  const sortedRonda = [...ronda].sort((a: any, b: any) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
 
   // ... (Keeping validation helpers)
   const validatePhone = (phone: string) => {
@@ -1854,6 +1622,7 @@ const AdminDashboard = ({
               </div>
           )}
 
+          {/* ... (Residents, Polls, Services, Finance, Officials, UMKM, Announcements tabs retained...) */}
           {activeTab === 'residents' && (
               <div className="animate-fade-in space-y-6">
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -2003,7 +1772,7 @@ const AdminDashboard = ({
                 <div>
                    <h2 className="font-black text-2xl text-slate-800 mb-4 flex items-center gap-2"><Moon size={24} className="text-indigo-600"/> Jadwal Siskamling</h2>
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                       {ronda.length > 0 ? ronda.map((r:any) => {
+                       {sortedRonda.length > 0 ? sortedRonda.map((r:any) => {
                            const isToday = r.day === new Date().toLocaleDateString('id-ID', {weekday:'long'});
                            return (<div key={r.id || r.day} className={`relative p-5 rounded-3xl border transition-all duration-300 group ${isToday ? 'bg-gradient-to-br from-indigo-900 to-indigo-700 border-indigo-500 shadow-xl shadow-indigo-200 ring-2 ring-indigo-300 transform scale-[1.02]' : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg'}`}>{isToday && (<div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm animate-bounce-slow">Hari Ini</div>)}<div className="flex justify-between items-start mb-4"><div><h4 className={`font-black text-lg ${isToday ? 'text-white' : 'text-slate-700'}`}>{r.day}</h4><p className={`text-xs font-medium ${isToday ? 'text-indigo-200' : 'text-slate-400'}`}>{r.members.length} Personil</p></div><button onClick={() => openEditRonda(r)} className={`p-2 rounded-xl transition-colors ${isToday ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-50 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600'}`}><Edit2 size={16}/></button></div><div className="space-y-2">{r.members.length > 0 ? r.members.map((m:any, idx:any) => (<div key={idx} className={`flex items-center gap-2 text-sm p-2 rounded-xl ${isToday ? 'bg-white/10 text-indigo-50 border border-white/5' : 'bg-slate-50 text-slate-600'}`}><div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isToday ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-600'}`}>{m.charAt(0)}</div><span className="truncate">{m}</span></div>)) : (<div className={`text-center py-4 italic text-xs ${isToday ? 'text-indigo-300' : 'text-slate-400'}`}>Belum ada jadwal</div>)}</div></div>);
                        }) : (<div className="col-span-full text-center py-8 text-slate-400 italic bg-slate-50 rounded-2xl border-dashed border-2 border-slate-200">Jadwal ronda belum dikonfigurasi.</div>)}
@@ -2153,58 +1922,3 @@ const AdminDashboard = ({
                                    placeholder="Password Baru"
                                    value={newPassword}
                                    onChange={e => setNewPassword(e.target.value)}
-                                   minLength={6}
-                               />
-                               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                                   {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
-                               </button>
-                           </div>
-                           <div className="relative">
-                               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                               <input 
-                                   type={showPassword ? "text" : "password"} 
-                                   className="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all" 
-                                   placeholder="Konfirmasi Password"
-                                   value={confirmPassword}
-                                   onChange={e => setConfirmPassword(e.target.value)}
-                                   minLength={6}
-                               />
-                           </div>
-                           <Button type="submit" className="w-full" disabled={!newPassword || isChangingPassword}>
-                               {isChangingPassword ? 'Memproses...' : 'Simpan Password Baru'}
-                           </Button>
-                       </form>
-                   </Card>
-
-                   {/* System Management (Danger Zone) */}
-                   <Card title="Manajemen Sistem" icon={Database} className="border-rose-100">
-                       <div className="space-y-4">
-                           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
-                               <div>
-                                   <h4 className="font-bold text-sm text-slate-700">Backup Data</h4>
-                                   <p className="text-xs text-slate-400">Unduh semua data dalam format JSON.</p>
-                               </div>
-                               <Button size="sm" variant="outline" onClick={handleExportData}>
-                                   <Download size={14}/> Export
-                               </Button>
-                           </div>
-
-                           <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100">
-                               <div className="flex items-start gap-3 mb-4">
-                                   <div className="p-2 bg-rose-100 text-rose-600 rounded-lg"><AlertTriangle size={20}/></div>
-                                   <div>
-                                       <h4 className="font-bold text-sm text-rose-700">Reset Database (Seed)</h4>
-                                       <p className="text-xs text-rose-600 leading-relaxed">
-                                           Tindakan ini akan <strong>menghapus semua data real</strong> dan mengembalikannya ke data contoh (dummy). Gunakan hanya untuk keperluan testing.
-                                       </p>
-                                   </div>
-                               </div>
-                               <Button onClick={handleResetSystem} className="w-full bg-white text-rose-600 border border-rose-200 hover:bg-rose-600 hover:text-white shadow-sm hover:shadow-rose-200">
-                                   <Trash size={16}/> Reset ke Pengaturan Awal
-                               </Button>
-                           </div>
-                       </div>
-                   </Card>
-               </div>
-
-               {/* Right Column: PDF
