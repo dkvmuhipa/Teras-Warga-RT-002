@@ -16,7 +16,12 @@ export interface House {
   residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan including Kost
   paymentStatus: PaymentStatus;
   phone?: string;
+  accessCode?: string; // NEW: Kode Akses Unik untuk Verifikasi
   
+  // Gamification & Rewards (NEW)
+  paymentStreak?: number; // Jumlah bulan berturut-turut lunas
+  isExemplary?: boolean;  // Status Warga Teladan (Streak >= 12)
+
   // Data Demografi (Optional)
   hasPregnant?: boolean; // Ibu Hamil
   hasBaby?: boolean;     // Bayi
@@ -163,4 +168,19 @@ export interface Poll {
   options: PollOption[];
   totalVotes: number;
   createdBy?: string; // Admin email/id
+}
+
+// Bursa Warga (Marketplace) Types
+export interface MarketItem {
+  id: string;
+  title: string;
+  description: string;
+  price: number; // 0 for Gratis
+  category: 'Jual' | 'Barter' | 'Gratis';
+  sellerName: string;
+  sellerContact: string;
+  image: string;
+  date: string;
+  status: 'Available' | 'Sold';
+  houseId?: string;
 }

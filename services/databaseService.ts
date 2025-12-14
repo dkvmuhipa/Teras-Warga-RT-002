@@ -4,6 +4,10 @@
 
 
 
+
+
+
+
 import { db, auth, isFirebaseConfigured } from "./firebaseConfig";
 import { 
   collection, 
@@ -14,6 +18,7 @@ import {
   onSnapshot,
   query,
   getDocs,
+  getDoc,
   setDoc,
   writeBatch,
   orderBy,
@@ -40,6 +45,7 @@ const UMKM_COL = "umkm";
 const NOTIFICATIONS_COL = "notifications";
 const POLLS_COL = "polls";
 const RONDA_LOGS_COL = "rondaLogs";
+const MARKET_COL = "marketItems";
 
 // --- AUTH SERVICES ---
 export const loginAdmin = (email: string, pass: string) => {
@@ -170,6 +176,23 @@ export const updateHouseData = async (id: string, updates: any) => {
 
 export const deleteHouseFromDb = async (id: string) => {
   try { await deleteDoc(doc(db, HOUSES_COL, id)); } catch (e) { console.error("Error deleting house:", e); }
+};
+
+export const validateResidentAccess = async (houseId: string, code: string): Promise<boolean> => {
+    try {
+        const docRef = doc(db, HOUSES_COL, houseId);
+        const snapshot = await getDoc(docRef);
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            // Simple validation: check if code matches
+            // In production, bcrypt hash would be better, but plain text for MVP is fine per spec
+            return data.accessCode && data.accessCode.toUpperCase() === code.toUpperCase();
+        }
+        return false;
+    } catch (e) {
+        console.error("Verification error:", e);
+        return false;
+    }
 };
 
 export const batchUpdateHouses = async (housesData: any[]) => {
@@ -384,18 +407,6 @@ export const updatePollStatus = async (id: string, status: string) => {
 
 export const submitVote = async (pollId: string, optionId: string, currentOptions: any[]) => {
   try {
-    // We need to increment totalVotes AND the specific option's votes
-    // Since options are an array of objects, we have to find the index and update the specific field
-    // OR replace the entire options array with the incremented value locally + atomic write.
-    // However, for true atomic updates on array elements, it's tricky without a subcollection.
-    // Simpler approach for this app: Update entire object with transaction or just strict update if low concurrency.
-    // For better reliability with concurrency, we fetch fresh, update, write.
-    
-    // NOTE: In a real high-traffic app, options should be a subcollection. 
-    // Here we will do a read-modify-write pattern or optimistic update.
-    
-    // Let's rely on client passing current state is risky. 
-    // Best effort here:
     const pollRef = doc(db, POLLS_COL, pollId);
     
     // Find option index
@@ -444,6 +455,35 @@ export const subscribeToRondaLogs = (callback: (data: any[]) => void) => {
         data.sort((a:any, b:any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         callback(data.slice(0, 50));
     });
+  });
+};
+
+// --- 12. BURSA WARGA (COMMUNITY MARKET) ---
+export const addMarketItem = async (item: any) => {
+  try {
+    const { id, ...data } = item;
+    await addDoc(collection(db, MARKET_COL), deepSanitize(data));
+  } catch (e) { console.error("Error adding market item:", e); }
+};
+
+export const deleteMarketItem = async (id: string) => {
+  try { await deleteDoc(doc(db, MARKET_COL, id)); } catch (e) { console.error("Error deleting market item:", e); }
+};
+
+export const updateMarketItemStatus = async (id: string, status: string) => {
+  try { await updateDoc(doc(db, MARKET_COL, id), { status }); } catch (e) { console.error("Error updating market status:", e); }
+};
+
+export const subscribeToMarketItems = (callback: (data: any[]) => void) => {
+  const q = query(collection(db, MARKET_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      ...doc.data(), 
+      id: doc.id 
+    }));
+    callback(data);
+  }, (error) => {
+    console.error("Error subscribing to market items:", error);
   });
 };
 
@@ -521,12 +561,21 @@ export const seedDatabase = async (initialData: any) => {
           }
       }
 
-      // Seed Ronda Logs (New)
+      // Seed Ronda Logs
       const logsSnap = await getDocs(collection(db, RONDA_LOGS_COL));
       if (logsSnap.empty && initialData.rondaLogs && initialData.rondaLogs.length > 0) {
           for (const l of initialData.rondaLogs) {
               const { id, ...data } = l;
               await addDoc(collection(db, RONDA_LOGS_COL), deepSanitize(data));
+          }
+      }
+
+      // Seed Market Items (New)
+      const marketSnap = await getDocs(collection(db, MARKET_COL));
+      if (marketSnap.empty && initialData.marketItems && initialData.marketItems.length > 0) {
+          for (const m of initialData.marketItems) {
+              const { id, ...data } = m;
+              await addDoc(collection(db, MARKET_COL), deepSanitize(data));
           }
       }
 

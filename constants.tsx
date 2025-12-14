@@ -4,8 +4,12 @@
 
 
 
+
+
+
+
 import React from 'react';
-import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog } from './types';
+import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TERAS";
@@ -54,6 +58,11 @@ export const generateHouses = (): House[] => {
       // Simulasi Kontrak vs Tetap (20% Kontrak)
       const isRenter = Math.random() > 0.8;
 
+      // Generate Access Code: HOUSEID-RANDOM4CHAR
+      // Example: C5-01-AX92
+      const randomSuffix = Array(4).fill(0).map(() => Math.floor(Math.random()*36).toString(36).toUpperCase()).join('');
+      const accessCode = `${config.code}-${number}-${randomSuffix}`;
+
       houses.push({
         id: `${config.code}-${number}`,
         block: config.code,
@@ -63,7 +72,8 @@ export const generateHouses = (): House[] => {
         status,
         residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
         paymentStatus: Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID),
-        phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined
+        phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
+        accessCode: accessCode
       });
     }
   });
@@ -182,6 +192,35 @@ export const MOCK_POLLS: Poll[] = [
       { id: 'opt2', text: 'Penerangan Jalan (PJU)', votes: 4 },
       { id: 'opt3', text: 'Taman Bermain Anak', votes: 3 }
     ]
+  }
+];
+
+export const MOCK_MARKET_ITEMS: MarketItem[] = [
+  {
+    id: '1',
+    title: 'Sepeda Anak Bekas (Kondisi 80%)',
+    description: 'Sepeda roda empat, cocok untuk anak 3-5 tahun. Ban baru diganti, rem pakem. Dijual karena anak sudah besar.',
+    price: 150000,
+    category: 'Jual',
+    sellerName: 'Pak Budi (C5-02)',
+    sellerContact: '6281234567890',
+    image: 'https://images.unsplash.com/photo-1595188607248-2b04c6a66735?auto=format&fit=crop&q=80&w=300&h=300',
+    date: new Date().toISOString(),
+    status: 'Available',
+    houseId: 'C5-02'
+  },
+  {
+    id: '2',
+    title: 'Tanaman Lidah Buaya (Excess)',
+    description: 'Kebanyakan bibit di halaman, silakan ambil bagi yang butuh untuk obat atau hiasan.',
+    price: 0,
+    category: 'Gratis',
+    sellerName: 'Bu Siti (C7-10)',
+    sellerContact: '628987654321',
+    image: 'https://images.unsplash.com/photo-1596525737525-4c07db920c24?auto=format&fit=crop&q=80&w=300&h=300',
+    date: new Date().toISOString(),
+    status: 'Available',
+    houseId: 'C7-10'
   }
 ];
 
