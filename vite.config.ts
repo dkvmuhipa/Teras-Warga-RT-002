@@ -17,12 +17,19 @@ export default defineConfig(({ mode }) => {
       'process.env': env
     },
     build: {
-      // Prevent chunk size warnings
-      chunkSizeWarningLimit: 1600,
+      chunkSizeWarningLimit: 1000, // Increase limit slightly
       rollupOptions: {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
+              // Split vendor chunks to avoid huge files
+              if (id.includes('firebase')) return 'firebase';
+              if (id.includes('react')) return 'react-vendor';
+              if (id.includes('recharts')) return 'charts';
+              if (id.includes('lucide')) return 'icons';
+              if (id.includes('jspdf')) return 'pdf-lib';
+              if (id.includes('@google/genai')) return 'ai-sdk';
+              
               return 'vendor';
             }
           }
