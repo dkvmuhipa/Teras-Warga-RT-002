@@ -18,10 +18,6 @@ export interface House {
   phone?: string;
   accessCode?: string; // NEW: Kode Akses Unik untuk Verifikasi
   
-  // Gamification Features
-  paymentStreak?: number; // Jumlah bulan berturut-turut lunas
-  isExemplary?: boolean;  // Warga Teladan (Streak >= 12)
-
   // Data Demografi (Optional)
   hasPregnant?: boolean; // Ibu Hamil
   hasBaby?: boolean;     // Bayi

@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { 
@@ -8,7 +10,7 @@ import {
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
   RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle, ImageIcon, Link as LinkIcon, AlertCircle, Wrench, Battery, BatteryMedium, BatteryWarning, ChevronRight,
-  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, BarChart2, PieChart, LocateFixed, Navigation, ShoppingCart, Repeat, Trophy, Medal, Crown
+  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, BarChart2, PieChart, LocateFixed, Navigation, ShoppingCart, Repeat
 } from 'lucide-react';
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, BarChart, Bar, Cell, Legend } from 'recharts';
 
@@ -16,7 +18,7 @@ import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaCha
 const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } = ReactRouterDOM;
 
 // Components & Services
-import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, INITIAL_LETTERS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_MARKET_ITEMS } from './constants';
+import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, INITIAL_LETTERS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_MARKET_ITEMS } from '@/constants';
 import { House, Announcement, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem } from './types';
 import { HouseMap } from './components/HouseMap';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -35,41 +37,41 @@ import {
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
   updateTransactionInDb, 
-  deleteTransactionFromDb, 
-  addOfficialToDb, 
-  updateOfficialInDb, 
-  deleteOfficialFromDb, 
-  addReportToDb, 
-  updateReportStatus, 
-  deleteReportFromDb, 
-  addLetterToDb, 
-  updateLetterStatus, 
-  deleteLetterFromDb, 
-  updateHouseData, 
-  deleteHouseFromDb, 
-  addInventoryToDb, 
-  updateInventoryInDb, 
-  deleteInventoryFromDb, 
-  updateRondaSchedule, 
-  addUMKMToDb, 
-  updateUMKMInDb, 
-  deleteUMKMFromDb, 
-  batchUpdateHouses, 
-  logoutAdmin, 
-  seedDatabase, 
-  updateAdminPassword, 
-  addNotificationToDb, 
-  addPollToDb, 
-  deletePollFromDb, 
-  updatePollStatus, 
-  submitVote, 
-  addRondaLog, 
-  subscribeToRondaLogs, 
-  validateResidentAccess, 
-  subscribeToMarketItems, 
-  addMarketItem, 
-  deleteMarketItem, 
-  updateMarketItemStatus 
+  deleteTransactionFromDb,
+  addOfficialToDb,
+  updateOfficialInDb,
+  deleteOfficialFromDb,
+  addReportToDb,
+  updateReportStatus,
+  deleteReportFromDb,
+  addLetterToDb,
+  updateLetterStatus,
+  deleteLetterFromDb,
+  updateHouseData,
+  deleteHouseFromDb,
+  addInventoryToDb,
+  updateInventoryInDb,
+  deleteInventoryFromDb,
+  updateRondaSchedule,
+  addUMKMToDb,
+  updateUMKMInDb,
+  deleteUMKMFromDb,
+  batchUpdateHouses,
+  logoutAdmin,
+  seedDatabase,
+  updateAdminPassword,
+  addNotificationToDb,
+  addPollToDb,
+  deletePollFromDb,
+  updatePollStatus,
+  submitVote,
+  addRondaLog,
+  subscribeToRondaLogs,
+  validateResidentAccess,
+  subscribeToMarketItems,
+  addMarketItem,
+  deleteMarketItem,
+  updateMarketItemStatus
 } from './services/databaseService';
 
 // --- Shared Components ---
@@ -959,7 +961,7 @@ const PublicUMKM = ({ umkmData }: { umkmData: UMKM[] }) => {
   );
 };
 
-const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs, houses }: { officials: Official[], cashFlow: CashFlow[], ronda: RondaSchedule[], rondaLogs: RondaCheckLog[], houses: House[] }) => {
+const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs }: { officials: Official[], cashFlow: CashFlow[], ronda: RondaSchedule[], rondaLogs: RondaCheckLog[] }) => {
     const totalIncome = cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0);
     const totalExpense = cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0);
     const currentBalance = totalIncome - totalExpense;
@@ -975,15 +977,6 @@ const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs, houses }: { officia
     const [checkLocation, setCheckLocation] = useState('');
     const [checkOfficer, setCheckOfficer] = useState('');
     
-    // Leaderboard Logic
-    const availableBlocks = Array.from(new Set(houses.map(h => h.block))).sort();
-    const blockStats = availableBlocks.map(block => {
-        const blockHouses = houses.filter(h => h.block === block);
-        const paidCount = blockHouses.filter(h => h.paymentStatus === 'Lunas').length;
-        const percentage = blockHouses.length > 0 ? (paidCount / blockHouses.length) * 100 : 0;
-        return { block, percentage, total: blockHouses.length, paid: paidCount };
-    }).sort((a,b) => b.percentage - a.percentage);
-
     const handleCheckSubmit = async (status: 'Aman' | 'Mencurigakan') => {
         if (!checkOfficer || !checkLocation) { alert("Nama petugas dan lokasi wajib diisi!"); return; }
         const newLog: any = {
@@ -1051,90 +1044,11 @@ const PublicInfo = ({ officials, cashFlow, ronda, rondaLogs, houses }: { officia
                  <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100 flex flex-col justify-between group hover:border-brand-blue/30 transition-colors"><div className="flex justify-between items-start"><div><p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Struktur Organisasi</p><h2 className="text-4xl font-black text-slate-800 mt-2">{officials.length} <span className="text-lg font-medium text-slate-400">Personil</span></h2></div><div className="bg-brand-blue/5 p-4 rounded-2xl text-brand-blue group-hover:bg-brand-blue group-hover:text-white transition-colors"><Briefcase size={28}/></div></div><p className="text-xs text-slate-400 mt-4 leading-relaxed">Siap melayani kebutuhan administrasi, keamanan, dan sosial warga RT 002.</p></div>
                  <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100 flex flex-col justify-between group hover:border-indigo-200 transition-colors"><div className="flex justify-between items-start"><div><p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Jadwal Keamanan</p><h2 className="text-xl font-black text-slate-800 mt-2 capitalize">{new Date().toLocaleDateString('id-ID', {weekday:'long'})}</h2></div><div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors"><Moon size={28}/></div></div><div className="mt-4"><div className="flex -space-x-2 overflow-hidden py-1">{ronda.find(r => r.day === new Date().toLocaleDateString('id-ID', {weekday:'long'}))?.members.slice(0,4).map((m,i) => (<div key={i} className="w-9 h-9 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-700 shadow-sm" title={m}>{m.charAt(0)}</div>)) || <span className="text-sm text-slate-400 italic">Tidak ada jadwal</span>}</div><p className="text-[10px] text-slate-400 mt-2">*Tim Siskamling Malam Ini</p></div></div>
             </div>
-
-            {/* LEADERBOARD SECTION (NEW) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* 1. Leaderboard Widget */}
-                <div className="lg:col-span-1">
-                    <div className="bg-gradient-to-br from-slate-900 to-indigo-950 p-6 rounded-3xl shadow-xl shadow-indigo-900/20 text-white relative overflow-hidden h-full border border-slate-700">
-                        <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12">
-                            <Trophy size={150} fill="white"/>
-                        </div>
-                        <div className="relative z-10">
-                            <h3 className="text-lg font-black flex items-center gap-2 mb-1 text-amber-400">
-                                <Trophy size={20} className="animate-bounce-slow"/> Klasemen Blok
-                            </h3>
-                            <p className="text-xs text-slate-400 mb-6">Peringkat kerukunan berdasarkan persentase pelunasan iuran warga per blok.</p>
-
-                            {/* Top 3 Podium */}
-                            <div className="flex justify-center items-end gap-3 mb-8 px-2">
-                                {/* 2nd Place */}
-                                {blockStats[1] && (
-                                    <div className="flex flex-col items-center w-1/3 group">
-                                        <div className="mb-2 text-center">
-                                            <span className="text-xs font-bold text-slate-300 block">#{blockStats[1].block}</span>
-                                            <span className="text-[10px] text-slate-400">{Math.round(blockStats[1].percentage)}%</span>
-                                        </div>
-                                        <div className="w-full h-16 bg-slate-700 rounded-t-lg relative border-t-4 border-slate-400 flex items-end justify-center pb-2 shadow-lg group-hover:bg-slate-600 transition-colors">
-                                            <span className="font-black text-2xl text-slate-500 opacity-50">2</span>
-                                        </div>
-                                    </div>
-                                )}
-                                {/* 1st Place */}
-                                {blockStats[0] && (
-                                    <div className="flex flex-col items-center w-1/3 group">
-                                        <div className="absolute -top-12 animate-bounce-slow"><Crown size={24} fill="#f59e0b" className="text-amber-500"/></div>
-                                        <div className="mb-2 text-center">
-                                            <span className="text-sm font-black text-amber-400 block">#{blockStats[0].block}</span>
-                                            <span className="text-[10px] text-amber-200/80 font-bold">{Math.round(blockStats[0].percentage)}% Lunas</span>
-                                        </div>
-                                        <div className="w-full h-24 bg-gradient-to-b from-amber-500 to-amber-700 rounded-t-lg relative border-t-4 border-amber-300 flex items-end justify-center pb-2 shadow-xl shadow-amber-900/50">
-                                            <span className="font-black text-4xl text-amber-900 opacity-50">1</span>
-                                        </div>
-                                    </div>
-                                )}
-                                {/* 3rd Place */}
-                                {blockStats[2] && (
-                                    <div className="flex flex-col items-center w-1/3 group">
-                                        <div className="mb-2 text-center">
-                                            <span className="text-xs font-bold text-orange-300 block">#{blockStats[2].block}</span>
-                                            <span className="text-[10px] text-orange-400/80">{Math.round(blockStats[2].percentage)}%</span>
-                                        </div>
-                                        <div className="w-full h-12 bg-orange-900/50 rounded-t-lg relative border-t-4 border-orange-700 flex items-end justify-center pb-2 shadow-lg group-hover:bg-orange-800/50 transition-colors">
-                                            <span className="font-black text-xl text-orange-600 opacity-50">3</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* List for the rest */}
-                            <div className="space-y-3">
-                                {blockStats.slice(3).map((stat, idx) => (
-                                    <div key={stat.block} className="flex items-center gap-3 p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                                        <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">{idx + 4}</div>
-                                        <div className="flex-1">
-                                            <div className="flex justify-between text-xs mb-1">
-                                                <span className="font-bold text-slate-300">Blok {stat.block}</span>
-                                                <span className="text-slate-400">{Math.round(stat.percentage)}%</span>
-                                            </div>
-                                            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                                                <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${stat.percentage}%` }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div className="lg:col-span-2 space-y-8">
                     <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-sm"><div className="flex items-center justify-between mb-6"><h3 className="font-bold text-lg flex items-center gap-2 text-slate-800"><Target className="text-brand-blue" size={20}/> Program & Agenda 2024</h3></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4">{[{ title: "Perbaikan Saluran Air", status: "Sedang Berjalan", date: "Okt - Nov 2024", icon: RefreshCw, color: "text-amber-500", bg: "bg-amber-50" }, { title: "Penyemprotan Fogging", status: "Selesai", date: "September 2024", icon: CheckCircle, color: "text-emerald-500", bg: "bg-emerald-50" }, { title: "Pembuatan Taman Toga", status: "Direncanakan", date: "Desember 2024", icon: Calendar, color: "text-blue-500", bg: "bg-blue-50" }, { title: "Musyawarah Warga", status: "Rutin Bulanan", date: "Tiap Tanggal 10", icon: Users, color: "text-purple-500", bg: "bg-purple-50" }].map((prog, idx) => (<div key={idx} className="flex items-start gap-4 p-4 rounded-2xl border border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-default"><div className={`p-3 rounded-xl ${prog.bg} ${prog.color}`}><prog.icon size={20}/></div><div><h4 className="font-bold text-slate-800 text-sm">{prog.title}</h4><div className="flex items-center gap-2 mt-1"><span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">{prog.status}</span><span className="text-[10px] text-slate-400">{prog.date}</span></div></div></div>))}</div></div>
                     <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-sm"><div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4"><div><h3 className="font-bold text-lg flex items-center gap-2 text-slate-800"><BarChart3 className="text-emerald-500" size={20}/> Laporan Arus Kas</h3><p className="text-sm text-slate-500 mt-1">Grafik pemasukan dan pengeluaran kas operasional RT.</p></div><button className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-colors"><FileDown size={16}/> Unduh Laporan PDF</button></div><div className="h-72 w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={chartData}><defs><linearGradient id="colorInc" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/><stop offset="95%" stopColor="#10B981" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9"/><XAxis dataKey="date" tick={{fontSize: 10, fill: '#94a3b8'}} axisLine={false} tickLine={false} dy={10} /><YAxis tick={{fontSize: 10, fill: '#94a3b8'}} axisLine={false} tickLine={false} tickFormatter={(value) => `${value/1000}k`}/><RechartsTooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px'}} itemStyle={{fontSize: '12px', fontWeight: 'bold'}} formatter={(value: number) => [`Rp ${value.toLocaleString()}`, 'Jumlah']} labelStyle={{color: '#64748b', marginBottom: '4px', fontSize: '10px'}} /><Area type="monotone" dataKey="amount" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorInc)" /></AreaChart></ResponsiveContainer></div><div className="mt-8 pt-8 border-t border-slate-50"><h4 className="font-bold text-sm text-slate-700 mb-4">Transaksi Terakhir</h4><div className="space-y-3">{cashFlow.slice(0, 4).map(cf => (<div key={cf.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100"><div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-full flex items-center justify-center ${cf.type==='Income'?'bg-emerald-100 text-emerald-600':'bg-rose-100 text-rose-600'}`}>{cf.type==='Income' ? <ArrowUpRight size={14}/> : <ArrowDownRight size={14}/>}</div><div><p className="font-bold text-slate-800 text-xs md:text-sm">{cf.description}</p><p className="text-[10px] text-slate-400">{new Date(cf.date).toLocaleDateString('id-ID', {day:'numeric', month:'long'})}</p></div></div><span className={`font-bold text-xs md:text-sm ${cf.type==='Income'?'text-emerald-600':'text-rose-600'}`}>{cf.type==='Income' ? '+' : '-'} Rp {cf.amount.toLocaleString()}</span></div>))}</div></div></div>
                 </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-8">
                 <div className="lg:col-span-1"><div className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl shadow-slate-300 h-full flex flex-col relative overflow-hidden"><div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600 rounded-full blur-[80px] opacity-20 -translate-y-1/2 translate-x-1/2"></div>
                     <div className="flex items-center justify-between mb-6 relative z-10">
                         <h3 className="font-bold text-lg flex items-center gap-2"><Shield size={20} className="text-indigo-400"/> Jadwal Siskamling</h3>
@@ -1205,13 +1119,16 @@ const DEMOGRAPHIC_OPTIONS = [
 // --- Admin Dashboard (RECONSTRUCTED) ---
 
 const AdminDashboard = ({ 
-  houses, announcements, cashFlow, officials, reports, letters, ronda, inventory, umkm, polls, pdfConfig, setPdfConfig, rondaLogs, marketItems 
+  houses, announcements, cashFlow, officials, reports, letters, ronda, inventory, umkm, polls, pdfConfig, setPdfConfig, rondaLogs 
 }: any) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'announcement' | 'cash' | 'official' | 'editHouse' | 'inventory' | 'ronda' | 'umkm' | 'dues' | 'import' | 'bulkDues' | 'poll'>('announcement');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Market Items State (Admin)
+  const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
 
   // State Management
   const [residentView, setResidentView] = useState<'grid' | 'table'>('table');
@@ -1283,6 +1200,11 @@ const AdminDashboard = ({
   // --- AI ANALYSIS STATE ---
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  useEffect(() => {
+      const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
+      return () => unsubMarket();
+  }, []);
 
   // ... (Keeping validation helpers)
   const validatePhone = (phone: string) => {
@@ -1389,7 +1311,7 @@ const AdminDashboard = ({
       if (confirm("Reset sistem ke awal? Data akan hilang.")) {
           if (prompt("Ketik 'RESET'") === 'RESET') {
               try {
-                  const initialData = { houses: generateHouses(), announcements: MOCK_ANNOUNCEMENTS, cashFlow: MOCK_CASHFLOW, officials: INITIAL_OFFICIALS, reports: INITIAL_REPORTS, ronda: MOCK_RONDA, inventory: MOCK_INVENTORY, umkm: MOCK_UMKM, polls: MOCK_POLLS, rondaLogs: MOCK_RONDA_LOGS, marketItems: MOCK_MARKET_ITEMS };
+                  const initialData = { houses: generateHouses(), announcements: MOCK_ANNOUNCEMENTS, cashFlow: MOCK_CASHFLOW, officials: INITIAL_OFFICIALS, reports: INITIAL_REPORTS, ronda: MOCK_RONDA, inventory: MOCK_INVENTORY, umkm: MOCK_UMKM, polls: MOCK_POLLS, rondaLogs: MOCK_RONDA_LOGS };
                   await seedDatabase(initialData);
                   alert("Reset berhasil."); window.location.reload();
               } catch (e) { alert("Gagal reset."); }
@@ -1705,6 +1627,7 @@ const AdminDashboard = ({
               </div>
           )}
 
+          {/* ... (Residents, Polls, Services, Finance, Officials, UMKM, Announcements tabs retained...) */}
           {activeTab === 'residents' && (
               <div className="animate-fade-in space-y-6">
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1823,164 +1746,142 @@ const AdminDashboard = ({
                               <div className="flex justify-between items-start mb-3">
                                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${poll.status === 'Open' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>{poll.status}</span>
                                   <div className="flex gap-2">
-                                      {poll.status === 'Open' && <button onClick={() => handleClosePoll(poll.id)} className="text-xs font-bold text-amber-600 hover:text-amber-700">Tutup</button>}
-                                      <button onClick={() => handleDeletePoll(poll.id)} className="text-slate-400 hover:text-rose-500"><Trash2 size={16}/></button>
+                                      {poll.status === 'Open' && <button onClick={() => handleClosePoll(poll.id)} className="text-xs font-bold text-amber-600 hover:bg-amber-50 px-2 py-1 rounded" title="Tutup Voting">Tutup</button>}
+                                      <button onClick={() => handleDeletePoll(poll.id)} className="text-slate-300 hover:text-rose-500"><Trash2 size={16}/></button>
                                   </div>
                               </div>
-                              <h3 className="font-bold text-slate-800 mb-2">{poll.title}</h3>
+                              <h3 className="font-bold text-slate-800 mb-2 line-clamp-2">{poll.title}</h3>
                               <p className="text-xs text-slate-500 mb-4 line-clamp-2">{poll.description}</p>
-                              <div className="mt-auto pt-4 border-t border-slate-50 flex justify-between items-center text-xs">
-                                  <span className="font-bold text-slate-700">{poll.totalVotes} Suara</span>
-                                  <span className="text-slate-400">Deadline: {new Date(poll.deadline).toLocaleDateString()}</span>
+                              <div className="mt-auto">
+                                  <div className="w-full h-2 bg-slate-100 rounded-full mb-2 overflow-hidden">
+                                      {/* Simplified visualization for card */}
+                                      <div className="h-full bg-indigo-500" style={{ width: `${Math.min(100, (poll.totalVotes/50)*100)}%` }}></div>
+                                  </div>
+                                  <p className="text-xs font-bold text-slate-700">{poll.totalVotes} Suara Masuk</p>
+                                  <p className="text-[10px] text-slate-400 mt-1">Deadline: {new Date(poll.deadline).toLocaleDateString()}</p>
                               </div>
                           </div>
                       ))}
-                      {polls.length === 0 && <div className="col-span-full py-12 text-center text-slate-400 italic border border-dashed border-slate-200 rounded-2xl">Belum ada voting dibuat.</div>}
+                      {polls.length === 0 && (
+                          <div className="col-span-full py-12 text-center text-slate-400 italic bg-white rounded-2xl border border-dashed border-slate-200">
+                              Belum ada data voting.
+                          </div>
+                      )}
                   </div>
               </div>
           )}
 
-          {/* Placeholders for other tabs for completeness */}
-          {activeTab === 'services' && <div className="p-8 text-center text-slate-400">Services Management (Reports & Letters)</div>}
-          {activeTab === 'finance' && <div className="p-8 text-center text-slate-400">Finance Management (Cashflow)</div>}
-          {activeTab === 'facilities' && <div className="p-8 text-center text-slate-400">Facilities Management (Ronda & Inventory)</div>}
-          {activeTab === 'umkm' && <div className="p-8 text-center text-slate-400">UMKM Management</div>}
-          {activeTab === 'announcements' && <div className="p-8 text-center text-slate-400">Announcements Management</div>}
-          {activeTab === 'officials' && <div className="p-8 text-center text-slate-400">Officials Management</div>}
-          {activeTab === 'settings' && <div className="p-8 text-center text-slate-400">Settings</div>}
+          {activeTab === 'facilities' && (
+              <div className="space-y-8 animate-fade-in">
+                {/* 1. SECTION: Jadwal Ronda */}
+                <div>
+                   <h2 className="font-black text-2xl text-slate-800 mb-4 flex items-center gap-2"><Moon size={24} className="text-indigo-600"/> Jadwal Siskamling</h2>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                       {ronda.length > 0 ? ronda.map((r:any) => {
+                           const isToday = r.day === new Date().toLocaleDateString('id-ID', {weekday:'long'});
+                           return (<div key={r.id || r.day} className={`relative p-5 rounded-3xl border transition-all duration-300 group ${isToday ? 'bg-gradient-to-br from-indigo-900 to-indigo-700 border-indigo-500 shadow-xl shadow-indigo-200 ring-2 ring-indigo-300 transform scale-[1.02]' : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg'}`}>{isToday && (<div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm animate-bounce-slow">Hari Ini</div>)}<div className="flex justify-between items-start mb-4"><div><h4 className={`font-black text-lg ${isToday ? 'text-white' : 'text-slate-700'}`}>{r.day}</h4><p className={`text-xs font-medium ${isToday ? 'text-indigo-200' : 'text-slate-400'}`}>{r.members.length} Personil</p></div><button onClick={() => openEditRonda(r)} className={`p-2 rounded-xl transition-colors ${isToday ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-50 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600'}`}><Edit2 size={16}/></button></div><div className="space-y-2">{r.members.length > 0 ? r.members.map((m:any, idx:any) => (<div key={idx} className={`flex items-center gap-2 text-sm p-2 rounded-xl ${isToday ? 'bg-white/10 text-indigo-50 border border-white/5' : 'bg-slate-50 text-slate-600'}`}><div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isToday ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-600'}`}>{m.charAt(0)}</div><span className="truncate">{m}</span></div>)) : (<div className={`text-center py-4 italic text-xs ${isToday ? 'text-indigo-300' : 'text-slate-400'}`}>Belum ada jadwal</div>)}</div></div>);
+                       }) : (<div className="col-span-full text-center py-8 text-slate-400 italic bg-slate-50 rounded-2xl border-dashed border-2 border-slate-200">Jadwal ronda belum dikonfigurasi.</div>)}
+                   </div>
+                </div>
 
-      </div>
+                {/* 2. SECTION: DIGITAL RONDA LOGS (NEW) */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4 relative z-10">
+                        <div>
+                            <h2 className="font-black text-xl text-slate-800 flex items-center gap-2">
+                                <LocateFixed size={20} className="text-rose-500"/> Live Monitor Patroli
+                            </h2>
+                            <p className="text-slate-500 text-sm mt-1">Pantauan real-time check-point petugas siskamling.</p>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs font-bold bg-slate-50 px-3 py-1.5 rounded-lg text-slate-500">
+                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div> Live Feed
+                        </div>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                                <tr>
+                                    <th className="px-4 py-3 rounded-l-xl">Waktu</th>
+                                    <th className="px-4 py-3">Petugas</th>
+                                    <th className="px-4 py-3">Lokasi</th>
+                                    <th className="px-4 py-3">Status</th>
+                                    <th className="px-4 py-3 rounded-r-xl">Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {rondaLogs.length > 0 ? rondaLogs.map((log: any) => (
+                                    <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="px-4 py-3 font-mono text-xs text-slate-500">
+                                            {new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                            <span className="block text-[9px] text-slate-300">{new Date(log.timestamp).toLocaleDateString()}</span>
+                                        </td>
+                                        <td className="px-4 py-3 font-bold text-slate-700">{log.officerName}</td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 w-fit px-2 py-1 rounded-md">
+                                                <MapIcon size={10}/> {log.location}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${log.status === 'Aman' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                                {log.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-500 text-xs italic">{log.note}</td>
+                                    </tr>
+                                )) : (
+                                    <tr><td colSpan={5} className="text-center py-8 text-slate-400 italic">Belum ada data patroli hari ini.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-      {isModalOpen && (
-        <Modal 
-            isOpen={isModalOpen} 
-            onClose={() => setIsModalOpen(false)} 
-            title={modalType === 'announcement' ? 'Buat Pengumuman' : modalType === 'cash' ? 'Catat Transaksi' : modalType === 'poll' ? 'Buat Voting Baru' : 'Form Data'}
-        >
-            {/* Modal Content Implementation omitted for brevity but logic exists via modalType */}
-            <div className="text-center py-4 text-slate-500">Form Content for {modalType}</div>
-        </Modal>
-      )}
-    </div>
-  );
-};
+                {/* 3. SECTION: Inventaris */}
+                <div><div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4"><div><h2 className="font-black text-2xl text-slate-800 flex items-center gap-2"><Package size={24} className="text-emerald-600"/> Inventaris & Aset</h2><p className="text-slate-500 text-sm mt-1">Kelola barang milik warga dan status kondisinya.</p></div><Button onClick={() => { resetForms(); setModalType('inventory'); setIsModalOpen(true); }} className="shadow-emerald-200 bg-emerald-600 hover:bg-emerald-700"><Plus size={18}/> Tambah Barang</Button></div><div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-col md:flex-row gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} /><input type="text" placeholder="Cari barang (cth: Tenda, Kursi)..." className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none" value={searchInventory} onChange={(e) => setSearchInventory(e.target.value)}/></div><div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200"><div className="px-3 text-xs font-bold text-slate-500 uppercase">Kondisi:</div>{['All', 'Baik', 'Rusak', 'Perlu Perbaikan'].map(cond => (<button key={cond} onClick={() => setFilterInventoryCondition(cond)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterInventoryCondition === cond ? 'bg-white text-slate-800 shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:text-slate-600'}`}>{cond === 'All' ? 'Semua' : cond}</button>))}</div></div><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{inventory.filter((item:InventoryItem) => item.name.toLowerCase().includes(searchInventory.toLowerCase()) && (filterInventoryCondition === 'All' || item.condition === filterInventoryCondition)).length > 0 ? (inventory.filter((item:InventoryItem) => item.name.toLowerCase().includes(searchInventory.toLowerCase()) && (filterInventoryCondition === 'All' || item.condition === filterInventoryCondition)).map((item: InventoryItem) => { const percentage = item.total > 0 ? Math.round((item.available / item.total) * 100) : 0; const isCritical = percentage < 20; const isGood = item.condition === 'Baik'; return (<div key={item.id} className="bg-white rounded-3xl p-6 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group relative overflow-hidden"><div className="absolute top-0 right-0 p-8 opacity-[0.03] transform rotate-12 group-hover:scale-110 transition-transform"><Package size={120} /></div><div className="flex justify-between items-start mb-4 relative z-10"><div className={`p-3 rounded-2xl ${isGood ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{isGood ? <CheckCircle size={24} /> : <Wrench size={24} />}</div><span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide border shadow-sm ${isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>{item.condition}</span></div><h3 className="font-black text-xl text-slate-800 mb-1 relative z-10">{item.name}</h3>{item.notes && <p className="text-xs text-slate-400 mb-4 line-clamp-1 relative z-10">{item.notes}</p>}<div className="mt-6 mb-2 relative z-10"><div className="flex justify-between text-xs font-bold mb-1.5"><span className="text-slate-500">Ketersediaan</span><span className={`${isCritical ? 'text-rose-500' : 'text-slate-700'}`}>{item.available} / {item.total} Unit</span></div><div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden"><div className={`h-full rounded-full transition-all duration-1000 ${isCritical ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${percentage}%` }}></div></div></div><div className="flex gap-2 mt-6 pt-4 border-t border-slate-50 relative z-10"><button onClick={() => openEditInventory(item)} className="flex-1 py-2.5 rounded-xl bg-slate-50 text-slate-600 text-xs font-bold hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"><Edit2 size={14}/> Edit</button><button onClick={() => handleDeleteInventory(item.id)} className="flex-1 py-2.5 rounded-xl bg-slate-50 text-slate-600 text-xs font-bold hover:bg-rose-50 hover:text-rose-600 transition-colors flex items-center justify-center gap-2"><Trash2 size={14}/> Hapus</button></div></div>); })) : (<div className="col-span-full py-12 text-center text-slate-400 italic bg-slate-50 rounded-3xl border border-dashed border-slate-200">Tidak ada barang yang cocok dengan filter.</div>)}</div></div>
+              </div>
+          )}
 
-export const App = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  // Data States
-  const [houses, setHouses] = useState<House[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [cashFlow, setCashFlow] = useState<CashFlow[]>([]);
-  const [officials, setOfficials] = useState<Official[]>([]);
-  const [reports, setReports] = useState<Report[]>([]);
-  const [letters, setLetters] = useState<LetterRequest[]>([]);
-  const [ronda, setRonda] = useState<RondaSchedule[]>([]);
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [umkm, setUmkm] = useState<UMKM[]>([]);
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [rondaLogs, setRondaLogs] = useState<RondaCheckLog[]>([]);
-  const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
+          {/* ... (Finance, Officials, UMKM, Announcements, Services, Settings tabs retained...) */}
+          {activeTab === 'finance' && (
+            <div className="space-y-6">
+               <Card title="Arus Kas & Transaksi" icon={DollarSign} action={<Button onClick={() => { resetForms(); setModalType('cash'); setIsModalOpen(true); }} size="sm"><Plus size={16}/> Transaksi</Button>}>
+                  <div className="space-y-2">
+                    {cashFlow.length > 0 ? cashFlow.map((cf:CashFlow) => (
+                      <div key={cf.id} className="flex justify-between items-center p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-xl transition-colors group">
+                        <div>
+                          <p className="font-bold text-sm text-slate-800">{cf.description}</p>
+                          <p className="text-xs text-slate-400">{cf.date} • {cf.category}</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                           <span className={`font-bold text-sm ${cf.type==='Income'?'text-emerald-600':'text-rose-600'}`}>{cf.type==='Income'?'+':'-'} {cf.amount.toLocaleString()}</span>
+                           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => openEditCash(cf)} className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm"><Edit2 size={14}/></button>
+                              <button onClick={() => handleDeleteTransaction(cf.id)} className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm"><Trash2 size={14}/></button>
+                           </div>
+                        </div>
+                      </div>
+                    )) : <div className="py-8 text-center text-slate-400 italic">Belum ada transaksi.</div>}
+                  </div>
+               </Card>
+            </div>
+          )}
 
-  // Config
-  const [pdfConfig, setPdfConfig] = useState<PdfConfig>(DEFAULT_PDF_CONFIG);
+          {activeTab === 'officials' && (
+             <div className="space-y-8 animate-fade-in">
+                <div className="flex justify-between items-center"><div><h2 className="font-black text-2xl text-slate-800">Pengurus RT 002</h2><p className="text-sm text-slate-500 mt-1">Kelola data struktur organisasi Rukun Tetangga.</p></div><Button onClick={() => { resetForms(); setModalType('official'); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700"><Plus size={16}/> Tambah Personil</Button></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">{officials.length > 0 ? officials.map((o:Official) => { const isChairman = o.role.toLowerCase().includes('ketua'); const isSecretary = o.role.toLowerCase().includes('sekretaris'); const isTreasurer = o.role.toLowerCase().includes('bendahara'); let gradientClass = 'bg-gradient-to-r from-slate-700 to-slate-600'; let ringClass = 'ring-slate-100'; if (isChairman) { gradientClass = 'bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600'; ringClass = 'ring-indigo-100'; } else if (isSecretary) { gradientClass = 'bg-gradient-to-r from-cyan-500 to-blue-500'; ringClass = 'ring-cyan-100'; } else if (isTreasurer) { gradientClass = 'bg-gradient-to-r from-emerald-500 to-teal-500'; ringClass = 'ring-emerald-100'; } return (<div key={o.id} className={`group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative`}><div className={`h-24 relative ${gradientClass}`}><div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div><div className="absolute top-3 right-3 opacity-50 text-white"><Shield size={20} /></div><div className="absolute top-3 left-3"><span className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider border border-white/20">{o.role}</span></div></div><div className="absolute top-12 left-1/2 -translate-x-1/2"><div className={`p-1.5 bg-white rounded-full shadow-lg ring-4 ${ringClass}`}><img src={o.photo||`https://ui-avatars.com/api/?name=${o.name}&background=random&size=128`} className="w-20 h-20 rounded-full object-cover bg-slate-100" alt={o.name}/></div></div><div className="pt-14 pb-6 px-6 text-center mt-2"><h3 className="font-bold text-slate-800 text-lg leading-tight mb-1">{o.name}</h3><p className="text-xs text-slate-400 font-medium mb-4">{o.houseId ? `Warga Blok ${o.houseId}` : 'Warga RT 002'}</p><div className="bg-slate-50 rounded-2xl p-3 mb-6 grid grid-cols-2 gap-2 border border-slate-100"><div className="text-center"><p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Rumah</p><p className="text-xs font-bold text-slate-700">{o.houseId || '-'}</p></div><div className="text-center border-l border-slate-200"><p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Kontak</p><p className="text-xs font-bold text-slate-700">{o.phone ? 'Ada' : '-'}</p></div></div><div className="flex justify-center gap-3"><button onClick={() => handleEditOfficial(o)} className="w-10 h-10 rounded-full bg-slate-50 text-slate-600 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-all shadow-sm hover:shadow-blue-200 hover:scale-110" title="Edit Data"><Edit2 size={16}/></button><a href={`https://wa.me/${o.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white flex items-center justify-center transition-all shadow-sm hover:shadow-emerald-200 hover:scale-110" title="Chat WhatsApp"><MessageCircle size={16}/></a><button onClick={() => handleDeleteOfficial(o.id)} className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all shadow-sm hover:shadow-rose-200 hover:scale-110" title="Hapus"><Trash2 size={16}/></button></div></div></div>); }) : (<div className="col-span-full py-16 text-center bg-white rounded-3xl border border-dashed border-slate-200"><Briefcase size={48} className="mx-auto text-slate-300 mb-3"/><p className="text-slate-400 italic">Belum ada data pengurus.</p></div>)}</div>
+             </div>
+          )}
 
-  // Notification System
-  const [toast, setToast] = useState<AppNotification | null>(null);
-
-  useEffect(() => {
-    // Auth Listener
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      setIsAdmin(!!user);
-    });
-
-    // Subscriptions
-    const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data.length > 0 ? data : generateHouses()));
-    const unsubAnnounce = subscribeToCollection('announcements', setAnnouncements);
-    const unsubCash = subscribeToCollection('cashFlow', setCashFlow);
-    const unsubOfficial = subscribeToCollection('officials', setOfficials);
-    const unsubReports = subscribeToCollection('reports', setReports);
-    const unsubLetters = subscribeToCollection('letters', setLetters);
-    const unsubRonda = subscribeToCollection('ronda', setRonda);
-    const unsubInv = subscribeToCollection('inventory', setInventory);
-    const unsubUmkm = subscribeToCollection('umkm', setUmkm);
-    const unsubPolls = subscribeToCollection('polls', setPolls);
-    
-    // Optimized/Specific Subs
-    const unsubNotif = subscribeToNotifications((data) => {
-       setNotifications(data);
-    });
-    const unsubRondaLogs = subscribeToRondaLogs(setRondaLogs);
-    const unsubMarket = subscribeToMarketItems(setMarketItems);
-
-    // Load PDF Config
-    const storedConfig = localStorage.getItem('pdf_config');
-    if(storedConfig) setPdfConfig(JSON.parse(storedConfig));
-
-    return () => {
-      unsubAuth(); unsubHouses(); unsubAnnounce(); unsubCash(); unsubOfficial();
-      unsubReports(); unsubLetters(); unsubRonda(); unsubInv(); unsubUmkm();
-      unsubNotif(); unsubPolls(); unsubRondaLogs(); unsubMarket();
-    };
-  }, []);
-
-  // Listen for new notifications to show toast
-  useEffect(() => {
-      if (notifications.length > 0) {
-          const latest = notifications[0];
-          const now = new Date().getTime();
-          const notifTime = new Date(latest.date).getTime();
-          if (now - notifTime < 10000 && !latest.isRead) {
-              setToast(latest);
-          }
-      }
-  }, [notifications]);
-
-  return (
-    <HashRouter>
-        {toast && <NotificationToast notification={toast} onClose={() => setToast(null)} />}
-        <PanicButton />
-        
-        {/* ChatBot is global */}
-        <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-
-        <Routes>
-            <Route path="/admin/*" element={
-                <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard 
-                        houses={houses} 
-                        announcements={announcements} 
-                        cashFlow={cashFlow}
-                        officials={officials}
-                        reports={reports}
-                        letters={letters}
-                        ronda={ronda}
-                        inventory={inventory}
-                        umkm={umkm}
-                        polls={polls}
-                        pdfConfig={pdfConfig}
-                        setPdfConfig={setPdfConfig}
-                        rondaLogs={rondaLogs}
-                        marketItems={marketItems}
-                    />
-                </AdminRouteWrapper>
-            } />
-            
-            <Route path="*" element={
-                <>
-                    <PublicHeader notifications={notifications} onMarkRead={()=>{}} />
-                    <Routes>
-                        <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} />} />
-                        <Route path="/voting" element={<PublicVoting polls={polls} />} />
-                        <Route path="/market" element={<PublicMarket items={marketItems} />} />
-                        <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} />} />
-                        <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
-                        <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} houses={houses} />} />
-                    </Routes>
-                </>
-            } />
-        </Routes>
-    </HashRouter>
-  );
-};
+          {activeTab === 'announcements' && (
+             <div className="space-y-6">
+                <div className="flex justify-between items-center"><h2 className="font-black text-2xl text-slate-800">Pengumuman</h2><Button onClick={() => { resetForms(); setModalType('announcement'); setIsModalOpen(true); }}><Plus size={16}/> Buat Baru</Button></div>
+                <div className="space-y-4">{announcements.length > 0 ? announcements.map((a:Announcement) => (<div key={a.id} className="bg-white p-6 rounded-2xl border border-slate-100 flex justify-between hover:shadow-md transition-shadow"><div><div className="flex items-center gap-2 mb-2"><span className="text-[10px] font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-600 uppercase">{a.type}</span><span className="text-xs text-slate-400">{new Date(a.date).toLocaleDateString()}</span></div><h4 className="font-bold text-lg text-slate-800 mb-1">{a.title}</h4><p className="text-sm text-slate-500 line-clamp-2">{a.content}</p></div><button onClick={() => handleDeleteAnnouncement(a.id)} className="text-slate-300 hover:text-rose-500 h-fit"><Trash2 size={20}/></button></div>)) : <div className="py-12 text-center text-slate-400 italic bg-white rounded-2xl border border-dashed border-slate-200">Belum ada pengumuman.</div>}</div>
+             </div>
+          )}
+          
+          {activeTab === 'umkm' && (
+             <div className="space-y-6">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4"><h2 className="font-black text-2xl text-slate-800">UMKM Warga</h2><div className="flex w-full md:w-auto gap-3"><div className="relative flex-1 md:w-64"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} /><input type="text" placeholder="Cari UMKM..." className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-slate-900 focus:outline-none transition-all" value={searchUmkm} onChange={(e) => setSearchUmkm(e.target.value)} /></div><Button onClick={() => { resetForms(); setModalType('umkm'); setIsModalOpen(true); }}><Plus size={16}/> Tambah</Button></div></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{umkm.filter((u:

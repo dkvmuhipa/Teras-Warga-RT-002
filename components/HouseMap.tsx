@@ -1,9 +1,7 @@
 
-
-
 import React, { useState, useEffect } from 'react';
 import { House, PaymentStatus, Report, Official } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Crown, Flame } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle } from 'lucide-react';
 
 interface HouseMapProps {
   houses: House[];
@@ -181,39 +179,6 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             )}
                         </div>
 
-                        {/* GAMIFICATION BADGE SECTION */}
-                        {house.status === 'Occupied' && (
-                            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-4 border border-amber-100 shadow-sm relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 p-3 opacity-10 transform rotate-12 group-hover:scale-110 transition-transform duration-500">
-                                    <Crown size={60} fill="#f59e0b"/>
-                                </div>
-                                
-                                <div className="flex items-center gap-4 relative z-10">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md border-2 ${house.isExemplary ? 'bg-gradient-to-br from-yellow-300 to-amber-500 border-white text-white' : 'bg-slate-200 border-slate-300 text-slate-400'}`}>
-                                        {house.isExemplary ? <Crown size={24} fill="currentColor"/> : <Flame size={24}/>}
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-slate-800 text-sm uppercase tracking-wider flex items-center gap-1">
-                                            {house.isExemplary ? <span className="text-amber-600">Warga Teladan</span> : 'Status Keanggotaan'}
-                                        </h4>
-                                        <p className="text-xs text-slate-600 mt-0.5 font-medium">
-                                            {house.isExemplary 
-                                                ? 'Luar biasa! Pembayaran iuran sangat lancar.' 
-                                                : 'Tingkatkan pembayaran untuk raih badge.'}
-                                        </p>
-                                        <div className="flex items-center gap-1.5 mt-2">
-                                            <div className="h-1.5 w-24 bg-slate-200 rounded-full overflow-hidden">
-                                                <div className="h-full bg-amber-500 rounded-full" style={{ width: `${Math.min(100, ((house.paymentStreak || 0) / 12) * 100)}%` }}></div>
-                                            </div>
-                                            <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-md">
-                                                {house.paymentStreak || 0} Bulan
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
                         {/* Status Report / Safety Check */}
                         {isSafe ? (
                              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3 animate-fade-in">
@@ -345,9 +310,6 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
         if (house.status === 'Empty') return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
         if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
         
-        // GAMIFICATION VISUAL: Exemplary Citizen (Gold)
-        if (house.isExemplary) return "bg-gradient-to-br from-amber-50 to-yellow-100 border-amber-400 text-amber-900 shadow-[0_0_15px_rgba(251,191,36,0.4)] ring-2 ring-yellow-200";
-
         // 4. Safe / Occupied (Vibrant Green)
         // Check for Kost specifically
         if (house.residenceType === 'Kost') return "bg-gradient-to-br from-cyan-100 to-blue-200 border-cyan-500 text-cyan-900 shadow-sm hover:shadow-cyan-300/50 hover:border-cyan-600";
@@ -369,13 +331,6 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 ${getHouseColor()}
             `}
         >
-            {/* GAMIFICATION: CROWN ICON */}
-            {house.isExemplary && (
-                <div className="absolute -top-3 -left-2 z-30 filter drop-shadow-md animate-bounce-slow" title="Warga Teladan">
-                    <Crown size={20} fill="#fbbf24" className="text-amber-500" />
-                </div>
-            )}
-
             <span className={`font-black leading-none drop-shadow-sm ${officialRole ? 'text-lg' : 'text-sm'}`}>
                 {house.number}
             </span>
