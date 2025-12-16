@@ -8,6 +8,7 @@
 
 
 
+
 import React from 'react';
 import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
@@ -58,6 +59,20 @@ export const generateHouses = (): House[] => {
       // Simulasi Kontrak vs Tetap (20% Kontrak)
       const isRenter = Math.random() > 0.8;
 
+      // Payment Status Logic
+      const paymentStatus = Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID);
+
+      // GAMIFICATION DATA SEEDING
+      // Determine streak: 0-24 months
+      // Only Paid members can have a high streak
+      let streak = 0;
+      if (paymentStatus === PaymentStatus.PAID) {
+          streak = Math.floor(Math.random() * 25);
+      }
+      
+      // Exemplary status (Crown) if streak >= 12
+      const isExemplary = streak >= 12;
+
       // Generate Access Code: HOUSEID-RANDOM4CHAR
       // Example: C5-01-AX92
       const randomSuffix = Array(4).fill(0).map(() => Math.floor(Math.random()*36).toString(36).toUpperCase()).join('');
@@ -71,7 +86,9 @@ export const generateHouses = (): House[] => {
         occupants: status === 'Empty' ? 0 : Math.floor(Math.random() * 4) + 1,
         status,
         residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
-        paymentStatus: Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID),
+        paymentStatus,
+        paymentStreak: streak,
+        isExemplary: isExemplary,
         phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
         accessCode: accessCode
       });

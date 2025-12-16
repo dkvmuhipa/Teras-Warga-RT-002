@@ -18,9 +18,9 @@ export interface House {
   phone?: string;
   accessCode?: string; // NEW: Kode Akses Unik untuk Verifikasi
   
-  // Gamification & Rewards (NEW)
+  // Gamification Features
   paymentStreak?: number; // Jumlah bulan berturut-turut lunas
-  isExemplary?: boolean;  // Status Warga Teladan (Streak >= 12)
+  isExemplary?: boolean;  // Warga Teladan (Streak >= 12)
 
   // Data Demografi (Optional)
   hasPregnant?: boolean; // Ibu Hamil
