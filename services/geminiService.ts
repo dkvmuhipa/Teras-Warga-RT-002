@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
@@ -13,9 +14,10 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
     Struktur: Judul menarik, Salam pembuka, Isi pengumuman (singkat & jelas), Detail (Waktu/Tempat jika perlu), Salam penutup.
     Format: Plain text (Markdown allowed). Bahasa Indonesia yang baik dan benar.`;
 
+    // Updated model to gemini-3-flash-preview as per world-class standard
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
+      model: 'gemini-3-flash-preview',
+      contents: [{ parts: [{ text: prompt }] }],
     });
 
     return response.text || "Gagal membuat draf.";
@@ -35,8 +37,8 @@ export const analyzeReports = async (reports: string[]): Promise<string> => {
      Berikan ringkasan eksekutif singkat (maksimal 3 poin) mengenai isu utama yang perlu ditangani oleh Ketua RT.`;
      
      const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
+      model: 'gemini-3-flash-preview',
+      contents: [{ parts: [{ text: prompt }] }],
      });
      
      return response.text || "Tidak ada analisis.";
@@ -70,8 +72,8 @@ export const generateDashboardSummary = async (data: {
      Format output menggunakan Markdown bold/list agar mudah dibaca. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
      
      const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
+      model: 'gemini-3-flash-preview',
+      contents: [{ parts: [{ text: prompt }] }],
      });
      
      return response.text || "Tidak ada analisis yang dihasilkan.";
@@ -111,13 +113,6 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     STRUKTUR PENGURUS RT SAAT INI:
     ${officialsContext}
 
-    INFORMASI UMUM RT 002/020:
-    - Alamat: Huntap 2 Tondo, Kel. Tondo, Kec. Mantikulore, Kota Palu.
-    - Iuran: Rp 25.000/bulan (Keamanan + Sampah).
-    - Jadwal Angkut Sampah: Senin dan Kamis pagi.
-    - Syarat Surat Pengantar: Bawa KTP & KK Asli, Bukti lunas iuran bulan berjalan.
-    - Lokasi Sekretariat: Rumah Ketua RT (Lihat data pengurus). Buka Senin-Jumat 19.00-21.00.
-
     TUGAS ANDA:
     1. Jawab pertanyaan warga dengan ramah, singkat, dan informatif.
     2. Gunakan data di atas sebagai referensi utama.
@@ -128,8 +123,8 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: question,
+      model: 'gemini-3-flash-preview',
+      contents: [{ parts: [{ text: question }] }],
       config: {
         systemInstruction: systemInstruction,
       }
