@@ -1,10 +1,10 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
-// Safe Initialization
+// Safe Initialization using the recommended method
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+// Fix: Updated model to 'gemini-3-flash-preview' for text tasks as per guidelines
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
   if (!process.env.API_KEY) return "API Key AI belum dikonfigurasi.";
   
@@ -14,10 +14,9 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
     Struktur: Judul menarik, Salam pembuka, Isi pengumuman (singkat & jelas), Detail (Waktu/Tempat jika perlu), Salam penutup.
     Format: Plain text (Markdown allowed). Bahasa Indonesia yang baik dan benar.`;
 
-    // Updated model to gemini-3-flash-preview as per world-class standard
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: prompt,
     });
 
     return response.text || "Gagal membuat draf.";
@@ -27,6 +26,7 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
   }
 };
 
+// Fix: Updated model to 'gemini-3-flash-preview' for report analysis
 export const analyzeReports = async (reports: string[]): Promise<string> => {
    if (!process.env.API_KEY) return "Fitur AI belum aktif.";
 
@@ -38,7 +38,7 @@ export const analyzeReports = async (reports: string[]): Promise<string> => {
      
      const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: prompt,
      });
      
      return response.text || "Tidak ada analisis.";
@@ -48,6 +48,7 @@ export const analyzeReports = async (reports: string[]): Promise<string> => {
    }
 }
 
+// Fix: Updated model to 'gemini-3-flash-preview' for dashboard summary
 export const generateDashboardSummary = async (data: {
   totalResidents: number,
   cashBalance: number,
@@ -73,7 +74,7 @@ export const generateDashboardSummary = async (data: {
      
      const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: prompt,
      });
      
      return response.text || "Tidak ada analisis yang dihasilkan.";
@@ -83,6 +84,7 @@ export const generateDashboardSummary = async (data: {
    }
 }
 
+// Fix: Updated model to 'gemini-3-flash-preview' for chatbot interaction
 export const askRit = async (question: string, contextData: { announcements: Announcement[], ronda: RondaSchedule[], officials: Official[] }): Promise<string> => {
   if (!process.env.API_KEY) return "Maaf, fitur Chatbot sedang non-aktif (Missing API Key).";
 
@@ -113,6 +115,13 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     STRUKTUR PENGURUS RT SAAT INI:
     ${officialsContext}
 
+    INFORMASI UMUM RT 002/020:
+    - Alamat: Huntap 2 Tondo, Kel. Tondo, Kec. Mantikulore, Kota Palu.
+    - Iuran: Rp 25.000/bulan (Keamanan + Sampah).
+    - Jadwal Angkut Sampah: Senin dan Kamis pagi.
+    - Syarat Surat Pengantar: Bawa KTP & KK Asli, Bukti lunas iuran bulan berjalan.
+    - Lokasi Sekretariat: Rumah Ketua RT (Lihat data pengurus). Buka Senin-Jumat 19.00-21.00.
+
     TUGAS ANDA:
     1. Jawab pertanyaan warga dengan ramah, singkat, dan informatif.
     2. Gunakan data di atas sebagai referensi utama.
@@ -124,7 +133,7 @@ export const askRit = async (question: string, contextData: { announcements: Ann
 
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: question }] }],
+      contents: question,
       config: {
         systemInstruction: systemInstruction,
       }

@@ -13,14 +13,14 @@ const firebaseConfig = {
   appId: "1:710981295516:web:97bee73b"
 };
 
-// Initialize Firebase
+// Initialize Firebase with explicit type handling for modular SDK
 let app: any;
 let db: any;
 let auth: any;
 let isFirebaseConfigured = false;
 
 try {
-  // Using modular imports directly via namespace to avoid export errors
+  // Correct modular initialization for Firebase v9+
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);
