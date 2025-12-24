@@ -1,10 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
-// Safe Initialization using the recommended method
+// Safe Initialization
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// Fix: Updated model to 'gemini-3-flash-preview' for text tasks as per guidelines
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
   if (!process.env.API_KEY) return "API Key AI belum dikonfigurasi.";
   
@@ -15,7 +14,7 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
     Format: Plain text (Markdown allowed). Bahasa Indonesia yang baik dan benar.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
       contents: prompt,
     });
 
@@ -26,7 +25,6 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
   }
 };
 
-// Fix: Updated model to 'gemini-3-flash-preview' for report analysis
 export const analyzeReports = async (reports: string[]): Promise<string> => {
    if (!process.env.API_KEY) return "Fitur AI belum aktif.";
 
@@ -37,7 +35,7 @@ export const analyzeReports = async (reports: string[]): Promise<string> => {
      Berikan ringkasan eksekutif singkat (maksimal 3 poin) mengenai isu utama yang perlu ditangani oleh Ketua RT.`;
      
      const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
       contents: prompt,
      });
      
@@ -48,7 +46,6 @@ export const analyzeReports = async (reports: string[]): Promise<string> => {
    }
 }
 
-// Fix: Updated model to 'gemini-3-flash-preview' for dashboard summary
 export const generateDashboardSummary = async (data: {
   totalResidents: number,
   cashBalance: number,
@@ -73,7 +70,7 @@ export const generateDashboardSummary = async (data: {
      Format output menggunakan Markdown bold/list agar mudah dibaca. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
      
      const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
       contents: prompt,
      });
      
@@ -84,7 +81,6 @@ export const generateDashboardSummary = async (data: {
    }
 }
 
-// Fix: Updated model to 'gemini-3-flash-preview' for chatbot interaction
 export const askRit = async (question: string, contextData: { announcements: Announcement[], ronda: RondaSchedule[], officials: Official[] }): Promise<string> => {
   if (!process.env.API_KEY) return "Maaf, fitur Chatbot sedang non-aktif (Missing API Key).";
 
@@ -132,7 +128,7 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
       contents: question,
       config: {
         systemInstruction: systemInstruction,
