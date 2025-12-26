@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { 
@@ -10,7 +9,7 @@ import {
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
   RefreshCw, Calendar, DollarSign, Settings, Filter, MoreHorizontal, Heart, Baby, Smile, GraduationCap, Accessibility, Key, UserCheck, MessageCircle, ImageIcon, Link as LinkIcon, AlertCircle, Wrench, Battery, BatteryMedium, BatteryWarning, ChevronRight,
-  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, BarChart2, PieChart, LocateFixed, Navigation, ShoppingCart, Repeat
+  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, BarChart2, PieChart, LocateFixed, Navigation, ShoppingCart, Repeat, Wand2
 } from 'lucide-react';
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, BarChart, Bar, Cell, Legend } from 'recharts';
 
@@ -1297,6 +1296,36 @@ const AdminDashboard = ({
       }
   };
 
+  // NEW: HANDLE BULK PIN GENERATION
+  const handleGenerateBulkPins = async () => {
+      const isSelective = selectedIds.size > 0;
+      const targetHouses = isSelective 
+          ? houses.filter((h: House) => selectedIds.has(h.id))
+          : houses.filter((h: House) => !h.accessCode || h.accessCode === '');
+
+      if (targetHouses.length === 0) {
+          alert("Semua warga sudah memiliki PIN.");
+          return;
+      }
+
+      if (!confirm(`Generate PIN otomatis untuk ${targetHouses.length} rumah?`)) return;
+
+      const updates = targetHouses.map((h: House) => {
+          // Generate Access Code: HOUSEID-RANDOM4CHAR
+          const randomSuffix = Array(4).fill(0).map(() => Math.floor(Math.random()*36).toString(36).toUpperCase()).join('');
+          const newCode = `${h.block}-${h.number}-${randomSuffix}`;
+          return { id: h.id, accessCode: newCode };
+      });
+
+      try {
+          await batchUpdateHouses(updates);
+          alert(`Berhasil generate ${updates.length} PIN baru!`);
+          setSelectedIds(new Set());
+      } catch (e) {
+          alert("Gagal generate PIN massal.");
+      }
+  };
+
   // ... (Other handlers same as before)
   const handleDeleteHouse = async (id: string) => { if(confirm("Hapus warga?")) await deleteHouseFromDb(id); };
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -1652,11 +1681,18 @@ const AdminDashboard = ({
                                     <select className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 cursor-pointer hover:border-slate-400 outline-none shadow-sm" value={filterPayment} onChange={e => setFilterPayment(e.target.value)}><option value="All">Semua Status Iuran</option><option value="Lunas">Lunas</option><option value="Belum Lunas">Belum Lunas</option><option value="Menunggak">Menunggak</option></select>
                                     <select className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 cursor-pointer hover:border-slate-400 outline-none shadow-sm" value={filterBlock} onChange={e => setFilterBlock(e.target.value)}><option value="All">Semua Blok</option>{availableBlocks.map((b: string) => <option key={b} value={b}>Blok {b}</option>)}</select>
                                 </div>
-                                <div className="flex gap-2 w-full md:w-auto justify-end">
+                                <div className="flex flex-wrap gap-2 w-full md:w-auto justify-end">
                                     {selectedIds.size > 0 ? (
-                                        <Button onClick={handleBulkDuesUpdate} size="sm" className="h-8 bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 animate-fade-in"><CheckSquare size={14}/> Update Iuran ({selectedIds.size})</Button>
+                                        <div className="flex gap-2 animate-fade-in">
+                                            <Button onClick={handleGenerateBulkPins} size="sm" className="h-8 bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100"><Wand2 size={14}/> Generate PIN ({selectedIds.size})</Button>
+                                            <Button onClick={handleBulkDuesUpdate} size="sm" className="h-8 bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100"><CheckSquare size={14}/> Update Iuran</Button>
+                                        </div>
                                     ) : (
-                                        <><Button onClick={() => { resetForms(); setModalType('import'); setIsModalOpen(true); }} size="sm" variant="outline" className="h-8 bg-white border-blue-200 text-blue-600 hover:bg-blue-50"><Upload size={14}/> Import CSV</Button><Button onClick={() => generateResidentReportPDF(houses, pdfConfig)} size="sm" variant="outline" className="h-8 bg-white"><Printer size={14}/> PDF</Button></>
+                                        <>
+                                            <Button onClick={handleGenerateBulkPins} size="sm" variant="outline" className="h-8 bg-white border-indigo-200 text-indigo-600 hover:bg-indigo-50"><Key size={14}/> Generate PIN (Warga Baru)</Button>
+                                            <Button onClick={() => { resetForms(); setModalType('import'); setIsModalOpen(true); }} size="sm" variant="outline" className="h-8 bg-white border-blue-200 text-blue-600 hover:bg-blue-50"><Upload size={14}/> Import CSV</Button>
+                                            <Button onClick={() => generateResidentReportPDF(houses, pdfConfig)} size="sm" variant="outline" className="h-8 bg-white"><Printer size={14}/> PDF</Button>
+                                        </>
                                     )}
                                 </div>
                           </div>
@@ -1668,13 +1704,13 @@ const AdminDashboard = ({
                           <div className="overflow-x-auto rounded-2xl border border-slate-100">
                               <table className="w-full text-sm text-left">
                                   <thead className="bg-slate-50 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
-                                      <tr><th className="px-6 py-4 w-10"><input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" checked={filteredHouses.length > 0 && selectedIds.size === filteredHouses.length} onChange={handleSelectAll}/></th><th className="px-6 py-4">Kavling Rumah</th><th className="px-6 py-4">Kepala Keluarga</th><th className="px-6 py-4">Status & Kontak</th><th className="px-6 py-4">Demografi</th><th className="px-6 py-4">Status Iuran</th><th className="px-6 py-4 text-center">Aksi</th></tr>
+                                      <tr><th className="px-6 py-4 w-10"><input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" checked={filteredHouses.length > 0 && selectedIds.size === filteredHouses.length} onChange={handleSelectAll}/></th><th className="px-6 py-4">Kavling Rumah</th><th className="px-6 py-4">Kepala Keluarga</th><th className="px-6 py-4">Akses & PIN</th><th className="px-6 py-4">Demografi</th><th className="px-6 py-4">Status Iuran</th><th className="px-6 py-4 text-center">Aksi</th></tr>
                                   </thead>
                                   <tbody className="divide-y divide-slate-50">
                                       {filteredHouses.length > 0 ? (filteredHouses.map((h:House) => {
                                               const initials = h.headOfFamily !== '-' ? h.headOfFamily.split(' ').slice(0,2).map(n => n[0]).join('') : '?';
                                               const avatarColor = ['bg-red-100 text-red-600', 'bg-blue-100 text-blue-600', 'bg-green-100 text-green-600', 'bg-purple-100 text-purple-600', 'bg-amber-100 text-amber-600'][h.headOfFamily.length % 5];
-                                              return (<tr key={h.id} className={`transition-colors group ${selectedIds.has(h.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50/80'}`}><td className="px-6 py-4"><input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" checked={selectedIds.has(h.id)} onChange={() => handleSelectOne(h.id)}/></td><td className="px-6 py-4"><div className="flex flex-col"><span className="font-black text-slate-800 text-base">{h.block}-{h.number}</span><span className="text-[10px] text-slate-400 font-bold uppercase">Blok {h.block}</span></div></td><td className="px-6 py-4"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${h.status === 'Empty' ? 'bg-slate-100 text-slate-400' : avatarColor}`}>{initials}</div><div><p className={`font-bold text-sm ${h.status === 'Empty' ? 'text-slate-400 italic' : 'text-slate-700'}`}>{h.headOfFamily}</p>{h.status !== 'Empty' && <p className="text-xs text-slate-500 flex items-center gap-1"><Users size={12}/> {h.occupants} Penghuni</p>}</div></div></td><td className="px-6 py-4"><div className="flex flex-col gap-2 items-start"><div className="flex gap-1"><span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border flex items-center gap-1 ${h.status === 'Occupied' ? 'bg-white border-slate-200 text-slate-600' : h.status === 'Business' ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>{h.status === 'Occupied' ? 'Dihuni' : h.status === 'Business' ? 'Usaha' : 'Kosong'}</span>{h.status === 'Occupied' && (<span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border flex items-center gap-1 ${h.residenceType === 'Kontrak' ? 'bg-amber-50 text-amber-600 border-amber-100' : h.residenceType === 'Kost' ? 'bg-cyan-50 text-cyan-600 border-cyan-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>{h.residenceType === 'Kontrak' ? <Key size={10}/> : h.residenceType === 'Kost' ? <GraduationCap size={10}/> : <Home size={10}/>}{h.residenceType || 'Tetap'}</span>)}</div><div className="flex items-center gap-2">{h.phone ? (<><span className="font-mono text-xs font-medium text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">{h.phone}</span><a href={`https://wa.me/${h.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="p-1 rounded bg-green-100 text-green-600 hover:bg-green-200 transition-colors" title="Chat WhatsApp"><MessageCircle size={12} fill="currentColor" /></a></>) : (<span className="text-[10px] text-slate-300 italic">No HP -</span>)}</div></div></td><td className="px-6 py-4"><div className="flex gap-1">{h.hasPregnant && <div className="p-1.5 rounded-lg bg-pink-50 text-pink-600 border border-pink-100" title="Ibu Hamil"><Heart size={14} fill="currentColor"/></div>}{h.hasBaby && <div className="p-1.5 rounded-lg bg-cyan-50 text-cyan-600 border border-cyan-100" title="Bayi"><Baby size={14}/></div>}{h.hasToddler && <div className="p-1.5 rounded-lg bg-orange-50 text-orange-600 border border-orange-100" title="Balita"><Smile size={14}/></div>}{h.hasElderly && <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 border border-purple-100" title="Lansia"><Accessibility size={14}/></div>}{!h.hasPregnant && !h.hasBaby && !h.hasToddler && !h.hasElderly && <span className="text-slate-300">-</span>}</div></td><td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${h.paymentStatus === 'Lunas' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : h.paymentStatus === 'Belum Lunas' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}><div className={`w-1.5 h-1.5 rounded-full ${h.paymentStatus === 'Lunas' ? 'bg-emerald-500' : h.paymentStatus === 'Belum Lunas' ? 'bg-amber-500' : 'bg-rose-500'}`}></div>{h.paymentStatus}</span></td><td className="px-6 py-4 text-center"><div className="flex items-center justify-center gap-2"><button onClick={() => openEditHouse(h)} className="p-2 bg-white border border-slate-200 hover:bg-slate-800 hover:text-white hover:border-slate-800 rounded-xl text-slate-500 transition-all shadow-sm active:scale-95" title="Edit Data"><Edit2 size={16} /></button><button onClick={() => handleDeleteHouse(h.id)} className="p-2 bg-white border border-rose-100 hover:bg-rose-500 hover:text-white hover:border-rose-500 rounded-xl text-rose-400 transition-all shadow-sm active:scale-95" title="Hapus Permanen"><Trash2 size={16} /></button></div></td></tr>)})
+                                              return (<tr key={h.id} className={`transition-colors group ${selectedIds.has(h.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50/80'}`}><td className="px-6 py-4"><input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" checked={selectedIds.has(h.id)} onChange={() => handleSelectOne(h.id)}/></td><td className="px-6 py-4"><div className="flex flex-col"><span className="font-black text-slate-800 text-base">{h.block}-{h.number}</span><span className="text-[10px] text-slate-400 font-bold uppercase">Blok {h.block}</span></div></td><td className="px-6 py-4"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${h.status === 'Empty' ? 'bg-slate-100 text-slate-400' : avatarColor}`}>{initials}</div><div><p className={`font-bold text-sm ${h.status === 'Empty' ? 'text-slate-400 italic' : 'text-slate-700'}`}>{h.headOfFamily}</p>{h.status !== 'Empty' && <p className="text-xs text-slate-500 flex items-center gap-1"><Users size={12}/> {h.occupants} Penghuni</p>}</div></div></td><td className="px-6 py-4"><div className="flex flex-col gap-1.5">{h.accessCode ? (<div className="flex items-center gap-2"><span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded border border-indigo-100 select-all" title="Klik untuk seleksi PIN">{h.accessCode}</span><Lock size={12} className="text-slate-300"/></div>) : (<span className="text-[10px] text-rose-400 font-bold bg-rose-50 px-2 py-1 rounded border border-rose-100 flex items-center gap-1"><AlertCircle size={10}/> Belum ada PIN</span>)}{h.phone && <div className="flex items-center gap-2"><span className="text-[10px] font-mono text-slate-400">{h.phone}</span><a href={`https://wa.me/${h.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="p-1 rounded bg-green-50 text-green-600 hover:bg-green-100" title="Kirim PIN via WhatsApp"><MessageCircle size={10} fill="currentColor" /></a></div>}</div></td><td className="px-6 py-4"><div className="flex gap-1">{h.hasPregnant && <div className="p-1.5 rounded-lg bg-pink-50 text-pink-600 border border-pink-100" title="Ibu Hamil"><Heart size={14} fill="currentColor"/></div>}{h.hasBaby && <div className="p-1.5 rounded-lg bg-cyan-50 text-cyan-600 border border-cyan-100" title="Bayi"><Baby size={14}/></div>}{h.hasToddler && <div className="p-1.5 rounded-lg bg-orange-50 text-orange-600 border border-orange-100" title="Balita"><Smile size={14}/></div>}{h.hasElderly && <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 border border-purple-100" title="Lansia"><Accessibility size={14}/></div>}{!h.hasPregnant && !h.hasBaby && !h.hasToddler && !h.hasElderly && <span className="text-slate-300">-</span>}</div></td><td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${h.paymentStatus === 'Lunas' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : h.paymentStatus === 'Belum Lunas' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}><div className={`w-1.5 h-1.5 rounded-full ${h.paymentStatus === 'Lunas' ? 'bg-emerald-500' : h.paymentStatus === 'Belum Lunas' ? 'bg-amber-500' : 'bg-rose-500'}`}></div>{h.paymentStatus}</span></td><td className="px-6 py-4 text-center"><div className="flex items-center justify-center gap-2"><button onClick={() => openEditHouse(h)} className="p-2 bg-white border border-slate-200 hover:bg-slate-800 hover:text-white hover:border-slate-800 rounded-xl text-slate-500 transition-all shadow-sm active:scale-95" title="Edit Data"><Edit2 size={16} /></button><button onClick={() => handleDeleteHouse(h.id)} className="p-2 bg-white border border-rose-100 hover:bg-rose-500 hover:text-white hover:border-rose-500 rounded-xl text-rose-400 transition-all shadow-sm active:scale-95" title="Hapus Permanen"><Trash2 size={16} /></button></div></td></tr>)})
                                       ) : (<tr><td colSpan={7} className="text-center py-12 text-slate-400 italic bg-slate-50/30">Data tidak ditemukan untuk filter ini.</td></tr>)}
                                   </tbody>
                               </table>
@@ -1884,4 +1920,452 @@ const AdminDashboard = ({
           {activeTab === 'umkm' && (
              <div className="space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4"><h2 className="font-black text-2xl text-slate-800">UMKM Warga</h2><div className="flex w-full md:w-auto gap-3"><div className="relative flex-1 md:w-64"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} /><input type="text" placeholder="Cari UMKM..." className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-slate-900 focus:outline-none transition-all" value={searchUmkm} onChange={(e) => setSearchUmkm(e.target.value)} /></div><Button onClick={() => { resetForms(); setModalType('umkm'); setIsModalOpen(true); }}><Plus size={16}/> Tambah</Button></div></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{umkm.filter((u:
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{umkm.filter((u: UMKM) => u.name.toLowerCase().includes(searchUmkm.toLowerCase()) || u.owner.toLowerCase().includes(searchUmkm.toLowerCase())).length > 0 ? (umkm.filter((u: UMKM) => u.name.toLowerCase().includes(searchUmkm.toLowerCase()) || u.owner.toLowerCase().includes(searchUmkm.toLowerCase())).map((u:UMKM) => (<div key={u.id} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm group hover:shadow-lg transition-all"><div className="h-40 bg-slate-100 relative overflow-hidden"><img src={u.image} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" onError={(e)=>{(e.target as HTMLImageElement).src='https://placehold.co/600x400/f1f5f9/94a3b8?text=No+Image'}} /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"><button onClick={() => openEditUMKM(u)} className="p-2 bg-white/90 rounded-xl shadow-sm text-slate-700 hover:text-blue-600 hover:scale-110 transition-all"><Edit2 size={16}/></button><button onClick={() => handleDeleteUMKM(u.id)} className="p-2 bg-white/90 rounded-xl shadow-sm text-slate-700 hover:text-rose-600 hover:scale-110 transition-all"><Trash2 size={16}/></button></div><div className="absolute top-3 left-3"><span className="bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">{u.category}</span></div></div><div className="p-5"><div className="flex justify-between items-start mb-2"><h3 className="font-bold text-slate-800 text-lg leading-tight">{u.name}</h3></div><p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1.5"><User size={12}/> {u.owner}</p><div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-50"><div className="bg-green-50 text-green-600 p-1.5 rounded-lg"><MessageCircle size={14}/></div><span className="text-xs font-bold text-slate-600">{u.contact}</span></div></div></div>))) : (<div className="col-span-full py-12 text-center text-slate-400 italic bg-white rounded-2xl border border-dashed border-slate-200">{searchUmkm ? 'Tidak ada UMKM yang cocok dengan pencarian.' : 'Belum ada data UMKM.'}</div>)}</div>
+             </div>
+          )}
+
+          {activeTab === 'services' && (
+             <div className="space-y-6">
+                 <div className="flex gap-2 mb-6 bg-slate-100 p-1 rounded-xl w-fit"><button onClick={() => setServiceTab('surat')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${serviceTab === 'surat' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-800'}`}>Permohonan Surat</button><button onClick={() => setServiceTab('laporan')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${serviceTab === 'laporan' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-800'}`}>Laporan Warga</button></div>
+                 {serviceTab === 'surat' ? letters.map((l:LetterRequest) => (
+                     <div key={l.id} className="bg-white p-5 rounded-2xl border border-slate-100 flex justify-between items-center hover:shadow-sm"><div><div className="flex items-center gap-2 mb-1"><h4 className="font-bold text-slate-800">{l.type}</h4><span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${l.status === 'Approved' ? 'bg-green-100 text-green-700' : l.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{l.status}</span></div><p className="text-xs text-slate-500">Oleh: {l.applicantName} • {new Date(l.date).toLocaleDateString()}</p></div><div className="flex gap-2"><button onClick={() => handleUpdateLetter(l.id, 'Approved')} className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100"><CheckCircle size={20}/></button><button onClick={() => handleUpdateLetter(l.id, 'Rejected')} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"><XCircle size={20}/></button><button onClick={() => handleDeleteLetter(l.id)} className="p-2 text-slate-300 hover:text-slate-500"><Trash2 size={20}/></button></div></div>
+                 )) : reports.map((r:Report) => (
+                     <div key={r.id} className="bg-white p-5 rounded-2xl border border-slate-100 flex justify-between items-center hover:shadow-sm"><div><div className="flex items-center gap-2 mb-1"><h4 className="font-bold text-slate-800">{r.type}</h4><span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${r.status === 'Selesai' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{r.status}</span></div><p className="text-xs text-slate-500 mb-2">{r.description}</p><div className="flex items-center gap-3 text-[10px] text-slate-400 font-medium"><span className="flex items-center gap-1"><User size={10}/> {r.reporterName || 'Anonim'}</span>{r.houseId && <span className="flex items-center gap-1"><Home size={10}/> Blok {r.houseId}</span>}<span className="flex items-center gap-1"><Clock size={10}/> {new Date(r.date).toLocaleDateString('id-ID')}</span></div></div><div className="flex gap-2"><button onClick={() => handleUpdateReport(r.id, 'Selesai')} className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100" title="Tandai Selesai"><CheckCircle size={20}/></button><button onClick={() => handleDeleteReport(r.id)} className="p-2 text-slate-300 hover:text-slate-500"><Trash2 size={20}/></button></div></div>
+                 ))}
+                 {((serviceTab === 'surat' && letters.length === 0) || (serviceTab === 'laporan' && reports.length === 0)) && <div className="text-center py-12 text-slate-400 italic bg-white rounded-2xl border border-dashed border-slate-100">Belum ada data masuk.</div>}
+             </div>
+          )}
+
+          {activeTab === 'settings' && (
+             // ... existing settings tab ...
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
+                {/* Left Column: Admin Profile & System Management */}
+               <div className="space-y-8">
+                   {/* Admin Profile */}
+                   <Card title="Profil Admin" icon={User} className="relative overflow-hidden">
+                       <div className="flex items-center gap-4 mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                           <div className="w-14 h-14 bg-slate-800 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-md">
+                               A
+                           </div>
+                           <div>
+                               <h3 className="font-bold text-slate-800">Admin Utama</h3>
+                               <p className="text-xs text-slate-500 font-medium">{auth.currentUser?.email || 'admin@teras.id'}</p>
+                           </div>
+                       </div>
+                       
+                       <form onSubmit={handlePasswordChange} className="space-y-4">
+                           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ganti Password</p>
+                           <div className="relative">
+                               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                               <input 
+                                   type={showPassword ? "text" : "password"} 
+                                   className="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all" 
+                                   placeholder="Password Baru"
+                                   value={newPassword}
+                                   onChange={e => setNewPassword(e.target.value)}
+                                   minLength={6}
+                               />
+                               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                   {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
+                               </button>
+                           </div>
+                           <div className="relative">
+                               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                               <input 
+                                   type={showPassword ? "text" : "password"} 
+                                   className="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 focus:outline-none transition-all" 
+                                   placeholder="Konfirmasi Password"
+                                   value={confirmPassword}
+                                   onChange={e => setConfirmPassword(e.target.value)}
+                                   minLength={6}
+                               />
+                           </div>
+                           <Button type="submit" className="w-full" disabled={!newPassword || isChangingPassword}>
+                               {isChangingPassword ? 'Memproses...' : 'Simpan Password Baru'}
+                           </Button>
+                       </form>
+                   </Card>
+
+                   {/* System Management (Danger Zone) */}
+                   <Card title="Manajemen Sistem" icon={Database} className="border-rose-100">
+                       <div className="space-y-4">
+                           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
+                               <div>
+                                   <h4 className="font-bold text-sm text-slate-700">Backup Data</h4>
+                                   <p className="text-xs text-slate-400">Unduh semua data dalam format JSON.</p>
+                               </div>
+                               <Button size="sm" variant="outline" onClick={handleExportData}>
+                                   <Download size={14}/> Export
+                               </Button>
+                           </div>
+
+                           <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                               <div className="flex items-start gap-3 mb-4">
+                                   <div className="p-2 bg-rose-100 text-rose-600 rounded-lg"><AlertTriangle size={20}/></div>
+                                   <div>
+                                       <h4 className="font-bold text-sm text-rose-700">Reset Database (Seed)</h4>
+                                       <p className="text-xs text-rose-600 leading-relaxed">
+                                           Tindakan ini akan <strong>menghapus semua data real</strong> dan mengembalikannya ke data contoh (dummy). Gunakan hanya untuk keperluan testing.
+                                       </p>
+                                   </div>
+                               </div>
+                               <Button onClick={handleResetSystem} className="w-full bg-white text-rose-600 border border-rose-200 hover:bg-rose-600 hover:text-white shadow-sm hover:shadow-rose-200">
+                                   <Trash size={16}/> Reset ke Pengaturan Awal
+                               </Button>
+                           </div>
+                       </div>
+                   </Card>
+               </div>
+
+               {/* Right Column: PDF Configuration */}
+               <div className="space-y-8">
+                   <Card title="Konfigurasi Surat (PDF)" icon={FileText} action={<Button onClick={handleSaveConfig} size="sm" className="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"><Save size={16}/> Simpan</Button>}>
+                       <div className="space-y-6">
+                           <div>
+                               <label className="block text-xs font-bold mb-2 text-slate-700">Nama Instansi / Kop Surat</label>
+                               <input 
+                                   className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-800 outline-none transition-all" 
+                                   value={localConfig.rtAddress} 
+                                   onChange={e => setLocalConfig({...localConfig, rtAddress: e.target.value})} 
+                                   placeholder="Cth: Jl. Pue Lombe..."
+                               />
+                           </div>
+
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               {/* Logo Upload */}
+                               <div className="space-y-2">
+                                   <label className="block text-xs font-bold text-slate-700">Logo (PNG/JPG)</label>
+                                   <div className="relative h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center overflow-hidden hover:border-slate-400 transition-colors group">
+                                       {localConfig.logo ? (
+                                           <img src={localConfig.logo} alt="Logo" className="h-full w-full object-contain p-2" />
+                                       ) : (
+                                           <div className="text-center p-4">
+                                               <ImageIcon size={24} className="mx-auto text-slate-300 mb-2"/>
+                                               <span className="text-xs text-slate-400">Upload Logo</span>
+                                           </div>
+                                       )}
+                                       <input type="file" onChange={e => handleFileChange(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" title="Klik untuk ganti"/>
+                                       {localConfig.logo && <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"><span className="text-white text-xs font-bold">Ganti Gambar</span></div>}
+                                   </div>
+                               </div>
+
+                               {/* Stamp Upload */}
+                               <div className="space-y-2">
+                                   <label className="block text-xs font-bold text-slate-700">Stempel (Transparan)</label>
+                                   <div className="relative h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center overflow-hidden hover:border-slate-400 transition-colors group">
+                                       {localConfig.stamp ? (
+                                           <img src={localConfig.stamp} alt="Stempel" className="h-full w-full object-contain p-2" />
+                                       ) : (
+                                           <div className="text-center p-4">
+                                               <ShieldCheck size={24} className="mx-auto text-slate-300 mb-2"/>
+                                               <span className="text-xs text-slate-400">Upload Stempel</span>
+                                           </div>
+                                       )}
+                                       <input type="file" onChange={e => handleFileChange(e, 'stamp')} className="absolute inset-0 opacity-0 cursor-pointer" title="Klik untuk ganti"/>
+                                       {localConfig.stamp && <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"><span className="text-white text-xs font-bold">Ganti Gambar</span></div>}
+                                   </div>
+                               </div>
+                           </div>
+
+                           {/* Signature Upload */}
+                           <div className="space-y-2">
+                               <label className="block text-xs font-bold text-slate-700">Tanda Tangan Ketua RT (Transparan)</label>
+                               <div className="relative h-24 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center overflow-hidden hover:border-slate-400 transition-colors group">
+                                   {localConfig.signature ? (
+                                       <img src={localConfig.signature} alt="TTD" className="h-full w-full object-contain p-2" />
+                                   ) : (
+                                       <div className="text-center p-4">
+                                           <Edit2 size={20} className="mx-auto text-slate-300 mb-1"/>
+                                           <span className="text-xs text-slate-400">Upload TTD</span>
+                                       </div>
+                                   )}
+                                   <input type="file" onChange={e => handleFileChange(e, 'signature')} className="absolute inset-0 opacity-0 cursor-pointer" title="Klik untuk ganti"/>
+                                   {localConfig.signature && <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"><span className="text-white text-xs font-bold">Ganti Gambar</span></div>}
+                               </div>
+                           </div>
+                       </div>
+                   </Card>
+               </div>
+            </div>
+          )}
+          
+          {/* Modals */}
+          {isModalOpen && (
+             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalType === 'announcement' ? "Buat Pengumuman" : modalType === 'poll' ? "Buat Voting Baru" : modalType === 'cash' ? (editingCashId ? "Edit Transaksi" : "Catat Transaksi") : modalType === 'official' ? "Data Pengurus" : modalType === 'inventory' ? "Data Inventaris" : modalType === 'ronda' ? "Jadwal Ronda" : modalType === 'umkm' ? "Kelola Data UMKM" : modalType === 'dues' ? "Catat Iuran" : modalType === 'bulkDues' ? "Update Iuran Massal" : modalType === 'import' ? "Import Data Warga" : "Edit Data Warga"}>
+                 {modalType === 'announcement' && (
+                     <form onSubmit={handleCreateAnnouncement} className="space-y-4">
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5 text-slate-700">Judul</label>
+                            <input className={`w-full p-3 bg-white border rounded-xl text-sm ${formErrors.title ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`} value={annTitle} onChange={e=>setAnnTitle(e.target.value)} required/>
+                            {formErrors.title && <p className="text-xs text-rose-500 mt-1">{formErrors.title}</p>}
+                         </div>
+                         <div>
+                             <label className="block text-xs font-bold mb-1.5 text-slate-700">Isi Pengumuman (Gunakan AI)</label>
+                             <div className="flex gap-2 mb-2"><input className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-sm" placeholder="Topik..." value={draftTopic} onChange={e=>setDraftTopic(e.target.value)}/><button type="button" onClick={handleGenerateDraft} disabled={isGenerating} className="bg-purple-600 text-white px-4 rounded-xl text-xs font-bold shadow-sm hover:bg-purple-700 disabled:opacity-50">{isGenerating ? 'Generating...' : '✨ Buat Draf'}</button></div>
+                             <textarea className={`w-full p-3 bg-white border rounded-xl h-32 text-sm ${formErrors.content ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`} value={annContent} onChange={e=>setAnnContent(e.target.value)} required/>
+                             {formErrors.content && <p className="text-xs text-rose-500 mt-1">{formErrors.content}</p>}
+                         </div>
+                         <div className="grid grid-cols-2 gap-3">
+                             <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Tipe</label><select className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={annType} onChange={e=>{ const val = e.target.value as any; setAnnType(val); if(val === 'Urgent') setAnnNotify(true); }}><option>General</option><option>Urgent</option><option>Event</option></select></div>
+                             <div>
+                                <label className="block text-xs font-bold mb-1.5 text-slate-700">Opsi Tambahan</label>
+                                <label className="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
+                                    <input type="checkbox" className="w-4 h-4 rounded text-brand-blue" checked={annNotify} onChange={e => setAnnNotify(e.target.checked)}/>
+                                    <span className="text-xs font-bold text-slate-600 flex items-center gap-1"><Bell size={12}/> Kirim Notifikasi</span>
+                                </label>
+                             </div>
+                         </div>
+                         <Button type="submit" className="w-full py-3">Terbitkan</Button>
+                     </form>
+                 )}
+                 {modalType === 'poll' && (
+                     <form onSubmit={handleCreatePoll} className="space-y-4">
+                         <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Judul Voting</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={pollTitle} onChange={e=>setPollTitle(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Deskripsi</label><textarea className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm h-20" value={pollDesc} onChange={e=>setPollDesc(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5 text-slate-700">Batas Waktu</label><input type="date" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={pollDeadline} onChange={e=>setPollDeadline(e.target.value)} required/></div>
+                         
+                         <div className="space-y-2">
+                             <label className="block text-xs font-bold mb-1.5 text-slate-700">Pilihan Jawaban</label>
+                             {pollOptions.map((opt, idx) => (
+                                 <div key={idx} className="flex gap-2">
+                                     <input className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-sm" placeholder={`Pilihan ${idx + 1}`} value={opt} onChange={e => { const newOpts = [...pollOptions]; newOpts[idx] = e.target.value; setPollOptions(newOpts); }} required/>
+                                     {pollOptions.length > 2 && <button type="button" onClick={() => setPollOptions(pollOptions.filter((_, i) => i !== idx))} className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl"><Trash2 size={16}/></button>}
+                                 </div>
+                             ))}
+                             <button type="button" onClick={() => setPollOptions([...pollOptions, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1 mt-2 hover:underline"><Plus size={12}/> Tambah Pilihan Lain</button>
+                         </div>
+                         <Button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-700">Mulai Voting</Button>
+                     </form>
+                 )}
+                 {modalType === 'cash' && (
+                     <form onSubmit={handleSaveTransaction} className="space-y-4">
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5 text-slate-700">Keterangan</label>
+                            <input className={`w-full p-3 bg-white border rounded-xl text-sm ${formErrors.desc ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`} value={cashDesc} onChange={e=>setCashDesc(e.target.value)} required/>
+                            {formErrors.desc && <p className="text-xs text-rose-500 mt-1">{formErrors.desc}</p>}
+                         </div>
+                         <div>
+                            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp)</label>
+                            <input type="number" className={`w-full p-3 bg-white border rounded-xl text-sm ${formErrors.amount ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-200'}`} value={cashAmount} onChange={e=>setCashAmount(e.target.value)} required/>
+                            {formErrors.amount && <p className="text-xs text-rose-500 mt-1">{formErrors.amount}</p>}
+                         </div>
+                         <div className="grid grid-cols-2 gap-3"><div><label className="block text-xs font-bold mb-1.5 text-slate-700">Tipe</label><select className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashType} onChange={e=>setCashType(e.target.value as any)}><option value="Income">Pemasukan</option><option value="Expense">Pengeluaran</option></select></div><div><label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={cashCategory} onChange={e=>setCashCategory(e.target.value)}/></div></div>
+                         <Button type="submit" className="w-full py-3">{editingCashId ? 'Simpan Perubahan' : 'Catat Transaksi'}</Button>
+                     </form>
+                 )}
+                 {modalType === 'official' && (
+                     <form onSubmit={handleSaveOfficial} className="space-y-4">
+                         <div><label className="block text-xs font-bold mb-1.5">Nama</label><input className={`w-full p-3 border rounded-xl ${formErrors.name ? 'border-rose-500' : ''}`} value={offName} onChange={e=>setOffName(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Jabatan</label><input className="w-full p-3 border rounded-xl" value={offRole} onChange={e=>setOffRole(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Telepon</label><input className="w-full p-3 border rounded-xl" value={offPhone} onChange={e=>setOffPhone(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Rumah (Blok)</label><input className="w-full p-3 border rounded-xl" value={offHouse} onChange={e=>setOffHouse(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Foto URL</label><input className="w-full p-3 border rounded-xl" value={offPhoto} onChange={e=>setOffPhoto(e.target.value)}/></div>
+                         <Button type="submit" className="w-full py-3">Simpan Data Pengurus</Button>
+                     </form>
+                 )}
+                 {modalType === 'inventory' && (
+                     <form onSubmit={handleSaveInventory} className="space-y-4">
+                         <div><label className="block text-xs font-bold mb-1.5">Nama Barang</label><input className="w-full p-3 border rounded-xl" value={invName} onChange={e=>setInvName(e.target.value)} required/></div>
+                         <div className="grid grid-cols-2 gap-3">
+                             <div><label className="block text-xs font-bold mb-1.5">Total</label><input type="number" className="w-full p-3 border rounded-xl" value={invTotal} onChange={e=>setInvTotal(e.target.value)} required/></div>
+                             <div><label className="block text-xs font-bold mb-1.5">Tersedia</label><input type="number" className="w-full p-3 border rounded-xl" value={invAvailable} onChange={e=>setInvAvailable(e.target.value)} required/></div>
+                         </div>
+                         <div><label className="block text-xs font-bold mb-1.5">Kondisi</label><select className="w-full p-3 border rounded-xl" value={invCondition} onChange={e=>setInvCondition(e.target.value as any)}><option>Baik</option><option>Perlu Perbaikan</option><option>Rusak</option></select></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Catatan</label><textarea className="w-full p-3 border rounded-xl" value={invNotes} onChange={e=>setInvNotes(e.target.value)}/></div>
+                         <Button type="submit" className="w-full py-3">Simpan Barang</Button>
+                     </form>
+                 )}
+                 {modalType === 'ronda' && (
+                     <form onSubmit={handleSaveRonda} className="space-y-4">
+                         <div className="bg-slate-100 p-3 rounded-xl mb-2 text-center font-bold text-slate-700">{rondaDay}</div>
+                         <div><label className="block text-xs font-bold mb-1.5">Anggota (Pisahkan dengan koma)</label><textarea className="w-full p-3 border rounded-xl h-32" value={rondaMembers} onChange={e=>setRondaMembers(e.target.value)} placeholder="Bpk. A, Bpk. B, ..."/></div>
+                         <Button type="submit" className="w-full py-3">Update Jadwal</Button>
+                     </form>
+                 )}
+                 {modalType === 'umkm' && (
+                     <form onSubmit={handleSaveUMKM} className="space-y-4">
+                         <div><label className="block text-xs font-bold mb-1.5">Nama Usaha</label><input className="w-full p-3 border rounded-xl" value={umkmName} onChange={e=>setUmkmName(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Pemilik</label><input className="w-full p-3 border rounded-xl" value={umkmOwner} onChange={e=>setUmkmOwner(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Kategori</label><select className="w-full p-3 border rounded-xl" value={umkmCategory} onChange={e=>setUmkmCategory(e.target.value)}><option>Kuliner</option><option>Jasa</option><option>Retail</option><option>Lainnya</option></select></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Kontak (WA)</label><input className="w-full p-3 border rounded-xl" value={umkmContact} onChange={e=>setUmkmContact(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Deskripsi</label><textarea className="w-full p-3 border rounded-xl" value={umkmDesc} onChange={e=>setUmkmDesc(e.target.value)}/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Foto URL</label><input className="w-full p-3 border rounded-xl" value={umkmImage} onChange={e=>setUmkmImage(e.target.value)}/></div>
+                         <Button type="submit" className="w-full py-3">Simpan UMKM</Button>
+                     </form>
+                 )}
+                 {modalType === 'dues' && (
+                     <form onSubmit={handleSaveDues} className="space-y-4">
+                         <div className="bg-slate-100 p-3 rounded-xl mb-2 text-center font-bold text-slate-700">Warga: {duesHouseId}</div>
+                         <div><label className="block text-xs font-bold mb-1.5">Nominal Iuran</label><input type="number" className="w-full p-3 border rounded-xl" value={duesAmount} onChange={e=>setDuesAmount(e.target.value)} required/></div>
+                         <div><label className="block text-xs font-bold mb-1.5">Status Baru</label><select className="w-full p-3 border rounded-xl" value={duesStatus} onChange={e=>setDuesStatus(e.target.value as any)}><option value={PaymentStatus.PAID}>Lunas</option><option value={PaymentStatus.PENDING}>Belum Lunas</option><option value={PaymentStatus.UNPAID}>Menunggak</option></select></div>
+                         <Button type="submit" className="w-full py-3 bg-emerald-600 hover:bg-emerald-700">Simpan & Catat Transaksi</Button>
+                     </form>
+                 )}
+                 {modalType === 'bulkDues' && (
+                     <form onSubmit={handleSaveBulkDues} className="space-y-4">
+                         <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-center">
+                             <p className="text-sm font-bold text-indigo-800">Update {selectedIds.size} Data Warga</p>
+                         </div>
+                         <div><label className="block text-xs font-bold mb-1.5">Set Status Pembayaran Ke:</label><select className="w-full p-3 border rounded-xl" value={bulkStatus} onChange={e=>setBulkStatus(e.target.value as any)}><option value={PaymentStatus.PAID}>Lunas</option><option value={PaymentStatus.PENDING}>Belum Lunas</option><option value={PaymentStatus.UNPAID}>Menunggak</option></select></div>
+                         <Button type="submit" className="w-full py-3">Lakukan Update Massal</Button>
+                     </form>
+                 )}
+                 {modalType === 'import' && (
+                     <div className="space-y-4 text-center">
+                         <div className="border-2 border-dashed border-slate-300 p-8 rounded-2xl bg-slate-50">
+                             <p className="text-slate-500 mb-4">Upload file CSV data warga di sini. Pastikan format kolom sesuai.</p>
+                             <input type="file" accept=".csv" className="hidden" id="csvUpload" onChange={e => setImportFile(e.target.files?.[0] || null)} />
+                             <label htmlFor="csvUpload" className="inline-block px-6 py-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 font-bold text-sm shadow-sm">Pilih File CSV</label>
+                             {importFile && <p className="mt-4 font-bold text-slate-800">{importFile.name}</p>}
+                         </div>
+                         <Button onClick={handleProcessImport} disabled={!importFile || isImporting} className="w-full py-3">{isImporting ? 'Memproses...' : 'Mulai Import'}</Button>
+                         <button onClick={handleDownloadTemplate} className="text-xs text-blue-600 hover:underline">Download Template CSV</button>
+                     </div>
+                 )}
+                 {modalType === 'editHouse' && (
+                     <form onSubmit={handleSaveHouse} className="space-y-4">
+                         <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-center gap-3">
+                             <div className="bg-white p-2 rounded-full text-blue-600 font-bold text-xs shadow-sm">{selectedHouse?.block}-{selectedHouse?.number}</div>
+                             <p className="text-xs text-blue-700 font-bold">Mengedit Data Kavling</p>
+                         </div>
+                         <div><label className="block text-xs font-bold mb-1.5">Status Hunian</label><select className="w-full p-3 border rounded-xl" value={editHouseForm.unifiedStatus} onChange={e=>setEditHouseForm({...editHouseForm, unifiedStatus: e.target.value})}><option value="Tetap">Dihuni (Milik Sendiri)</option><option value="Kontrak">Dihuni (Kontrak/Sewa)</option><option value="Kost">Dihuni (Kost)</option><option value="Empty">Rumah Kosong</option><option value="Business">Tempat Usaha</option></select></div>
+                         
+                         {editHouseForm.unifiedStatus !== 'Empty' && (
+                             <>
+                                 <div><label className="block text-xs font-bold mb-1.5">Kepala Keluarga</label><input className="w-full p-3 border rounded-xl" value={editHouseForm.headOfFamily} onChange={e=>setEditHouseForm({...editHouseForm, headOfFamily: e.target.value})}/></div>
+                                 <div className="grid grid-cols-2 gap-3">
+                                     <div><label className="block text-xs font-bold mb-1.5">Jml Penghuni</label><input type="number" className="w-full p-3 border rounded-xl" value={editHouseForm.occupants} onChange={e=>setEditHouseForm({...editHouseForm, occupants: parseInt(e.target.value)})}/></div>
+                                     <div><label className="block text-xs font-bold mb-1.5">No. HP</label><input className="w-full p-3 border rounded-xl" value={editHouseForm.phone} onChange={e=>setEditHouseForm({...editHouseForm, phone: e.target.value})}/></div>
+                                 </div>
+                                 
+                                 {/* Access Code Input */}
+                                 <div>
+                                     <label className="block text-xs font-bold mb-1.5 text-slate-700">Kode Akses Rumah (PIN)</label>
+                                     <div className="relative">
+                                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
+                                         <input className="w-full pl-10 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono tracking-wider" value={editHouseForm.accessCode} onChange={e=>setEditHouseForm({...editHouseForm, accessCode: e.target.value})} placeholder="Buat PIN akses..."/>
+                                     </div>
+                                     <p className="text-[10px] text-slate-400 mt-1">Digunakan untuk verifikasi saat warga melapor/meminta surat.</p>
+                                 </div>
+                             </>
+                         )}
+                         <Button type="submit" className="w-full py-3 bg-blue-600 hover:bg-blue-700">Simpan Perubahan</Button>
+                     </form>
+                 )}
+             </Modal>
+          )}
+      </div>
+    </div>
+  );
+};
+
+export const App = () => {
+  const [houses, setHouses] = useState<House[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [cashFlow, setCashFlow] = useState<CashFlow[]>([]);
+  const [officials, setOfficials] = useState<Official[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [letters, setLetters] = useState<LetterRequest[]>([]);
+  const [ronda, setRonda] = useState<RondaSchedule[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [umkm, setUmkm] = useState<UMKM[]>([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [rondaLogs, setRondaLogs] = useState<RondaCheckLog[]>([]);
+  const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
+  
+  const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => {
+    try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; }
+  });
+
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data));
+    const unsubAnnouncements = subscribeToCollection('announcements', (data) => setAnnouncements(data));
+    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
+    const unsubOfficials = subscribeToCollection('officials', (data) => setOfficials(data));
+    const unsubReports = subscribeToCollection('reports', (data) => setReports(data));
+    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
+    const unsubRonda = subscribeToCollection('ronda', (data) => setRonda(data));
+    const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data));
+    const unsubUmkm = subscribeToCollection('umkm', (data) => setUmkm(data));
+    const unsubPolls = subscribeToCollection('polls', (data) => setPolls(data));
+    const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
+    const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
+    const unsubNotifs = subscribeToNotifications((data) => {
+        setNotifications(data);
+        const unread = data.filter(n => !n.isRead);
+        if (unread.length > 0 && unread[0].date > new Date(Date.now() - 5000).toISOString()) {
+            setActiveNotification(unread[0]);
+        }
+    });
+
+    return () => {
+      unsubHouses(); unsubAnnouncements(); unsubCash(); unsubOfficials(); 
+      unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
+      unsubUmkm(); unsubPolls(); unsubMarket(); unsubRondaLogs(); unsubNotifs();
+    };
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        setIsAdmin(true); 
+      } else {
+        setCurrentUser(null);
+        setIsAdmin(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleMarkRead = async (id: string) => {
+      // In a real app, update DB.
+  };
+
+  return (
+    <HashRouter>
+        {activeNotification && <NotificationToast notification={activeNotification} onClose={() => setActiveNotification(null)} />}
+        <Routes>
+            <Route path="/admin" element={
+                <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
+                    <AdminDashboard 
+                        houses={houses} 
+                        announcements={announcements} 
+                        cashFlow={cashFlow}
+                        officials={officials}
+                        reports={reports}
+                        letters={letters}
+                        ronda={ronda}
+                        inventory={inventory}
+                        umkm={umkm}
+                        polls={polls}
+                        rondaLogs={rondaLogs}
+                        pdfConfig={pdfConfig}
+                        setPdfConfig={setPdfConfig}
+                    />
+                </AdminRouteWrapper>
+            }/>
+            <Route path="*" element={
+                <>
+                    <PublicHeader notifications={notifications} onMarkRead={handleMarkRead} />
+                    <Routes>
+                        <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} />} />
+                        <Route path="/voting" element={<PublicVoting polls={polls} />} />
+                        <Route path="/market" element={<PublicMarket items={marketItems} />} />
+                        <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} />} />
+                        <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
+                        <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} />} />
+                    </Routes>
+                    <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+                    <PanicButton />
+                </>
+            } />
+        </Routes>
+    </HashRouter>
+  );
+};
