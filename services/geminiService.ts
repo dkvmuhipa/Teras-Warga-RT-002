@@ -1,20 +1,22 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
-// Safe Initialization
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Helper function to initialize AI with the latest API key from the environment
+const getAi = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
   if (!process.env.API_KEY) return "API Key AI belum dikonfigurasi.";
   
   try {
+    const ai = getAi();
     const prompt = `Buatkan draf pengumuman untuk warga RT (Rukun Tetangga) dengan topik: "${topic}".
     Gaya bahasa: ${tone}.
     Struktur: Judul menarik, Salam pembuka, Isi pengumuman (singkat & jelas), Detail (Waktu/Tempat jika perlu), Salam penutup.
     Format: Plain text (Markdown allowed). Bahasa Indonesia yang baik dan benar.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
     });
 
@@ -29,13 +31,14 @@ export const analyzeReports = async (reports: string[]): Promise<string> => {
    if (!process.env.API_KEY) return "Fitur AI belum aktif.";
 
    try {
+     const ai = getAi();
      const prompt = `Berikut adalah daftar laporan warga minggu ini:
      ${reports.join('\n- ')}
      
      Berikan ringkasan eksekutif singkat (maksimal 3 poin) mengenai isu utama yang perlu ditangani oleh Ketua RT.`;
      
      const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
      });
      
@@ -55,6 +58,7 @@ export const generateDashboardSummary = async (data: {
    if (!process.env.API_KEY) return "Fitur AI belum aktif (API Key belum diset).";
 
    try {
+     const ai = getAi();
      const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
      Analisis data realtime dashboard RT 002 berikut:
      - Jumlah Penduduk: ${data.totalResidents} jiwa
@@ -70,7 +74,7 @@ export const generateDashboardSummary = async (data: {
      Format output menggunakan Markdown bold/list agar mudah dibaca. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
      
      const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
      });
      
@@ -85,6 +89,7 @@ export const askRit = async (question: string, contextData: { announcements: Ann
   if (!process.env.API_KEY) return "Maaf, fitur Chatbot sedang non-aktif (Missing API Key).";
 
   try {
+    const ai = getAi();
     const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     
     // Mempersiapkan konteks data untuk AI
@@ -128,7 +133,7 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: question,
       config: {
         systemInstruction: systemInstruction,
