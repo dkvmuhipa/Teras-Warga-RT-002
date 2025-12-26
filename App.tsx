@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { 
@@ -411,7 +410,6 @@ const PublicHome = ({ houses, announcements, ronda, reports, officials }: any) =
   );
 };
 
-// ... Include PublicVoting, PublicMarket, PublicServices, PublicUMKM, PublicInfo ...
 const PublicVoting = ({ polls }: { polls: Poll[] }) => {
     const [votedPolls, setVotedPolls] = useState<Set<string>>(new Set());
     
@@ -818,9 +816,9 @@ const PublicServices = ({ pdfConfig }: { pdfConfig: PdfConfig }) => {
          <div className="text-center mb-8 md:mb-10"><span className="inline-block px-3 py-1 rounded-full bg-brand-blue/10 text-brand-blue text-[10px] font-bold uppercase tracking-wider mb-2">Pusat Layanan Warga</span><h1 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">Layanan Digital RT 002</h1><p className="text-sm md:text-base text-slate-500 mt-2 max-w-xl mx-auto">Sistem pelayanan mandiri untuk pembuatan surat pengantar, pelaporan masalah, dan pemantauan aktivitas lingkungan.</p></div>
          <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 overflow-hidden border border-slate-100 flex flex-col md:flex-row min-h-[600px]">
             <div className="w-full md:w-72 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-100 p-4 md:p-6 flex flex-row md:flex-col gap-2 overflow-x-auto no-scrollbar snap-x">
-               <button onClick={() => setActiveTab('surat')} className={`flex-none min-w-[140px] md:min-w-0 p-4 rounded-2xl text-left flex items-center md:items-start md:flex-col gap-3 transition-all snap-start ${activeTab === 'surat' ? 'bg-white text-brand-blue shadow-lg shadow-blue-100 ring-1 ring-blue-100' : 'hover:bg-white hover:shadow-sm text-slate-500 hover:text-slate-800'}`}><div className={`p-2 rounded-xl ${activeTab==='surat' ? 'bg-blue-50' : 'bg-slate-100'}`}><FileText size={20} className="shrink-0" /></div><div><span className="font-bold block text-sm">Surat Pengantar</span><span className="text-[10px] opacity-70 hidden md:block mt-1">KTP, KK, Domisili, dll</span></div></button>
-               <button onClick={() => setActiveTab('lapor')} className={`flex-none min-w-[140px] md:min-w-0 p-4 rounded-2xl text-left flex items-center md:items-start md:flex-col gap-3 transition-all snap-start ${activeTab === 'lapor' ? 'bg-white text-rose-600 shadow-lg shadow-rose-100 ring-1 ring-rose-100' : 'hover:bg-white hover:shadow-sm text-slate-500 hover:text-slate-800'}`}><div className={`p-2 rounded-xl ${activeTab==='lapor' ? 'bg-rose-50' : 'bg-slate-100'}`}><AlertTriangle size={20} className="shrink-0" /></div><div><span className="font-bold block text-sm">Lapor Pak RT</span><span className="text-[10px] opacity-70 hidden md:block mt-1">Keamanan & Fasilitas</span></div></button>
-               <button onClick={() => setActiveTab('history')} className={`flex-none min-w-[140px] md:min-w-0 p-4 rounded-2xl text-left flex items-center md:items-start md:flex-col gap-3 transition-all snap-start ${activeTab === 'history' ? 'bg-white text-emerald-600 shadow-lg shadow-emerald-100 ring-1 ring-emerald-100' : 'hover:bg-white hover:shadow-sm text-slate-500 hover:text-slate-800'}`}><div className={`p-2 rounded-xl ${activeTab==='history' ? 'bg-emerald-50' : 'bg-slate-100'}`}><History size={20} className="shrink-0" /></div><div><span className="font-bold block text-sm">Riwayat Saya</span><span className="text-[10px] opacity-70 hidden md:block mt-1">Log Aktivitas Lokal</span></div></button>
+               <button onClick={() => setActiveTab('surat')} className={`flex-none min-w-[140px] md:min-w-0 p-4 rounded-2xl text-left flex items-center md:items-start md:flex-col gap-3 transition-all snap-start ${activeTab === 'surat' ? 'bg-white text-brand-blue shadow-lg shadow-blue-100 ring-1 ring-blue-100' : 'hover:bg-white hover:shadow-sm text-slate-500 hover:text-brand-blue'}`}><div className={`p-2 rounded-xl ${activeTab==='surat' ? 'bg-blue-50' : 'bg-slate-100'}`}><FileText size={20} className="shrink-0" /></div><div><span className="font-bold block text-sm">Surat Pengantar</span><span className="text-[10px] opacity-70 hidden md:block mt-1">KTP, KK, Domisili, dll</span></div></button>
+               <button onClick={() => setActiveTab('lapor')} className={`flex-none min-w-[140px] md:min-w-0 p-4 rounded-2xl text-left flex items-center md:items-start md:flex-col gap-3 transition-all snap-start ${activeTab === 'lapor' ? 'bg-white text-rose-600 shadow-lg shadow-rose-100 ring-1 ring-rose-100' : 'hover:bg-white hover:shadow-sm text-slate-500 hover:text-brand-blue'}`}><div className={`p-2 rounded-xl ${activeTab==='lapor' ? 'bg-rose-50' : 'bg-slate-100'}`}><AlertTriangle size={20} className="shrink-0" /></div><div><span className="font-bold block text-sm">Lapor Pak RT</span><span className="text-[10px] opacity-70 hidden md:block mt-1">Keamanan & Fasilitas</span></div></button>
+               <button onClick={() => setActiveTab('history')} className={`flex-none min-w-[140px] md:min-w-0 p-4 rounded-2xl text-left flex items-center md:items-start md:flex-col gap-3 transition-all snap-start ${activeTab === 'history' ? 'bg-white text-emerald-600 shadow-lg shadow-emerald-100 ring-1 ring-emerald-100' : 'hover:bg-white hover:shadow-sm text-slate-500 hover:text-brand-blue'}`}><div className={`p-2 rounded-xl ${activeTab==='history' ? 'bg-emerald-50' : 'bg-slate-100'}`}><History size={20} className="shrink-0" /></div><div><span className="font-bold block text-sm">Riwayat Saya</span><span className="text-[10px] opacity-70 hidden md:block mt-1">Log Aktivitas Lokal</span></div></button>
             </div>
             <div className="flex-1 p-6 md:p-10 overflow-y-auto bg-white/50 relative">
                {activeTab === 'surat' && (
@@ -1660,8 +1658,56 @@ const AdminDashboard = ({
           
           {activeTab === 'umkm' && (
              <div className="space-y-6">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4"><h2 className="font-black text-2xl text-slate-800">UMKM Warga</h2><div className="flex w-full md:w-auto gap-3"><div className="relative flex-1 md:w-64"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} /><input type="text" placeholder="Cari UMKM..." className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-slate-900 outline-none transition-all" value={searchUmkm} onChange={(e) => setSearchUmkm(e.target.value)} /></div><Button onClick={() => { resetForms(); setModalType('umkm'); setIsModalOpen(true); }}><Plus size={16}/> Tambah</Button></div></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{umkm.filter((u: UMKM) => u.name.toLowerCase().includes(searchUmkm.toLowerCase())).map((u:UMKM) => (<div key={u.id} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm group hover:shadow-lg transition-all"><div className="h-40 bg-slate-100 relative overflow-hidden"><SmartImage src={u.image} alt={u.name} className="w-full h-full" /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"><button onClick={() => openEditUMKM(u)} className="p-2 bg-white/90 rounded-xl shadow-sm text-slate-700 hover:text-blue-600 transition-all"><Edit2 size={16}/></button><button onClick={() => handleDeleteUMKM(u.id)} className="p-2 bg-white/90 rounded-xl shadow-sm text-slate-700 hover:text-rose-600 transition-all"><Trash2 size={16}/></button></div><div className="absolute top-3 left-3 z-10"><span className="bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">{u.category}</span></div></div><div className="p-5"><h3 className="font-bold text-slate-800 text-lg leading-tight mb-2">{u.name}</h3><p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1.5"><User size={12}/> {u.owner}</p><div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-50"><div className="bg-green-50 text-green-600 p-1.5 rounded-lg"><MessageCircle size={14}/></div><span className="text-xs font-bold text-slate-600">{u.contact}</span></div></div></div>)}</div>
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                  <h2 className="font-black text-2xl text-slate-800">UMKM Warga</h2>
+                  <div className="flex w-full md:w-auto gap-3">
+                    <div className="relative flex-1 md:w-64">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <input 
+                        type="text" 
+                        placeholder="Cari UMKM..." 
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-slate-900 outline-none transition-all" 
+                        value={searchUmkm} 
+                        onChange={(e) => setSearchUmkm(e.target.value)} 
+                      />
+                    </div>
+                    <Button onClick={() => { resetForms(); setModalType('umkm'); setIsModalOpen(true); }}>
+                      <Plus size={16}/> Tambah
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {umkm.filter((u: UMKM) => 
+                    u.name.toLowerCase().includes(searchUmkm.toLowerCase()) || 
+                    u.owner.toLowerCase().includes(searchUmkm.toLowerCase())
+                  ).length > 0 ? (
+                    umkm.filter((u: UMKM) => 
+                      u.name.toLowerCase().includes(searchUmkm.toLowerCase()) || 
+                      u.owner.toLowerCase().includes(searchUmkm.toLowerCase())
+                    ).map((u: UMKM) => (
+                      <div key={u.id} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm group hover:shadow-lg transition-all">
+                        <div className="h-40 bg-slate-100 relative overflow-hidden">
+                          <SmartImage src={u.image} alt={u.name} className="w-full h-full" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <button onClick={() => openEditUMKM(u)} className="p-2 bg-white/90 rounded-xl shadow-sm text-slate-700 hover:text-blue-600 transition-all"><Edit2 size={16}/></button>
+                            <button onClick={() => handleDeleteUMKM(u.id)} className="p-2 bg-white/90 rounded-xl shadow-sm text-slate-700 hover:text-rose-600 transition-all"><Trash2 size={16}/></button>
+                          </div>
+                          <div className="absolute top-3 left-3 z-10"><span className="bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">{u.category}</span></div>
+                        </div>
+                        <div className="p-5">
+                          <h3 className="font-bold text-slate-800 text-lg leading-tight mb-2">{u.name}</h3>
+                          <p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1.5"><User size={12}/> {u.owner}</p>
+                          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-50"><div className="bg-green-50 text-green-600 p-1.5 rounded-lg"><MessageCircle size={14}/></div><span className="text-xs font-bold text-slate-600">{u.contact}</span></div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full py-12 text-center text-slate-400 italic bg-white rounded-2xl border border-dashed border-slate-200">
+                      {searchUmkm ? 'Tidak ada UMKM yang cocok dengan pencarian.' : 'Belum ada data UMKM.'}
+                    </div>
+                  )}
+                </div>
              </div>
           )}
 
