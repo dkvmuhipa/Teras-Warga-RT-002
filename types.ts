@@ -1,5 +1,3 @@
-
-
 export enum PaymentStatus {
   PAID = 'Lunas',
   PENDING = 'Belum Lunas',
@@ -14,7 +12,9 @@ export interface House {
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
   residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan including Kost
-  paymentStatus: PaymentStatus;
+  paymentStatus: PaymentStatus; // Default: Keamanan
+  paymentStatusAir?: PaymentStatus; // NEW: Iuran Air
+  paymentStatusSampah?: PaymentStatus; // NEW: Iuran Sampah
   phone?: string;
   accessCode?: string; // NEW: Kode Akses Unik untuk Verifikasi
   

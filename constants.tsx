@@ -1,13 +1,3 @@
-
-
-
-
-
-
-
-
-
-
 import React from 'react';
 import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
@@ -31,8 +21,6 @@ export const Logo = () => (
 // --- DATA DUMMY (MOCK DATA) ---
 
 export const generateHouses = (): House[] => {
-  // Konfigurasi Wilayah RT 002 (Fix Update)
-  // C5 (1-26), C7 (1-18), C8 (1-18), C9 (1-18), C10 (1-16), C11 (1-18), C12 (1-15)
   const blockConfig = [
     { code: 'C5', start: 1, end: 26 },
     { code: 'C7', start: 1, end: 18 },
@@ -51,17 +39,15 @@ export const generateHouses = (): House[] => {
       const statusRandom = Math.random();
       let status: House['status'] = 'Occupied';
       
-      // Simulasi status hunian
       if (statusRandom > 0.85) status = 'Empty';
       else if (statusRandom > 0.95) status = 'Business';
 
-      // Simulasi Kontrak vs Tetap (20% Kontrak)
       const isRenter = Math.random() > 0.8;
-
-      // Generate Access Code: HOUSEID-RANDOM4CHAR
-      // Example: C5-01-AX92
       const randomSuffix = Array(4).fill(0).map(() => Math.floor(Math.random()*36).toString(36).toUpperCase()).join('');
       const accessCode = `${config.code}-${number}-${randomSuffix}`;
+
+      // Helper for random status
+      const getRandStatus = () => Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID);
 
       houses.push({
         id: `${config.code}-${number}`,
@@ -71,7 +57,9 @@ export const generateHouses = (): House[] => {
         occupants: status === 'Empty' ? 0 : Math.floor(Math.random() * 4) + 1,
         status,
         residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
-        paymentStatus: Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID),
+        paymentStatus: getRandStatus(),
+        paymentStatusAir: getRandStatus(),
+        paymentStatusSampah: getRandStatus(),
         phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
         accessCode: accessCode
       });
@@ -80,9 +68,7 @@ export const generateHouses = (): House[] => {
   return houses;
 };
 
-// Updated Officials to match valid blocks (C5, C7-C12)
 export const INITIAL_OFFICIALS: Official[] = [
-    // Updated Name per Letter Reference (IRFAN ARIANTO)
     { id: '1', role: 'Ketua RT', name: 'Bpk. IRFAN ARIANTO', houseId: 'C10-08', phone: '0859-6119-4621' }, 
     { id: '2', role: 'Sekretaris', name: 'Ibu Siti Aminah', houseId: 'C5-02', phone: '0812-9876-5432' },
     { id: '3', role: 'Bendahara', name: 'Bpk. Rudi Hartono', houseId: 'C11-12', phone: '0813-4567-8901' },
@@ -116,31 +102,12 @@ export const MOCK_UMKM: UMKM[] = [
     description: 'Nasi kuning khas Palu, tersedia mulai jam 6 pagi. Menerima pesanan katering.',
     contact: '628123456789',
     image: 'https://images.unsplash.com/photo-1604152135912-04a022e23696?auto=format&fit=crop&q=80&w=300&h=200'
-  },
-  {
-    id: '2',
-    name: 'Jasa Service AC Berkah',
-    owner: 'Pak Budi',
-    category: 'Jasa',
-    description: 'Cuci AC, tambah freon, bongkar pasang. Bergaransi dan profesional.',
-    contact: '628219876543',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=300&h=200'
-  },
-  {
-    id: '3',
-    name: 'Keripik Pisang Renyah',
-    owner: 'Mama Nisa',
-    category: 'Kuliner',
-    description: 'Keripik pisang aneka rasa: coklat, balado, keju. Cocok untuk oleh-oleh.',
-    contact: '6285211223344',
-    image: 'https://images.unsplash.com/photo-1599639668555-735096e411d3?auto=format&fit=crop&q=80&w=300&h=200'
   }
 ];
 
 export const INITIAL_REPORTS: Report[] = [];
 export const INITIAL_LETTERS: LetterRequest[] = [];
 
-// Updated Ronda Schedule to match valid blocks (C5, C7, etc)
 export const MOCK_RONDA: RondaSchedule[] = [
   { day: 'Senin', members: ['Bpk. Asep (C5-01)', 'Bpk. Budi (C5-02)', 'Bpk. Cecep (C5-03)'] },
   { day: 'Selasa', members: ['Bpk. Dedi (C7-01)', 'Bpk. Eko (C7-02)', 'Bpk. Fajar (C7-03)'] },
@@ -154,93 +121,21 @@ export const MOCK_RONDA: RondaSchedule[] = [
 export const MOCK_CASHFLOW: CashFlow[] = [
     { id: '1', date: '2023-10-01', description: 'Iuran Warga Blok C5', amount: 500000, type: 'Income', category: 'Iuran Warga' },
     { id: '2', date: '2023-10-02', description: 'Perbaikan Lampu Jalan C10', amount: 150000, type: 'Expense', category: 'Fasilitas' },
-    { id: '3', date: '2023-10-05', description: 'Iuran Warga Blok C7', amount: 450000, type: 'Income', category: 'Iuran Warga' },
-    { id: '4', date: '2023-10-10', description: 'Konsumsi Kerja Bakti', amount: 200000, type: 'Expense', category: 'Kegiatan' },
 ];
 
 export const MOCK_INVENTORY: InventoryItem[] = [
     { id: '1', name: 'Tenda Terpal 4x6', total: 2, available: 2, condition: 'Baik' },
-    { id: '2', name: 'Kursi Plastik', total: 50, available: 45, condition: 'Baik', notes: '5 kursi dipinjam Pak Budi' },
-    { id: '3', name: 'Wireless Sound System', total: 1, available: 1, condition: 'Baik' },
-    { id: '4', name: 'Mesin Potong Rumput', total: 1, available: 0, condition: 'Perlu Perbaikan', notes: 'Sedang diservis' },
 ];
 
-export const MOCK_POLLS: Poll[] = [
-  {
-    id: '1',
-    title: 'Pemilihan Ketua Panitia 17 Agustus',
-    description: 'Siapa yang menurut Anda paling cocok menjadi ketua panitia acara kemerdekaan tahun ini? Mari berpartisipasi dalam demokrasi warga.',
-    date: '2023-10-25',
-    deadline: '2023-11-01',
-    status: 'Closed',
-    totalVotes: 45,
-    options: [
-      { id: 'opt1', text: 'Bpk. Budi (C5-02)', votes: 25 },
-      { id: 'opt2', text: 'Ibu Siti (C7-10)', votes: 20 }
-    ]
-  },
-  {
-    id: '2',
-    title: 'Prioritas Pembangunan Fasilitas 2024',
-    description: 'Fasilitas umum apa yang paling mendesak untuk diperbaiki atau dibangun menggunakan Kas RT periode depan?',
-    date: '2023-11-01',
-    deadline: '2023-12-31',
-    status: 'Open',
-    totalVotes: 12,
-    options: [
-      { id: 'opt1', text: 'Perbaikan Jalan Utama', votes: 5 },
-      { id: 'opt2', text: 'Penerangan Jalan (PJU)', votes: 4 },
-      { id: 'opt3', text: 'Taman Bermain Anak', votes: 3 }
-    ]
-  }
-];
+export const MOCK_POLLS: Poll[] = [];
+export const MOCK_MARKET_ITEMS: MarketItem[] = [];
+export const MOCK_RONDA_LOGS: RondaCheckLog[] = [];
+export const MOCK_GALLERY = [];
 
-export const MOCK_MARKET_ITEMS: MarketItem[] = [
-  {
-    id: '1',
-    title: 'Sepeda Anak Bekas (Kondisi 80%)',
-    description: 'Sepeda roda empat, cocok untuk anak 3-5 tahun. Ban baru diganti, rem pakem. Dijual karena anak sudah besar.',
-    price: 150000,
-    category: 'Jual',
-    sellerName: 'Pak Budi (C5-02)',
-    sellerContact: '6281234567890',
-    image: 'https://images.unsplash.com/photo-1595188607248-2b04c6a66735?auto=format&fit=crop&q=80&w=300&h=300',
-    date: new Date().toISOString(),
-    status: 'Available',
-    houseId: 'C5-02'
-  },
-  {
-    id: '2',
-    title: 'Tanaman Lidah Buaya (Excess)',
-    description: 'Kebanyakan bibit di halaman, silakan ambil bagi yang butuh untuk obat atau hiasan.',
-    price: 0,
-    category: 'Gratis',
-    sellerName: 'Bu Siti (C7-10)',
-    sellerContact: '628987654321',
-    image: 'https://images.unsplash.com/photo-1596525737525-4c07db920c24?auto=format&fit=crop&q=80&w=300&h=300',
-    date: new Date().toISOString(),
-    status: 'Available',
-    houseId: 'C7-10'
-  }
-];
-
-export const MOCK_RONDA_LOGS: RondaCheckLog[] = [
-  { id: '1', timestamp: new Date().toISOString(), officerName: 'Bpk. Asep', location: 'Gerbang Utama', status: 'Aman', note: 'Situasi kondusif.' }
-];
-
-export const MOCK_GALLERY = [
-    { id: 1, title: "Kerja Bakti", image: "https://images.unsplash.com/photo-1558036117-15db5275d42b?auto=format&fit=crop&q=80&w=300&h=300" },
-    { id: 2, title: "Rapat Warga", image: "https://images.unsplash.com/photo-1529070538774-1843cb6e65b3?auto=format&fit=crop&q=80&w=300&h=300" },
-    { id: 3, title: "Lomba 17an", image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=300&h=300" },
-    { id: 4, title: "Posyandu", image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&q=80&w=300&h=300" },
-];
-
-// --- KONFIGURASI DEFAULT (Fallback) ---
 export const DEFAULT_PDF_CONFIG: PdfConfig = {
   logo: "", 
   stamp: "",
   signature: "",
   rtName: "RT.002 / RW.020",
-  // Updated default address
   rtAddress: "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Telp. 085961194621" 
 };

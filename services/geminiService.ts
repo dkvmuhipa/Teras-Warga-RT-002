@@ -1,25 +1,24 @@
 
+// Fix: Use the correct import for GoogleGenAI and ensure initialization follows the latest guidelines
 import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
-// Helper function to initialize AI with the latest API key from the environment
-const getAi = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-
+// Fix: Always use new GoogleGenAI({ apiKey: process.env.API_KEY }) to initialize the client
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
-  if (!process.env.API_KEY) return "API Key AI belum dikonfigurasi.";
-  
   try {
-    const ai = getAi();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Buatkan draf pengumuman untuk warga RT (Rukun Tetangga) dengan topik: "${topic}".
     Gaya bahasa: ${tone}.
     Struktur: Judul menarik, Salam pembuka, Isi pengumuman (singkat & jelas), Detail (Waktu/Tempat jika perlu), Salam penutup.
     Format: Plain text (Markdown allowed). Bahasa Indonesia yang baik dan benar.`;
 
+    // Fix: Use ai.models.generateContent with the model name directly
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
 
+    // Fix: Access response.text as a property, not a method
     return response.text || "Gagal membuat draf.";
   } catch (error) {
     console.error("Gemini Error:", error);
@@ -28,10 +27,8 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
 };
 
 export const analyzeReports = async (reports: string[]): Promise<string> => {
-   if (!process.env.API_KEY) return "Fitur AI belum aktif.";
-
    try {
-     const ai = getAi();
+     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
      const prompt = `Berikut adalah daftar laporan warga minggu ini:
      ${reports.join('\n- ')}
      
@@ -55,10 +52,8 @@ export const generateDashboardSummary = async (data: {
   reportsCount: number,
   unpaidCount: number
 }): Promise<string> => {
-   if (!process.env.API_KEY) return "Fitur AI belum aktif (API Key belum diset).";
-
    try {
-     const ai = getAi();
+     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
      const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
      Analisis data realtime dashboard RT 002 berikut:
      - Jumlah Penduduk: ${data.totalResidents} jiwa
@@ -86,20 +81,15 @@ export const generateDashboardSummary = async (data: {
 }
 
 export const askRit = async (question: string, contextData: { announcements: Announcement[], ronda: RondaSchedule[], officials: Official[] }): Promise<string> => {
-  if (!process.env.API_KEY) return "Maaf, fitur Chatbot sedang non-aktif (Missing API Key).";
-
   try {
-    const ai = getAi();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     
-    // Mempersiapkan konteks data untuk AI
     const announcementContext = contextData.announcements.length > 0 
       ? contextData.announcements.slice(0, 5).map(a => `- [${a.date}] ${a.title}: ${a.content} (Tipe: ${a.type})`).join('\n')
       : "Belum ada pengumuman terbaru.";
       
     const rondaContext = contextData.ronda.map(r => `- ${r.day}: ${r.members.join(', ')}`).join('\n');
-    
-    // Dynamic Officials Context
     const officialsContext = contextData.officials.map(o => `- ${o.role}: ${o.name} (Rumah: ${o.houseId}, HP: ${o.phone})`).join('\n');
 
     const systemInstruction = `Anda adalah "Rit", Asisten Virtual Cerdas untuk RT 002 RW 020 (Aplikasi: TERAS RT 002).
