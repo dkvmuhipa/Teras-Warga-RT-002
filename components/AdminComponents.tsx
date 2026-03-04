@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Lock, Mail, Loader2, AlertCircle, ArrowLeft, Info, Key, CheckCircle2, ShieldAlert, HelpCircle } from 'lucide-react';
 import { loginAdmin } from '../services/databaseService';
 import { isFirebaseConfigured } from '../services/firebaseConfig';
+import { FULL_RT_NAME, ADMIN_EMAIL, ADMIN_TITLE } from '../constants';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -42,7 +43,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
       // Handle modern Firebase error codes
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
         setError({ 
-          message: 'Kombinasi Email atau Password salah. Pastikan akun Ketua RT sudah didaftarkan di Konsol Firebase oleh Pengembang.', 
+          message: `Kombinasi Email atau Password salah. Pastikan akun ${ADMIN_TITLE} sudah didaftarkan di Konsol Firebase oleh Pengembang.`, 
           type: 'error' 
         });
       } else if (err.code === 'auth/too-many-requests') {
@@ -83,7 +84,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             </div>
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Portal Administrasi</h1>
-          <p className="text-slate-500 text-sm font-medium">Khusus Pengurus RT 002 RW 020</p>
+          <p className="text-slate-500 text-sm font-medium">Khusus Pengurus {FULL_RT_NAME}</p>
           
           <div className="mt-4 flex items-center justify-center gap-2">
             <span className={`w-2 h-2 rounded-full ${isFirebaseConfigured ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`}></span>
@@ -106,7 +107,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                   type="email" 
                   autoComplete="email"
                   className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:bg-white focus:border-slate-900 transition-all text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium" 
-                  placeholder="rt002@huntaptondo.id" 
+                  placeholder={ADMIN_EMAIL} 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -195,7 +196,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                 </li>
                 <li className="flex gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 shrink-0"></div>
-                  Jika Anda Ketua RT yang sah dan belum memiliki akun, hubungi Tim IT Terpadu untuk pembuatan kredensial.
+                  Jika Anda {ADMIN_TITLE} yang sah dan belum memiliki akun, hubungi Tim IT Terpadu untuk pembuatan kredensial.
                 </li>
               </ul>
               <button 

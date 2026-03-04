@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, X, Bot, User, Loader2 } from 'lucide-react';
 import { askRit } from '../services/geminiService';
 import { Announcement, RondaSchedule, Official } from '../types';
+import { RT_NAME } from '../constants';
 
 interface ChatBotProps {
   announcements: Announcement[];
@@ -23,7 +24,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Halo! Saya Rit, asisten virtual RT 002. Ada yang bisa saya bantu? Tanyakan soal jadwal ronda, iuran, atau pengumuman.',
+      text: `Halo! Saya Rit, asisten virtual ${RT_NAME}. Ada yang bisa saya bantu? Tanyakan soal jadwal ronda, iuran, atau pengumuman.`,
       sender: 'bot',
       timestamp: new Date()
     }

@@ -31,6 +31,14 @@ export interface House {
   toddlerCount?: number;
   teenagerCount?: number;
   elderlyCount?: number;
+
+  // Family Members
+  familyMembers?: {
+    name: string;
+    nik?: string;
+    relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
+    birthDate?: string;
+  }[];
 }
 
 export interface Announcement {
@@ -60,6 +68,7 @@ export interface Report {
   date: string;
   status: 'Baru' | 'Diproses' | 'Selesai';
   houseId?: string; // Optional: Link report to specific house (e.g., "Rumah C1-05 kotor")
+  reporterHouseId?: string;
 }
 
 export interface UMKM {
@@ -74,7 +83,7 @@ export interface UMKM {
 
 export interface LetterRequest {
   id: string;
-  type: 'Pengantar KTP' | 'Pengantar KK' | 'Domisili' | 'Kematian' | 'Kelahiran' | 'Surat Keterangan Usaha (SKU)' | 'Surat Izin Keramaian';
+  type: 'Pengantar KTP' | 'Pengantar KK' | 'Domisili' | 'Kematian' | 'Kelahiran' | 'Surat Keterangan Usaha (SKU)' | 'Surat Izin Keramaian' | 'Lainnya';
   applicantName: string;
   houseId: string; // Alamat Domisili di RT (Blok)
   
@@ -90,6 +99,13 @@ export interface LetterRequest {
   nationality: string; // 10. Kewarganegaraan
   addressKtp: string; 
   purposeDetail: string; // 11. Keperluan (Deskripsi Panjang)
+
+  // New Detailed Fields
+  phone: string;
+  email?: string;
+  education: string;
+  familyStatus: 'Kepala Keluarga' | 'Istri' | 'Anak' | 'Lainnya';
+  bloodType: 'A' | 'B' | 'AB' | 'O' | '-';
   
   status: 'Pending' | 'Approved' | 'Rejected';
   date: string;
@@ -179,4 +195,11 @@ export interface MarketItem {
   date: string;
   status: 'Available' | 'Sold';
   houseId?: string;
+}
+
+export interface GalleryItem {
+  id: string;
+  title: string;
+  image: string;
+  date: string;
 }

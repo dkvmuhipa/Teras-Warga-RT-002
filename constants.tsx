@@ -1,8 +1,17 @@
 import React from 'react';
-import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem } from './types';
+import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem, GalleryItem } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TERAS";
+export const RT_NAME = "RT 002";
+export const RW_NAME = "RW 020";
+export const FULL_RT_NAME = `${RT_NAME} ${RW_NAME}`;
+export const ADMIN_ROLE = "Admin Utama";
+export const ADMIN_TITLE = "Ketua RT 002";
+export const ADMIN_EMAIL = "admin@teras.id";
+export const DEFAULT_DUES_AMOUNT = 25000;
+export const CURRENCY_SYMBOL = "Rp";
+
 // Updated Address per Letter Reference
 export const RT_ADDRESS = "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu";
 
@@ -130,7 +139,12 @@ export const MOCK_INVENTORY: InventoryItem[] = [
 export const MOCK_POLLS: Poll[] = [];
 export const MOCK_MARKET_ITEMS: MarketItem[] = [];
 export const MOCK_RONDA_LOGS: RondaCheckLog[] = [];
-export const MOCK_GALLERY = [];
+export const MOCK_GALLERY: GalleryItem[] = [
+  { id: '1', title: 'Kerja Bakti Blok C', image: 'https://images.unsplash.com/photo-1558036117-15db5275d42b?auto=format&fit=crop&q=80', date: '2023-10-25' },
+  { id: '2', title: 'Rapat Warga Bulanan', image: 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&q=80', date: '2023-10-01' },
+  { id: '3', title: 'Lomba 17 Agustus', image: 'https://images.unsplash.com/photo-1530021232320-687d8e3dba54?auto=format&fit=crop&q=80', date: '2023-08-17' },
+  { id: '4', title: 'Posyandu Balita', image: 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&q=80', date: '2023-09-15' },
+];
 
 export const DEFAULT_PDF_CONFIG: PdfConfig = {
   logo: "", 

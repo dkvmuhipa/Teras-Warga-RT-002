@@ -1,0 +1,150 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../services/firebaseConfig';
+import { 
+  House, Announcement, CashFlow, Official, Report, LetterRequest, 
+  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig 
+} from '../../types';
+import { AdminSidebar } from './Sidebar';
+import { DashboardOverview } from './DashboardOverview';
+import { ResidentManager } from './ResidentManager';
+import { FinanceManager } from './FinanceManager';
+import { ContentManager } from './ContentManager';
+import { FacilityManager } from './FacilityManager';
+import { ServiceManager } from './ServiceManager';
+import { Settings } from './Settings';
+import { OfficialManagement } from './OfficialManagement';
+import { motion, AnimatePresence } from 'motion/react';
+import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2 } from 'lucide-react';
+
+interface AdminDashboardProps {
+  houses: House[];
+  announcements: Announcement[];
+  cashFlow: CashFlow[];
+  officials: Official[];
+  reports: Report[];
+  letters: LetterRequest[];
+  ronda: RondaSchedule[];
+  inventory: InventoryItem[];
+  umkm: UMKM[];
+  polls: Poll[];
+  rondaLogs: RondaCheckLog[];
+  pdfConfig: PdfConfig;
+  setPdfConfig: (config: PdfConfig) => void;
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({
+  houses, announcements, cashFlow, officials, reports, letters, 
+  ronda, inventory, umkm, polls, rondaLogs, pdfConfig, setPdfConfig
+}) => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} onTabChange={setActiveTab} />;
+      case 'residents':
+        return <ResidentManager houses={houses} reports={reports} officials={officials} pdfConfig={pdfConfig} />;
+      case 'finance':
+        return <FinanceManager cashFlow={cashFlow} />;
+      case 'services':
+        return <ServiceManager letters={letters} reports={reports} />;
+      case 'facilities':
+        return <FacilityManager ronda={ronda} inventory={inventory} rondaLogs={rondaLogs} />;
+      case 'content':
+        return <ContentManager announcements={announcements} polls={polls} umkm={umkm} />;
+      case 'officials':
+        return <OfficialManagement officials={officials} />;
+      case 'settings':
+        return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
+      default:
+        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} onTabChange={setActiveTab} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-600 flex overflow-hidden">
+      <AdminSidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        isOpen={isSidebarOpen} 
+        setIsOpen={setIsSidebarOpen}
+        onLogout={handleLogout}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Modern Top Bar */}
+        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(true)} 
+              className="md:hidden p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-600"
+            >
+              <Menu size={24} />
+            </button>
+            <div className="hidden md:flex items-center gap-2 text-sm font-bold text-slate-400">
+              <span>Admin</span>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-800 capitalize">{activeTab.replace('-', ' ')}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="hidden sm:flex items-center gap-2 bg-slate-100/50 border border-slate-200/60 rounded-2xl px-4 py-2 text-slate-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+              <Search size={18} />
+              <input type="text" placeholder="Cari data..." className="bg-transparent border-none outline-none text-sm font-medium w-40 lg:w-64" />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button className="p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-all relative">
+                <Bell size={22} />
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
+              </button>
+              
+              <div className="h-10 w-[1px] bg-slate-200 mx-2 hidden md:block"></div>
+              
+              <div className="flex items-center gap-3 pl-2">
+                <div className="hidden md:block text-right">
+                  <p className="text-sm font-bold text-slate-800 leading-none">Admin RT 002</p>
+                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mt-1">Online</p>
+                </div>
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                  <User size={20} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+          <div className="max-w-7xl mx-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {renderContent()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};

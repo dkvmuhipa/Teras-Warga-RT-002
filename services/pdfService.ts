@@ -1,6 +1,6 @@
 
 import { jsPDF } from "jspdf";
-import { LetterRequest, PdfConfig, House, PaymentStatus } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 
 // --- Shared Helper Functions ---
@@ -203,6 +203,45 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   const filenamePrefix = isDraft ? "DRAFT_" : "RESMI_";
   doc.save(`${filenamePrefix}Surat_${title.replace(/\s/g, '_')}_${letter.applicantName}.pdf`);
+};
+
+export const generateReportReceiptPDF = async (report: Report, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a5" });
+    const centerX = doc.internal.pageSize.getWidth() / 2;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("BUKTI LAPORAN WARGA", centerX, 20, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`ID Laporan: ${report.id}`, centerX, 28, { align: "center" });
+    doc.text(`Tanggal: ${new Date(report.date).toLocaleDateString('id-ID')}`, centerX, 34, { align: "center" });
+
+    doc.setLineWidth(0.5);
+    doc.line(10, 40, 138, 40);
+
+    let y = 50;
+    const addField = (label: string, value: string) => {
+        doc.setFont("helvetica", "bold");
+        doc.text(label, 15, y);
+        doc.setFont("helvetica", "normal");
+        const splitVal = doc.splitTextToSize(value, 80);
+        doc.text(splitVal, 50, y);
+        y += (splitVal.length * 5) + 5;
+    };
+
+    addField("Kategori", report.type);
+    addField("Pelapor", report.reporterName);
+    addField("Lokasi", report.houseId || "-");
+    addField("Deskripsi", report.description);
+    addField("Status", report.status);
+
+    doc.setFontSize(8);
+    doc.text("Simpan bukti ini sebagai referensi.", centerX, y + 10, { align: "center" });
+    
+    doc.save(`Bukti_Lapor_${report.id}.pdf`);
 };
 
 export const generateResidentReportPDF = async (houses: House[], customConfig?: PdfConfig) => {

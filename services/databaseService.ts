@@ -284,6 +284,10 @@ export const deleteAnnouncementFromDb = async (id: string) => {
   try { await deleteDoc(doc(db, ANNOUNCEMENTS_COL, id)); } catch (e) { console.error("Error deleting announcement:", e); }
 };
 
+export const updateAnnouncementInDb = async (id: string, updates: any) => {
+  try { await updateDoc(doc(db, ANNOUNCEMENTS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating announcement:", e); }
+};
+
 // --- 3. CASHFLOW ---
 export const addTransactionToDb = async (transaction: any) => {
   try {
@@ -489,8 +493,15 @@ export const subscribeToMarketItems = (callback: (data: any[]) => void) => {
 
 
 // --- SEEDING & AUTO-MIGRATION ---
-export const seedDatabase = async (initialData: any) => {
+export const seedDatabase = async (initialData?: any) => {
     try {
+      // If no initialData provided, use dummy data or fetch from a source
+      // For now, we'll just log a warning if it's missing and return
+      if (!initialData) {
+          console.warn("No initial data provided for seeding.");
+          return;
+      }
+
       const housesSnap = await getDocs(collection(db, HOUSES_COL));
       
       const hasOldData = housesSnap.docs.some(doc => {
