@@ -180,7 +180,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, invento
                         <td className="px-6 py-4 font-bold text-slate-600">
                           {new Date(log.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
                         </td>
-                        <td className="px-6 py-4 font-bold text-slate-800">{log.userName}</td>
+                        <td className="px-6 py-4 font-bold text-slate-800">{log.officerName}</td>
                         <td className="px-6 py-4 text-slate-500">
                            <div className="flex items-center gap-1">
                               <div className="w-2 h-2 rounded-full bg-indigo-500"></div>

@@ -21,14 +21,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
 
   const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected') => {
     if (confirm(`Ubah status surat menjadi ${status}?`)) {
-      await updateLetterStatusInDb(id, status);
+      await updateLetterStatus(id, status);
       setSelectedLetter(null);
     }
   };
 
   const handleUpdateReportStatus = async (id: string, status: 'Diproses' | 'Selesai') => {
     if (confirm(`Ubah status laporan menjadi ${status}?`)) {
-      await updateReportStatusInDb(id, status);
+      await updateReportStatus(id, status);
       setSelectedReport(null);
     }
   };

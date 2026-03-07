@@ -8,7 +8,7 @@ import {
 import { House, Report, Official, PdfConfig, PaymentStatus } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF } from '../../services/pdfService';
-import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse } from '../../services/databaseService';
+import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,6 +29,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedResident, setSelectedResident] = useState<House | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,8 +44,24 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     status: 'Occupied',
     paymentStatus: PaymentStatus.UNPAID,
     occupants: 1,
-    familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string }[]
+    familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string }[],
+    accessCode: ''
   });
+
+  const handleGenerateAllPins = async () => {
+    if (confirm('Apakah Anda yakin ingin meng-generate PIN untuk semua warga yang belum memiliki PIN?')) {
+        setIsGenerating(true);
+        try {
+            await generateAllAccessCodes(houses);
+            alert('PIN berhasil di-generate untuk warga yang belum memiliki PIN.');
+        } catch (e) {
+            console.error(e);
+            alert('Gagal meng-generate PIN.');
+        } finally {
+            setIsGenerating(false);
+        }
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -55,7 +72,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       status: 'Occupied',
       paymentStatus: PaymentStatus.UNPAID,
       occupants: 1,
-      familyMembers: []
+      familyMembers: [],
+      accessCode: ''
     });
     setEditingHouseId(null);
   };
@@ -75,7 +93,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       status: house.status,
       paymentStatus: house.paymentStatus,
       occupants: house.occupants || 1,
-      familyMembers: house.familyMembers || []
+      familyMembers: house.familyMembers || [],
+      accessCode: house.accessCode || ''
     });
     setIsModalOpen(true);
   };
@@ -183,6 +202,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <p className="text-slate-500 font-medium mt-1">Kelola data kependudukan dan status hunian RT 002.</p>
         </div>
         <div className="flex gap-3">
+          <button 
+            onClick={handleGenerateAllPins}
+            className="flex items-center gap-2 px-5 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-2xl hover:bg-amber-100 font-bold text-sm transition-all shadow-sm"
+            disabled={isGenerating}
+          >
+            {isGenerating ? 'Sedang Generate...' : 'Generate PIN Massal'}
+          </button>
           <button 
             onClick={() => generateResidentReportPDF(houses, pdfConfig)}
             className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
@@ -568,6 +594,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <div>
             <label className="block text-xs font-bold mb-1.5 text-slate-700">Telepon / WA</label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="08..." />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700">PIN Akses (Access Code)</label>
+            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.accessCode} onChange={e => setFormData({...formData, accessCode: e.target.value})} placeholder="Masukkan PIN..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

@@ -18,7 +18,7 @@ const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } =
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS } from '@/constants';
-import { House, Announcement, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem } from './types';
+import { House, Announcement, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -48,6 +48,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { 
   subscribeToCollection, 
   subscribeToNotifications,
+  subscribeToGallery,
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
@@ -916,6 +917,7 @@ export const App = () => {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [rondaLogs, setRondaLogs] = useState<RondaCheckLog[]>([]);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
@@ -934,6 +936,7 @@ export const App = () => {
     const unsubPolls = subscribeToCollection('polls', (data) => setPolls(data));
     const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
     const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
+    const unsubGallery = subscribeToGallery((data) => setGallery(data));
     const unsubNotifs = subscribeToNotifications((data) => {
         setNotifications(data);
         const unread = data.filter(n => !n.isRead);
@@ -946,6 +949,7 @@ export const App = () => {
       unsubHouses(); unsubAnnouncements(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
       unsubUmkm(); unsubPolls(); unsubMarket(); unsubRondaLogs(); unsubNotifs();
+      unsubGallery();
     };
   }, []);
 
@@ -962,14 +966,14 @@ export const App = () => {
         <Routes>
             <Route path="/admin" element={
                 <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard houses={houses} announcements={announcements} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />
+                    <AdminDashboard houses={houses} announcements={announcements} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />
                 </AdminRouteWrapper>
             }/>
             <Route path="*" element={
                 <>
                     <PublicHeader notifications={notifications} onMarkRead={() => {}} />
                     <Routes>
-                        <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} />} />
+                        <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} gallery={gallery} />} />
                         <Route path="/voting" element={<PublicVoting polls={polls} />} />
                         <Route path="/market" element={<PublicMarket items={marketItems} />} />
                         <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} />} />

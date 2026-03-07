@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 // --- KONFIGURASI FIREBASE ---
 // Project: TerasWarga (teras-warga)
@@ -17,6 +18,7 @@ const firebaseConfig = {
 let app: any;
 let db: any;
 let auth: any;
+let storage: any;
 let isFirebaseConfigured = false;
 
 try {
@@ -24,9 +26,10 @@ try {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);
+  storage = getStorage(app);
   isFirebaseConfigured = true;
 } catch (error) {
   console.error("Firebase initialization failed:", error);
 }
 
-export { app, db, auth, isFirebaseConfigured };
+export { app, db, auth, storage, isFirebaseConfigured };

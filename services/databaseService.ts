@@ -8,7 +8,7 @@
 
 
 
-import { db, auth, isFirebaseConfigured } from "./firebaseConfig";
+import { db, auth, storage, isFirebaseConfigured } from "./firebaseConfig";
 import { 
   collection, 
   addDoc, 
@@ -31,6 +31,7 @@ import {
   signOut, 
   updatePassword
 } from "firebase/auth";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -47,7 +48,17 @@ const POLLS_COL = "polls";
 const RONDA_LOGS_COL = "rondaLogs";
 const MARKET_COL = "marketItems";
 
-// --- AUTH SERVICES ---
+// --- STORAGE SERVICES ---
+export const uploadImageToStorage = async (file: File, path: string) => {
+  try {
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
+  } catch (e) {
+    console.error("Error uploading image:", e);
+    throw e;
+  }
+};
 export const loginAdmin = (email: string, pass: string) => {
   return signInWithEmailAndPassword(auth, email, pass);
 };
@@ -193,6 +204,42 @@ export const validateResidentAccess = async (houseId: string, code: string): Pro
         console.error("Verification error:", e);
         return false;
     }
+};
+
+export const generateAllAccessCodes = async (houses: any[]) => {
+  try {
+    console.log(`Mulai generate PIN untuk ${houses.length} data warga...`);
+    const MAX_BATCH_SIZE = 400; 
+    let batch = writeBatch(db);
+    let operationCount = 0;
+
+    const commitBatch = async () => {
+        await batch.commit();
+        batch = writeBatch(db);
+        operationCount = 0;
+    };
+
+    for (const house of houses) {
+       // Hanya generate jika belum ada accessCode
+       if (house.accessCode) continue;
+
+       const newCode = Math.floor(1000 + Math.random() * 9000).toString();
+       const ref = doc(db, HOUSES_COL, house.id);
+       batch.update(ref, { accessCode: newCode });
+       
+       operationCount++;
+       if (operationCount >= MAX_BATCH_SIZE) await commitBatch();
+    }
+
+    if (operationCount > 0) {
+      await batch.commit();
+    }
+    console.log("Generate PIN massal selesai.");
+    return true;
+  } catch (e) {
+    console.error("Gagal melakukan generate PIN massal:", e);
+    throw e;
+  }
 };
 
 export const batchUpdateHouses = async (housesData: any[]) => {
@@ -488,6 +535,41 @@ export const subscribeToMarketItems = (callback: (data: any[]) => void) => {
     callback(data);
   }, (error) => {
     console.error("Error subscribing to market items:", error);
+  });
+};
+
+
+// --- 13. GALLERY ---
+const GALLERY_COL = "gallery";
+
+export const addGalleryItemToDb = async (item: any) => {
+  try {
+    const { id, ...data } = item;
+    await addDoc(collection(db, GALLERY_COL), deepSanitize(data));
+  } catch (e) { console.error("Error adding gallery item:", e); }
+};
+
+export const deleteGalleryItemFromDb = async (id: string) => {
+  try { await deleteDoc(doc(db, GALLERY_COL, id)); } catch (e) { console.error("Error deleting gallery item:", e); }
+};
+
+export const subscribeToGallery = (callback: (data: any[]) => void) => {
+  const q = query(collection(db, GALLERY_COL), orderBy("date", "desc"));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      ...doc.data(), 
+      id: doc.id 
+    }));
+    callback(data);
+  }, (error) => {
+    console.error("Error subscribing to gallery:", error);
+    // Fallback if index missing
+    const qSimple = query(collection(db, GALLERY_COL));
+    onSnapshot(qSimple, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        callback(data);
+    });
   });
 };
 

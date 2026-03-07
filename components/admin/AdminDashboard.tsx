@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
   House, Announcement, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig 
+  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem 
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -30,13 +30,14 @@ interface AdminDashboardProps {
   umkm: UMKM[];
   polls: Poll[];
   rondaLogs: RondaCheckLog[];
+  gallery: GalleryItem[];
   pdfConfig: PdfConfig;
   setPdfConfig: (config: PdfConfig) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, pdfConfig, setPdfConfig
+  ronda, inventory, umkm, polls, rondaLogs, gallery, pdfConfig, setPdfConfig
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -64,7 +65,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'facilities':
         return <FacilityManager ronda={ronda} inventory={inventory} rondaLogs={rondaLogs} />;
       case 'content':
-        return <ContentManager announcements={announcements} polls={polls} umkm={umkm} />;
+        return <ContentManager announcements={announcements} polls={polls} umkm={umkm} gallery={gallery} />;
       case 'officials':
         return <OfficialManagement officials={officials} />;
       case 'settings':

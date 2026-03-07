@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, User, Phone, MapPin, Briefcase } from 'lucide-react';
+import { Plus, Edit2, Trash2, User, Phone, MapPin, Briefcase, Upload } from 'lucide-react';
 import { Official } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb } from '../../services/databaseService';
+import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface OfficialManagementProps {
@@ -20,6 +20,9 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
   const [offPhone, setOffPhone] = useState('');
   const [offHouse, setOffHouse] = useState('');
   const [offPhoto, setOffPhoto] = useState('');
+  const [imageType, setImageType] = useState<'upload' | 'link'>('upload');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const resetForms = () => {
     setOffName('');
@@ -27,6 +30,8 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     setOffPhone('');
     setOffHouse('');
     setOffPhoto('');
+    setImageFile(null);
+    setImageType('upload');
     setEditingOfficialId(null);
   };
 
@@ -37,18 +42,25 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     setOffPhone(o.phone);
     setOffHouse(o.houseId);
     setOffPhoto(o.photo || '');
+    setImageType('link');
     setIsModalOpen(true);
   };
 
   const handleSaveOfficial = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsUploading(true);
     try {
+      let finalPhotoUrl = offPhoto;
+      if (imageType === 'upload' && imageFile) {
+        finalPhotoUrl = await uploadImageToStorage(imageFile, `officials/${Date.now()}_${imageFile.name}`);
+      }
+
       const data = {
         name: offName,
         role: offRole,
         phone: offPhone,
         houseId: offHouse,
-        photo: offPhoto
+        photo: finalPhotoUrl
       };
 
       if (editingOfficialId) {
@@ -62,6 +74,8 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     } catch (error) {
       console.error(error);
       alert('Gagal menyimpan data pengurus.');
+    } finally {
+        setIsUploading(false);
     }
   };
 
@@ -191,13 +205,39 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nomor Telepon / WA</label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offPhone} onChange={e=>setOffPhone(e.target.value)} placeholder="08..." required/>
           </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">URL Foto Profil (Opsional)</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offPhoto} onChange={e=>setOffPhoto(e.target.value)} placeholder="https://..."/>
-            <p className="text-[10px] text-slate-400 mt-1.5 ml-1">*Biarkan kosong untuk menggunakan avatar default.</p>
+          
+          <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+            <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
+            <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
           </div>
-          <Button type="submit" className="w-full py-3.5 text-sm shadow-xl shadow-indigo-200 mt-2">
-            {editingOfficialId ? 'Simpan Perubahan' : 'Simpan Data Pengurus'}
+
+          {imageType === 'upload' ? (
+            <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Pilih Foto</label>
+                <div className="relative">
+                    <input 
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="official-file-upload"
+                        onChange={e => setImageFile(e.target.files?.[0] || null)}
+                    />
+                    <label htmlFor="official-file-upload" className="flex items-center gap-3 w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold cursor-pointer hover:bg-slate-100 transition-colors">
+                        <Upload size={18} className="text-slate-400" />
+                        <span className="text-slate-600">{imageFile ? imageFile.name : 'Pilih file foto...'}</span>
+                    </label>
+                </div>
+            </div>
+          ) : (
+            <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">URL Foto Profil</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offPhoto} onChange={e=>setOffPhoto(e.target.value)} placeholder="https://..."/>
+                <p className="text-[10px] text-slate-400 mt-1.5 ml-1">*Biarkan kosong untuk menggunakan avatar default.</p>
+            </div>
+          )}
+          
+          <Button type="submit" className="w-full py-3.5 text-sm shadow-xl shadow-indigo-200 mt-2" disabled={isUploading}>
+            {isUploading ? 'Sedang Mengunggah...' : (editingOfficialId ? 'Simpan Perubahan' : 'Simpan Data Pengurus')}
           </Button>
         </form>
       </Modal>

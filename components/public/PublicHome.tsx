@@ -5,11 +5,10 @@ import {
   Clock, Moon, Calendar, ChevronRight, ArrowRight 
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { House, Announcement, Report, Official, RondaSchedule } from '../../types';
+import { House, Announcement, Report, Official, RondaSchedule, GalleryItem } from '../../types';
 import { HeroSection } from '../HeroSection';
 import { HouseMap } from '../HouseMap';
 import { Card } from '../ui/Card';
-import { MOCK_GALLERY } from '../../constants';
 
 interface PublicHomeProps {
   houses: House[];
@@ -17,10 +16,11 @@ interface PublicHomeProps {
   ronda: RondaSchedule[];
   reports: Report[];
   officials: Official[];
+  gallery: GalleryItem[];
 }
 
 export const PublicHome: React.FC<PublicHomeProps> = ({ 
-  houses, announcements, ronda, reports, officials 
+  houses, announcements, ronda, reports, officials, gallery
 }) => {
   const navigate = useNavigate();
   const dateObj = new Date();
@@ -47,6 +47,10 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     { label: 'E-Voting', icon: Vote, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/voting' },
     { label: 'Lapor Warga', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=lapor' }
   ];
+
+  const [filterType, setFilterType] = React.useState<'All' | 'General' | 'Urgent' | 'Event'>('All');
+
+  const filteredAnnouncements = announcements.filter(a => filterType === 'All' || a.type === filterType);
 
   return (
     <motion.div 
@@ -98,20 +102,39 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Announcements */}
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
               <div className="bg-indigo-50 p-2.5 rounded-xl text-indigo-600">
                 <Megaphone size={24} />
               </div>
               Info Terbaru
             </h2>
-            <button className="text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-              Lihat Semua <ArrowRight size={16} />
-            </button>
+            
+            {/* Filter Tabs */}
+            <div className="flex bg-slate-100 p-1 rounded-xl">
+              {[
+                { id: 'All', label: 'Semua' },
+                { id: 'Urgent', label: 'Penting' },
+                { id: 'Event', label: 'Acara' },
+                { id: 'General', label: 'Info' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setFilterType(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    filterType === tab.id 
+                      ? 'bg-white text-slate-900 shadow-sm' 
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-4">
-            {announcements.map((ann) => (
+            {filteredAnnouncements.map((ann) => (
               <motion.div 
                 key={ann.id} 
                 whileHover={{ scale: 1.01 }}
@@ -139,9 +162,9 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                 </p>
               </motion.div>
             ))}
-            {announcements.length === 0 && (
+            {filteredAnnouncements.length === 0 && (
               <div className="text-center p-12 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                <p className="text-slate-400 font-bold">Belum ada pengumuman terbaru.</p>
+                <p className="text-slate-400 font-bold">Tidak ada pengumuman untuk kategori ini.</p>
               </div>
             )}
           </div>
@@ -198,9 +221,9 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           {/* Gallery Widget */}
           <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
             <h3 className="text-lg font-black text-slate-800 mb-6 px-2">Galeri Kegiatan</h3>
-            {MOCK_GALLERY.length > 0 ? (
+            {gallery.length > 0 ? (
               <div className="grid grid-cols-2 gap-3">
-                {MOCK_GALLERY.slice(0, 4).map((item) => (
+                {gallery.slice(0, 4).map((item) => (
                   <div key={item.id} className="relative aspect-square rounded-2xl overflow-hidden group cursor-pointer">
                     <img 
                       src={item.image} 

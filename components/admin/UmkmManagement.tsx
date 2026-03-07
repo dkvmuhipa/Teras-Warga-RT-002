@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, User, MessageCircle, Store, Tag, MapPin, Phone } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, User, MessageCircle, Store, Tag, MapPin, Phone, Upload } from 'lucide-react';
 import { UMKM } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { addUMKMToDb, updateUMKMInDb, deleteUMKMFromDb } from '../../services/databaseService';
+import { addUMKMToDb, updateUMKMInDb, deleteUMKMFromDb, uploadImageToStorage } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface UmkmManagementProps {
@@ -17,9 +17,14 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
   
   // Form State
   const [umkmForm, setUmkmForm] = useState({ name: '', owner: '', category: 'Kuliner', contact: '', image: '', description: '' });
+  const [imageType, setImageType] = useState<'upload' | 'link'>('upload');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const resetForms = () => {
     setUmkmForm({ name: '', owner: '', category: 'Kuliner', contact: '', image: '', description: '' });
+    setImageFile(null);
+    setImageType('upload');
     setEditingUmkmId(null);
   };
 
@@ -33,16 +38,25 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
       image: u.image || '',
       description: u.description || ''
     });
+    setImageType('link');
     setIsModalOpen(true);
   };
 
   const handleSaveUMKM = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsUploading(true);
     try {
+      let finalImageUrl = umkmForm.image;
+      if (imageType === 'upload' && imageFile) {
+        finalImageUrl = await uploadImageToStorage(imageFile, `umkm/${Date.now()}_${imageFile.name}`);
+      }
+
+      const data = { ...umkmForm, image: finalImageUrl };
+
       if (editingUmkmId) {
-        await updateUMKMInDb(editingUmkmId, umkmForm);
+        await updateUMKMInDb(editingUmkmId, data);
       } else {
-        await addUMKMToDb(umkmForm);
+        await addUMKMToDb(data);
       }
       alert('Data UMKM berhasil disimpan!');
       setIsModalOpen(false);
@@ -50,6 +64,8 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
     } catch (error) {
       console.error(error);
       alert('Gagal menyimpan data UMKM.');
+    } finally {
+        setIsUploading(false);
     }
   };
 
@@ -210,12 +226,38 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kontak (WhatsApp)</label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.contact} onChange={e=>setUmkmForm({...umkmForm, contact: e.target.value})} placeholder="08..." required/>
           </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">URL Foto Produk/Usaha</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.image} onChange={e=>setUmkmForm({...umkmForm, image: e.target.value})} placeholder="https://..."/>
+          
+          <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+            <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
+            <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
           </div>
-          <Button type="submit" className="w-full py-3.5 text-sm shadow-xl shadow-indigo-200 mt-2">
-            {editingUmkmId ? 'Simpan Perubahan' : 'Simpan Data UMKM'}
+
+          {imageType === 'upload' ? (
+            <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Pilih Foto</label>
+                <div className="relative">
+                    <input 
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="umkm-file-upload"
+                        onChange={e => setImageFile(e.target.files?.[0] || null)}
+                    />
+                    <label htmlFor="umkm-file-upload" className="flex items-center gap-3 w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold cursor-pointer hover:bg-slate-100 transition-colors">
+                        <Upload size={18} className="text-slate-400" />
+                        <span className="text-slate-600">{imageFile ? imageFile.name : 'Pilih file foto...'}</span>
+                    </label>
+                </div>
+            </div>
+          ) : (
+            <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">URL Foto Produk/Usaha</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.image} onChange={e=>setUmkmForm({...umkmForm, image: e.target.value})} placeholder="https://..."/>
+            </div>
+          )}
+          
+          <Button type="submit" className="w-full py-3.5 text-sm shadow-xl shadow-indigo-200 mt-2" disabled={isUploading}>
+            {isUploading ? 'Sedang Mengunggah...' : (editingUmkmId ? 'Simpan Perubahan' : 'Simpan Data UMKM')}
           </Button>
         </form>
       </Modal>

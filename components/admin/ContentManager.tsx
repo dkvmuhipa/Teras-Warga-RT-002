@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
-import { Megaphone, Vote, ShoppingBag } from 'lucide-react';
-import { Announcement, Poll, UMKM } from '../../types';
+import { Megaphone, Vote, ShoppingBag, Image } from 'lucide-react';
+import { Announcement, Poll, UMKM, GalleryItem } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnnouncementManagement } from './AnnouncementManagement';
 import { PollManagement } from './PollManagement';
 import { UmkmManagement } from './UmkmManagement';
+import { GalleryManagement } from './GalleryManagement';
 
 interface ContentManagerProps {
   announcements: Announcement[];
   polls: Poll[];
   umkm: UMKM[];
+  gallery: GalleryItem[];
 }
 
-export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, polls, umkm }) => {
-  const [activeTab, setActiveTab] = useState<'announcements' | 'polls' | 'umkm'>('announcements');
+export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, polls, umkm, gallery }) => {
+  const [activeTab, setActiveTab] = useState<'announcements' | 'polls' | 'umkm' | 'gallery'>('announcements');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -34,12 +36,14 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, p
             {activeTab === 'announcements' && <Megaphone size={24} />}
             {activeTab === 'polls' && <Vote size={24} />}
             {activeTab === 'umkm' && <ShoppingBag size={24} />}
+            {activeTab === 'gallery' && <Image size={24} />}
           </div>
           <div>
             <h2 className="text-lg font-black text-slate-800 tracking-tight">
               {activeTab === 'announcements' && 'Konten Pengumuman'}
               {activeTab === 'polls' && 'Konten Voting'}
               {activeTab === 'umkm' && 'Konten UMKM'}
+              {activeTab === 'gallery' && 'Konten Galeri'}
             </h2>
             <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Manajemen Konten</p>
           </div>
@@ -49,7 +53,8 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, p
           {[
             { id: 'announcements', icon: Megaphone, label: 'Pengumuman' },
             { id: 'polls', icon: Vote, label: 'Voting' },
-            { id: 'umkm', icon: ShoppingBag, label: 'UMKM' }
+            { id: 'umkm', icon: ShoppingBag, label: 'UMKM' },
+            { id: 'gallery', icon: Image, label: 'Galeri' }
           ].map((tab) => (
             <button 
               key={tab.id}
@@ -79,6 +84,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, p
           {activeTab === 'announcements' && <AnnouncementManagement announcements={announcements} />}
           {activeTab === 'polls' && <PollManagement polls={polls} />}
           {activeTab === 'umkm' && <UmkmManagement umkm={umkm} />}
+          {activeTab === 'gallery' && <GalleryManagement gallery={gallery} />}
         </motion.div>
       </AnimatePresence>
     </motion.div>
