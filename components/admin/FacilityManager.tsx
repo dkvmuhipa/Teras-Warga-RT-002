@@ -105,6 +105,40 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, invento
         </div>
       </div>
 
+      {/* Ronda Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl"><Shield size={24}/></div>
+            <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sedang Patroli</p>
+                <h3 className="text-xl font-black text-slate-800">
+                    {rondaLogs.filter(l => l.type === 'Start').length > rondaLogs.filter(l => l.type === 'End').length ? 'Aktif' : 'Tidak Ada'}
+                </h3>
+            </div>
+        </div>
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><CheckCircle2 size={24}/></div>
+            <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Laporan Aman</p>
+                <h3 className="text-2xl font-black text-slate-800">{rondaLogs.filter(l => l.status === 'Aman').length}</h3>
+            </div>
+        </div>
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl"><AlertTriangle size={24}/></div>
+            <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Insiden/Mencurigakan</p>
+                <h3 className="text-2xl font-black text-slate-800">{rondaLogs.filter(l => l.status !== 'Aman').length}</h3>
+            </div>
+        </div>
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl"><Calendar size={24}/></div>
+            <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Laporan</p>
+                <h3 className="text-2xl font-black text-slate-800">{rondaLogs.length}</h3>
+            </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Ronda Section */}
         <motion.div variants={itemVariants} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -170,7 +204,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, invento
                     <th className="px-6 py-4">Petugas</th>
                     <th className="px-6 py-4">Lokasi</th>
                     <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 rounded-tr-2xl">Catatan</th>
+                    <th className="px-6 py-4">Catatan</th>
+                    <th className="px-6 py-4 rounded-tr-2xl">Bukti</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -196,6 +231,11 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, invento
                           </span>
                         </td>
                         <td className="px-6 py-4 text-slate-500 italic">"{log.note || '-'}"</td>
+                        <td className="px-6 py-4">
+                          {log.photoUrl ? (
+                              <img src={log.photoUrl} alt="Bukti" className="w-12 h-12 rounded-lg object-cover border border-slate-200" />
+                          ) : '-'}
+                        </td>
                       </tr>
                     ))
                   ) : (

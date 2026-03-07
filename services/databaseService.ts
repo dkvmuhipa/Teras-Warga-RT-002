@@ -46,6 +46,7 @@ const UMKM_COL = "umkm";
 const NOTIFICATIONS_COL = "notifications";
 const POLLS_COL = "polls";
 const RONDA_LOGS_COL = "rondaLogs";
+const PATROL_SESSIONS_COL = "patrolSessions";
 const MARKET_COL = "marketItems";
 
 // --- STORAGE SERVICES ---
@@ -507,6 +508,51 @@ export const subscribeToRondaLogs = (callback: (data: any[]) => void) => {
         callback(data.slice(0, 50));
     });
   });
+};
+
+// --- 11.5 PATROL SESSIONS ---
+export const startPatrolSession = async (officerName: string) => {
+    try {
+        const session = {
+            officerName,
+            startTime: new Date().toISOString(),
+            visitedCheckpoints: [],
+            status: 'Ongoing'
+        };
+        const docRef = await addDoc(collection(db, PATROL_SESSIONS_COL), deepSanitize(session));
+        return docRef.id;
+    } catch (e) { console.error("Error starting patrol:", e); }
+};
+
+export const visitCheckpoint = async (sessionId: string, checkpointId: string) => {
+    try {
+        const sessionRef = doc(db, PATROL_SESSIONS_COL, sessionId);
+        const sessionSnap = await getDoc(sessionRef);
+        if (sessionSnap.exists()) {
+            const data = sessionSnap.data();
+            const visited = data.visitedCheckpoints || [];
+            if (!visited.includes(checkpointId)) {
+                await updateDoc(sessionRef, { visitedCheckpoints: [...visited, checkpointId] });
+            }
+        }
+    } catch (e) { console.error("Error visiting checkpoint:", e); }
+};
+
+export const finishPatrolSession = async (sessionId: string) => {
+    try {
+        await updateDoc(doc(db, PATROL_SESSIONS_COL, sessionId), { 
+            endTime: new Date().toISOString(),
+            status: 'Completed' 
+        });
+    } catch (e) { console.error("Error finishing patrol:", e); }
+};
+
+export const subscribeToActivePatrols = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, PATROL_SESSIONS_COL), where("status", "==", "Ongoing"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    });
 };
 
 // --- 12. BURSA WARGA (COMMUNITY MARKET) ---

@@ -1,0 +1,23 @@
+import React from 'react';
+import { House, Report, Official } from '../../types';
+import { HouseMap } from '../HouseMap';
+
+interface PublicMapProps {
+  houses: House[];
+  reports: Report[];
+  officials: Official[];
+}
+
+export const PublicMap: React.FC<PublicMapProps> = ({ houses, reports, officials }) => {
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8 mb-24">
+      <h2 className="text-2xl font-black text-slate-800 mb-6">Peta Wilayah RT 002</h2>
+      <HouseMap 
+        houses={houses} 
+        isAdmin={false} 
+        reports={reports} 
+        officials={officials} 
+      />
+    </div>
+  );
+};

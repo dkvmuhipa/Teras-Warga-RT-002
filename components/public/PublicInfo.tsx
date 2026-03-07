@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon } from 'lucide-react';
-import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement } from '../../types';
-import { addRondaLog } from '../../services/databaseService';
+import React, { useState, useEffect } from 'react';
+import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2 } from 'lucide-react';
+import { QrReader } from 'react-qr-reader';
+import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession } from '../../types';
+import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
+import { EmergencyContacts } from './EmergencyContacts';
+import { CHECKPOINTS } from '../../constants';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
@@ -41,18 +44,49 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     const [isCheckModalOpen, setIsCheckModalOpen] = useState(false);
     const [checkLocation, setCheckLocation] = useState('');
     const [checkOfficer, setCheckOfficer] = useState('');
+    const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
+
+    useEffect(() => {
+        const unsub = subscribeToActivePatrols((data) => {
+            if (data.length > 0) setActivePatrol(data[0]);
+            else setActivePatrol(null);
+        });
+        return () => unsub();
+    }, []);
+
+    const handleStartPatrol = async () => {
+        if (!checkOfficer) { alert("Nama petugas wajib diisi!"); return; }
+        await startPatrolSession(checkOfficer);
+        setIsCheckModalOpen(false);
+    };
+
+    const handleFinishPatrol = async () => {
+        if (!activePatrol) return;
+        if (activePatrol.visitedCheckpoints.length < CHECKPOINTS.length) {
+            alert("Patroli belum selesai! Kunjungi semua titik.");
+            return;
+        }
+        await finishPatrolSession(activePatrol.id);
+        setIsCheckModalOpen(false);
+    };
     
-    const handleCheckSubmit = async (status: 'Aman' | 'Mencurigakan') => {
+    const handleCheckSubmit = async (type: 'Start' | 'End' | 'Report', status: 'Aman' | 'Mencurigakan' | 'Insiden', note?: string) => {
         if (!checkOfficer || !checkLocation) { alert("Nama petugas dan lokasi wajib diisi!"); return; }
+        
+        const photoUrl = (window as any).tempPhoto;
+        (window as any).tempPhoto = null; // Clear temp storage
+
         const newLog: any = {
             officerName: checkOfficer,
             location: checkLocation,
+            type,
             status,
             timestamp: new Date().toISOString(),
-            note: status === 'Aman' ? 'Kondisi aman terkendali.' : 'Perlu pemantauan lebih lanjut.'
+            note: note || (status === 'Aman' ? 'Kondisi aman terkendali.' : 'Perlu pemantauan lebih lanjut.'),
+            photoUrl
         };
         await addRondaLog(newLog);
-        alert(`Laporan patroli (${status}) tercatat!`);
+        alert(`Laporan patroli (${type} - ${status}) tercatat!`);
         setIsCheckModalOpen(false);
         setCheckLocation('');
     };
@@ -101,47 +135,14 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
             </motion.div>
 
             {/* Emergency Contacts & Events */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Emergency Contacts */}
-                <motion.div variants={itemVariants} className="bg-rose-500 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl shadow-rose-500/20">
-                    <div className="absolute top-0 right-0 p-8 opacity-10"><AlertTriangle size={150}/></div>
-                    <div className="relative z-10">
-                        <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
-                            <div className="p-2 bg-white/20 rounded-xl"><Phone size={24}/></div>
-                            Kontak Darurat
-                        </h2>
-                        <div className="space-y-4">
-                            <a href="tel:110" className="flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/10 group">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white text-rose-600 flex items-center justify-center font-black text-lg group-hover:scale-110 transition-transform">P</div>
-                                    <div><p className="font-bold text-lg">Polisi</p><p className="text-xs text-rose-100 opacity-80">Layanan Darurat</p></div>
-                                </div>
-                                <span className="text-2xl font-black tracking-widest">110</span>
-                            </a>
-                            <a href="tel:113" className="flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/10 group">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white text-rose-600 flex items-center justify-center font-black text-lg group-hover:scale-110 transition-transform">D</div>
-                                    <div><p className="font-bold text-lg">Damkar</p><p className="text-xs text-rose-100 opacity-80">Pemadam Kebakaran</p></div>
-                                </div>
-                                <span className="text-2xl font-black tracking-widest">113</span>
-                            </a>
-                            <a href="tel:118" className="flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/10 group">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white text-rose-600 flex items-center justify-center font-black text-lg group-hover:scale-110 transition-transform">A</div>
-                                    <div><p className="font-bold text-lg">Ambulans</p><p className="text-xs text-rose-100 opacity-80">Gawat Darurat Medis</p></div>
-                                </div>
-                                <span className="text-2xl font-black tracking-widest">118</span>
-                            </a>
-                            <div className="mt-6 pt-4 border-t border-white/20 text-center">
-                                <p className="text-xs font-bold text-rose-100 mb-2 uppercase tracking-wider">Pos Keamanan RT 002</p>
-                                <a href="tel:081234567890" className="text-xl font-black bg-white text-rose-600 px-4 py-2 rounded-xl inline-block shadow-lg hover:scale-105 transition-transform">0812-3456-7890</a>
-                            </div>
-                        </div>
-                    </div>
+                <motion.div variants={itemVariants} className="lg:col-span-2 h-full">
+                    <EmergencyContacts />
                 </motion.div>
 
                 {/* Upcoming Events */}
-                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden">
+                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden h-full">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
                             <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><Calendar size={24}/></div>
@@ -196,7 +197,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
                         <h2 className="text-2xl font-black text-slate-800 mb-4">Visi Kami</h2>
                         <p className="text-slate-600 leading-relaxed">
-                            "Menjadikan RT 002 sebagai lingkungan hunian yang mandiri, aman, dan guyub rukun berbasis teknologi informasi serta gotong royong."
+                            "Menjadikan RT 002 sebagai lingkungan hunian yang mandiri, aman, dan guyub rukun berbasis teknologi informasi serta gotong royong dengan semangat <strong>TERAS RT 002 : Teknologi • Ekraf • Rukun • Aman • Sinergi</strong>."
                         </p>
                     </div>
                 </div>
@@ -212,15 +213,23 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         <ul className="space-y-3 text-slate-600">
                             <li className="flex items-start gap-3">
                                 <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                                <span>Digitalisasi pelayanan administrasi warga.</span>
+                                <span><strong>Teknologi:</strong> Digitalisasi pelayanan administrasi warga.</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                                <span>Peningkatan keamanan lingkungan terpadu (Siskamling).</span>
+                                <span><strong>Ekraf:</strong> Pengembangan Ekonomi Kreatif warga.</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                                <span>Transparansi pengelolaan dana sosial dan pembangunan.</span>
+                                <span><strong>Rukun:</strong> Mempererat tali silaturahmi dan gotong royong.</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
+                                <span><strong>Aman:</strong> Peningkatan keamanan lingkungan terpadu (Siskamling).</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
+                                <span><strong>Sinergi:</strong> Transparansi pengelolaan dana sosial dan pembangunan.</span>
                             </li>
                         </ul>
                     </div>
@@ -329,6 +338,15 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
                     </div>
                     
+                    <div className="flex flex-col gap-2 mb-6">
+                        <button onClick={() => { setIsCheckModalOpen(true); }} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20">
+                            Mulai Ronda
+                        </button>
+                        <button onClick={() => { setIsCheckModalOpen(true); }} className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-rose-600/20">
+                            Lapor Kejadian
+                        </button>
+                    </div>
+                    
                     <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                         {ronda.map((schedule, idx) => {
                             const isToday = schedule.day === new Date().toLocaleDateString('id-ID', {weekday:'long'});
@@ -403,24 +421,43 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Petugas</label>
                         <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" placeholder="Nama Anda" value={checkOfficer} onChange={e => setCheckOfficer(e.target.value)} />
                     </div>
-                    <div>
-                        <label className="block text-xs font-bold mb-1.5 text-slate-700">Lokasi / Titik Pantau</label>
-                        <select className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm" value={checkLocation} onChange={e => setCheckLocation(e.target.value)}>
-                            <option value="">-- Pilih Lokasi --</option>
-                            <option value="Gerbang Utama">Gerbang Utama</option>
-                            <option value="Pos Satpam">Pos Satpam</option>
-                        </select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                        <button onClick={() => handleCheckSubmit('Aman')} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95 flex flex-col items-center justify-center gap-1">
-                            <CheckCircle size={24}/>
-                            <span>AMAN</span>
-                        </button>
-                        <button onClick={() => handleCheckSubmit('Mencurigakan')} className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-rose-200 transition-all active:scale-95 flex flex-col items-center justify-center gap-1">
-                            <AlertTriangle size={24}/>
-                            <span>MENCURIGAKAN</span>
-                        </button>
-                    </div>
+                    {activePatrol ? (
+                        <div className="space-y-4">
+                            <div className="p-4 bg-indigo-50 rounded-xl">
+                                <p className="text-xs font-bold text-indigo-600 mb-1">Progress Patroli</p>
+                                <div className="w-full bg-indigo-200 rounded-full h-2.5">
+                                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${(activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100}%` }}></div>
+                                </div>
+                                <p className="text-xs text-indigo-800 mt-1">{activePatrol.visitedCheckpoints.length} / {CHECKPOINTS.length} Titik Tercapai</p>
+                            </div>
+                            <div className="w-full aspect-square bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+                                <QrReader
+                                    constraints={{ facingMode: 'environment' }}
+                                    onResult={(result, error) => {
+                                        if (result) {
+                                            const checkpoint = CHECKPOINTS.find(cp => cp.qrCode === result.getText());
+                                            if (checkpoint) {
+                                                visitCheckpoint(activePatrol.id, checkpoint.id);
+                                                alert("Titik tercapai: " + checkpoint.name);
+                                            } else {
+                                                alert("QR tidak valid!");
+                                            }
+                                        }
+                                    }}
+                                    className="w-full h-full"
+                                />
+                            </div>
+                            <button onClick={handleFinishPatrol} className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20">
+                                Selesai Patroli
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <button onClick={handleStartPatrol} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20">
+                                Mulai Patroli Baru
+                            </button>
+                        </div>
+                    )}
                 </div>
             </Modal>
         </motion.div>

@@ -23,6 +23,7 @@ import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
 import { generateSuratPengantar, generateResidentReportPDF } from './services/pdfService';
+import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from './services/whatsappService';
 import { AdminRouteWrapper } from './components/AdminComponents';
 import { AdminDashboard } from './components/admin/AdminDashboard'; 
 import { ChatBot } from './components/ChatBot';
@@ -34,6 +35,7 @@ import { PublicMarket } from './components/public/PublicMarket';
 import { PublicServices } from './components/public/PublicServices';
 import { PublicUMKM } from './components/public/PublicUMKM';
 import { PublicInfo } from './components/public/PublicInfo';
+import { PublicMap } from './components/public/PublicMap';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -978,6 +980,7 @@ export const App = () => {
                         <Route path="/market" element={<PublicMarket items={marketItems} />} />
                         <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} />} />
                         <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
+                        <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} />} />
                         <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} houses={houses} announcements={announcements} />} />
                     </Routes>
                     <ChatBot announcements={announcements} ronda={ronda} officials={officials} />

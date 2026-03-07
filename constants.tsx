@@ -1,5 +1,5 @@
 import React from 'react';
-import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem, GalleryItem } from './types';
+import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem, GalleryItem, Checkpoint } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TERAS";
@@ -125,6 +125,13 @@ export const MOCK_RONDA: RondaSchedule[] = [
   { day: 'Jumat', members: ['Bpk. Maman (C10-01)', 'Bpk. Nanda (C10-02)', 'Bpk. Opik (C10-03)'] },
   { day: 'Sabtu', members: ['Bpk. Purnomo (C11-01)', 'Bpk. Qodir (C11-02)', 'Bpk. Rahmat (C11-03)'] },
   { day: 'Minggu', members: ['Bpk. Syaiful (C12-01)', 'Bpk. Tono (C12-02)', 'Bpk. Ujang (C12-03)'] },
+];
+
+export const CHECKPOINTS: Checkpoint[] = [
+    { id: 'cp1', name: 'Gerbang Utama', qrCode: 'GERBANG_UTAMA_RT002' },
+    { id: 'cp2', name: 'Pos Satpam', qrCode: 'POS_SATPAM_RT002' },
+    { id: 'cp3', name: 'Blok C5', qrCode: 'BLOK_C5_RT002' },
+    { id: 'cp4', name: 'Blok C10', qrCode: 'BLOK_C10_RT002' },
 ];
 
 export const MOCK_CASHFLOW: CashFlow[] = [

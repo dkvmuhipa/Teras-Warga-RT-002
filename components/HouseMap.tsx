@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { House, PaymentStatus, Report, Official } from '../types';
 import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2 } from 'lucide-react';
+import { CHECKPOINTS } from '../constants';
 
 interface HouseMapProps {
   houses: House[];
@@ -280,6 +281,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const totalIssues = reports.filter(r => r.status !== 'Selesai').length;
   const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
   
+  const [showCheckpoints, setShowCheckpoints] = useState(false);
+  
   return (
     <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[750px]">
       <div className="bg-white border-b border-slate-100 px-6 py-4 z-20 shadow-sm relative space-y-4">
@@ -289,15 +292,17 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                <p className="text-xs text-slate-500 font-medium">Klik kavling rumah untuk melihat detail informasi.</p>
             </div>
             <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar">
-               <div className="flex items-center gap-1.5 px-2 whitespace-nowrap"><Droplets size={12} className="text-blue-500"/> OP Air</div>
+               <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-2 whitespace-nowrap ${showCheckpoints ? 'text-indigo-600' : 'text-slate-500'}`}>
+                   <ShieldCheck size={12}/> {showCheckpoints ? 'Sembunyikan' : 'Tampilkan'} Patroli
+               </button>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Droplets size={12} className="text-blue-500"/> OP Air</div>
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Trash2 size={12} className="text-slate-500"/> Sampah</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><ShieldCheck size={12} className="text-emerald-500"/> Keamanan</div>
             </div>
         </div>
       </div>
       <div className="flex flex-1 overflow-hidden">
           <div className="flex-1 overflow-auto bg-slate-50 relative custom-scrollbar p-4 md:p-8 scroll-smooth">
-               <div className="min-w-[900px]">
+               <div className="min-w-[900px] relative">
                    <div className="border-[6px] border-dashed border-amber-400 bg-amber-50/50 p-6 rounded-3xl relative">
                        <div className="grid grid-cols-4 gap-6">
                            <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C5" houses={getBlockHouses('C5')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
@@ -305,6 +310,13 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                            <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C9" houses={getBlockHouses('C9')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C10" houses={getBlockHouses('C10')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
                            <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C11" houses={getBlockHouses('C11')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C12" houses={getBlockHouses('C12')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
                        </div>
+                       
+                       {/* Checkpoints Overlay */}
+                       {showCheckpoints && CHECKPOINTS.map((cp, i) => (
+                           <div key={cp.id} className="absolute z-30 flex items-center gap-2 bg-indigo-600 text-white px-3 py-1.5 rounded-full shadow-lg text-xs font-bold" style={{ top: `${10 + i * 15}%`, left: `${10 + i * 20}%` }}>
+                               <ShieldCheck size={14}/> {cp.name}
+                           </div>
+                       ))}
                    </div>
                </div>
           </div>

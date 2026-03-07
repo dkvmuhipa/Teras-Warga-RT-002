@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle } from 'lucide-react';
 import { LetterRequest, Report } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus } from '../../services/databaseService';
+import { sendWhatsAppMessage, formatLetterStatusForWhatsApp } from '../../services/whatsappService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
@@ -325,6 +326,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     </Button>
                   </div>
                 )}
+                <Button 
+                  onClick={() => sendWhatsAppMessage(selectedLetter.phone, formatLetterStatusForWhatsApp(selectedLetter.applicantName, selectedLetter.type, selectedLetter.status))}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200 mt-4"
+                >
+                  <MessageCircle size={18} className="mr-2" /> Kirim Update via WhatsApp
+                </Button>
               </div>
             )}
       </Modal>

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle } from 'lucide-react';
 import { Announcement } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { addAnnouncementToDb, deleteAnnouncementFromDb, updateAnnouncementInDb } from '../../services/databaseService';
+import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface AnnouncementManagementProps {
@@ -147,6 +148,13 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                 </div>
                 
                 <div className="flex items-start gap-2">
+                  <button 
+                    onClick={() => sendWhatsAppMessage('081234567890', formatAnnouncementForWhatsApp(a.title, a.content))} 
+                    className="p-3 rounded-xl text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                    title="Bagikan ke WhatsApp"
+                  >
+                    <MessageCircle size={20}/>
+                  </button>
                   <button 
                     onClick={() => handleEdit(a)} 
                     className="p-3 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all"

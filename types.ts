@@ -124,8 +124,25 @@ export interface RondaCheckLog {
   timestamp: string; // ISO String
   officerName: string;
   location: string; // "Gerbang", "Blok C5", "C5-02"
+  type: 'Start' | 'End' | 'Report'; // NEW
   status: 'Aman' | 'Mencurigakan' | 'Insiden';
   note?: string;
+  photoUrl?: string; // NEW
+}
+
+export interface Checkpoint {
+  id: string;
+  name: string;
+  qrCode: string;
+}
+
+export interface PatrolSession {
+  id: string;
+  officerName: string;
+  startTime: string;
+  endTime?: string;
+  visitedCheckpoints: string[]; // Array of Checkpoint IDs
+  status: 'Ongoing' | 'Completed';
 }
 
 export interface CashFlow {
