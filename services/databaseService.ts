@@ -381,9 +381,19 @@ export const validateResidentAccess = async (houseId: string, code: string): Pro
         if (snapshot.exists()) {
             const data = snapshot.data();
             console.log(`Found house data:`, data);
-            // Simple validation: check if code matches
-            // In production, bcrypt hash would be better, but plain text for MVP is fine per spec
-            const isValid = data.accessCode && data.accessCode.toUpperCase().replace(/[\s-]+/g, '') === code.toUpperCase().replace(/[\s-]+/g, '');
+            
+            if (!data.accessCode) return false;
+
+            const dbCodeClean = data.accessCode.toUpperCase().replace(/[\s-]+/g, '');
+            const inputCodeClean = code.toUpperCase().replace(/[\s-]+/g, '');
+            
+            const parts = data.accessCode.split('-');
+            const suffix = parts.length > 1 ? parts[parts.length - 1] : data.accessCode;
+            const suffixClean = suffix.toUpperCase().replace(/[\s-]+/g, '');
+
+            // Allow exact match OR if the user only typed the suffix (e.g. "SHEA" instead of "C10-08-SHEA")
+            const isValid = inputCodeClean.length > 0 && (dbCodeClean === inputCodeClean || suffixClean === inputCodeClean);
+            
             console.log(`Validation result: ${isValid}`);
             return isValid;
         } else {

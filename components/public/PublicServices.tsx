@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   FileText, AlertTriangle, History, Send, User, MapPin, 
-  Calendar, Briefcase, Heart, Flag, Home, Lock, CheckCircle2, Clock, XCircle, Sparkles, Eye,
+  Calendar, Briefcase, Heart, Flag, Home, Lock, CheckCircle2, Clock, XCircle, Sparkles, Eye, EyeOff,
   Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -25,6 +25,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'mutasi' | 'history'>(initialTab as any);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [accessCode, setAccessCode] = useState('');
+  const [showPin, setShowPin] = useState(false);
   
   // Form States
   const [reportType, setReportType] = useState<Report['type']>('Fasilitas');
@@ -572,14 +573,23 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         </div>
                         <div className="group">
                           <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 ml-1 text-center">PIN Akses</label>
-                          <input 
-                            type="password" 
-                            placeholder="PIN" 
-                            className="w-full p-5 bg-white border border-indigo-100 rounded-2xl text-base font-black focus:border-indigo-500 outline-none transition-all text-center shadow-sm tracking-[0.5em]" 
-                            value={accessCode} 
-                            onChange={e=>setAccessCode(e.target.value)} 
-                            required
-                          />
+                          <div className="relative">
+                            <input 
+                              type={showPin ? "text" : "password"} 
+                              placeholder="PIN" 
+                              className="w-full p-5 bg-white border border-indigo-100 rounded-2xl text-base font-black focus:border-indigo-500 outline-none transition-all text-center shadow-sm tracking-[0.5em]" 
+                              value={accessCode} 
+                              onChange={e=>setAccessCode(e.target.value)} 
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPin(!showPin)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-600 transition-colors"
+                            >
+                              {showPin ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -747,14 +757,23 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         </div>
                         <div className="group">
                           <label className="block text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2 ml-1">PIN Akses</label>
-                          <input 
-                            type="password" 
-                            placeholder="PIN" 
-                            className="w-full p-5 bg-white border border-rose-100 rounded-2xl text-sm font-black focus:border-rose-500 outline-none transition-all text-center shadow-sm" 
-                            value={accessCode} 
-                            onChange={e=>setAccessCode(e.target.value)} 
-                            required
-                          />
+                          <div className="relative">
+                            <input 
+                              type={showPin ? "text" : "password"} 
+                              placeholder="PIN" 
+                              className="w-full p-5 bg-white border border-rose-100 rounded-2xl text-sm font-black focus:border-rose-500 outline-none transition-all text-center shadow-sm" 
+                              value={accessCode} 
+                              onChange={e=>setAccessCode(e.target.value)} 
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPin(!showPin)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-rose-400 hover:text-rose-600 transition-colors"
+                            >
+                              {showPin ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -906,14 +925,23 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 ml-1">
                             {mutationType === 'Newcomer' ? 'PIN (Opsional)' : 'PIN Akses'}
                           </label>
-                          <input 
-                            type="password" 
-                            placeholder={mutationType === 'Newcomer' ? 'Kosongkan' : 'PIN'} 
-                            className={`w-full p-5 bg-white border border-emerald-100 rounded-2xl text-sm font-black focus:border-emerald-500 outline-none transition-all text-center shadow-sm ${mutationType === 'Newcomer' ? 'opacity-50' : ''}`} 
-                            value={accessCode} 
-                            onChange={e=>setAccessCode(e.target.value)} 
-                            required={mutationType !== 'Newcomer'}
-                          />
+                          <div className="relative">
+                            <input 
+                              type={showPin ? "text" : "password"} 
+                              placeholder={mutationType === 'Newcomer' ? 'Kosongkan' : 'PIN'} 
+                              className={`w-full p-5 bg-white border border-emerald-100 rounded-2xl text-sm font-black focus:border-emerald-500 outline-none transition-all text-center shadow-sm ${mutationType === 'Newcomer' ? 'opacity-50' : ''}`} 
+                              value={accessCode} 
+                              onChange={e=>setAccessCode(e.target.value)} 
+                              required={mutationType !== 'Newcomer'}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPin(!showPin)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-600 transition-colors"
+                            >
+                              {showPin ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

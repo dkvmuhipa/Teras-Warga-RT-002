@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Search, Plus, Lock, MessageCircle, Tag, User, Phone, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Search, Plus, Lock, MessageCircle, Tag, User, Phone, Image as ImageIcon, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MarketItem } from '../../types';
 import { addMarketItem, validateResidentAccess, formatHouseId } from '../../services/databaseService';
@@ -28,6 +28,7 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
   // Auth
   const [postHouseId, setPostHouseId] = useState('');
   const [accessCode, setAccessCode] = useState('');
+  const [showPin, setShowPin] = useState(false);
 
   const filteredItems = items.filter(item => {
     const matchSearch = item.title.toLowerCase().includes(search.toLowerCase()) || item.description.toLowerCase().includes(search.toLowerCase());
@@ -382,14 +383,23 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">PIN Akses</label>
-                  <input 
-                    type="password" 
-                    placeholder="PIN Rumah" 
-                    className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:border-slate-400 outline-none transition-all text-center placeholder:normal-case" 
-                    value={accessCode} 
-                    onChange={e=>setAccessCode(e.target.value)} 
-                    required
-                  />
+                  <div className="relative">
+                    <input 
+                      type={showPin ? "text" : "password"} 
+                      placeholder="PIN Rumah" 
+                      className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:border-slate-400 outline-none transition-all text-center placeholder:normal-case" 
+                      value={accessCode} 
+                      onChange={e=>setAccessCode(e.target.value)} 
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPin(!showPin)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {showPin ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
