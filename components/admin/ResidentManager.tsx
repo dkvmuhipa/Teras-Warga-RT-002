@@ -148,7 +148,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (window.confirm('Apakah Anda yakin ingin mengupload data ini? Data yang ada mungkin akan ditimpa jika ID sama (namun fitur ini hanya menambah data baru saat ini).')) {
+    if (window.confirm('Apakah Anda yakin ingin mengupload data ini? Sistem akan otomatis mengabaikan data warga yang Blok dan Nomornya sudah ada di sistem (menghindari duplikat).')) {
       setIsUploading(true);
       try {
         const parsedData = await parseExcelFile(file);
@@ -156,6 +156,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         // Add each house one by one (or batch if supported)
         let successCount = 0;
         let failCount = 0;
+        let duplicateCount = 0;
 
         for (const houseData of parsedData) {
           try {
@@ -163,6 +164,18 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             if (!houseData.block || !houseData.number || !houseData.headOfFamily) {
               console.warn('Skipping invalid row:', houseData);
               failCount++;
+              continue;
+            }
+
+            // Check for duplicate block and number
+            const isDuplicate = houses.some(
+              h => h.block.toLowerCase() === houseData.block?.toLowerCase() && 
+                   h.number.toLowerCase() === houseData.number?.toLowerCase()
+            );
+
+            if (isDuplicate) {
+              console.warn(`Skipping duplicate house: Blok ${houseData.block} No ${houseData.number}`);
+              duplicateCount++;
               continue;
             }
 
@@ -180,7 +193,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           }
         }
 
-        alert(`Upload selesai. Berhasil: ${successCount}, Gagal: ${failCount}`);
+        alert(`Upload selesai.\nBerhasil ditambahkan: ${successCount}\nDuplikat (diabaikan): ${duplicateCount}\nGagal/Format Salah: ${failCount}`);
       } catch (error) {
         console.error('Excel Parse Error:', error);
         alert('Gagal memproses file Excel.');
