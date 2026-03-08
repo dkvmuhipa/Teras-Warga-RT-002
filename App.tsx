@@ -343,7 +343,7 @@ import { subscribeToMapPoints, subscribeToCollection,
 
   const handleAiAnalysis = async () => {
       setIsAnalyzing(true);
-      const totalResidents = houses.reduce((acc:any, h:any) => acc + (h.occupants || 0), 0);
+      const totalResidents = houses.filter((h:any) => h.status === 'Occupied').reduce((acc:any, h:any) => acc + (h.occupants || 0), 0);
       const income = cashFlow.filter((c:any) => c.type === 'Income').reduce((acc:any, c:any) => acc + c.amount, 0);
       const expense = cashFlow.filter((c:any) => c.type === 'Expense').reduce((acc:any, c:any) => acc + c.amount, 0);
       const balance = income - expense;
@@ -587,7 +587,7 @@ import { subscribeToMapPoints, subscribeToCollection,
           {activeTab === 'residents' && (
               <div className="animate-fade-in space-y-6">
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Total Warga</p><h4 className="text-2xl font-black text-slate-800">{houses.reduce((acc:any, h:any) => acc + (h.occupants || 0), 0)} <span className="text-xs font-medium text-slate-400">Jiwa</span></h4></div><div className="p-2 bg-slate-50 rounded-xl"><Users size={20} className="text-slate-400"/></div></div>
+                      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Total Warga</p><h4 className="text-2xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Occupied').reduce((acc:any, h:any) => acc + (h.occupants || 0), 0)} <span className="text-xs font-medium text-slate-400">Jiwa</span></h4></div><div className="p-2 bg-slate-50 rounded-xl"><Users size={20} className="text-slate-400"/></div></div>
                       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Kepala Keluarga</p><h4 className="text-2xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Occupied').length} <span className="text-xs font-medium text-slate-400">KK</span></h4></div><div className="p-2 bg-slate-50 rounded-xl"><User size={20} className="text-slate-400"/></div></div>
                       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Rumah Kosong</p><h4 className="text-2xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Empty').length} <span className="text-xs font-medium text-slate-400">Unit</span></h4></div><div className="p-2 bg-slate-50 rounded-xl"><Home size={20} className="text-slate-400"/></div></div>
                       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Iuran Lunas</p><h4 className="text-2xl font-black text-emerald-600">{houses.filter((h:any) => h.status === 'Occupied' && h.paymentStatus === 'Lunas').length} <span className="text-xs font-medium text-slate-400">KK</span></h4></div><div className="p-2 bg-emerald-50 rounded-xl"><CheckCircle size={20} className="text-emerald-500"/></div></div>

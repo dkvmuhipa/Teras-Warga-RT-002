@@ -344,7 +344,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   });
 
   // Stats
-  const totalResidents = houses.reduce((acc, h) => acc + (h.occupants || 0), 0);
+  const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const emptyHouses = houses.filter(h => h.status === 'Empty').length;
 

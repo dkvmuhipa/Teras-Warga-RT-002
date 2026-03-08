@@ -29,7 +29,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
   const handleGenerateSummary = async () => {
     setIsAiLoading(true);
     const data = {
-      totalResidents: houses.reduce((acc, h) => acc + (h.occupants || 0), 0),
+      totalResidents: houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0),
       cashBalance: cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0) - cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0),
       reportsCount: reports.filter(r => r.status === 'Baru').length,
       unpaidCount: houses.filter(h => h.paymentStatus === 'Menunggak').length
@@ -39,7 +39,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
     setIsAiLoading(false);
   };
   // Calculate Stats
-  const totalResidents = houses.reduce((acc, h) => acc + (h.occupants || 0), 0);
+  const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   
   const income = cashFlow.filter(c => c.type === 'Income').reduce((acc, c) => acc + c.amount, 0);
