@@ -8,23 +8,22 @@ export const generateProfessionalExcel = async (houses: House[]) => {
 
   // Define columns
   worksheet.columns = [
-    { header: 'NO', key: 'no', width: 5 },
-    { header: 'BLOK', key: 'block', width: 10 },
-    { header: 'NOMOR', key: 'number', width: 10 },
-    { header: 'KEPALA KELUARGA', key: 'headOfFamily', width: 30 },
-    { header: 'NAMA PEMILIK', key: 'ownerName', width: 30 },
+    { header: 'BLOK (Wajib)', key: 'block', width: 15 },
+    { header: 'NOMOR (Wajib)', key: 'number', width: 15 },
+    { header: 'NAMA KEPALA KELUARGA (Wajib)', key: 'headOfFamily', width: 35 },
+    { header: 'NAMA PEMILIK (Opsional)', key: 'ownerName', width: 35 },
     { header: 'TELEPON', key: 'phone', width: 20 },
-    { header: 'STATUS HUNIAN', key: 'status', width: 15 },
-    { header: 'STATUS KEPEMILIKAN', key: 'residenceType', width: 20 },
-    { header: 'PENGHUNI', key: 'occupants', width: 10 },
-    { header: 'PENDIDIKAN', key: 'education', width: 15 },
-    { header: 'PEKERJAAN', key: 'jobCategory', width: 20 },
-    { header: 'KENDARAAN', key: 'vehicleCount', width: 12 },
-    { header: 'IBU HAMIL', key: 'pregnantCount', width: 12 },
-    { header: 'BALITA', key: 'toddlerCount', width: 12 },
-    { header: 'LANSIA', key: 'elderlyCount', width: 12 },
-    { header: 'PEMBAYARAN', key: 'paymentStatus', width: 15 },
-    { header: 'KODE AKSES', key: 'accessCode', width: 15 },
+    { header: 'STATUS HUNIAN (Occupied/Empty/Business)', key: 'status', width: 35 },
+    { header: 'STATUS KEPEMILIKAN (Tetap/Kontrak/Kost)', key: 'residenceType', width: 40 },
+    { header: 'JUMLAH PENGHUNI', key: 'occupants', width: 20 },
+    { header: 'PENDIDIKAN', key: 'education', width: 20 },
+    { header: 'PEKERJAAN', key: 'jobCategory', width: 25 },
+    { header: 'JUMLAH KENDARAAN', key: 'vehicleCount', width: 20 },
+    { header: 'JUMLAH IBU HAMIL', key: 'pregnantCount', width: 25 },
+    { header: 'JUMLAH BALITA', key: 'toddlerCount', width: 25 },
+    { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
+    { header: 'STATUS PEMBAYARAN (Lunas/Belum Lunas)', key: 'paymentStatus', width: 35 },
+    { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
   ];
 
   // Style Header
@@ -53,7 +52,6 @@ export const generateProfessionalExcel = async (houses: House[]) => {
   // Add Data
   houses.forEach((house, index) => {
     const row = worksheet.addRow({
-      no: index + 1,
       block: house.block,
       number: house.number,
       headOfFamily: house.headOfFamily,
@@ -65,9 +63,9 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       education: house.education || '-',
       jobCategory: house.jobCategory || '-',
       vehicleCount: house.vehicleCount || 0,
-      hasPregnant: house.pregnantCount || 0,
-      hasToddler: house.toddlerCount || 0,
-      hasElderly: house.elderlyCount || 0,
+      pregnantCount: house.pregnantCount || 0,
+      toddlerCount: house.toddlerCount || 0,
+      elderlyCount: house.elderlyCount || 0,
       paymentStatus: house.paymentStatus,
       accessCode: house.accessCode || '-',
     });
