@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb } from '../../services/databaseService';
@@ -538,7 +538,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
       </AnimatePresence>
 
       {/* Letter Detail Modal */}
-      <Modal isOpen={!!selectedLetter} onClose={() => setSelectedLetter(null)} title="Detail Permohonan Surat">
+      <Modal isOpen={!!selectedLetter} onClose={() => setSelectedLetter(null)} title="Detail Permohonan Surat" maxWidth="max-w-2xl">
             {selectedLetter && (
               <div className="space-y-6">
                 <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
@@ -643,86 +643,245 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
       </Modal>
 
       {/* Admin Create Letter Modal */}
-      <Modal isOpen={isCreatingLetter} onClose={() => setIsCreatingLetter(false)} title="Buat Surat Baru (Admin)">
-        <form onSubmit={handleAdminCreateLetter} className="space-y-6 max-h-[70vh] overflow-y-auto px-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">Data Diri</h4>
-              <div className="group">
-                <label className="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap</label>
-                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.applicantName} onChange={e=>setAdminForm({...adminForm, applicantName: e.target.value})} required />
+      <Modal isOpen={isCreatingLetter} onClose={() => setIsCreatingLetter(false)} title="Buat Surat Baru (Admin)" maxWidth="max-w-4xl">
+        <form onSubmit={handleAdminCreateLetter} className="space-y-8 max-h-[75vh] overflow-y-auto px-2 pb-4">
+          <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 flex items-start gap-3">
+            <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
+              <Sparkles size={18} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-indigo-900">Mode Penerbitan Langsung</h4>
+              <p className="text-xs text-indigo-700/80 mt-1">Surat yang dibuat di sini akan langsung disetujui dan diterbitkan dengan nomor resmi.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column: Personal Data */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <User size={16} className="text-slate-400" />
+                <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest">Data Pemohon</h4>
               </div>
-              <div className="group">
-                <label className="block text-xs font-bold text-slate-700 mb-1">NIK</label>
-                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.nik} onChange={e=>setAdminForm({...adminForm, nik: e.target.value})} required />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Tempat Lahir</label>
-                  <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.birthPlace} onChange={e=>setAdminForm({...adminForm, birthPlace: e.target.value})} required />
+              
+              <div className="space-y-4">
+                <div className="group">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Lengkap</label>
+                  <input 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-300" 
+                    value={adminForm.applicantName} 
+                    onChange={e=>setAdminForm({...adminForm, applicantName: e.target.value})} 
+                    required 
+                    placeholder="Sesuai KTP"
+                  />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Tgl Lahir</label>
-                  <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.birthDate} onChange={e=>setAdminForm({...adminForm, birthDate: e.target.value})} required />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">NIK</label>
+                    <input 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
+                      value={adminForm.nik} 
+                      onChange={e=>setAdminForm({...adminForm, nik: e.target.value})} 
+                      required 
+                      placeholder="16 digit NIK"
+                    />
+                  </div>
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Kepala Keluarga</label>
+                    <input 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
+                      value={adminForm.familyHeadName} 
+                      onChange={e=>setAdminForm({...adminForm, familyHeadName: e.target.value})} 
+                      required 
+                      placeholder="Nama di KK"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Jenis Kelamin</label>
-                  <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.gender} onChange={e=>setAdminForm({...adminForm, gender: e.target.value as any})}>
-                    <option>Laki-laki</option>
-                    <option>Perempuan</option>
-                  </select>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tempat Lahir</label>
+                    <input 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.birthPlace} 
+                      onChange={e=>setAdminForm({...adminForm, birthPlace: e.target.value})} 
+                      required 
+                    />
+                  </div>
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tanggal Lahir</label>
+                    <input 
+                      type="date" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.birthDate} 
+                      onChange={e=>setAdminForm({...adminForm, birthDate: e.target.value})} 
+                      required 
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Agama</label>
-                  <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.religion} onChange={e=>setAdminForm({...adminForm, religion: e.target.value})}>
-                    <option>Islam</option><option>Kristen</option><option>Katolik</option><option>Hindu</option><option>Buddha</option><option>Konghucu</option>
-                  </select>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Kelamin</label>
+                    <select 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.gender} 
+                      onChange={e=>setAdminForm({...adminForm, gender: e.target.value as any})}
+                    >
+                      <option>Laki-laki</option>
+                      <option>Perempuan</option>
+                    </select>
+                  </div>
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Agama</label>
+                    <select 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.religion} 
+                      onChange={e=>setAdminForm({...adminForm, religion: e.target.value})}
+                    >
+                      <option>Islam</option><option>Kristen</option><option>Katolik</option><option>Hindu</option><option>Buddha</option><option>Konghucu</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Pekerjaan</label>
-                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.job} onChange={e=>setAdminForm({...adminForm, job: e.target.value})} required />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pekerjaan</label>
+                    <input 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.job} 
+                      onChange={e=>setAdminForm({...adminForm, job: e.target.value})} 
+                      required 
+                    />
+                  </div>
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Status Perkawinan</label>
+                    <select 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.maritalStatus} 
+                      onChange={e=>setAdminForm({...adminForm, maritalStatus: e.target.value as any})}
+                    >
+                      <option>Belum Kawin</option>
+                      <option>Kawin</option>
+                      <option>Cerai Hidup</option>
+                      <option>Cerai Mati</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Kewarganegaraan</label>
+                    <input 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.nationality} 
+                      onChange={e=>setAdminForm({...adminForm, nationality: e.target.value})} 
+                      required 
+                    />
+                  </div>
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">No. HP / WhatsApp</label>
+                    <input 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.phone} 
+                      onChange={e=>setAdminForm({...adminForm, phone: e.target.value})} 
+                      required 
+                      placeholder="0812..."
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">Detail Surat</h4>
-              <div className="group">
-                <label className="block text-xs font-bold text-slate-700 mb-1">Jenis Surat</label>
-                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.type} onChange={e=>setAdminForm({...adminForm, type: e.target.value})}>
-                  {(pdfConfig.letterTemplates || [
-                    { type: 'Surat Pengantar KTP' }, { type: 'Surat Pengantar KK' }, { type: 'Surat Keterangan Domisili' }
-                  ]).map(t => <option key={t.type}>{t.type}</option>)}
-                  <option>Lainnya</option>
-                </select>
+            {/* Right Column: Letter Details */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <FileText size={16} className="text-slate-400" />
+                <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest">Detail Surat</h4>
               </div>
-              <div className="group">
-                <label className="block text-xs font-bold text-slate-700 mb-1">Blok Rumah</label>
-                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold uppercase" value={adminForm.houseId} onChange={e=>setAdminForm({...adminForm, houseId: e.target.value})} required placeholder="Cth: C7-02" />
-              </div>
-              <div className="group">
-                <label className="block text-xs font-bold text-slate-700 mb-1">Keperluan</label>
-                <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold h-24 resize-none" value={adminForm.purposeDetail} onChange={e=>setAdminForm({...adminForm, purposeDetail: e.target.value})} required />
-              </div>
-              <div className="group">
-                <label className="block text-xs font-bold text-slate-700 mb-1">Alamat KTP</label>
-                <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold h-20 resize-none" value={adminForm.addressKtp} onChange={e=>setAdminForm({...adminForm, addressKtp: e.target.value})} required />
+
+              <div className="space-y-4">
+                <div className="group">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Surat</label>
+                  <div className="relative">
+                    <select 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all appearance-none" 
+                      value={adminForm.type} 
+                      onChange={e=>setAdminForm({...adminForm, type: e.target.value})}
+                    >
+                      {(pdfConfig.letterTemplates || [
+                        { type: 'Surat Pengantar KTP' }, { type: 'Surat Pengantar KK' }, { type: 'Surat Keterangan Domisili' }
+                      ]).map(t => <option key={t.type}>{t.type}</option>)}
+                      <option>Lainnya</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Blok / Nomor Rumah</label>
+                  <div className="relative">
+                    <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input 
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold uppercase focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.houseId} 
+                      onChange={e=>setAdminForm({...adminForm, houseId: e.target.value})} 
+                      required 
+                      placeholder="Cth: C7-02" 
+                    />
+                  </div>
+                </div>
+
+                <div className="group">
+                  <div className="flex justify-between items-end mb-1.5 ml-1">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Keperluan</label>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const template = (pdfConfig.letterTemplates || []).find(t => t.type === adminForm.type)?.suggestion;
+                        if (template) setAdminForm({...adminForm, purposeDetail: template});
+                      }}
+                      className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                    >
+                      <Sparkles size={10} /> Isi Otomatis
+                    </button>
+                  </div>
+                  <textarea 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-32 resize-none leading-relaxed" 
+                    value={adminForm.purposeDetail} 
+                    onChange={e=>setAdminForm({...adminForm, purposeDetail: e.target.value})} 
+                    required 
+                    placeholder="Jelaskan keperluan surat..."
+                  />
+                </div>
+
+                <div className="group">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Lengkap (Sesuai KTP)</label>
+                  <textarea 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed" 
+                    value={adminForm.addressKtp} 
+                    onChange={e=>setAdminForm({...adminForm, addressKtp: e.target.value})} 
+                    required 
+                    placeholder="Jalan, RT/RW, Kelurahan, Kecamatan..."
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div className="pt-4 border-t flex justify-end gap-3">
-            <Button type="button" variant="secondary" onClick={() => setIsCreatingLetter(false)}>Batal</Button>
-            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
-              <Save size={18} className="mr-2" /> Terbitkan Surat Resmi
+
+          <div className="pt-6 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white pb-2">
+            <Button type="button" variant="secondary" onClick={() => setIsCreatingLetter(false)} className="px-6">Batal</Button>
+            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 px-8">
+              <Printer size={18} className="mr-2" /> Terbitkan & Cetak
             </Button>
           </div>
         </form>
       </Modal>
 
       {/* Report Detail Modal */}
-      <Modal isOpen={!!selectedReport} onClose={() => setSelectedReport(null)} title="Detail Laporan Warga">
+      <Modal isOpen={!!selectedReport} onClose={() => setSelectedReport(null)} title="Detail Laporan Warga" maxWidth="max-w-lg">
         {selectedReport && (
           <div className="space-y-6">
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">

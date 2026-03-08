@@ -126,13 +126,14 @@ export interface AppNotification {
 
 export interface Report {
   id: string;
-  type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Lainnya';
+  type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Sosial' | 'Lainnya';
   description: string;
   reporterName: string;
   date: string;
   status: 'Baru' | 'Diproses' | 'Selesai';
   houseId?: string; // Optional: Link report to specific house (e.g., "Rumah C1-05 kotor")
   reporterHouseId?: string;
+  photoUrl?: string; // NEW: Photo evidence
 }
 
 export interface UMKM {
@@ -174,6 +175,9 @@ export interface LetterRequest {
   status: 'Pending' | 'Approved' | 'Rejected';
   date: string;
   letterNumber?: string;
+  estimatedTime?: string; // NEW: Estimated processing time
+  rating?: number; // NEW: User feedback
+  feedback?: string; // NEW: User feedback
 }
 
 // New Types
