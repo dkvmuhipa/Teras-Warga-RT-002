@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint } from '../types';
 import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield } from 'lucide-react';
-import { CHECKPOINTS as DEFAULT_CHECKPOINTS } from '../constants';
 import { subscribeToCheckpoints, updateCheckpointPosition } from '../services/databaseService';
 
 interface HouseMapProps {
@@ -278,7 +277,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
 
 export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], mapPoints = [], onEditHouse, onPayDues, onReportHouse }) => {
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
-  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>(DEFAULT_CHECKPOINTS);
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [showCheckpoints, setShowCheckpoints] = useState(false);
   const [isManageMode, setIsManageMode] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -286,14 +285,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
 
   useEffect(() => {
     const unsub = subscribeToCheckpoints((data) => {
-      if (data.length > 0) {
-        // Merge with default names/qrCodes if missing in DB
-        const merged = DEFAULT_CHECKPOINTS.map(def => {
-          const dbCp = data.find(d => d.id === def.id);
-          return dbCp ? { ...def, ...dbCp } : def;
-        });
-        setCheckpoints(merged);
-      }
+      setCheckpoints(data);
     });
     return () => unsub();
   }, []);

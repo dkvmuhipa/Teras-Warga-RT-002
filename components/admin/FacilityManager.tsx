@@ -1,31 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw } from 'lucide-react';
-import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest } from '../../types';
+import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest, PatrolSession, Checkpoint } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { updateRondaSchedule, updateRondaShifts, updateRondaSwapRequestStatus } from '../../services/databaseService';
+import { subscribeToCheckpoints, updateRondaSchedule, updateRondaShifts, updateRondaSwapRequestStatus } from '../../services/databaseService';
+import { CheckpointQRGenerator } from './CheckpointQRGenerator';
+import { CheckpointManager } from './CheckpointManager';
+import { QrCode } from 'lucide-react';
 
 interface FacilityManagerProps {
   ronda: RondaSchedule[];
   rondaLogs: RondaCheckLog[];
   rondaSwapRequests: RondaSwapRequest[];
   houses: House[];
+  activePatrol: PatrolSession | null;
 }
 
-export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses }) => {
+export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol }) => {
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [isRondaModalOpen, setIsRondaModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [editingRonda, setEditingRonda] = useState<RondaSchedule | null>(null);
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps'>('schedule');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints'>('schedule');
 
   // Shift Management State
   const [shifts, setShifts] = useState<{ id: string; time: string; members: string[] }[]>([]);
   const [residentSearch, setResidentSearch] = useState('');
+
+  useEffect(() => {
+    const unsubscribe = subscribeToCheckpoints((data) => {
+        setCheckpoints(data);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleEditRonda = (schedule: RondaSchedule) => {
     setEditingRonda(schedule);
@@ -92,7 +105,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
     return matchesFilter && matchesSearch;
   });
 
-  const isPatrolActive = rondaLogs.filter(l => l.type === 'Start').length > rondaLogs.filter(l => l.type === 'End').length;
+  const isPatrolActive = !!activePatrol;
   const today = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
 
   const containerVariants = {
@@ -124,6 +137,9 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           <p className="text-slate-500 font-medium">Sistem Monitoring Siskamling Digital RT 002</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
+          <Button onClick={() => setIsQRModalOpen(true)} variant="outline" className="flex-1 md:flex-none border-slate-200 hover:bg-slate-50">
+            <QrCode size={18} className="mr-2" /> Cetak QR
+          </Button>
           <Button onClick={handleAutoRotate} variant="outline" className="flex-1 md:flex-none border-indigo-200 text-indigo-600 hover:bg-indigo-50">
             <RefreshCw size={18} className="mr-2" /> Rotasi Otomatis
           </Button>
@@ -141,7 +157,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         {[
           { id: 'schedule', label: 'Jadwal & Shift', icon: Calendar },
           { id: 'logs', label: 'Log Aktivitas', icon: Activity },
-          { id: 'swaps', label: 'Tukar Jadwal', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Pending').length }
+          { id: 'swaps', label: 'Tukar Jadwal', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Pending').length },
+          { id: 'checkpoints', label: 'Titik Patroli', icon: MapPin }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -163,15 +180,15 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
       {/* Live Status Banner */}
       <AnimatePresence>
-        {isPatrolActive && (
+        {activePatrol && (
           <motion.div 
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="bg-indigo-600 text-white p-4 rounded-3xl flex items-center justify-between shadow-xl shadow-indigo-100 border border-indigo-500">
-              <div className="flex items-center gap-4">
+            <div className="bg-indigo-600 text-white p-4 rounded-3xl flex flex-col md:flex-row items-center justify-between shadow-xl shadow-indigo-100 border border-indigo-500 gap-4">
+              <div className="flex items-center gap-4 w-full md:w-auto">
                 <div className="relative">
                   <div className="w-3 h-3 bg-emerald-400 rounded-full animate-ping absolute inset-0"></div>
                   <div className="w-3 h-3 bg-emerald-400 rounded-full relative"></div>
@@ -181,15 +198,21 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   <p className="font-black text-lg">Patroli Sedang Berlangsung</p>
                 </div>
               </div>
-              <div className="hidden md:flex items-center gap-6">
+              
+              <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
                 <div className="text-right">
                   <p className="text-[10px] font-bold uppercase opacity-70">Petugas Aktif</p>
-                  <p className="font-bold">Budi & Team</p>
+                  <p className="font-bold">{activePatrol.officerName}</p>
                 </div>
-                <div className="w-px h-8 bg-white/20"></div>
+                <div className="w-px h-8 bg-white/20 hidden md:block"></div>
                 <div className="text-right">
                   <p className="text-[10px] font-bold uppercase opacity-70">Mulai Sejak</p>
-                  <p className="font-bold">22:15 WITA</p>
+                  <p className="font-bold">{new Date(activePatrol.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })} WITA</p>
+                </div>
+                <div className="w-px h-8 bg-white/20 hidden md:block"></div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold uppercase opacity-70">Progress</p>
+                  <p className="font-bold">{activePatrol.visitedCheckpoints.length} / {checkpoints.length} Titik</p>
                 </div>
               </div>
             </div>
@@ -503,6 +526,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             </div>
           </motion.div>
         )}
+
+        {activeTab === 'checkpoints' && (
+          <motion.div variants={itemVariants} className="lg:col-span-3">
+            <CheckpointManager />
+          </motion.div>
+        )}
       </div>
 
       <Modal isOpen={isRondaModalOpen} onClose={() => setIsRondaModalOpen(false)} title={`Pengaturan Jadwal: ${editingRonda?.day}`}>
@@ -622,6 +651,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           </div>
         </div>
       </Modal>
+
+      {isQRModalOpen && <CheckpointQRGenerator onClose={() => setIsQRModalOpen(false)} />}
     </motion.div>
   );
 };

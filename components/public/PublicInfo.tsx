@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
-import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest } from '../../types';
-import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest } from '../../services/databaseService';
+import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint } from '../../types';
+import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
-import { CHECKPOINTS } from '../../constants';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
@@ -20,9 +19,10 @@ interface PublicInfoProps {
   announcements: Announcement[];
   galleryItems: GalleryItem[];
   faqItems: FAQItem[];
+  activePatrol: PatrolSession | null;
 }
 
-export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, houses, announcements, galleryItems, faqItems }) => {
+export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, houses, announcements, galleryItems, faqItems, activePatrol }) => {
     const totalIncome = cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0);
     const totalExpense = cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0);
     const currentBalance = totalIncome - totalExpense;
@@ -52,7 +52,16 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
     const [checkLocation, setCheckLocation] = useState('');
     const [checkOfficer, setCheckOfficer] = useState('');
-    const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
+    const [checkPin, setCheckPin] = useState('');
+    const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
+    // activePatrol is now a prop
+
+    useEffect(() => {
+        const unsubscribe = subscribeToCheckpoints((data) => {
+            setCheckpoints(data);
+        });
+        return () => unsubscribe();
+    }, []);
 
     // Status Check State
     const [statusSearchId, setStatusSearchId] = useState('');
@@ -66,23 +75,34 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     const [swapReason, setSwapReason] = useState('');
     const [isSubmittingSwap, setIsSubmittingSwap] = useState(false);
 
-    useEffect(() => {
-        const unsub = subscribeToActivePatrols((data) => {
-            if (data.length > 0) setActivePatrol(data[0]);
-            else setActivePatrol(null);
-        });
-        return () => unsub();
-    }, []);
+    // useEffect for activePatrol removed as it is now passed as prop
 
     const handleStartPatrol = async () => {
         if (!checkOfficer) { alert("Nama petugas wajib diisi!"); return; }
+        if (!checkPin) { alert("PIN wajib diisi!"); return; }
+        
+        // Find house/resident by name to verify PIN
+        // In a real app, this would be a secure backend check
+        const resident = houses.find(h => h.headOfFamily.toLowerCase() === checkOfficer.toLowerCase());
+        
+        if (!resident) {
+            alert("Nama petugas tidak ditemukan dalam data warga.");
+            return;
+        }
+
+        if (resident.accessCode !== checkPin) {
+            alert("PIN salah! Silakan coba lagi.");
+            return;
+        }
+
         await startPatrolSession(checkOfficer);
         setIsCheckModalOpen(false);
+        setCheckPin(''); // Reset PIN
     };
 
     const handleFinishPatrol = async () => {
         if (!activePatrol) return;
-        if (activePatrol.visitedCheckpoints.length < CHECKPOINTS.length) {
+        if (activePatrol.visitedCheckpoints.length < checkpoints.length) {
             alert("Patroli belum selesai! Kunjungi semua titik.");
             return;
         }
@@ -510,6 +530,36 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
                     </div>
                     
+                    {activePatrol && (
+                        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <ShieldCheck size={48} className="text-emerald-600"/>
+                            </div>
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="flex items-center gap-2 text-xs font-black text-emerald-600 uppercase tracking-widest">
+                                        <span className="relative flex h-2 w-2">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        Patroli Aktif
+                                    </span>
+                                    <span className="text-[10px] font-bold text-emerald-500 bg-white/50 px-2 py-0.5 rounded-full">
+                                        {new Date(activePatrol.startTime).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}
+                                    </span>
+                                </div>
+                                <p className="font-bold text-slate-800 text-sm mb-3">{activePatrol.officerName}</p>
+                                <div className="w-full bg-emerald-200 rounded-full h-1.5 mb-1">
+                                    <div className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${(activePatrol.visitedCheckpoints.length / checkpoints.length) * 100}%` }}></div>
+                                </div>
+                                <div className="flex justify-between items-center text-[10px] font-medium text-emerald-600">
+                                    <span>Progress</span>
+                                    <span>{activePatrol.visitedCheckpoints.length} / {checkpoints.length} Titik</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
                     <div className="flex flex-col gap-2 mb-6">
                         <button onClick={() => { setIsCheckModalOpen(true); }} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2">
                             <ShieldCheck size={18} /> Mulai Ronda
@@ -621,16 +671,16 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                             <div className="p-4 bg-indigo-50 rounded-xl">
                                 <p className="text-xs font-bold text-indigo-600 mb-1">Progress Patroli</p>
                                 <div className="w-full bg-indigo-200 rounded-full h-2.5">
-                                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${(activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100}%` }}></div>
+                                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${(activePatrol.visitedCheckpoints.length / checkpoints.length) * 100}%` }}></div>
                                 </div>
-                                <p className="text-xs text-indigo-800 mt-1">{activePatrol.visitedCheckpoints.length} / {CHECKPOINTS.length} Titik Tercapai</p>
+                                <p className="text-xs text-indigo-800 mt-1">{activePatrol.visitedCheckpoints.length} / {checkpoints.length} Titik Tercapai</p>
                             </div>
                             <div className="w-full aspect-square bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
                                 <QrReader
                                     constraints={{ facingMode: 'environment' }}
                                     onResult={(result, error) => {
                                         if (result) {
-                                            const checkpoint = CHECKPOINTS.find(cp => cp.qrCode === result.getText());
+                                            const checkpoint = checkpoints.find(cp => cp.qrCode === result.getText());
                                             if (checkpoint) {
                                                 visitCheckpoint(activePatrol.id, checkpoint.id);
                                                 alert("Titik tercapai: " + checkpoint.name);
@@ -648,6 +698,33 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
                     ) : (
                         <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Nama Petugas</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                    <input 
+                                        type="text" 
+                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                                        placeholder="Masukkan nama Anda"
+                                        value={checkOfficer}
+                                        onChange={(e) => setCheckOfficer(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">PIN Keamanan</label>
+                                <div className="relative">
+                                    <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                    <input 
+                                        type="password" 
+                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                                        placeholder="Masukkan PIN Akses"
+                                        value={checkPin}
+                                        onChange={(e) => setCheckPin(e.target.value)}
+                                    />
+                                </div>
+                                <p className="text-[10px] text-slate-400 mt-1 font-medium">* Gunakan Kode Akses Rumah Anda sebagai PIN.</p>
+                            </div>
                             <button onClick={handleStartPatrol} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20">
                                 Mulai Patroli Baru
                             </button>

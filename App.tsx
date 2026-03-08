@@ -18,7 +18,7 @@ const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } =
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint } from './types';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -101,7 +101,9 @@ import { subscribeToMapPoints, subscribeToCollection,
   addNewsToDb,
   updateNewsInDb,
   deleteNewsFromDb,
-  deepSanitize
+  deepSanitize,
+  subscribeToPopulationLogs,
+  subscribeToActivePatrols
 } from './services/databaseService';
 
 // --- Shared Components ---
@@ -955,6 +957,7 @@ export const App = () => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [populationReports, setPopulationReports] = useState<PopulationReport[]>([]);
   const [populationLogs, setPopulationLogs] = useState<PopulationChangeLog[]>([]);
+  const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
   const [isAdmin, setIsAdmin] = useState(false);
@@ -973,13 +976,17 @@ export const App = () => {
     const unsubPolls = subscribeToCollection('polls', (data) => setPolls(data));
     const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
     const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
-    const unsubPopulationLogs = subscribeToCollection('populationLogs', (data) => setPopulationLogs(data));
+    const unsubPopulationLogs = subscribeToPopulationLogs((data) => setPopulationLogs(data));
     const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
     const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
     const unsubDocuments = subscribeToDocuments((data) => setDocuments(data));
     const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
     const unsubSwapRequests = subscribeToRondaSwapRequests((data) => setRondaSwapRequests(data));
     const unsubGallery = subscribeToGallery((data) => setGallery(data));
+    const unsubActivePatrol = subscribeToActivePatrols((data) => {
+        if (data.length > 0) setActivePatrol(data[0]);
+        else setActivePatrol(null);
+    });
     const unsubNotifs = subscribeToNotifications((data) => {
         setNotifications(data);
         const unread = data.filter(n => !n.isRead);
@@ -992,7 +999,7 @@ export const App = () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery();
+      unsubGallery(); unsubActivePatrol();
     };
   }, []);
 
@@ -1009,21 +1016,21 @@ export const App = () => {
         <Routes>
             <Route path="/admin" element={
                 <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={documents} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} mapPoints={mapPoints} />
+                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={documents} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} mapPoints={mapPoints} activePatrol={activePatrol} />
                 </AdminRouteWrapper>
             }/>
             <Route path="*" element={
                 <>
                     <PublicHeader notifications={notifications} onMarkRead={() => {}} />
                     <Routes>
-                        <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} gallery={gallery} />} />
+                        <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
                         <Route path="/voting" element={<PublicVoting polls={polls} />} />
                         <Route path="/market" element={<PublicMarket items={marketItems} />} />
                         <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
                         <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} />} />
                         <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
                         <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} />} />
-                        <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={MOCK_FAQ} />} />
+                        <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={MOCK_FAQ} activePatrol={activePatrol} />} />
                     </Routes>
                     <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
                     <PanicButton />

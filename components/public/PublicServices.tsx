@@ -3,12 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   FileText, AlertTriangle, History, Send, User, MapPin, 
   Calendar, Briefcase, Heart, Flag, Home, Lock, CheckCircle2, Clock, XCircle, Sparkles, Eye,
-  Camera, Star, MessageCircle, ExternalLink, Share2
+  Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
-import { addLetterToDb, addReportToDb, validateResidentAccess } from '../../services/databaseService';
+import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
 
@@ -22,7 +22,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const initialTab = searchParams.get('tab') === 'lapor' ? 'lapor' : 'surat';
   const initialHouseId = searchParams.get('houseId') || '';
   
-  const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'history'>(initialTab as any);
+  const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'mutasi' | 'history'>(initialTab as any);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [accessCode, setAccessCode] = useState('');
   
@@ -32,6 +32,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [reporterName, setReporterName] = useState('');
   const [reportHouseId, setReportHouseId] = useState(initialHouseId); 
   const [reporterHouseId, setReporterHouseId] = useState(''); 
+
+  // Mutasi States
+  const [mutationType, setMutationType] = useState<'Newcomer' | 'MovedOut' | 'Birth' | 'Death'>('Newcomer');
+  const [mutationName, setMutationName] = useState('');
+  const [mutationPhone, setMutationPhone] = useState('');
+  const [mutationDate, setMutationDate] = useState(new Date().toISOString().split('T')[0]);
+  const [mutationDesc, setMutationDesc] = useState('');
+  const [mutationHouseId, setMutationHouseId] = useState(initialHouseId);
 
   const [requestType, setRequestType] = useState<string>('Surat Izin Keramaian');
   const [customRequestType, setCustomRequestType] = useState('');
@@ -213,6 +221,52 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     setReportPhoto(null);
   };
 
+  const handleSubmitMutasi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Only validate PIN for existing residents (MovedOut, Birth, Death)
+    if (mutationType !== 'Newcomer') {
+      const isValid = await validateResidentAccess(mutationHouseId, accessCode);
+      if (!isValid) {
+        alert("Verifikasi Gagal! Kode Akses Rumah tidak valid.");
+        return;
+      }
+    }
+
+    const mutationData = {
+      id: Date.now().toString(),
+      type: mutationType,
+      name: mutationName,
+      phone: mutationPhone,
+      date: mutationDate,
+      description: mutationDesc,
+      houseId: mutationHouseId,
+      status: 'Pending'
+    };
+
+    await addPopulationLogToDb(mutationData);
+
+    // In a real app, we would add this to a database
+    saveToHistory({
+      ...mutationData, 
+      category: 'Mutasi', 
+      title: `${mutationType === 'Newcomer' ? 'Warga Baru' : mutationType === 'MovedOut' ? 'Warga Pindah' : mutationType === 'Birth' ? 'Kelahiran' : 'Kematian'}: ${mutationName}`
+    });
+    
+    setSubmittedItem({
+      ...mutationData,
+      category: 'Mutasi',
+      title: `Laporan Mutasi: ${mutationName}`
+    });
+    setShowSuccessModal(true);
+
+    // Reset form
+    setMutationName('');
+    setMutationPhone('');
+    setMutationDesc('');
+    setAccessCode('');
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
@@ -254,6 +308,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
           {[
             { id: 'surat', label: 'Buat Surat', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
             { id: 'lapor', label: 'Lapor Warga', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
+            { id: 'mutasi', label: 'Mutasi Warga', icon: UserPlus, color: 'text-emerald-600', bg: 'bg-emerald-50' },
             { id: 'history', label: 'Riwayat Saya', icon: History, color: 'text-amber-600', bg: 'bg-amber-50' }
           ].map(tab => (
             <button
@@ -701,6 +756,165 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               <div className="pt-12 border-t border-slate-100 flex justify-end">
                 <Button type="submit" variant="danger" size="lg" className="w-full md:w-auto px-12 py-5 rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-2xl shadow-rose-500/40 hover:shadow-rose-500/60 hover:-translate-y-1.5 transition-all duration-300">
                   <Send size={20} className="mr-2" /> Kirim Laporan Resmi
+                </Button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+
+        {activeTab === 'mutasi' && (
+          <motion.div 
+            key="mutasi"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-white p-8 md:p-16 rounded-[4rem] border border-slate-100 shadow-2xl shadow-emerald-100/30"
+          >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 pb-12 border-b border-slate-100">
+              <div className="flex items-center gap-6">
+                <div className="p-5 bg-emerald-600 text-white rounded-[2rem] shadow-lg shadow-emerald-200">
+                  <UserPlus size={40} strokeWidth={2} />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-black text-slate-900">Mutasi Warga</h2>
+                  <p className="text-slate-500 font-medium mt-1">Laporkan warga baru, pindah, kelahiran, atau kematian.</p>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmitMutasi} className="space-y-12">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <div className="space-y-8">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center text-xs font-black">01</div>
+                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Jenis Mutasi</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { id: 'Newcomer', label: 'Masuk', icon: UserPlus },
+                      { id: 'MovedOut', label: 'Pindah', icon: Share2 },
+                      { id: 'Birth', label: 'Lahir', icon: Heart },
+                      { id: 'Death', label: 'Wafat', icon: Flag }
+                    ].map(type => (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => setMutationType(type.id as any)}
+                        className={`
+                          p-5 rounded-3xl flex flex-col items-center gap-3 border transition-all duration-300
+                          ${mutationType === type.id 
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-xl shadow-emerald-200' 
+                            : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-emerald-300 hover:text-emerald-600'}
+                        `}
+                      >
+                        <type.icon size={24} />
+                        <span className="text-xs font-black uppercase tracking-widest">{type.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center text-xs font-black">02</div>
+                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Detail Informasi</h3>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Warga Terkait</label>
+                      <input 
+                        className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
+                        value={mutationName} 
+                        onChange={e=>setMutationName(e.target.value)} 
+                        required 
+                        placeholder="Nama lengkap warga"
+                      />
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">No. HP / WhatsApp</label>
+                      <input 
+                        className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
+                        value={mutationPhone} 
+                        onChange={e=>setMutationPhone(e.target.value)} 
+                        required 
+                        placeholder="08..."
+                      />
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tanggal Kejadian</label>
+                      <input 
+                        type="date"
+                        className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
+                        value={mutationDate} 
+                        onChange={e=>setMutationDate(e.target.value)} 
+                        required 
+                      />
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Keterangan Tambahan</label>
+                      <textarea 
+                        className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all min-h-[120px] resize-none" 
+                        value={mutationDesc} 
+                        onChange={e=>setMutationDesc(e.target.value)} 
+                        placeholder="Contoh: Pindah ke Jakarta, Lahir di RS, dsb."
+                      />
+                    </div>
+
+                    <div className="p-8 bg-emerald-50/50 border border-emerald-100 rounded-[2.5rem] space-y-6 mt-10">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-emerald-600 text-white rounded-2xl shadow-md">
+                          {mutationType === 'Newcomer' ? <Users size={20} /> : <Lock size={20} />}
+                        </div>
+                        <div>
+                          <h4 className="text-base font-black text-emerald-900">
+                            {mutationType === 'Newcomer' ? 'Verifikasi Warga Baru' : 'Verifikasi Pelapor'}
+                          </h4>
+                          <p className="text-xs text-emerald-700/70 font-medium">
+                            {mutationType === 'Newcomer' 
+                              ? 'Laporan akan diverifikasi manual oleh RT.' 
+                              : 'Gunakan PIN rumah Anda untuk melapor.'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-5">
+                        <div className="group">
+                          <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 ml-1">Blok Rumah</label>
+                          <input 
+                            className="w-full p-5 bg-white border border-emerald-100 rounded-2xl text-sm font-black focus:border-emerald-500 outline-none transition-all text-center uppercase shadow-sm" 
+                            placeholder="C7-02" 
+                            value={mutationHouseId} 
+                            onChange={e=>setMutationHouseId(e.target.value)} 
+                            required
+                          />
+                        </div>
+                        <div className="group">
+                          <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 ml-1">
+                            {mutationType === 'Newcomer' ? 'PIN (Opsional)' : 'PIN Akses'}
+                          </label>
+                          <input 
+                            type="password" 
+                            placeholder={mutationType === 'Newcomer' ? 'Kosongkan' : 'PIN'} 
+                            className={`w-full p-5 bg-white border border-emerald-100 rounded-2xl text-sm font-black focus:border-emerald-500 outline-none transition-all text-center shadow-sm ${mutationType === 'Newcomer' ? 'opacity-50' : ''}`} 
+                            value={accessCode} 
+                            onChange={e=>setAccessCode(e.target.value)} 
+                            required={mutationType !== 'Newcomer'}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-12 border-t border-slate-100 flex justify-end">
+                <Button type="submit" className="w-full md:w-auto px-12 py-5 rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-2xl shadow-emerald-500/40 hover:shadow-emerald-500/60 hover:-translate-y-1.5 transition-all duration-300 bg-emerald-600 hover:bg-emerald-700">
+                  <Send size={20} className="mr-2" /> Kirim Laporan Mutasi
                 </Button>
               </div>
             </form>

@@ -32,7 +32,7 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { MapPoint } from "../types";
+import { MapPoint, Checkpoint } from "../types";
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -54,6 +54,7 @@ const NEWS_COL = "news";
 const CHECKPOINTS_COL = "checkpoints";
 const MAP_POINTS_COL = "mapPoints";
 const DOCUMENTS_COL = "documents";
+const POPULATION_LOGS_COL = "populationLogs";
 
 // --- DOCUMENTS SERVICES ---
 export const subscribeToDocuments = (callback: (data: any[]) => void) => {
@@ -86,6 +87,41 @@ export const deleteDocumentFromDb = async (id: string) => {
         await deleteDoc(doc(db, DOCUMENTS_COL, id));
     } catch (e) {
         console.error("Error deleting document:", e);
+    }
+};
+
+// --- CHECKPOINTS SERVICES ---
+export const subscribeToCheckpoints = (callback: (data: Checkpoint[]) => void) => {
+    const q = query(collection(db, CHECKPOINTS_COL));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Checkpoint));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to checkpoints:", error);
+    });
+};
+
+export const addCheckpointToDb = async (checkpoint: Omit<Checkpoint, 'id'>) => {
+    try {
+        await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(checkpoint));
+    } catch (e) {
+        console.error("Error adding checkpoint:", e);
+    }
+};
+
+export const updateCheckpointInDb = async (id: string, data: Partial<Checkpoint>) => {
+    try {
+        await updateDoc(doc(db, CHECKPOINTS_COL, id), deepSanitize(data));
+    } catch (e) {
+        console.error("Error updating checkpoint:", e);
+    }
+};
+
+export const deleteCheckpointFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, CHECKPOINTS_COL, id));
+    } catch (e) {
+        console.error("Error deleting checkpoint:", e);
     }
 };
 
@@ -126,15 +162,6 @@ export const deleteMapPointFromDb = async (id: string) => {
 };
 
 // --- CHECKPOINTS SERVICES ---
-export const subscribeToCheckpoints = (callback: (data: any[]) => void) => {
-    const q = query(collection(db, CHECKPOINTS_COL));
-    return onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
-    }, (error) => {
-        console.error("Error subscribing to checkpoints:", error);
-    });
-};
 
 export const updateCheckpointPosition = async (id: string, x: number, y: number) => {
     try {
@@ -144,18 +171,6 @@ export const updateCheckpointPosition = async (id: string, x: number, y: number)
     }
 };
 
-export const addCheckpointToDb = async (checkpoint: any) => {
-    try {
-        const { id, ...data } = checkpoint;
-        if (id) {
-            await setDoc(doc(db, CHECKPOINTS_COL, id), deepSanitize(data));
-        } else {
-            await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(data));
-        }
-    } catch (e) {
-        console.error("Error adding checkpoint:", e);
-    }
-};
 
 // --- BILLS SERVICES ---
 export const addBillToDb = async (bill: any) => {
@@ -536,6 +551,29 @@ export const updateLetterStatus = async (id: string, status: string, letterNumbe
 
 export const deleteLetterFromDb = async (id: string) => {
   try { await deleteDoc(doc(db, LETTERS_COL, id)); } catch (e) { console.error("Error deleting letter:", e); }
+};
+
+// --- 6.5 MUTATIONS ---
+export const addPopulationLogToDb = async (log: any) => {
+  try {
+    const { id, ...data } = log;
+    await addDoc(collection(db, POPULATION_LOGS_COL), deepSanitize(data));
+  } catch (e) { console.error("Error adding population log:", e); }
+};
+
+export const subscribeToPopulationLogs = (callback: (data: any[]) => void) => {
+  const q = query(collection(db, POPULATION_LOGS_COL), orderBy("date", "desc"));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    callback(data);
+  }, (error) => {
+    console.error("Error subscribing to population logs:", error);
+    const qSimple = query(collection(db, POPULATION_LOGS_COL));
+    onSnapshot(qSimple, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      callback(data);
+    });
+  });
 };
 
 // --- 7. INVENTORY ---

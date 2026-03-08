@@ -2,10 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
-  Clock, Moon, Calendar, ChevronRight, ArrowRight 
+  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { House, Announcement, Report, Official, RondaSchedule, GalleryItem } from '../../types';
+import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession } from '../../types';
 import { HeroSection } from '../HeroSection';
 import { HouseMap } from '../HouseMap';
 import { Card } from '../ui/Card';
@@ -17,10 +17,11 @@ interface PublicHomeProps {
   reports: Report[];
   officials: Official[];
   gallery: GalleryItem[];
+  activePatrol: PatrolSession | null;
 }
 
 export const PublicHome: React.FC<PublicHomeProps> = ({ 
-  houses, announcements, ronda, reports, officials, gallery
+  houses, announcements, ronda, reports, officials, gallery, activePatrol
 }) => {
   const navigate = useNavigate();
   const dateObj = new Date();
@@ -181,6 +182,32 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-500/30 rounded-full blur-3xl"></div>
             
             <div className="relative z-10">
+              {activePatrol && (
+                <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Patroli Aktif</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      {new Date(activePatrol.startTime).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
+                      <ShieldCheck size={14} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-sm leading-tight">{activePatrol.officerName}</p>
+                      <p className="text-[10px] text-slate-400 font-medium">Sedang bertugas</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="mb-6 pb-6 border-b border-white/10 flex justify-between items-end">
                 <div>
                   <p className="text-4xl font-black text-emerald-400 leading-none mb-2">{today}</p>

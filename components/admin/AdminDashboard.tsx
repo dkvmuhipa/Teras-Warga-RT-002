@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, Bill, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint
+  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, Bill, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -25,7 +25,8 @@ import { AdvancedAnalytics } from './AdvancedAnalytics';
 import { NotificationCombined } from './NotificationCombined';
 import { MapManager } from './MapManager';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar } from 'lucide-react';
+import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck } from 'lucide-react';
+import { CHECKPOINTS } from '../../constants';
 
 interface AdminDashboardProps {
   houses: House[];
@@ -53,11 +54,12 @@ interface AdminDashboardProps {
   setPopulationLogs: (logs: PopulationChangeLog[]) => void;
   events: AppEvent[];
   mapPoints: MapPoint[];
+  activePatrol: PatrolSession | null;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints
+  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -83,7 +85,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'services':
         return <ServiceManager letters={letters} reports={reports} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       case 'facilities':
-        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} />;
+        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} />;
       case 'assets':
         return <AssetManager inventory={inventory} />;
       case 'events':
@@ -139,6 +141,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-3 md:gap-6">
+            {activePatrol && (
+              <div className="hidden lg:flex items-center gap-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-2">
+                <div className="relative">
+                  <ShieldCheck size={20} className="text-emerald-600" />
+                  <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Patroli Aktif</p>
+                  <p className="text-xs font-bold text-slate-700 leading-none">{activePatrol.officerName} • {Math.round((activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100)}%</p>
+                </div>
+              </div>
+            )}
+
             <div className="hidden sm:flex items-center gap-2 bg-slate-100/50 border border-slate-200/60 rounded-2xl px-4 py-2 text-slate-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
               <Search size={18} />
               <input type="text" placeholder="Cari data..." className="bg-transparent border-none outline-none text-sm font-medium w-40 lg:w-64" />

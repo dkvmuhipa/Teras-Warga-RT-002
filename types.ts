@@ -360,7 +360,7 @@ export interface Bill {
 
 export interface PopulationChangeLog {
   id: string;
-  type: 'Birth' | 'Newcomer' | 'MovedOut';
+  type: 'Birth' | 'Newcomer' | 'MovedOut' | 'Death';
   houseId: string;
   date: string; // ISO String
   description: string;
@@ -374,6 +374,7 @@ export interface PopulationReport {
   // Data Utama
   initialPopulation: number; // Penduduk Awal
   birthCount: number;        // Lahir
+  deathCount: number;        // Meninggal
   newcomerCount: number;     // Pendatang
   movedOutCount: number;     // Pindah
   
