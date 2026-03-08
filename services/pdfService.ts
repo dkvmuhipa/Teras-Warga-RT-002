@@ -186,6 +186,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const leftSignX = 50;
+  doc.setFontSize(11); // Perbaiki ukuran font
   doc.text("Pemohon", leftSignX, cursorY, { align: "center" });
 
   const rightSignX = 150;
@@ -203,7 +204,8 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
       if (config.stamp) {
           try {
              const stampImg = await getImageData(config.stamp);
-             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 28, signSpaceY - 5, 30, 30);
+             // Ukuran stempel diperkecil lagi (20x20) dan posisi disesuaikan
+             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 25, signSpaceY - 2, 20, 20);
           } catch(e) {}
       }
 
@@ -432,6 +434,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     if (signY + 30 > pageHeight) { doc.addPage(); }
 
     const signX = pageWidth - 60;
+    doc.setFontSize(11);
     doc.text(`Palu, ${dateString}`, signX, signY, { align: "center" });
     doc.text(`Ketua ${config.rtName}`, signX, signY + 6, { align: "center" });
 

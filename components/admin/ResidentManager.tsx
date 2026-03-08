@@ -91,12 +91,21 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     
                     const matchPadded = h.headOfFamily.toLowerCase() === `warga ${h.block}-${paddedNum}`.toLowerCase();
                     const matchUnpadded = h.headOfFamily.toLowerCase() === `warga ${h.block}-${unpaddedNum}`.toLowerCase();
+                    
+                    // Check for variations with spaces (e.g. "Warga C5 - 02")
+                    const matchWithSpaces = h.headOfFamily.toLowerCase().replace(/\s+/g, '') === `warga${h.block}-${paddedNum}`.toLowerCase();
+                    const matchWithSpacesUnpadded = h.headOfFamily.toLowerCase().replace(/\s+/g, '') === `warga${h.block}-${unpaddedNum}`.toLowerCase();
 
-                    return exactMatch || caseInsensitiveMatch || matchPadded || matchUnpadded;
+                    // Check for "Warga Blok [Block] No [Number]" pattern
+                    const matchVerbose = h.headOfFamily.toLowerCase() === `warga blok ${h.block} no ${paddedNum}`.toLowerCase() ||
+                                         h.headOfFamily.toLowerCase() === `warga blok ${h.block} no ${unpaddedNum}`.toLowerCase();
+
+                    return exactMatch || caseInsensitiveMatch || matchPadded || matchUnpadded || matchWithSpaces || matchWithSpacesUnpadded || matchVerbose;
                 })
                 .map(h => ({
                     id: h.id,
                     status: 'Empty',
+                    headOfFamily: `Rumah ${h.block}-${h.number}`, // Rename to generic "Rumah X-Y" instead of leaving it as "Warga X-Y"
                     phone: '',
                     occupants: 0,
                     familyMembers: [],
