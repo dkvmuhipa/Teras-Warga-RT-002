@@ -17,7 +17,7 @@ import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaCha
 const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } = ReactRouterDOM;
 
 // Components & Services
-import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS } from '@/constants';
+import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS } from '@/constants';
 import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
@@ -314,7 +314,7 @@ import {
       if (confirm("Reset sistem ke awal? Data akan hilang.")) {
           if (prompt("Ketik 'RESET'") === 'RESET') {
               try {
-                  const initialData = { houses: generateHouses(), announcements: MOCK_ANNOUNCEMENTS, cashFlow: MOCK_CASHFLOW, officials: INITIAL_OFFICIALS, reports: INITIAL_REPORTS, ronda: MOCK_RONDA, inventory: MOCK_INVENTORY, umkm: MOCK_UMKM, polls: MOCK_POLLS, rondaLogs: MOCK_RONDA_LOGS };
+                  const initialData = { houses: generateHouses(), announcements: MOCK_ANNOUNCEMENTS, cashFlow: MOCK_CASHFLOW, officials: INITIAL_OFFICIALS, reports: INITIAL_REPORTS, ronda: MOCK_RONDA, inventory: MOCK_INVENTORY, umkm: MOCK_UMKM, polls: MOCK_POLLS, rondaLogs: MOCK_RONDA_LOGS, checkpoints: CHECKPOINTS };
                   await seedDatabase(initialData);
                   alert("Reset berhasil."); window.location.reload();
               } catch (e) { alert("Gagal reset."); }

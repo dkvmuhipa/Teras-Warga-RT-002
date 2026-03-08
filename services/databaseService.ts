@@ -50,6 +50,39 @@ const PATROL_SESSIONS_COL = "patrolSessions";
 const MARKET_COL = "marketItems";
 const BILLS_COL = "bills";
 const NEWS_COL = "news";
+const CHECKPOINTS_COL = "checkpoints";
+
+// --- CHECKPOINTS SERVICES ---
+export const subscribeToCheckpoints = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, CHECKPOINTS_COL));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to checkpoints:", error);
+    });
+};
+
+export const updateCheckpointPosition = async (id: string, x: number, y: number) => {
+    try {
+        await setDoc(doc(db, CHECKPOINTS_COL, id), { x, y }, { merge: true });
+    } catch (e) {
+        console.error("Error updating checkpoint position:", e);
+    }
+};
+
+export const addCheckpointToDb = async (checkpoint: any) => {
+    try {
+        const { id, ...data } = checkpoint;
+        if (id) {
+            await setDoc(doc(db, CHECKPOINTS_COL, id), deepSanitize(data));
+        } else {
+            await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(data));
+        }
+    } catch (e) {
+        console.error("Error adding checkpoint:", e);
+    }
+};
 
 // --- BILLS SERVICES ---
 export const addBillToDb = async (bill: any) => {
@@ -803,6 +836,19 @@ export const seedDatabase = async (initialData?: any) => {
           for (const m of initialData.marketItems) {
               const { id, ...data } = m;
               await addDoc(collection(db, MARKET_COL), deepSanitize(data));
+          }
+      }
+
+      // Seed Checkpoints
+      const checkpointsSnap = await getDocs(collection(db, CHECKPOINTS_COL));
+      if (checkpointsSnap.empty && initialData.checkpoints && initialData.checkpoints.length > 0) {
+          for (const cp of initialData.checkpoints) {
+              const { id, ...data } = cp;
+              if (id) {
+                  await setDoc(doc(db, CHECKPOINTS_COL, id), deepSanitize(data));
+              } else {
+                  await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(data));
+              }
           }
       }
 

@@ -147,10 +147,10 @@ export const MOCK_RONDA: RondaSchedule[] = [
 ];
 
 export const CHECKPOINTS: Checkpoint[] = [
-    { id: 'cp1', name: 'Gerbang Utama', qrCode: 'GERBANG_UTAMA_RT002' },
-    { id: 'cp2', name: 'Pos Satpam', qrCode: 'POS_SATPAM_RT002' },
-    { id: 'cp3', name: 'Blok C5', qrCode: 'BLOK_C5_RT002' },
-    { id: 'cp4', name: 'Blok C10', qrCode: 'BLOK_C10_RT002' },
+    { id: 'cp1', name: 'Gerbang Utama', qrCode: 'GERBANG_UTAMA_RT002', x: 5, y: 50 },
+    { id: 'cp2', name: 'Pos Satpam', qrCode: 'POS_SATPAM_RT002', x: 10, y: 50 },
+    { id: 'cp3', name: 'Blok C5', qrCode: 'BLOK_C5_RT002', x: 25, y: 20 },
+    { id: 'cp4', name: 'Blok C10', qrCode: 'BLOK_C10_RT002', x: 75, y: 20 },
 ];
 
 export const MOCK_CASHFLOW: CashFlow[] = [

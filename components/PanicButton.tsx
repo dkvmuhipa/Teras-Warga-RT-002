@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 
-export default function PanicButton() {
+export function PanicButton() {
   const [alert, setAlert] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 

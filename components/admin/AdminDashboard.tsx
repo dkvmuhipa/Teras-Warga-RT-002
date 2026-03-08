@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, Bill, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest
+  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, Bill, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -23,6 +23,7 @@ import { EventManager } from './EventManager';
 import { AssetManager } from './AssetManager';
 import { AdvancedAnalytics } from './AdvancedAnalytics';
 import { NotificationCombined } from './NotificationCombined';
+import { MapManager } from './MapManager';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar } from 'lucide-react';
 
@@ -51,11 +52,12 @@ interface AdminDashboardProps {
   populationLogs: PopulationChangeLog[];
   setPopulationLogs: (logs: PopulationChangeLog[]) => void;
   events: AppEvent[];
+  mapPoints: MapPoint[];
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events
+  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -100,6 +102,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <BillManager bills={bills} houses={houses} />;
       case 'population-reports':
         return <PopulationReportManager reports={populationReports} onAddReport={(r) => setPopulationReports([...populationReports, { ...r, id: Date.now().toString(), createdAt: new Date().toISOString() }])} onDeleteReport={(id) => setPopulationReports(populationReports.filter(r => r.id !== id))} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} />;
+      case 'map':
+        return <MapManager mapPoints={mapPoints} />;
       case 'settings':
         return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       default:

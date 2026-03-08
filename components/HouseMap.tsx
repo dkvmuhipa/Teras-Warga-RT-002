@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { House, PaymentStatus, Report, Official } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2 } from 'lucide-react';
-import { CHECKPOINTS } from '../constants';
+import React, { useState, useEffect, useRef } from 'react';
+import { House, PaymentStatus, Report, Official, Checkpoint } from '../types';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save } from 'lucide-react';
+import { CHECKPOINTS as DEFAULT_CHECKPOINTS } from '../constants';
+import { subscribeToCheckpoints, updateCheckpointPosition } from '../services/databaseService';
 
 interface HouseMapProps {
   houses: House[];
@@ -276,12 +277,41 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
 
 export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], onEditHouse, onPayDues, onReportHouse }) => {
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>(DEFAULT_CHECKPOINTS);
+  const [showCheckpoints, setShowCheckpoints] = useState(false);
+  const [isManageMode, setIsManageMode] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsub = subscribeToCheckpoints((data) => {
+      if (data.length > 0) {
+        // Merge with default names/qrCodes if missing in DB
+        const merged = DEFAULT_CHECKPOINTS.map(def => {
+          const dbCp = data.find(d => d.id === def.id);
+          return dbCp ? { ...def, ...dbCp } : def;
+        });
+        setCheckpoints(merged);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const handleMapClick = async (e: React.MouseEvent) => {
+    if (!isManageMode || !draggingId || !mapRef.current) return;
+    
+    const rect = mapRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    await updateCheckpointPosition(draggingId, x, y);
+    setDraggingId(null);
+  };
+
   const totalHouses = houses.length;
   const totalOccupied = houses.filter(h => h.status === 'Occupied').length;
   const totalIssues = reports.filter(r => r.status !== 'Selesai').length;
   const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
-  
-  const [showCheckpoints, setShowCheckpoints] = useState(false);
   
   return (
     <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[750px]">
@@ -295,6 +325,11 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-2 whitespace-nowrap ${showCheckpoints ? 'text-indigo-600' : 'text-slate-500'}`}>
                    <ShieldCheck size={12}/> {showCheckpoints ? 'Sembunyikan' : 'Tampilkan'} Patroli
                </button>
+               {isAdmin && showCheckpoints && (
+                 <button onClick={() => setIsManageMode(!isManageMode)} className={`flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap ${isManageMode ? 'text-rose-600' : 'text-slate-500'}`}>
+                    {isManageMode ? <Save size={12}/> : <Settings2 size={12}/>} {isManageMode ? 'Selesai Atur' : 'Atur Titik'}
+                 </button>
+               )}
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Droplets size={12} className="text-blue-500"/> OP Air</div>
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Trash2 size={12} className="text-slate-500"/> Sampah</div>
             </div>
@@ -303,7 +338,11 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
       <div className="flex flex-1 overflow-hidden">
           <div className="flex-1 overflow-auto bg-slate-50 relative custom-scrollbar p-4 md:p-8 scroll-smooth">
                <div className="min-w-[900px] relative">
-                   <div className="border-[6px] border-dashed border-amber-400 bg-amber-50/50 p-6 rounded-3xl relative">
+                   <div 
+                    ref={mapRef}
+                    onClick={handleMapClick}
+                    className={`border-[6px] border-dashed border-amber-400 bg-amber-50/50 p-6 rounded-3xl relative ${isManageMode ? 'cursor-crosshair' : ''}`}
+                   >
                        <div className="grid grid-cols-4 gap-6">
                            <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C5" houses={getBlockHouses('C5')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
                            <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C7" houses={getBlockHouses('C7')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C8" houses={getBlockHouses('C8')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
@@ -312,9 +351,24 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                        </div>
                        
                        {/* Checkpoints Overlay */}
-                       {showCheckpoints && CHECKPOINTS.map((cp, i) => (
-                           <div key={cp.id} className="absolute z-30 flex items-center gap-2 bg-indigo-600 text-white px-3 py-1.5 rounded-full shadow-lg text-xs font-bold" style={{ top: `${10 + i * 15}%`, left: `${10 + i * 20}%` }}>
+                       {showCheckpoints && checkpoints.map((cp, i) => (
+                           <div 
+                            key={cp.id} 
+                            onClick={(e) => {
+                                if (isManageMode) {
+                                    e.stopPropagation();
+                                    setDraggingId(cp.id);
+                                }
+                            }}
+                            className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-xs font-bold transition-all ${draggingId === cp.id ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' : 'bg-indigo-600'} text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
+                            style={{ 
+                                top: cp.y !== undefined ? `${cp.y}%` : `${10 + i * 15}%`, 
+                                left: cp.x !== undefined ? `${cp.x}%` : `${10 + i * 20}%`,
+                                transform: 'translate(-50%, -50%)'
+                            }}
+                           >
                                <ShieldCheck size={14}/> {cp.name}
+                               {isManageMode && draggingId === cp.id && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
                            </div>
                        ))}
                    </div>

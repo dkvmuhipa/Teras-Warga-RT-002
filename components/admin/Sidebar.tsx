@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, DollarSign, FileText, 
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
-  ChevronLeft, ChevronRight, Search, Bell
+  ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -48,6 +48,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
         { id: 'bills', icon: DollarSign, label: 'Manajemen Iuran' },
         { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
+        { id: 'map', icon: MapIcon, label: 'Denah Digital' },
       ] 
     },
     { 

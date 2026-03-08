@@ -214,6 +214,8 @@ export interface Checkpoint {
   id: string;
   name: string;
   qrCode: string;
+  x?: number; // Position X in percentage (0-100)
+  y?: number; // Position Y in percentage (0-100)
 }
 
 export interface PatrolSession {

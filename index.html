@@ -6,80 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TERAS RT 002 - Teknologi | Ekraf | Rukun | Aman | Sinergi</title>
     <meta name="description" content="Sistem Informasi Digital TERAS RT 002. Mengusung semangat Teknologi, Ekraf, Rukun, Aman, dan Sinergi untuk warga RT 002 RW 020.">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       // Polyfill for process.env in browser environment (Safe fallback)
       window.process = window.process || { env: {} };
     </script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              brand: {
-                blue: '#0EA5E9',
-                green: '#10B981',
-                dark: '#0F172A',
-                light: '#F8FAFC'
-              }
-            },
-            animation: {
-              'fade-in': 'fadeIn 0.5s ease-out',
-              'slide-up': 'slideUp 0.5s ease-out',
-              'slide-in-right': 'slideInRight 0.3s ease-out',
-              'bounce-slow': 'bounce 3s infinite',
-              'spin-slow': 'spin 3s linear infinite',
-            },
-            keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              slideUp: {
-                '0%': { transform: 'translateY(20px)', opacity: '0' },
-                '100%': { transform: 'translateY(0)', opacity: '1' },
-              },
-              slideInRight: {
-                '0%': { transform: 'translateX(100%)', opacity: '0' },
-                '100%': { transform: 'translateX(0)', opacity: '1' },
-              }
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      body { background-color: #F8FAFC; }
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: #f1f1f1; }
-      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-      
-      /* Safe area for mobile bottom nav */
-      .safe-area-pb {
-        padding-bottom: env(safe-area-inset-bottom);
-      }
-
-      /* Hide scrollbar for Chrome, Safari and Opera */
-      .no-scrollbar::-webkit-scrollbar {
-          display: none;
-      }
-      /* Hide scrollbar for IE, Edge and Firefox */
-      .no-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-      }
-      
-      .mask-gradient-right {
-        mask-image: linear-gradient(to right, black 80%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
-      }
-    </style>
 <script type="importmap">
 {
   "imports": {
