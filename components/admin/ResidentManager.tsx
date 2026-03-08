@@ -71,8 +71,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     if (window.confirm('Apakah Anda yakin ingin meng-generate PIN untuk semua warga yang belum memiliki PIN?')) {
         setIsGenerating(true);
         try {
-            await generateAllAccessCodes(houses);
-            alert('PIN berhasil di-generate untuk warga yang belum memiliki PIN.');
+            const count = await generateAllAccessCodes(houses);
+            if (count > 0) {
+              alert(`PIN berhasil di-generate untuk ${count} warga yang belum memiliki PIN.`);
+            } else {
+              alert('Semua data warga sudah memiliki PIN. Tidak ada PIN baru yang di-generate.');
+            }
         } catch (e) {
             console.error(e);
             alert('Gagal meng-generate PIN.');

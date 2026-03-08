@@ -360,6 +360,7 @@ export const generateAllAccessCodes = async (houses: any[]) => {
     const MAX_BATCH_SIZE = 400; 
     let batch = writeBatch(db);
     let operationCount = 0;
+    let generatedCount = 0;
 
     const commitBatch = async () => {
         await batch.commit();
@@ -376,14 +377,15 @@ export const generateAllAccessCodes = async (houses: any[]) => {
        batch.update(ref, { accessCode: newCode });
        
        operationCount++;
+       generatedCount++;
        if (operationCount >= MAX_BATCH_SIZE) await commitBatch();
     }
 
     if (operationCount > 0) {
       await batch.commit();
     }
-    console.log("Generate PIN massal selesai.");
-    return true;
+    console.log(`Generate PIN massal selesai. ${generatedCount} PIN dibuat.`);
+    return generatedCount;
   } catch (e) {
     console.error("Gagal melakukan generate PIN massal:", e);
     throw e;
