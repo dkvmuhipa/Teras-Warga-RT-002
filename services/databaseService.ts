@@ -341,14 +341,24 @@ export const formatHouseId = (houseId: string): string => {
     let formattedHouseId = houseId.toUpperCase().replace(/\s+/g, '');
     
     if (!formattedHouseId.includes('-')) {
-        const match = formattedHouseId.match(/([A-Z]+)(\d+)/);
+        const match = formattedHouseId.match(/^([A-Z]+\d+?)(\d{1,2})$/);
         if (match) {
             formattedHouseId = `${match[1]}-${match[2]}`;
+        } else {
+            const match2 = formattedHouseId.match(/^([A-Z]+)(\d+)$/);
+            if (match2) {
+                formattedHouseId = `${match2[1]}-${match2[2]}`;
+            } else {
+                const match3 = formattedHouseId.match(/^([A-Z]+\d+?)(\d{1,2})([A-Z]+)$/);
+                if (match3) {
+                    formattedHouseId = `${match3[1]}-${match3[2]}`;
+                }
+            }
         }
     }
 
     const parts = formattedHouseId.split('-');
-    if (parts.length === 2) {
+    if (parts.length >= 2) {
         const block = parts[0];
         let num = parts[1];
         if (num.length === 1) {
@@ -363,14 +373,21 @@ export const formatHouseId = (houseId: string): string => {
 export const validateResidentAccess = async (houseId: string, code: string): Promise<boolean> => {
     try {
         const formattedHouseId = formatHouseId(houseId);
+        console.log(`Validating access for houseId: ${houseId} -> formatted: ${formattedHouseId}`);
+        console.log(`Input code: ${code}`);
 
         const docRef = doc(db, HOUSES_COL, formattedHouseId);
         const snapshot = await getDoc(docRef);
         if (snapshot.exists()) {
             const data = snapshot.data();
+            console.log(`Found house data:`, data);
             // Simple validation: check if code matches
             // In production, bcrypt hash would be better, but plain text for MVP is fine per spec
-            return data.accessCode && data.accessCode.toUpperCase().replace(/\s+/g, '') === code.toUpperCase().replace(/\s+/g, '');
+            const isValid = data.accessCode && data.accessCode.toUpperCase().replace(/[\s-]+/g, '') === code.toUpperCase().replace(/[\s-]+/g, '');
+            console.log(`Validation result: ${isValid}`);
+            return isValid;
+        } else {
+            console.log(`House document not found for ${formattedHouseId}`);
         }
         return false;
     } catch (e) {
