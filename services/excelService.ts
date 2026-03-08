@@ -206,27 +206,28 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     // If block is empty or looks like an instruction row, skip
     if (!block || !number || block.startsWith('PETUNJUK') || block.match(/^\d+\./)) return;
 
-    const ownerName = row.getCell(4 + offset).text;
-    const phone = row.getCell(5 + offset).text;
-    const statusRaw = row.getCell(6 + offset).text;
-    const residenceTypeRaw = row.getCell(7 + offset).text;
+    const ownerName = row.getCell(4 + offset).text?.trim() || undefined;
+    const phone = row.getCell(5 + offset).text?.trim() || undefined;
+    const statusRaw = row.getCell(6 + offset).text?.trim() || undefined;
+    const residenceTypeRaw = row.getCell(7 + offset).text?.trim() || undefined;
     const occupantsRaw = row.getCell(8 + offset).value;
-    const education = row.getCell(9 + offset).text;
-    const jobCategory = row.getCell(10 + offset).text;
+    const education = row.getCell(9 + offset).text?.trim() || undefined;
+    const jobCategory = row.getCell(10 + offset).text?.trim() || undefined;
     const vehicleCountRaw = row.getCell(11 + offset).value;
     const pregnantCountRaw = row.getCell(12 + offset).value;
     const toddlerCountRaw = row.getCell(13 + offset).value;
     const elderlyCountRaw = row.getCell(14 + offset).value;
-    const paymentStatusRaw = row.getCell(15 + offset).text;
-    const accessCode = row.getCell(16 + offset).text;
+    const paymentStatusRaw = row.getCell(15 + offset).text?.trim() || undefined;
+    const accessCode = row.getCell(16 + offset).text?.trim() || undefined;
 
     // Map status
-    let status: 'Occupied' | 'Empty' | 'Business' = 'Occupied';
+    let status: 'Occupied' | 'Empty' | 'Business' | undefined = undefined;
     if (statusRaw?.toLowerCase() === 'empty' || statusRaw?.toLowerCase() === 'kosong') status = 'Empty';
     else if (statusRaw?.toLowerCase() === 'business' || statusRaw?.toLowerCase() === 'usaha') status = 'Business';
+    else if (statusRaw?.toLowerCase() === 'occupied' || statusRaw?.toLowerCase() === 'dihuni') status = 'Occupied';
 
     // Map payment status
-    let paymentStatus = PaymentStatus.UNPAID;
+    let paymentStatus: PaymentStatus | undefined = undefined;
     if (paymentStatusRaw?.toLowerCase() === 'lunas' || paymentStatusRaw?.toLowerCase() === 'paid') paymentStatus = PaymentStatus.PAID;
     else if (paymentStatusRaw?.toLowerCase() === 'belum lunas' || paymentStatusRaw?.toLowerCase() === 'pending') paymentStatus = PaymentStatus.PENDING;
 
@@ -240,20 +241,19 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       block,
       number,
       headOfFamily,
-      ownerName,
-      phone,
-      status,
-      occupants: Number(occupantsRaw) || 1,
-      residenceType,
-      education,
-      jobCategory,
-      vehicleCount: Number(vehicleCountRaw) || 0,
-      pregnantCount: Number(pregnantCountRaw) || 0,
-      toddlerCount: Number(toddlerCountRaw) || 0,
-      elderlyCount: Number(elderlyCountRaw) || 0,
-      paymentStatus,
-      accessCode,
-      familyMembers: []
+      ...(ownerName !== undefined && { ownerName }),
+      ...(phone !== undefined && { phone }),
+      ...(status !== undefined && { status }),
+      ...(occupantsRaw !== null && occupantsRaw !== undefined && occupantsRaw !== '' && { occupants: Number(occupantsRaw) }),
+      ...(residenceType !== undefined && { residenceType }),
+      ...(education !== undefined && { education }),
+      ...(jobCategory !== undefined && { jobCategory }),
+      ...(vehicleCountRaw !== null && vehicleCountRaw !== undefined && vehicleCountRaw !== '' && { vehicleCount: Number(vehicleCountRaw) }),
+      ...(pregnantCountRaw !== null && pregnantCountRaw !== undefined && pregnantCountRaw !== '' && { pregnantCount: Number(pregnantCountRaw) }),
+      ...(toddlerCountRaw !== null && toddlerCountRaw !== undefined && toddlerCountRaw !== '' && { toddlerCount: Number(toddlerCountRaw) }),
+      ...(elderlyCountRaw !== null && elderlyCountRaw !== undefined && elderlyCountRaw !== '' && { elderlyCount: Number(elderlyCountRaw) }),
+      ...(paymentStatus !== undefined && { paymentStatus }),
+      ...(accessCode !== undefined && { accessCode })
     });
   });
 

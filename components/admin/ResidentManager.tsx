@@ -175,12 +175,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
             if (existingHouse) {
               // Update existing house
-              await updateHouseData(existingHouse.id, {
-                ...houseData,
-                headOfFamily: houseData.headOfFamily && houseData.headOfFamily !== '-' ? houseData.headOfFamily : existingHouse.headOfFamily,
-                status: houseData.status || existingHouse.status || 'Occupied',
-                paymentStatus: houseData.paymentStatus || existingHouse.paymentStatus || PaymentStatus.UNPAID
-              });
+              const updates: any = { ...houseData };
+              
+              // Don't overwrite headOfFamily if it's empty in Excel
+              if (!houseData.headOfFamily || houseData.headOfFamily === '-') {
+                delete updates.headOfFamily;
+              }
+
+              // Ensure status and paymentStatus are not undefined if they were missing in Excel
+              // but we don't need to set them if we are just updating existing data
+              
+              await updateHouseData(existingHouse.id, updates);
               updatedCount++;
             } else {
               // Add new house
@@ -190,7 +195,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 location: { x: 0, y: 0 },
                 familyMembers: [],
                 paymentStatus: houseData.paymentStatus || PaymentStatus.UNPAID,
-                status: houseData.status || 'Occupied'
+                status: houseData.status || 'Occupied',
+                occupants: houseData.occupants || 1,
+                vehicleCount: houseData.vehicleCount || 0,
+                pregnantCount: houseData.pregnantCount || 0,
+                toddlerCount: houseData.toddlerCount || 0,
+                elderlyCount: houseData.elderlyCount || 0
               } as any);
               addedCount++;
             }
@@ -947,7 +957,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1.5 text-slate-700">PIN Akses (Access Code)</label>
-                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.accessCode} onChange={e => setFormData({...formData, accessCode: e.target.value})} placeholder="Masukkan PIN..." />
+                <div className="flex gap-2">
+                  <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.accessCode} onChange={e => setFormData({...formData, accessCode: e.target.value})} placeholder="Masukkan PIN..." />
+                  <button 
+                    type="button"
+                    onClick={() => setFormData({...formData, accessCode: Math.floor(1000 + Math.random() * 9000).toString()})}
+                    className="px-4 py-3 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-100 font-bold text-sm transition-all shadow-sm whitespace-nowrap"
+                    title="Generate PIN Acak"
+                  >
+                    Generate
+                  </button>
+                </div>
               </div>
             </div>
           </div>
