@@ -186,30 +186,39 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
 
   if (!worksheet) return [];
 
+  let isOldFormat = false;
+
   worksheet.eachRow((row, rowNumber) => {
-    // Skip header and instruction rows
-    if (rowNumber === 1 || rowNumber > worksheet.rowCount - 5) return;
+    // Skip header row and detect format
+    if (rowNumber === 1) {
+      if (row.getCell(1).text?.toString().trim().toUpperCase() === 'NO') {
+        isOldFormat = true;
+      }
+      return;
+    }
     
     // Check if it's the example row or empty
-    const block = row.getCell(1).text;
-    const number = row.getCell(2).text;
-    const headOfFamily = row.getCell(3).text;
+    const offset = isOldFormat ? 1 : 0;
+    const block = row.getCell(1 + offset).text?.toString().trim();
+    const number = row.getCell(2 + offset).text?.toString().trim();
+    const headOfFamily = row.getCell(3 + offset).text?.toString().trim();
 
-    if (!block || !number || !headOfFamily) return;
+    // If block is empty or looks like an instruction row, skip
+    if (!block || !number || !headOfFamily || block.startsWith('PETUNJUK') || block.match(/^\d+\./)) return;
 
-    const ownerName = row.getCell(4).text;
-    const phone = row.getCell(5).text;
-    const statusRaw = row.getCell(6).text;
-    const residenceTypeRaw = row.getCell(7).text;
-    const occupantsRaw = row.getCell(8).value;
-    const education = row.getCell(9).text;
-    const jobCategory = row.getCell(10).text;
-    const vehicleCountRaw = row.getCell(11).value;
-    const pregnantCountRaw = row.getCell(12).value;
-    const toddlerCountRaw = row.getCell(13).value;
-    const elderlyCountRaw = row.getCell(14).value;
-    const paymentStatusRaw = row.getCell(15).text;
-    const accessCode = row.getCell(16).text;
+    const ownerName = row.getCell(4 + offset).text;
+    const phone = row.getCell(5 + offset).text;
+    const statusRaw = row.getCell(6 + offset).text;
+    const residenceTypeRaw = row.getCell(7 + offset).text;
+    const occupantsRaw = row.getCell(8 + offset).value;
+    const education = row.getCell(9 + offset).text;
+    const jobCategory = row.getCell(10 + offset).text;
+    const vehicleCountRaw = row.getCell(11 + offset).value;
+    const pregnantCountRaw = row.getCell(12 + offset).value;
+    const toddlerCountRaw = row.getCell(13 + offset).value;
+    const elderlyCountRaw = row.getCell(14 + offset).value;
+    const paymentStatusRaw = row.getCell(15 + offset).text;
+    const accessCode = row.getCell(16 + offset).text;
 
     // Map status
     let status: 'Occupied' | 'Empty' | 'Business' = 'Occupied';
