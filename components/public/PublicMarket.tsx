@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ShoppingCart, Search, Plus, Lock, MessageCircle, Tag, User, Phone, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MarketItem } from '../../types';
-import { addMarketItem, validateResidentAccess } from '../../services/databaseService';
+import { addMarketItem, validateResidentAccess, formatHouseId } from '../../services/databaseService';
 import { SmartImage } from '../SmartImage';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -43,6 +43,8 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
       return;
     }
 
+    const formattedPostHouseId = formatHouseId(postHouseId);
+
     const newItem: any = {
       title: postTitle,
       description: postDesc,
@@ -53,7 +55,7 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
       image: postImage,
       date: new Date().toISOString(),
       status: 'Available',
-      houseId: postHouseId
+      houseId: formattedPostHouseId
     };
 
     await addMarketItem(newItem);

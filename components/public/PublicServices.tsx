@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
-import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess } from '../../services/databaseService';
+import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
 
@@ -153,6 +153,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     }
 
     const finalRequestType = requestType === 'Lainnya' ? customRequestType : requestType;
+    const formattedHouseId = formatHouseId(houseId);
 
     const letterData: LetterRequest = { 
       id: Date.now().toString(), 
@@ -168,7 +169,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       maritalStatus, 
       nationality, 
       addressKtp, 
-      houseId, 
+      houseId: formattedHouseId, 
       purposeDetail, 
       phone,
       email,
@@ -200,13 +201,16 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       return;
     }
 
+    const formattedReporterHouseId = formatHouseId(reporterHouseId);
+    const formattedReportHouseId = reportHouseId ? formatHouseId(reportHouseId) : '';
+
     const reportData: Report = { 
       id: Date.now().toString(), 
       type: reportType, 
       description: reportDesc, 
       reporterName, 
-      houseId: reportHouseId, 
-      reporterHouseId, 
+      houseId: formattedReportHouseId, 
+      reporterHouseId: formattedReporterHouseId, 
       status: 'Baru', 
       date: new Date().toISOString(),
       photoUrl: reportPhoto || undefined
@@ -236,6 +240,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       }
     }
 
+    const formattedMutationHouseId = formatHouseId(mutationHouseId);
+
     const mutationData = {
       id: Date.now().toString(),
       type: mutationType,
@@ -243,7 +249,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       phone: mutationPhone,
       date: mutationDate,
       description: mutationDesc,
-      houseId: mutationHouseId,
+      houseId: formattedMutationHouseId,
       status: 'Pending'
     };
 

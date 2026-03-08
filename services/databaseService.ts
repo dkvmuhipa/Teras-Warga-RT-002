@@ -337,15 +337,40 @@ export const deleteHouseFromDb = async (id: string) => {
   try { await deleteDoc(doc(db, HOUSES_COL, id)); } catch (e) { console.error("Error deleting house:", e); }
 };
 
+export const formatHouseId = (houseId: string): string => {
+    let formattedHouseId = houseId.toUpperCase().replace(/\s+/g, '');
+    
+    if (!formattedHouseId.includes('-')) {
+        const match = formattedHouseId.match(/([A-Z]+)(\d+)/);
+        if (match) {
+            formattedHouseId = `${match[1]}-${match[2]}`;
+        }
+    }
+
+    const parts = formattedHouseId.split('-');
+    if (parts.length === 2) {
+        const block = parts[0];
+        let num = parts[1];
+        if (num.length === 1) {
+            num = `0${num}`;
+        }
+        formattedHouseId = `${block}-${num}`;
+    }
+    
+    return formattedHouseId;
+};
+
 export const validateResidentAccess = async (houseId: string, code: string): Promise<boolean> => {
     try {
-        const docRef = doc(db, HOUSES_COL, houseId);
+        const formattedHouseId = formatHouseId(houseId);
+
+        const docRef = doc(db, HOUSES_COL, formattedHouseId);
         const snapshot = await getDoc(docRef);
         if (snapshot.exists()) {
             const data = snapshot.data();
             // Simple validation: check if code matches
             // In production, bcrypt hash would be better, but plain text for MVP is fine per spec
-            return data.accessCode && data.accessCode.toUpperCase() === code.toUpperCase();
+            return data.accessCode && data.accessCode.toUpperCase().replace(/\s+/g, '') === code.toUpperCase().replace(/\s+/g, '');
         }
         return false;
     } catch (e) {
