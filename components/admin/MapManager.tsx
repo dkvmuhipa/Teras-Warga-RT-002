@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { MapPin, Plus, Trash2, Save, Move, Info, Shield, Home } from 'lucide-react';
-import { MapPoint } from '../../types';
+import { MapPoint, House } from '../../types';
 import { addMapPointToDb, updateMapPointInDb, deleteMapPointFromDb } from '../../services/databaseService';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 
 interface MapManagerProps {
   mapPoints: MapPoint[];
+  houses: House[];
 }
 
-export const MapManager: React.FC<MapManagerProps> = ({ mapPoints }) => {
+export const MapManager: React.FC<MapManagerProps> = ({ mapPoints, houses }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<MapPoint>>({
@@ -153,7 +154,7 @@ export const MapManager: React.FC<MapManagerProps> = ({ mapPoints }) => {
                 <div className="space-y-4">
                   <label className="block text-xs font-bold text-slate-500 uppercase">Posisi pada Denah (Klik pada area di bawah)</label>
                   <div 
-                    className="relative aspect-[16/9] bg-slate-200 rounded-2xl overflow-hidden cursor-crosshair border-2 border-slate-300"
+                    className="relative aspect-[16/9] bg-slate-100 rounded-2xl overflow-hidden cursor-crosshair border-2 border-slate-300 shadow-inner"
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
@@ -161,8 +162,29 @@ export const MapManager: React.FC<MapManagerProps> = ({ mapPoints }) => {
                       setFormData({ ...formData, x, y });
                     }}
                   >
-                    <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-                      <p className="text-slate-800 font-black text-4xl uppercase tracking-widest">Preview Denah</p>
+                    {/* Simplified Map Background for Context */}
+                    <div className="absolute inset-0 p-4 opacity-30 pointer-events-none">
+                      <div className="grid grid-cols-4 gap-2 h-full">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex-1 bg-slate-300 rounded border border-slate-400 flex items-center justify-center text-[10px] font-black">C5</div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex-1 bg-slate-300 rounded border border-slate-400 flex items-center justify-center text-[10px] font-black">C7</div>
+                          <div className="flex-1 bg-slate-300 rounded border border-slate-400 flex items-center justify-center text-[10px] font-black">C8</div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex-1 bg-slate-300 rounded border border-slate-400 flex items-center justify-center text-[10px] font-black">C9</div>
+                          <div className="flex-1 bg-slate-300 rounded border border-slate-400 flex items-center justify-center text-[10px] font-black">C10</div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex-1 bg-slate-300 rounded border border-slate-400 flex items-center justify-center text-[10px] font-black">C11</div>
+                          <div className="flex-1 bg-slate-300 rounded border border-slate-400 flex items-center justify-center text-[10px] font-black">C12</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+                      <p className="text-slate-800 font-black text-2xl uppercase tracking-widest">Klik untuk Atur Posisi</p>
                     </div>
                     
                     {/* Current Point Preview */}
