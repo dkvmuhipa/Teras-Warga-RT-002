@@ -52,7 +52,7 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
   };
 
   const handleResetSystem = async () => {
-    if (confirm("PERINGATAN: Tindakan ini akan MENGHAPUS SEMUA DATA REAL dan me-reset sistem ke data dummy awal. Apakah Anda yakin?")) {
+    if (window.confirm("PERINGATAN: Tindakan ini akan MENGHAPUS SEMUA DATA REAL dan me-reset sistem ke data dummy awal. Apakah Anda yakin?")) {
         const confirmation = prompt("Ketik 'RESET' untuk konfirmasi penghapusan data:");
         if (confirmation === 'RESET') {
             try {

@@ -80,7 +80,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow }) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Hapus transaksi ini?')) await deleteTransactionFromDb(id);
+    if (window.confirm('Hapus transaksi ini?')) await deleteTransactionFromDb(id);
   };
 
   const openEdit = (cf: CashFlow) => {

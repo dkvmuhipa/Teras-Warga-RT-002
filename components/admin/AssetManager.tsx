@@ -46,7 +46,9 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory }) => {
   };
 
   const handleDeleteInventory = async (id: string) => {
-    if (confirm('Hapus barang inventaris ini?')) await deleteInventoryFromDb(id);
+    if (window.confirm('Hapus barang inventaris ini?')) {
+      await deleteInventoryFromDb(id);
+    }
   };
 
   return (

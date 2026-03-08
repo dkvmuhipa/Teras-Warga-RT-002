@@ -95,7 +95,16 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 <td className="p-4 text-right text-amber-600">-{r.movedOutCount}</td>
                 <td className="p-4 text-right font-black">{r.initialPopulation + r.birthCount + r.newcomerCount - r.movedOutCount - (r.deathCount || 0)}</td>
                 <td className="p-4 text-center">
-                  <button onClick={() => onDeleteReport(r.id)} className="text-rose-500 hover:text-rose-700"><Trash2 size={16} /></button>
+                  <button 
+                    onClick={() => {
+                      if (window.confirm("Apakah Anda yakin ingin menghapus laporan ini?")) {
+                        onDeleteReport(r.id);
+                      }
+                    }} 
+                    className="text-rose-500 hover:text-rose-700"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </td>
               </tr>
             ))}

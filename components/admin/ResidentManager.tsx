@@ -60,7 +60,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   });
 
   const handleGenerateAllPins = async () => {
-    if (confirm('Apakah Anda yakin ingin meng-generate PIN untuk semua warga yang belum memiliki PIN?')) {
+    if (window.confirm('Apakah Anda yakin ingin meng-generate PIN untuk semua warga yang belum memiliki PIN?')) {
         setIsGenerating(true);
         try {
             await generateAllAccessCodes(houses);
@@ -68,6 +68,51 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         } catch (e) {
             console.error(e);
             alert('Gagal meng-generate PIN.');
+        } finally {
+            setIsGenerating(false);
+        }
+    }
+  };
+
+  const handleCleanupPlaceholders = async () => {
+    if (window.confirm('Aksi ini akan mengubah status semua data dengan nama default "Warga [Blok]-[Nomor]" menjadi "Kosong" (Empty) dan mengosongkan detail data mereka. Lanjutkan?')) {
+        setIsGenerating(true);
+        try {
+            const updates = houses
+                .filter(h => {
+                    // Check for exact match or case-insensitive match
+                    const exactMatch = h.headOfFamily === `Warga ${h.block}-${h.number}`;
+                    const caseInsensitiveMatch = h.headOfFamily.toLowerCase() === `warga ${h.block}-${h.number}`.toLowerCase();
+                    
+                    // Check for leading zero variations (e.g. "02" vs "2")
+                    const num = parseInt(h.number);
+                    const paddedNum = num < 10 ? `0${num}` : `${num}`;
+                    const unpaddedNum = `${num}`;
+                    
+                    const matchPadded = h.headOfFamily.toLowerCase() === `warga ${h.block}-${paddedNum}`.toLowerCase();
+                    const matchUnpadded = h.headOfFamily.toLowerCase() === `warga ${h.block}-${unpaddedNum}`.toLowerCase();
+
+                    return exactMatch || caseInsensitiveMatch || matchPadded || matchUnpadded;
+                })
+                .map(h => ({
+                    id: h.id,
+                    status: 'Empty',
+                    phone: '',
+                    occupants: 0,
+                    familyMembers: [],
+                    paymentStatus: PaymentStatus.UNPAID
+                }));
+
+            if (updates.length === 0) {
+                alert('Tidak ada data warga default yang ditemukan.');
+                return;
+            }
+
+            await batchUpdateHouses(updates);
+            alert(`Berhasil mereset ${updates.length} data rumah menjadi status Kosong.`);
+        } catch (e) {
+            console.error(e);
+            alert('Gagal melakukan cleanup data.');
         } finally {
             setIsGenerating(false);
         }
@@ -82,7 +127,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (confirm('Apakah Anda yakin ingin mengupload data ini? Data yang ada mungkin akan ditimpa jika ID sama (namun fitur ini hanya menambah data baru saat ini).')) {
+    if (window.confirm('Apakah Anda yakin ingin mengupload data ini? Data yang ada mungkin akan ditimpa jika ID sama (namun fitur ini hanya menambah data baru saat ini).')) {
       setIsUploading(true);
       try {
         const parsedData = await parseExcelFile(file);
@@ -129,7 +174,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const handleBulkVerify = async () => {
     if (selectedIds.size === 0) return;
-    if (confirm(`Apakah Anda yakin ingin memverifikasi ${selectedIds.size} warga terpilih?`)) {
+    if (window.confirm(`Apakah Anda yakin ingin memverifikasi ${selectedIds.size} warga terpilih?`)) {
         try {
             const updates = Array.from(selectedIds).map(id => ({ id, data: { isVerified: true } }));
             await batchUpdateHouses(updates);
@@ -215,9 +260,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     let matchesStatus = true;
     if (filterStatus === 'paid') matchesStatus = paymentStatus === PaymentStatus.PAID;
     else if (filterStatus === 'unpaid') matchesStatus = paymentStatus === PaymentStatus.PENDING;
-    else if (filterStatus === 'occupied') matchesStatus = h.status === 'Occupied';
-    else if (filterStatus === 'empty') matchesStatus = h.status === 'Empty';
-    else if (filterStatus === 'business') matchesStatus = h.status === 'Business';
+    else if (filterStatus === 'occupied') matchesStatus = h.status?.toLowerCase() === 'occupied';
+    else if (filterStatus === 'empty') matchesStatus = h.status?.toLowerCase() === 'empty';
+    else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business';
 
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
@@ -247,7 +292,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Apakah Anda yakin ingin menghapus data warga ini?')) {
+    if (window.confirm('Apakah Anda yakin ingin menghapus data warga ini?')) {
       await deleteHouseFromDb(id);
       if (selectedResident?.id === id) {
         setIsDrawerOpen(false);
@@ -307,6 +352,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             disabled={isGenerating}
           >
             {isGenerating ? 'Sedang Generate...' : 'Generate PIN Massal'}
+          </button>
+          <button 
+            onClick={handleCleanupPlaceholders}
+            className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl hover:bg-rose-100 font-bold text-sm transition-all shadow-sm"
+            disabled={isGenerating}
+          >
+            <Trash2 size={18} /> Reset Warga Default
           </button>
           <button 
             onClick={() => generateProfessionalExcel(houses)}
@@ -463,10 +515,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
-              <option value="All">Semua Status</option>
-              <option value="Occupied">Dihuni</option>
-              <option value="Empty">Kosong</option>
-              <option value="Business">Usaha</option>
+              <option value="all">Semua Status</option>
+              <option value="paid">Lunas</option>
+              <option value="unpaid">Belum Lunas</option>
+              <option value="occupied">Dihuni</option>
+              <option value="empty">Kosong</option>
+              <option value="business">Usaha</option>
             </select>
           </div>
         </div>

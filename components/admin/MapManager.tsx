@@ -35,7 +35,7 @@ export const MapManager: React.FC<MapManagerProps> = ({ mapPoints, houses }) => 
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Hapus titik informasi ini?')) {
+    if (window.confirm('Hapus titik informasi ini?')) {
       await deleteMapPointFromDb(id);
     }
   };

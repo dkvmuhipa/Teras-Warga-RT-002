@@ -72,7 +72,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
   };
 
   const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected', letter?: LetterRequest) => {
-    if (confirm(`Ubah status surat menjadi ${status}?`)) {
+    if (window.confirm(`Ubah status surat menjadi ${status}?`)) {
       await updateLetterStatus(id, status, status === 'Approved' ? letterNumberInput : undefined);
       
       if (status === 'Approved' && letter) {
@@ -93,14 +93,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
   };
 
   const handleUpdateReportStatus = async (id: string, status: 'Diproses' | 'Selesai') => {
-    if (confirm(`Ubah status laporan menjadi ${status}?`)) {
+    if (window.confirm(`Ubah status laporan menjadi ${status}?`)) {
       await updateReportStatus(id, status);
       setSelectedReport(null);
     }
   };
 
   const handleDeleteLetter = async (id: string) => {
-    if (confirm('Hapus pengajuan surat ini secara permanen?')) {
+    if (window.confirm('Hapus pengajuan surat ini secara permanen?')) {
       await deleteLetterFromDb(id);
     }
   };

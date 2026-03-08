@@ -47,7 +47,7 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Hapus foto ini dari galeri?')) {
+    if (window.confirm('Hapus foto ini dari galeri?')) {
       await deleteGalleryItemFromDb(id);
     }
   };

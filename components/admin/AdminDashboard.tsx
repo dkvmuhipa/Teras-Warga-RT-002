@@ -163,9 +163,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
             
             <div className="flex items-center gap-2">
-              <button className="p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-all relative">
+              <button 
+                onClick={() => setActiveTab('notifications')}
+                className={`p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-all relative ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
+                title="Lihat Notifikasi"
+              >
                 <Bell size={22} />
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
+                {notifications.length > 0 && (
+                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full animate-pulse"></span>
+                )}
               </button>
               
               <div className="h-10 w-[1px] bg-slate-200 mx-2 hidden md:block"></div>

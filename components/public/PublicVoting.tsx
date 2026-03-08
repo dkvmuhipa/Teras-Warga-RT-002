@@ -24,7 +24,7 @@ export const PublicVoting: React.FC<PublicVotingProps> = ({ polls }) => {
   const handleVote = async (pollId: string, optionId: string, options: PollOption[]) => {
     if (votedPolls.has(pollId)) return;
 
-    if (confirm("Apakah Anda yakin dengan pilihan Anda? Pilihan tidak dapat diubah.")) {
+    if (window.confirm("Apakah Anda yakin dengan pilihan Anda? Pilihan tidak dapat diubah.")) {
       await submitVote(pollId, optionId, options);
       localStorage.setItem(`voted_poll_${pollId}`, 'true');
       setVotedPolls(prev => new Set(prev).add(pollId));
