@@ -26,6 +26,7 @@ import { generateSuratPengantar, generateResidentReportPDF } from './services/pd
 import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from './services/whatsappService';
 import { AdminRouteWrapper } from './components/AdminComponents';
 import { AdminDashboard } from './components/admin/AdminDashboard'; 
+import { DocumentManager } from './components/admin/DocumentManager';
 import { ChatBot } from './components/ChatBot';
 import { PublicHeader } from './components/PublicHeader';
 import { HeroSection } from './components/HeroSection';
@@ -36,6 +37,7 @@ import { PublicServices } from './components/public/PublicServices';
 import { PublicUMKM } from './components/public/PublicUMKM';
 import { PublicInfo } from './components/public/PublicInfo';
 import { PublicMap } from './components/public/PublicMap';
+import { PublicDocuments } from './components/public/PublicDocuments';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -50,6 +52,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { subscribeToMapPoints, subscribeToCollection, 
   subscribeToNotifications,
   subscribeToGallery,
+  subscribeToDocuments,
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
@@ -488,7 +491,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   const navGroups = [
       { title: "Menu Utama", items: [{ id: 'overview', icon: LayoutDashboard, label: 'Dashboard' }] },
       { title: "Administrasi", items: [{ id: 'residents', icon: Users, label: 'Data Warga' }, { id: 'services', icon: Archive, label: 'Layanan & Laporan' }, { id: 'finance', icon: DollarSign, label: 'Keuangan & Kas' }] },
-      { title: "Lingkungan", items: [{ id: 'facilities', icon: Package, label: 'Fasilitas & Jadwal' }, { id: 'market', icon: ShoppingCart, label: 'Bursa Warga' }, { id: 'umkm', icon: ShoppingBag, label: 'UMKM' }, { id: 'announcements', icon: Megaphone, label: 'Pengumuman' }, { id: 'polls', icon: Vote, label: 'E-Voting' }, { id: 'officials', icon: Briefcase, label: 'Pengurus' }] },
+      { title: "Lingkungan", items: [{ id: 'facilities', icon: Package, label: 'Fasilitas & Jadwal' }, { id: 'market', icon: ShoppingCart, label: 'Bursa Warga' }, { id: 'umkm', icon: ShoppingBag, label: 'UMKM' }, { id: 'documents', icon: FileText, label: 'Pusat Dokumen' }, { id: 'announcements', icon: Megaphone, label: 'Pengumuman' }, { id: 'polls', icon: Vote, label: 'E-Voting' }, { id: 'officials', icon: Briefcase, label: 'Pengurus' }] },
       { title: "Sistem", items: [{ id: 'settings', icon: Settings, label: 'Pengaturan' }] }
   ];
 
@@ -757,6 +760,12 @@ import { subscribeToMapPoints, subscribeToCollection,
              </div>
           )}
 
+          {activeTab === 'documents' && (
+            <div className="animate-fade-in">
+              <DocumentManager />
+            </div>
+          )}
+
           {activeTab === 'announcements' && (
              <div className="space-y-6">
                 <div className="flex justify-between items-center"><h2 className="font-black text-2xl text-slate-800">Pengumuman</h2><Button onClick={() => { resetForms(); setModalType('announcement'); setIsModalOpen(true); }}><Plus size={16}/> Buat Baru</Button></div>
@@ -941,6 +950,7 @@ export const App = () => {
   const [rondaSwapRequests, setRondaSwapRequests] = useState<RondaSwapRequest[]>([]);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [mapPoints, setMapPoints] = useState<MapPoint[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [populationReports, setPopulationReports] = useState<PopulationReport[]>([]);
@@ -966,6 +976,7 @@ export const App = () => {
     const unsubPopulationLogs = subscribeToCollection('populationLogs', (data) => setPopulationLogs(data));
     const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
     const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
+    const unsubDocuments = subscribeToDocuments((data) => setDocuments(data));
     const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
     const unsubSwapRequests = subscribeToRondaSwapRequests((data) => setRondaSwapRequests(data));
     const unsubGallery = subscribeToGallery((data) => setGallery(data));
@@ -980,7 +991,7 @@ export const App = () => {
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
-      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
+      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery();
     };
   }, []);
@@ -998,7 +1009,7 @@ export const App = () => {
         <Routes>
             <Route path="/admin" element={
                 <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={MOCK_DOCUMENTS} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} mapPoints={mapPoints} />
+                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={documents} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} mapPoints={mapPoints} />
                 </AdminRouteWrapper>
             }/>
             <Route path="*" element={
@@ -1008,6 +1019,7 @@ export const App = () => {
                         <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} gallery={gallery} />} />
                         <Route path="/voting" element={<PublicVoting polls={polls} />} />
                         <Route path="/market" element={<PublicMarket items={marketItems} />} />
+                        <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
                         <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} />} />
                         <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
                         <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} />} />

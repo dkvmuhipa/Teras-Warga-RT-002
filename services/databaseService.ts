@@ -53,6 +53,41 @@ const BILLS_COL = "bills";
 const NEWS_COL = "news";
 const CHECKPOINTS_COL = "checkpoints";
 const MAP_POINTS_COL = "mapPoints";
+const DOCUMENTS_COL = "documents";
+
+// --- DOCUMENTS SERVICES ---
+export const subscribeToDocuments = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, DOCUMENTS_COL), orderBy("uploadDate", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to documents:", error);
+        const qSimple = query(collection(db, DOCUMENTS_COL));
+        onSnapshot(qSimple, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            data.sort((a:any, b:any) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
+            callback(data);
+        });
+    });
+};
+
+export const addDocumentToDb = async (docData: any) => {
+    try {
+        const { id, ...data } = docData;
+        await addDoc(collection(db, DOCUMENTS_COL), deepSanitize(data));
+    } catch (e) {
+        console.error("Error adding document:", e);
+    }
+};
+
+export const deleteDocumentFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, DOCUMENTS_COL, id));
+    } catch (e) {
+        console.error("Error deleting document:", e);
+    }
+};
 
 // --- MAP POINTS SERVICES ---
 export const subscribeToMapPoints = (callback: (data: MapPoint[]) => void) => {

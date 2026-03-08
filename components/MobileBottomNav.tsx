@@ -9,6 +9,7 @@ export const MobileBottomNav: React.FC = () => {
     { path: '/', icon: Home, label: 'Beranda' },
     { path: '/voting', icon: Vote, label: 'Voting' }, 
     { path: '/market', icon: ShoppingCart, label: 'Pasar' },
+    { path: '/dokumen', icon: FileText, label: 'Dokumen' },
     { path: '/services', icon: FileText, label: 'Layanan' },
     { path: '/info', icon: Shield, label: 'Info' },
   ];

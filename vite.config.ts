@@ -21,6 +21,9 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         injectRegister: 'script',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+        workbox: {
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        },
         manifest: {
           name: 'TERAS RT 002',
           short_name: 'TERAS',
@@ -68,6 +71,7 @@ export default defineConfig(({ mode }) => {
               if (id.includes('recharts') || id.includes('d3')) return 'charts';
               if (id.includes('lucide-react')) return 'icons';
               if (id.includes('jspdf')) return 'pdf';
+              if (id.includes('exceljs')) return 'excel';
               if (id.includes('react-router-dom') || id.includes('react-router')) return 'router';
               if (id.includes('motion')) return 'motion';
               return 'vendor';

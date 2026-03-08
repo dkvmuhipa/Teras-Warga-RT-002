@@ -12,7 +12,7 @@ import { House, Report, Official, PdfConfig, PaymentStatus } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF } from '../../services/pdfService';
 import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes } from '../../services/databaseService';
-import { generateTemplateCSV, parseResidentCSV } from '../../services/csvService';
+import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
@@ -75,20 +75,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   };
 
   const handleDownloadTemplate = () => {
-    generateTemplateCSV();
+    generateExcelTemplate();
   };
 
-  const handleUploadCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (confirm('Apakah Anda yakin ingin mengupload data ini? Data yang ada mungkin akan ditimpa jika ID sama (namun fitur ini hanya menambah data baru saat ini).')) {
       setIsUploading(true);
       try {
-        const parsedData = await parseResidentCSV(file);
+        const parsedData = await parseExcelFile(file);
         
         // Add each house one by one (or batch if supported)
-        // For now, we'll loop and add. Ideally, backend should handle batch insert.
         let successCount = 0;
         let failCount = 0;
 
@@ -117,8 +116,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
         alert(`Upload selesai. Berhasil: ${successCount}, Gagal: ${failCount}`);
       } catch (error) {
-        console.error('CSV Parse Error:', error);
-        alert('Gagal memproses file CSV.');
+        console.error('Excel Parse Error:', error);
+        alert('Gagal memproses file Excel.');
       } finally {
         setIsUploading(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -310,18 +309,18 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             {isGenerating ? 'Sedang Generate...' : 'Generate PIN Massal'}
           </button>
           <button 
-            onClick={() => generateResidentReportPDF(houses, pdfConfig)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
+            onClick={() => generateProfessionalExcel(houses)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 font-bold text-sm transition-all shadow-lg shadow-emerald-600/20"
           >
-            <Download size={18} /> Export PDF
+            <Download size={18} /> Export Excel
           </button>
           
-          {/* Import/Export CSV Actions */}
+          {/* Import/Export Excel Actions */}
           <div className="flex gap-2">
             <button 
               onClick={handleDownloadTemplate}
               className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
-              title="Download Template CSV"
+              title="Download Template Excel"
             >
               <LayoutList size={18} /> Template
             </button>
@@ -329,15 +328,15 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
               disabled={isUploading}
-              title="Upload Data CSV"
+              title="Upload Data Excel"
             >
-              <Upload size={18} /> {isUploading ? 'Uploading...' : 'Import CSV'}
+              <Upload size={18} /> {isUploading ? 'Uploading...' : 'Import Excel'}
             </button>
             <input 
               type="file" 
               ref={fileInputRef} 
-              onChange={handleUploadCSV} 
-              accept=".csv" 
+              onChange={handleUploadExcel} 
+              accept=".xlsx,.xls" 
               className="hidden" 
             />
           </div>
