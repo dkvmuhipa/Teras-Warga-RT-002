@@ -12,6 +12,7 @@ import { House, Report, Official, PdfConfig, PaymentStatus } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF } from '../../services/pdfService';
 import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes } from '../../services/databaseService';
+import { generateTemplateCSV, parseResidentCSV } from '../../services/csvService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
@@ -38,6 +39,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [selectedResident, setSelectedResident] = useState<House | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,6 +71,60 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         } finally {
             setIsGenerating(false);
         }
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    generateTemplateCSV();
+  };
+
+  const handleUploadCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (confirm('Apakah Anda yakin ingin mengupload data ini? Data yang ada mungkin akan ditimpa jika ID sama (namun fitur ini hanya menambah data baru saat ini).')) {
+      setIsUploading(true);
+      try {
+        const parsedData = await parseResidentCSV(file);
+        
+        // Add each house one by one (or batch if supported)
+        // For now, we'll loop and add. Ideally, backend should handle batch insert.
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const houseData of parsedData) {
+          try {
+            // Basic validation
+            if (!houseData.block || !houseData.number || !houseData.headOfFamily) {
+              console.warn('Skipping invalid row:', houseData);
+              failCount++;
+              continue;
+            }
+
+            await addHouse({
+              ...houseData,
+              location: { x: 0, y: 0 },
+              familyMembers: [],
+              paymentStatus: houseData.paymentStatus || PaymentStatus.UNPAID,
+              status: houseData.status || 'Occupied'
+            } as any);
+            successCount++;
+          } catch (err) {
+            console.error('Error adding house:', err);
+            failCount++;
+          }
+        }
+
+        alert(`Upload selesai. Berhasil: ${successCount}, Gagal: ${failCount}`);
+      } catch (error) {
+        console.error('CSV Parse Error:', error);
+        alert('Gagal memproses file CSV.');
+      } finally {
+        setIsUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    } else {
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -258,6 +315,33 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           >
             <Download size={18} /> Export PDF
           </button>
+          
+          {/* Import/Export CSV Actions */}
+          <div className="flex gap-2">
+            <button 
+              onClick={handleDownloadTemplate}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
+              title="Download Template CSV"
+            >
+              <LayoutList size={18} /> Template
+            </button>
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
+              disabled={isUploading}
+              title="Upload Data CSV"
+            >
+              <Upload size={18} /> {isUploading ? 'Uploading...' : 'Import CSV'}
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleUploadCSV} 
+              accept=".csv" 
+              className="hidden" 
+            />
+          </div>
+
           <button 
             onClick={handleOpenAdd}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all"
