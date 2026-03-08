@@ -369,8 +369,8 @@ export const generateAllAccessCodes = async (houses: any[]) => {
     };
 
     for (const house of houses) {
-       // Hanya generate jika belum ada accessCode
-       if (house.accessCode) continue;
+       // Hanya generate jika belum ada accessCode, atau accessCode hanya berisi spasi/strip
+       if (house.accessCode && house.accessCode.trim() !== '' && house.accessCode.trim() !== '-') continue;
 
        const newCode = Math.floor(100000 + Math.random() * 900000).toString();
        const ref = doc(db, HOUSES_COL, house.id);
