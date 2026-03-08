@@ -148,52 +148,59 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (window.confirm('Apakah Anda yakin ingin mengupload data ini? Sistem akan otomatis mengabaikan data warga yang Blok dan Nomornya sudah ada di sistem (menghindari duplikat).')) {
+    if (window.confirm('Apakah Anda yakin ingin mengupload data ini? Data yang sudah ada di sistem (berdasarkan Blok dan Nomor) akan diupdate dengan data dari file Excel ini.')) {
       setIsUploading(true);
       try {
         const parsedData = await parseExcelFile(file);
         
         // Add each house one by one (or batch if supported)
-        let successCount = 0;
+        let addedCount = 0;
+        let updatedCount = 0;
         let failCount = 0;
-        let duplicateCount = 0;
 
         for (const houseData of parsedData) {
           try {
             // Basic validation
-            if (!houseData.block || !houseData.number || !houseData.headOfFamily) {
+            if (!houseData.block || !houseData.number) {
               console.warn('Skipping invalid row:', houseData);
               failCount++;
               continue;
             }
 
-            // Check for duplicate block and number
-            const isDuplicate = houses.some(
+            // Check for existing block and number
+            const existingHouse = houses.find(
               h => h.block.toLowerCase() === houseData.block?.toLowerCase() && 
                    h.number.toLowerCase() === houseData.number?.toLowerCase()
             );
 
-            if (isDuplicate) {
-              console.warn(`Skipping duplicate house: Blok ${houseData.block} No ${houseData.number}`);
-              duplicateCount++;
-              continue;
+            if (existingHouse) {
+              // Update existing house
+              await updateHouseData(existingHouse.id, {
+                ...houseData,
+                headOfFamily: houseData.headOfFamily && houseData.headOfFamily !== '-' ? houseData.headOfFamily : existingHouse.headOfFamily,
+                status: houseData.status || existingHouse.status || 'Occupied',
+                paymentStatus: houseData.paymentStatus || existingHouse.paymentStatus || PaymentStatus.UNPAID
+              });
+              updatedCount++;
+            } else {
+              // Add new house
+              await addHouse({
+                ...houseData,
+                headOfFamily: houseData.headOfFamily || '-',
+                location: { x: 0, y: 0 },
+                familyMembers: [],
+                paymentStatus: houseData.paymentStatus || PaymentStatus.UNPAID,
+                status: houseData.status || 'Occupied'
+              } as any);
+              addedCount++;
             }
-
-            await addHouse({
-              ...houseData,
-              location: { x: 0, y: 0 },
-              familyMembers: [],
-              paymentStatus: houseData.paymentStatus || PaymentStatus.UNPAID,
-              status: houseData.status || 'Occupied'
-            } as any);
-            successCount++;
           } catch (err) {
-            console.error('Error adding house:', err);
+            console.error('Error processing house:', err);
             failCount++;
           }
         }
 
-        alert(`Upload selesai.\nBerhasil ditambahkan: ${successCount}\nDuplikat (diabaikan): ${duplicateCount}\nGagal/Format Salah: ${failCount}`);
+        alert(`Upload selesai.\nData Baru Ditambahkan: ${addedCount}\nData Diperbarui: ${updatedCount}\nGagal/Format Salah: ${failCount}`);
       } catch (error) {
         console.error('Excel Parse Error:', error);
         alert('Gagal memproses file Excel.');

@@ -201,10 +201,10 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     const offset = isOldFormat ? 1 : 0;
     const block = row.getCell(1 + offset).text?.toString().trim();
     const number = row.getCell(2 + offset).text?.toString().trim();
-    const headOfFamily = row.getCell(3 + offset).text?.toString().trim();
+    const headOfFamily = row.getCell(3 + offset).text?.toString().trim() || '-';
 
     // If block is empty or looks like an instruction row, skip
-    if (!block || !number || !headOfFamily || block.startsWith('PETUNJUK') || block.match(/^\d+\./)) return;
+    if (!block || !number || block.startsWith('PETUNJUK') || block.match(/^\d+\./)) return;
 
     const ownerName = row.getCell(4 + offset).text;
     const phone = row.getCell(5 + offset).text;
