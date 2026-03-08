@@ -105,7 +105,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 .map(h => ({
                     id: h.id,
                     status: 'Empty',
-                    headOfFamily: `Rumah ${h.block}-${h.number}`, // Rename to generic "Rumah X-Y" instead of leaving it as "Warga X-Y"
+                    headOfFamily: '', // Empty the name as requested
                     phone: '',
                     occupants: 0,
                     familyMembers: [],
