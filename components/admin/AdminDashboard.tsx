@@ -81,7 +81,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'finance':
         return <FinanceManager cashFlow={cashFlow} />;
       case 'services':
-        return <ServiceManager letters={letters} reports={reports} />;
+        return <ServiceManager letters={letters} reports={reports} pdfConfig={pdfConfig} />;
       case 'facilities':
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} />;
       case 'assets':

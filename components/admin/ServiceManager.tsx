@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles } from 'lucide-react';
-import { LetterRequest, Report } from '../../types';
+import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
+import { generateSuratPengantar } from '../../services/pdfService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
 interface ServiceManagerProps {
   reports: Report[];
   letters: LetterRequest[];
+  pdfConfig: PdfConfig;
 }
 
-export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters }) => {
+export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters, pdfConfig }) => {
   const [activeTab, setActiveTab] = useState<'letters' | 'reports'>('letters');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -31,9 +33,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
     setIsAiLoading(false);
   };
 
-  const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected') => {
+  const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected', letter?: LetterRequest) => {
     if (confirm(`Ubah status surat menjadi ${status}?`)) {
       await updateLetterStatus(id, status);
+      
+      if (status === 'Approved' && letter) {
+        // Generate official PDF with stamp and signature
+        await generateSuratPengantar(letter, pdfConfig, false);
+      }
+      
       setSelectedLetter(null);
     }
   };
@@ -348,7 +356,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <XCircle size={18} className="mr-2" /> Tolak
                     </Button>
                     <Button 
-                      onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Approved')}
+                      onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Approved', selectedLetter)}
                       className="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
                     >
                       <CheckCircle2 size={18} className="mr-2" /> Setujui & Cetak
