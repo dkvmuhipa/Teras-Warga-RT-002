@@ -218,6 +218,15 @@ export interface Checkpoint {
   y?: number; // Position Y in percentage (0-100)
 }
 
+export interface MapPoint {
+  id: string;
+  label: string;
+  type: 'Gate' | 'Security' | 'Block' | 'Other';
+  x: number;
+  y: number;
+  icon: string;
+}
+
 export interface PatrolSession {
   id: string;
   officerName: string;

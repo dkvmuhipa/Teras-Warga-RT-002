@@ -32,6 +32,7 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { MapPoint } from "../types";
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -51,6 +52,43 @@ const MARKET_COL = "marketItems";
 const BILLS_COL = "bills";
 const NEWS_COL = "news";
 const CHECKPOINTS_COL = "checkpoints";
+const MAP_POINTS_COL = "mapPoints";
+
+// --- MAP POINTS SERVICES ---
+export const subscribeToMapPoints = (callback: (data: MapPoint[]) => void) => {
+    const q = query(collection(db, MAP_POINTS_COL));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MapPoint));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to map points:", error);
+    });
+};
+
+export const addMapPointToDb = async (point: Partial<MapPoint>) => {
+    try {
+        await addDoc(collection(db, MAP_POINTS_COL), deepSanitize(point));
+    } catch (e) {
+        console.error("Error adding map point:", e);
+    }
+};
+
+export const updateMapPointInDb = async (id: string, point: Partial<MapPoint>) => {
+    try {
+        const { id: _, ...data } = point;
+        await setDoc(doc(db, MAP_POINTS_COL, id), deepSanitize(data), { merge: true });
+    } catch (e) {
+        console.error("Error updating map point:", e);
+    }
+};
+
+export const deleteMapPointFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, MAP_POINTS_COL, id));
+    } catch (e) {
+        console.error("Error deleting map point:", e);
+    }
+};
 
 // --- CHECKPOINTS SERVICES ---
 export const subscribeToCheckpoints = (callback: (data: any[]) => void) => {
@@ -849,6 +887,15 @@ export const seedDatabase = async (initialData?: any) => {
               } else {
                   await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(data));
               }
+          }
+      }
+
+      // Seed Map Points
+      const mapPointsSnap = await getDocs(collection(db, MAP_POINTS_COL));
+      if (mapPointsSnap.empty && initialData.mapPoints && initialData.mapPoints.length > 0) {
+          for (const mp of initialData.mapPoints) {
+              const { id, ...data } = mp;
+              await addDoc(collection(db, MAP_POINTS_COL), deepSanitize(data));
           }
       }
 

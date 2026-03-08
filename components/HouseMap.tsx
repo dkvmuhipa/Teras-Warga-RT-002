@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { House, PaymentStatus, Report, Official, Checkpoint } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save } from 'lucide-react';
+import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint } from '../types';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield } from 'lucide-react';
 import { CHECKPOINTS as DEFAULT_CHECKPOINTS } from '../constants';
 import { subscribeToCheckpoints, updateCheckpointPosition } from '../services/databaseService';
 
@@ -9,6 +9,7 @@ interface HouseMapProps {
   isAdmin: boolean;
   reports?: Report[];
   officials?: Official[];
+  mapPoints?: MapPoint[];
   onEditHouse?: (house: House) => void;
   onPayDues?: (house: House) => void;
   onReportHouse?: (house: House) => void;
@@ -275,7 +276,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     );
 };
 
-export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], onEditHouse, onPayDues, onReportHouse }) => {
+export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], mapPoints = [], onEditHouse, onPayDues, onReportHouse }) => {
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>(DEFAULT_CHECKPOINTS);
   const [showCheckpoints, setShowCheckpoints] = useState(false);
@@ -369,6 +370,29 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                            >
                                <ShieldCheck size={14}/> {cp.name}
                                {isManageMode && draggingId === cp.id && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
+                           </div>
+                       ))}
+
+                       {/* Map Points Overlay (General Info) */}
+                       {mapPoints.map((point) => (
+                           <div 
+                            key={point.id}
+                            className={`absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2`}
+                            style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                           >
+                               <div className={`p-1.5 rounded-full shadow-md ${
+                                   point.type === 'Gate' ? 'bg-amber-500' :
+                                   point.type === 'Security' ? 'bg-blue-500' :
+                                   point.type === 'Block' ? 'bg-emerald-500' :
+                                   'bg-slate-500'
+                               } text-white`}>
+                                   {point.type === 'Gate' ? <Move size={14} /> : 
+                                    point.type === 'Security' ? <Shield size={14} /> : 
+                                    <MapPin size={14} />}
+                               </div>
+                               <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">
+                                   {point.label}
+                               </span>
                            </div>
                        ))}
                    </div>

@@ -17,8 +17,8 @@ import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaCha
 const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } = ReactRouterDOM;
 
 // Components & Services
-import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent } from './types';
+import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -47,8 +47,7 @@ import { Modal } from './components/ui/Modal';
 // Firebase imports
 import { auth } from './services/firebaseConfig';
 import { onAuthStateChanged } from "firebase/auth";
-import { 
-  subscribeToCollection, 
+import { subscribeToMapPoints, subscribeToCollection, 
   subscribeToNotifications,
   subscribeToGallery,
   addAnnouncementToDb, 
@@ -314,7 +313,7 @@ import {
       if (confirm("Reset sistem ke awal? Data akan hilang.")) {
           if (prompt("Ketik 'RESET'") === 'RESET') {
               try {
-                  const initialData = { houses: generateHouses(), announcements: MOCK_ANNOUNCEMENTS, cashFlow: MOCK_CASHFLOW, officials: INITIAL_OFFICIALS, reports: INITIAL_REPORTS, ronda: MOCK_RONDA, inventory: MOCK_INVENTORY, umkm: MOCK_UMKM, polls: MOCK_POLLS, rondaLogs: MOCK_RONDA_LOGS, checkpoints: CHECKPOINTS };
+                  const initialData = { houses: generateHouses(), announcements: MOCK_ANNOUNCEMENTS, cashFlow: MOCK_CASHFLOW, officials: INITIAL_OFFICIALS, reports: INITIAL_REPORTS, ronda: MOCK_RONDA, inventory: MOCK_INVENTORY, umkm: MOCK_UMKM, polls: MOCK_POLLS, rondaLogs: MOCK_RONDA_LOGS, checkpoints: CHECKPOINTS, mapPoints: MOCK_MAP_POINTS };
                   await seedDatabase(initialData);
                   alert("Reset berhasil."); window.location.reload();
               } catch (e) { alert("Gagal reset."); }
@@ -941,6 +940,7 @@ export const App = () => {
   const [rondaLogs, setRondaLogs] = useState<RondaCheckLog[]>([]);
   const [rondaSwapRequests, setRondaSwapRequests] = useState<RondaSwapRequest[]>([]);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
+  const [mapPoints, setMapPoints] = useState<MapPoint[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [populationReports, setPopulationReports] = useState<PopulationReport[]>([]);
@@ -965,6 +965,7 @@ export const App = () => {
     const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
     const unsubPopulationLogs = subscribeToCollection('populationLogs', (data) => setPopulationLogs(data));
     const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
+    const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
     const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
     const unsubSwapRequests = subscribeToRondaSwapRequests((data) => setRondaSwapRequests(data));
     const unsubGallery = subscribeToGallery((data) => setGallery(data));
@@ -979,7 +980,7 @@ export const App = () => {
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
-      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubPopulationLogs(); unsubMarket(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
+      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery();
     };
   }, []);
@@ -997,7 +998,7 @@ export const App = () => {
         <Routes>
             <Route path="/admin" element={
                 <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={MOCK_DOCUMENTS} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} />
+                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={MOCK_DOCUMENTS} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} mapPoints={mapPoints} />
                 </AdminRouteWrapper>
             }/>
             <Route path="*" element={
@@ -1009,7 +1010,7 @@ export const App = () => {
                         <Route path="/market" element={<PublicMarket items={marketItems} />} />
                         <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} />} />
                         <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
-                        <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} />} />
+                        <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} />} />
                         <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={MOCK_FAQ} />} />
                     </Routes>
                     <ChatBot announcements={announcements} ronda={ronda} officials={officials} />

@@ -153,6 +153,11 @@ export const CHECKPOINTS: Checkpoint[] = [
     { id: 'cp4', name: 'Blok C10', qrCode: 'BLOK_C10_RT002', x: 75, y: 20 },
 ];
 
+export const MOCK_MAP_POINTS: MapPoint[] = [
+    { id: 'mp1', label: 'Gerbang Utama', type: 'Gate', x: 5, y: 50, icon: 'Move' },
+    { id: 'mp2', label: 'Pos Satpam', type: 'Security', x: 10, y: 50, icon: 'Shield' },
+];
+
 export const MOCK_CASHFLOW: CashFlow[] = [
     { id: '1', date: '2023-10-01', description: 'Iuran Warga Blok C5', amount: 500000, type: 'Income', category: 'Iuran Warga' },
     { id: '2', date: '2023-10-02', description: 'Perbaikan Lampu Jalan C10', amount: 150000, type: 'Expense', category: 'Fasilitas' },
