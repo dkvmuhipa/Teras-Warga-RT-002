@@ -208,6 +208,22 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (window.confirm(`PERINGATAN: Apakah Anda yakin ingin MENGHAPUS PERMANEN ${selectedIds.size} warga terpilih?`)) {
+        try {
+            for (const id of Array.from(selectedIds)) {
+                await deleteHouseFromDb(id);
+            }
+            alert('Warga terpilih berhasil dihapus.');
+            setSelectedIds(new Set());
+        } catch (e) {
+            console.error(e);
+            alert('Gagal menghapus warga terpilih.');
+        }
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       headOfFamily: '',
@@ -376,12 +392,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         </div>
         <div className="flex gap-3">
           {selectedIds.size > 0 && (
-            <button 
-              onClick={handleBulkVerify}
-              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 font-bold text-sm transition-all shadow-sm"
-            >
-              <CheckCircle size={18} /> Verifikasi Terpilih
-            </button>
+            <>
+              <button 
+                onClick={handleBulkVerify}
+                className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 font-bold text-sm transition-all shadow-sm"
+              >
+                <CheckCircle size={18} /> Verifikasi Terpilih
+              </button>
+              <button 
+                onClick={handleBulkDelete}
+                className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl hover:bg-rose-100 font-bold text-sm transition-all shadow-sm"
+              >
+                <Trash2 size={18} /> Hapus Terpilih
+              </button>
+            </>
           )}
           <button 
             onClick={handleGenerateAllPins}
