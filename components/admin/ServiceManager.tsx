@@ -22,11 +22,35 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
   const [filterStatus, setFilterStatus] = useState('All');
   
   const [selectedLetter, setSelectedLetter] = useState<LetterRequest | null>(null);
+  const [isCreatingLetter, setIsCreatingLetter] = useState(false);
   const [letterNumberInput, setLetterNumberInput] = useState('');
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   
+  // Admin Form State
+  const [adminForm, setAdminForm] = useState<Partial<LetterRequest>>({
+    type: 'Surat Pengantar KTP',
+    applicantName: '',
+    nik: '',
+    familyHeadName: '',
+    birthPlace: '',
+    birthDate: '',
+    gender: 'Laki-laki',
+    religion: 'Islam',
+    job: '',
+    maritalStatus: 'Kawin',
+    nationality: 'Indonesia',
+    addressKtp: '',
+    houseId: '',
+    purposeDetail: '',
+    phone: '',
+    email: '',
+    education: 'SMA/Sederajat',
+    familyStatus: 'Kepala Keluarga',
+    bloodType: '-',
+  });
+
   React.useEffect(() => {
     if (selectedLetter && selectedLetter.status === 'Pending') {
       const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
@@ -79,6 +103,38 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
     if (confirm('Hapus pengajuan surat ini secara permanen?')) {
       await deleteLetterFromDb(id);
     }
+  };
+
+  const handleAdminCreateLetter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
+    const currentYear = new Date().getFullYear();
+    const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+    const paddedNum = nextNum.toString().padStart(3, '0');
+    const autoLetterNumber = `${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`;
+
+    const newLetter: LetterRequest = {
+      ...adminForm as LetterRequest,
+      id: Date.now().toString(),
+      status: 'Approved',
+      date: new Date().toISOString().split('T')[0],
+      letterNumber: autoLetterNumber
+    };
+
+    await updateLetterStatus(newLetter.id, 'Approved', autoLetterNumber); // This will add it if not exists in some implementations, but let's assume we need a specific add function if it's new
+    // Actually, we should probably use addLetterToDb from databaseService
+    const { addLetterToDb } = await import('../../services/databaseService');
+    await addLetterToDb(newLetter);
+
+    await generateSuratPengantar(newLetter, pdfConfig, false);
+
+    // Update config
+    const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
+    setPdfConfig(newConfig);
+    localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+
+    setIsCreatingLetter(false);
+    alert("Surat berhasil dibuat dan diunduh!");
   };
 
   const filteredLetters = letters.filter(l => {
@@ -187,6 +243,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
           />
         </div>
         <div className="flex items-center gap-3">
+          {activeTab === 'letters' && (
+            <Button onClick={() => setIsCreatingLetter(true)} className="bg-indigo-600 hover:bg-indigo-700">
+              <Plus size={18} className="mr-2" /> Buat Surat Baru
+            </Button>
+          )}
           <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
              <Filter size={14} className="text-slate-400"/>
              <select className="bg-transparent border-none text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer" value={filterStatus} onChange={(e:any) => setFilterStatus(e.target.value)}>
@@ -579,6 +640,85 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                 </Button>
               </div>
             )}
+      </Modal>
+
+      {/* Admin Create Letter Modal */}
+      <Modal isOpen={isCreatingLetter} onClose={() => setIsCreatingLetter(false)} title="Buat Surat Baru (Admin)">
+        <form onSubmit={handleAdminCreateLetter} className="space-y-6 max-h-[70vh] overflow-y-auto px-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">Data Diri</h4>
+              <div className="group">
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.applicantName} onChange={e=>setAdminForm({...adminForm, applicantName: e.target.value})} required />
+              </div>
+              <div className="group">
+                <label className="block text-xs font-bold text-slate-700 mb-1">NIK</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.nik} onChange={e=>setAdminForm({...adminForm, nik: e.target.value})} required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tempat Lahir</label>
+                  <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.birthPlace} onChange={e=>setAdminForm({...adminForm, birthPlace: e.target.value})} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tgl Lahir</label>
+                  <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.birthDate} onChange={e=>setAdminForm({...adminForm, birthDate: e.target.value})} required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Jenis Kelamin</label>
+                  <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.gender} onChange={e=>setAdminForm({...adminForm, gender: e.target.value as any})}>
+                    <option>Laki-laki</option>
+                    <option>Perempuan</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Agama</label>
+                  <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.religion} onChange={e=>setAdminForm({...adminForm, religion: e.target.value})}>
+                    <option>Islam</option><option>Kristen</option><option>Katolik</option><option>Hindu</option><option>Buddha</option><option>Konghucu</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Pekerjaan</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.job} onChange={e=>setAdminForm({...adminForm, job: e.target.value})} required />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">Detail Surat</h4>
+              <div className="group">
+                <label className="block text-xs font-bold text-slate-700 mb-1">Jenis Surat</label>
+                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={adminForm.type} onChange={e=>setAdminForm({...adminForm, type: e.target.value})}>
+                  {(pdfConfig.letterTemplates || [
+                    { type: 'Surat Pengantar KTP' }, { type: 'Surat Pengantar KK' }, { type: 'Surat Keterangan Domisili' }
+                  ]).map(t => <option key={t.type}>{t.type}</option>)}
+                  <option>Lainnya</option>
+                </select>
+              </div>
+              <div className="group">
+                <label className="block text-xs font-bold text-slate-700 mb-1">Blok Rumah</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold uppercase" value={adminForm.houseId} onChange={e=>setAdminForm({...adminForm, houseId: e.target.value})} required placeholder="Cth: C7-02" />
+              </div>
+              <div className="group">
+                <label className="block text-xs font-bold text-slate-700 mb-1">Keperluan</label>
+                <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold h-24 resize-none" value={adminForm.purposeDetail} onChange={e=>setAdminForm({...adminForm, purposeDetail: e.target.value})} required />
+              </div>
+              <div className="group">
+                <label className="block text-xs font-bold text-slate-700 mb-1">Alamat KTP</label>
+                <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold h-20 resize-none" value={adminForm.addressKtp} onChange={e=>setAdminForm({...adminForm, addressKtp: e.target.value})} required />
+              </div>
+            </div>
+          </div>
+          <div className="pt-4 border-t flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={() => setIsCreatingLetter(false)}>Batal</Button>
+            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
+              <Save size={18} className="mr-2" /> Terbitkan Surat Resmi
+            </Button>
+          </div>
+        </form>
       </Modal>
 
       {/* Report Detail Modal */}
