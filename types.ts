@@ -19,6 +19,7 @@ export interface House {
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
   residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan including Kost
+  ownerName?: string; // NEW: Nama Pemilik Rumah (jika berbeda dengan penghuni)
   paymentStatus: PaymentStatus; // Default: Keamanan
   paymentStatusAir?: PaymentStatus; // NEW: Iuran Air
   paymentStatusSampah?: PaymentStatus; // NEW: Iuran Sampah
@@ -386,6 +387,11 @@ export interface PopulationReport {
   seasonalCount: number;     // Total Musiman
   seasonalMaleCount: number; // Musiman Laki-laki
   seasonalFemaleCount: number; // Musiman Perempuan
+  
+  // Kelompok Rentan
+  pregnantCount?: number;
+  toddlerCount?: number;
+  elderlyCount?: number;
   
   createdAt: string;
 }

@@ -49,12 +49,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   // Form State
   const [formData, setFormData] = useState({
     headOfFamily: '',
+    ownerName: '', // NEW: Nama Pemilik
     block: '',
     number: '',
     phone: '',
     status: 'Occupied',
+    residenceType: 'Tetap', // Default to Tetap (Pemilik)
     paymentStatus: PaymentStatus.UNPAID,
     occupants: 1,
+    education: '',
+    jobCategory: '',
+    vehicleCount: 0,
+    pregnantCount: 0,
+    toddlerCount: 0,
+    elderlyCount: 0,
     familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string }[],
     accessCode: ''
   });
@@ -203,12 +211,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const resetForm = () => {
     setFormData({
       headOfFamily: '',
+      ownerName: '', // NEW: Reset ownerName
       block: '',
       number: '',
       phone: '',
       status: 'Occupied',
+      residenceType: 'Tetap',
       paymentStatus: PaymentStatus.UNPAID,
       occupants: 1,
+      education: '',
+      jobCategory: '',
+      vehicleCount: 0,
+      pregnantCount: 0,
+      toddlerCount: 0,
+      elderlyCount: 0,
       familyMembers: [],
       accessCode: ''
     });
@@ -224,12 +240,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setEditingHouseId(house.id);
     setFormData({
       headOfFamily: house.headOfFamily,
+      ownerName: house.ownerName || '', // NEW: Populate ownerName
       block: house.block,
       number: house.number,
       phone: house.phone || '',
       status: house.status,
+      residenceType: house.residenceType || 'Tetap',
       paymentStatus: house.paymentStatus,
       occupants: house.occupants || 1,
+      education: house.education || '',
+      jobCategory: house.jobCategory || '',
+      vehicleCount: house.vehicleCount || 0,
+      pregnantCount: house.pregnantCount || 0,
+      toddlerCount: house.toddlerCount || 0,
+      elderlyCount: house.elderlyCount || 0,
       familyMembers: house.familyMembers || [],
       accessCode: house.accessCode || ''
     });
@@ -691,13 +715,24 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     <h2 className="text-3xl font-black mb-2">{selectedResident.headOfFamily}</h2>
                     <p className="text-indigo-100/80 font-bold uppercase tracking-widest text-[10px]">Kepala Keluarga</p>
                     
+                    {selectedResident.ownerName && selectedResident.ownerName !== selectedResident.headOfFamily && (
+                      <div className="mt-2 px-3 py-1 bg-white/10 rounded-lg inline-block">
+                        <p className="text-[10px] font-bold text-white/90 uppercase tracking-widest">Pemilik: {selectedResident.ownerName}</p>
+                      </div>
+                    )}
+
                     <div className="flex justify-center gap-3 mt-8">
                       <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-xs font-black uppercase tracking-widest">
                         Blok {selectedResident.block}-{selectedResident.number}
                       </div>
                       <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-xs font-black uppercase tracking-widest">
-                        {selectedResident.status}
+                        {selectedResident.status === 'Occupied' ? 'Dihuni' : selectedResident.status === 'Empty' ? 'Kosong' : 'Usaha'}
                       </div>
+                      {selectedResident.status === 'Occupied' && (
+                        <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-xs font-black uppercase tracking-widest">
+                          {selectedResident.residenceType === 'Kontrak' ? 'Kontrak' : selectedResident.residenceType === 'Kost' ? 'Kost' : 'Pemilik'}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -752,6 +787,39 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   </section>
 
                   <section>
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Demografi & Kerentanan</h4>
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Pendidikan</p>
+                        <p className="text-sm font-bold text-slate-800">{selectedResident.education || '-'}</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Pekerjaan</p>
+                        <p className="text-sm font-bold text-slate-800">{selectedResident.jobCategory || '-'}</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Kendaraan</p>
+                        <p className="text-sm font-bold text-slate-800">{selectedResident.vehicleCount || 0} Unit</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Penghuni</p>
+                        <p className="text-sm font-bold text-slate-800">{selectedResident.occupants || 0} Orang</p>
+                      </div>
+                    </div>
+                    
+                    {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0) && (
+                      <div className="p-4 bg-rose-50 border border-rose-100 rounded-3xl">
+                        <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none mb-3">Kelompok Rentan</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(selectedResident.pregnantCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.pregnantCount} Ibu Hamil</span>}
+                          {(selectedResident.toddlerCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.toddlerCount} Balita</span>}
+                          {(selectedResident.elderlyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.elderlyCount} Lansia</span>}
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
+                  <section>
                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Anggota Keluarga</h4>
                     {selectedResident.familyMembers && selectedResident.familyMembers.length > 0 ? (
                       <div className="space-y-3">
@@ -802,54 +870,142 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
       {/* Add/Edit Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingHouseId ? "Edit Data Warga" : "Tambah Warga Baru"}>
-        <form onSubmit={handleSaveHouse} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Kepala Keluarga</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} required placeholder="Nama Lengkap..." />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold mb-1.5 text-slate-700">Blok</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.block} onChange={e => setFormData({...formData, block: e.target.value})} required placeholder="A" />
+        <form onSubmit={handleSaveHouse} className="space-y-6">
+          {/* Section 1: Informasi Utama */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2 border-b border-indigo-100 pb-2">
+              <User size={14} /> Informasi Utama
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kepala Keluarga (Penghuni)</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} required placeholder="Nama Lengkap..." />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Pemilik Rumah</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} placeholder="Nama Pemilik (Opsional)" />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-bold mb-1.5 text-slate-700">Nomor</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} required placeholder="12" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Blok</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.block} onChange={e => setFormData({...formData, block: e.target.value})} required placeholder="A" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Nomor</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} required placeholder="12" />
+              </div>
             </div>
-          </div>
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Telepon / WA</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="08..." />
-          </div>
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">PIN Akses (Access Code)</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.accessCode} onChange={e => setFormData({...formData, accessCode: e.target.value})} placeholder="Masukkan PIN..." />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold mb-1.5 text-slate-700">Status Hunian</label>
-              <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
-                <option value="Occupied">Dihuni</option>
-                <option value="Empty">Kosong</option>
-                <option value="Business">Usaha</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Penghuni</label>
-              <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={formData.occupants} onChange={e => setFormData({...formData, occupants: parseInt(e.target.value)})} min={1} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Telepon / WA</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="08..." />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">PIN Akses (Access Code)</label>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.accessCode} onChange={e => setFormData({...formData, accessCode: e.target.value})} placeholder="Masukkan PIN..." />
+              </div>
             </div>
           </div>
 
-          <div className="border-t border-slate-100 pt-4">
-            <div className="flex justify-between items-center mb-3">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">Daftar Anggota Keluarga</label>
+          {/* Section 2: Status & Kepemilikan */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2 border-b border-indigo-100 pb-2">
+              <Home size={14} /> Status & Kepemilikan
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Status Hunian</label>
+                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
+                  <option value="Occupied">Dihuni</option>
+                  <option value="Empty">Kosong</option>
+                  <option value="Business">Usaha</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Status Kepemilikan</label>
+                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.residenceType} onChange={e => setFormData({...formData, residenceType: e.target.value as any})}>
+                  <option value="Tetap">Pemilik (Tetap)</option>
+                  <option value="Kontrak">Kontrak</option>
+                  <option value="Kost">Kost</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Penghuni</label>
+                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.occupants} onChange={e => setFormData({...formData, occupants: parseInt(e.target.value)})} min={1} />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Data Demografi & Kerentanan */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2 border-b border-indigo-100 pb-2">
+              <Activity size={14} /> Demografi & Kerentanan
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Pendidikan Terakhir</label>
+                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.education} onChange={e => setFormData({...formData, education: e.target.value})}>
+                  <option value="">Pilih...</option>
+                  <option value="SD">SD</option>
+                  <option value="SMP">SMP</option>
+                  <option value="SMA/SMK">SMA/SMK</option>
+                  <option value="D3">D3</option>
+                  <option value="S1">S1</option>
+                  <option value="S2">S2</option>
+                  <option value="S3">S3</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori Pekerjaan</label>
+                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.jobCategory} onChange={e => setFormData({...formData, jobCategory: e.target.value})}>
+                  <option value="">Pilih...</option>
+                  <option value="PNS">PNS / TNI / Polri</option>
+                  <option value="Pegawai Swasta">Pegawai Swasta</option>
+                  <option value="Wiraswasta">Wiraswasta / Pengusaha</option>
+                  <option value="Freelance">Pekerja Lepas / Freelance</option>
+                  <option value="Pensiunan">Pensiunan</option>
+                  <option value="Tidak Bekerja">Tidak / Belum Bekerja</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Kendaraan</label>
+                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.vehicleCount} onChange={e => setFormData({...formData, vehicleCount: parseInt(e.target.value)})} min={0} />
+              </div>
+            </div>
+            
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <label className="block text-xs font-bold mb-3 text-slate-700">Kelompok Rentan (Jumlah Jiwa)</label>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Ibu Hamil</label>
+                  <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.pregnantCount} onChange={e => setFormData({...formData, pregnantCount: parseInt(e.target.value) || 0})} min={0} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Balita</label>
+                  <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.toddlerCount} onChange={e => setFormData({...formData, toddlerCount: parseInt(e.target.value) || 0})} min={0} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Lansia</label>
+                  <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.elderlyCount} onChange={e => setFormData({...formData, elderlyCount: parseInt(e.target.value) || 0})} min={0} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Anggota Keluarga */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center border-b border-indigo-100 pb-2">
+              <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                <Users size={14} /> Anggota Keluarga
+              </h3>
               <button 
                 type="button"
                 onClick={() => setFormData({
                   ...formData, 
                   familyMembers: [...formData.familyMembers, { name: '', relation: 'Anak', nik: '', birthDate: '' }]
                 })}
-                className="text-xs font-black text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                className="text-xs font-black text-indigo-600 hover:text-indigo-700 flex items-center gap-1 bg-indigo-50 px-2 py-1 rounded-lg transition-colors"
               >
                 <UserPlus size={14} /> Tambah
               </button>
@@ -857,7 +1013,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             
             <div className="space-y-3">
               {formData.familyMembers.map((member, idx) => (
-                <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
+                <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group transition-all hover:border-indigo-200 hover:shadow-sm">
                   <button 
                     type="button"
                     onClick={() => {
@@ -865,67 +1021,87 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       newMembers.splice(idx, 1);
                       setFormData({...formData, familyMembers: newMembers});
                     }}
-                    className="absolute top-2 right-2 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-3 right-3 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white p-1 rounded-md shadow-sm border border-slate-100"
                   >
-                    <X size={16} />
+                    <X size={14} />
                   </button>
                   
                   <div className="grid grid-cols-2 gap-3">
-                    <input 
-                      placeholder="Nama Lengkap" 
-                      className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold"
-                      value={member.name}
-                      onChange={e => {
-                        const newMembers = [...formData.familyMembers];
-                        newMembers[idx].name = e.target.value;
-                        setFormData({...formData, familyMembers: newMembers});
-                      }}
-                    />
-                    <select 
-                      className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold"
-                      value={member.relation}
-                      onChange={e => {
-                        const newMembers = [...formData.familyMembers];
-                        newMembers[idx].relation = e.target.value as any;
-                        setFormData({...formData, familyMembers: newMembers});
-                      }}
-                    >
-                      <option value="Istri">Istri</option>
-                      <option value="Anak">Anak</option>
-                      <option value="Orang Tua">Orang Tua</option>
-                      <option value="Famili Lain">Famili Lain</option>
-                    </select>
+                    <div>
+                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Nama Lengkap</label>
+                      <input 
+                        placeholder="Nama Lengkap" 
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        value={member.name}
+                        onChange={e => {
+                          const newMembers = [...formData.familyMembers];
+                          newMembers[idx].name = e.target.value;
+                          setFormData({...formData, familyMembers: newMembers});
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Hubungan</label>
+                      <select 
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        value={member.relation}
+                        onChange={e => {
+                          const newMembers = [...formData.familyMembers];
+                          newMembers[idx].relation = e.target.value as any;
+                          setFormData({...formData, familyMembers: newMembers});
+                        }}
+                      >
+                        <option value="Istri">Istri</option>
+                        <option value="Anak">Anak</option>
+                        <option value="Orang Tua">Orang Tua</option>
+                        <option value="Famili Lain">Famili Lain</option>
+                      </select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <input 
-                      placeholder="NIK (Opsional)" 
-                      className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold"
-                      value={member.nik || ''}
-                      onChange={e => {
-                        const newMembers = [...formData.familyMembers];
-                        newMembers[idx].nik = e.target.value;
-                        setFormData({...formData, familyMembers: newMembers});
-                      }}
-                    />
-                    <input 
-                      type="date"
-                      className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold"
-                      value={member.birthDate || ''}
-                      onChange={e => {
-                        const newMembers = [...formData.familyMembers];
-                        newMembers[idx].birthDate = e.target.value;
-                        setFormData({...formData, familyMembers: newMembers});
-                      }}
-                    />
+                    <div>
+                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">NIK (Opsional)</label>
+                      <input 
+                        placeholder="NIK" 
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        value={member.nik || ''}
+                        onChange={e => {
+                          const newMembers = [...formData.familyMembers];
+                          newMembers[idx].nik = e.target.value;
+                          setFormData({...formData, familyMembers: newMembers});
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Tanggal Lahir</label>
+                      <input 
+                        type="date"
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        value={member.birthDate || ''}
+                        onChange={e => {
+                          const newMembers = [...formData.familyMembers];
+                          newMembers[idx].birthDate = e.target.value;
+                          setFormData({...formData, familyMembers: newMembers});
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
               {formData.familyMembers.length === 0 && (
-                <p className="text-center text-xs text-slate-400 py-2 italic">Belum ada anggota keluarga ditambahkan.</p>
+                <div className="text-center p-6 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+                  <Users size={24} className="mx-auto text-slate-300 mb-2" />
+                  <p className="text-xs text-slate-400 font-bold">Belum ada anggota keluarga ditambahkan.</p>
+                </div>
               )}
             </div>
           </div>
-          <Button type="submit" className="w-full py-3 mt-2">{editingHouseId ? 'Simpan Perubahan' : 'Tambah Warga'}</Button>
+
+          <div className="pt-4 mt-6 border-t border-slate-100">
+            <Button type="submit" className="w-full py-4 text-sm font-black shadow-lg shadow-indigo-500/20">
+              {editingHouseId ? 'Simpan Perubahan' : 'Tambah Warga'}
+            </Button>
+          </div>
         </form>
       </Modal>
     </motion.div>

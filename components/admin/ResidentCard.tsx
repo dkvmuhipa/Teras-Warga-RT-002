@@ -31,6 +31,9 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
           </div>
           <div>
             <h4 className="font-black text-slate-800 text-sm">{house.headOfFamily}</h4>
+            {house.ownerName && house.ownerName !== house.headOfFamily && (
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Pemilik: {house.ownerName}</p>
+            )}
             <p className="text-[10px] font-bold text-slate-400 flex items-center gap-1 mt-0.5">
               <Phone size={10} /> {house.phone || '-'}
             </p>
@@ -41,7 +44,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
         </span>
       </div>
 
-      <div className="flex gap-1.5 mb-4">
+      <div className="flex gap-1.5 mb-4 flex-wrap">
         <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
           house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
           house.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' : 
@@ -49,6 +52,17 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
         }`}>
           {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha'}
         </span>
+        
+        {house.status === 'Occupied' && (
+          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+            house.residenceType === 'Kontrak' ? 'bg-violet-50 text-violet-600 border-violet-100' :
+            house.residenceType === 'Kost' ? 'bg-orange-50 text-orange-600 border-orange-100' :
+            'bg-blue-50 text-blue-600 border-blue-100'
+          }`}>
+            {house.residenceType === 'Kontrak' ? 'Kontrak' : house.residenceType === 'Kost' ? 'Kost' : 'Pemilik'}
+          </span>
+        )}
+
         <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
           paymentStatus === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
           'bg-rose-50 text-rose-600 border-rose-100'
@@ -56,6 +70,12 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
           {paymentStatus === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
           {paymentStatus === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
         </span>
+
+        {((house.pregnantCount || 0) > 0 || (house.toddlerCount || 0) > 0 || (house.elderlyCount || 0) > 0) && (
+          <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-rose-50 text-rose-600 border-rose-100">
+            Rentan
+          </span>
+        )}
       </div>
 
       <div className="flex gap-1.5 pt-3 border-t border-slate-100">

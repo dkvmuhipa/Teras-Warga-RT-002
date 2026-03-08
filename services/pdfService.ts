@@ -366,8 +366,10 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         const count = house.occupants.toString();
         
         let status = house.status === 'Occupied' ? 'Dihuni' : (house.status === 'Business' ? 'Usaha' : 'Kosong');
-        if (house.status === 'Occupied' && house.residenceType === 'Kontrak') {
-             status += " (Kontrak)";
+        if (house.status === 'Occupied') {
+             if (house.residenceType === 'Kontrak') status += " (Kontrak)";
+             else if (house.residenceType === 'Kost') status += " (Kost)";
+             else status += " (Pemilik)";
         }
 
         const payment = house.paymentStatus;
@@ -414,6 +416,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
     const totalPermanent = houses.filter(h => h.status === 'Occupied' && (h.residenceType === 'Tetap' || !h.residenceType)).length;
     const totalRenter = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kontrak').length;
+    const totalBoarding = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kost').length;
     const totalEmpty = houses.filter(h => h.status === 'Empty').length;
     const totalPeople = houses.reduce((acc, h) => acc + h.occupants, 0);
 
@@ -424,11 +427,12 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     doc.text(`Total Unit Rumah: ${houses.length} Unit`, margin, currentY);
     doc.text(`Total Kepala Keluarga: ${houses.length}`, margin + 70, currentY);
     currentY += 5;
-    doc.text(`Dihuni Tetap: ${totalPermanent}`, margin, currentY);
+    doc.text(`Dihuni Tetap (Pemilik): ${totalPermanent}`, margin, currentY);
     doc.text(`Dihuni Kontrak/Sewa: ${totalRenter}`, margin + 70, currentY);
-    doc.text(`Rumah Kosong: ${totalEmpty}`, margin + 140, currentY);
+    doc.text(`Dihuni Kost: ${totalBoarding}`, margin + 140, currentY);
     currentY += 5;
-    doc.text(`Estimasi Total Penduduk: ${totalPeople} Jiwa`, margin, currentY);
+    doc.text(`Rumah Kosong: ${totalEmpty}`, margin, currentY);
+    doc.text(`Estimasi Total Penduduk: ${totalPeople} Jiwa`, margin + 70, currentY);
 
     const signY = currentY + 10;
     if (signY + 30 > pageHeight) { doc.addPage(); }

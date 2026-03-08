@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PopulationReport, PopulationChangeLog } from '../../types';
+import { PopulationReport, PopulationChangeLog, House } from '../../types';
 import { Plus, FileText, Trash2, Edit2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 
@@ -9,9 +9,10 @@ interface PopulationReportManagerProps {
   onDeleteReport: (id: string) => void;
   populationLogs: PopulationChangeLog[];
   setPopulationLogs: (logs: PopulationChangeLog[]) => void;
+  houses: House[];
 }
 
-export const PopulationReportManager: React.FC<PopulationReportManagerProps> = ({ reports, onAddReport, onDeleteReport, populationLogs, setPopulationLogs }) => {
+export const PopulationReportManager: React.FC<PopulationReportManagerProps> = ({ reports, onAddReport, onDeleteReport, populationLogs, setPopulationLogs, houses }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<Omit<PopulationReport, 'id' | 'createdAt'>>({
     month: new Date().toISOString().slice(0, 7),
@@ -26,6 +27,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     seasonalCount: 0,
     seasonalMaleCount: 0,
     seasonalFemaleCount: 0,
+    pregnantCount: 0,
+    toddlerCount: 0,
+    elderlyCount: 0,
   });
 
   const handleGenerateFromLog = () => {
@@ -37,6 +41,21 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     const newcomerCount = logsThisMonth.filter(l => l.type === 'Newcomer').length;
     const movedOutCount = logsThisMonth.filter(l => l.type === 'MovedOut').length;
 
+    // Calculate current demographics from houses
+    let currentPregnant = 0;
+    let currentToddler = 0;
+    let currentElderly = 0;
+    let currentTotal = 0;
+
+    houses.forEach(house => {
+      if (house.status === 'Occupied') {
+        currentTotal += house.occupants || 0;
+        currentPregnant += house.pregnantCount || 0;
+        currentToddler += house.toddlerCount || 0;
+        currentElderly += house.elderlyCount || 0;
+      }
+    });
+
     // Calculate initial population from previous month if available, or just keep 0
     // For now, let's just pre-fill the counts
     setFormData(prev => ({
@@ -45,7 +64,12 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       birthCount,
       deathCount,
       newcomerCount,
-      movedOutCount
+      movedOutCount,
+      pregnantCount: currentPregnant,
+      toddlerCount: currentToddler,
+      elderlyCount: currentElderly,
+      // Optional: set initial population based on currentTotal and changes
+      // initialPopulation: currentTotal - birthCount - newcomerCount + deathCount + movedOutCount
     }));
     setIsModalOpen(true);
   };
@@ -194,6 +218,23 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             <div>
               <label className="block text-xs font-bold text-slate-500 mb-1">Pindah</label>
               <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value)})} className="w-full p-2 border rounded-xl" required />
+            </div>
+          </div>
+          <div className="border-t border-slate-100 pt-4 mt-4">
+            <h4 className="text-xs font-black text-slate-700 mb-3">Data Kelompok Rentan (Otomatis dari Data Warga)</h4>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Ibu Hamil</label>
+                <input type="number" value={formData.pregnantCount} onChange={e => setFormData({...formData, pregnantCount: parseInt(e.target.value) || 0})} className="w-full p-2 border rounded-xl bg-slate-50" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Balita</label>
+                <input type="number" value={formData.toddlerCount} onChange={e => setFormData({...formData, toddlerCount: parseInt(e.target.value) || 0})} className="w-full p-2 border rounded-xl bg-slate-50" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Lansia</label>
+                <input type="number" value={formData.elderlyCount} onChange={e => setFormData({...formData, elderlyCount: parseInt(e.target.value) || 0})} className="w-full p-2 border rounded-xl bg-slate-50" />
+              </div>
             </div>
           </div>
           <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">Simpan Laporan</button>

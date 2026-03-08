@@ -12,11 +12,18 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     { header: 'BLOK', key: 'block', width: 10 },
     { header: 'NOMOR', key: 'number', width: 10 },
     { header: 'KEPALA KELUARGA', key: 'headOfFamily', width: 30 },
+    { header: 'NAMA PEMILIK', key: 'ownerName', width: 30 },
     { header: 'TELEPON', key: 'phone', width: 20 },
     { header: 'STATUS HUNIAN', key: 'status', width: 15 },
+    { header: 'STATUS KEPEMILIKAN', key: 'residenceType', width: 20 },
     { header: 'PENGHUNI', key: 'occupants', width: 10 },
+    { header: 'PENDIDIKAN', key: 'education', width: 15 },
+    { header: 'PEKERJAAN', key: 'jobCategory', width: 20 },
+    { header: 'KENDARAAN', key: 'vehicleCount', width: 12 },
+    { header: 'IBU HAMIL', key: 'pregnantCount', width: 12 },
+    { header: 'BALITA', key: 'toddlerCount', width: 12 },
+    { header: 'LANSIA', key: 'elderlyCount', width: 12 },
     { header: 'PEMBAYARAN', key: 'paymentStatus', width: 15 },
-    { header: 'TIPE HUNIAN', key: 'residenceType', width: 15 },
     { header: 'KODE AKSES', key: 'accessCode', width: 15 },
   ];
 
@@ -50,11 +57,18 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       block: house.block,
       number: house.number,
       headOfFamily: house.headOfFamily,
+      ownerName: house.ownerName || '-',
       phone: house.phone || '-',
       status: house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha',
-      occupants: house.occupants || 0,
-      paymentStatus: house.paymentStatus,
       residenceType: house.residenceType || '-',
+      occupants: house.occupants || 0,
+      education: house.education || '-',
+      jobCategory: house.jobCategory || '-',
+      vehicleCount: house.vehicleCount || 0,
+      hasPregnant: house.pregnantCount || 0,
+      hasToddler: house.toddlerCount || 0,
+      hasElderly: house.elderlyCount || 0,
+      paymentStatus: house.paymentStatus,
       accessCode: house.accessCode || '-',
     });
 
@@ -102,11 +116,18 @@ export const generateExcelTemplate = async () => {
     { header: 'BLOK (Wajib)', key: 'block', width: 15 },
     { header: 'NOMOR (Wajib)', key: 'number', width: 15 },
     { header: 'NAMA KEPALA KELUARGA (Wajib)', key: 'headOfFamily', width: 35 },
+    { header: 'NAMA PEMILIK (Opsional)', key: 'ownerName', width: 35 },
     { header: 'TELEPON', key: 'phone', width: 20 },
     { header: 'STATUS HUNIAN (Occupied/Empty/Business)', key: 'status', width: 35 },
+    { header: 'STATUS KEPEMILIKAN (Tetap/Kontrak/Kost)', key: 'residenceType', width: 40 },
     { header: 'JUMLAH PENGHUNI', key: 'occupants', width: 20 },
+    { header: 'PENDIDIKAN', key: 'education', width: 20 },
+    { header: 'PEKERJAAN', key: 'jobCategory', width: 25 },
+    { header: 'JUMLAH KENDARAAN', key: 'vehicleCount', width: 20 },
+    { header: 'JUMLAH IBU HAMIL', key: 'pregnantCount', width: 25 },
+    { header: 'JUMLAH BALITA', key: 'toddlerCount', width: 25 },
+    { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
     { header: 'STATUS PEMBAYARAN (Lunas/Belum Lunas)', key: 'paymentStatus', width: 35 },
-    { header: 'TIPE HUNIAN (Tetap/Kontrak/Kost)', key: 'residenceType', width: 30 },
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
   ];
 
@@ -128,11 +149,18 @@ export const generateExcelTemplate = async () => {
     block: 'C5',
     number: '01',
     headOfFamily: 'Budi Santoso',
+    ownerName: 'Ahmad Dahlan',
     phone: '081234567890',
     status: 'Occupied',
+    residenceType: 'Kontrak',
     occupants: 4,
+    education: 'S1',
+    jobCategory: 'Karyawan Swasta',
+    vehicleCount: 2,
+    pregnantCount: 0,
+    toddlerCount: 1,
+    elderlyCount: 0,
     paymentStatus: 'Belum Lunas',
-    residenceType: 'Tetap',
     accessCode: '123456',
   });
 
@@ -142,8 +170,9 @@ export const generateExcelTemplate = async () => {
   instructionRow.font = { bold: true, color: { argb: 'FFDC2626' } };
   worksheet.addRow(['1. Kolom bertanda (Wajib) tidak boleh kosong.']);
   worksheet.addRow(['2. Status Hunian harus diisi salah satu dari: Occupied, Empty, atau Business.']);
-  worksheet.addRow(['3. Status Pembayaran harus diisi: Lunas atau Belum Lunas.']);
-  worksheet.addRow(['4. Tipe Hunian harus diisi: Tetap, Kontrak, atau Kost.']);
+  worksheet.addRow(['3. Status Kepemilikan harus diisi: Tetap, Kontrak, atau Kost.']);
+  worksheet.addRow(['4. Status Pembayaran harus diisi: Lunas atau Belum Lunas.']);
+  worksheet.addRow(['5. Kolom Jumlah (Kendaraan, Ibu Hamil, Balita, Lansia) diisi dengan angka.']);
 
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
@@ -170,12 +199,19 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
 
     if (!block || !number || !headOfFamily) return;
 
-    const phone = row.getCell(4).text;
-    const statusRaw = row.getCell(5).text;
-    const occupantsRaw = row.getCell(6).value;
-    const paymentStatusRaw = row.getCell(7).text;
-    const residenceTypeRaw = row.getCell(8).text;
-    const accessCode = row.getCell(9).text;
+    const ownerName = row.getCell(4).text;
+    const phone = row.getCell(5).text;
+    const statusRaw = row.getCell(6).text;
+    const residenceTypeRaw = row.getCell(7).text;
+    const occupantsRaw = row.getCell(8).value;
+    const education = row.getCell(9).text;
+    const jobCategory = row.getCell(10).text;
+    const vehicleCountRaw = row.getCell(11).value;
+    const pregnantCountRaw = row.getCell(12).value;
+    const toddlerCountRaw = row.getCell(13).value;
+    const elderlyCountRaw = row.getCell(14).value;
+    const paymentStatusRaw = row.getCell(15).text;
+    const accessCode = row.getCell(16).text;
 
     // Map status
     let status: 'Occupied' | 'Empty' | 'Business' = 'Occupied';
@@ -197,11 +233,18 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       block,
       number,
       headOfFamily,
+      ownerName,
       phone,
       status,
       occupants: Number(occupantsRaw) || 1,
-      paymentStatus,
       residenceType,
+      education,
+      jobCategory,
+      vehicleCount: Number(vehicleCountRaw) || 0,
+      pregnantCount: Number(pregnantCountRaw) || 0,
+      toddlerCount: Number(toddlerCountRaw) || 0,
+      elderlyCount: Number(elderlyCountRaw) || 0,
+      paymentStatus,
       accessCode,
       familyMembers: []
     });
