@@ -1,3 +1,10 @@
+export enum Role {
+  ADMIN = 'Admin',
+  TREASURER = 'Bendahara',
+  SECRETARY = 'Sekretaris',
+  RESIDENT = 'Warga'
+}
+
 export enum PaymentStatus {
   PAID = 'Lunas',
   PENDING = 'Belum Lunas',
@@ -17,6 +24,16 @@ export interface House {
   paymentStatusSampah?: PaymentStatus; // NEW: Iuran Sampah
   phone?: string;
   accessCode?: string; // NEW: Kode Akses Unik untuk Verifikasi
+  
+  // New Fields for Professional Data Management
+  isVerified?: boolean;
+  ktpUrl?: string;
+  kkUrl?: string;
+  role?: Role; // RBAC
+  
+  education?: string;
+  jobCategory?: string;
+  vehicleCount?: number;
   
   // Data Demografi (Optional)
   hasPregnant?: boolean; // Ibu Hamil
@@ -41,12 +58,59 @@ export interface House {
   }[];
 }
 
+export interface AuditLog {
+  id: string;
+  action: string;
+  timestamp: string;
+  user: string;
+  targetId?: string;
+}
+
+// Feature 1: Event Management
+export interface AppEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  attendees: string[]; // House IDs or Names
+}
+
+// Feature 3: Asset Management
+export interface AssetLoan {
+  id: string;
+  assetId: string;
+  houseId: string;
+  borrowDate: string;
+  returnDate?: string;
+  status: 'Borrowed' | 'Returned';
+}
+
+// Feature 4: Direct Communication
+export interface Message {
+  id: string;
+  senderId: string;
+  receiverId: string; // 'All' or specific ID
+  content: string;
+  timestamp: string;
+  isRead: boolean;
+}
+
 export interface Announcement {
   id: string;
   title: string;
   content: string;
   date: string;
   type: 'General' | 'Urgent' | 'Event';
+}
+
+export interface News {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  image?: string;
+  category?: 'Kegiatan' | 'Pengumuman' | 'Warga' | 'Lainnya';
 }
 
 // New Notification Interface
@@ -115,7 +179,23 @@ export interface LetterRequest {
 export interface RondaSchedule {
   id?: string; // Optional for seeding, required for edit
   day: string;
-  members: string[]; // Nama warga
+  members: string[]; // Nama warga (Legacy/Simple)
+  shifts?: {
+    id: string;
+    time: string; // e.g., "22:00 - 01:00"
+    members: string[];
+  }[];
+}
+
+export interface RondaSwapRequest {
+  id: string;
+  requesterName: string;
+  requesterHouseId: string;
+  fromDay: string;
+  toDay: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  reason?: string;
+  timestamp: string;
 }
 
 // Digitalisasi Ronda (New Interface)
@@ -219,4 +299,68 @@ export interface GalleryItem {
   title: string;
   image: string;
   date: string;
+}
+
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface Document {
+  id: string;
+  title: string;
+  category: 'SK RT' | 'Aturan' | 'Formulir' | 'Lainnya';
+  url: string;
+  uploadDate: string;
+  uploadedBy: string;
+}
+
+export interface BillItem {
+  id: string;
+  name: string; // e.g., "Air", "Sampah", "Keamanan"
+  amount: number;
+  manager: string; // Name of the person/entity managing this item
+  status: 'Unpaid' | 'Paid';
+  paymentDate?: string;
+}
+
+export interface Bill {
+  id: string;
+  houseId: string;
+  month: string; // e.g., "2026-03"
+  items: BillItem[];
+  total: number;
+  dueDate: string; // e.g., "2026-03-20"
+}
+
+export interface PopulationChangeLog {
+  id: string;
+  type: 'Birth' | 'Newcomer' | 'MovedOut';
+  houseId: string;
+  date: string; // ISO String
+  description: string;
+}
+
+export interface PopulationReport {
+  id: string;
+  month: string; // e.g., "2026-03"
+  year: number;
+  
+  // Data Utama
+  initialPopulation: number; // Penduduk Awal
+  birthCount: number;        // Lahir
+  newcomerCount: number;     // Pendatang
+  movedOutCount: number;     // Pindah
+  
+  // Data Demografi Akhir
+  maleCount: number;         // Laki-laki
+  femaleCount: number;       // Perempuan
+  
+  // Data Musiman
+  seasonalCount: number;     // Total Musiman
+  seasonalMaleCount: number; // Musiman Laki-laki
+  seasonalFemaleCount: number; // Musiman Perempuan
+  
+  createdAt: string;
 }

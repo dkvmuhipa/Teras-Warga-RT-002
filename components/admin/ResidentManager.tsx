@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { BillDetailModal } from './BillDetailModal';
+import { ResidentAnalytics } from './ResidentAnalytics';
+import { ResidentCard } from './ResidentCard';
 import { 
   Search, Filter, Grid, List, UserPlus, Download, Upload, 
   Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle,
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
-  ChevronRight, CreditCard, Mail, User
+  ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList
 } from 'lucide-react';
 import { House, Report, Official, PdfConfig, PaymentStatus } from '../../types';
 import { HouseMap } from '../HouseMap';
@@ -15,17 +18,22 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface ResidentManagerProps {
   houses: House[];
+  bills: any[];
   reports: Report[];
   officials: Official[];
   pdfConfig: PdfConfig;
 }
 
+type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business';
+
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
-  houses, reports, officials, pdfConfig 
+  houses, bills, reports, officials, pdfConfig 
 }) => {
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
+  const [selectedHouseForBills, setSelectedHouseForBills] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<any>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'block'>('block');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedResident, setSelectedResident] = useState<House | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -59,6 +67,21 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             alert('Gagal meng-generate PIN.');
         } finally {
             setIsGenerating(false);
+        }
+    }
+  };
+
+  const handleBulkVerify = async () => {
+    if (selectedIds.size === 0) return;
+    if (confirm(`Apakah Anda yakin ingin memverifikasi ${selectedIds.size} warga terpilih?`)) {
+        try {
+            const updates = Array.from(selectedIds).map(id => ({ id, data: { isVerified: true } }));
+            await batchUpdateHouses(updates);
+            alert('Warga terpilih berhasil diverifikasi.');
+            setSelectedIds(new Set());
+        } catch (e) {
+            console.error(e);
+            alert('Gagal memverifikasi warga.');
         }
     }
   };
@@ -124,22 +147,26 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     }
   };
 
-  const handleUpdatePayment = async (house: House) => {
-    const newStatus = house.paymentStatus === PaymentStatus.PAID ? PaymentStatus.UNPAID : PaymentStatus.PAID;
-    if (confirm(`Ubah status pembayaran menjadi ${newStatus}?`)) {
-      await updateHouseData(house.id, { paymentStatus: newStatus });
-      if (selectedResident?.id === house.id) {
-        setSelectedResident({ ...selectedResident, paymentStatus: newStatus });
-      }
-    }
-  };
-
   // Filter Logic
   const filteredHouses = houses.filter(h => {
     const matchesSearch = h.headOfFamily.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           h.block.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'All' || h.status === filterStatus;
+    
+    const houseBills = bills.filter(b => b.houseId === h.id);
+    const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
+    const paymentStatus = isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING;
+
+    let matchesStatus = true;
+    if (filterStatus === 'paid') matchesStatus = paymentStatus === PaymentStatus.PAID;
+    else if (filterStatus === 'unpaid') matchesStatus = paymentStatus === PaymentStatus.PENDING;
+    else if (filterStatus === 'occupied') matchesStatus = h.status === 'Occupied';
+    else if (filterStatus === 'empty') matchesStatus = h.status === 'Empty';
+    else if (filterStatus === 'business') matchesStatus = h.status === 'Business';
+
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    if (sortBy === 'name') return a.headOfFamily.localeCompare(b.headOfFamily);
+    return (a.block + a.number).localeCompare(b.block + b.number);
   });
 
   // Stats
@@ -178,6 +205,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setIsDrawerOpen(true);
   };
 
+  const selectedResidentBills = bills.filter(b => b.houseId === selectedResident?.id);
+  const isFullyPaid = selectedResidentBills.length > 0 && selectedResidentBills.every(b => b.total === 0);
+
+  const maskData = (data: string | undefined) => {
+    if (!data) return '-';
+    return data.replace(/.(?=.{4})/g, '*');
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
@@ -202,6 +237,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <p className="text-slate-500 font-medium mt-1">Kelola data kependudukan dan status hunian RT 002.</p>
         </div>
         <div className="flex gap-3">
+          {selectedIds.size > 0 && (
+            <button 
+              onClick={handleBulkVerify}
+              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 font-bold text-sm transition-all shadow-sm"
+            >
+              <CheckCircle size={18} /> Verifikasi Terpilih
+            </button>
+          )}
           <button 
             onClick={handleGenerateAllPins}
             className="flex items-center gap-2 px-5 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-2xl hover:bg-amber-100 font-bold text-sm transition-all shadow-sm"
@@ -225,6 +268,46 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       </div>
 
       {/* Stats Cards */}
+      <ResidentAnalytics houses={houses} />
+      
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <input 
+          type="text" 
+          placeholder="Cari warga..." 
+          className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+        <select className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)}>
+            <option value="all">Semua Status</option>
+            <option value="paid">Lunas</option>
+            <option value="unpaid">Belum Lunas</option>
+            <option value="occupied">Dihuni</option>
+            <option value="empty">Kosong</option>
+            <option value="business">Usaha</option>
+        </select>
+        <select className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
+            <option value="block">Urutkan Blok</option>
+            <option value="name">Urutkan Nama</option>
+        </select>
+        <div className="flex gap-2">
+            <button onClick={() => setViewMode('grid')} className={`p-3 rounded-xl ${viewMode === 'grid' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'}`}><Users size={18}/></button>
+            <button onClick={() => setViewMode('table')} className={`p-3 rounded-xl ${viewMode === 'table' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'}`}><LayoutList size={18}/></button>
+            <button onClick={() => setViewMode('map')} className={`p-3 rounded-xl ${viewMode === 'map' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'}`}><MapPin size={18}/></button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {selectedHouseForBills && (
+          <BillDetailModal 
+            houseId={selectedHouseForBills} 
+            bills={bills} 
+            onClose={() => setSelectedHouseForBills(null)} 
+          />
+        )}
+      </AnimatePresence>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div 
           variants={itemVariants}
@@ -309,6 +392,101 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       {/* Content View */}
       <motion.div variants={itemVariants}>
         {viewMode === 'grid' ? (
+          <div className="space-y-8">
+            {Object.entries(filteredHouses.reduce((acc, house) => {
+              if (!acc[house.block]) acc[house.block] = [];
+              acc[house.block].push(house);
+              return acc;
+            }, {} as Record<string, typeof filteredHouses>)).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'})).map(([block, houses]) => (
+              <div key={block} className="space-y-4 p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
+                <div className="flex items-center gap-3 px-2">
+                  <div className="w-1.5 h-8 bg-indigo-500 rounded-full"></div>
+                  <h3 className="text-xl font-black text-slate-800">Blok {block}</h3>
+                  <span className="text-xs font-bold text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200">{houses.length} Rumah</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {houses.map((house) => (
+                    <ResidentCard 
+                      key={house.id}
+                      house={house}
+                      bills={bills}
+                      onOpenDetail={openDetail}
+                      onOpenEdit={handleOpenEdit}
+                      onDelete={handleDelete}
+                      onOpenBills={setSelectedHouseForBills}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : viewMode === 'table' ? (
+          <div className="space-y-8">
+            {Object.entries(filteredHouses.reduce((acc, house) => {
+              if (!acc[house.block]) acc[house.block] = [];
+              acc[house.block].push(house);
+              return acc;
+            }, {} as Record<string, typeof filteredHouses>)).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'})).map(([block, houses]) => (
+              <div key={block} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="bg-slate-50 p-4 border-b border-slate-100 font-black text-slate-700">Blok {block}</div>
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50/50">
+                    <tr>
+                      <th className="p-4"><input type="checkbox" onChange={handleSelectAll} checked={selectedIds.size === filteredHouses.length && filteredHouses.length > 0} /></th>
+                      <th className="p-4 text-left font-black text-slate-600">Nama</th>
+                      <th className="p-4 text-left font-black text-slate-600">Nomor</th>
+                      <th className="p-4 text-left font-black text-slate-600">Telepon</th>
+                      <th className="p-4 text-left font-black text-slate-600">Penghuni</th>
+                      <th className="p-4 text-left font-black text-slate-600">Status</th>
+                      <th className="p-4 text-left font-black text-slate-600">Pembayaran</th>
+                      <th className="p-4 text-right font-black text-slate-600">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {houses.map((house) => {
+                      const houseBills = bills.filter(b => b.houseId === house.id);
+                      const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
+                      const paymentStatus = isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING;
+                      return (
+                        <tr key={house.id} className="border-t border-slate-100">
+                          <td className="p-4"><input type="checkbox" checked={selectedIds.has(house.id)} onChange={() => handleSelectOne(house.id)} /></td>
+                          <td className="p-4 font-bold">{house.headOfFamily}</td>
+                          <td className="p-4 font-mono font-black">{house.number}</td>
+                          <td className="p-4 text-slate-600">{house.phone || '-'}</td>
+                          <td className="p-4 text-slate-600">{house.occupants}</td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                              house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                              house.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' : 
+                              'bg-amber-50 text-amber-600 border-amber-100'
+                            }`}>
+                              {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha'}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${
+                              paymentStatus === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                              'bg-rose-50 text-rose-600 border-rose-100'
+                            }`}>
+                              {paymentStatus === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
+                              {paymentStatus === PaymentStatus.PAID ? 'Lunas' : 'Belum Lunas'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex justify-end gap-2">
+                              <button onClick={() => openDetail(house)} className="p-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100"><User size={16}/></button>
+                              <button onClick={() => setSelectedHouseForBills(house.id)} className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100"><DollarSign size={16}/></button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
             <HouseMap 
               houses={filteredHouses} 
@@ -316,103 +494,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               reports={reports} 
               officials={officials}
               onEditHouse={(h) => openDetail(h)}
-              onPayDues={(h) => handleUpdatePayment(h)} 
             />
-          </div>
-        ) : (
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-sm text-left">
-                <thead>
-                  <tr className="bg-slate-50/50 text-slate-400 font-black uppercase text-[10px] tracking-[0.15em] border-b border-slate-100">
-                    <th className="px-8 py-5 w-10">
-                      <input 
-                        type="checkbox" 
-                        className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer transition-all"
-                        checked={selectedIds.size === filteredHouses.length && filteredHouses.length > 0}
-                        onChange={handleSelectAll}
-                      />
-                    </th>
-                    <th className="px-8 py-5">Warga / KK</th>
-                    <th className="px-8 py-5">Blok & Nomor</th>
-                    <th className="px-8 py-5">Status Hunian</th>
-                    <th className="px-8 py-5">Status Iuran</th>
-                    <th className="px-8 py-5 text-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {filteredHouses.map((house) => (
-                    <motion.tr 
-                      key={house.id} 
-                      layout
-                      className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
-                      onClick={() => openDetail(house)}
-                    >
-                      <td className="px-8 py-5" onClick={(e) => e.stopPropagation()}>
-                        <input 
-                          type="checkbox" 
-                          className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer transition-all"
-                          checked={selectedIds.has(house.id)}
-                          onChange={() => handleSelectOne(house.id)}
-                        />
-                      </td>
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm border border-indigo-100 group-hover:scale-110 transition-transform">
-                            {house.headOfFamily.charAt(0)}
-                          </div>
-                          <div>
-                            <p className="font-black text-slate-800 group-hover:text-indigo-600 transition-colors text-base">{house.headOfFamily}</p>
-                            <p className="text-xs font-bold text-slate-400 flex items-center gap-1 mt-0.5">
-                              <Phone size={10} /> {house.phone || '-'}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-5">
-                        <span className="font-mono font-black text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl text-xs border border-slate-200">
-                          {house.block}-{house.number}
-                        </span>
-                      </td>
-                      <td className="px-8 py-5">
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                          house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                          house.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' : 
-                          'bg-amber-50 text-amber-600 border-amber-100'
-                        }`}>
-                          {house.status}
-                        </span>
-                      </td>
-                      <td className="px-8 py-5">
-                        <span className={`flex items-center gap-2 w-fit px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                          house.paymentStatus === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                          'bg-rose-50 text-rose-600 border-rose-100'
-                        }`}>
-                          {house.paymentStatus === PaymentStatus.PAID ? <CheckCircle size={14}/> : <XCircle size={14}/>}
-                          {house.paymentStatus}
-                        </span>
-                      </td>
-                      <td className="px-8 py-5 text-center" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                          <button 
-                            onClick={() => handleOpenEdit(house)}
-                            className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-                          >
-                            <Edit2 size={18} />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(house.id)}
-                            className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           </div>
         )}
       </motion.div>
@@ -499,7 +581,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   <section>
                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Status Keuangan</h4>
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-                      <div className={`absolute top-0 right-0 w-2 h-full ${selectedResident.paymentStatus === PaymentStatus.PAID ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+                      <div className={`absolute top-0 right-0 w-2 h-full ${isFullyPaid ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
                           <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
@@ -507,21 +589,15 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           </div>
                           <div>
                             <p className="text-sm font-black text-slate-800">Iuran Bulanan</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Periode Februari 2026</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Otomatis</p>
                           </div>
                         </div>
                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                          selectedResident.paymentStatus === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                          isFullyPaid ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                         }`}>
-                          {selectedResident.paymentStatus}
+                          {isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING}
                         </span>
                       </div>
-                      <button 
-                        onClick={() => handleUpdatePayment(selectedResident)}
-                        className="w-full py-4 bg-indigo-50 text-indigo-600 rounded-2xl text-sm font-black hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                      >
-                        Update Status Pembayaran
-                      </button>
                     </div>
                   </section>
 

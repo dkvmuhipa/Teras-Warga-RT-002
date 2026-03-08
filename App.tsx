@@ -17,8 +17,8 @@ import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaCha
 const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } = ReactRouterDOM;
 
 // Components & Services
-import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS } from '@/constants';
-import { House, Announcement, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem } from './types';
+import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS } from '@/constants';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -85,11 +85,21 @@ import {
   submitVote,
   addRondaLog,
   subscribeToRondaLogs,
+  subscribeToRondaSwapRequests,
   validateResidentAccess,
   subscribeToMarketItems,
   addMarketItem,
   deleteMarketItem,
-  updateMarketItemStatus
+  updateMarketItemStatus,
+  subscribeToBills,
+  addBillToDb,
+  updateBillInDb,
+  deleteBillFromDb,
+  subscribeToNews,
+  addNewsToDb,
+  updateNewsInDb,
+  deleteNewsFromDb,
+  deepSanitize
 } from './services/databaseService';
 
 // --- Shared Components ---
@@ -179,12 +189,16 @@ import {
   const [isGenerating, setIsGenerating] = useState(false);
   const [draftTopic, setDraftTopic] = useState('');
   const [localConfig, setLocalConfig] = useState<PdfConfig>(pdfConfig);
+  const [bills, setBills] = useState<any[]>([]);
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [news, setNews] = useState<News[]>([]);
 
   useEffect(() => {
       const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
-      return () => unsubMarket();
+      const unsubBills = subscribeToBills((data) => setBills(data));
+      const unsubNews = subscribeToNews((data) => setNews(data));
+      return () => { unsubMarket(); unsubBills(); unsubNews(); };
   }, []);
 
   const getFilteredHouses = () => {
@@ -308,14 +322,19 @@ import {
       }
   };
   const handleExportData = () => {
-      const data = { houses, announcements, cashFlow, officials, reports, letters, ronda, inventory, umkm, polls };
-      const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", jsonString);
-      downloadAnchorNode.setAttribute("download", `backup_rt002_${new Date().toISOString().split('T')[0]}.json`);
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
+      try {
+          const data = { houses, announcements, cashFlow, officials, reports, letters, ronda, inventory, umkm, polls };
+          const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(deepSanitize(data), null, 2));
+          const downloadAnchorNode = document.createElement('a');
+          downloadAnchorNode.setAttribute("href", jsonString);
+          downloadAnchorNode.setAttribute("download", `backup_rt002_${new Date().toISOString().split('T')[0]}.json`);
+          document.body.appendChild(downloadAnchorNode);
+          downloadAnchorNode.click();
+          downloadAnchorNode.remove();
+      } catch (e) {
+          console.error("Error exporting data:", e);
+          alert('Gagal mengekspor data: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
+      }
   };
 
   const handleAiAnalysis = async () => {
@@ -909,6 +928,7 @@ import {
 export const App = () => {
   const [houses, setHouses] = useState<House[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [news, setNews] = useState<News[]>([]);
   const [cashFlow, setCashFlow] = useState<CashFlow[]>([]);
   const [officials, setOfficials] = useState<Official[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -917,10 +937,14 @@ export const App = () => {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [umkm, setUmkm] = useState<UMKM[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
+  const [bills, setBills] = useState<Bill[]>([]);
   const [rondaLogs, setRondaLogs] = useState<RondaCheckLog[]>([]);
+  const [rondaSwapRequests, setRondaSwapRequests] = useState<RondaSwapRequest[]>([]);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [populationReports, setPopulationReports] = useState<PopulationReport[]>([]);
+  const [populationLogs, setPopulationLogs] = useState<PopulationChangeLog[]>([]);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
   const [isAdmin, setIsAdmin] = useState(false);
@@ -928,6 +952,7 @@ export const App = () => {
   useEffect(() => {
     const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data));
     const unsubAnnouncements = subscribeToCollection('announcements', (data) => setAnnouncements(data));
+    const unsubNews = subscribeToNews((data) => setNews(data));
     const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
     const unsubOfficials = subscribeToCollection('officials', (data) => setOfficials(data));
     const unsubReports = subscribeToCollection('reports', (data) => setReports(data));
@@ -936,8 +961,12 @@ export const App = () => {
     const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data));
     const unsubUmkm = subscribeToCollection('umkm', (data) => setUmkm(data));
     const unsubPolls = subscribeToCollection('polls', (data) => setPolls(data));
+    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
+    const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
+    const unsubPopulationLogs = subscribeToCollection('populationLogs', (data) => setPopulationLogs(data));
     const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
     const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
+    const unsubSwapRequests = subscribeToRondaSwapRequests((data) => setRondaSwapRequests(data));
     const unsubGallery = subscribeToGallery((data) => setGallery(data));
     const unsubNotifs = subscribeToNotifications((data) => {
         setNotifications(data);
@@ -948,9 +977,9 @@ export const App = () => {
     });
 
     return () => {
-      unsubHouses(); unsubAnnouncements(); unsubCash(); unsubOfficials(); 
+      unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
-      unsubUmkm(); unsubPolls(); unsubMarket(); unsubRondaLogs(); unsubNotifs();
+      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubPopulationLogs(); unsubMarket(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery();
     };
   }, []);
@@ -968,7 +997,7 @@ export const App = () => {
         <Routes>
             <Route path="/admin" element={
                 <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard houses={houses} announcements={announcements} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />
+                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={MOCK_DOCUMENTS} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} />
                 </AdminRouteWrapper>
             }/>
             <Route path="*" element={
@@ -981,7 +1010,7 @@ export const App = () => {
                         <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} />} />
                         <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
                         <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} />} />
-                        <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} houses={houses} announcements={announcements} />} />
+                        <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={MOCK_FAQ} />} />
                     </Routes>
                     <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
                     <PanicButton />

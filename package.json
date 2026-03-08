@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit"
@@ -13,21 +13,22 @@
     "@google/genai": "*",
     "firebase": "^10.8.0",
     "jspdf": "^2.5.1",
-    "leaflet": "^1.7.1",
     "lucide-react": "^0.344.0",
     "motion": "^12.34.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-is": "^18.2.0",
-    "react-leaflet": "^3.2.5",
     "react-qr-reader": "^3.0.0-beta-1",
     "react-router-dom": "^6.22.1",
-    "recharts": "^2.12.0"
+    "recharts": "^2.15.4",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.3.3",
     "vite": "^5.1.4"
   }

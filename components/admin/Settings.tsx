@@ -17,9 +17,14 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const handleSave = () => {
-    setPdfConfig(localConfig);
-    localStorage.setItem('pdf_config', JSON.stringify(localConfig));
-    alert('Konfigurasi berhasil disimpan!');
+    try {
+      setPdfConfig(localConfig);
+      localStorage.setItem('pdf_config', JSON.stringify(localConfig));
+      alert('Konfigurasi berhasil disimpan!');
+    } catch (e) {
+      console.error("Error saving config:", e);
+      alert('Gagal menyimpan konfigurasi: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
+    }
   };
 
   const handlePasswordChange = async () => {
@@ -75,25 +80,24 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
   };
 
   const handleExportData = () => {
-    // In a real app, we would fetch all data from DB first. 
-    // For now, we'll just export the config as a placeholder or try to fetch if possible.
-    // Since props doesn't have all data, we might need to rely on what's available or fetch it.
-    // Ideally, this component should receive all data or have a way to fetch it.
-    // Given the constraints, I'll export the localConfig and a note.
-    
-    const data = {
-        pdfConfig: localConfig,
-        exportedAt: new Date().toISOString(),
-        note: "Full database export requires fetching all collections."
-    };
-    
-    const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", jsonString);
-    downloadAnchorNode.setAttribute("download", `backup_config_rt002_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+    try {
+      const data = {
+          pdfConfig: localConfig,
+          exportedAt: new Date().toISOString(),
+          note: "Full database export requires fetching all collections."
+      };
+      
+      const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", jsonString);
+      downloadAnchorNode.setAttribute("download", `backup_config_rt002_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    } catch (e) {
+      console.error("Error exporting data:", e);
+      alert('Gagal mengekspor data: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
+    }
   };
 
   const containerVariants = {

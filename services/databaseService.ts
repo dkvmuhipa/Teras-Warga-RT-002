@@ -48,8 +48,34 @@ const POLLS_COL = "polls";
 const RONDA_LOGS_COL = "rondaLogs";
 const PATROL_SESSIONS_COL = "patrolSessions";
 const MARKET_COL = "marketItems";
+const BILLS_COL = "bills";
+const NEWS_COL = "news";
 
-// --- STORAGE SERVICES ---
+// --- BILLS SERVICES ---
+export const addBillToDb = async (bill: any) => {
+    try {
+        const { id, ...data } = bill;
+        await addDoc(collection(db, BILLS_COL), deepSanitize(data));
+    } catch (e) { console.error("Error adding bill:", e); }
+};
+
+export const updateBillInDb = async (id: string, updates: any) => {
+    try { await updateDoc(doc(db, BILLS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating bill:", e); }
+};
+
+export const deleteBillFromDb = async (id: string) => {
+    try { await deleteDoc(doc(db, BILLS_COL, id)); } catch (e) { console.error("Error deleting bill:", e); }
+};
+
+export const subscribeToBills = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, BILLS_COL));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to bills:", error);
+    });
+};
 export const uploadImageToStorage = async (file: File, path: string) => {
   try {
     const storageRef = ref(storage, path);
@@ -78,7 +104,7 @@ export const updateAdminPassword = async (newPass: string) => {
 
 // --- UTILS ---
 
-const deepSanitize = (data: any, seen = new WeakSet()): any => {
+export const deepSanitize = (data: any, seen = new WeakSet()): any => {
   if (data === null || typeof data !== 'object') {
     return data;
   }
@@ -425,6 +451,39 @@ export const updateRondaSchedule = async (id: string, members: string[]) => {
     } catch (e) { console.error("Error updating ronda:", e); }
 };
 
+export const updateRondaShifts = async (id: string, shifts: any[]) => {
+    try {
+        await updateDoc(doc(db, RONDA_COL, id), { shifts });
+    } catch (e) { console.error("Error updating ronda shifts:", e); }
+};
+
+export const addRondaSwapRequest = async (request: any) => {
+    try {
+        await addDoc(collection(db, "rondaSwapRequests"), deepSanitize(request));
+    } catch (e) { console.error("Error adding swap request:", e); }
+};
+
+export const updateRondaSwapRequestStatus = async (id: string, status: string) => {
+    try {
+        await updateDoc(doc(db, "rondaSwapRequests", id), { status });
+    } catch (e) { console.error("Error updating swap request status:", e); }
+};
+
+export const subscribeToRondaSwapRequests = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, "rondaSwapRequests"), orderBy("timestamp", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to swap requests:", error);
+        const qSimple = query(collection(db, "rondaSwapRequests"));
+        onSnapshot(qSimple, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            callback(data);
+        });
+    });
+};
+
 // --- 9. UMKM ---
 export const addUMKMToDb = async (umkm: any) => {
   try {
@@ -619,6 +678,35 @@ export const subscribeToGallery = (callback: (data: any[]) => void) => {
   });
 };
 
+// --- 14. NEWS ---
+export const addNewsToDb = async (news: any) => {
+  try {
+    const { id, ...data } = news;
+    await addDoc(collection(db, NEWS_COL), deepSanitize(data));
+  } catch (e) { console.error("Error adding news:", e); }
+};
+
+export const updateNewsInDb = async (id: string, updates: any) => {
+  try { await updateDoc(doc(db, NEWS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating news:", e); }
+};
+
+export const deleteNewsFromDb = async (id: string) => {
+  try { await deleteDoc(doc(db, NEWS_COL, id)); } catch (e) { console.error("Error deleting news:", e); }
+};
+
+export const subscribeToNews = (callback: (data: any[]) => void) => {
+  const q = query(collection(db, NEWS_COL), orderBy("date", "desc"));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      ...doc.data(), 
+      id: doc.id 
+    }));
+    callback(data);
+  }, (error) => {
+    console.error("Error subscribing to news:", error);
+  });
+};
+
 
 // --- SEEDING & AUTO-MIGRATION ---
 export const seedDatabase = async (initialData?: any) => {
@@ -715,6 +803,15 @@ export const seedDatabase = async (initialData?: any) => {
           for (const m of initialData.marketItems) {
               const { id, ...data } = m;
               await addDoc(collection(db, MARKET_COL), deepSanitize(data));
+          }
+      }
+
+      // Seed Bills (New)
+      const billsSnap = await getDocs(collection(db, BILLS_COL));
+      if (billsSnap.empty && initialData.bills && initialData.bills.length > 0) {
+          for (const b of initialData.bills) {
+              const { id, ...data } = b;
+              await addDoc(collection(db, BILLS_COL), deepSanitize(data));
           }
       }
 

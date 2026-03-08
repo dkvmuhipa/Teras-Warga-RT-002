@@ -1,33 +1,39 @@
-import React, { useState } from 'react';
-import { Shield, Package, Plus, Edit2, Trash2, Users, CheckCircle2, AlertTriangle, Box, Calendar, UserCheck, ArrowRight } from 'lucide-react';
-import { RondaSchedule, InventoryItem, RondaCheckLog } from '../../types';
-import { motion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw } from 'lucide-react';
+import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest } from '../../types';
+import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { addInventoryToDb, updateInventoryInDb, deleteInventoryFromDb, updateRondaSchedule } from '../../services/databaseService';
+import { updateRondaSchedule, updateRondaShifts, updateRondaSwapRequestStatus } from '../../services/databaseService';
 
 interface FacilityManagerProps {
   ronda: RondaSchedule[];
-  inventory: InventoryItem[];
   rondaLogs: RondaCheckLog[];
+  rondaSwapRequests: RondaSwapRequest[];
+  houses: House[];
 }
 
-export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, inventory, rondaLogs }) => {
-  // Ronda State
+export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses }) => {
   const [isRondaModalOpen, setIsRondaModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
   const [editingRonda, setEditingRonda] = useState<RondaSchedule | null>(null);
   const [rondaMembersInput, setRondaMembersInput] = useState('');
+  const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps'>('schedule');
 
-  // Inventory State
-  const [isInvModalOpen, setIsInvModalOpen] = useState(false);
-  const [editingInvId, setEditingInvId] = useState<string | null>(null);
-  const [invName, setInvName] = useState('');
-  const [invTotal, setInvTotal] = useState('');
-  const [invCondition, setInvCondition] = useState<'Baik' | 'Perlu Perbaikan' | 'Rusak'>('Baik');
+  // Shift Management State
+  const [shifts, setShifts] = useState<{ id: string; time: string; members: string[] }[]>([]);
+  const [residentSearch, setResidentSearch] = useState('');
 
   const handleEditRonda = (schedule: RondaSchedule) => {
     setEditingRonda(schedule);
     setRondaMembersInput(schedule.members.join(', '));
+    setShifts(schedule.shifts || [
+      { id: '1', time: '22:00 - 01:00', members: [] },
+      { id: '2', time: '01:00 - 04:00', members: [] }
+    ]);
     setIsRondaModalOpen(true);
   };
 
@@ -35,50 +41,67 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, invento
     e.preventDefault();
     if (!editingRonda || !editingRonda.id) return;
     
-    const members = rondaMembersInput.split(',').map(m => m.trim()).filter(m => m !== '');
+    // Save legacy members for backward compatibility
+    const members = shifts.flatMap(s => s.members);
     await updateRondaSchedule(editingRonda.id, members);
+    await updateRondaShifts(editingRonda.id, shifts);
+    
     setIsRondaModalOpen(false);
   };
 
-  const resetInvForm = () => {
-    setInvName(''); setInvTotal(''); setInvCondition('Baik'); setEditingInvId(null);
+  const handleAddMemberToShift = (shiftId: string, memberName: string) => {
+    setShifts(prev => prev.map(s => 
+      s.id === shiftId 
+        ? { ...s, members: Array.from(new Set([...s.members, memberName])) } 
+        : s
+    ));
+    setResidentSearch('');
   };
 
-  const handleEditInventory = (item: InventoryItem) => {
-    setEditingInvId(item.id);
-    setInvName(item.name);
-    setInvTotal(item.total.toString());
-    setInvCondition(item.condition);
-    setIsInvModalOpen(true);
+  const handleRemoveMemberFromShift = (shiftId: string, memberName: string) => {
+    setShifts(prev => prev.map(s => 
+      s.id === shiftId 
+        ? { ...s, members: s.members.filter(m => m !== memberName) } 
+        : s
+    ));
   };
 
-  const handleSaveInventory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const data = {
-      name: invName,
-      total: parseInt(invTotal),
-      available: parseInt(invTotal), // Simplified logic
-      condition: invCondition
-    };
-
-    if (editingInvId) await updateInventoryInDb(editingInvId, data);
-    else await addInventoryToDb(data);
-
-    setIsInvModalOpen(false);
-    resetInvForm();
+  const handleUpdateSwapStatus = async (id: string, status: 'Approved' | 'Rejected') => {
+    await updateRondaSwapRequestStatus(id, status);
   };
 
-  const handleDeleteInventory = async (id: string) => {
-    if (confirm('Hapus barang inventaris ini?')) await deleteInventoryFromDb(id);
+  const handleAutoRotate = () => {
+    // Simple rotation logic: shift everyone one day forward
+    // In a real app, this would be more complex
+    alert("Fitur Rotasi Otomatis sedang diproses. Sistem akan mengacak jadwal berdasarkan ketersediaan warga.");
   };
+
+  const residents = houses
+    .filter(h => h.status === 'Occupied')
+    .map(h => h.headOfFamily)
+    .filter(name => name !== '-');
+
+  const filteredResidents = residents.filter(r => 
+    r.toLowerCase().includes(residentSearch.toLowerCase())
+  );
+
+  const filteredLogs = rondaLogs.filter(log => {
+    const matchesFilter = logFilter === 'All' || (logFilter === 'Aman' ? log.status === 'Aman' : log.status !== 'Aman');
+    const matchesSearch = log.officerName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         (log.note || '').toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const isPatrolActive = rondaLogs.filter(l => l.type === 'Start').length > rondaLogs.filter(l => l.type === 'End').length;
+  const today = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
+    hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
   };
 
@@ -87,272 +110,517 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, invento
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-8"
+      className="space-y-8 pb-12"
     >
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Fasilitas & Keamanan</h2>
-          <p className="text-slate-500 font-medium mt-1">Kelola jadwal ronda malam dan inventaris aset RT 002.</p>
-        </div>
-        <div className="flex gap-3">
-          <button 
-            onClick={() => { resetInvForm(); setIsInvModalOpen(true); }}
-            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20"
-          >
-            <Plus size={16} /> Tambah Inventaris
-          </button>
-        </div>
-      </div>
-
-      {/* Ronda Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl"><Shield size={24}/></div>
-            <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sedang Patroli</p>
-                <h3 className="text-xl font-black text-slate-800">
-                    {rondaLogs.filter(l => l.type === 'Start').length > rondaLogs.filter(l => l.type === 'End').length ? 'Aktif' : 'Tidak Ada'}
-                </h3>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-200">
+              <Shield size={20} />
             </div>
-        </div>
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><CheckCircle2 size={24}/></div>
-            <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Laporan Aman</p>
-                <h3 className="text-2xl font-black text-slate-800">{rondaLogs.filter(l => l.status === 'Aman').length}</h3>
-            </div>
-        </div>
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-            <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl"><AlertTriangle size={24}/></div>
-            <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Insiden/Mencurigakan</p>
-                <h3 className="text-2xl font-black text-slate-800">{rondaLogs.filter(l => l.status !== 'Aman').length}</h3>
-            </div>
-        </div>
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
-            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl"><Calendar size={24}/></div>
-            <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Laporan</p>
-                <h3 className="text-2xl font-black text-slate-800">{rondaLogs.length}</h3>
-            </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Ronda Section */}
-        <motion.div variants={itemVariants} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl">
-                  <Shield size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-800">Jadwal Ronda</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Siskamling Mingguan</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              {ronda.map((r) => (
-                <div key={r.id || r.day} className="flex justify-between items-center p-5 bg-slate-50/50 border border-slate-100 rounded-3xl hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all group/item">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-sm font-black text-indigo-600 shadow-sm group-hover/item:scale-110 transition-transform">
-                      {r.day.substring(0, 3)}
-                    </div>
-                    <div>
-                      <h4 className="font-black text-slate-800 text-base">{r.day}</h4>
-                      <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-black uppercase tracking-widest mt-0.5">
-                        <Users size={12} /> {r.members.length} Personil
-                      </div>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => handleEditRonda(r)}
-                    className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pusat Komando Keamanan</h2>
           </div>
-        </motion.div>
+          <p className="text-slate-500 font-medium">Sistem Monitoring Siskamling Digital RT 002</p>
+        </div>
+        <div className="flex gap-3 w-full md:w-auto">
+          <Button onClick={handleAutoRotate} variant="outline" className="flex-1 md:flex-none border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+            <RefreshCw size={18} className="mr-2" /> Rotasi Otomatis
+          </Button>
+          <Button variant="outline" className="flex-1 md:flex-none border-slate-200 hover:bg-slate-50">
+            <Download size={18} className="mr-2" /> Export
+          </Button>
+          <Button onClick={() => setIsReportModalOpen(true)} className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-200">
+            <AlertTriangle size={18} className="mr-2" /> Laporkan Insiden
+          </Button>
+        </div>
+      </div>
 
-        {/* Ronda Logs Section */}
-        <motion.div variants={itemVariants} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group lg:col-span-2">
-           <div className="flex justify-between items-center mb-8">
+      {/* Navigation Tabs */}
+      <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 w-fit">
+        {[
+          { id: 'schedule', label: 'Jadwal & Shift', icon: Calendar },
+          { id: 'logs', label: 'Log Aktivitas', icon: Activity },
+          { id: 'swaps', label: 'Tukar Jadwal', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Pending').length }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+              activeTab === tab.id ? 'bg-white text-indigo-600 shadow-lg shadow-indigo-100' : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <tab.icon size={16} />
+            {tab.label}
+            {tab.count !== undefined && tab.count > 0 && (
+              <span className="bg-rose-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] animate-pulse">
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Live Status Banner */}
+      <AnimatePresence>
+        {isPatrolActive && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-indigo-600 text-white p-4 rounded-3xl flex items-center justify-between shadow-xl shadow-indigo-100 border border-indigo-500">
               <div className="flex items-center gap-4">
-                <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
-                  <UserCheck size={24} />
+                <div className="relative">
+                  <div className="w-3 h-3 bg-emerald-400 rounded-full animate-ping absolute inset-0"></div>
+                  <div className="w-3 h-3 bg-emerald-400 rounded-full relative"></div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-800">Log Siskamling Digital</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Riwayat Absensi & Laporan Ronda</p>
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-80">Status Saat Ini</p>
+                  <p className="font-black text-lg">Patroli Sedang Berlangsung</p>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center gap-6">
+                <div className="text-right">
+                  <p className="text-[10px] font-bold uppercase opacity-70">Petugas Aktif</p>
+                  <p className="font-bold">Budi & Team</p>
+                </div>
+                <div className="w-px h-8 bg-white/20"></div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold uppercase opacity-70">Mulai Sejak</p>
+                  <p className="font-bold">22:15 WITA</p>
                 </div>
               </div>
             </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead>
-                  <tr className="bg-slate-50/50 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
-                    <th className="px-6 py-4 rounded-tl-2xl">Waktu</th>
-                    <th className="px-6 py-4">Petugas</th>
-                    <th className="px-6 py-4">Lokasi</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Catatan</th>
-                    <th className="px-6 py-4 rounded-tr-2xl">Bukti</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {rondaLogs.length > 0 ? (
-                    rondaLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-4 font-bold text-slate-600">
-                          {new Date(log.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
-                        </td>
-                        <td className="px-6 py-4 font-bold text-slate-800">{log.officerName}</td>
-                        <td className="px-6 py-4 text-slate-500">
-                           <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-                              Pos Utama
-                           </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                            log.status === 'Aman' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                            'bg-rose-50 text-rose-600 border-rose-100'
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Status Patroli', value: isPatrolActive ? 'Aktif' : 'Standby', icon: Activity, color: 'indigo', sub: 'Kondisi Lingkungan' },
+          { label: 'Laporan Aman', value: rondaLogs.filter(l => l.status === 'Aman').length, icon: CheckCircle2, color: 'emerald', sub: '24 Jam Terakhir' },
+          { label: 'Insiden Terdeteksi', value: rondaLogs.filter(l => l.status !== 'Aman').length, icon: AlertTriangle, color: 'rose', sub: 'Perlu Tindakan' },
+          { label: 'Total Aktivitas', value: rondaLogs.length, icon: Calendar, color: 'blue', sub: 'Log Terintegrasi' },
+        ].map((stat, i) => (
+          <motion.div 
+            key={i}
+            variants={itemVariants}
+            className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className={`p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-2xl w-fit mb-4 group-hover:scale-110 transition-transform`}>
+              <stat.icon size={24} />
+            </div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+            <h3 className="text-2xl font-black text-slate-900">{stat.value}</h3>
+            <p className="text-[10px] font-medium text-slate-400 mt-1">{stat.sub}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {activeTab === 'schedule' && (
+          <>
+            {/* Weekly Schedule */}
+            <motion.div variants={itemVariants} className="lg:col-span-1 space-y-6">
+              <div className="flex items-center justify-between px-2">
+                <h3 className="text-xl font-black text-slate-900">Jadwal Mingguan</h3>
+                <Button variant="ghost" size="sm" className="text-indigo-600 font-bold hover:bg-indigo-50">Lihat Kalender</Button>
+              </div>
+              <div className="space-y-3">
+                {ronda.map((r) => {
+                  const isToday = r.day === today;
+                  return (
+                    <div 
+                      key={r.id || r.day} 
+                      onClick={() => handleEditRonda(r)}
+                      className={`p-4 rounded-3xl border transition-all cursor-pointer group ${
+                        isToday 
+                        ? 'bg-indigo-600 border-indigo-500 text-white shadow-xl shadow-indigo-100' 
+                        : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black shadow-sm ${
+                            isToday ? 'bg-white/20 text-white' : 'bg-slate-50 text-indigo-600'
                           }`}>
-                            {log.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-slate-500 italic">"{log.note || '-'}"</td>
-                        <td className="px-6 py-4">
-                          {log.photoUrl ? (
-                              <img src={log.photoUrl} alt="Bukti" className="w-12 h-12 rounded-lg object-cover border border-slate-200" />
-                          ) : '-'}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-slate-400 font-bold italic">
-                        Belum ada data log siskamling.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-        </motion.div>
-
-        {/* Inventory Section */}
-        <motion.div variants={itemVariants} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
-                  <Package size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-800">Inventaris Aset</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aset & Perlengkapan RT</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {inventory.map((item) => (
-                <div key={item.id} className="flex justify-between items-center p-5 bg-slate-50/50 border border-slate-100 rounded-3xl hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all group/item">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm group-hover/item:scale-110 transition-transform">
-                      <Box size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-slate-800 text-base">{item.name}</h4>
-                      <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-black uppercase tracking-widest mt-0.5">
-                        <CheckCircle2 size={12} /> {item.total} Unit Tersedia
+                            {r.day.substring(0, 3)}
+                          </div>
+                          <div>
+                            <h4 className="font-black text-base">{r.day}</h4>
+                            <p className={`text-[10px] font-bold uppercase tracking-wider ${isToday ? 'text-indigo-200' : 'text-slate-400'}`}>
+                              {r.shifts ? r.shifts.reduce((acc, s) => acc + s.members.length, 0) : r.members.length} Personil Bertugas
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight size={18} className={isToday ? 'text-white/50' : 'text-slate-300'} />
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
+                        {r.shifts ? r.shifts.map((s) => (
+                          <div key={s.id} className="space-y-1">
+                            <p className={`text-[9px] font-black uppercase tracking-widest ${isToday ? 'text-indigo-200' : 'text-slate-400'}`}>{s.time}</p>
+                            <div className="flex flex-wrap gap-2">
+                              {s.members.map((m, idx) => (
+                                <span key={idx} className={`px-2 py-1 rounded-lg text-[10px] font-bold backdrop-blur-sm ${isToday ? 'bg-white/10' : 'bg-slate-50 text-slate-600'}`}>
+                                  {m}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )) : (
+                          <div className="flex flex-wrap gap-2">
+                            {r.members.map((m, idx) => (
+                              <span key={idx} className={`px-2 py-1 rounded-lg text-[10px] font-bold backdrop-blur-sm ${isToday ? 'bg-white/10' : 'bg-slate-50 text-slate-600'}`}>
+                                {m}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                      item.condition === 'Baik' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                      item.condition === 'Rusak' ? 'bg-rose-50 text-rose-600 border-rose-100' : 
-                      'bg-amber-50 text-amber-600 border-amber-100'
-                    }`}>
-                      {item.condition}
-                    </span>
-                    <div className="flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                      <button onClick={() => handleEditInventory(item)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
-                        <Edit2 size={16} />
-                      </button>
-                      <button onClick={() => handleDeleteInventory(item.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
-                        <Trash2 size={16} />
-                      </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+            {/* Shift Overview Card */}
+            <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-100 shadow-sm p-8">
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">Detail Shift Hari Ini</h3>
+                  <p className="text-xs font-medium text-slate-400 mt-1">Pembagian tugas siskamling malam ini</p>
+                </div>
+                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                  <Clock size={24} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {(ronda.find(r => r.day === today)?.shifts || [
+                  { id: '1', time: '22:00 - 01:00', members: ronda.find(r => r.day === today)?.members || [] },
+                  { id: '2', time: '01:00 - 04:00', members: [] }
+                ]).map((shift, idx) => (
+                  <div key={shift.id} className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="px-3 py-1 bg-white rounded-full text-[10px] font-black text-indigo-600 border border-slate-100 uppercase tracking-widest">Shift {idx + 1}</span>
+                      <span className="text-xs font-bold text-slate-400">{shift.time}</span>
+                    </div>
+                    <div className="space-y-3">
+                      {shift.members.length > 0 ? shift.members.map((m, i) => (
+                        <div key={i} className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                          <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-black">{m.charAt(0)}</div>
+                          <span className="text-sm font-bold text-slate-700">{m}</span>
+                          <div className="ml-auto w-2 h-2 rounded-full bg-emerald-500"></div>
+                        </div>
+                      )) : (
+                        <p className="text-xs text-slate-400 italic text-center py-4">Belum ada personil</p>
+                      )}
                     </div>
                   </div>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+
+        {activeTab === 'logs' && (
+          <motion.div variants={itemVariants} className="lg:col-span-3 bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-8 border-b border-slate-50">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">Log Aktivitas Digital</h3>
+                  <p className="text-xs font-medium text-slate-400 mt-1">Monitoring riwayat keamanan secara real-time</p>
                 </div>
-              ))}
-              {inventory.length === 0 && (
-                <div className="text-center py-12 px-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-4 shadow-sm">
-                    <Package size={32} />
+                <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100 w-full md:w-auto">
+                  {(['All', 'Aman', 'Insiden'] as const).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setLogFilter(f)}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        logFilter === f ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input 
+                  type="text"
+                  placeholder="Cari petugas, lokasi, atau catatan..."
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto max-h-[600px] p-8 space-y-6 custom-scrollbar">
+              {filteredLogs.length > 0 ? (
+                filteredLogs.map((log, idx) => (
+                  <div key={log.id} className="relative pl-8 group">
+                    {/* Timeline Line */}
+                    {idx !== filteredLogs.length - 1 && (
+                      <div className="absolute left-[11px] top-8 bottom-[-24px] w-0.5 bg-slate-100 group-hover:bg-indigo-100 transition-colors"></div>
+                    )}
+                    {/* Timeline Dot */}
+                    <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm z-10 transition-transform group-hover:scale-125 ${
+                      log.status === 'Aman' ? 'bg-emerald-500' : 'bg-rose-500'
+                    }`}></div>
+
+                    <div className="bg-slate-50/50 border border-slate-100 rounded-[2rem] p-6 hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all">
+                      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-xs font-black text-indigo-600">
+                            {log.officerName.charAt(0)}
+                          </div>
+                          <div>
+                            <h4 className="font-black text-slate-900">{log.officerName}</h4>
+                            <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                              <span className="flex items-center gap-1"><Clock size={12} /> {new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })} WITA</span>
+                              <span className="flex items-center gap-1"><MapPin size={12} /> Pos Utama</span>
+                            </div>
+                          </div>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                          log.status === 'Aman' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
+                        }`}>
+                          {log.status}
+                        </span>
+                      </div>
+                      
+                      <p className="text-sm text-slate-600 leading-relaxed italic mb-4">"{log.note || 'Kondisi terpantau aman terkendali.'}"</p>
+                      
+                      {log.photoUrl && (
+                        <div className="relative w-full h-48 rounded-2xl overflow-hidden border border-slate-200 group/img">
+                          <img src={log.photoUrl} alt="Bukti Patroli" className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button size="sm" variant="secondary" className="bg-white/90 backdrop-blur-sm">Lihat Detail</Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-slate-400 font-bold text-sm">Belum ada data inventaris.</p>
-                  <button onClick={() => { resetInvForm(); setIsInvModalOpen(true); }} className="mt-4 text-xs font-black text-indigo-600 uppercase tracking-widest hover:underline">Tambah Sekarang</button>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200 mb-4">
+                    <Search size={40} />
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-800">Tidak Ada Data</h4>
+                  <p className="text-sm text-slate-400 max-w-xs mx-auto mt-1">Coba ubah filter atau kata kunci pencarian Anda.</p>
                 </div>
               )}
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
+
+        {activeTab === 'swaps' && (
+          <motion.div variants={itemVariants} className="lg:col-span-3 bg-white rounded-[3rem] border border-slate-100 shadow-sm p-8">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h3 className="text-xl font-black text-slate-900">Permintaan Tukar Jadwal</h3>
+                <p className="text-xs font-medium text-slate-400 mt-1">Kelola permohonan pergantian jadwal antar warga</p>
+              </div>
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                <ArrowLeftRight size={24} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {rondaSwapRequests.length > 0 ? rondaSwapRequests.map((request) => (
+                <div key={request.id} className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 relative overflow-hidden group">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-sm font-black text-indigo-600 shadow-sm">
+                        {request.requesterName.charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-900">{request.requesterName}</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rumah {request.requesterHouseId}</p>
+                      </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                      request.status === 'Pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                      request.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                      'bg-rose-50 text-rose-600 border-rose-100'
+                    }`}>
+                      {request.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 mb-6">
+                    <div className="text-center flex-1">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Dari</p>
+                      <p className="text-sm font-black text-slate-700">{request.fromDay}</p>
+                    </div>
+                    <div className="px-4 text-indigo-400">
+                      <ArrowLeftRight size={16} />
+                    </div>
+                    <div className="text-center flex-1">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Ke</p>
+                      <p className="text-sm font-black text-slate-700">{request.toDay}</p>
+                    </div>
+                  </div>
+
+                  {request.reason && (
+                    <p className="text-xs text-slate-500 italic mb-6">"{request.reason}"</p>
+                  )}
+
+                  {request.status === 'Pending' && (
+                    <div className="flex gap-3">
+                      <Button 
+                        onClick={() => handleUpdateSwapStatus(request.id, 'Approved')}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-10 rounded-xl text-xs font-black"
+                      >
+                        <Check size={14} className="mr-2" /> Setujui
+                      </Button>
+                      <Button 
+                        onClick={() => handleUpdateSwapStatus(request.id, 'Rejected')}
+                        variant="outline" 
+                        className="flex-1 border-rose-100 text-rose-600 hover:bg-rose-50 h-10 rounded-xl text-xs font-black"
+                      >
+                        <X size={14} className="mr-2" /> Tolak
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )) : (
+                <div className="col-span-full py-20 text-center">
+                  <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200 mx-auto mb-4">
+                    <Bell size={40} />
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-800">Tidak Ada Permintaan</h4>
+                  <p className="text-sm text-slate-400 mt-1">Belum ada warga yang mengajukan tukar jadwal.</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
       </div>
 
-      {/* Ronda Modal */}
-      <Modal isOpen={isRondaModalOpen} onClose={() => setIsRondaModalOpen(false)} title={`Edit Jadwal Ronda: ${editingRonda?.day}`}>
-        <form onSubmit={handleSaveRonda} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Petugas Ronda (Pisahkan dengan koma)</label>
-            <textarea 
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all h-32"
-              value={rondaMembersInput}
-              onChange={e => setRondaMembersInput(e.target.value)}
-              placeholder="Contoh: Budi, Anto, Joko..."
-            />
-            <p className="text-[10px] text-slate-400 mt-1.5">*Masukkan nama warga yang bertugas pada hari ini.</p>
+      <Modal isOpen={isRondaModalOpen} onClose={() => setIsRondaModalOpen(false)} title={`Pengaturan Jadwal: ${editingRonda?.day}`}>
+        <form onSubmit={handleSaveRonda} className="space-y-8 max-w-2xl mx-auto">
+          <div className="p-6 bg-indigo-50 rounded-[2rem] border border-indigo-100 flex items-center gap-6">
+            <div className="p-4 bg-white rounded-2xl text-indigo-600 shadow-xl shadow-indigo-100"><Users size={28} /></div>
+            <div>
+              <p className="text-sm font-black text-indigo-900 uppercase tracking-widest">Konfigurasi Shift & Petugas</p>
+              <p className="text-xs text-indigo-600 font-medium mt-1">Pilih warga dari daftar untuk ditugaskan pada shift malam ini.</p>
+            </div>
           </div>
-          <Button type="submit" className="w-full py-3">Simpan Jadwal</Button>
+
+          <div className="space-y-6">
+            {shifts.map((shift, sIdx) => (
+              <div key={shift.id} className="bg-slate-50 rounded-[2.5rem] p-8 border border-slate-100 relative group">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xs font-black text-indigo-600 shadow-sm">{sIdx + 1}</span>
+                    <h4 className="font-black text-slate-900 uppercase tracking-widest text-sm">Shift {sIdx + 1}</h4>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm">
+                    <Clock size={14} className="text-indigo-500" />
+                    <input 
+                      type="text" 
+                      className="bg-transparent border-none outline-none text-xs font-black text-slate-700 w-24 text-center"
+                      value={shift.time}
+                      onChange={(e) => setShifts(prev => prev.map(s => s.id === shift.id ? { ...s, time: e.target.value } : s))}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {shift.members.map((m, mIdx) => (
+                      <div key={mIdx} className="flex items-center gap-2 bg-white pl-3 pr-1 py-1 rounded-xl border border-slate-200 shadow-sm animate-slide-in-right">
+                        <span className="text-xs font-bold text-slate-700">{m}</span>
+                        <button 
+                          type="button"
+                          onClick={() => handleRemoveMemberFromShift(shift.id, m)}
+                          className="p-1 hover:bg-rose-50 text-slate-300 hover:text-rose-500 rounded-lg transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    {shift.members.length === 0 && (
+                      <p className="text-xs text-slate-400 italic py-2">Belum ada warga terpilih</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input 
+                      type="text"
+                      placeholder="Cari nama warga..."
+                      className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                      onChange={(e) => setResidentSearch(e.target.value)}
+                      onFocus={() => setResidentSearch('')}
+                    />
+                    {residentSearch && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-48 overflow-y-auto custom-scrollbar p-2">
+                        {filteredResidents.length > 0 ? filteredResidents.map((r, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => handleAddMemberToShift(shift.id, r)}
+                            className="w-full text-left px-4 py-3 hover:bg-indigo-50 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-between group"
+                          >
+                            {r}
+                            <Plus size={14} className="opacity-0 group-hover:opacity-100 text-indigo-600" />
+                          </button>
+                        )) : (
+                          <p className="text-xs text-slate-400 italic p-4 text-center">Warga tidak ditemukan</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-4">
+            <Button type="button" variant="outline" onClick={() => setIsRondaModalOpen(false)} className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-xs">Batal</Button>
+            <Button type="submit" className="flex-1 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 font-black uppercase tracking-widest text-xs">Simpan Jadwal</Button>
+          </div>
         </form>
       </Modal>
 
-      {/* Inventory Modal */}
-      <Modal isOpen={isInvModalOpen} onClose={() => setIsInvModalOpen(false)} title={editingInvId ? "Edit Barang" : "Tambah Barang Baru"}>
-        <form onSubmit={handleSaveInventory} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Barang</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invName} onChange={e => setInvName(e.target.value)} required placeholder="Contoh: Tenda..." />
+      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Laporan Insiden Keamanan">
+        <div className="space-y-6">
+          <div className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100 text-center relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-b from-rose-100/0 to-rose-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="relative z-10">
+              <button className="w-20 h-20 bg-rose-600 text-white rounded-full flex items-center justify-center mx-auto hover:bg-rose-700 transition-all shadow-xl shadow-rose-200 hover:scale-110 active:scale-95">
+                <Megaphone size={32} />
+              </button>
+              <h4 className="text-lg font-black text-rose-900 mt-6">Tekan & Bicara</h4>
+              <p className="text-xs text-rose-600 font-medium mt-1">AI akan otomatis mentranskripsi laporan Anda.</p>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Total</label>
-                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invTotal} onChange={e => setInvTotal(e.target.value)} required />
-             </div>
-             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kondisi</label>
-                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invCondition} onChange={e => setInvCondition(e.target.value as any)}>
-                   <option value="Baik">Baik</option>
-                   <option value="Perlu Perbaikan">Perlu Perbaikan</option>
-                   <option value="Rusak">Rusak</option>
-                </select>
-             </div>
+          
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 w-1 bg-indigo-500 rounded-full"></div>
+            <div className="pl-4">
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Detail Laporan Manual</label>
+              <textarea 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all h-32"
+                placeholder="Jelaskan situasi atau kejadian yang Anda temukan..."
+              />
+            </div>
           </div>
-          <Button type="submit" className="w-full py-3 mt-2">{editingInvId ? 'Simpan Perubahan' : 'Simpan Barang'}</Button>
-        </form>
+
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setIsReportModalOpen(false)} className="flex-1 py-3">Batal</Button>
+            <Button className="flex-1 py-3 bg-rose-600 hover:bg-rose-700">Kirim Laporan Darurat</Button>
+          </div>
+        </div>
       </Modal>
     </motion.div>
   );

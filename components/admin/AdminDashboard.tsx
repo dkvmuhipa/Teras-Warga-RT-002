@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
-  House, Announcement, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem 
+  House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
+  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, Bill, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -15,12 +15,21 @@ import { FacilityManager } from './FacilityManager';
 import { ServiceManager } from './ServiceManager';
 import { Settings } from './Settings';
 import { OfficialManagement } from './OfficialManagement';
+import { NotificationManager } from './NotificationManager';
+import { DocumentManager } from './DocumentManager';
+import { BillManager } from './BillManager';
+import { PopulationReportManager } from './PopulationReportManager';
+import { EventManager } from './EventManager';
+import { AssetManager } from './AssetManager';
+import { AdvancedAnalytics } from './AdvancedAnalytics';
+import { NotificationCombined } from './NotificationCombined';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar } from 'lucide-react';
 
 interface AdminDashboardProps {
   houses: House[];
   announcements: Announcement[];
+  news: News[];
   cashFlow: CashFlow[];
   officials: Official[];
   reports: Report[];
@@ -30,14 +39,23 @@ interface AdminDashboardProps {
   umkm: UMKM[];
   polls: Poll[];
   rondaLogs: RondaCheckLog[];
+  rondaSwapRequests: RondaSwapRequest[];
   gallery: GalleryItem[];
   pdfConfig: PdfConfig;
   setPdfConfig: (config: PdfConfig) => void;
+  notifications: AppNotification[];
+  documents: Document[];
+  bills: Bill[];
+  populationReports: PopulationReport[];
+  setPopulationReports: (reports: PopulationReport[]) => void;
+  populationLogs: PopulationChangeLog[];
+  setPopulationLogs: (logs: PopulationChangeLog[]) => void;
+  events: AppEvent[];
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  houses, announcements, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, gallery, pdfConfig, setPdfConfig
+  houses, announcements, news, cashFlow, officials, reports, letters, 
+  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -55,23 +73,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} onTabChange={setActiveTab} />;
+        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} bills={bills} onTabChange={setActiveTab} />;
       case 'residents':
-        return <ResidentManager houses={houses} reports={reports} officials={officials} pdfConfig={pdfConfig} />;
+        return <ResidentManager houses={houses} bills={bills} reports={reports} officials={officials} pdfConfig={pdfConfig} />;
       case 'finance':
         return <FinanceManager cashFlow={cashFlow} />;
       case 'services':
         return <ServiceManager letters={letters} reports={reports} />;
       case 'facilities':
-        return <FacilityManager ronda={ronda} inventory={inventory} rondaLogs={rondaLogs} />;
+        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} />;
+      case 'assets':
+        return <AssetManager inventory={inventory} />;
+      case 'events':
+        return <EventManager events={events} />;
+      case 'analytics':
+        return <AdvancedAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />;
       case 'content':
-        return <ContentManager announcements={announcements} polls={polls} umkm={umkm} gallery={gallery} />;
+        return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} />;
       case 'officials':
         return <OfficialManagement officials={officials} />;
+      case 'notifications':
+        return <NotificationCombined notifications={notifications} />;
+      case 'documents':
+        return <DocumentManager documents={documents} />;
+      case 'bills':
+        return <BillManager bills={bills} houses={houses} />;
+      case 'population-reports':
+        return <PopulationReportManager reports={populationReports} onAddReport={(r) => setPopulationReports([...populationReports, { ...r, id: Date.now().toString(), createdAt: new Date().toISOString() }])} onDeleteReport={(id) => setPopulationReports(populationReports.filter(r => r.id !== id))} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} />;
       case 'settings':
         return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       default:
-        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} onTabChange={setActiveTab} />;
+        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} bills={bills} onTabChange={setActiveTab} />;
     }
   };
 

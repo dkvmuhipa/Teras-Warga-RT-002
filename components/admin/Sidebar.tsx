@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   LayoutDashboard, Users, DollarSign, FileText, 
   Megaphone, ShoppingBag, Settings, LogOut, 
-  Menu, X, Shield, Package, Vote, Briefcase,
+  Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -38,9 +38,16 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     { 
       title: "Manajemen", 
       items: [
-        { id: 'facilities', icon: Package, label: 'Fasilitas & Ronda' },
+        { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
+        { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
+        { id: 'events', icon: Calendar, label: 'Manajemen Acara' },
+        { id: 'analytics', icon: BarChart3, label: 'Analitik Lanjutan' },
         { id: 'content', icon: Megaphone, label: 'Konten & Informasi' },
         { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
+        { id: 'notifications', icon: Bell, label: 'Notifikasi' },
+        { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
+        { id: 'bills', icon: DollarSign, label: 'Manajemen Iuran' },
+        { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
       ] 
     },
     { 

@@ -5,7 +5,7 @@ import { auth } from '../../services/firebaseConfig';
 import { PdfConfig, House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, MarketItem, AppNotification } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { seedDatabase } from '../../services/databaseService';
+import { seedDatabase, deepSanitize } from '../../services/databaseService';
 
 interface AdminSettingsProps {
   pdfConfig: PdfConfig;
@@ -58,16 +58,21 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   };
 
   const handleExportData = () => {
-    const data = {
-      houses, announcements, cashFlow, officials, reports, letters, 
-      ronda, inventory, umkm, polls, rondaLogs, marketItems, notifications
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `teras-backup-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
+    try {
+      const data = {
+        houses, announcements, cashFlow, officials, reports, letters, 
+        ronda, inventory, umkm, polls, rondaLogs, marketItems, notifications
+      };
+      const blob = new Blob([JSON.stringify(deepSanitize(data), null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `teras-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    } catch (e) {
+      console.error("Error exporting data:", e);
+      alert('Gagal mengekspor data: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
+    }
   };
 
   const handleResetSystem = async () => {

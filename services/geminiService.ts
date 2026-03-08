@@ -3,14 +3,27 @@
 import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
+let aiInstance: GoogleGenAI | null = null;
+
+function getAiInstance(): GoogleGenAI {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("API key must be set when using the Gemini API.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
+
 // Fix: Always use new GoogleGenAI({ apiKey: process.env.API_KEY }) to initialize the client
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = getAiInstance();
     const prompt = `Buatkan draf pengumuman untuk warga RT (Rukun Tetangga) dengan topik: "${topic}".
     Gaya bahasa: ${tone}.
     Struktur: Judul menarik, Salam pembuka, Isi pengumuman (singkat & jelas), Detail (Waktu/Tempat jika perlu), Salam penutup.
-    Format: Plain text (Markdown allowed). Bahasa Indonesia yang baik dan benar.`;
+    Format: Plain text. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Bahasa Indonesia yang baik dan benar.`;
 
     // Fix: Use ai.models.generateContent with the model name directly
     const response = await ai.models.generateContent({
@@ -28,11 +41,11 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
 
 export const analyzeReports = async (reports: string[]): Promise<string> => {
    try {
-     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+     const ai = getAiInstance();
      const prompt = `Berikut adalah daftar laporan warga minggu ini:
      ${reports.join('\n- ')}
      
-     Berikan ringkasan eksekutif singkat (maksimal 3 poin) mengenai isu utama yang perlu ditangani oleh Ketua RT.`;
+     Berikan ringkasan eksekutif singkat (maksimal 3 poin) mengenai isu utama yang perlu ditangani oleh Ketua RT. DILARANG menggunakan karakter asterik (*) atau format bold/italic.`;
      
      const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -53,7 +66,7 @@ export const generateDashboardSummary = async (data: {
   unpaidCount: number
 }): Promise<string> => {
    try {
-     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+     const ai = getAiInstance();
      const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
      Analisis data realtime dashboard RT 002 berikut:
      - Jumlah Penduduk: ${data.totalResidents} jiwa
@@ -66,7 +79,7 @@ export const generateDashboardSummary = async (data: {
      2. 🛡️ Tingkat Keresahan Warga (berdasarkan jumlah laporan)
      3. 💡 Satu rekomendasi aksi prioritas untuk pengurus RT minggu ini.
 
-     Format output menggunakan Markdown bold/list agar mudah dibaca. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
+     Format output menggunakan daftar poin (list) agar mudah dibaca. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
      
      const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -82,7 +95,7 @@ export const generateDashboardSummary = async (data: {
 
 export const askRit = async (question: string, contextData: { announcements: Announcement[], ronda: RondaSchedule[], officials: Official[] }): Promise<string> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = getAiInstance();
     const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     
     const announcementContext = contextData.announcements.length > 0 
@@ -120,6 +133,7 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     4. Jika warga bertanya "siapa ronda hari ini?", cek hari ini (${today}) dan cocokkan dengan data jadwal ronda di atas.
     5. Jika informasi tidak ada di data, sarankan untuk menghubungi Pak RT atau datang ke sekretariat.
     6. Gunakan bahasa Indonesia yang sopan dan natural.
+    7. DILARANG menggunakan karakter asterik (*) atau format bold/italic dalam jawaban Anda.
     `;
 
     const response = await ai.models.generateContent({

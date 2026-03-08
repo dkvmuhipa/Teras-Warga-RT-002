@@ -1,25 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Users, DollarSign, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Calendar, ArrowRight, Plus, Download, FileText,
-  Clock, CheckCircle2, MessageSquare, User, Megaphone
+  Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
 } from 'recharts';
-import { House, CashFlow, Report, Announcement } from '../../types';
+import { House, CashFlow, Report, Announcement, Bill } from '../../types';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { generateDashboardSummary } from '../../services/geminiService';
+import { Button } from '../ui/Button';
 
 interface DashboardOverviewProps {
   houses: House[];
   cashFlow: CashFlow[];
   reports: Report[];
   announcements: Announcement[];
+  bills: Bill[];
   onTabChange: (tab: string) => void;
 }
 
-export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, cashFlow, reports, announcements, onTabChange }) => {
+export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, cashFlow, reports, announcements, bills, onTabChange }) => {
+  const [aiSummary, setAiSummary] = useState<string>('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
+  const handleGenerateSummary = async () => {
+    setIsAiLoading(true);
+    const data = {
+      totalResidents: houses.reduce((acc, h) => acc + (h.occupants || 0), 0),
+      cashBalance: cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0) - cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0),
+      reportsCount: reports.filter(r => r.status === 'Baru').length,
+      unpaidCount: houses.filter(h => h.paymentStatus === 'Menunggak').length
+    };
+    const summary = await generateDashboardSummary(data);
+    setAiSummary(summary);
+    setIsAiLoading(false);
+  };
   // Calculate Stats
   const totalResidents = houses.reduce((acc, h) => acc + (h.occupants || 0), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
@@ -29,6 +47,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
   const balance = income - expense;
 
   const newReports = reports.filter(r => r.status === 'Baru').length;
+  
+  // Overdue Bills
+  const overdueBills = bills.filter(b => b.total > 0 && new Date(b.dueDate) < new Date());
 
   // Chart Data Preparation
   const chartData = cashFlow.slice(-7).map(c => ({
@@ -36,6 +57,22 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
     amount: c.amount,
     type: c.type
   }));
+
+  // Demographic Chart Data
+  const demographicData = [
+    { name: 'Ibu Hamil', value: houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0) },
+    { name: 'Bayi', value: houses.reduce((acc, h) => acc + (h.babyCount || 0), 0) },
+    { name: 'Balita', value: houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0) },
+    { name: 'Remaja', value: houses.reduce((acc, h) => acc + (h.teenagerCount || 0), 0) },
+    { name: 'Lansia', value: houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0) },
+  ];
+
+  // Report Status Chart Data
+  const reportStatusData = [
+    { name: 'Baru', value: reports.filter(r => r.status === 'Baru').length },
+    { name: 'Diproses', value: reports.filter(r => r.status === 'Diproses').length },
+    { name: 'Selesai', value: reports.filter(r => r.status === 'Selesai').length },
+  ];
 
   // Recent Activity Logic
   const recentActivity = [
@@ -104,6 +141,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
           <p className="text-slate-500 font-medium mt-1">Berikut adalah ringkasan aktivitas RT 002 hari ini.</p>
         </div>
         <div className="flex items-center gap-3">
+          <Button onClick={handleGenerateSummary} className="bg-indigo-600 hover:bg-indigo-700">
+            <Sparkles size={18} className="mr-2" /> {isAiLoading ? 'Memproses...' : 'Ringkasan AI'}
+          </Button>
           <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
             <Download size={18} />
             Ekspor Laporan
@@ -115,8 +155,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
         </div>
       </div>
 
+      {aiSummary && (
+        <div className="bg-slate-900 text-white p-8 rounded-[2rem] shadow-xl">
+          <h4 className="font-bold text-lg mb-4 text-indigo-300">Ringkasan AI:</h4>
+          <div className="prose prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
+            {aiSummary}
+          </div>
+        </div>
+      )}
+
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Warga Card */}
         <motion.div variants={itemVariants} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
           <div className="absolute -right-4 -top-4 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
@@ -188,70 +237,77 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
             </div>
           </div>
         </motion.div>
+
+        {/* Tagihan Jatuh Tempo Card */}
+        <motion.div variants={itemVariants} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-amber-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('bills')}>
+          <div className="absolute -right-4 -top-4 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
+                <Clock size={24} />
+              </div>
+              <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Tagihan</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-4xl font-black text-slate-900">{overdueBills.length}</h3>
+              <span className="text-sm font-bold text-slate-400">Jatuh Tempo</span>
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-xs font-bold text-amber-500">
+              <AlertTriangle size={14} />
+              <span>Perlu penagihan</span>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Chart Section */}
-        <motion.div variants={itemVariants} className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
-            <div>
-              <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <Activity size={20} className="text-indigo-500" />
-                Arus Kas Mingguan
-              </h3>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Statistik 7 Hari Terakhir</p>
-            </div>
-            <div className="flex bg-slate-100 p-1 rounded-xl">
-              <button className="px-4 py-1.5 bg-white text-slate-800 text-xs font-bold rounded-lg shadow-sm">Income</button>
-              <button className="px-4 py-1.5 text-slate-500 text-xs font-bold rounded-lg hover:text-slate-700">Expense</button>
+        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
+          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight mb-8">Arus Kas Mingguan</h3>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 11, fill: '#94a3b8'}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 11, fill: '#94a3b8'}} tickFormatter={(v) => `Rp${v/1000}k`} />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="amount" stroke="#6366f1" fill="#6366f1" fillOpacity={0.1} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
           
-          <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fontSize: 11, fill: '#94a3b8', fontWeight: 600}} 
-                  dy={15}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fontSize: 11, fill: '#94a3b8', fontWeight: 600}} 
-                  tickFormatter={(value) => `Rp${value/1000}k`}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    borderRadius: '20px', 
-                    border: 'none', 
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                    padding: '12px 16px'
-                  }}
-                  itemStyle={{ fontWeight: 700, fontSize: '12px' }}
-                  labelStyle={{ fontWeight: 800, color: '#1e293b', marginBottom: '4px' }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="amount" 
-                  stroke="#6366f1" 
-                  strokeWidth={4}
-                  fillOpacity={1} 
-                  fill="url(#colorIncome)" 
-                  animationDuration={2000}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight mb-8">Demografi Warga</h3>
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={demographicData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight mb-8">Status Laporan</h3>
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={reportStatusData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
         </motion.div>
 

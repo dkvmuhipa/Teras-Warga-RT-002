@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles } from 'lucide-react';
 import { LetterRequest, Report } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp } from '../../services/whatsappService';
+import { analyzeReports } from '../../services/geminiService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
@@ -19,6 +20,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
   
   const [selectedLetter, setSelectedLetter] = useState<LetterRequest | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<string>('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
+  const handleAnalyzeReports = async () => {
+    setIsAiLoading(true);
+    const reportTexts = reports.map(r => r.description);
+    const analysis = await analyzeReports(reportTexts);
+    setAiAnalysis(analysis);
+    setIsAiLoading(false);
+  };
 
   const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected') => {
     if (confirm(`Ubah status surat menjadi ${status}?`)) {
@@ -97,6 +108,24 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
           </button>
         </div>
       </div>
+
+      {activeTab === 'reports' && (
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
+          <p className="text-sm font-bold text-slate-600">Butuh bantuan menganalisis laporan warga?</p>
+          <Button onClick={handleAnalyzeReports} className="bg-indigo-600 hover:bg-indigo-700">
+            <Sparkles size={18} className="mr-2" /> {isAiLoading ? 'Menganalisis...' : 'Analisis dengan AI'}
+          </Button>
+        </div>
+      )}
+
+      {aiAnalysis && (
+        <div className="bg-slate-900 text-white p-8 rounded-[2rem] shadow-xl">
+          <h4 className="font-bold text-lg mb-4 text-indigo-300">Hasil Analisis AI:</h4>
+          <div className="prose prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
+            {aiAnalysis}
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem, GalleryItem, Checkpoint } from './types';
+import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem, GalleryItem, Checkpoint, FAQItem, Document, Bill, AppEvent } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TERAS";
@@ -102,6 +102,25 @@ export const MOCK_ANNOUNCEMENTS: Announcement[] = [
   }
 ];
 
+export const MOCK_EVENTS: AppEvent[] = [
+  {
+    id: '1',
+    title: 'Kerja Bakti',
+    description: 'Membersihkan selokan dan jalan utama',
+    date: '2026-03-15',
+    location: 'Area Blok C',
+    attendees: ['C10-01', 'C10-02']
+  },
+  {
+    id: '2',
+    title: 'Rapat Warga',
+    description: 'Pembahasan iuran bulanan',
+    date: '2026-03-20',
+    location: 'Pos Ronda',
+    attendees: []
+  }
+];
+
 export const MOCK_UMKM: UMKM[] = [
   {
     id: '1',
@@ -151,6 +170,30 @@ export const MOCK_GALLERY: GalleryItem[] = [
   { id: '2', title: 'Rapat Warga Bulanan', image: 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&q=80', date: '2023-10-01' },
   { id: '3', title: 'Lomba 17 Agustus', image: 'https://images.unsplash.com/photo-1530021232320-687d8e3dba54?auto=format&fit=crop&q=80', date: '2023-08-17' },
   { id: '4', title: 'Posyandu Balita', image: 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&q=80', date: '2023-09-15' },
+];
+
+export const MOCK_FAQ: FAQItem[] = [
+  { id: '1', question: 'Bagaimana cara mengurus KTP?', answer: 'Silakan hubungi Sekretaris RT untuk mendapatkan surat pengantar.' },
+  { id: '2', question: 'Kapan jadwal pengambilan sampah?', answer: 'Jadwal pengambilan sampah adalah setiap hari Senin dan Kamis pagi.' },
+];
+
+export const MOCK_DOCUMENTS: Document[] = [
+  { id: '1', title: 'SK Pengurus RT 002', category: 'SK RT', url: '#', uploadDate: '2023-01-01', uploadedBy: 'Admin' },
+  { id: '2', title: 'Aturan Kebersihan Lingkungan', category: 'Aturan', url: '#', uploadDate: '2023-02-15', uploadedBy: 'Admin' },
+];
+
+export const MOCK_BILLS: Bill[] = [
+  {
+    id: '1',
+    houseId: 'C10-01',
+    month: '2026-03',
+    dueDate: '2026-03-20',
+    total: 75000,
+    items: [
+      { id: '1-1', name: 'Iuran Kebersihan', amount: 25000, status: 'Paid', manager: 'Bpk. Asep' },
+      { id: '1-2', name: 'Iuran Keamanan', amount: 50000, status: 'Unpaid', manager: 'Bpk. Joko' }
+    ]
+  }
 ];
 
 export const DEFAULT_PDF_CONFIG: PdfConfig = {

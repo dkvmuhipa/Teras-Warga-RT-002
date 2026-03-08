@@ -192,16 +192,36 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {todayRonda && todayRonda.members.length > 0 ? (
-                  todayRonda.members.map((member, i) => (
-                    <div key={i} className="flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-xs border border-emerald-500/30">
-                        {i + 1}
+              <div className="space-y-4">
+                {todayRonda && (todayRonda.shifts || todayRonda.members.length > 0) ? (
+                  todayRonda.shifts ? (
+                    todayRonda.shifts.map((shift, i) => (
+                      <div key={shift.id} className="space-y-2 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-1">
+                            <Clock size={10} /> {shift.time}
+                          </p>
+                          <span className="text-[8px] font-black bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 uppercase">Shift {i+1}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {shift.members.map((member, j) => (
+                            <span key={j} className="text-[11px] font-bold text-white/90 bg-white/5 px-2 py-1 rounded-lg border border-white/10">
+                              {member}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                      <span className="font-bold text-sm tracking-wide">{member}</span>
-                    </div>
-                  ))
+                    ))
+                  ) : (
+                    todayRonda.members.map((member, i) => (
+                      <div key={i} className="flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-xs border border-emerald-500/30">
+                          {i + 1}
+                        </div>
+                        <span className="font-bold text-sm tracking-wide">{member}</span>
+                      </div>
+                    ))
+                  )
                 ) : (
                   <div className="text-center py-6 border border-dashed border-slate-700 rounded-2xl text-slate-500 text-sm font-medium">
                     Jadwal belum diatur.

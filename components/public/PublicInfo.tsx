@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2 } from 'lucide-react';
+import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
-import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession } from '../../types';
-import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols } from '../../services/databaseService';
+import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest } from '../../types';
+import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
 import { CHECKPOINTS } from '../../constants';
 import { motion } from 'motion/react';
@@ -14,11 +15,14 @@ interface PublicInfoProps {
   cashFlow: CashFlow[];
   ronda: RondaSchedule[];
   rondaLogs: RondaCheckLog[];
+  rondaSwapRequests: RondaSwapRequest[];
   houses: House[];
   announcements: Announcement[];
+  galleryItems: GalleryItem[];
+  faqItems: FAQItem[];
 }
 
-export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ronda, rondaLogs, houses, announcements }) => {
+export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, houses, announcements, galleryItems, faqItems }) => {
     const totalIncome = cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0);
     const totalExpense = cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0);
     const currentBalance = totalIncome - totalExpense;
@@ -42,9 +46,25 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     });
 
     const [isCheckModalOpen, setIsCheckModalOpen] = useState(false);
+    const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
+    const [isFinanceModalOpen, setIsFinanceModalOpen] = useState(false);
+    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
     const [checkLocation, setCheckLocation] = useState('');
     const [checkOfficer, setCheckOfficer] = useState('');
     const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
+
+    // Status Check State
+    const [statusSearchId, setStatusSearchId] = useState('');
+    const [foundHouse, setFoundHouse] = useState<House | null>(null);
+
+    // Swap Request Form State
+    const [swapRequester, setSwapRequester] = useState('');
+    const [swapHouseId, setSwapHouseId] = useState('');
+    const [swapFromDay, setSwapFromDay] = useState('');
+    const [swapToDay, setSwapToDay] = useState('');
+    const [swapReason, setSwapReason] = useState('');
+    const [isSubmittingSwap, setIsSubmittingSwap] = useState(false);
 
     useEffect(() => {
         const unsub = subscribeToActivePatrols((data) => {
@@ -89,6 +109,50 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
         alert(`Laporan patroli (${type} - ${status}) tercatat!`);
         setIsCheckModalOpen(false);
         setCheckLocation('');
+    };
+
+    const handleSwapSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!swapRequester || !swapHouseId || !swapFromDay || !swapToDay) {
+            alert("Mohon lengkapi semua data permintaan!");
+            return;
+        }
+
+        setIsSubmittingSwap(true);
+        try {
+            await addRondaSwapRequest({
+                requesterName: swapRequester,
+                requesterHouseId: swapHouseId,
+                fromDay: swapFromDay,
+                toDay: swapToDay,
+                reason: swapReason,
+                status: 'Pending',
+                timestamp: new Date().toISOString()
+            });
+            alert("Permintaan tukar jadwal berhasil dikirim! Admin akan segera meninjau.");
+            setIsSwapModalOpen(false);
+            setSwapRequester('');
+            setSwapHouseId('');
+            setSwapFromDay('');
+            setSwapToDay('');
+            setSwapReason('');
+        } catch (error) {
+            console.error("Error submitting swap request:", error);
+            alert("Gagal mengirim permintaan. Silakan coba lagi.");
+        } finally {
+            setIsSubmittingSwap(false);
+        }
+    };
+
+    const handleCheckStatus = (e: React.FormEvent) => {
+        e.preventDefault();
+        const house = houses.find(h => h.id.toLowerCase() === statusSearchId.toLowerCase());
+        if (house) {
+            setFoundHouse(house);
+        } else {
+            alert("No. Rumah tidak ditemukan. Pastikan format benar (Contoh: A1-01)");
+            setFoundHouse(null);
+        }
     };
 
     const containerVariants = {
@@ -185,6 +249,90 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 </motion.div>
             </div>
 
+            {/* News & Announcements Feed */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Pengumuman (Urgent) */}
+                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><AlertTriangle size={24}/></div>
+                        <h2 className="text-2xl font-black text-slate-800">Pengumuman Penting</h2>
+                    </div>
+                    <div className="space-y-4">
+                        {announcements.filter(a => a.type === 'Urgent').map(a => (
+                            <div key={a.id} onClick={() => setSelectedAnnouncement(a)} className="p-6 bg-rose-50 rounded-3xl border border-rose-100 hover:border-rose-200 transition-colors group cursor-pointer">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide bg-rose-100 text-rose-700">Penting</span>
+                                    <span className="text-xs font-bold text-rose-400">{new Date(a.date).toLocaleDateString('id-ID')}</span>
+                                </div>
+                                <h4 className="font-black text-slate-800 text-lg group-hover:text-rose-700 transition-colors">{a.title}</h4>
+                            </div>
+                        ))}
+                        {announcements.filter(a => a.type === 'Urgent').length === 0 && (
+                            <p className="text-sm text-slate-400 italic">Tidak ada pengumuman penting saat ini.</p>
+                        )}
+                    </div>
+                </motion.div>
+
+                {/* Berita & Kegiatan (General/Event) */}
+                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><Megaphone size={24}/></div>
+                        <h2 className="text-2xl font-black text-slate-800">Berita & Kegiatan</h2>
+                    </div>
+                    <div className="space-y-4">
+                        {announcements.filter(a => a.type !== 'Urgent').map(a => (
+                            <div key={a.id} onClick={() => setSelectedAnnouncement(a)} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-indigo-100 transition-colors group cursor-pointer">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide ${a.type === 'Event' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                                        {a.type}
+                                    </span>
+                                    <span className="text-xs font-bold text-slate-400">{new Date(a.date).toLocaleDateString('id-ID')}</span>
+                                </div>
+                                <h4 className="font-black text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{a.title}</h4>
+                                <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">{a.content}</p>
+                            </div>
+                        ))}
+                        {announcements.filter(a => a.type !== 'Urgent').length === 0 && (
+                            <p className="text-sm text-slate-400 italic">Tidak ada berita atau kegiatan saat ini.</p>
+                        )}
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Gallery */}
+            <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                <div className="flex items-center gap-3 mb-8">
+                    <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><Image size={24}/></div>
+                    <h2 className="text-2xl font-black text-slate-800">Galeri Kegiatan</h2>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {galleryItems.map(g => (
+                        <div key={g.id} className="group relative aspect-square rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                            <img src={g.image} alt={g.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                <p className="text-white font-bold text-sm">{g.title}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </motion.div>
+
+            {/* FAQ */}
+            <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                <div className="flex items-center gap-3 mb-8">
+                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><HelpCircle size={24}/></div>
+                    <h2 className="text-2xl font-black text-slate-800">Pertanyaan Umum (FAQ)</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {faqItems.map(f => (
+                        <div key={f.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                            <h4 className="font-black text-slate-800 text-sm mb-2">{f.question}</h4>
+                            <p className="text-xs text-slate-600 leading-relaxed">{f.answer}</p>
+                        </div>
+                    ))}
+                </div>
+            </motion.div>
+
             {/* Vision & Mission */}
             <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group">
@@ -236,32 +384,53 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 </div>
             </motion.div>
 
-            {/* Key Statistics */}
-            <motion.div variants={itemVariants}>
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600"><TrendingUp size={24}/></div>
-                    <h2 className="text-2xl font-bold text-slate-800">Statistik Lingkungan</h2>
+            {/* Key Statistics & Status Check */}
+            <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div className="lg:col-span-3">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600"><TrendingUp size={24}/></div>
+                        <h2 className="text-2xl font-bold text-slate-800">Statistik Lingkungan</h2>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
+                            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Total Penduduk</p>
+                            <h3 className="text-3xl font-black text-slate-800">{totalResidents}</h3>
+                            <p className="text-xs text-slate-400 mt-1">Jiwa</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
+                            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Kepala Keluarga</p>
+                            <h3 className="text-3xl font-black text-slate-800">{totalHouseholds}</h3>
+                            <p className="text-xs text-slate-400 mt-1">KK Terdaftar</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
+                            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Unit Rumah</p>
+                            <h3 className="text-3xl font-black text-slate-800">{houses.length}</h3>
+                            <p className="text-xs text-slate-400 mt-1">Total Unit</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
+                            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Okupansi</p>
+                            <h3 className="text-3xl font-black text-emerald-600">{occupancyRate}%</h3>
+                            <p className="text-xs text-slate-400 mt-1">Tingkat Hunian</p>
+                        </div>
+                    </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Total Penduduk</p>
-                        <h3 className="text-3xl font-black text-slate-800">{totalResidents}</h3>
-                        <p className="text-xs text-slate-400 mt-1">Jiwa</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Kepala Keluarga</p>
-                        <h3 className="text-3xl font-black text-slate-800">{totalHouseholds}</h3>
-                        <p className="text-xs text-slate-400 mt-1">KK Terdaftar</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Unit Rumah</p>
-                        <h3 className="text-3xl font-black text-slate-800">{houses.length}</h3>
-                        <p className="text-xs text-slate-400 mt-1">Total Unit</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Okupansi</p>
-                        <h3 className="text-3xl font-black text-emerald-600">{occupancyRate}%</h3>
-                        <p className="text-xs text-slate-400 mt-1">Tingkat Hunian</p>
+                <div className="lg:col-span-1 bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-indigo-200 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><CheckCircle2 size={120} /></div>
+                    <div className="relative z-10">
+                        <h3 className="text-xl font-black mb-2">Cek Status Iuran</h3>
+                        <p className="text-xs text-indigo-100 mb-6 font-medium">Verifikasi status pembayaran iuran rumah Anda secara mandiri.</p>
+                        <form onSubmit={handleCheckStatus} className="space-y-3">
+                            <input 
+                                type="text" 
+                                placeholder="No. Rumah (Contoh: A1-01)" 
+                                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-sm font-bold placeholder:text-indigo-200 outline-none focus:bg-white/20 transition-all"
+                                value={statusSearchId}
+                                onChange={e => setStatusSearchId(e.target.value)}
+                            />
+                            <button type="submit" className="w-full py-3 bg-white text-indigo-600 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-colors shadow-lg">
+                                Periksa Sekarang
+                            </button>
+                        </form>
                     </div>
                 </div>
             </motion.div>
@@ -303,7 +472,10 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
 
                         <div className="bg-white/5 rounded-3xl p-6 border border-white/5">
-                            <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Riwayat Transaksi Terakhir</h4>
+                            <div className="flex justify-between items-center mb-4">
+                                <h4 className="font-bold text-white text-sm uppercase tracking-wider">Riwayat Transaksi Terakhir</h4>
+                                <button onClick={() => setIsFinanceModalOpen(true)} className="text-[10px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest">Detail Lengkap</button>
+                            </div>
                             <div className="space-y-3">
                                 {cashFlow.slice(0, 3).map((flow) => (
                                     <div key={flow.id} className="flex items-center justify-between p-3 hover:bg-white/5 rounded-xl transition-colors border-b border-white/5 last:border-0">
@@ -339,11 +511,14 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                     </div>
                     
                     <div className="flex flex-col gap-2 mb-6">
-                        <button onClick={() => { setIsCheckModalOpen(true); }} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20">
-                            Mulai Ronda
+                        <button onClick={() => { setIsCheckModalOpen(true); }} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2">
+                            <ShieldCheck size={18} /> Mulai Ronda
                         </button>
-                        <button onClick={() => { setIsCheckModalOpen(true); }} className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-rose-600/20">
-                            Lapor Kejadian
+                        <button onClick={() => { setIsSwapModalOpen(true); }} className="w-full py-3 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                            <ArrowLeftRight size={18} /> Tukar Jadwal
+                        </button>
+                        <button onClick={() => { setIsCheckModalOpen(true); }} className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2">
+                            <AlertTriangle size={18} /> Lapor Kejadian
                         </button>
                     </div>
                     
@@ -356,13 +531,33 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                                         <h4 className={`font-black text-sm ${isToday ? 'text-indigo-700' : 'text-slate-700'}`}>{schedule.day}</h4>
                                         {isToday && <span className="px-2 py-0.5 bg-indigo-200 text-indigo-700 text-[10px] font-bold rounded-full uppercase">Hari Ini</span>}
                                     </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {schedule.members.map((member, i) => (
-                                            <span key={i} className={`text-xs px-2 py-1 rounded-lg font-medium ${isToday ? 'bg-white text-indigo-600 border border-indigo-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
-                                                {member}
-                                            </span>
-                                        ))}
-                                    </div>
+                                    
+                                    {schedule.shifts ? (
+                                        <div className="space-y-3">
+                                            {schedule.shifts.map((shift) => (
+                                                <div key={shift.id} className="space-y-1">
+                                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                                        <Clock size={10} /> {shift.time}
+                                                    </p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {shift.members.map((member, i) => (
+                                                            <span key={i} className={`text-[10px] px-2 py-1 rounded-lg font-bold ${isToday ? 'bg-white text-indigo-600 border border-indigo-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
+                                                                {member}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                            {schedule.members.map((member, i) => (
+                                                <span key={i} className={`text-xs px-2 py-1 rounded-lg font-medium ${isToday ? 'bg-white text-indigo-600 border border-indigo-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
+                                                    {member}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
@@ -415,7 +610,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 <div className="space-y-4">
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
                         <p className="text-xs font-bold text-slate-500 uppercase">Waktu Check-In</p>
-                        <p className="text-xl font-black text-slate-800 font-mono mt-1">{new Date().toLocaleTimeString()}</p>
+                        <p className="text-xl font-black text-slate-800 font-mono mt-1">{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })} WITA</p>
                     </div>
                     <div>
                         <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Petugas</label>
@@ -458,6 +653,177 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                             </button>
                         </div>
                     )}
+                </div>
+            </Modal>
+
+            <Modal isOpen={isSwapModalOpen} onClose={() => setIsSwapModalOpen(false)} title="Permintaan Tukar Jadwal">
+                <form onSubmit={handleSwapSubmit} className="space-y-6">
+                    <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-4">
+                        <div className="p-3 bg-white rounded-xl text-amber-600 shadow-sm"><ArrowLeftRight size={20} /></div>
+                        <div>
+                            <p className="text-xs font-bold text-amber-900 uppercase tracking-wider">Tukar Jadwal Ronda</p>
+                            <p className="text-[10px] text-amber-600 font-medium">Ajukan permohonan tukar jadwal kepada admin.</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Nama Anda</label>
+                            <div className="relative">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                <input 
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                                    placeholder="Nama Lengkap"
+                                    value={swapRequester}
+                                    onChange={e => setSwapRequester(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">No. Rumah</label>
+                            <select 
+                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                                value={swapHouseId}
+                                onChange={e => setSwapHouseId(e.target.value)}
+                            >
+                                <option value="">Pilih Rumah</option>
+                                {houses.filter(h => h.status === 'Occupied').map(h => (
+                                    <option key={h.id} value={h.id}>{h.id} - {h.headOfFamily}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Jadwal Asal</label>
+                            <select 
+                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                                value={swapFromDay}
+                                onChange={e => setSwapFromDay(e.target.value)}
+                            >
+                                <option value="">Pilih Hari</option>
+                                {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(day => (
+                                    <option key={day} value={day}>{day}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Tukar Ke Hari</label>
+                            <select 
+                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                                value={swapToDay}
+                                onChange={e => setSwapToDay(e.target.value)}
+                            >
+                                <option value="">Pilih Hari</option>
+                                {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(day => (
+                                    <option key={day} value={day}>{day}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Alasan (Opsional)</label>
+                        <div className="relative">
+                            <MessageSquare className="absolute left-3 top-3 text-slate-400" size={14} />
+                            <textarea 
+                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none h-24"
+                                placeholder="Contoh: Ada acara keluarga, dinas luar kota, dll."
+                                value={swapReason}
+                                onChange={e => setSwapReason(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                        <Button type="button" variant="outline" onClick={() => setIsSwapModalOpen(false)} className="flex-1 py-3">Batal</Button>
+                        <Button type="submit" disabled={isSubmittingSwap} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
+                            {isSubmittingSwap ? 'Mengirim...' : 'Kirim Permintaan'}
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
+            <Modal isOpen={!!selectedAnnouncement} onClose={() => setSelectedAnnouncement(null)} title={selectedAnnouncement?.title || ''}>
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide ${selectedAnnouncement?.type === 'Event' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                            {selectedAnnouncement?.type}
+                        </span>
+                        <span className="text-xs font-bold text-slate-400">{selectedAnnouncement && new Date(selectedAnnouncement.date).toLocaleDateString('id-ID')}</span>
+                    </div>
+                    <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{selectedAnnouncement?.content}</p>
+                </div>
+            </Modal>
+
+            <Modal isOpen={isFinanceModalOpen} onClose={() => setIsFinanceModalOpen(false)} title="Laporan Keuangan Detail">
+                <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total Pemasukan</p>
+                            <p className="text-lg font-black text-emerald-700">Rp {totalIncome.toLocaleString()}</p>
+                        </div>
+                        <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                            <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-1">Total Pengeluaran</p>
+                            <p className="text-lg font-black text-rose-700">Rp {totalExpense.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        {cashFlow.map((flow) => (
+                            <div key={flow.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-xl ${flow.type === 'Income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                                        {flow.type === 'Income' ? <ArrowUpRight size={16}/> : <ArrowDownRight size={16}/>}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm text-slate-800">{flow.description}</p>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase">{new Date(flow.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                    </div>
+                                </div>
+                                <span className={`font-black text-sm ${flow.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                    {flow.type === 'Income' ? '+' : '-'} Rp {flow.amount.toLocaleString()}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    <Button onClick={() => setIsFinanceModalOpen(false)} className="w-full py-3 bg-slate-900 hover:bg-slate-800">Tutup Laporan</Button>
+                </div>
+            </Modal>
+
+            <Modal isOpen={!!foundHouse} onClose={() => setFoundHouse(null)} title={`Status Iuran: Rumah ${foundHouse?.id}`}>
+                <div className="space-y-6">
+                    <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 text-center">
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-4 shadow-sm">
+                            <Home size={32} />
+                        </div>
+                        <h4 className="text-xl font-black text-slate-900">{foundHouse?.headOfFamily}</h4>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Blok {foundHouse?.block} No. {foundHouse?.number}</p>
+                    </div>
+
+                    <div className="space-y-3">
+                        {[
+                            { label: 'Iuran Keamanan', status: foundHouse?.paymentStatus },
+                            { label: 'Iuran Air', status: foundHouse?.paymentStatusAir || 'Belum Lunas' },
+                            { label: 'Iuran Sampah', status: foundHouse?.paymentStatusSampah || 'Belum Lunas' },
+                        ].map((item, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                <span className="text-sm font-bold text-slate-700">{item.label}</span>
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                                    item.status === 'Lunas' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
+                                }`}>
+                                    {item.status}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                        <p className="text-[10px] text-indigo-600 font-bold leading-relaxed">
+                            * Jika terdapat ketidaksesuaian data, silakan hubungi Bendahara RT melalui menu Layanan atau WhatsApp.
+                        </p>
+                    </div>
+
+                    <Button onClick={() => setFoundHouse(null)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700">Tutup Detail</Button>
                 </div>
             </Modal>
         </motion.div>

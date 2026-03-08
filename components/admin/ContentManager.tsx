@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
-import { Megaphone, Vote, ShoppingBag, Image } from 'lucide-react';
-import { Announcement, Poll, UMKM, GalleryItem } from '../../types';
+import { Megaphone, Vote, ShoppingBag, Image, BookOpen } from 'lucide-react';
+import { Announcement, News, Poll, UMKM, GalleryItem } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnnouncementManagement } from './AnnouncementManagement';
+import { NewsManagement } from './NewsManagement';
 import { PollManagement } from './PollManagement';
 import { UmkmManagement } from './UmkmManagement';
 import { GalleryManagement } from './GalleryManagement';
 
 interface ContentManagerProps {
   announcements: Announcement[];
+  news: News[];
   polls: Poll[];
   umkm: UMKM[];
   gallery: GalleryItem[];
 }
 
-export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, polls, umkm, gallery }) => {
-  const [activeTab, setActiveTab] = useState<'announcements' | 'polls' | 'umkm' | 'gallery'>('announcements');
+export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, news, polls, umkm, gallery }) => {
+  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery'>('announcements');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -34,6 +36,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, p
         <div className="flex items-center gap-3 px-2">
           <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
             {activeTab === 'announcements' && <Megaphone size={24} />}
+            {activeTab === 'news' && <BookOpen size={24} />}
             {activeTab === 'polls' && <Vote size={24} />}
             {activeTab === 'umkm' && <ShoppingBag size={24} />}
             {activeTab === 'gallery' && <Image size={24} />}
@@ -41,6 +44,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, p
           <div>
             <h2 className="text-lg font-black text-slate-800 tracking-tight">
               {activeTab === 'announcements' && 'Konten Pengumuman'}
+              {activeTab === 'news' && 'Konten Berita'}
               {activeTab === 'polls' && 'Konten Voting'}
               {activeTab === 'umkm' && 'Konten UMKM'}
               {activeTab === 'gallery' && 'Konten Galeri'}
@@ -52,6 +56,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, p
         <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] border border-slate-200/50 shadow-inner w-full md:w-auto overflow-x-auto">
           {[
             { id: 'announcements', icon: Megaphone, label: 'Pengumuman' },
+            { id: 'news', icon: BookOpen, label: 'Berita' },
             { id: 'polls', icon: Vote, label: 'Voting' },
             { id: 'umkm', icon: ShoppingBag, label: 'UMKM' },
             { id: 'gallery', icon: Image, label: 'Galeri' }
@@ -82,6 +87,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, p
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
           {activeTab === 'announcements' && <AnnouncementManagement announcements={announcements} />}
+          {activeTab === 'news' && <NewsManagement news={news} />}
           {activeTab === 'polls' && <PollManagement polls={polls} />}
           {activeTab === 'umkm' && <UmkmManagement umkm={umkm} />}
           {activeTab === 'gallery' && <GalleryManagement gallery={gallery} />}

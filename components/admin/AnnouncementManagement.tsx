@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle } from 'lucide-react';
+import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle, Sparkles } from 'lucide-react';
 import { Announcement } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { addAnnouncementToDb, deleteAnnouncementFromDb, updateAnnouncementInDb } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from '../../services/whatsappService';
+import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface AnnouncementManagementProps {
@@ -14,11 +15,27 @@ interface AnnouncementManagementProps {
 export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ announcements }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('All');
   
   // Form State
   const [annTitle, setAnnTitle] = useState('');
   const [annContent, setAnnContent] = useState('');
   const [annType, setAnnType] = useState('Info');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
+  const filteredAnnouncements = announcements.filter(a => 
+    (filterType === 'All' || a.type === filterType) &&
+    (a.title.toLowerCase().includes(searchTerm.toLowerCase()) || a.content.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const handleGenerateWithAi = async () => {
+    if (!annTitle) return alert('Masukkan judul terlebih dahulu');
+    setIsAiLoading(true);
+    const draft = await generateAnnouncementDraft(annTitle);
+    setAnnContent(draft);
+    setIsAiLoading(false);
+  };
 
   const resetForms = () => {
     setAnnTitle('');
@@ -116,9 +133,29 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
         </Button>
       </div>
 
+      <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <input 
+          type="text" 
+          placeholder="Cari pengumuman..." 
+          className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select 
+          className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+        >
+          <option value="All">Semua Tipe</option>
+          <option value="Info">Info Umum</option>
+          <option value="Urgent">Penting</option>
+          <option value="Event">Kegiatan</option>
+        </select>
+      </div>
+
       <div className="space-y-4">
         <AnimatePresence mode="popLayout">
-          {announcements.map((a: Announcement) => (
+          {filteredAnnouncements.map((a: Announcement) => (
             <motion.div 
               key={a.id} 
               variants={itemVariants}
@@ -175,13 +212,13 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
           ))}
         </AnimatePresence>
 
-        {announcements.length === 0 && (
+        {filteredAnnouncements.length === 0 && (
           <motion.div variants={itemVariants} className="py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
             <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-slate-300 mx-auto mb-4 shadow-sm">
               <Megaphone size={40} />
             </div>
-            <p className="text-slate-400 font-bold text-lg">Belum ada pengumuman aktif.</p>
-            <p className="text-slate-400 text-sm mt-1">Buat pengumuman baru untuk menginformasikan warga.</p>
+            <p className="text-slate-400 font-bold text-lg">Belum ada pengumuman yang cocok.</p>
+            <p className="text-slate-400 text-sm mt-1">Coba ubah kata kunci pencarian atau filter.</p>
           </motion.div>
         )}
       </div>
@@ -194,6 +231,9 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
           </div>
           <div>
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Isi Pengumuman</label>
+            <Button type="button" onClick={handleGenerateWithAi} className="mb-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 shadow-none text-xs py-2 px-3">
+              <Sparkles size={14} className="mr-2" /> {isAiLoading ? 'Memproses...' : 'Buat dengan AI'}
+            </Button>
             <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[120px]" rows={4} value={annContent} onChange={e=>setAnnContent(e.target.value)} placeholder="Tulis detail pengumuman di sini..." required/>
           </div>
           <div>
