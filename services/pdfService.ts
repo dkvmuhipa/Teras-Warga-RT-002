@@ -99,7 +99,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.text("PEMERINTAH KOTA PALU", centerX, 14, { align: "center" });
   doc.text("KECAMATAN MANTIKULORE", centerX, 20, { align: "center" });
   doc.text("KELURAHAN TONDO", centerX, 26, { align: "center" });
-  doc.text("PENGURUS RT.002/RW.020", centerX, 32, { align: "center" });
+  doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
 
   doc.setFontSize(11);
   doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
@@ -162,7 +162,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   cursorY += 4;
 
-  const closingText = "Orang tersebut adalah benar-benar warga RT 002 RW 020 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu dengan data seperti di atas.";
+  const closingText = `Orang tersebut adalah benar-benar warga ${config.rtName} Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu dengan data seperti di atas.`;
   doc.text(closingText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
   
   cursorY += 10;
@@ -177,13 +177,13 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   const rightSignX = 150;
   doc.text(`Palu, ${dateString}`, rightSignX, cursorY, { align: "center" });
   cursorY += 6;
-  doc.text("Ketua RT 002 RW 020", rightSignX, cursorY, { align: "center" });
+  doc.text(`Ketua ${config.rtName}`, rightSignX, cursorY, { align: "center" });
 
   const signSpaceY = cursorY + 2; 
   cursorY += 25; 
 
   doc.text(letter.applicantName, leftSignX, cursorY, { align: "center" });
-  doc.text("IRFAN ARIANTO", rightSignX, cursorY, { align: "center" });
+  doc.text(config.rtChairman, rightSignX, cursorY, { align: "center" });
 
   if (!isDraft) {
       if (config.stamp) {
@@ -273,7 +273,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     doc.text("PEMERINTAH KOTA PALU", centerX, 14, { align: "center" });
     doc.text("KECAMATAN MANTIKULORE", centerX, 20, { align: "center" });
     doc.text("KELURAHAN TONDO", centerX, 26, { align: "center" });
-    doc.text("PENGURUS RT.002/RW.020", centerX, 32, { align: "center" });
+    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
     doc.setFontSize(10);
     doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
 
@@ -419,7 +419,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
     const signX = pageWidth - 60;
     doc.text(`Palu, ${dateString}`, signX, signY, { align: "center" });
-    doc.text("Ketua RT 002 RW 020", signX, signY + 6, { align: "center" });
+    doc.text(`Ketua ${config.rtName}`, signX, signY + 6, { align: "center" });
 
     if (config.signature) {
         try {
@@ -429,7 +429,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     }
 
     doc.setFont("times", "bold", "underline");
-    doc.text("IRFAN ARIANTO", signX, signY + 35, { align: "center" });
+    doc.text(config.rtChairman, signX, signY + 35, { align: "center" });
 
     doc.save(`Laporan_Warga_RT002_${new Date().toISOString().split('T')[0]}.pdf`);
 };

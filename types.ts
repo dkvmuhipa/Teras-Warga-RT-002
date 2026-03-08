@@ -260,6 +260,7 @@ export interface PdfConfig {
   signature: string; // Base64 string
   rtName: string;
   rtAddress: string;
+  rtChairman: string;
 }
 
 export interface InventoryItem {
