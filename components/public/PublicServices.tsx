@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   FileText, AlertTriangle, History, Send, User, MapPin, 
-  Calendar, Briefcase, Heart, Flag, Home, Lock, CheckCircle2, Clock, XCircle 
+  Calendar, Briefcase, Heart, Flag, Home, Lock, CheckCircle2, Clock, XCircle, Sparkles 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
@@ -32,7 +32,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [reportHouseId, setReportHouseId] = useState(initialHouseId); 
   const [reporterHouseId, setReporterHouseId] = useState(''); 
 
-  const [requestType, setRequestType] = useState<LetterRequest['type']>('Surat Izin Keramaian');
+  const [requestType, setRequestType] = useState<string>('Surat Izin Keramaian');
+  const [customRequestType, setCustomRequestType] = useState('');
   const [applicantName, setApplicantName] = useState('');
   const [nik, setNik] = useState('');
   const [familyHeadName, setFamilyHeadName] = useState(''); 
@@ -46,6 +47,24 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [addressKtp, setAddressKtp] = useState('');
   const [houseId, setHouseId] = useState(initialHouseId);
   const [purposeDetail, setPurposeDetail] = useState(''); 
+  
+  const dynamicTemplates = pdfConfig.letterTemplates?.reduce((acc, curr) => {
+    acc[curr.type] = curr.suggestion;
+    return acc;
+  }, {} as Record<string, string>) || {
+    'Surat Pengantar KTP': 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.',
+    'Surat Pengantar KK': 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.',
+    'Surat Keterangan Domisili': 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.',
+    'Surat Keterangan Tidak Mampu': 'Persyaratan pengajuan bantuan sosial / beasiswa pendidikan / keringanan biaya medis.',
+    'Surat Izin Keramaian': 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].',
+    'Surat Keterangan Usaha': 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.',
+    'Surat Keterangan Berkelakuan Baik': 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.',
+  };
+
+  const handleUseTemplate = () => {
+    const template = dynamicTemplates[requestType];
+    if (template) setPurposeDetail(template);
+  };
   
   // New Fields State
   const [phone, setPhone] = useState('');
@@ -84,9 +103,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       return;
     }
 
+    const finalRequestType = requestType === 'Lainnya' ? customRequestType : requestType;
+
     const letterData: LetterRequest = { 
       id: Date.now().toString(), 
-      type: requestType, 
+      type: finalRequestType, 
       applicantName, 
       nik, 
       familyHeadName, 
@@ -111,12 +132,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     
     generateSuratPengantar(letterData, pdfConfig, true); 
     await addLetterToDb(letterData); 
-    saveToHistory({...letterData, category: 'Surat', title: `Surat ${requestType}`}); 
+    saveToHistory({...letterData, category: 'Surat', title: `Surat ${finalRequestType}`}); 
     alert("Permohonan berhasil dikirim! Bukti DRAFT surat telah diunduh. Silakan hubungi Ketua RT untuk validasi."); 
     
     // Reset form
     setApplicantName(''); setNik(''); setFamilyHeadName(''); setBirthPlace(''); setBirthDate(''); setJob(''); setAddressKtp(''); setHouseId(''); setPurposeDetail(''); setAccessCode('');
-    setNationality('Indonesia'); setMaritalStatus('Kawin'); setPhone(''); setEmail('');
+    setNationality('Indonesia'); setMaritalStatus('Kawin'); setPhone(''); setEmail(''); setCustomRequestType('');
   };
 
   const handleSubmitLapor = async (e: React.FormEvent) => { 
@@ -351,20 +372,53 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <div className="space-y-4">
                     <div className="group">
                       <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Jenis Surat</label>
-                      <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all appearance-none" value={requestType} onChange={e=>setRequestType(e.target.value as any)}>
-                        <option>Surat Pengantar KTP</option>
-                        <option>Surat Pengantar KK</option>
-                        <option>Surat Keterangan Domisili</option>
-                        <option>Surat Keterangan Tidak Mampu</option>
-                        <option>Surat Izin Keramaian</option>
-                        <option>Surat Keterangan Usaha</option>
-                        <option>Surat Keterangan Berkelakuan Baik</option>
-                        <option>Lainnya</option>
+                      <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all appearance-none" value={requestType} onChange={e=>setRequestType(e.target.value)}>
+                        {Object.keys(dynamicTemplates).map(type => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                        <option value="Lainnya">Lainnya</option>
                       </select>
                     </div>
+
+                    {requestType === 'Lainnya' && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="group"
+                      >
+                        <label className="block text-xs font-bold text-indigo-600 mb-1.5 ml-1">Sebutkan Jenis Surat Lainnya</label>
+                        <input 
+                          className="w-full p-4 bg-indigo-50 border border-indigo-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                          value={customRequestType} 
+                          onChange={e=>setCustomRequestType(e.target.value)} 
+                          required 
+                          placeholder="Contoh: Surat Keterangan Ahli Waris"
+                        />
+                      </motion.div>
+                    )}
                     <div className="group">
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Keperluan Spesifik</label>
-                      <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all min-h-[100px] resize-none" value={purposeDetail} onChange={e=>setPurposeDetail(e.target.value)} required placeholder="Jelaskan keperluan pembuatan surat..."/>
+                      <div className="flex justify-between items-end mb-1.5 ml-1">
+                        <label className="block text-xs font-bold text-slate-700">Keperluan Spesifik</label>
+                        {dynamicTemplates[requestType] && (
+                          <button 
+                            type="button"
+                            onClick={handleUseTemplate}
+                            className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                          >
+                            <Sparkles size={10} /> Gunakan Saran
+                          </button>
+                        )}
+                      </div>
+                      <textarea 
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all min-h-[100px] resize-none" 
+                        value={purposeDetail} 
+                        onChange={e=>setPurposeDetail(e.target.value)} 
+                        required 
+                        placeholder={dynamicTemplates[requestType] || "Jelaskan keperluan pembuatan surat..."}
+                      />
+                      <p className="mt-2 text-[10px] text-slate-400 font-medium italic">
+                        * Tuliskan alasan lengkap pembuatan surat ini agar proses validasi lebih cepat.
+                      </p>
                     </div>
                     
                     <div className="p-6 bg-slate-50 border border-slate-200 rounded-[2rem] space-y-4 mt-8">

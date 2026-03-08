@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb } from '../../services/databaseService';
@@ -17,7 +17,7 @@ interface ServiceManagerProps {
 }
 
 export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters, pdfConfig, setPdfConfig }) => {
-  const [activeTab, setActiveTab] = useState<'letters' | 'reports'>('letters');
+  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'settings'>('letters');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   
@@ -142,6 +142,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
             <AlertTriangle size={16} />
             <span>Laporan ({reports.filter(r => r.status === 'Baru').length})</span>
           </button>
+          <button 
+            onClick={() => setActiveTab('settings')} 
+            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
+              activeTab === 'settings' 
+                ? 'bg-white text-slate-800 shadow-md ring-1 ring-black/5' 
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+            }`}
+          >
+            <Settings size={16} />
+            <span>Pengaturan</span>
+          </button>
         </div>
       </div>
 
@@ -200,7 +211,146 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
 
       {/* Content */}
       <AnimatePresence mode="wait">
-        {activeTab === 'letters' ? (
+        {activeTab === 'settings' ? (
+          <motion.div
+            key="settings"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-8"
+          >
+            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
+              <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl">
+                    <Settings size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900">Pengaturan Template Surat</h3>
+                    <p className="text-sm font-medium text-slate-500">Atur jenis surat dan saran pengisian untuk warga.</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => {
+                    const newTemplates = [...(pdfConfig.letterTemplates || []), { type: 'Jenis Surat Baru', suggestion: 'Isi saran pengisian di sini...' }];
+                    const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
+                    setPdfConfig(newConfig);
+                    localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Plus size={18} className="mr-2" /> Tambah Jenis Surat
+                </Button>
+              </div>
+
+              <div className="space-y-6">
+                {(pdfConfig.letterTemplates || [
+                  { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
+                  { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
+                  { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
+                  { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Persyaratan pengajuan bantuan sosial / beasiswa pendidikan / keringanan biaya medis.' },
+                  { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
+                  { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
+                  { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
+                ]).map((template, idx) => (
+                  <div key={idx} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 relative group">
+                    <button 
+                      onClick={() => {
+                        const newTemplates = (pdfConfig.letterTemplates || []).filter((_, i) => i !== idx);
+                        const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
+                        setPdfConfig(newConfig);
+                        localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                      }}
+                      className="absolute top-4 right-4 p-2 text-rose-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jenis Surat</label>
+                        <input 
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:border-indigo-500 outline-none transition-all"
+                          value={template.type}
+                          onChange={(e) => {
+                            const newTemplates = [...(pdfConfig.letterTemplates || [])];
+                            if (newTemplates.length === 0) {
+                              // Initialize if empty
+                              newTemplates.push(...[
+                                { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
+                                { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
+                                { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
+                                { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Persyaratan pengajuan bantuan sosial / beasiswa pendidikan / keringanan biaya medis.' },
+                                { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
+                                { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
+                                { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
+                              ]);
+                            }
+                            newTemplates[idx].type = e.target.value;
+                            const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
+                            setPdfConfig(newConfig);
+                            localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                          }}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Saran Pengisian (Template)</label>
+                        <textarea 
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:border-indigo-500 outline-none transition-all h-20 resize-none"
+                          value={template.suggestion}
+                          onChange={(e) => {
+                            const newTemplates = [...(pdfConfig.letterTemplates || [])];
+                            if (newTemplates.length === 0) {
+                              newTemplates.push(...[
+                                { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
+                                { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
+                                { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
+                                { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Persyaratan pengajuan bantuan sosial / beasiswa pendidikan / keringanan biaya medis.' },
+                                { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
+                                { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
+                                { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
+                              ]);
+                            }
+                            newTemplates[idx].suggestion = e.target.value;
+                            const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
+                            setPdfConfig(newConfig);
+                            localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-12 pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Teks Pembuka Surat (Intro)</label>
+                  <textarea 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-32 resize-none"
+                    value={pdfConfig.introText || "Yang bertanda tangan di bawah ini Ketua RT 002 RW 020 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :"}
+                    onChange={(e) => {
+                      const newConfig = { ...pdfConfig, introText: e.target.value };
+                      setPdfConfig(newConfig);
+                      localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Teks Penutup Surat (Closing)</label>
+                  <textarea 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-32 resize-none"
+                    value={pdfConfig.closingText || "Demikian surat keterangan ini dibuat, untuk dipergunakan sebagaimana mestinya."}
+                    onChange={(e) => {
+                      const newConfig = { ...pdfConfig, closingText: e.target.value };
+                      setPdfConfig(newConfig);
+                      localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ) : activeTab === 'letters' ? (
           <motion.div 
             key="letters"
             initial={{ opacity: 0, y: 20 }}

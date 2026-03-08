@@ -33,12 +33,12 @@ export function PanicButton() {
     <>
       <button
         onClick={handlePanic}
-        className="fixed bottom-24 right-4 md:bottom-8 md:right-8 bg-rose-600 text-white p-3 md:p-4 rounded-full shadow-2xl hover:bg-rose-700 transition-all z-50 flex items-center justify-center group border-4 border-white/20"
+        className="fixed bottom-24 left-4 md:bottom-8 md:left-8 bg-rose-600 text-white p-3 md:p-4 rounded-full shadow-2xl hover:bg-rose-700 transition-all z-50 flex items-center justify-center group border-4 border-white/20"
         title="Tombol Darurat (Panic Button)"
       >
         <div className="absolute inset-0 bg-rose-600 rounded-full animate-ping opacity-20 group-hover:opacity-40 scale-75"></div>
         <AlertTriangle size={24} className="relative z-10 md:w-8 md:h-8" />
-        <span className="absolute right-full mr-3 px-3 py-1 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+        <span className="absolute left-full ml-3 px-3 py-1 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
           Panic Button
         </span>
       </button>

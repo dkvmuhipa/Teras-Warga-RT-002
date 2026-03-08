@@ -147,7 +147,7 @@ export interface UMKM {
 
 export interface LetterRequest {
   id: string;
-  type: 'Pengantar KTP' | 'Pengantar KK' | 'Domisili' | 'Kematian' | 'Kelahiran' | 'Surat Keterangan Usaha (SKU)' | 'Surat Izin Keramaian' | 'Lainnya';
+  type: string;
   applicantName: string;
   houseId: string; // Alamat Domisili di RT (Blok)
   
@@ -263,6 +263,12 @@ export interface PdfConfig {
   rtAddress: string;
   rtChairman: string;
   lastLetterNumber: number;
+  letterTemplates?: {
+    type: string;
+    suggestion: string;
+  }[];
+  introText?: string;
+  closingText?: string;
 }
 
 export interface InventoryItem {

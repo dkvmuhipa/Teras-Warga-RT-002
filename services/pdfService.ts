@@ -125,7 +125,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   let cursorY = 66;
   const lineHeight = 6;
 
-  const introText = "Yang bertanda tangan di bawah ini Ketua RT 002 RW 020 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :";
+  const introText = config.introText || "Yang bertanda tangan di bawah ini Ketua RT 002 RW 020 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :";
   doc.text(introText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
   cursorY += 12;
 
@@ -162,11 +162,25 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   cursorY += 4;
 
-  const closingText = `Orang tersebut adalah benar-benar warga ${config.rtName} Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu dengan data seperti di atas.`;
-  doc.text(closingText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
+  const confirmationText = `Orang tersebut adalah benar-benar warga ${config.rtName} Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu dengan data seperti di atas.`;
+  doc.text(confirmationText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
   
   cursorY += 10;
-  doc.text("Demikian surat keterangan ini dibuat, untuk dipergunakan sebagaimana mestinya.", marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
+  const closingText = config.closingText || "Demikian surat keterangan ini dibuat, untuk dipergunakan sebagaimana mestinya.";
+  doc.text(closingText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
+
+  // Digital Verification Footer for Official Letters
+  if (!isDraft) {
+    const footerY = pageHeight - 25;
+    doc.setDrawColor(200);
+    doc.setLineWidth(0.1);
+    doc.line(marginX, footerY, pageWidth - marginX, footerY);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("Dokumen ini diterbitkan secara digital melalui Sistem Teras Warga RT 002.", marginX, footerY + 5);
+    doc.text(`ID Verifikasi: ${letter.id}-${letter.houseId}`, marginX, footerY + 9);
+    doc.setTextColor(0);
+  }
 
   cursorY += 15;
   const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
