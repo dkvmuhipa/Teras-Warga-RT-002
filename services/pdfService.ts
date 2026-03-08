@@ -119,7 +119,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.setFontSize(11);
   const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
   const currentYear = new Date().getFullYear();
-  const nomorSurat = `003/RT. 002/RW. 020/${currentMonthRoman}/${currentYear}`;
+  const nomorSurat = letter.letterNumber || `.../RT. 002/RW. 020/${currentMonthRoman}/${currentYear}`;
   doc.text(`Nomor : ${nomorSurat}`, centerX, 57, { align: "center" });
 
   let cursorY = 66;

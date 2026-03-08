@@ -298,6 +298,17 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
                     />
                   </div>
                   <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Nomor Terakhir (Counter)</label>
+                    <input 
+                      type="number"
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={localConfig.lastLetterNumber} 
+                      onChange={e => setLocalConfig({...localConfig, lastLetterNumber: parseInt(e.target.value) || 0})} 
+                      placeholder="0"
+                    />
+                    <p className="text-[9px] font-medium text-slate-400 px-2 italic">Sistem akan menyarankan nomor berikutnya (n+1).</p>
+                  </div>
+                  <div className="space-y-2">
                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Alamat Lengkap RT</label>
                     <textarea 
                       rows={4}

@@ -173,6 +173,7 @@ export interface LetterRequest {
   
   status: 'Pending' | 'Approved' | 'Rejected';
   date: string;
+  letterNumber?: string;
 }
 
 // New Types
@@ -261,6 +262,7 @@ export interface PdfConfig {
   rtName: string;
   rtAddress: string;
   rtChairman: string;
+  lastLetterNumber: number;
 }
 
 export interface InventoryItem {

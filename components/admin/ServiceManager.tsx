@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus } from '../../services/databaseService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -13,17 +13,31 @@ interface ServiceManagerProps {
   reports: Report[];
   letters: LetterRequest[];
   pdfConfig: PdfConfig;
+  setPdfConfig: (config: PdfConfig) => void;
 }
 
-export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters, pdfConfig }) => {
+export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters, pdfConfig, setPdfConfig }) => {
   const [activeTab, setActiveTab] = useState<'letters' | 'reports'>('letters');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   
   const [selectedLetter, setSelectedLetter] = useState<LetterRequest | null>(null);
+  const [letterNumberInput, setLetterNumberInput] = useState('');
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  
+  React.useEffect(() => {
+    if (selectedLetter && selectedLetter.status === 'Pending') {
+      const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
+      const currentYear = new Date().getFullYear();
+      const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+      const paddedNum = nextNum.toString().padStart(3, '0');
+      setLetterNumberInput(`${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
+    } else if (selectedLetter && selectedLetter.letterNumber) {
+      setLetterNumberInput(selectedLetter.letterNumber);
+    }
+  }, [selectedLetter, pdfConfig]);
 
   const handleAnalyzeReports = async () => {
     setIsAiLoading(true);
@@ -35,14 +49,22 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
 
   const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected', letter?: LetterRequest) => {
     if (confirm(`Ubah status surat menjadi ${status}?`)) {
-      await updateLetterStatus(id, status);
+      await updateLetterStatus(id, status, status === 'Approved' ? letterNumberInput : undefined);
       
       if (status === 'Approved' && letter) {
         // Generate official PDF with stamp and signature
-        await generateSuratPengantar(letter, pdfConfig, false);
+        const updatedLetter = { ...letter, letterNumber: letterNumberInput };
+        await generateSuratPengantar(updatedLetter, pdfConfig, false);
+
+        // Update lastLetterNumber in config
+        const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+        const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
+        setPdfConfig(newConfig);
+        localStorage.setItem('pdf_config', JSON.stringify(newConfig));
       }
       
       setSelectedLetter(null);
+      setLetterNumberInput('');
     }
   };
 
@@ -50,6 +72,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
     if (confirm(`Ubah status laporan menjadi ${status}?`)) {
       await updateReportStatus(id, status);
       setSelectedReport(null);
+    }
+  };
+
+  const handleDeleteLetter = async (id: string) => {
+    if (confirm('Hapus pengajuan surat ini secara permanen?')) {
+      await deleteLetterFromDb(id);
     }
   };
 
@@ -220,7 +248,25 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     onClick={() => setSelectedLetter(letter)}
                     className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
                   >
-                    <Eye size={14} /> Detail & Aksi
+                    <Eye size={14} /> Detail
+                  </button>
+                  
+                  {letter.status === 'Approved' && (
+                    <button 
+                      onClick={() => generateSuratPengantar(letter, pdfConfig, false)}
+                      className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100"
+                      title="Cetak Surat"
+                    >
+                      <Printer size={16} />
+                    </button>
+                  )}
+
+                  <button 
+                    onClick={() => handleDeleteLetter(letter.id)}
+                    className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100"
+                    title="Hapus Pengajuan"
+                  >
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </motion.div>
@@ -343,6 +389,18 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <div className="col-span-2">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
                       <p className="font-medium text-slate-700 bg-white p-3 rounded-xl border border-slate-200">{selectedLetter.purposeDetail}</p>
+                    </div>
+
+                    <div className="col-span-2 pt-4 border-t border-slate-200">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nomor Surat (Dapat Diedit)</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                        value={letterNumberInput}
+                        onChange={(e) => setLetterNumberInput(e.target.value)}
+                        placeholder="Contoh: 001/RT002/III/2026"
+                      />
+                      <p className="text-[10px] font-medium text-slate-400 mt-2 italic">* Nomor ini akan dicetak pada dokumen resmi.</p>
                     </div>
                   </div>
                 </div>

@@ -526,8 +526,12 @@ export const addLetterToDb = async (letter: any) => {
   } catch (e) { console.error("Error adding letter:", e); }
 };
 
-export const updateLetterStatus = async (id: string, status: string) => {
-  try { await updateDoc(doc(db, LETTERS_COL, id), { status }); } catch (e) { console.error("Error updating letter:", e); }
+export const updateLetterStatus = async (id: string, status: string, letterNumber?: string) => {
+  try { 
+    const updates: any = { status };
+    if (letterNumber) updates.letterNumber = letterNumber;
+    await updateDoc(doc(db, LETTERS_COL, id), updates); 
+  } catch (e) { console.error("Error updating letter:", e); }
 };
 
 export const deleteLetterFromDb = async (id: string) => {

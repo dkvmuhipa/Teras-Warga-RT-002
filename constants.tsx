@@ -207,5 +207,6 @@ export const DEFAULT_PDF_CONFIG: PdfConfig = {
   signature: "",
   rtName: "RT.002 / RW.020",
   rtAddress: "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Telp. 085961194621",
-  rtChairman: "IRFAN ARIANTO"
+  rtChairman: "IRFAN ARIANTO",
+  lastLetterNumber: 0
 };
