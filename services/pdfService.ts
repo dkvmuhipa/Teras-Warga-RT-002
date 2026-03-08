@@ -203,7 +203,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
       if (config.stamp) {
           try {
              const stampImg = await getImageData(config.stamp);
-             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 20, signSpaceY - 5, 35, 35);
+             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 28, signSpaceY - 5, 30, 30);
           } catch(e) {}
       }
 
