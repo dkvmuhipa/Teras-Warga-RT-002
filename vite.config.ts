@@ -2,6 +2,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 // Fix: Import process from node:process to ensure the TypeScript compiler recognizes Node.js process methods like cwd()
 import process from 'node:process';
@@ -15,7 +16,35 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
-      tailwindcss()
+      tailwindcss(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        injectRegister: 'script',
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+        manifest: {
+          name: 'TERAS RT 002',
+          short_name: 'TERAS',
+          description: 'Sistem Informasi & Layanan Warga RT 002',
+          theme_color: '#0f172a',
+          background_color: '#ffffff',
+          display: 'standalone',
+          orientation: 'portrait',
+          icons: [
+            {
+              src: 'logo.svg',
+              sizes: '192x192 512x512',
+              type: 'image/svg+xml',
+              purpose: 'any'
+            },
+            {
+              src: 'logo.svg',
+              sizes: '192x192 512x512',
+              type: 'image/svg+xml',
+              purpose: 'maskable'
+            }
+          ]
+        }
+      })
     ],
     resolve: {
       alias: {
