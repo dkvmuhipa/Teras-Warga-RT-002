@@ -41,7 +41,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [mutationDesc, setMutationDesc] = useState('');
   const [mutationHouseId, setMutationHouseId] = useState(initialHouseId);
 
-  const [requestType, setRequestType] = useState<string>('Surat Izin Keramaian');
+  const [requestType, setRequestType] = useState<string>('Surat Pengantar');
   const [customRequestType, setCustomRequestType] = useState('');
   const [applicantName, setApplicantName] = useState('');
   const [nik, setNik] = useState('');
@@ -61,6 +61,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     acc[curr.type] = curr.suggestion;
     return acc;
   }, {} as Record<string, string>) || {
+    'Surat Pengantar': 'Surat pengantar umum untuk berbagai keperluan administratif.',
     'Surat Pengantar KTP': 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.',
     'Surat Pengantar KK': 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.',
     'Surat Keterangan Domisili': 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.',
@@ -71,6 +72,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   };
 
   const letterRequirements: Record<string, string[]> = {
+    'Surat Pengantar': ['Fotokopi KTP', 'Fotokopi KK'],
     'Surat Pengantar KTP': ['Fotokopi Kartu Keluarga (KK)', 'KTP Lama (jika perpanjangan)', 'Pas Foto 3x4 (2 lembar)'],
     'Surat Pengantar KK': ['KK Asli', 'Surat Pindah (jika warga baru)', 'Akta Kelahiran/Nikah (jika tambah anggota)'],
     'Surat Keterangan Domisili': ['Fotokopi KTP', 'Fotokopi KK', 'Surat Keterangan Kerja (jika untuk melamar)'],
@@ -86,6 +88,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [submittedItem, setSubmittedItem] = useState<any>(null);
 
   const estimatedTimes: Record<string, string> = {
+    'Surat Pengantar': '1x24 Jam',
     'Surat Pengantar KTP': '1x24 Jam',
     'Surat Pengantar KK': '1-2 Hari Kerja',
     'Surat Keterangan Domisili': '1x24 Jam',

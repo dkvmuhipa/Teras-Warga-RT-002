@@ -153,10 +153,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       try {
         const parsedData = await parseExcelFile(file);
         
-        // Add each house one by one (or batch if supported)
         let addedCount = 0;
         let updatedCount = 0;
         let failCount = 0;
+        
+        const updatesToApply: any[] = [];
+        const addsToApply: any[] = [];
 
         for (const houseData of parsedData) {
           try {
@@ -182,14 +184,26 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 delete updates.headOfFamily;
               }
 
-              // Ensure status and paymentStatus are not undefined if they were missing in Excel
-              // but we don't need to set them if we are just updating existing data
-              
-              await updateHouseData(existingHouse.id, updates);
-              updatedCount++;
+              // Check if there are actual changes
+              let hasChanges = false;
+              for (const key in updates) {
+                if (key === 'block' || key === 'number') continue;
+                
+                const newValue = updates[key];
+                const oldValue = (existingHouse as any)[key];
+                
+                if (newValue !== oldValue) {
+                  hasChanges = true;
+                  break;
+                }
+              }
+
+              if (hasChanges) {
+                updatesToApply.push({ id: existingHouse.id, ...updates });
+              }
             } else {
               // Add new house
-              await addHouse({
+              addsToApply.push({
                 ...houseData,
                 headOfFamily: houseData.headOfFamily || '-',
                 location: { x: 0, y: 0 },
@@ -201,8 +215,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 pregnantCount: houseData.pregnantCount || 0,
                 toddlerCount: houseData.toddlerCount || 0,
                 elderlyCount: houseData.elderlyCount || 0
-              } as any);
-              addedCount++;
+              });
             }
           } catch (err) {
             console.error('Error processing house:', err);
@@ -210,7 +223,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           }
         }
 
-        alert(`Upload selesai.\nData Baru Ditambahkan: ${addedCount}\nData Diperbarui: ${updatedCount}\nGagal/Format Salah: ${failCount}`);
+        // Apply updates in batch
+        if (updatesToApply.length > 0) {
+            await batchUpdateHouses(updatesToApply);
+            updatedCount += updatesToApply.length;
+        }
+
+        // Apply additions
+        for (const add of addsToApply) {
+            await addHouse(add);
+            addedCount++;
+        }
+
+        alert(`Upload selesai.\nData Baru Ditambahkan: ${addedCount}\nData Diperbarui: ${updatedCount}\nGagal/Format Salah: ${failCount}\nData Tidak Berubah: ${parsedData.length - addedCount - updatedCount - failCount}`);
       } catch (error) {
         console.error('Excel Parse Error:', error);
         alert('Gagal memproses file Excel.');
@@ -227,7 +252,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     if (selectedIds.size === 0) return;
     if (window.confirm(`Apakah Anda yakin ingin memverifikasi ${selectedIds.size} warga terpilih?`)) {
         try {
-            const updates = Array.from(selectedIds).map(id => ({ id, data: { isVerified: true } }));
+            const updates = Array.from(selectedIds).map(id => ({ id, isVerified: true }));
             await batchUpdateHouses(updates);
             alert('Warga terpilih berhasil diverifikasi.');
             setSelectedIds(new Set());
@@ -961,7 +986,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.accessCode} onChange={e => setFormData({...formData, accessCode: e.target.value})} placeholder="Masukkan PIN..." />
                   <button 
                     type="button"
-                    onClick={() => setFormData({...formData, accessCode: Math.floor(1000 + Math.random() * 9000).toString()})}
+                    onClick={() => setFormData({...formData, accessCode: Math.floor(100000 + Math.random() * 900000).toString()})}
                     className="px-4 py-3 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-100 font-bold text-sm transition-all shadow-sm whitespace-nowrap"
                     title="Generate PIN Acak"
                   >

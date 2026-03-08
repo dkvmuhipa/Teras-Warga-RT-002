@@ -371,7 +371,7 @@ export const generateAllAccessCodes = async (houses: any[]) => {
        // Hanya generate jika belum ada accessCode
        if (house.accessCode) continue;
 
-       const newCode = Math.floor(1000 + Math.random() * 9000).toString();
+       const newCode = Math.floor(100000 + Math.random() * 900000).toString();
        const ref = doc(db, HOUSES_COL, house.id);
        batch.update(ref, { accessCode: newCode });
        

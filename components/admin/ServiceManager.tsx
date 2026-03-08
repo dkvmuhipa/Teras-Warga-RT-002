@@ -306,6 +306,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
 
               <div className="space-y-6">
                 {(pdfConfig.letterTemplates || [
+                  { type: 'Surat Pengantar', suggestion: 'Surat pengantar umum untuk berbagai keperluan administratif.' },
                   { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
                   { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
                   { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
@@ -337,6 +338,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                             if (newTemplates.length === 0) {
                               // Initialize if empty
                               newTemplates.push(...[
+                                { type: 'Surat Pengantar', suggestion: 'Surat pengantar umum untuk berbagai keperluan administratif.' },
                                 { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
                                 { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
                                 { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
@@ -362,6 +364,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                             const newTemplates = [...(pdfConfig.letterTemplates || [])];
                             if (newTemplates.length === 0) {
                               newTemplates.push(...[
+                                { type: 'Surat Pengantar', suggestion: 'Surat pengantar umum untuk berbagai keperluan administratif.' },
                                 { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
                                 { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
                                 { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
