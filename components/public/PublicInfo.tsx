@@ -6,6 +6,7 @@ import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, 
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
+import { PublicRules } from './PublicRules';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
@@ -318,6 +319,11 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                     </div>
                 </motion.div>
             </div>
+
+            {/* Rules Section */}
+            <motion.div variants={itemVariants}>
+                <PublicRules />
+            </motion.div>
 
             {/* Gallery */}
             <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
