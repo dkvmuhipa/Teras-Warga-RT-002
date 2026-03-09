@@ -320,7 +320,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 <div className="lg:col-span-2 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nama RT (Kop Surat)</label>
                       <input 
@@ -348,6 +348,23 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                         }} 
                         placeholder="NAMA KETUA RT"
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">No. Surat Terakhir</label>
+                      <input 
+                        type="number"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={pdfConfig.lastLetterNumber || 0} 
+                        onChange={e => {
+                          const newConfig = {...pdfConfig, lastLetterNumber: parseInt(e.target.value) || 0};
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                        }} 
+                        placeholder="0"
+                      />
+                      <p className="text-[9px] text-slate-400 mt-1 ml-1 leading-tight">
+                        Digunakan untuk penomoran otomatis. Format: KODE/NOMOR/RT/BULAN/TAHUN
+                      </p>
                     </div>
                   </div>
 
