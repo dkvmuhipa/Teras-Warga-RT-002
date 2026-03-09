@@ -6,7 +6,7 @@ import {
   Search, Filter, Grid, List, UserPlus, Download, Upload, 
   Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle,
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
-  ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList
+  ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText
 } from 'lucide-react';
 import { House, Report, Official, PdfConfig, PaymentStatus, ResidentRegistration } from '../../types';
 import { HouseMap } from '../HouseMap';
@@ -1216,6 +1216,46 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       </div>
                     </div>
                   </section>
+
+                  {(selectedResident.ktpUrl || selectedResident.kkUrl) && (
+                    <section>
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Dokumen Kependudukan</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {selectedResident.ktpUrl && (
+                          <a 
+                            href={selectedResident.ktpUrl} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="flex items-center gap-3 p-4 bg-indigo-50 border border-indigo-100 rounded-3xl hover:bg-indigo-100 transition-all group"
+                          >
+                            <div className="p-2 bg-white text-indigo-600 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+                              <FileText size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-indigo-900">Foto KTP</p>
+                              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Lihat Dokumen</p>
+                            </div>
+                          </a>
+                        )}
+                        {selectedResident.kkUrl && (
+                          <a 
+                            href={selectedResident.kkUrl} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-3xl hover:bg-emerald-100 transition-all group"
+                          >
+                            <div className="p-2 bg-white text-emerald-600 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+                              <FileText size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-emerald-900">Foto KK</p>
+                              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Lihat Dokumen</p>
+                            </div>
+                          </a>
+                        )}
+                      </div>
+                    </section>
+                  )}
 
                   <section>
                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Status Keuangan</h4>
