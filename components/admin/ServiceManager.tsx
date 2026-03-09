@@ -771,7 +771,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   
                   {letter.status === 'Approved' && (
                     <button 
-                      onClick={() => generateSuratPengantar(letter, pdfConfig, false)}
+                      onClick={async () => {
+                        try {
+                          await generateSuratPengantar(letter, pdfConfig, false);
+                        } catch (err) {
+                          console.error("Print Error:", err);
+                          alert("Gagal mencetak surat. Pastikan data lengkap.");
+                        }
+                      }}
                       className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100"
                       title="Cetak Surat"
                     >

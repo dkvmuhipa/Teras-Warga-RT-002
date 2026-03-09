@@ -55,13 +55,14 @@ const getImageData = (source: string): Promise<string> => {
 };
 
 export const generateSuratPengantar = async (letter: LetterRequest, customConfig?: PdfConfig, isDraft: boolean = true) => {
-  const config = customConfig || DEFAULT_PDF_CONFIG;
-  
-  const doc = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4"
-  });
+  try {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -111,9 +112,11 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   const title = letter.type === 'Surat Izin Keramaian' ? "SURAT IZIN KERAMAIAN" : "SURAT PENGANTAR";
   
-  doc.setFont("times", "bold", "underline");
+  doc.setFont("times", "bold");
   doc.setFontSize(12);
   doc.text(title, centerX, 52, { align: "center" });
+  const textWidth = doc.getTextWidth(title);
+  doc.line(centerX - (textWidth / 2), 53, centerX + (textWidth / 2), 53);
   
   doc.setFont("times", "normal");
   doc.setFontSize(11);
@@ -224,7 +227,13 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   }
 
   const filenamePrefix = isDraft ? "DRAFT_" : "RESMI_";
-  doc.save(`${filenamePrefix}Surat_${title.replace(/\s/g, '_')}_${letter.applicantName}.pdf`);
+  const safeApplicantName = letter.applicantName.replace(/[^a-z0-9]/gi, '_');
+  const safeTitle = title.replace(/[^a-z0-9]/gi, '_');
+  doc.save(`${filenamePrefix}Surat_${safeTitle}_${safeApplicantName}.pdf`);
+  } catch (error) {
+    console.error("PDF Generation Error:", error);
+    alert("Gagal membuat PDF: " + (error instanceof Error ? error.message : "Unknown error"));
+  }
 };
 
 export const generateReportReceiptPDF = async (report: Report, customConfig?: PdfConfig) => {
@@ -455,8 +464,10 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         } catch(e) {}
     }
 
-    doc.setFont("times", "bold", "underline");
+    doc.setFont("times", "bold");
     doc.text(config.rtChairman, signX, signY + 35, { align: "center" });
+    const chairmanWidth = doc.getTextWidth(config.rtChairman);
+    doc.line(signX - (chairmanWidth / 2), signY + 36, signX + (chairmanWidth / 2), signY + 36);
 
     doc.save(`Laporan_Warga_RT002_${new Date().toISOString().split('T')[0]}.pdf`);
 };

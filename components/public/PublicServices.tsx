@@ -185,7 +185,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       estimatedTime: estimatedTimes[finalRequestType] || estimatedTimes['Lainnya']
     }; 
     
-    generateSuratPengantar(letterData, pdfConfig, true); 
+    await generateSuratPengantar(letterData, pdfConfig, true); 
     await addLetterToDb(letterData); 
     const historyItem = {...letterData, category: 'Surat', title: `Surat ${finalRequestType}`};
     saveToHistory(historyItem); 
