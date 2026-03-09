@@ -295,48 +295,94 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       className="max-w-5xl mx-auto px-4 py-8 mb-24 font-sans"
     >
       {/* Header Section */}
-      <div className="text-center mb-16 relative">
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="inline-block p-3 bg-indigo-50 text-indigo-600 rounded-3xl mb-6"
-        >
-          <Sparkles size={24} />
-        </motion.div>
-        <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight mb-6 leading-tight">
-          Layanan Mandiri <br/>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Warga RT 002</span>
-        </h1>
-        <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto leading-relaxed">
-          Platform digital untuk mempermudah urusan administrasi dan pelaporan warga secara mandiri, transparan, dan efisien.
-        </p>
+      <div className="relative mb-20 pt-10">
+        {/* Atmospheric Background Elements */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[10%] w-[40%] h-[60%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[10%] w-[30%] h-[50%] bg-violet-200/20 blur-[100px] rounded-full" />
+        </div>
+
+        <div className="text-center max-w-4xl mx-auto">
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md border border-indigo-100 rounded-full shadow-sm mb-8"
+          >
+            <Sparkles size={16} className="text-indigo-600" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">Layanan Digital Terpadu</span>
+          </motion.div>
+          
+          <motion.h1 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-8 leading-[0.95]"
+          >
+            Solusi Administrasi <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 bg-[length:200%_auto] animate-gradient-x">
+              Warga Lebih Cerdas.
+            </span>
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-slate-500 font-medium text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-12"
+          >
+            Urus surat pengantar, lapor kejadian, hingga mutasi warga kini lebih mudah, cepat, dan transparan langsung dari genggaman Anda.
+          </motion.p>
+
+          {/* Quick Stats / Info */}
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto"
+          >
+            {[
+              { label: 'Proses Cepat', icon: Clock, desc: '1x24 Jam' },
+              { label: 'Transparan', icon: Eye, desc: 'Pantau Status' },
+              { label: 'Paperless', icon: FileText, desc: 'Digital PDF' },
+              { label: 'Terintegrasi', icon: CheckCircle2, desc: 'Data Akurat' }
+            ].map((item, i) => (
+              <div key={i} className="p-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-3xl text-left hover:bg-white hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
+                <item.icon size={20} className="text-indigo-600 mb-3 group-hover:scale-110 transition-transform" />
+                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">{item.label}</p>
+                <p className="text-sm font-bold text-slate-700">{item.desc}</p>
+              </div>
+            ))}
+          </motion.div>
+        </div>
       </div>
 
       {/* Modern Tabs Navigation */}
-      <div className="flex justify-center mb-16">
-        <div className="bg-white p-2 rounded-[2.5rem] inline-flex shadow-xl shadow-slate-200/50 border border-slate-100">
+      <div className="sticky top-4 z-50 flex justify-center mb-20 px-4">
+        <div className="bg-white/80 backdrop-blur-xl p-2 rounded-[2.5rem] inline-flex shadow-2xl shadow-indigo-500/10 border border-white/50">
           {[
-            { id: 'surat', label: 'Buat Surat', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            { id: 'surat', label: 'Layanan Surat', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
             { id: 'lapor', label: 'Lapor Warga', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
             { id: 'mutasi', label: 'Mutasi Warga', icon: UserPlus, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { id: 'history', label: 'Riwayat Saya', icon: History, color: 'text-amber-600', bg: 'bg-amber-50' }
+            { id: 'history', label: 'Cek Status', icon: History, color: 'text-amber-600', bg: 'bg-amber-50' }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`
-                relative flex items-center gap-3 px-8 py-4 rounded-[2rem] text-sm font-black uppercase tracking-widest transition-all duration-500
+                relative flex items-center gap-3 px-6 md:px-8 py-4 rounded-[2rem] text-xs md:text-sm font-black uppercase tracking-widest transition-all duration-500
                 ${activeTab === tab.id 
                   ? `${tab.bg} ${tab.color} shadow-sm` 
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}
               `}
             >
-              <tab.icon size={18} strokeWidth={2.5} />
-              <span className="hidden md:inline">{tab.label}</span>
+              <tab.icon size={18} strokeWidth={2.5} className={`${activeTab === tab.id ? 'scale-110' : 'scale-100'} transition-transform`} />
+              <span className="hidden sm:inline">{tab.label}</span>
               {activeTab === tab.id && (
                 <motion.div 
                   layoutId="activeTab"
                   className="absolute inset-0 border-2 border-current opacity-10 rounded-[2rem]"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
             </button>
