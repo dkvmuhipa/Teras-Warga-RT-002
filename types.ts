@@ -61,6 +61,52 @@ export interface House {
   }[];
 }
 
+export interface ResidentRegistration {
+  id: string;
+  headOfFamily: string;
+  ownerName?: string;
+  block: string;
+  number: string;
+  phone: string;
+  status: 'Occupied' | 'Empty' | 'Business';
+  residenceType: 'Tetap' | 'Kontrak' | 'Kost';
+  occupants: number;
+  education?: string;
+  jobCategory?: string;
+  vehicleCount?: number;
+  pregnantCount?: number;
+  babyCount?: number;
+  toddlerCount?: number;
+  teenagerCount?: number;
+  elderlyCount?: number;
+  widowCount?: number;
+  ktpUrl?: string;
+  kkUrl?: string;
+  familyMembers?: {
+    name: string;
+    nik?: string;
+    relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
+    birthDate?: string;
+  }[];
+  date: string;
+  approvalStatus: 'Pending' | 'Approved' | 'Rejected';
+  notes?: string;
+}
+
+export interface GuestReport {
+  id: string;
+  residentName: string;
+  residentHouseId: string;
+  guestName: string;
+  relationship: string;
+  stayDuration: string;
+  arrivalDate: string;
+  ktpUrl?: string;
+  phone: string;
+  status: 'Active' | 'Departed';
+  createdAt: string;
+}
+
 export interface AuditLog {
   id: string;
   action: string;

@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Bill, BillItem } from '../../types';
+import { Bill, BillItem, House } from '../../types';
 import { X, CheckCircle, AlertCircle, Plus, Upload } from 'lucide-react';
 import { updateBillInDb } from '../../services/databaseService';
 
 interface BillDetailModalProps {
-  houseId: string;
+  house: House;
   bills: Bill[];
   onClose: () => void;
 }
 
-export const BillDetailModal: React.FC<BillDetailModalProps> = ({ houseId, bills, onClose }) => {
-  const houseBills = bills.filter(b => b.houseId === houseId).sort((a, b) => b.month.localeCompare(a.month));
+export const BillDetailModal: React.FC<BillDetailModalProps> = ({ house, bills, onClose }) => {
+  const houseBills = bills.filter(b => b.houseId === house.id).sort((a, b) => b.month.localeCompare(a.month));
 
   const handleMarkAsPaid = async (billId: string, itemId: string) => {
     const bill = houseBills.find(b => b.id === billId);
@@ -41,7 +41,12 @@ export const BillDetailModal: React.FC<BillDetailModalProps> = ({ houseId, bills
         className="bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
       >
         <div className="p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white">
-          <h2 className="text-xl font-black text-slate-800">Riwayat Tagihan {houseId}</h2>
+          <div>
+            <h2 className="text-xl font-black text-slate-800">Riwayat Tagihan</h2>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              {house.headOfFamily} • Blok {house.block}-{house.number}
+            </p>
+          </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full"><X size={20} /></button>
         </div>
         <div className="p-6 space-y-6">

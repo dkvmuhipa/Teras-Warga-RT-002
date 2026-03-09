@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, DollarSign, FileText, 
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
-  ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon
+  ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -13,10 +13,12 @@ interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   onLogout: () => void;
+  residentRegistrations?: any[];
+  guestReports?: any[];
 }
 
 export const AdminSidebar: React.FC<SidebarProps> = ({ 
-  activeTab, setActiveTab, isOpen, setIsOpen, onLogout 
+  activeTab, setActiveTab, isOpen, setIsOpen, onLogout, residentRegistrations = [], guestReports = []
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -31,6 +33,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Administrasi", 
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
+        { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },
         { id: 'services', icon: FileText, label: 'Layanan & Surat' },
         { id: 'finance', icon: DollarSign, label: 'Keuangan' },
       ] 
@@ -157,6 +160,19 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                       {!isCollapsed && (
                         <span className="truncate">{item.label}</span>
                       )}
+                      
+                      {/* Badges */}
+                      {!isCollapsed && item.id === 'residents' && residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 && (
+                        <span className="ml-auto bg-indigo-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
+                          {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length}
+                        </span>
+                      )}
+                      {!isCollapsed && item.id === 'guests' && guestReports.filter(g => g.status === 'Active').length > 0 && (
+                        <span className="ml-auto bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
+                          {guestReports.filter(g => g.status === 'Active').length}
+                        </span>
+                      )}
+
                       {activeTab === item.id && !isCollapsed && (
                         <motion.div 
                           layoutId="activeTab"

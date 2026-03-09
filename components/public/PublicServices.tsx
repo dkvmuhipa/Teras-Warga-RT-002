@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   FileText, AlertTriangle, History, Send, User, MapPin, 
   Calendar, Briefcase, Heart, Flag, Home, Lock, CheckCircle2, Clock, XCircle, Sparkles, Eye, EyeOff,
-  Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus
+  Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
@@ -11,6 +11,7 @@ import { generateSuratPengantar, generateReportReceiptPDF } from '../../services
 import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
+import { GuestReportForm } from '../GuestReportForm';
 
 interface PublicServicesProps {
   pdfConfig: PdfConfig;
@@ -19,10 +20,11 @@ interface PublicServicesProps {
 
 export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, houses = [] }) => {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'lapor' ? 'lapor' : 'surat';
+  const initialTab = searchParams.get('tab') === 'lapor' ? 'lapor' : 
+                     searchParams.get('tab') === 'tamu' ? 'tamu' : 'surat';
   const initialHouseId = searchParams.get('houseId') || '';
   
-  const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'mutasi' | 'history'>(initialTab as any);
+  const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'tamu' | 'mutasi' | 'history'>(initialTab as any);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [accessCode, setAccessCode] = useState('');
   const [showPin, setShowPin] = useState(false);
@@ -361,10 +363,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       </div>
 
       {/* Modern Tabs Navigation */}
-      <div className="sticky top-4 z-50 flex justify-center mb-20 px-4">
-        <div className="bg-white/80 backdrop-blur-xl p-2 rounded-[2.5rem] inline-flex shadow-2xl shadow-indigo-500/10 border border-white/50">
+      <div className="sticky top-4 z-50 flex justify-center mb-16 px-4">
+        <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-[2rem] inline-flex shadow-2xl shadow-indigo-500/10 border border-white/50 overflow-x-auto no-scrollbar max-w-full">
           {[
             { id: 'surat', label: 'Layanan Surat', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            { id: 'tamu', label: 'Lapor Tamu', icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50' },
             { id: 'lapor', label: 'Lapor Warga', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
             { id: 'mutasi', label: 'Mutasi Warga', icon: UserPlus, color: 'text-emerald-600', bg: 'bg-emerald-50' },
             { id: 'history', label: 'Cek Status', icon: History, color: 'text-amber-600', bg: 'bg-amber-50' }
@@ -373,18 +376,18 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`
-                relative flex items-center gap-3 px-6 md:px-8 py-4 rounded-[2rem] text-xs md:text-sm font-black uppercase tracking-widest transition-all duration-500
+                relative flex items-center gap-2 px-4 md:px-6 py-3 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-500
                 ${activeTab === tab.id 
                   ? `${tab.bg} ${tab.color} shadow-sm` 
                   : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}
               `}
             >
-              <tab.icon size={18} strokeWidth={2.5} className={`${activeTab === tab.id ? 'scale-110' : 'scale-100'} transition-transform`} />
+              <tab.icon size={16} strokeWidth={2.5} className={`${activeTab === tab.id ? 'scale-110' : 'scale-100'} transition-transform`} />
               <span className="hidden sm:inline">{tab.label}</span>
               {activeTab === tab.id && (
                 <motion.div 
                   layoutId="activeTab"
-                  className="absolute inset-0 border-2 border-current opacity-10 rounded-[2rem]"
+                  className="absolute inset-0 border-2 border-current opacity-10 rounded-2xl"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -394,6 +397,18 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       </div>
 
       <AnimatePresence mode="wait">
+        {activeTab === 'tamu' && (
+          <motion.div
+            key="tamu"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="max-w-2xl mx-auto"
+          >
+            <GuestReportForm onClose={() => setActiveTab('surat')} houses={houses} />
+          </motion.div>
+        )}
+
         {activeTab === 'surat' && (
           <motion.div 
             key="surat"

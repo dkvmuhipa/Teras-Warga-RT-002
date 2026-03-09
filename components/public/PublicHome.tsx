@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
-  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck
+  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession } from '../../types';
@@ -44,9 +44,10 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
   const quickActions = [
     { label: 'Buat Surat', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', link: '/services' },
+    { label: 'Lapor Tamu', icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=tamu' },
+    { label: 'Warga Baru', icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/register' },
     { label: 'Pasar Warga', icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', link: '/market' },
     { label: 'E-Voting', icon: Vote, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/voting' },
-    { label: 'Dokumen', icon: FileText, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', link: '/dokumen' },
     { label: 'Lapor Warga', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=lapor' }
   ];
 
@@ -71,7 +72,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       <HeroSection />
 
       {/* Quick Actions - Bento Style */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 -mt-8 relative z-10">
+      <div className="flex md:grid md:grid-cols-6 gap-4 -mt-8 relative z-10 overflow-x-auto no-scrollbar pb-4 md:pb-0 px-2 md:px-0">
         {quickActions.map((action, idx) => (
           <motion.button
             key={idx}
@@ -80,17 +81,17 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate(action.link)}
             className={`
-              flex flex-col items-center justify-center gap-4 p-8 
-              bg-white/80 backdrop-blur-md rounded-[2.5rem] shadow-xl shadow-slate-200/40 border ${action.border}
-              transition-all duration-500 group relative overflow-hidden
+              flex flex-col items-center justify-center gap-3 p-5 min-w-[140px] md:min-w-0
+              bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-slate-200/40 border ${action.border}
+              transition-all duration-500 group relative overflow-hidden flex-shrink-0 md:flex-shrink
             `}
           >
             <div className={`absolute inset-0 ${action.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
             <div className={`
-              relative z-10 p-5 rounded-3xl ${action.bg} ${action.color} 
+              relative z-10 p-3 rounded-2xl ${action.bg} ${action.color} 
               group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm
             `}>
-              <action.icon size={32} strokeWidth={2.5} />
+              <action.icon size={24} strokeWidth={2.5} />
             </div>
             <span className="relative z-10 font-black text-slate-700 text-xs uppercase tracking-widest group-hover:text-slate-900 transition-colors">
               {action.label}
@@ -104,9 +105,6 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         variants={itemVariants} 
         className="w-full bg-white/60 backdrop-blur-md p-3 rounded-[3rem] shadow-2xl shadow-indigo-500/5 border border-white/50 relative group"
       >
-        <div className="absolute -top-4 -right-4 bg-indigo-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg z-20">
-          Peta Interaktif
-        </div>
         <HouseMap 
           houses={houses} 
           isAdmin={false} 

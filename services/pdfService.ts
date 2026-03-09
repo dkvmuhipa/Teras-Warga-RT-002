@@ -1,7 +1,152 @@
 
 import { jsPDF } from "jspdf";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
+
+// ... (existing helper functions) ...
+
+export const generatePopulationReportPDF = async (report: PopulationReport, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    // --- Professional Header (Kop Surat) ---
+    let logoDrawn = false;
+    try {
+        const logoData = await getImageData(config.logo);
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+            logoDrawn = true;
+        }
+    } catch (e) { console.error(e); }
+
+    doc.setFont("times", "normal"); 
+    doc.setFontSize(14);
+    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+    doc.setLineWidth(1.0);
+    doc.line(20, 42, 190, 42);
+    doc.setLineWidth(0.3);
+    doc.line(20, 43, 190, 43);
+
+    // --- Title ---
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text("LAPORAN KEPENDUDUKAN BULANAN", centerX, 52, { align: "center" });
+    const titleWidth = doc.getTextWidth("LAPORAN KEPENDUDUKAN BULANAN");
+    doc.line(centerX - (titleWidth / 2), 53, centerX + (titleWidth / 2), 53);
+    
+    doc.setFont("times", "normal");
+    doc.text(`Periode: ${report.month} ${report.year}`, centerX, 58, { align: "center" });
+
+    let y = 70;
+    const rowHeight = 10;
+
+    // --- Section 1: Mutasi Penduduk ---
+    doc.setFont("times", "bold");
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.text("I. DATA MUTASI PENDUDUK", margin + 2, y);
+    y += 12;
+
+    const addStatRow = (label: string, value: string | number, isBold = false, color?: [number, number, number]) => {
+        doc.setFont("times", isBold ? "bold" : "normal");
+        doc.setFontSize(11);
+        if (color) doc.setTextColor(color[0], color[1], color[2]);
+        doc.text(label, margin + 5, y);
+        doc.text(value.toString(), pageWidth - margin - 5, y, { align: "right" });
+        doc.setTextColor(0);
+        
+        doc.setDrawColor(230);
+        doc.setLineWidth(0.1);
+        doc.line(margin + 5, y + 2, pageWidth - margin - 5, y + 2);
+        y += rowHeight;
+    };
+
+    addStatRow("1. Penduduk Awal Bulan", report.initialPopulation);
+    addStatRow("2. Kelahiran (+)", `+ ${report.birthCount}`, false, [16, 185, 129]);
+    addStatRow("3. Kematian (-)", `- ${report.deathCount || 0}`, false, [239, 68, 68]);
+    addStatRow("4. Pendatang (+)", `+ ${report.newcomerCount}`, false, [37, 99, 235]);
+    addStatRow("5. Pindah Keluar (-)", `- ${report.movedOutCount}`, false, [245, 158, 11]);
+    
+    const totalAkhir = report.initialPopulation + report.birthCount + report.newcomerCount - report.movedOutCount - (report.deathCount || 0);
+    y += 2;
+    doc.setFillColor(240, 244, 255);
+    doc.rect(margin, y - 7, contentWidth, 10, 'F');
+    addStatRow("TOTAL PENDUDUK AKHIR", totalAkhir, true, [79, 70, 229]);
+
+    y += 10;
+
+    // --- Section 2: Kelompok Rentan ---
+    doc.setFont("times", "bold");
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.text("II. DATA KELOMPOK RENTAN", margin + 2, y);
+    y += 12;
+
+    addStatRow("1. Ibu Hamil", report.pregnantCount || 0);
+    addStatRow("2. Bayi", report.babyCount || 0);
+    addStatRow("3. Balita", report.toddlerCount || 0);
+    addStatRow("4. Lansia", report.elderlyCount || 0);
+    addStatRow("5. Janda", report.widowCount || 0);
+
+    // --- Signature Section ---
+    y += 15;
+    if (y > pageHeight - 60) {
+        doc.addPage();
+        y = 30;
+    }
+
+    const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const signX = pageWidth - 60;
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    doc.text(`Palu, ${dateString}`, signX, y, { align: "center" });
+    doc.text(`Ketua ${config.rtName}`, signX, y + 6, { align: "center" });
+    
+    const signSpaceY = y + 8;
+    
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y + 35, { align: "center" });
+    const chairmanWidth = doc.getTextWidth(config.rtChairman);
+    doc.line(signX - (chairmanWidth / 2), y + 36, signX + (chairmanWidth / 2), y + 36);
+
+    // Add Stamp and Signature if available
+    try {
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY, 25, 25);
+        }
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+    } catch (e) {}
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setFont("times", "italic");
+    doc.setTextColor(150);
+    doc.text(`Dicetak otomatis melalui Sistem Teras Warga pada ${new Date().toLocaleString('id-ID')}`, margin, pageHeight - 10);
+
+    doc.save(`Laporan_Penduduk_${report.month}_${report.year}.pdf`);
+};
 
 // --- Shared Helper Functions ---
 // Fungsi universal untuk mengambil ID file dari berbagai format link Google Drive

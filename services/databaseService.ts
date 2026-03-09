@@ -32,7 +32,7 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { MapPoint, Checkpoint, LetterRequest } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration } from "../types";
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -55,6 +55,44 @@ const CHECKPOINTS_COL = "checkpoints";
 const MAP_POINTS_COL = "mapPoints";
 const DOCUMENTS_COL = "documents";
 const POPULATION_LOGS_COL = "populationLogs";
+const IURAN_PAYMENTS_COL = "iuranPayments";
+const RESIDENT_REGISTRATIONS_COL = "residentRegistrations";
+const GUEST_REPORTS_COL = "guestReports";
+
+// --- GUEST REPORTS SERVICES ---
+export const subscribeToGuestReports = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, GUEST_REPORTS_COL), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to guest reports:", error);
+    });
+};
+
+export const addGuestReportToDb = async (data: any) => {
+    try {
+        await addDoc(collection(db, GUEST_REPORTS_COL), deepSanitize(data));
+    } catch (e) {
+        console.error("Error adding guest report:", e);
+    }
+};
+
+export const updateGuestReportStatus = async (id: string, status: 'Active' | 'Departed') => {
+    try {
+        await updateDoc(doc(db, GUEST_REPORTS_COL, id), { status });
+    } catch (e) {
+        console.error("Error updating guest report status:", e);
+    }
+};
+
+export const deleteGuestReportFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, GUEST_REPORTS_COL, id));
+    } catch (e) {
+        console.error("Error deleting guest report:", e);
+    }
+};
 
 // --- DOCUMENTS SERVICES ---
 export const subscribeToDocuments = (callback: (data: any[]) => void) => {
@@ -562,6 +600,63 @@ export const deleteAnnouncementFromDb = async (id: string) => {
 
 export const updateAnnouncementInDb = async (id: string, updates: any) => {
   try { await updateDoc(doc(db, ANNOUNCEMENTS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating announcement:", e); }
+};
+
+export const addIuranPaymentToDb = async (payment: any) => {
+    try {
+        await addDoc(collection(db, IURAN_PAYMENTS_COL), deepSanitize(payment));
+    } catch (e) {
+        console.error("Error adding iuran payment:", e);
+    }
+};
+
+export const subscribeToIuranPayments = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, IURAN_PAYMENTS_COL), orderBy("date", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    });
+};
+
+export const deleteIuranPaymentFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, IURAN_PAYMENTS_COL, id));
+    } catch (e) {
+        console.error("Error deleting iuran payment:", e);
+    }
+};
+
+// --- RESIDENT REGISTRATIONS ---
+export const addResidentRegistrationToDb = async (registration: any) => {
+    try {
+        await addDoc(collection(db, RESIDENT_REGISTRATIONS_COL), deepSanitize(registration));
+    } catch (e) {
+        console.error("Error adding resident registration:", e);
+    }
+};
+
+export const subscribeToResidentRegistrations = (callback: (data: ResidentRegistration[]) => void) => {
+    const q = query(collection(db, RESIDENT_REGISTRATIONS_COL), orderBy("date", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as ResidentRegistration[];
+        callback(data);
+    });
+};
+
+export const updateResidentRegistrationInDb = async (id: string, updates: any) => {
+    try {
+        await updateDoc(doc(db, RESIDENT_REGISTRATIONS_COL, id), deepSanitize(updates));
+    } catch (e) {
+        console.error("Error updating resident registration:", e);
+    }
+};
+
+export const deleteResidentRegistrationFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, RESIDENT_REGISTRATIONS_COL, id));
+    } catch (e) {
+        console.error("Error deleting resident registration:", e);
+    }
 };
 
 // --- 3. CASHFLOW ---

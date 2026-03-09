@@ -1,6 +1,6 @@
 import React from 'react';
 import { House, PaymentStatus, Bill } from '../../types';
-import { Phone, CheckCircle, XCircle, DollarSign, Edit2, Trash2 } from 'lucide-react';
+import { Phone, CheckCircle, XCircle, DollarSign, Edit2, Trash2, LayoutList } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface ResidentCardProps {
@@ -9,11 +9,12 @@ interface ResidentCardProps {
   onOpenDetail: (house: House) => void;
   onOpenEdit: (house: House) => void;
   onDelete: (id: string) => void;
-  onOpenBills: (houseId: string) => void;
+  onOpenBills: (house: House) => void;
+  onOpenPay: (house: House) => void;
 }
 
 export const ResidentCard: React.FC<ResidentCardProps> = ({ 
-  house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills 
+  house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills, onOpenPay 
 }) => {
   const houseBills = bills.filter(b => b.houseId === house.id);
   const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
@@ -88,7 +89,8 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
 
       <div className="flex gap-1.5 pt-3 border-t border-slate-100">
         <button onClick={() => onOpenDetail(house)} className="flex-1 py-2 bg-slate-50 text-slate-600 rounded-lg font-bold text-[10px] hover:bg-slate-100 transition-all">Detail</button>
-        <button onClick={() => onOpenBills(house.id)} className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all"><DollarSign size={14} /></button>
+        <button onClick={() => onOpenPay(house)} className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="Bayar Iuran"><DollarSign size={14} /></button>
+        <button onClick={() => onOpenBills(house)} className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all" title="Riwayat Tagihan"><LayoutList size={14} /></button>
         <button onClick={() => onOpenEdit(house)} className="p-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-all"><Edit2 size={14} /></button>
         <button onClick={() => onDelete(house.id)} className="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-all"><Trash2 size={14} /></button>
       </div>

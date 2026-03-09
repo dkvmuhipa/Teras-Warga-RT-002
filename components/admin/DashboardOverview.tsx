@@ -7,9 +7,10 @@ import {
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
 } from 'recharts';
-import { House, CashFlow, Report, Announcement, Bill, PaymentStatus } from '../../types';
+import { House, CashFlow, Report, Announcement, Bill, PaymentStatus, GuestReport } from '../../types';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { ShieldAlert } from 'lucide-react';
 import { generateDashboardSummary } from '../../services/geminiService';
 import { Button } from '../ui/Button';
 
@@ -19,10 +20,11 @@ interface DashboardOverviewProps {
   reports: Report[];
   announcements: Announcement[];
   bills: Bill[];
+  guestReports: GuestReport[];
   onTabChange: (tab: string) => void;
 }
 
-export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, cashFlow, reports, announcements, bills, onTabChange }) => {
+export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, cashFlow, reports, announcements, bills, guestReports, onTabChange }) => {
   const [aiSummary, setAiSummary] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
 
@@ -52,6 +54,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
   const balance = income - expense;
 
   const newReports = reports.filter(r => r.status === 'Baru').length;
+  const activeGuests = guestReports.filter(g => g.status === 'Active').length;
   
   // Overdue Bills
   const overdueBills = bills.filter(b => b.total > 0 && new Date(b.dueDate) < new Date());
@@ -244,23 +247,23 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
           </div>
         </motion.div>
 
-        {/* Tagihan Jatuh Tempo Card */}
-        <motion.div variants={itemVariants} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-amber-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('bills')}>
+        {/* Tamu Card */}
+        <motion.div variants={itemVariants} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-amber-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('guests')}>
           <div className="absolute -right-4 -top-4 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
-                <Clock size={24} />
+                <ShieldAlert size={24} />
               </div>
-              <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Tagihan</span>
+              <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Tamu</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-4xl font-black text-slate-900">{overdueBills.length}</h3>
-              <span className="text-sm font-bold text-slate-400">Jatuh Tempo</span>
+              <h3 className="text-4xl font-black text-slate-900">{activeGuests}</h3>
+              <span className="text-sm font-bold text-slate-400">Aktif</span>
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-bold text-amber-500">
-              <AlertTriangle size={14} />
-              <span>Perlu penagihan</span>
+              <Clock size={14} />
+              <span>Menginap 1x24 Jam</span>
             </div>
           </div>
         </motion.div>

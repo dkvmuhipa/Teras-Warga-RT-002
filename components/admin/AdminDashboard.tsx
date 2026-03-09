@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, Bill, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession
+  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, Bill, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -21,6 +21,7 @@ import { BillManager } from './BillManager';
 import { PopulationReportManager } from './PopulationReportManager';
 import { EventManager } from './EventManager';
 import { AssetManager } from './AssetManager';
+import { GuestManager } from './GuestManager';
 import { AdvancedAnalytics } from './AdvancedAnalytics';
 import { NotificationCombined } from './NotificationCombined';
 import { MapManager } from './MapManager';
@@ -55,11 +56,14 @@ interface AdminDashboardProps {
   events: AppEvent[];
   mapPoints: MapPoint[];
   activePatrol: PatrolSession | null;
+  iuranPayments: any[];
+  residentRegistrations: ResidentRegistration[];
+  guestReports: any[];
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol
+  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -77,9 +81,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} bills={bills} onTabChange={setActiveTab} />;
+        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} bills={bills} guestReports={guestReports} onTabChange={setActiveTab} />;
       case 'residents':
-        return <ResidentManager houses={houses} bills={bills} reports={reports} officials={officials} pdfConfig={pdfConfig} />;
+        return <ResidentManager houses={houses} bills={bills} reports={reports} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} residentRegistrations={residentRegistrations} />;
       case 'finance':
         return <FinanceManager cashFlow={cashFlow} />;
       case 'services':
@@ -88,6 +92,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} />;
       case 'assets':
         return <AssetManager inventory={inventory} />;
+      case 'guests':
+        return <GuestManager guestReports={guestReports} />;
       case 'events':
         return <EventManager events={events} />;
       case 'analytics':
@@ -109,7 +115,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'settings':
         return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       default:
-        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} bills={bills} onTabChange={setActiveTab} />;
+        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} bills={bills} guestReports={guestReports} onTabChange={setActiveTab} />;
     }
   };
 
@@ -121,6 +127,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         isOpen={isSidebarOpen} 
         setIsOpen={setIsSidebarOpen}
         onLogout={handleLogout}
+        residentRegistrations={residentRegistrations}
+        guestReports={guestReports}
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
