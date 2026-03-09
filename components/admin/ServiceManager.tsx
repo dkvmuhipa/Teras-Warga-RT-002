@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus, deleteLetterFromDb } from '../../services/databaseService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -24,6 +24,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
   const [selectedLetter, setSelectedLetter] = useState<LetterRequest | null>(null);
   const [isCreatingLetter, setIsCreatingLetter] = useState(false);
   const [letterNumberInput, setLetterNumberInput] = useState('');
+  const [adminLetterNumber, setAdminLetterNumber] = useState('');
+  const [editLetterData, setEditLetterData] = useState<Partial<LetterRequest>>({});
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -53,27 +55,53 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
   });
 
   React.useEffect(() => {
-    if (selectedLetter && selectedLetter.status === 'Pending') {
+    if (selectedLetter) {
+      setEditLetterData({
+        applicantName: selectedLetter.applicantName,
+        nik: selectedLetter.nik,
+        phone: selectedLetter.phone,
+        email: selectedLetter.email,
+        education: selectedLetter.education,
+        bloodType: selectedLetter.bloodType,
+        familyStatus: selectedLetter.familyStatus,
+        job: selectedLetter.job,
+        addressKtp: selectedLetter.addressKtp,
+        currentAddress: selectedLetter.currentAddress,
+        purposeDetail: selectedLetter.purposeDetail,
+        type: selectedLetter.type
+      });
+
+      if (selectedLetter.status === 'Pending') {
+        const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
+        const currentYear = new Date().getFullYear();
+        const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+        const paddedNum = nextNum.toString().padStart(3, '0');
+        
+        const words = selectedLetter.type.split(' ').filter(w => w.length > 0);
+        let letterCode = words.map(w => w[0].toUpperCase()).join('');
+        if (!letterCode) letterCode = 'S';
+        
+        setLetterNumberInput(`${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
+      } else if (selectedLetter.letterNumber) {
+        setLetterNumberInput(selectedLetter.letterNumber);
+      }
+    }
+  }, [selectedLetter, pdfConfig.lastLetterNumber, pdfConfig.rtName]);
+
+  React.useEffect(() => {
+    if (isCreatingLetter) {
       const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
       const currentYear = new Date().getFullYear();
       const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
       const paddedNum = nextNum.toString().padStart(3, '0');
       
-      // Generate abbreviation dynamically from the letter type
-      // e.g., "Surat Pengantar KTP" -> "SPK"
-      // e.g., "Surat Keterangan Domisili" -> "SKD"
-      // e.g., "Undangan Rapat" -> "UR"
-      const words = selectedLetter.type.split(' ').filter(w => w.length > 0);
+      const words = (adminForm.type || '').split(' ').filter(w => w.length > 0);
       let letterCode = words.map(w => w[0].toUpperCase()).join('');
-      
-      // Fallback if somehow empty
       if (!letterCode) letterCode = 'S';
       
-      setLetterNumberInput(`${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
-    } else if (selectedLetter && selectedLetter.letterNumber) {
-      setLetterNumberInput(selectedLetter.letterNumber);
+      setAdminLetterNumber(`${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
     }
-  }, [selectedLetter, pdfConfig]);
+  }, [isCreatingLetter, adminForm.type, pdfConfig.lastLetterNumber, pdfConfig.rtName]);
 
   const handleAnalyzeReports = async () => {
     setIsAiLoading(true);
@@ -92,8 +120,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
         const updatedLetter = { ...letter, letterNumber: letterNumberInput };
         await generateSuratPengantar(updatedLetter, pdfConfig, false);
 
-        // Update lastLetterNumber in config
-        const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+        // Update lastLetterNumber in config based on the number used
+        const parts = letterNumberInput.split('/');
+        let nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+        if (parts.length >= 2) {
+          const extractedNum = parseInt(parts[1]);
+          if (!isNaN(extractedNum)) nextNum = extractedNum;
+        }
+
         const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
         setPdfConfig(newConfig);
         localStorage.setItem('pdf_config', JSON.stringify(newConfig));
@@ -101,6 +135,32 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
       
       setSelectedLetter(null);
       setLetterNumberInput('');
+    }
+  };
+
+  const handleSaveLetterDetails = async () => {
+    if (!selectedLetter) return;
+    try {
+      await updateLetterInDb(selectedLetter.id, {
+        ...editLetterData,
+        letterNumber: letterNumberInput
+      });
+      
+      // Update lastLetterNumber in config if it's a valid number
+      const parts = letterNumberInput.split('/');
+      if (parts.length >= 2) {
+        const extractedNum = parseInt(parts[1]);
+        if (!isNaN(extractedNum) && extractedNum > (pdfConfig.lastLetterNumber || 0)) {
+          const newConfig = { ...pdfConfig, lastLetterNumber: extractedNum };
+          setPdfConfig(newConfig);
+          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+        }
+      }
+      
+      alert("Detail surat berhasil disimpan!");
+    } catch (error) {
+      console.error("Error saving letter details:", error);
+      alert("Gagal menyimpan detail surat.");
     }
   };
 
@@ -119,28 +179,27 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
 
   const handleAdminCreateLetter = async (e: React.FormEvent) => {
     e.preventDefault();
-    const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
-    const currentYear = new Date().getFullYear();
-    const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
-    const paddedNum = nextNum.toString().padStart(3, '0');
-    const autoLetterNumber = `${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`;
-
     const newLetter: LetterRequest = {
       ...adminForm as LetterRequest,
       id: Date.now().toString(),
       status: 'Approved',
       date: new Date().toISOString().split('T')[0],
-      letterNumber: autoLetterNumber
+      letterNumber: adminLetterNumber
     };
 
-    await updateLetterStatus(newLetter.id, 'Approved', autoLetterNumber); // This will add it if not exists in some implementations, but let's assume we need a specific add function if it's new
-    // Actually, we should probably use addLetterToDb from databaseService
     const { addLetterToDb } = await import('../../services/databaseService');
     await addLetterToDb(newLetter);
 
     await generateSuratPengantar(newLetter, pdfConfig, false);
 
-    // Update config
+    // Update lastLetterNumber in config based on the number used
+    const parts = adminLetterNumber.split('/');
+    let nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+    if (parts.length >= 2) {
+      const extractedNum = parseInt(parts[1]);
+      if (!isNaN(extractedNum)) nextNum = extractedNum;
+    }
+
     const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
     setPdfConfig(newConfig);
     localStorage.setItem('pdf_config', JSON.stringify(newConfig));
@@ -876,7 +935,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Surat</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.type}</p>
+                      <select 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.type}
+                        onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
+                      >
+                        {(pdfConfig.letterTemplates || []).map(t => <option key={t.type}>{t.type}</option>)}
+                        <option>Lainnya</option>
+                      </select>
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Saat Ini</p>
@@ -890,52 +956,107 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nama Pemohon</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.applicantName}</p>
+                      <input 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.applicantName}
+                        onChange={e => setEditLetterData({...editLetterData, applicantName: e.target.value})}
+                      />
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">NIK</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.nik}</p>
+                      <input 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.nik}
+                        onChange={e => setEditLetterData({...editLetterData, nik: e.target.value})}
+                      />
                     </div>
                     
                     {/* New Fields */}
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">No. HP / WA</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.phone || '-'}</p>
+                      <input 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.phone}
+                        onChange={e => setEditLetterData({...editLetterData, phone: e.target.value})}
+                      />
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.email || '-'}</p>
+                      <input 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.email}
+                        onChange={e => setEditLetterData({...editLetterData, email: e.target.value})}
+                      />
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pendidikan</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.education || '-'}</p>
+                      <input 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.education}
+                        onChange={e => setEditLetterData({...editLetterData, education: e.target.value})}
+                      />
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Gol. Darah</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.bloodType || '-'}</p>
+                      <select 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.bloodType}
+                        onChange={e => setEditLetterData({...editLetterData, bloodType: e.target.value as any})}
+                      >
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                        <option value="-">-</option>
+                      </select>
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Keluarga</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.familyStatus || '-'}</p>
+                      <select 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.familyStatus}
+                        onChange={e => setEditLetterData({...editLetterData, familyStatus: e.target.value as any})}
+                      >
+                        <option value="Kepala Keluarga">Kepala Keluarga</option>
+                        <option value="Istri">Istri</option>
+                        <option value="Anak">Anak</option>
+                        <option value="Lainnya">Lainnya</option>
+                      </select>
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pekerjaan</p>
-                      <p className="font-bold text-slate-800">{selectedLetter.job || '-'}</p>
+                      <input 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+                        value={editLetterData.job}
+                        onChange={e => setEditLetterData({...editLetterData, job: e.target.value})}
+                      />
                     </div>
 
                     <div className="col-span-2">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat KTP</p>
-                      <p className="font-medium text-slate-700">{selectedLetter.addressKtp || '-'}</p>
+                      <textarea 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-16 resize-none"
+                        value={editLetterData.addressKtp}
+                        onChange={e => setEditLetterData({...editLetterData, addressKtp: e.target.value})}
+                      />
                     </div>
 
                     <div className="col-span-2">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat Domisili Saat Ini</p>
-                      <p className="font-medium text-slate-700">{selectedLetter.currentAddress || selectedLetter.addressKtp || '-'}</p>
+                      <textarea 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-16 resize-none"
+                        value={editLetterData.currentAddress}
+                        onChange={e => setEditLetterData({...editLetterData, currentAddress: e.target.value})}
+                      />
                     </div>
 
                     <div className="col-span-2">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
-                      <p className="font-medium text-slate-700 bg-white p-3 rounded-xl border border-slate-200">{selectedLetter.purposeDetail}</p>
+                      <textarea 
+                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-20 resize-none"
+                        value={editLetterData.purposeDetail}
+                        onChange={e => setEditLetterData({...editLetterData, purposeDetail: e.target.value})}
+                      />
                     </div>
 
                     <div className="col-span-2 pt-4 border-t border-slate-200">
@@ -968,12 +1089,23 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     </Button>
                   </div>
                 )}
-                <Button 
-                  onClick={() => sendWhatsAppMessage(selectedLetter.phone, formatLetterStatusForWhatsApp(selectedLetter.applicantName, selectedLetter.type, selectedLetter.status))}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200 mt-4"
-                >
-                  <MessageCircle size={18} className="mr-2" /> Kirim Update via WhatsApp
-                </Button>
+
+                <div className="flex gap-3 mt-4">
+                  <Button 
+                    onClick={handleSaveLetterDetails}
+                    variant="secondary"
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-none"
+                  >
+                    <Save size={18} className="mr-2" /> Simpan Perubahan
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => sendWhatsAppMessage(selectedLetter.phone, formatLetterStatusForWhatsApp(selectedLetter.applicantName, selectedLetter.type, selectedLetter.status))}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                  >
+                    <MessageCircle size={18} className="mr-2" /> Update WA
+                  </Button>
+                </div>
               </div>
             )}
       </Modal>
@@ -1183,6 +1315,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
               </div>
 
               <div className="space-y-4">
+                <div className="group">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nomor Surat (Otomatis)</label>
+                  <input 
+                    type="text"
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-indigo-600 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                    value={adminLetterNumber} 
+                    onChange={e => setAdminLetterNumber(e.target.value)}
+                    placeholder="Contoh: SPK/001/RT002/III/2026"
+                  />
+                </div>
+
                 <div className="group">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Surat</label>
                   <div className="relative">

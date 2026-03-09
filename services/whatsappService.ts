@@ -1,5 +1,11 @@
 export const sendWhatsAppMessage = (phone: string, message: string) => {
-  const formattedPhone = phone.replace(/[^0-9]/g, '');
+  let formattedPhone = phone.replace(/[^0-9]/g, '');
+  
+  // Handle Indonesian numbers starting with '0'
+  if (formattedPhone.startsWith('0')) {
+    formattedPhone = '62' + formattedPhone.substring(1);
+  }
+  
   const encodedMessage = encodeURIComponent(message);
   const url = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
   window.open(url, '_blank');

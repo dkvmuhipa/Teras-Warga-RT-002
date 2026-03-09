@@ -32,7 +32,7 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { MapPoint, Checkpoint } from "../types";
+import { MapPoint, Checkpoint, LetterRequest } from "../types";
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -628,6 +628,12 @@ export const updateLetterStatus = async (id: string, status: string, letterNumbe
     if (letterNumber) updates.letterNumber = letterNumber;
     await updateDoc(doc(db, LETTERS_COL, id), updates); 
   } catch (e) { console.error("Error updating letter:", e); }
+};
+
+export const updateLetterInDb = async (id: string, updates: Partial<LetterRequest>) => {
+  try {
+    await updateDoc(doc(db, LETTERS_COL, id), deepSanitize(updates));
+  } catch (e) { console.error("Error updating letter in DB:", e); }
 };
 
 export const deleteLetterFromDb = async (id: string) => {
