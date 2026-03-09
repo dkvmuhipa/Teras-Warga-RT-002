@@ -172,7 +172,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             </div>
 
                             {/* Demografi Detail */}
-                            {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount) ? (
+                            {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount || house.widowCount) ? (
                                 <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 shadow-sm">
                                     <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-3">Kelompok Rentan</p>
                                     <div className="flex flex-wrap gap-4">
@@ -198,6 +198,12 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                             <div className="flex items-center gap-2">
                                                 <div className="p-1.5 bg-white rounded-lg text-indigo-500 shadow-sm"><Accessibility size={14}/></div>
                                                 <span className="text-xs font-bold text-slate-700">{house.elderlyCount} Lansia</span>
+                                            </div>
+                                        ) : null}
+                                        {house.widowCount ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="p-1.5 bg-white rounded-lg text-slate-500 shadow-sm"><User size={14}/></div>
+                                                <span className="text-xs font-bold text-slate-700">{house.widowCount} Janda</span>
                                             </div>
                                         ) : null}
                                     </div>
@@ -270,6 +276,9 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                         )}
                         {(house.hasPregnant || (house.pregnantCount || 0) > 0) && (
                             <Heart size={10} className="text-rose-400" fill="currentColor" />
+                        )}
+                        {(house.hasWidow || (house.widowCount || 0) > 0) && (
+                            <User size={10} className="text-slate-600" />
                         )}
                     </div>
                 )}
@@ -354,6 +363,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const totalToddler = houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0);
   const totalElderly = houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0);
   const totalPregnant = houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0);
+  const totalWidow = houses.reduce((acc, h) => acc + (h.widowCount || 0), 0);
 
   const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
   
@@ -380,6 +390,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Baby size={12} className="text-orange-500"/> {totalToddler} Balita</div>
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Accessibility size={12} className="text-indigo-500"/> {totalElderly} Lansia</div>
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Heart size={12} className="text-rose-400" fill="currentColor"/> {totalPregnant} Hamil</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><User size={12} className="text-slate-600"/> {totalWidow} Janda</div>
             </div>
         </div>
       </div>

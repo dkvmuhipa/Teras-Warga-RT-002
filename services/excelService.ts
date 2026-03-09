@@ -6,6 +6,20 @@ export const generateProfessionalExcel = async (houses: House[]) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Data Warga RT 002');
 
+  // Sort houses by block and number
+  const sortedHouses = [...houses].sort((a, b) => {
+    if (a.block !== b.block) {
+      return a.block.localeCompare(b.block);
+    }
+    // Try to sort numerically if possible
+    const numA = parseInt(a.number, 10);
+    const numB = parseInt(b.number, 10);
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numA - numB;
+    }
+    return a.number.localeCompare(b.number);
+  });
+
   // Define columns
   worksheet.columns = [
     { header: 'BLOK (Wajib)', key: 'block', width: 15 },
@@ -23,6 +37,7 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
     { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
     { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
+    { header: 'JUMLAH JANDA', key: 'widowCount', width: 25 },
     { header: 'STATUS IURAN AIR (Lunas/Belum Lunas)', key: 'paymentStatusAir', width: 35 },
     { header: 'STATUS IURAN SAMPAH (Lunas/Belum Lunas)', key: 'paymentStatusSampah', width: 35 },
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
@@ -52,7 +67,7 @@ export const generateProfessionalExcel = async (houses: House[]) => {
   });
 
   // Add Data
-  houses.forEach((house, index) => {
+  sortedHouses.forEach((house, index) => {
     const row = worksheet.addRow({
       block: house.block,
       number: house.number,
@@ -69,6 +84,7 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       babyCount: house.babyCount || 0,
       toddlerCount: house.toddlerCount || 0,
       elderlyCount: house.elderlyCount || 0,
+      widowCount: house.widowCount || 0,
       paymentStatusAir: house.paymentStatusAir || PaymentStatus.UNPAID,
       paymentStatusSampah: house.paymentStatusSampah || PaymentStatus.UNPAID,
       accessCode: house.accessCode || '-',
@@ -130,6 +146,7 @@ export const generateExcelTemplate = async () => {
     { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
     { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
     { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
+    { header: 'JUMLAH JANDA', key: 'widowCount', width: 25 },
     { header: 'STATUS IURAN AIR (Lunas/Belum Lunas)', key: 'paymentStatusAir', width: 35 },
     { header: 'STATUS IURAN SAMPAH (Lunas/Belum Lunas)', key: 'paymentStatusSampah', width: 35 },
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
@@ -165,6 +182,7 @@ export const generateExcelTemplate = async () => {
     babyCount: 0,
     toddlerCount: 1,
     elderlyCount: 0,
+    widowCount: 0,
     paymentStatusAir: 'Lunas',
     paymentStatusSampah: 'Belum Lunas',
     accessCode: '123456',
@@ -178,7 +196,7 @@ export const generateExcelTemplate = async () => {
   worksheet.addRow(['2. Status Hunian harus diisi salah satu dari: Occupied, Empty, atau Business.']);
   worksheet.addRow(['3. Status Kepemilikan harus diisi: Tetap, Kontrak, atau Kost.']);
   worksheet.addRow(['4. Status Iuran (Air/Sampah) harus diisi: Lunas atau Belum Lunas.']);
-  worksheet.addRow(['5. Kolom Jumlah (Kendaraan, Ibu Hamil, Bayi, Balita, Lansia) diisi dengan angka.']);
+  worksheet.addRow(['5. Kolom Jumlah (Kendaraan, Ibu Hamil, Bayi, Balita, Lansia, Janda) diisi dengan angka.']);
 
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
@@ -226,9 +244,10 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     const babyCountRaw = row.getCell(13 + offset).value;
     const toddlerCountRaw = row.getCell(14 + offset).value;
     const elderlyCountRaw = row.getCell(15 + offset).value;
-    const paymentStatusAirRaw = row.getCell(16 + offset).text?.trim() || undefined;
-    const paymentStatusSampahRaw = row.getCell(17 + offset).text?.trim() || undefined;
-    const accessCode = row.getCell(18 + offset).text?.trim() || undefined;
+    const widowCountRaw = row.getCell(16 + offset).value;
+    const paymentStatusAirRaw = row.getCell(17 + offset).text?.trim() || undefined;
+    const paymentStatusSampahRaw = row.getCell(18 + offset).text?.trim() || undefined;
+    const accessCode = row.getCell(19 + offset).text?.trim() || undefined;
 
     // Map status
     let status: 'Occupied' | 'Empty' | 'Business' | undefined = undefined;
@@ -268,6 +287,7 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       ...(babyCountRaw !== null && babyCountRaw !== undefined && babyCountRaw !== '' && { babyCount: Number(babyCountRaw) }),
       ...(toddlerCountRaw !== null && toddlerCountRaw !== undefined && toddlerCountRaw !== '' && { toddlerCount: Number(toddlerCountRaw) }),
       ...(elderlyCountRaw !== null && elderlyCountRaw !== undefined && elderlyCountRaw !== '' && { elderlyCount: Number(elderlyCountRaw) }),
+      ...(widowCountRaw !== null && widowCountRaw !== undefined && widowCountRaw !== '' && { widowCount: Number(widowCountRaw) }),
       ...(paymentStatusAir !== undefined && { paymentStatusAir }),
       ...(paymentStatusSampah !== undefined && { paymentStatusSampah }),
       ...(accessCode !== undefined && { accessCode })

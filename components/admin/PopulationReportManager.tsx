@@ -31,6 +31,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     babyCount: 0,
     toddlerCount: 0,
     elderlyCount: 0,
+    widowCount: 0,
   });
 
   const handleGenerateFromLog = () => {
@@ -47,6 +48,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     let currentBaby = 0;
     let currentToddler = 0;
     let currentElderly = 0;
+    let currentWidow = 0;
     let currentTotal = 0;
 
     houses.forEach(house => {
@@ -56,6 +58,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         currentBaby += house.babyCount || 0;
         currentToddler += house.toddlerCount || 0;
         currentElderly += house.elderlyCount || 0;
+        currentWidow += house.widowCount || 0;
       }
     });
 
@@ -72,6 +75,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       babyCount: currentBaby,
       toddlerCount: currentToddler,
       elderlyCount: currentElderly,
+      widowCount: currentWidow,
       // Optional: set initial population based on currentTotal and changes
       // initialPopulation: currentTotal - birthCount - newcomerCount + deathCount + movedOutCount
     }));
@@ -226,7 +230,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           </div>
           <div className="border-t border-slate-100 pt-4 mt-4">
             <h4 className="text-xs font-black text-slate-700 mb-3">Data Kelompok Rentan (Otomatis dari Data Warga)</h4>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-5 gap-4">
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Ibu Hamil</label>
                 <input type="number" value={formData.pregnantCount} onChange={e => setFormData({...formData, pregnantCount: parseInt(e.target.value) || 0})} className="w-full p-2 border rounded-xl bg-slate-50" />
@@ -242,6 +246,10 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Lansia</label>
                 <input type="number" value={formData.elderlyCount} onChange={e => setFormData({...formData, elderlyCount: parseInt(e.target.value) || 0})} className="w-full p-2 border rounded-xl bg-slate-50" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Janda</label>
+                <input type="number" value={formData.widowCount} onChange={e => setFormData({...formData, widowCount: parseInt(e.target.value) || 0})} className="w-full p-2 border rounded-xl bg-slate-50" />
               </div>
             </div>
           </div>

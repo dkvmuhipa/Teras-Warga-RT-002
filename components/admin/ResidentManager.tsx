@@ -65,6 +65,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     babyCount: 0,
     toddlerCount: 0,
     elderlyCount: 0,
+    widowCount: 0,
     familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string }[],
     accessCode: ''
   });
@@ -306,6 +307,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       babyCount: 0,
       toddlerCount: 0,
       elderlyCount: 0,
+      widowCount: 0,
       familyMembers: [],
       accessCode: ''
     });
@@ -337,6 +339,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       babyCount: house.babyCount || 0,
       toddlerCount: house.toddlerCount || 0,
       elderlyCount: house.elderlyCount || 0,
+      widowCount: house.widowCount || 0,
       familyMembers: house.familyMembers || [],
       accessCode: house.accessCode || ''
     });
@@ -908,7 +911,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       </div>
                     </div>
                     
-                    {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.babyCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0) && (
+                    {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.babyCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0 || (selectedResident.widowCount || 0) > 0) && (
                       <div className="p-4 bg-rose-50 border border-rose-100 rounded-3xl">
                         <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none mb-3">Kelompok Rentan</p>
                         <div className="flex flex-wrap gap-2">
@@ -916,6 +919,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           {(selectedResident.babyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.babyCount} Bayi</span>}
                           {(selectedResident.toddlerCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.toddlerCount} Balita</span>}
                           {(selectedResident.elderlyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.elderlyCount} Lansia</span>}
+                          {(selectedResident.widowCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.widowCount} Janda</span>}
                         </div>
                       </div>
                     )}
@@ -1088,22 +1092,26 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
               <label className="block text-xs font-bold mb-3 text-slate-700">Kelompok Rentan (Jumlah Jiwa)</label>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-5 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Ibu Hamil</label>
                   <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.pregnantCount} onChange={e => setFormData({...formData, pregnantCount: parseInt(e.target.value) || 0})} min={0} />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Bayi (0-11 bln)</label>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Bayi</label>
                   <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.babyCount} onChange={e => setFormData({...formData, babyCount: parseInt(e.target.value) || 0})} min={0} />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Balita (1-5 thn)</label>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Balita</label>
                   <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.toddlerCount} onChange={e => setFormData({...formData, toddlerCount: parseInt(e.target.value) || 0})} min={0} />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Lansia</label>
                   <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.elderlyCount} onChange={e => setFormData({...formData, elderlyCount: parseInt(e.target.value) || 0})} min={0} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Janda</label>
+                  <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.widowCount} onChange={e => setFormData({...formData, widowCount: parseInt(e.target.value) || 0})} min={0} />
                 </div>
               </div>
             </div>

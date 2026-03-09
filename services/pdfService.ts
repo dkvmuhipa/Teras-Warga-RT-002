@@ -422,6 +422,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         if(house.babyCount && house.babyCount > 0) notes.push("Bayi");
         if(house.toddlerCount && house.toddlerCount > 0) notes.push("Balita");
         if(house.elderlyCount && house.elderlyCount > 0) notes.push("Lansia");
+        if(house.widowCount && house.widowCount > 0) notes.push("Janda");
         const ket = notes.join(', ');
 
         doc.text(no, cols[0].x + 1, currentY + 5);

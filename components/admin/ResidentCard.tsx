@@ -79,7 +79,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
           Sampah: {house.paymentStatusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
         </span>
 
-        {((house.pregnantCount || 0) > 0 || (house.babyCount || 0) > 0 || (house.toddlerCount || 0) > 0 || (house.elderlyCount || 0) > 0) && (
+        {((house.pregnantCount || 0) > 0 || (house.babyCount || 0) > 0 || (house.toddlerCount || 0) > 0 || (house.elderlyCount || 0) > 0 || (house.widowCount || 0) > 0) && (
           <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-rose-50 text-rose-600 border-rose-100">
             Rentan
           </span>

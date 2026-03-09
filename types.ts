@@ -42,6 +42,7 @@ export interface House {
   hasToddler?: boolean;  // Balita
   hasTeenager?: boolean; // Remaja
   hasElderly?: boolean;  // Lansia
+  hasWidow?: boolean;    // Janda
 
   // Data Demografi Counts
   pregnantCount?: number;
@@ -49,6 +50,7 @@ export interface House {
   toddlerCount?: number;
   teenagerCount?: number;
   elderlyCount?: number;
+  widowCount?: number;
 
   // Family Members
   familyMembers?: {
@@ -399,6 +401,7 @@ export interface PopulationReport {
   babyCount?: number;
   toddlerCount?: number;
   elderlyCount?: number;
+  widowCount?: number;
   
   createdAt: string;
 }

@@ -67,7 +67,8 @@ export const generateDashboardSummary = async (data: {
   babyCount?: number,
   toddlerCount?: number,
   pregnantCount?: number,
-  elderlyCount?: number
+  elderlyCount?: number,
+  widowCount?: number
 }): Promise<string> => {
    try {
      const ai = getAiInstance();
@@ -77,7 +78,7 @@ export const generateDashboardSummary = async (data: {
      - Kas Keuangan: Rp ${data.cashBalance.toLocaleString('id-ID')}
      - Laporan Masalah Baru (Aktif): ${data.reportsCount}
      - Warga Menunggak Iuran: ${data.unpaidCount} KK
-     - Kelompok Rentan: ${data.babyCount || 0} Bayi, ${data.toddlerCount || 0} Balita, ${data.pregnantCount || 0} Ibu Hamil, ${data.elderlyCount || 0} Lansia
+     - Kelompok Rentan: ${data.babyCount || 0} Bayi, ${data.toddlerCount || 0} Balita, ${data.pregnantCount || 0} Ibu Hamil, ${data.elderlyCount || 0} Lansia, ${data.widowCount || 0} Janda
      
      Berikan laporan singkat dan padat (maksimal 150 kata) yang mencakup:
      1. 💰 Status Kesehatan Keuangan (Aman/Waspada)

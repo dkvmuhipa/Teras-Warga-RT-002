@@ -36,7 +36,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
       babyCount: houses.reduce((acc, h) => acc + (h.babyCount || 0), 0),
       toddlerCount: houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0),
       pregnantCount: houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0),
-      elderlyCount: houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0)
+      elderlyCount: houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0),
+      widowCount: houses.reduce((acc, h) => acc + (h.widowCount || 0), 0)
     };
     const summary = await generateDashboardSummary(data);
     setAiSummary(summary);
@@ -69,6 +70,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
     { name: 'Balita', value: houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0) },
     { name: 'Remaja', value: houses.reduce((acc, h) => acc + (h.teenagerCount || 0), 0) },
     { name: 'Lansia', value: houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0) },
+    { name: 'Janda', value: houses.reduce((acc, h) => acc + (h.widowCount || 0), 0) },
   ];
 
   // Report Status Chart Data
