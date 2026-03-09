@@ -376,22 +376,49 @@ export const validateResidentAccess = async (houseId: string, code: string): Pro
         console.log(`Validating access for houseId: ${houseId} -> formatted: ${formattedHouseId}`);
         console.log(`Input code: ${code}`);
 
+        let data: any = null;
+
+        // Try direct document ID first
         const docRef = doc(db, HOUSES_COL, formattedHouseId);
         const snapshot = await getDoc(docRef);
+        
         if (snapshot.exists()) {
-            const data = snapshot.data();
+            data = snapshot.data();
+        } else {
+            // If not found by ID, try finding by block and number (handles case and padding differences)
+            const parts = formattedHouseId.split('-');
+            if (parts.length >= 2) {
+                const block = parts[0];
+                const number = parts[1];
+                
+                const q = query(collection(db, HOUSES_COL));
+                const querySnapshot = await getDocs(q);
+                const allHouses = querySnapshot.docs.map(doc => doc.data());
+                
+                data = allHouses.find(h => {
+                    const hBlock = String(h.block || '').toUpperCase().trim();
+                    const hNum = String(h.number || '').toUpperCase().trim();
+                    const hNumPadded = hNum.length === 1 ? `0${hNum}` : hNum;
+                    return hBlock === block && (hNum === number || hNumPadded === number);
+                });
+            }
+        }
+
+        if (data) {
             console.log(`Found house data:`, data);
             
             if (!data.accessCode) return false;
 
-            const dbCodeClean = data.accessCode.toUpperCase().replace(/[\s-]+/g, '');
-            const inputCodeClean = code.toUpperCase().replace(/[\s-]+/g, '');
+            const dbCodeClean = String(data.accessCode).toUpperCase().replace(/[\s-]+/g, '');
+            const inputCodeClean = String(code).toUpperCase().replace(/[\s-]+/g, '');
             
-            const parts = data.accessCode.split('-');
-            const suffix = parts.length > 1 ? parts[parts.length - 1] : data.accessCode;
+            // Handle both legacy format (C10-08-SHEA) and new format (123456)
+            const parts = String(data.accessCode).split('-');
+            const suffix = parts.length > 1 ? parts[parts.length - 1] : String(data.accessCode);
             const suffixClean = suffix.toUpperCase().replace(/[\s-]+/g, '');
 
-            // Allow exact match OR if the user only typed the suffix (e.g. "SHEA" instead of "C10-08-SHEA")
+            // Allow exact match OR if the user only typed the suffix
+            // This works for both "123456" === "123456" and "SHEA" === "SHEA"
             const isValid = inputCodeClean.length > 0 && (dbCodeClean === inputCodeClean || suffixClean === inputCodeClean);
             
             console.log(`Validation result: ${isValid}`);

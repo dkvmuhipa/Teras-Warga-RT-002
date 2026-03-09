@@ -57,7 +57,18 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
       const currentYear = new Date().getFullYear();
       const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
       const paddedNum = nextNum.toString().padStart(3, '0');
-      setLetterNumberInput(`${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
+      
+      // Generate abbreviation dynamically from the letter type
+      // e.g., "Surat Pengantar KTP" -> "SPK"
+      // e.g., "Surat Keterangan Domisili" -> "SKD"
+      // e.g., "Undangan Rapat" -> "UR"
+      const words = selectedLetter.type.split(' ').filter(w => w.length > 0);
+      let letterCode = words.map(w => w[0].toUpperCase()).join('');
+      
+      // Fallback if somehow empty
+      if (!letterCode) letterCode = 'S';
+      
+      setLetterNumberInput(`${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
     } else if (selectedLetter && selectedLetter.letterNumber) {
       setLetterNumberInput(selectedLetter.letterNumber);
     }
