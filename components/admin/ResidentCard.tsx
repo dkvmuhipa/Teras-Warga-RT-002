@@ -64,14 +64,22 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
         )}
 
         <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-          paymentStatus === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+          house.paymentStatusAir === PaymentStatus.PAID ? 'bg-blue-50 text-blue-600 border-blue-100' : 
           'bg-rose-50 text-rose-600 border-rose-100'
         }`}>
-          {paymentStatus === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
-          {paymentStatus === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+          {house.paymentStatusAir === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
+          Air: {house.paymentStatusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
         </span>
 
-        {((house.pregnantCount || 0) > 0 || (house.toddlerCount || 0) > 0 || (house.elderlyCount || 0) > 0) && (
+        <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+          house.paymentStatusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+          'bg-rose-50 text-rose-600 border-rose-100'
+        }`}>
+          {house.paymentStatusSampah === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
+          Sampah: {house.paymentStatusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+        </span>
+
+        {((house.pregnantCount || 0) > 0 || (house.babyCount || 0) > 0 || (house.toddlerCount || 0) > 0 || (house.elderlyCount || 0) > 0) && (
           <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-rose-50 text-rose-600 border-rose-100">
             Rentan
           </span>

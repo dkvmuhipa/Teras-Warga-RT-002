@@ -28,6 +28,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     seasonalMaleCount: 0,
     seasonalFemaleCount: 0,
     pregnantCount: 0,
+    babyCount: 0,
     toddlerCount: 0,
     elderlyCount: 0,
   });
@@ -43,6 +44,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
     // Calculate current demographics from houses
     let currentPregnant = 0;
+    let currentBaby = 0;
     let currentToddler = 0;
     let currentElderly = 0;
     let currentTotal = 0;
@@ -51,6 +53,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       if (house.status === 'Occupied') {
         currentTotal += house.occupants || 0;
         currentPregnant += house.pregnantCount || 0;
+        currentBaby += house.babyCount || 0;
         currentToddler += house.toddlerCount || 0;
         currentElderly += house.elderlyCount || 0;
       }
@@ -66,6 +69,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       newcomerCount,
       movedOutCount,
       pregnantCount: currentPregnant,
+      babyCount: currentBaby,
       toddlerCount: currentToddler,
       elderlyCount: currentElderly,
       // Optional: set initial population based on currentTotal and changes
@@ -222,10 +226,14 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           </div>
           <div className="border-t border-slate-100 pt-4 mt-4">
             <h4 className="text-xs font-black text-slate-700 mb-3">Data Kelompok Rentan (Otomatis dari Data Warga)</h4>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Ibu Hamil</label>
                 <input type="number" value={formData.pregnantCount} onChange={e => setFormData({...formData, pregnantCount: parseInt(e.target.value) || 0})} className="w-full p-2 border rounded-xl bg-slate-50" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Bayi</label>
+                <input type="number" value={formData.babyCount} onChange={e => setFormData({...formData, babyCount: parseInt(e.target.value) || 0})} className="w-full p-2 border rounded-xl bg-slate-50" />
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Balita</label>

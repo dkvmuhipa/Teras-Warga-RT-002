@@ -128,12 +128,9 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                         {/* Status Iuran (NEW: Air & Sampah) */}
                         <div className="space-y-3">
                             <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">Status Pembayaran Iuran</h4>
-                            <div className="grid grid-cols-1 gap-2">
-                                <StatusBadge label="Keamanan" status={house.paymentStatus} icon={ShieldCheck} />
-                                <div className="flex gap-2">
-                                    <StatusBadge label="OP Air" status={house.paymentStatusAir || PaymentStatus.UNPAID} icon={Droplets} />
-                                    <StatusBadge label="Sampah" status={house.paymentStatusSampah || PaymentStatus.UNPAID} icon={Trash2} />
-                                </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <StatusBadge label="OP Air" status={house.paymentStatusAir || PaymentStatus.UNPAID} icon={Droplets} />
+                                <StatusBadge label="Sampah" status={house.paymentStatusSampah || PaymentStatus.UNPAID} icon={Trash2} />
                             </div>
                         </div>
 
@@ -173,6 +170,39 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center shadow-sm"><p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Penghuni</p><p className="font-bold text-slate-800 text-xl mt-1">{house.occupants} <span className="text-xs font-normal text-slate-500">Jiwa</span></p></div>
                                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center shadow-sm"><p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Telepon</p><p className="font-bold text-slate-800 text-sm mt-2 break-all">{house.phone || '-'}</p></div>
                             </div>
+
+                            {/* Demografi Detail */}
+                            {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount) ? (
+                                <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 shadow-sm">
+                                    <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-3">Kelompok Rentan</p>
+                                    <div className="flex flex-wrap gap-4">
+                                        {house.pregnantCount ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="p-1.5 bg-white rounded-lg text-rose-400 shadow-sm"><Heart size={14} fill="currentColor"/></div>
+                                                <span className="text-xs font-bold text-slate-700">{house.pregnantCount} Ibu Hamil</span>
+                                            </div>
+                                        ) : null}
+                                        {house.babyCount ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="p-1.5 bg-white rounded-lg text-rose-500 shadow-sm"><Baby size={14}/></div>
+                                                <span className="text-xs font-bold text-slate-700">{house.babyCount} Bayi</span>
+                                            </div>
+                                        ) : null}
+                                        {house.toddlerCount ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="p-1.5 bg-white rounded-lg text-orange-500 shadow-sm"><Baby size={14}/></div>
+                                                <span className="text-xs font-bold text-slate-700">{house.toddlerCount} Balita</span>
+                                            </div>
+                                        ) : null}
+                                        {house.elderlyCount ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="p-1.5 bg-white rounded-lg text-indigo-500 shadow-sm"><Accessibility size={14}/></div>
+                                                <span className="text-xs font-bold text-slate-700">{house.elderlyCount} Lansia</span>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            ) : null}
                         </div>
                     </div>
                 </div>
@@ -216,7 +246,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
     return (
         <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-200 min-h-[60px] w-full hover:shadow-md hover:-translate-y-0.5 ${getHouseColor()}`}>
             <span className={`font-black leading-none drop-shadow-sm ${officialRole ? 'text-lg' : 'text-sm'}`}>{house.number}</span>
-            <div className="flex items-center justify-center mt-1 w-full">
+            <div className="flex items-center justify-center mt-1 w-full gap-0.5">
                 {formattedRole ? (
                     <div className="flex flex-col items-center w-full px-1">
                         <span className="text-[8px] font-bold uppercase tracking-tight bg-black/30 px-2 py-1 rounded text-amber-300 mt-1 w-full text-center leading-none border border-white/10 shadow-sm break-words whitespace-normal">{formattedRole}</span>
@@ -224,14 +254,28 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 ) : house.status === 'Business' ? (
                     <Store size={12} className="opacity-80"/>
                 ) : (
-                    house.residenceType === 'Kost' ? <GraduationCap size={12} className="opacity-80 text-cyan-800" /> :
-                    house.residenceType === 'Kontrak' ? <Key size={12} className="opacity-80 text-amber-800" /> : 
-                    <Home size={12} className="opacity-80"/>
+                    <div className="flex flex-wrap items-center justify-center gap-0.5">
+                        {house.residenceType === 'Kost' ? <GraduationCap size={10} className="opacity-80 text-cyan-800" /> :
+                         house.residenceType === 'Kontrak' ? <Key size={10} className="opacity-80 text-amber-800" /> : 
+                         <Home size={10} className="opacity-80"/>}
+                        
+                        {(house.hasBaby || (house.babyCount || 0) > 0) && (
+                            <Baby size={10} className="text-rose-500" />
+                        )}
+                        {(house.hasToddler || (house.toddlerCount || 0) > 0) && (
+                            <Baby size={10} className="text-orange-500" />
+                        )}
+                        {(house.hasElderly || (house.elderlyCount || 0) > 0) && (
+                            <Accessibility size={10} className="text-indigo-500" />
+                        )}
+                        {(house.hasPregnant || (house.pregnantCount || 0) > 0) && (
+                            <Heart size={10} className="text-rose-400" fill="currentColor" />
+                        )}
+                    </div>
                 )}
             </div>
             {isAdmin && !officialRole && (
                 <div className="absolute top-1 right-1 flex flex-col gap-0.5">
-                    <div className={`w-2 h-2 rounded-full border border-white shadow-sm ${house.paymentStatus === PaymentStatus.PAID ? 'bg-emerald-500' : house.paymentStatus === PaymentStatus.PENDING ? 'bg-amber-500' : 'bg-rose-500'}`} title="Keamanan"></div>
                     {(house.paymentStatusAir === PaymentStatus.UNPAID || house.paymentStatusSampah === PaymentStatus.UNPAID) && (
                         <div className="w-2 h-2 rounded-full border border-white shadow-sm bg-rose-500 animate-pulse"></div>
                     )}
@@ -304,6 +348,13 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const totalHouses = houses.length;
   const totalOccupied = houses.filter(h => h.status === 'Occupied').length;
   const totalIssues = reports.filter(r => r.status !== 'Selesai').length;
+  
+  // Demografi Totals
+  const totalBaby = houses.reduce((acc, h) => acc + (h.babyCount || 0), 0);
+  const totalToddler = houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0);
+  const totalElderly = houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0);
+  const totalPregnant = houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0);
+
   const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
   
   return (
@@ -325,6 +376,10 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                )}
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Droplets size={12} className="text-blue-500"/> OP Air</div>
                <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Trash2 size={12} className="text-slate-500"/> Sampah</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Baby size={12} className="text-rose-500"/> {totalBaby} Bayi</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Baby size={12} className="text-orange-500"/> {totalToddler} Balita</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Accessibility size={12} className="text-indigo-500"/> {totalElderly} Lansia</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Heart size={12} className="text-rose-400" fill="currentColor"/> {totalPregnant} Hamil</div>
             </div>
         </div>
       </div>

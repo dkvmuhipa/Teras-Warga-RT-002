@@ -385,7 +385,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <input 
                         type="text"
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={pdfConfig.rtName} 
+                        value={pdfConfig.rtName || ''} 
                         onChange={e => {
                           const newConfig = {...pdfConfig, rtName: e.target.value};
                           setPdfConfig(newConfig);
@@ -399,7 +399,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <input 
                         type="text"
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={pdfConfig.rtChairman} 
+                        value={pdfConfig.rtChairman || ''} 
                         onChange={e => {
                           const newConfig = {...pdfConfig, rtChairman: e.target.value};
                           setPdfConfig(newConfig);
@@ -477,7 +477,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <textarea 
                       rows={3}
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none" 
-                      value={pdfConfig.rtAddress} 
+                      value={pdfConfig.rtAddress || ''} 
                       onChange={e => {
                         const newConfig = {...pdfConfig, rtAddress: e.target.value};
                         setPdfConfig(newConfig);
@@ -937,7 +937,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Surat</p>
                       <select 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.type}
+                        value={editLetterData.type || ''}
                         onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
                       >
                         {(pdfConfig.letterTemplates || []).map(t => <option key={t.type}>{t.type}</option>)}
@@ -958,7 +958,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nama Pemohon</p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.applicantName}
+                        value={editLetterData.applicantName || ''}
                         onChange={e => setEditLetterData({...editLetterData, applicantName: e.target.value})}
                       />
                     </div>
@@ -966,7 +966,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">NIK</p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.nik}
+                        value={editLetterData.nik || ''}
                         onChange={e => setEditLetterData({...editLetterData, nik: e.target.value})}
                       />
                     </div>
@@ -976,7 +976,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">No. HP / WA</p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.phone}
+                        value={editLetterData.phone || ''}
                         onChange={e => setEditLetterData({...editLetterData, phone: e.target.value})}
                       />
                     </div>
@@ -984,7 +984,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email</p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.email}
+                        value={editLetterData.email || ''}
                         onChange={e => setEditLetterData({...editLetterData, email: e.target.value})}
                       />
                     </div>
@@ -992,7 +992,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pendidikan</p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.education}
+                        value={editLetterData.education || ''}
                         onChange={e => setEditLetterData({...editLetterData, education: e.target.value})}
                       />
                     </div>
@@ -1000,7 +1000,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Gol. Darah</p>
                       <select 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.bloodType}
+                        value={editLetterData.bloodType || ''}
                         onChange={e => setEditLetterData({...editLetterData, bloodType: e.target.value as any})}
                       >
                         <option value="A">A</option>
@@ -1014,7 +1014,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Keluarga</p>
                       <select 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.familyStatus}
+                        value={editLetterData.familyStatus || ''}
                         onChange={e => setEditLetterData({...editLetterData, familyStatus: e.target.value as any})}
                       >
                         <option value="Kepala Keluarga">Kepala Keluarga</option>
@@ -1027,7 +1027,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pekerjaan</p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.job}
+                        value={editLetterData.job || ''}
                         onChange={e => setEditLetterData({...editLetterData, job: e.target.value})}
                       />
                     </div>
@@ -1036,7 +1036,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat KTP</p>
                       <textarea 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-16 resize-none"
-                        value={editLetterData.addressKtp}
+                        value={editLetterData.addressKtp || ''}
                         onChange={e => setEditLetterData({...editLetterData, addressKtp: e.target.value})}
                       />
                     </div>
@@ -1045,7 +1045,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat Domisili Saat Ini</p>
                       <textarea 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-16 resize-none"
-                        value={editLetterData.currentAddress}
+                        value={editLetterData.currentAddress || ''}
                         onChange={e => setEditLetterData({...editLetterData, currentAddress: e.target.value})}
                       />
                     </div>
@@ -1054,7 +1054,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
                       <textarea 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-20 resize-none"
-                        value={editLetterData.purposeDetail}
+                        value={editLetterData.purposeDetail || ''}
                         onChange={e => setEditLetterData({...editLetterData, purposeDetail: e.target.value})}
                       />
                     </div>
@@ -1136,7 +1136,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Lengkap</label>
                   <input 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-300" 
-                    value={adminForm.applicantName} 
+                    value={adminForm.applicantName || ''} 
                     onChange={e=>setAdminForm({...adminForm, applicantName: e.target.value})} 
                     required 
                     placeholder="Sesuai KTP"
@@ -1148,7 +1148,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">NIK</label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
-                      value={adminForm.nik} 
+                      value={adminForm.nik || ''} 
                       onChange={e=>setAdminForm({...adminForm, nik: e.target.value})} 
                       required 
                       placeholder="16 digit NIK"
@@ -1158,7 +1158,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Kepala Keluarga</label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
-                      value={adminForm.familyHeadName} 
+                      value={adminForm.familyHeadName || ''} 
                       onChange={e=>setAdminForm({...adminForm, familyHeadName: e.target.value})} 
                       required 
                       placeholder="Nama di KK"
@@ -1171,7 +1171,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tempat Lahir</label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.birthPlace} 
+                      value={adminForm.birthPlace || ''} 
                       onChange={e=>setAdminForm({...adminForm, birthPlace: e.target.value})} 
                       required 
                     />
@@ -1181,7 +1181,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <input 
                       type="date" 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.birthDate} 
+                      value={adminForm.birthDate || ''} 
                       onChange={e=>setAdminForm({...adminForm, birthDate: e.target.value})} 
                       required 
                     />
@@ -1193,7 +1193,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Kelamin</label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.gender} 
+                      value={adminForm.gender || 'Laki-laki'} 
                       onChange={e=>setAdminForm({...adminForm, gender: e.target.value as any})}
                     >
                       <option>Laki-laki</option>
@@ -1204,7 +1204,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Agama</label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.religion} 
+                      value={adminForm.religion || 'Islam'} 
                       onChange={e=>setAdminForm({...adminForm, religion: e.target.value})}
                     >
                       <option>Islam</option><option>Kristen</option><option>Katolik</option><option>Hindu</option><option>Buddha</option><option>Konghucu</option>
@@ -1217,7 +1217,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pekerjaan</label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.job} 
+                      value={adminForm.job || ''} 
                       onChange={e=>setAdminForm({...adminForm, job: e.target.value})} 
                       required 
                     />
@@ -1226,7 +1226,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Golongan Darah</label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.bloodType} 
+                      value={adminForm.bloodType || '-'} 
                       onChange={e=>setAdminForm({...adminForm, bloodType: e.target.value as any})}
                     >
                       <option>-</option><option>A</option><option>B</option><option>AB</option><option>O</option>
@@ -1239,7 +1239,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pendidikan</label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.education} 
+                      value={adminForm.education || 'SMA/Sederajat'} 
                       onChange={e=>setAdminForm({...adminForm, education: e.target.value})}
                     >
                       <option>SD/Sederajat</option><option>SMP/Sederajat</option><option>SMA/Sederajat</option><option>D3</option><option>S1</option><option>S2</option><option>S3</option><option>Tidak Sekolah</option>
@@ -1249,7 +1249,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Hubungan Keluarga</label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.familyStatus} 
+                      value={adminForm.familyStatus || 'Kepala Keluarga'} 
                       onChange={e=>setAdminForm({...adminForm, familyStatus: e.target.value as any})}
                     >
                       <option>Kepala Keluarga</option><option>Istri</option><option>Anak</option><option>Lainnya</option>
@@ -1262,7 +1262,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Status Perkawinan</label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.maritalStatus} 
+                      value={adminForm.maritalStatus || 'Kawin'} 
                       onChange={e=>setAdminForm({...adminForm, maritalStatus: e.target.value as any})}
                     >
                       <option>Belum Kawin</option>
@@ -1275,7 +1275,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Kewarganegaraan</label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.nationality} 
+                      value={adminForm.nationality || ''} 
                       onChange={e=>setAdminForm({...adminForm, nationality: e.target.value})} 
                       required 
                     />
@@ -1287,7 +1287,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">No. HP / WhatsApp</label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.phone} 
+                      value={adminForm.phone || ''} 
                       onChange={e=>setAdminForm({...adminForm, phone: e.target.value})} 
                       required 
                       placeholder="0812..."
@@ -1298,7 +1298,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <input 
                       type="email"
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.email} 
+                      value={adminForm.email || ''} 
                       onChange={e=>setAdminForm({...adminForm, email: e.target.value})} 
                       placeholder="email@contoh.com"
                     />
@@ -1320,7 +1320,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   <input 
                     type="text"
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-indigo-600 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                    value={adminLetterNumber} 
+                    value={adminLetterNumber || ''} 
                     onChange={e => setAdminLetterNumber(e.target.value)}
                     placeholder="Contoh: SPK/001/RT002/III/2026"
                   />
@@ -1351,7 +1351,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold uppercase focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={adminForm.houseId} 
+                      value={adminForm.houseId || ''} 
                       onChange={e=>setAdminForm({...adminForm, houseId: e.target.value})} 
                       required 
                       placeholder="Cth: C7-02" 
@@ -1375,7 +1375,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   </div>
                   <textarea 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-32 resize-none leading-relaxed" 
-                    value={adminForm.purposeDetail} 
+                    value={adminForm.purposeDetail || ''} 
                     onChange={e=>setAdminForm({...adminForm, purposeDetail: e.target.value})} 
                     required 
                     placeholder="Jelaskan keperluan surat..."
@@ -1386,7 +1386,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Lengkap (Sesuai KTP)</label>
                   <textarea 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed" 
-                    value={adminForm.addressKtp} 
+                    value={adminForm.addressKtp || ''} 
                     onChange={e=>setAdminForm({...adminForm, addressKtp: e.target.value})} 
                     required 
                     placeholder="Jalan, RT/RW, Kelurahan, Kecamatan..."
@@ -1397,7 +1397,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Domisili Saat Ini</label>
                   <textarea 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed" 
-                    value={adminForm.currentAddress} 
+                    value={adminForm.currentAddress || ''} 
                     onChange={e=>setAdminForm({...adminForm, currentAddress: e.target.value})} 
                     placeholder="Kosongkan jika sama dengan KTP"
                   />

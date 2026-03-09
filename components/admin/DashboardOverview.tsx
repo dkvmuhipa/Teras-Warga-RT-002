@@ -7,7 +7,7 @@ import {
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
 } from 'recharts';
-import { House, CashFlow, Report, Announcement, Bill } from '../../types';
+import { House, CashFlow, Report, Announcement, Bill, PaymentStatus } from '../../types';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { generateDashboardSummary } from '../../services/geminiService';
@@ -32,7 +32,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
       totalResidents: houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0),
       cashBalance: cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0) - cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0),
       reportsCount: reports.filter(r => r.status === 'Baru').length,
-      unpaidCount: houses.filter(h => h.paymentStatus === 'Menunggak').length
+      unpaidCount: houses.filter(h => h.paymentStatusAir === PaymentStatus.UNPAID || h.paymentStatusSampah === PaymentStatus.UNPAID).length,
+      babyCount: houses.reduce((acc, h) => acc + (h.babyCount || 0), 0),
+      toddlerCount: houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0),
+      pregnantCount: houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0),
+      elderlyCount: houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0)
     };
     const summary = await generateDashboardSummary(data);
     setAiSummary(summary);

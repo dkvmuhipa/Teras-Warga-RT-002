@@ -10,30 +10,58 @@ export const HeroSection = () => {
     useEffect(() => { 
         const timer = setInterval(() => setDate(new Date()), 60000); 
         
-        // Fetch weather for Palu
-        fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,weather_code')
-            .then(res => res.json())
-            .then(data => {
-                const code = data.current.weather_code;
-                let condition = 'Cerah';
-                let icon = <Sun size={24} className="text-amber-300 animate-spin-slow" />;
-                
-                if (code === 0) { condition = 'Cerah'; icon = <Sun size={24} className="text-amber-300 animate-spin-slow" />; }
-                else if (code <= 3) { condition = 'Berawan'; icon = <Cloud size={24} className="text-slate-200" />; }
-                else if (code <= 48) { condition = 'Berkabut'; icon = <CloudFog size={24} className="text-slate-300" />; }
-                else if (code <= 67) { condition = 'Hujan'; icon = <CloudRain size={24} className="text-blue-300" />; }
-                else if (code <= 77) { condition = 'Bersalju'; icon = <Snowflake size={24} className="text-white" />; }
-                else if (code <= 99) { condition = 'Badai'; icon = <CloudLightning size={24} className="text-yellow-300" />; }
+        const fetchWeather = () => {
+            // Fetch weather for Palu (Huntap 2 Tondo)
+            fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,weather_code')
+                .then(res => res.json())
+                .then(data => {
+                    const code = data.current.weather_code;
+                    let condition = 'Cerah';
+                    let icon = <Sun size={24} className="text-amber-300 animate-spin-slow" />;
+                    
+                    // WMO Weather interpretation codes (WW)
+                    if (code === 0) { 
+                        condition = 'Cerah'; 
+                        icon = <Sun size={24} className="text-amber-300 animate-spin-slow" />; 
+                    } else if (code >= 1 && code <= 3) { 
+                        condition = 'Berawan'; 
+                        icon = <Cloud size={24} className="text-slate-200" />; 
+                    } else if (code === 45 || code === 48) { 
+                        condition = 'Berkabut'; 
+                        icon = <CloudFog size={24} className="text-slate-300" />; 
+                    } else if (code >= 51 && code <= 55) { 
+                        condition = 'Gerimis'; 
+                        icon = <CloudRain size={24} className="text-blue-200" />; 
+                    } else if (code >= 61 && code <= 65) { 
+                        condition = 'Hujan'; 
+                        icon = <CloudRain size={24} className="text-blue-400" />; 
+                    } else if (code >= 80 && code <= 82) { 
+                        condition = 'Hujan Deras'; 
+                        icon = <CloudRain size={24} className="text-blue-600" />; 
+                    } else if (code >= 95) { 
+                        condition = 'Badai Petir'; 
+                        icon = <CloudLightning size={24} className="text-yellow-400" />; 
+                    } else if (code >= 71 && code <= 77) {
+                        condition = 'Salju';
+                        icon = <Snowflake size={24} className="text-white" />;
+                    }
 
-                setWeather({
-                    temp: Math.round(data.current.temperature_2m),
-                    condition,
-                    icon
-                });
-            })
-            .catch(err => console.error("Error fetching weather:", err));
+                    setWeather({
+                        temp: Math.round(data.current.temperature_2m),
+                        condition,
+                        icon
+                    });
+                })
+                .catch(err => console.error("Error fetching weather:", err));
+        };
 
-        return () => clearInterval(timer); 
+        fetchWeather();
+        const weatherTimer = setInterval(fetchWeather, 1800000); // Update every 30 minutes
+        
+        return () => {
+            clearInterval(timer);
+            clearInterval(weatherTimer);
+        }; 
     }, []);
 
     return (

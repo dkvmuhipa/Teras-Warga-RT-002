@@ -12,9 +12,39 @@ export const sendWhatsAppMessage = (phone: string, message: string) => {
 };
 
 export const formatAnnouncementForWhatsApp = (title: string, content: string) => {
-  return `*Pengumuman RT 002*\n\n*${title}*\n\n${content}\n\nInfo lebih lanjut kunjungi aplikasi TERAS RT 002.`;
+  return `*PENGUMUMAN RESMI RT 002*
+------------------------------------------
+
+Yth. Bapak/Ibu Warga RT 002,
+
+Berikut adalah informasi terbaru:
+
+*Judul:* ${title}
+*Isi:* ${content}
+
+Untuk informasi lebih lengkap, silakan akses aplikasi *TERAS RT 002*.
+
+Terima kasih atas perhatiannya.
+_Pesan otomatis dari Pengurus RT 002_`;
 };
 
 export const formatLetterStatusForWhatsApp = (name: string, type: string, status: string) => {
-  return `*Update Status Surat RT 002*\n\nHalo ${name},\n\nStatus permohonan surat *${type}* Anda saat ini adalah: *${status}*.\n\nTerima kasih.`;
+  const statusLabel = status === 'Approved' ? '✅ DISETUJUI' : status === 'Rejected' ? '❌ DITOLAK' : '⏳ SEDANG DIPROSES';
+  const footer = status === 'Approved' 
+    ? '\nSilakan mengambil dokumen fisik di rumah Ketua RT dengan membawa persyaratan yang diperlukan.' 
+    : '';
+
+  return `*KONFIRMASI LAYANAN SURAT RT 002*
+------------------------------------------
+
+Yth. Sdr/i *${name}*,
+
+Kami menginformasikan bahwa permohonan surat Anda:
+
+*Jenis:* ${type}
+*Status:* ${statusLabel}
+${footer}
+
+Terima kasih telah menggunakan layanan digital RT 002.
+_Pesan otomatis dari Pengurus RT 002_`;
 };

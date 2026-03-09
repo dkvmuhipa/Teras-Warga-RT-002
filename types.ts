@@ -20,9 +20,9 @@ export interface House {
   status: 'Occupied' | 'Empty' | 'Business';
   residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan including Kost
   ownerName?: string; // NEW: Nama Pemilik Rumah (jika berbeda dengan penghuni)
-  paymentStatus: PaymentStatus; // Default: Keamanan
-  paymentStatusAir?: PaymentStatus; // NEW: Iuran Air
-  paymentStatusSampah?: PaymentStatus; // NEW: Iuran Sampah
+  paymentStatusAir?: PaymentStatus; // Iuran Air
+  paymentStatusSampah?: PaymentStatus; // Iuran Sampah
+  paymentStatusKeamanan?: PaymentStatus; // Iuran Keamanan (Opsional/Belum Ada)
   phone?: string;
   accessCode?: string; // NEW: Kode Akses Unik untuk Verifikasi
   
@@ -396,6 +396,7 @@ export interface PopulationReport {
   
   // Kelompok Rentan
   pregnantCount?: number;
+  babyCount?: number;
   toddlerCount?: number;
   elderlyCount?: number;
   

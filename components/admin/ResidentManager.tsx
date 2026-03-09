@@ -55,12 +55,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     phone: '',
     status: 'Occupied',
     residenceType: 'Tetap', // Default to Tetap (Pemilik)
-    paymentStatus: PaymentStatus.UNPAID,
+    paymentStatusAir: PaymentStatus.UNPAID,
+    paymentStatusSampah: PaymentStatus.UNPAID,
     occupants: 1,
     education: '',
     jobCategory: '',
     vehicleCount: 0,
     pregnantCount: 0,
+    babyCount: 0,
     toddlerCount: 0,
     elderlyCount: 0,
     familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string }[],
@@ -212,11 +214,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 headOfFamily: houseData.headOfFamily || '-',
                 location: { x: 0, y: 0 },
                 familyMembers: [],
-                paymentStatus: houseData.paymentStatus || PaymentStatus.UNPAID,
+                paymentStatusAir: houseData.paymentStatusAir || PaymentStatus.UNPAID,
+                paymentStatusSampah: houseData.paymentStatusSampah || PaymentStatus.UNPAID,
                 status: houseData.status || 'Occupied',
                 occupants: houseData.occupants || 1,
                 vehicleCount: houseData.vehicleCount || 0,
                 pregnantCount: houseData.pregnantCount || 0,
+                babyCount: houseData.babyCount || 0,
                 toddlerCount: houseData.toddlerCount || 0,
                 elderlyCount: houseData.elderlyCount || 0
               });
@@ -292,12 +296,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       phone: '',
       status: 'Occupied',
       residenceType: 'Tetap',
-      paymentStatus: PaymentStatus.UNPAID,
+      paymentStatusAir: PaymentStatus.UNPAID,
+      paymentStatusSampah: PaymentStatus.UNPAID,
       occupants: 1,
       education: '',
       jobCategory: '',
       vehicleCount: 0,
       pregnantCount: 0,
+      babyCount: 0,
       toddlerCount: 0,
       elderlyCount: 0,
       familyMembers: [],
@@ -321,12 +327,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       phone: house.phone || '',
       status: house.status,
       residenceType: house.residenceType || 'Tetap',
-      paymentStatus: house.paymentStatus,
+      paymentStatusAir: house.paymentStatusAir || PaymentStatus.UNPAID,
+      paymentStatusSampah: house.paymentStatusSampah || PaymentStatus.UNPAID,
       occupants: house.occupants || 1,
       education: house.education || '',
       jobCategory: house.jobCategory || '',
       vehicleCount: house.vehicleCount || 0,
       pregnantCount: house.pregnantCount || 0,
+      babyCount: house.babyCount || 0,
       toddlerCount: house.toddlerCount || 0,
       elderlyCount: house.elderlyCount || 0,
       familyMembers: house.familyMembers || [],
@@ -695,7 +703,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <th className="p-4 text-left font-black text-slate-600">Telepon</th>
                       <th className="p-4 text-left font-black text-slate-600">Penghuni</th>
                       <th className="p-4 text-left font-black text-slate-600">Status</th>
-                      <th className="p-4 text-left font-black text-slate-600">Pembayaran</th>
+                      <th className="p-4 text-left font-black text-slate-600">Sampah</th>
+                      <th className="p-4 text-left font-black text-slate-600">Air</th>
                       <th className="p-4 text-right font-black text-slate-600">Aksi</th>
                     </tr>
                   </thead>
@@ -722,11 +731,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           </td>
                           <td className="p-4">
                             <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${
-                              paymentStatus === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                              house.paymentStatusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                               'bg-rose-50 text-rose-600 border-rose-100'
                             }`}>
-                              {paymentStatus === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
-                              {paymentStatus === PaymentStatus.PAID ? 'Lunas' : 'Belum Lunas'}
+                              {house.paymentStatusSampah === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
+                              {house.paymentStatusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${
+                              house.paymentStatusAir === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                              'bg-rose-50 text-rose-600 border-rose-100'
+                            }`}>
+                              {house.paymentStatusAir === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
+                              {house.paymentStatusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
                             </span>
                           </td>
                           <td className="p-4 text-right">
@@ -890,11 +908,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       </div>
                     </div>
                     
-                    {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0) && (
+                    {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.babyCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0) && (
                       <div className="p-4 bg-rose-50 border border-rose-100 rounded-3xl">
                         <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none mb-3">Kelompok Rentan</p>
                         <div className="flex flex-wrap gap-2">
                           {(selectedResident.pregnantCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.pregnantCount} Ibu Hamil</span>}
+                          {(selectedResident.babyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.babyCount} Bayi</span>}
                           {(selectedResident.toddlerCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.toddlerCount} Balita</span>}
                           {(selectedResident.elderlyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.elderlyCount} Lansia</span>}
                         </div>
@@ -1069,13 +1088,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
               <label className="block text-xs font-bold mb-3 text-slate-700">Kelompok Rentan (Jumlah Jiwa)</label>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Ibu Hamil</label>
                   <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.pregnantCount} onChange={e => setFormData({...formData, pregnantCount: parseInt(e.target.value) || 0})} min={0} />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Balita</label>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Bayi (0-11 bln)</label>
+                  <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.babyCount} onChange={e => setFormData({...formData, babyCount: parseInt(e.target.value) || 0})} min={0} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Balita (1-5 thn)</label>
                   <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.toddlerCount} onChange={e => setFormData({...formData, toddlerCount: parseInt(e.target.value) || 0})} min={0} />
                 </div>
                 <div>

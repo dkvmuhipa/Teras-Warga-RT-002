@@ -39,13 +39,31 @@ const getImageData = (source: string): Promise<string> => {
     img.setAttribute('crossOrigin', 'anonymous');
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      
+      // Optimize image size: Max 800px for logos/stamps to reduce PDF size
+      const MAX_DIM = 800;
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > MAX_DIM || height > MAX_DIM) {
+        if (width > height) {
+          height = (height / width) * MAX_DIM;
+          width = MAX_DIM;
+        } else {
+          width = (width / height) * MAX_DIM;
+          height = MAX_DIM;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
       if (ctx) {
           try {
-            ctx.drawImage(img, 0, 0);
-            resolve(canvas.toDataURL('image/png'));
+            ctx.drawImage(img, 0, 0, width, height);
+            // Use JPEG for non-transparent or PNG with compression if needed
+            // For stamps/logos we usually want PNG for transparency, but we can use a lower bit depth or just the resized version
+            resolve(canvas.toDataURL('image/png')); 
           } catch (e) { resolve(''); }
       } else { resolve(''); }
     };
@@ -61,7 +79,8 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
-      format: "a4"
+      format: "a4",
+      compress: true // Enable PDF compression
     });
 
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -238,7 +257,12 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
 export const generateReportReceiptPDF = async (report: Report, customConfig?: PdfConfig) => {
     const config = customConfig || DEFAULT_PDF_CONFIG;
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a5" });
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a5",
+        compress: true 
+    });
     const centerX = doc.internal.pageSize.getWidth() / 2;
 
     doc.setFont("helvetica", "bold");
@@ -278,10 +302,11 @@ export const generateReportReceiptPDF = async (report: Report, customConfig?: Pd
 export const generateResidentReportPDF = async (houses: House[], customConfig?: PdfConfig) => {
     const config = customConfig || DEFAULT_PDF_CONFIG;
     
-    const doc = new jsPDF({
-        orientation: "landscape",
-        unit: "mm",
-        format: "a4"
+    const doc = new jsPDF({ 
+        orientation: "landscape", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
     });
 
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -329,7 +354,8 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         { header: "Kepala Keluarga", width: 80, x: margin + 40 },
         { header: "Jml", width: 15, x: margin + 120 },
         { header: "Status Hunian", width: 35, x: margin + 135 },
-        { header: "Status Iuran", width: 35, x: margin + 170 },
+        { header: "Air", width: 18, x: margin + 170 },
+        { header: "Sampah", width: 17, x: margin + 188 },
         { header: "No. HP", width: 40, x: margin + 205 },
         { header: "Ket", width: 32, x: margin + 245 },
     ];
@@ -387,15 +413,15 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
              else status += " (Pemilik)";
         }
 
-        const payment = house.paymentStatus;
+        const paymentAir = house.paymentStatusAir || PaymentStatus.UNPAID;
+        const paymentSampah = house.paymentStatusSampah || PaymentStatus.UNPAID;
         const phone = house.phone || '-';
         
         const notes = [];
-        if(house.hasPregnant) notes.push("Hamil");
-        if(house.hasBaby) notes.push("Bayi");
-        if(house.hasToddler) notes.push("Balita");
-        if(house.hasTeenager) notes.push("Remaja");
-        if(house.hasElderly) notes.push("Lansia");
+        if(house.pregnantCount && house.pregnantCount > 0) notes.push("Hamil");
+        if(house.babyCount && house.babyCount > 0) notes.push("Bayi");
+        if(house.toddlerCount && house.toddlerCount > 0) notes.push("Balita");
+        if(house.elderlyCount && house.elderlyCount > 0) notes.push("Lansia");
         const ket = notes.join(', ');
 
         doc.text(no, cols[0].x + 1, currentY + 5);
@@ -406,13 +432,20 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         const splitStatus = doc.splitTextToSize(status, cols[4].width - 2);
         doc.text(splitStatus, cols[4].x + 1, currentY + 5);
         
-        if (payment === PaymentStatus.UNPAID) doc.setTextColor(220, 38, 38);
-        else if (payment === PaymentStatus.PENDING) doc.setTextColor(217, 119, 6);
-        doc.text(payment, cols[5].x + 1, currentY + 5);
+        // Air
+        if (paymentAir === PaymentStatus.UNPAID) doc.setTextColor(220, 38, 38);
+        else if (paymentAir === PaymentStatus.PENDING) doc.setTextColor(217, 119, 6);
+        doc.text(paymentAir === PaymentStatus.PAID ? 'L' : 'B', cols[5].x + 1, currentY + 5);
         doc.setTextColor(0);
 
-        doc.text(phone, cols[6].x + 1, currentY + 5);
-        doc.text(ket, cols[7].x + 1, currentY + 5);
+        // Sampah
+        if (paymentSampah === PaymentStatus.UNPAID) doc.setTextColor(220, 38, 38);
+        else if (paymentSampah === PaymentStatus.PENDING) doc.setTextColor(217, 119, 6);
+        doc.text(paymentSampah === PaymentStatus.PAID ? 'L' : 'B', cols[6].x + 1, currentY + 5);
+        doc.setTextColor(0);
+
+        doc.text(phone, cols[7].x + 1, currentY + 5);
+        doc.text(ket, cols[8].x + 1, currentY + 5);
 
         doc.rect(margin, currentY, contentWidth, rowHeight);
         

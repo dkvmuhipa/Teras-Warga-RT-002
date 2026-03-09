@@ -20,9 +20,11 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     { header: 'PEKERJAAN', key: 'jobCategory', width: 25 },
     { header: 'JUMLAH KENDARAAN', key: 'vehicleCount', width: 20 },
     { header: 'JUMLAH IBU HAMIL', key: 'pregnantCount', width: 25 },
-    { header: 'JUMLAH BALITA', key: 'toddlerCount', width: 25 },
+    { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
+    { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
     { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
-    { header: 'STATUS PEMBAYARAN (Lunas/Belum Lunas)', key: 'paymentStatus', width: 35 },
+    { header: 'STATUS IURAN AIR (Lunas/Belum Lunas)', key: 'paymentStatusAir', width: 35 },
+    { header: 'STATUS IURAN SAMPAH (Lunas/Belum Lunas)', key: 'paymentStatusSampah', width: 35 },
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
   ];
 
@@ -64,9 +66,11 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       jobCategory: house.jobCategory || '-',
       vehicleCount: house.vehicleCount || 0,
       pregnantCount: house.pregnantCount || 0,
+      babyCount: house.babyCount || 0,
       toddlerCount: house.toddlerCount || 0,
       elderlyCount: house.elderlyCount || 0,
-      paymentStatus: house.paymentStatus,
+      paymentStatusAir: house.paymentStatusAir || PaymentStatus.UNPAID,
+      paymentStatusSampah: house.paymentStatusSampah || PaymentStatus.UNPAID,
       accessCode: house.accessCode || '-',
     });
 
@@ -123,9 +127,11 @@ export const generateExcelTemplate = async () => {
     { header: 'PEKERJAAN', key: 'jobCategory', width: 25 },
     { header: 'JUMLAH KENDARAAN', key: 'vehicleCount', width: 20 },
     { header: 'JUMLAH IBU HAMIL', key: 'pregnantCount', width: 25 },
-    { header: 'JUMLAH BALITA', key: 'toddlerCount', width: 25 },
+    { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
+    { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
     { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
-    { header: 'STATUS PEMBAYARAN (Lunas/Belum Lunas)', key: 'paymentStatus', width: 35 },
+    { header: 'STATUS IURAN AIR (Lunas/Belum Lunas)', key: 'paymentStatusAir', width: 35 },
+    { header: 'STATUS IURAN SAMPAH (Lunas/Belum Lunas)', key: 'paymentStatusSampah', width: 35 },
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
   ];
 
@@ -156,9 +162,11 @@ export const generateExcelTemplate = async () => {
     jobCategory: 'Karyawan Swasta',
     vehicleCount: 2,
     pregnantCount: 0,
+    babyCount: 0,
     toddlerCount: 1,
     elderlyCount: 0,
-    paymentStatus: 'Belum Lunas',
+    paymentStatusAir: 'Lunas',
+    paymentStatusSampah: 'Belum Lunas',
     accessCode: '123456',
   });
 
@@ -169,8 +177,8 @@ export const generateExcelTemplate = async () => {
   worksheet.addRow(['1. Kolom bertanda (Wajib) tidak boleh kosong.']);
   worksheet.addRow(['2. Status Hunian harus diisi salah satu dari: Occupied, Empty, atau Business.']);
   worksheet.addRow(['3. Status Kepemilikan harus diisi: Tetap, Kontrak, atau Kost.']);
-  worksheet.addRow(['4. Status Pembayaran harus diisi: Lunas atau Belum Lunas.']);
-  worksheet.addRow(['5. Kolom Jumlah (Kendaraan, Ibu Hamil, Balita, Lansia) diisi dengan angka.']);
+  worksheet.addRow(['4. Status Iuran (Air/Sampah) harus diisi: Lunas atau Belum Lunas.']);
+  worksheet.addRow(['5. Kolom Jumlah (Kendaraan, Ibu Hamil, Bayi, Balita, Lansia) diisi dengan angka.']);
 
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
@@ -215,10 +223,12 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     const jobCategory = row.getCell(10 + offset).text?.trim() || undefined;
     const vehicleCountRaw = row.getCell(11 + offset).value;
     const pregnantCountRaw = row.getCell(12 + offset).value;
-    const toddlerCountRaw = row.getCell(13 + offset).value;
-    const elderlyCountRaw = row.getCell(14 + offset).value;
-    const paymentStatusRaw = row.getCell(15 + offset).text?.trim() || undefined;
-    const accessCode = row.getCell(16 + offset).text?.trim() || undefined;
+    const babyCountRaw = row.getCell(13 + offset).value;
+    const toddlerCountRaw = row.getCell(14 + offset).value;
+    const elderlyCountRaw = row.getCell(15 + offset).value;
+    const paymentStatusAirRaw = row.getCell(16 + offset).text?.trim() || undefined;
+    const paymentStatusSampahRaw = row.getCell(17 + offset).text?.trim() || undefined;
+    const accessCode = row.getCell(18 + offset).text?.trim() || undefined;
 
     // Map status
     let status: 'Occupied' | 'Empty' | 'Business' | undefined = undefined;
@@ -226,10 +236,15 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     else if (statusRaw?.toLowerCase() === 'business' || statusRaw?.toLowerCase() === 'usaha') status = 'Business';
     else if (statusRaw?.toLowerCase() === 'occupied' || statusRaw?.toLowerCase() === 'dihuni') status = 'Occupied';
 
-    // Map payment status
-    let paymentStatus: PaymentStatus | undefined = undefined;
-    if (paymentStatusRaw?.toLowerCase() === 'lunas' || paymentStatusRaw?.toLowerCase() === 'paid') paymentStatus = PaymentStatus.PAID;
-    else if (paymentStatusRaw?.toLowerCase() === 'belum lunas' || paymentStatusRaw?.toLowerCase() === 'pending') paymentStatus = PaymentStatus.PENDING;
+    // Map payment status Air
+    let paymentStatusAir: PaymentStatus | undefined = undefined;
+    if (paymentStatusAirRaw?.toLowerCase() === 'lunas' || paymentStatusAirRaw?.toLowerCase() === 'paid') paymentStatusAir = PaymentStatus.PAID;
+    else if (paymentStatusAirRaw?.toLowerCase() === 'belum lunas' || paymentStatusAirRaw?.toLowerCase() === 'pending') paymentStatusAir = PaymentStatus.PENDING;
+
+    // Map payment status Sampah
+    let paymentStatusSampah: PaymentStatus | undefined = undefined;
+    if (paymentStatusSampahRaw?.toLowerCase() === 'lunas' || paymentStatusSampahRaw?.toLowerCase() === 'paid') paymentStatusSampah = PaymentStatus.PAID;
+    else if (paymentStatusSampahRaw?.toLowerCase() === 'belum lunas' || paymentStatusSampahRaw?.toLowerCase() === 'pending') paymentStatusSampah = PaymentStatus.PENDING;
 
     // Map residence type
     let residenceType: 'Tetap' | 'Kontrak' | 'Kost' | undefined = undefined;
@@ -250,9 +265,11 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       ...(jobCategory !== undefined && { jobCategory }),
       ...(vehicleCountRaw !== null && vehicleCountRaw !== undefined && vehicleCountRaw !== '' && { vehicleCount: Number(vehicleCountRaw) }),
       ...(pregnantCountRaw !== null && pregnantCountRaw !== undefined && pregnantCountRaw !== '' && { pregnantCount: Number(pregnantCountRaw) }),
+      ...(babyCountRaw !== null && babyCountRaw !== undefined && babyCountRaw !== '' && { babyCount: Number(babyCountRaw) }),
       ...(toddlerCountRaw !== null && toddlerCountRaw !== undefined && toddlerCountRaw !== '' && { toddlerCount: Number(toddlerCountRaw) }),
       ...(elderlyCountRaw !== null && elderlyCountRaw !== undefined && elderlyCountRaw !== '' && { elderlyCount: Number(elderlyCountRaw) }),
-      ...(paymentStatus !== undefined && { paymentStatus }),
+      ...(paymentStatusAir !== undefined && { paymentStatusAir }),
+      ...(paymentStatusSampah !== undefined && { paymentStatusSampah }),
       ...(accessCode !== undefined && { accessCode })
     });
   });

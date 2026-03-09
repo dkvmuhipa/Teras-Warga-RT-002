@@ -66,7 +66,6 @@ export const generateHouses = (): House[] => {
         occupants: status === 'Empty' ? 0 : Math.floor(Math.random() * 4) + 1,
         status,
         residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
-        paymentStatus: getRandStatus(),
         paymentStatusAir: getRandStatus(),
         paymentStatusSampah: getRandStatus(),
         phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
@@ -193,10 +192,10 @@ export const MOCK_BILLS: Bill[] = [
     houseId: 'C10-01',
     month: '2026-03',
     dueDate: '2026-03-20',
-    total: 75000,
+    total: 50000,
     items: [
-      { id: '1-1', name: 'Iuran Kebersihan', amount: 25000, status: 'Paid', manager: 'Bpk. Asep' },
-      { id: '1-2', name: 'Iuran Keamanan', amount: 50000, status: 'Unpaid', manager: 'Bpk. Joko' }
+      { id: '1-1', name: 'Iuran Sampah', amount: 25000, status: 'Paid', manager: 'Bpk. Asep' },
+      { id: '1-2', name: 'Iuran Air', amount: 25000, status: 'Unpaid', manager: 'Bpk. Irfan' }
     ]
   }
 ];

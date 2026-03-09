@@ -63,7 +63,11 @@ export const generateDashboardSummary = async (data: {
   totalResidents: number,
   cashBalance: number,
   reportsCount: number,
-  unpaidCount: number
+  unpaidCount: number,
+  babyCount?: number,
+  toddlerCount?: number,
+  pregnantCount?: number,
+  elderlyCount?: number
 }): Promise<string> => {
    try {
      const ai = getAiInstance();
@@ -73,11 +77,13 @@ export const generateDashboardSummary = async (data: {
      - Kas Keuangan: Rp ${data.cashBalance.toLocaleString('id-ID')}
      - Laporan Masalah Baru (Aktif): ${data.reportsCount}
      - Warga Menunggak Iuran: ${data.unpaidCount} KK
+     - Kelompok Rentan: ${data.babyCount || 0} Bayi, ${data.toddlerCount || 0} Balita, ${data.pregnantCount || 0} Ibu Hamil, ${data.elderlyCount || 0} Lansia
      
      Berikan laporan singkat dan padat (maksimal 150 kata) yang mencakup:
      1. 💰 Status Kesehatan Keuangan (Aman/Waspada)
      2. 🛡️ Tingkat Keresahan Warga (berdasarkan jumlah laporan)
-     3. 💡 Satu rekomendasi aksi prioritas untuk pengurus RT minggu ini.
+     3. 👶 Analisis Kelompok Rentan (apakah perlu perhatian khusus minggu ini)
+     4. 💡 Satu rekomendasi aksi prioritas untuk pengurus RT minggu ini.
 
      Format output menggunakan daftar poin (list) agar mudah dibaca. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
      

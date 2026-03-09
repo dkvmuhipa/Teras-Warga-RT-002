@@ -879,7 +879,6 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
 
                     <div className="space-y-3">
                         {[
-                            { label: 'Iuran Keamanan', status: foundHouse?.paymentStatus },
                             { label: 'Iuran Air', status: foundHouse?.paymentStatusAir || 'Belum Lunas' },
                             { label: 'Iuran Sampah', status: foundHouse?.paymentStatusSampah || 'Belum Lunas' },
                         ].map((item, i) => (
