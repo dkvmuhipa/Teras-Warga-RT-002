@@ -133,23 +133,25 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   const colonX = 72;
   const valueX = 75;
 
-  const fields = [
-      { label: "Nama Lengkap", value: letter.applicantName.toUpperCase() },
-      { label: "NIK / No KTP", value: letter.nik },
-      { label: "Kepala Keluarga", value: letter.familyHeadName.toUpperCase() },
-      { label: "Tempat/Tanggal Lahir", value: `${letter.birthPlace.toUpperCase()}, ${letter.birthDate.split('-').reverse().join('-')}` },
-      { label: "Jenis Kelamin", value: letter.gender },
-      { label: "Alamat Sesuai KTP", value: letter.addressKtp }, 
-      { label: "Alamat Domisili", value: letter.currentAddress || letter.addressKtp }, 
-      { label: "Agama", value: letter.religion },
-      { label: "Status", value: letter.maritalStatus },
-      { label: "Pekerjaan", value: letter.job },
-      { label: "Pendidikan", value: letter.education || "-" },
-      { label: "Hub. Keluarga", value: letter.familyStatus || "-" },
-      { label: "Gol. Darah", value: letter.bloodType || "-" },
-      { label: "Kewarganegaraan", value: letter.nationality || "Indonesia" },
-      { label: "Keperluan", value: letter.purposeDetail || letter.type } 
+  const fieldDefinitions = [
+      { id: 'applicantName', label: config.fieldLabels?.applicantName || "Nama Lengkap", value: letter.applicantName.toUpperCase() },
+      { id: 'nik', label: config.fieldLabels?.nik || "NIK / No KTP", value: letter.nik },
+      { id: 'familyHeadName', label: config.fieldLabels?.familyHeadName || "Kepala Keluarga", value: letter.familyHeadName.toUpperCase() },
+      { id: 'birthPlaceDate', label: config.fieldLabels?.birthPlaceDate || "Tempat/Tanggal Lahir", value: `${letter.birthPlace.toUpperCase()}, ${letter.birthDate.split('-').reverse().join('-')}` },
+      { id: 'gender', label: config.fieldLabels?.gender || "Jenis Kelamin", value: letter.gender },
+      { id: 'addressKtp', label: config.fieldLabels?.addressKtp || "Alamat Sesuai KTP", value: letter.addressKtp }, 
+      { id: 'currentAddress', label: config.fieldLabels?.currentAddress || "Alamat Domisili", value: letter.currentAddress || letter.addressKtp }, 
+      { id: 'religion', label: config.fieldLabels?.religion || "Agama", value: letter.religion },
+      { id: 'maritalStatus', label: config.fieldLabels?.maritalStatus || "Status", value: letter.maritalStatus },
+      { id: 'job', label: config.fieldLabels?.job || "Pekerjaan", value: letter.job },
+      { id: 'education', label: config.fieldLabels?.education || "Pendidikan", value: letter.education || "-" },
+      { id: 'familyStatus', label: config.fieldLabels?.familyStatus || "Hub. Keluarga", value: letter.familyStatus || "-" },
+      { id: 'bloodType', label: config.fieldLabels?.bloodType || "Gol. Darah", value: letter.bloodType || "-" },
+      { id: 'nationality', label: config.fieldLabels?.nationality || "Kewarganegaraan", value: letter.nationality || "Indonesia" },
+      { id: 'purposeDetail', label: config.fieldLabels?.purposeDetail || "Keperluan", value: letter.purposeDetail || letter.type } 
   ];
+
+  const fields = fieldDefinitions.filter(f => config.visibleFields ? config.visibleFields[f.id] !== false : true);
 
   fields.forEach((field, index) => {
       const num = `${index + 1}.`;
@@ -209,7 +211,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
           try {
              const stampImg = await getImageData(config.stamp);
              // Ukuran stempel diperkecil lagi (20x20) dan posisi disesuaikan
-             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 25, signSpaceY - 2, 20, 20);
+             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 25, signSpaceY - 2, 25, 25);
           } catch(e) {}
       }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Save, Download, Trash2, Shield, User, FileText, Key, Mail, Database, RefreshCw, AlertCircle, CheckCircle2, Upload, Image as ImageIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Download, Trash2, Shield, User, Key, Mail, Database, RefreshCw, AlertCircle } from 'lucide-react';
 import { PdfConfig } from '../../types';
 import { motion } from 'motion/react';
 import { updateAdminPassword, seedDatabase } from '../../services/databaseService';
@@ -15,17 +15,6 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-
-  const handleSave = () => {
-    try {
-      setPdfConfig(localConfig);
-      localStorage.setItem('pdf_config', JSON.stringify(localConfig));
-      alert('Konfigurasi berhasil disimpan!');
-    } catch (e) {
-      console.error("Error saving config:", e);
-      alert('Gagal menyimpan konfigurasi: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
-    }
-  };
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
@@ -100,21 +89,6 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof PdfConfig) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 1024 * 1024) { // 1MB limit for base64
-        alert("File terlalu besar! Maksimal 1MB untuk performa terbaik.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLocalConfig({ ...localConfig, [field]: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
@@ -138,12 +112,6 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pengaturan Sistem</h2>
           <p className="text-slate-500 font-medium mt-1">Konfigurasi aplikasi, keamanan, dan profil administrator.</p>
         </div>
-        <button 
-          onClick={handleSave}
-          className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all"
-        >
-          <Save size={18} /> Simpan Perubahan
-        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -255,199 +223,6 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
                     className="w-full py-4 bg-white text-rose-600 border border-rose-200 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                   >
                     <RefreshCw size={14} className="inline mr-2" /> Reset ke Pengaturan Awal
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* PDF Config */}
-        <motion.div variants={itemVariants} className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="relative z-10">
-            <h3 className="text-xl font-black text-slate-800 mb-8 flex items-center gap-3">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-                <FileText size={20} />
-              </div>
-              Konfigurasi Kop Surat & Validasi Digital
-            </h3>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Text Info */}
-              <div className="lg:col-span-1 space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Nama RT (Kop Surat)</label>
-                    <input 
-                      type="text"
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={localConfig.rtName} 
-                      onChange={e => setLocalConfig({...localConfig, rtName: e.target.value})} 
-                      placeholder="Contoh: RT.002 / RW.020"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Nama Ketua RT</label>
-                    <input 
-                      type="text"
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={localConfig.rtChairman} 
-                      onChange={e => setLocalConfig({...localConfig, rtChairman: e.target.value})} 
-                      placeholder="Nama lengkap Ketua RT..."
-                    />
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Kelurahan</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={localConfig.kelurahan || ''} 
-                        onChange={e => setLocalConfig({...localConfig, kelurahan: e.target.value})} 
-                        placeholder="TONDO"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Kecamatan</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={localConfig.kecamatan || ''} 
-                        onChange={e => setLocalConfig({...localConfig, kecamatan: e.target.value})} 
-                        placeholder="MANTIKULORE"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Kota</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={localConfig.kota || ''} 
-                        onChange={e => setLocalConfig({...localConfig, kota: e.target.value})} 
-                        placeholder="PALU"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Nomor Terakhir (Counter)</label>
-                    <input 
-                      type="number"
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      value={localConfig.lastLetterNumber} 
-                      onChange={e => setLocalConfig({...localConfig, lastLetterNumber: parseInt(e.target.value) || 0})} 
-                      placeholder="0"
-                    />
-                    <p className="text-[9px] font-medium text-slate-400 px-2 italic">Sistem akan menyarankan nomor berikutnya (n+1).</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Alamat Lengkap RT</label>
-                    <textarea 
-                      rows={4}
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none" 
-                      value={localConfig.rtAddress} 
-                      onChange={e => setLocalConfig({...localConfig, rtAddress: e.target.value})} 
-                      placeholder="Alamat lengkap untuk kop surat..."
-                    />
-                  </div>
-                </div>
-
-                <div className="p-6 bg-blue-50/50 border border-blue-100 rounded-[2rem] flex items-center gap-4">
-                  <div className="p-3 bg-white text-blue-600 rounded-2xl shadow-sm">
-                    <CheckCircle2 size={20} />
-                  </div>
-                  <p className="text-xs font-bold text-blue-700 leading-relaxed">
-                    Data ini akan muncul otomatis pada Surat Pengantar dan Laporan PDF yang diterbitkan sistem.
-                  </p>
-                </div>
-              </div>
-
-              {/* Visual Assets */}
-              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Logo */}
-                <div className="space-y-3">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Logo RT / Kota</p>
-                  <div className="relative aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center overflow-hidden group/upload">
-                    {localConfig.logo ? (
-                      <>
-                        <img src={localConfig.logo} alt="Logo" className="w-full h-full object-contain p-4" />
-                        <button 
-                          onClick={() => setLocalConfig({...localConfig, logo: ''})}
-                          className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="text-center p-4">
-                        <ImageIcon size={32} className="mx-auto text-slate-300 mb-2" />
-                        <p className="text-[10px] font-bold text-slate-400">Belum Ada Logo</p>
-                      </div>
-                    )}
-                    <label className="absolute inset-0 cursor-pointer">
-                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
-                    </label>
-                  </div>
-                  <button className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
-                    <Upload size={14} /> Ganti Logo
-                  </button>
-                </div>
-
-                {/* Stempel */}
-                <div className="space-y-3">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Stempel RT</p>
-                  <div className="relative aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center overflow-hidden group/upload">
-                    {localConfig.stamp ? (
-                      <>
-                        <img src={localConfig.stamp} alt="Stempel" className="w-full h-full object-contain p-4" />
-                        <button 
-                          onClick={() => setLocalConfig({...localConfig, stamp: ''})}
-                          className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="text-center p-4">
-                        <ImageIcon size={32} className="mx-auto text-slate-300 mb-2" />
-                        <p className="text-[10px] font-bold text-slate-400">Belum Ada Stempel</p>
-                      </div>
-                    )}
-                    <label className="absolute inset-0 cursor-pointer">
-                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'stamp')} />
-                    </label>
-                  </div>
-                  <button className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
-                    <Upload size={14} /> Ganti Stempel
-                  </button>
-                </div>
-
-                {/* Tanda Tangan */}
-                <div className="space-y-3">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Tanda Tangan Ketua RT</p>
-                  <div className="relative aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center overflow-hidden group/upload">
-                    {localConfig.signature ? (
-                      <>
-                        <img src={localConfig.signature} alt="TTD" className="w-full h-full object-contain p-4" />
-                        <button 
-                          onClick={() => setLocalConfig({...localConfig, signature: ''})}
-                          className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="text-center p-4">
-                        <ImageIcon size={32} className="mx-auto text-slate-300 mb-2" />
-                        <p className="text-[10px] font-bold text-slate-400">Belum Ada TTD</p>
-                      </div>
-                    )}
-                    <label className="absolute inset-0 cursor-pointer">
-                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'signature')} />
-                    </label>
-                  </div>
-                  <button className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
-                    <Upload size={14} /> Ganti TTD
                   </button>
                 </div>
               </div>

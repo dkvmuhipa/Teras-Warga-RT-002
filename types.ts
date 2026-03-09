@@ -278,6 +278,8 @@ export interface PdfConfig {
   }[];
   introText?: string;
   closingText?: string;
+  visibleFields?: Record<string, boolean>;
+  fieldLabels?: Record<string, string>;
 }
 
 export interface InventoryItem {

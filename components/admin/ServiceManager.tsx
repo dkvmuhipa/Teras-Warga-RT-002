@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb } from '../../services/databaseService';
@@ -173,6 +173,19 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
     visible: { opacity: 1, y: 0 }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof PdfConfig) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newConfig = { ...pdfConfig, [field]: reader.result as string };
+        setPdfConfig(newConfig);
+        localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -299,6 +312,205 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     <Settings size={24} />
                   </div>
                   <div>
+                    <h3 className="text-xl font-black text-slate-900">Konfigurasi Kop Surat & Validasi</h3>
+                    <p className="text-sm font-medium text-slate-500">Atur informasi RT dan aset visual untuk dokumen resmi.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nama RT (Kop Surat)</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={pdfConfig.rtName} 
+                        onChange={e => {
+                          const newConfig = {...pdfConfig, rtName: e.target.value};
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                        }} 
+                        placeholder="RT 002 / RW 005"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nama Ketua RT</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={pdfConfig.rtChairman} 
+                        onChange={e => {
+                          const newConfig = {...pdfConfig, rtChairman: e.target.value};
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                        }} 
+                        placeholder="NAMA KETUA RT"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Kelurahan</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={pdfConfig.kelurahan || ''} 
+                        onChange={e => {
+                          const newConfig = {...pdfConfig, kelurahan: e.target.value};
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                        }} 
+                        placeholder="TONDO"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Kecamatan</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={pdfConfig.kecamatan || ''} 
+                        onChange={e => {
+                          const newConfig = {...pdfConfig, kecamatan: e.target.value};
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                        }} 
+                        placeholder="MANTIKULORE"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Kota</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={pdfConfig.kota || ''} 
+                        onChange={e => {
+                          const newConfig = {...pdfConfig, kota: e.target.value};
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                        }} 
+                        placeholder="PALU"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Alamat Lengkap RT</label>
+                    <textarea 
+                      rows={3}
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none" 
+                      value={pdfConfig.rtAddress} 
+                      onChange={e => {
+                        const newConfig = {...pdfConfig, rtAddress: e.target.value};
+                        setPdfConfig(newConfig);
+                        localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                      }} 
+                      placeholder="Alamat lengkap untuk kop surat..."
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Logo */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Logo RT / Kota</p>
+                    <div className="relative aspect-video bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload">
+                      {pdfConfig.logo ? (
+                        <>
+                          <img src={pdfConfig.logo} alt="Logo" className="w-full h-full object-contain p-4" />
+                          <button 
+                            onClick={() => {
+                              const newConfig = {...pdfConfig, logo: ''};
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                            }}
+                            className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="text-center p-4">
+                          <ImageIcon size={24} className="mx-auto text-slate-300 mb-1" />
+                          <p className="text-[9px] font-bold text-slate-400 uppercase">Belum Ada Logo</p>
+                        </div>
+                      )}
+                      <label className="absolute inset-0 cursor-pointer">
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Stempel */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Stempel RT</p>
+                    <div className="relative aspect-video bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload">
+                      {pdfConfig.stamp ? (
+                        <>
+                          <img src={pdfConfig.stamp} alt="Stempel" className="w-full h-full object-contain p-4" />
+                          <button 
+                            onClick={() => {
+                              const newConfig = {...pdfConfig, stamp: ''};
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                            }}
+                            className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="text-center p-4">
+                          <ImageIcon size={24} className="mx-auto text-slate-300 mb-1" />
+                          <p className="text-[9px] font-bold text-slate-400 uppercase">Belum Ada Stempel</p>
+                        </div>
+                      )}
+                      <label className="absolute inset-0 cursor-pointer">
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'stamp')} />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Tanda Tangan */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tanda Tangan Ketua RT</p>
+                    <div className="relative aspect-video bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload">
+                      {pdfConfig.signature ? (
+                        <>
+                          <img src={pdfConfig.signature} alt="TTD" className="w-full h-full object-contain p-4" />
+                          <button 
+                            onClick={() => {
+                              const newConfig = {...pdfConfig, signature: ''};
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                            }}
+                            className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="text-center p-4">
+                          <ImageIcon size={24} className="mx-auto text-slate-300 mb-1" />
+                          <p className="text-[9px] font-bold text-slate-400 uppercase">Belum Ada TTD</p>
+                        </div>
+                      )}
+                      <label className="absolute inset-0 cursor-pointer">
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'signature')} />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl">
+                    <FileText size={24} />
+                  </div>
+                  <div>
                     <h3 className="text-xl font-black text-slate-900">Pengaturan Template Surat</h3>
                     <p className="text-sm font-medium text-slate-500">Atur jenis surat dan saran pengisian untuk warga.</p>
                   </div>
@@ -422,6 +634,86 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       localStorage.setItem('pdf_config', JSON.stringify(newConfig));
                     }}
                   />
+                </div>
+              </div>
+
+              {/* Field Visibility Toggles */}
+              <div className="mt-12 pt-12 border-t border-slate-100">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <Eye size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Visibilitas Data Surat</h4>
+                    <p className="text-[10px] font-bold text-slate-400 mt-1">Pilih data apa saja yang akan ditampilkan pada Surat Pengantar PDF.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[
+                    { id: 'applicantName', defaultLabel: 'Nama Lengkap' },
+                    { id: 'nik', defaultLabel: 'NIK / No KTP' },
+                    { id: 'familyHeadName', defaultLabel: 'Kepala Keluarga' },
+                    { id: 'birthPlaceDate', defaultLabel: 'Tempat/Tgl Lahir' },
+                    { id: 'gender', defaultLabel: 'Jenis Kelamin' },
+                    { id: 'addressKtp', defaultLabel: 'Alamat KTP' },
+                    { id: 'currentAddress', defaultLabel: 'Alamat Domisili' },
+                    { id: 'religion', defaultLabel: 'Agama' },
+                    { id: 'maritalStatus', defaultLabel: 'Status Kawin' },
+                    { id: 'job', defaultLabel: 'Pekerjaan' },
+                    { id: 'education', defaultLabel: 'Pendidikan' },
+                    { id: 'familyStatus', defaultLabel: 'Hub. Keluarga' },
+                    { id: 'bloodType', defaultLabel: 'Gol. Darah' },
+                    { id: 'nationality', defaultLabel: 'Kewarganegaraan' },
+                    { id: 'purposeDetail', defaultLabel: 'Keperluan' }
+                  ].map(field => (
+                    <div 
+                      key={field.id}
+                      className={`
+                        p-4 rounded-2xl border transition-all
+                        ${(pdfConfig.visibleFields?.[field.id] !== false) 
+                          ? 'bg-white border-slate-200 shadow-sm' 
+                          : 'bg-slate-50 border-slate-100 opacity-60 hover:opacity-100'}
+                      `}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Field ID: {field.id}</span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer"
+                            checked={pdfConfig.visibleFields?.[field.id] !== false}
+                            onChange={(e) => {
+                              const newVisibleFields = { 
+                                ...(pdfConfig.visibleFields || {}), 
+                                [field.id]: e.target.checked 
+                              };
+                              const newConfig = { ...pdfConfig, visibleFields: newVisibleFields };
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                            }}
+                          />
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </label>
+                      </div>
+                      <input 
+                        type="text"
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                        value={pdfConfig.fieldLabels?.[field.id] || field.defaultLabel}
+                        onChange={(e) => {
+                          const newLabels = {
+                            ...(pdfConfig.fieldLabels || {}),
+                            [field.id]: e.target.value
+                          };
+                          const newConfig = { ...pdfConfig, fieldLabels: newLabels };
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                        }}
+                        placeholder={field.defaultLabel}
+                        disabled={pdfConfig.visibleFields?.[field.id] === false}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
