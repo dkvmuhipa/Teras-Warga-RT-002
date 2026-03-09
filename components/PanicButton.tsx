@@ -4,7 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import { motion, AnimatePresence } from 'motion/react';
 
 export function PanicButton() {
-  const [alert, setAlert] = useState<{ message: string; sender: string; timestamp: string } | null>(null);
+  const [alert, setAlert] = useState<{ message: string; sender: string; timestamp: string } | string | null>(null);
   const [isHolding, setIsHolding] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -158,12 +158,14 @@ export function PanicButton() {
       <AnimatePresence>
         {alert && (
           <motion.div 
+            key="emergency-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-rose-950/80 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-rose-950/90 backdrop-blur-md"
           >
             <motion.div 
+              key="emergency-modal"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
@@ -191,18 +193,26 @@ export function PanicButton() {
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Pesan</p>
-                      <p className="text-lg font-bold text-slate-800 leading-tight">{alert.message}</p>
+                      <p className="text-lg font-bold text-slate-800 leading-tight">
+                        {typeof alert === 'string' ? alert : alert.message || 'Peringatan Darurat!'}
+                      </p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pengirim</p>
-                      <p className="font-bold text-slate-800">{alert.sender}</p>
+                      <p className="font-bold text-slate-800">
+                        {typeof alert === 'string' ? 'Sistem' : alert.sender || 'Warga'}
+                      </p>
                     </div>
                     <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Waktu</p>
-                      <p className="font-bold text-slate-800">{new Date(alert.timestamp).toLocaleTimeString('id-ID')}</p>
+                      <p className="font-bold text-slate-800">
+                        {typeof alert === 'object' && alert.timestamp 
+                          ? new Date(alert.timestamp).toLocaleTimeString('id-ID') 
+                          : new Date().toLocaleTimeString('id-ID')}
+                      </p>
                     </div>
                   </div>
                 </div>

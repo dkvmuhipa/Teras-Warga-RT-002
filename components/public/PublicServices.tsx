@@ -25,6 +25,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const initialHouseId = searchParams.get('houseId') || '';
   
   const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'tamu' | 'mutasi' | 'history'>(initialTab as any);
+  
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'lapor' || tab === 'tamu' || tab === 'surat' || tab === 'mutasi' || tab === 'history') {
+      setActiveTab(tab as any);
+    }
+  }, [searchParams]);
+
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [accessCode, setAccessCode] = useState('');
   const [showPin, setShowPin] = useState(false);
