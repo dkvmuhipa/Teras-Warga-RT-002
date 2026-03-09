@@ -55,6 +55,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [maritalStatus, setMaritalStatus] = useState<LetterRequest['maritalStatus']>('Kawin');
   const [nationality, setNationality] = useState('Indonesia'); 
   const [addressKtp, setAddressKtp] = useState('');
+  const [currentAddress, setCurrentAddress] = useState('');
+  const [isSameAddress, setIsSameAddress] = useState(false);
   const [houseId, setHouseId] = useState(initialHouseId);
   const [purposeDetail, setPurposeDetail] = useState(''); 
   
@@ -170,6 +172,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       maritalStatus, 
       nationality, 
       addressKtp, 
+      currentAddress: isSameAddress ? addressKtp : currentAddress,
       houseId: formattedHouseId, 
       purposeDetail, 
       phone,
@@ -508,6 +511,35 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     <div className="md:col-span-2 group">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Sesuai KTP</label>
                       <textarea className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none h-24" value={addressKtp} onChange={e=>setAddressKtp(e.target.value)} required placeholder="Alamat lengkap sesuai KTP"/>
+                    </div>
+
+                    <div className="md:col-span-2 group">
+                      <div className="flex items-center justify-between mb-2 ml-1">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Alamat Domisili Saat Ini</label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            checked={isSameAddress}
+                            onChange={(e) => setIsSameAddress(e.target.checked)}
+                          />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Sama dengan KTP</span>
+                        </label>
+                      </div>
+                      {!isSameAddress && (
+                        <textarea 
+                          className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none h-24" 
+                          value={currentAddress} 
+                          onChange={e=>setCurrentAddress(e.target.value)} 
+                          required={!isSameAddress}
+                          placeholder="Alamat tempat tinggal sekarang..."
+                        />
+                      )}
+                      {isSameAddress && (
+                        <div className="w-full p-5 bg-slate-100 border border-slate-200 rounded-3xl text-sm font-bold text-slate-400 italic">
+                          Alamat domisili sama dengan alamat KTP.
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

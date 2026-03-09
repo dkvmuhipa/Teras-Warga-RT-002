@@ -208,5 +208,8 @@ export const DEFAULT_PDF_CONFIG: PdfConfig = {
   rtName: "RT.002 / RW.020",
   rtAddress: "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Telp. 085961194621",
   rtChairman: "IRFAN ARIANTO",
+  kelurahan: "TONDO",
+  kecamatan: "MANTIKULORE",
+  kota: "PALU",
   lastLetterNumber: 0
 };

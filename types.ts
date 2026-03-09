@@ -164,6 +164,7 @@ export interface LetterRequest {
   maritalStatus: 'Kawin' | 'Belum Kawin' | 'Cerai Hidup' | 'Cerai Mati'; // Sesuai format PDF
   nationality: string; // 10. Kewarganegaraan
   addressKtp: string; 
+  currentAddress: string; // NEW: Alamat Domisili Saat Ini
   purposeDetail: string; // 11. Keperluan (Deskripsi Panjang)
 
   // New Detailed Fields
@@ -267,6 +268,9 @@ export interface PdfConfig {
   rtName: string;
   rtAddress: string;
   rtChairman: string;
+  kelurahan?: string;
+  kecamatan?: string;
+  kota?: string;
   lastLetterNumber: number;
   letterTemplates?: {
     type: string;

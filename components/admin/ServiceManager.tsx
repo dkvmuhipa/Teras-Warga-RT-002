@@ -42,6 +42,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
     maritalStatus: 'Kawin',
     nationality: 'Indonesia',
     addressKtp: '',
+    currentAddress: '',
     houseId: '',
     purposeDetail: '',
     phone: '',
@@ -402,7 +403,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Teks Pembuka Surat (Intro)</label>
                   <textarea 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-32 resize-none"
-                    value={pdfConfig.introText || "Yang bertanda tangan di bawah ini Ketua RT 002 RW 020 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :"}
+                    value={pdfConfig.introText || `Yang bertanda tangan di bawah ini Ketua ${pdfConfig.rtName}, Kel. ${pdfConfig.kelurahan || 'Tondo'}, Kec. ${pdfConfig.kecamatan || 'Mantikulore'}, Kota ${pdfConfig.kota || 'Palu'}, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :`}
                     onChange={(e) => {
                       const newConfig = { ...pdfConfig, introText: e.target.value };
                       setPdfConfig(newConfig);
@@ -612,6 +613,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     </div>
 
                     <div className="col-span-2">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat Domisili Saat Ini</p>
+                      <p className="font-medium text-slate-700">{selectedLetter.currentAddress || selectedLetter.addressKtp || '-'}</p>
+                    </div>
+
+                    <div className="col-span-2">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
                       <p className="font-medium text-slate-700 bg-white p-3 rounded-xl border border-slate-200">{selectedLetter.purposeDetail}</p>
                     </div>
@@ -769,6 +775,42 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     />
                   </div>
                   <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Golongan Darah</label>
+                    <select 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.bloodType} 
+                      onChange={e=>setAdminForm({...adminForm, bloodType: e.target.value as any})}
+                    >
+                      <option>-</option><option>A</option><option>B</option><option>AB</option><option>O</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pendidikan</label>
+                    <select 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.education} 
+                      onChange={e=>setAdminForm({...adminForm, education: e.target.value})}
+                    >
+                      <option>SD/Sederajat</option><option>SMP/Sederajat</option><option>SMA/Sederajat</option><option>D3</option><option>S1</option><option>S2</option><option>S3</option><option>Tidak Sekolah</option>
+                    </select>
+                  </div>
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Hubungan Keluarga</label>
+                    <select 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.familyStatus} 
+                      onChange={e=>setAdminForm({...adminForm, familyStatus: e.target.value as any})}
+                    >
+                      <option>Kepala Keluarga</option><option>Istri</option><option>Anak</option><option>Lainnya</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Status Perkawinan</label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
@@ -781,9 +823,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       <option>Cerai Mati</option>
                     </select>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Kewarganegaraan</label>
                     <input 
@@ -793,6 +832,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       required 
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">No. HP / WhatsApp</label>
                     <input 
@@ -801,6 +843,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       onChange={e=>setAdminForm({...adminForm, phone: e.target.value})} 
                       required 
                       placeholder="0812..."
+                    />
+                  </div>
+                  <div className="group">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Email (Opsional)</label>
+                    <input 
+                      type="email"
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      value={adminForm.email} 
+                      onChange={e=>setAdminForm({...adminForm, email: e.target.value})} 
+                      placeholder="email@contoh.com"
                     />
                   </div>
                 </div>
@@ -879,6 +931,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     onChange={e=>setAdminForm({...adminForm, addressKtp: e.target.value})} 
                     required 
                     placeholder="Jalan, RT/RW, Kelurahan, Kecamatan..."
+                  />
+                </div>
+
+                <div className="group">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Domisili Saat Ini</label>
+                  <textarea 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed" 
+                    value={adminForm.currentAddress} 
+                    onChange={e=>setAdminForm({...adminForm, currentAddress: e.target.value})} 
+                    placeholder="Kosongkan jika sama dengan KTP"
                   />
                 </div>
               </div>

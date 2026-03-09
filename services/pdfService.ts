@@ -96,9 +96,9 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   doc.setFont("times", "normal"); 
   doc.setFontSize(14);
-  doc.text("PEMERINTAH KOTA PALU", centerX, 14, { align: "center" });
-  doc.text("KECAMATAN MANTIKULORE", centerX, 20, { align: "center" });
-  doc.text("KELURAHAN TONDO", centerX, 26, { align: "center" });
+  doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+  doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+  doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
   doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
 
   doc.setFontSize(11);
@@ -125,7 +125,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   let cursorY = 66;
   const lineHeight = 6;
 
-  const introText = config.introText || "Yang bertanda tangan di bawah ini Ketua RT 002 RW 020 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :";
+  const introText = config.introText || `Yang bertanda tangan di bawah ini Ketua ${config.rtName}, Kel. ${config.kelurahan || 'Tondo'}, Kec. ${config.kecamatan || 'Mantikulore'}, Kota ${config.kota || 'Palu'}, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :`;
   doc.text(introText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
   cursorY += 12;
 
@@ -139,10 +139,14 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
       { label: "Kepala Keluarga", value: letter.familyHeadName.toUpperCase() },
       { label: "Tempat/Tanggal Lahir", value: `${letter.birthPlace.toUpperCase()}, ${letter.birthDate.split('-').reverse().join('-')}` },
       { label: "Jenis Kelamin", value: letter.gender },
-      { label: "Alamat/Tempat Tinggal", value: `${letter.addressKtp}, Kel. Tondo, Kec. Mantikulore, Kota Palu` }, 
+      { label: "Alamat Sesuai KTP", value: letter.addressKtp }, 
+      { label: "Alamat Domisili", value: letter.currentAddress || letter.addressKtp }, 
       { label: "Agama", value: letter.religion },
       { label: "Status", value: letter.maritalStatus },
       { label: "Pekerjaan", value: letter.job },
+      { label: "Pendidikan", value: letter.education || "-" },
+      { label: "Hub. Keluarga", value: letter.familyStatus || "-" },
+      { label: "Gol. Darah", value: letter.bloodType || "-" },
       { label: "Kewarganegaraan", value: letter.nationality || "Indonesia" },
       { label: "Keperluan", value: letter.purposeDetail || letter.type } 
   ];
@@ -162,7 +166,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   cursorY += 4;
 
-  const confirmationText = `Orang tersebut adalah benar-benar warga ${config.rtName} Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu dengan data seperti di atas.`;
+  const confirmationText = `Orang tersebut adalah benar-benar warga ${config.rtName}, Kel. ${config.kelurahan || 'Tondo'}, Kec. ${config.kecamatan || 'Mantikulore'}, Kota ${config.kota || 'Palu'} dengan data seperti di atas.`;
   doc.text(confirmationText, marginX, cursorY, { maxWidth: contentWidth, align: "justify" });
   
   cursorY += 10;
@@ -286,9 +290,9 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
     doc.setFont("times", "normal");
     doc.setFontSize(14);
-    doc.text("PEMERINTAH KOTA PALU", centerX, 14, { align: "center" });
-    doc.text("KECAMATAN MANTIKULORE", centerX, 20, { align: "center" });
-    doc.text("KELURAHAN TONDO", centerX, 26, { align: "center" });
+    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
     doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
     doc.setFontSize(10);
     doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
@@ -301,7 +305,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     doc.setFont("times", "bold");
     doc.setFontSize(12);
-    doc.text("LAPORAN DATA WARGA RT 002 RW 020", centerX, 52, { align: "center" });
+    doc.text(`LAPORAN DATA WARGA ${config.rtName}`, centerX, 52, { align: "center" });
     doc.setFontSize(10);
     doc.setFont("times", "normal");
     doc.text(`Per Tanggal: ${dateString}`, centerX, 57, { align: "center" });

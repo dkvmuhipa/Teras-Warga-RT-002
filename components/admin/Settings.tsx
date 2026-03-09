@@ -297,6 +297,38 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
                       placeholder="Nama lengkap Ketua RT..."
                     />
                   </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Kelurahan</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={localConfig.kelurahan || ''} 
+                        onChange={e => setLocalConfig({...localConfig, kelurahan: e.target.value})} 
+                        placeholder="TONDO"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Kecamatan</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={localConfig.kecamatan || ''} 
+                        onChange={e => setLocalConfig({...localConfig, kecamatan: e.target.value})} 
+                        placeholder="MANTIKULORE"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Kota</label>
+                      <input 
+                        type="text"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                        value={localConfig.kota || ''} 
+                        onChange={e => setLocalConfig({...localConfig, kota: e.target.value})} 
+                        placeholder="PALU"
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Nomor Terakhir (Counter)</label>
                     <input 
