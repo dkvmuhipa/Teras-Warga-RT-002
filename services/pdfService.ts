@@ -650,3 +650,83 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
     doc.save(`Laporan_Warga_RT002_${new Date().toISOString().split('T')[0]}.pdf`);
 };
+
+export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a5",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const centerX = pageWidth / 2;
+    const margin = 10;
+
+    // Header / Kop Surat Mini
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text(`PENGURUS ${config.rtName}`, centerX, 15, { align: "center" });
+    doc.setFontSize(8);
+    doc.setFont("times", "normal");
+    doc.text(config.rtAddress, centerX, 20, { align: "center" });
+    doc.setLineWidth(0.5);
+    doc.line(margin, 23, pageWidth - margin, 23);
+
+    // Title
+    doc.setFont("times", "bold");
+    doc.setFontSize(14);
+    doc.text("KWITANSI PEMBAYARAN IURAN", centerX, 32, { align: "center" });
+    
+    doc.setFontSize(9);
+    doc.setFont("times", "normal");
+    doc.text(`No. Ref: ${payment.id.substring(0, 8).toUpperCase()}`, pageWidth - margin - 5, 40, { align: "right" });
+
+    // Content Table-like structure
+    let y = 50;
+    const drawRow = (label: string, value: string) => {
+        doc.setFont("times", "bold");
+        doc.text(label, margin + 5, y);
+        doc.text(":", margin + 40, y);
+        doc.setFont("times", "normal");
+        doc.text(value, margin + 43, y);
+        y += 8;
+    };
+
+    drawRow("Telah Terima Dari", payment.headOfFamily);
+    drawRow("Alamat / Rumah", `Blok ${payment.block} No. ${payment.number}`);
+    drawRow("Untuk Pembayaran", `Iuran ${payment.type === 'Both' ? 'Air & Sampah' : payment.type}`);
+    drawRow("Periode Bulan", payment.month);
+    drawRow("Tanggal Bayar", new Date(payment.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+
+    y += 5;
+    // Amount Box
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin + 5, y, pageWidth - (margin * 2) - 10, 12, 'F');
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text(`TERBILANG: Rp ${payment.amount.toLocaleString()},-`, margin + 10, y + 8);
+
+    // Signature
+    y += 25;
+    const signX = pageWidth - 45;
+    doc.setFontSize(9);
+    doc.setFont("times", "normal");
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, y, { align: "center" });
+    doc.text("Penerima / Bendahara,", signX, y + 5, { align: "center" });
+    
+    y += 20;
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    doc.line(signX - 15, y + 1, signX + 15, y + 1);
+
+    // Footer
+    doc.setFontSize(7);
+    doc.setFont("times", "italic");
+    doc.setTextColor(150);
+    doc.text("* Bukti pembayaran ini sah dan diterbitkan secara digital.", margin + 5, pageHeight - 10);
+
+    doc.save(`Kwitansi_Iuran_${payment.headOfFamily}_${payment.month.replace(/\s+/g, '_')}.pdf`);
+};

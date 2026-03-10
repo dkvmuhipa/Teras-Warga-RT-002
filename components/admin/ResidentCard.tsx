@@ -1,6 +1,6 @@
 import React from 'react';
 import { House, PaymentStatus, Bill } from '../../types';
-import { Phone, CheckCircle, XCircle, DollarSign, Edit2, Trash2, LayoutList } from 'lucide-react';
+import { Phone, CheckCircle, XCircle, DollarSign, Edit2, Trash2, LayoutList, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface ResidentCardProps {
@@ -13,11 +13,12 @@ interface ResidentCardProps {
   onOpenPay: (house: House) => void;
   dynamicStatusAir?: PaymentStatus;
   dynamicStatusSampah?: PaymentStatus;
+  arrears?: string[];
 }
 
 export const ResidentCard: React.FC<ResidentCardProps> = ({ 
   house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills, onOpenPay,
-  dynamicStatusAir, dynamicStatusSampah
+  dynamicStatusAir, dynamicStatusSampah, arrears = []
 }) => {
   const houseBills = bills.filter(b => b.houseId === house.id);
   const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
@@ -91,7 +92,26 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
             Rentan
           </span>
         )}
+
+        {arrears.length > 0 && (
+          <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-100 flex items-center gap-1">
+            <AlertCircle size={10} /> Tunggakan: {arrears.length} Bln
+          </span>
+        )}
       </div>
+
+      {arrears.length > 0 && (
+        <div className="mb-4 p-2 bg-amber-50/50 rounded-xl border border-amber-100/50">
+          <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-1">Bulan Belum Bayar:</p>
+          <div className="flex flex-wrap gap-1">
+            {arrears.map(m => (
+              <span key={m} className="text-[8px] font-bold text-amber-700 bg-white px-1.5 py-0.5 rounded border border-amber-200">
+                {m.split(' ')[0]}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-1.5 pt-3 border-t border-slate-100">
         <button onClick={() => onOpenDetail(house)} className="flex-1 py-2 bg-slate-50 text-slate-600 rounded-lg font-bold text-[10px] hover:bg-slate-100 transition-all">Detail</button>
