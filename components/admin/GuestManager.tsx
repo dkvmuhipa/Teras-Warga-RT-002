@@ -3,13 +3,15 @@ import { ShieldAlert, User, Calendar, Clock, Phone, Trash2, CheckCircle, Externa
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { updateGuestReportStatus, deleteGuestReportFromDb } from '../../services/databaseService';
-import { GuestReport } from '../../types';
+import { GuestReport, PdfConfig } from '../../types';
+import { generateGuestReportPDF } from '../../services/pdfService';
 
 interface GuestManagerProps {
   guestReports: GuestReport[];
+  pdfConfig: PdfConfig;
 }
 
-export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports }) => {
+export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfConfig }) => {
   const activeGuests = guestReports.filter(g => g.status === 'Active');
   const departedGuests = guestReports.filter(g => g.status === 'Departed');
 
@@ -33,6 +35,13 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports }) => {
           <p className="text-slate-500 font-medium">Pantau tamu yang menginap di lingkungan RT 002</p>
         </div>
         <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => generateGuestReportPDF(guestReports, pdfConfig)}
+            className="flex items-center gap-2"
+          >
+            <ExternalLink size={16} /> Cetak Laporan
+          </Button>
           <div className="px-4 py-2 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100 flex items-center gap-2">
             <ShieldAlert size={16} />
             <span className="text-xs font-black uppercase tracking-widest">{activeGuests.length} Tamu Aktif</span>

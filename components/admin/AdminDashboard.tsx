@@ -22,6 +22,7 @@ import { EventManager } from './EventManager';
 import { AssetManager } from './AssetManager';
 import { GuestManager } from './GuestManager';
 import { AdvancedAnalytics } from './AdvancedAnalytics';
+import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
 import { MapManager } from './MapManager';
 import { motion, AnimatePresence } from 'motion/react';
@@ -58,11 +59,13 @@ interface AdminDashboardProps {
   iuranPayments: any[];
   residentRegistrations: ResidentRegistration[];
   guestReports: any[];
+  inventoryLogs: any[];
+  auditLogs: any[];
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports
+  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -84,19 +87,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'residents':
         return <ResidentManager houses={houses} bills={bills} reports={reports} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} residentRegistrations={residentRegistrations} />;
       case 'finance':
-        return <FinanceManager cashFlow={cashFlow} />;
+        return <FinanceManager cashFlow={cashFlow} pdfConfig={pdfConfig} />;
       case 'services':
         return <ServiceManager letters={letters} reports={reports} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       case 'facilities':
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} />;
       case 'assets':
-        return <AssetManager inventory={inventory} />;
+        return <AssetManager inventory={inventory} inventoryLogs={inventoryLogs} />;
       case 'guests':
-        return <GuestManager guestReports={guestReports} />;
+        return <GuestManager guestReports={guestReports} pdfConfig={pdfConfig} />;
       case 'events':
         return <EventManager events={events} />;
       case 'analytics':
         return <AdvancedAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />;
+      case 'audit':
+        return <AuditLogManager logs={auditLogs} />;
       case 'content':
         return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} />;
       case 'officials':
@@ -119,7 +124,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-600 flex overflow-hidden">
+    <div className="h-screen h-[100dvh] bg-[#F8FAFC] font-sans text-slate-600 flex overflow-hidden">
       <AdminSidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
@@ -130,7 +135,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         guestReports={guestReports}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Modern Top Bar */}
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-4">
@@ -197,7 +202,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-32 custom-scrollbar">
           <div className="max-w-7xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div

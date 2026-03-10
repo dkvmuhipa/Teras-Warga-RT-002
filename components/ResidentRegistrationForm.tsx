@@ -15,6 +15,8 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
   const [kkFile, setKkFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     headOfFamily: '',
+    gender: 'Laki-laki' as 'Laki-laki' | 'Perempuan',
+    birthDate: '',
     ownerName: '',
     block: '',
     number: '',
@@ -31,13 +33,13 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     teenagerCount: 0,
     elderlyCount: 0,
     widowCount: 0,
-    familyMembers: [] as { name: string; nik?: string; relation: any; birthDate?: string }[]
+    familyMembers: [] as { name: string; nik?: string; gender: 'Laki-laki' | 'Perempuan'; relation: any; birthDate?: string; job?: string }[]
   });
 
   const addFamilyMember = () => {
     setFormData({
       ...formData,
-      familyMembers: [...formData.familyMembers, { name: '', relation: 'Anak' }]
+      familyMembers: [...formData.familyMembers, { name: '', relation: 'Anak', gender: 'Laki-laki', birthDate: '' }]
     });
   };
 
@@ -130,6 +132,19 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input required type="text" placeholder="Contoh: Budi Santoso" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jenis Kelamin</label>
+              <select required className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal Lahir</label>
+              <input required type="date" className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
             </div>
 
             <div className="space-y-2">
@@ -253,10 +268,21 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                 <button type="button" onClick={() => removeFamilyMember(idx)} className="absolute top-4 right-4 p-2 text-slate-300 hover:text-rose-600 transition-colors">
                   <Trash2 size={16} />
                 </button>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
                     <input required type="text" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.name} onChange={e => updateFamilyMember(idx, 'name', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jenis Kelamin</label>
+                    <select className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.gender} onChange={e => updateFamilyMember(idx, 'gender', e.target.value)}>
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal Lahir</label>
+                    <input required type="date" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.birthDate || ''} onChange={e => updateFamilyMember(idx, 'birthDate', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hubungan</label>
@@ -270,6 +296,10 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">NIK (Opsional)</label>
                     <input type="text" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.nik || ''} onChange={e => updateFamilyMember(idx, 'nik', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pekerjaan</label>
+                    <input type="text" placeholder="Contoh: Pelajar" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.job || ''} onChange={e => updateFamilyMember(idx, 'job', e.target.value)} />
                   </div>
                 </div>
               </div>

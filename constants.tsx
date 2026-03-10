@@ -58,18 +58,38 @@ export const generateHouses = (): House[] => {
       // Helper for random status
       const getRandStatus = () => Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID);
 
+      const educations = ['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2'];
+      const jobs = ['PNS', 'Karyawan Swasta', 'Wiraswasta', 'Buruh', 'IRT', 'Mahasiswa', 'Pensiunan'];
+      const religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'];
+      
+      const occupants = status === 'Empty' ? 0 : Math.floor(Math.random() * 5) + 1;
+      const hasElderly = occupants > 2 && Math.random() > 0.7;
+      const hasBaby = occupants > 1 && Math.random() > 0.8;
+      const hasToddler = occupants > 1 && Math.random() > 0.7;
+
       houses.push({
         id: `${config.code}-${number}`,
         block: config.code,
         number: number,
         headOfFamily: status === 'Empty' ? '-' : `Warga ${config.code}-${number}`,
-        occupants: status === 'Empty' ? 0 : Math.floor(Math.random() * 4) + 1,
+        occupants,
         status,
         residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
         paymentStatusAir: getRandStatus(),
         paymentStatusSampah: getRandStatus(),
         phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
-        accessCode: accessCode
+        accessCode: accessCode,
+        education: status === 'Occupied' ? educations[Math.floor(Math.random() * educations.length)] : undefined,
+        jobCategory: status === 'Occupied' ? jobs[Math.floor(Math.random() * jobs.length)] : undefined,
+        religion: status === 'Occupied' ? religions[Math.floor(Math.random() * religions.length)] : undefined,
+        gender: status === 'Occupied' ? (Math.random() > 0.5 ? 'Laki-laki' : 'Perempuan') : undefined,
+        vehicleCount: status === 'Occupied' ? Math.floor(Math.random() * 3) : 0,
+        babyCount: hasBaby ? 1 : 0,
+        toddlerCount: hasToddler ? 1 : 0,
+        elderlyCount: hasElderly ? 1 : 0,
+        pregnantCount: status === 'Occupied' && Math.random() > 0.9 ? 1 : 0,
+        widowCount: status === 'Occupied' && Math.random() > 0.9 ? 1 : 0,
+        teenagerCount: occupants > 3 ? 1 : 0
       });
     }
   });

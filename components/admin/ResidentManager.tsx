@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { BillDetailModal } from './BillDetailModal';
 import { ResidentAnalytics } from './ResidentAnalytics';
 import { ResidentCard } from './ResidentCard';
+import { DemographicAnalytics } from './DemographicAnalytics';
 import { 
   Search, Filter, Grid, List, UserPlus, Download, Upload, 
   Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle,
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
-  ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer
+  ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
+  PieChart as PieChartIcon
 } from 'lucide-react';
 import { House, Report, Official, PdfConfig, PaymentStatus, ResidentRegistration } from '../../types';
 import { HouseMap } from '../HouseMap';
@@ -32,7 +34,7 @@ type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
   houses, bills, reports, officials, pdfConfig, iuranPayments, residentRegistrations 
 }) => {
-  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
   const [filterStatus, setFilterStatus] = useState<any>('all');
@@ -102,6 +104,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   // Form State
   const [formData, setFormData] = useState({
     headOfFamily: '',
+    gender: 'Laki-laki' as 'Laki-laki' | 'Perempuan',
+    birthDate: '',
     ownerName: '', // NEW: Nama Pemilik
     block: '',
     number: '',
@@ -119,7 +123,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     toddlerCount: 0,
     elderlyCount: 0,
     widowCount: 0,
-    familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string }[],
+    familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     accessCode: ''
   });
 
@@ -344,6 +348,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const resetForm = () => {
     setFormData({
       headOfFamily: '',
+      gender: 'Laki-laki',
+      birthDate: '',
       ownerName: '', // NEW: Reset ownerName
       block: '',
       number: '',
@@ -453,6 +459,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setEditingHouseId(house.id);
     setFormData({
       headOfFamily: house.headOfFamily,
+      gender: house.gender || 'Laki-laki',
+      birthDate: house.birthDate || '',
       ownerName: house.ownerName || '', // NEW: Populate ownerName
       block: house.block,
       number: house.number,
@@ -900,14 +908,23 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             <button 
               onClick={() => setViewMode('grid')} 
               className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white shadow-md text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+              title="Tampilan Grid"
             >
               <Grid size={20}/>
             </button>
             <button 
               onClick={() => setViewMode('table')} 
               className={`p-2 rounded-xl transition-all ${viewMode === 'table' ? 'bg-white shadow-md text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+              title="Tampilan Tabel"
             >
               <List size={20}/>
+            </button>
+            <button 
+              onClick={() => setViewMode('analytics')} 
+              className={`p-2 rounded-xl transition-all ${viewMode === 'analytics' ? 'bg-white shadow-md text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+              title="Analitik Demografi"
+            >
+              <PieChartIcon size={20}/>
             </button>
           </div>
         </div>
@@ -934,7 +951,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
       {/* Content View */}
       <motion.div variants={itemVariants}>
-        {viewMode === 'grid' ? (
+        {viewMode === 'analytics' ? (
+          <div className="animate-fade-in">
+            <DemographicAnalytics houses={houses} />
+          </div>
+        ) : viewMode === 'grid' ? (
           <div className="space-y-8">
             {Object.entries(filteredHouses.reduce((acc, house) => {
               if (!acc[house.block]) acc[house.block] = [];
@@ -1234,6 +1255,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                                   // 1. Add to houses
                                   await addHouse({
                                     headOfFamily: reg.headOfFamily,
+                                    gender: reg.gender,
+                                    birthDate: reg.birthDate,
                                     ownerName: reg.ownerName || reg.headOfFamily,
                                     block: reg.block,
                                     number: reg.number,
@@ -1585,6 +1608,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Demografi & Kerentanan</h4>
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Jenis Kelamin</p>
+                        <p className="text-sm font-bold text-slate-800">{selectedResident.gender || '-'}</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Tanggal Lahir</p>
+                        <p className="text-sm font-bold text-slate-800">{selectedResident.birthDate ? new Date(selectedResident.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Pendidikan</p>
                         <p className="text-sm font-bold text-slate-800">{selectedResident.education || '-'}</p>
                       </div>
@@ -1677,6 +1708,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               <div>
                 <label className="block text-xs font-bold mb-1.5 text-slate-700">Kepala Keluarga (Penghuni)</label>
                 <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} required placeholder="Nama Lengkap..." />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Jenis Kelamin</label>
+                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
+                  <option value="Laki-laki">Laki-laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Tanggal Lahir</label>
+                <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Pemilik Rumah</label>
@@ -1856,6 +1900,23 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       />
                     </div>
                     <div>
+                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Jenis Kelamin</label>
+                      <select 
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        value={member.gender || 'Laki-laki'}
+                        onChange={e => {
+                          const newMembers = [...formData.familyMembers];
+                          newMembers[idx].gender = e.target.value as any;
+                          setFormData({...formData, familyMembers: newMembers});
+                        }}
+                      >
+                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
                       <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Hubungan</label>
                       <select 
                         className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
@@ -1872,10 +1933,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         <option value="Famili Lain">Famili Lain</option>
                       </select>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">NIK (Opsional)</label>
+                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">NIK</label>
                       <input 
                         placeholder="NIK" 
                         className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
@@ -1887,8 +1946,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         }}
                       />
                     </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Tanggal Lahir</label>
+                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Tgl Lahir</label>
                       <input 
                         type="date"
                         className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
@@ -1896,6 +1957,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         onChange={e => {
                           const newMembers = [...formData.familyMembers];
                           newMembers[idx].birthDate = e.target.value;
+                          setFormData({...formData, familyMembers: newMembers});
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Pekerjaan</label>
+                      <input 
+                        placeholder="Pekerjaan" 
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        value={member.job || ''}
+                        onChange={e => {
+                          const newMembers = [...formData.familyMembers];
+                          newMembers[idx].job = e.target.value;
                           setFormData({...formData, familyMembers: newMembers});
                         }}
                       />

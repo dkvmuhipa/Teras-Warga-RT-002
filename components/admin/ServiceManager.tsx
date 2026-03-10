@@ -8,6 +8,7 @@ import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar } from '../../services/pdfService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { SignaturePad } from './SignaturePad';
 
 interface ServiceManagerProps {
   reports: Report[];
@@ -552,30 +553,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   {/* Tanda Tangan */}
                   <div className="space-y-2">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tanda Tangan Ketua RT</p>
-                    <div className="relative aspect-video bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload">
-                      {pdfConfig.signature ? (
-                        <>
-                          <img src={pdfConfig.signature} alt="TTD" className="w-full h-full object-contain p-4" />
-                          <button 
-                            onClick={() => {
-                              const newConfig = {...pdfConfig, signature: ''};
-                              setPdfConfig(newConfig);
-                              localStorage.setItem('pdf_config', JSON.stringify(newConfig));
-                            }}
-                            className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </>
-                      ) : (
-                        <div className="text-center p-4">
-                          <ImageIcon size={24} className="mx-auto text-slate-300 mb-1" />
-                          <p className="text-[9px] font-bold text-slate-400 uppercase">Belum Ada TTD</p>
-                        </div>
-                      )}
-                      <label className="absolute inset-0 cursor-pointer">
-                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'signature')} />
-                      </label>
+                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                      <SignaturePad 
+                        initialValue={pdfConfig.signature}
+                        onSave={(dataUrl) => {
+                          const newConfig = { ...pdfConfig, signature: dataUrl };
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                          alert("Tanda tangan berhasil disimpan!");
+                        }}
+                      />
                     </div>
                   </div>
                 </div>

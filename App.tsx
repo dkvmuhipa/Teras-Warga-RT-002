@@ -109,7 +109,8 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToResidentRegistrations,
   subscribeToGuestReports,
   updateGuestReportStatus,
-  deleteGuestReportFromDb
+  deleteGuestReportFromDb,
+  subscribeToAuditLogs
 } from './services/databaseService';
 
 // --- Shared Components ---
@@ -498,7 +499,7 @@ import { subscribeToMapPoints, subscribeToCollection,
 
   const navGroups = [
       { title: "Menu Utama", items: [{ id: 'overview', icon: LayoutDashboard, label: 'Dashboard' }] },
-      { title: "Administrasi", items: [{ id: 'residents', icon: Users, label: 'Data Warga' }, { id: 'services', icon: Archive, label: 'Layanan & Laporan' }, { id: 'finance', icon: DollarSign, label: 'Keuangan & Kas' }] },
+      { title: "Administrasi", items: [{ id: 'residents', icon: Users, label: 'Data Warga' }, { id: 'demographics', icon: PieChart, label: 'Demografi Warga' }, { id: 'services', icon: Archive, label: 'Layanan & Laporan' }, { id: 'finance', icon: DollarSign, label: 'Keuangan & Kas' }] },
       { title: "Lingkungan", items: [{ id: 'facilities', icon: Package, label: 'Fasilitas & Jadwal' }, { id: 'market', icon: ShoppingCart, label: 'Bursa Warga' }, { id: 'umkm', icon: ShoppingBag, label: 'UMKM' }, { id: 'documents', icon: FileText, label: 'Pusat Dokumen' }, { id: 'announcements', icon: Megaphone, label: 'Pengumuman' }, { id: 'polls', icon: Vote, label: 'E-Voting' }, { id: 'officials', icon: Briefcase, label: 'Pengurus' }] },
       { title: "Sistem", items: [{ id: 'settings', icon: Settings, label: 'Pengaturan' }] }
   ];
@@ -590,14 +591,148 @@ import { subscribeToMapPoints, subscribeToCollection,
               </div>
           )}
 
+          {activeTab === 'demographics' && (
+              <div className="animate-fade-in space-y-8">
+                  <div className="flex justify-between items-center">
+                      <div>
+                          <h2 className="font-black text-2xl text-slate-800">Demografi Warga</h2>
+                          <p className="text-sm text-slate-500 mt-1">Statistik dan analisis kependudukan RT 002.</p>
+                      </div>
+                      <Button onClick={() => generateResidentReportPDF(houses, pdfConfig)} variant="outline" className="bg-white">
+                          <Printer size={16}/> Cetak Laporan
+                      </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                          <div className="flex items-center gap-4 mb-4">
+                              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><Users size={24}/></div>
+                              <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Jiwa</p><h4 className="text-3xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Occupied').reduce((acc:any, h:any) => acc + (h.occupants || 0), 0)}</h4></div>
+                          </div>
+                          <div className="space-y-2">
+                              <div className="flex justify-between text-xs font-bold text-slate-500"><span>Laki-laki</span><span>Estimasi 50%</span></div>
+                              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-indigo-500" style={{width: '50%'}}></div></div>
+                          </div>
+                      </div>
+                      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                          <div className="flex items-center gap-4 mb-4">
+                              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><Home size={24}/></div>
+                              <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kepala Keluarga</p><h4 className="text-3xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Occupied').length}</h4></div>
+                          </div>
+                          <p className="text-xs text-slate-400 font-medium">Rata-rata {Math.round(houses.filter((h:any) => h.status === 'Occupied').reduce((acc:any, h:any) => acc + (h.occupants || 0), 0) / (houses.filter((h:any) => h.status === 'Occupied').length || 1))} jiwa per rumah.</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                          <div className="flex items-center gap-4 mb-4">
+                              <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><MapIcon size={24}/></div>
+                              <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rumah Kosong</p><h4 className="text-3xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Empty').length}</h4></div>
+                          </div>
+                          <p className="text-xs text-slate-400 font-medium">{Math.round((houses.filter((h:any) => h.status === 'Empty').length / (houses.length || 1)) * 100)}% dari total kavling.</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                          <div className="flex items-center gap-4 mb-4">
+                              <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><Heart size={24}/></div>
+                              <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategori Khusus</p><h4 className="text-3xl font-black text-slate-800">{houses.filter(h => h.hasPregnant || h.hasBaby || h.hasToddler || h.hasElderly).length}</h4></div>
+                          </div>
+                          <p className="text-xs text-slate-400 font-medium">Rumah dengan prioritas layanan.</p>
+                      </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                          <h3 className="font-black text-lg text-slate-800 mb-6 flex items-center gap-2"><Baby size={20} className="text-indigo-500"/> Kelompok Usia & Kondisi</h3>
+                          <div className="space-y-6">
+                              {[
+                                  { label: 'Bayi (0-1 thn)', count: houses.filter(h => h.hasBaby).length, color: 'bg-cyan-500', icon: Baby },
+                                  { label: 'Balita (1-5 thn)', count: houses.filter(h => h.hasToddler).length, color: 'bg-orange-500', icon: Smile },
+                                  { label: 'Remaja (12-18 thn)', count: houses.filter(h => h.hasTeenager).length, color: 'bg-indigo-500', icon: User },
+                                  { label: 'Lansia (>60 thn)', count: houses.filter(h => h.hasElderly).length, color: 'bg-purple-500', icon: Accessibility },
+                                  { label: 'Ibu Hamil', count: houses.filter(h => h.hasPregnant).length, color: 'bg-pink-500', icon: Heart }
+                              ].map((item, idx) => (
+                                  <div key={idx} className="flex items-center gap-4">
+                                      <div className={`p-2 rounded-xl ${item.color.replace('bg-', 'bg-')}/10 ${item.color.replace('bg-', 'text-')}`}><item.icon size={18}/></div>
+                                      <div className="flex-1">
+                                          <div className="flex justify-between mb-1.5">
+                                              <span className="text-sm font-bold text-slate-700">{item.label}</span>
+                                              <span className="text-sm font-black text-slate-900">{item.count} <span className="text-[10px] text-slate-400 uppercase">Rumah</span></span>
+                                          </div>
+                                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                              <div className={`h-full ${item.color}`} style={{width: `${(item.count / (houses.length || 1)) * 100}%`}}></div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                      </div>
+
+                      <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                          <h3 className="font-black text-lg text-slate-800 mb-6 flex items-center gap-2"><Home size={20} className="text-emerald-500"/> Status Kepemilikan & Hunian</h3>
+                          <div className="space-y-6">
+                              {[
+                                  { label: 'Warga Tetap', count: houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Tetap').length, color: 'bg-emerald-500' },
+                                  { label: 'Warga Kontrak', count: houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kontrak').length, color: 'bg-blue-500' },
+                                  { label: 'Rumah Kosong', count: houses.filter(h => h.status === 'Empty').length, color: 'bg-slate-400' },
+                                  { label: 'Tempat Usaha', count: houses.filter(h => h.status === 'Business').length, color: 'bg-amber-500' }
+                              ].map((item, idx) => (
+                                  <div key={idx} className="flex items-center gap-4">
+                                      <div className="flex-1">
+                                          <div className="flex justify-between mb-1.5">
+                                              <span className="text-sm font-bold text-slate-700">{item.label}</span>
+                                              <span className="text-sm font-black text-slate-900">{item.count} <span className="text-[10px] text-slate-400 uppercase">Unit</span></span>
+                                          </div>
+                                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                              <div className={`h-full ${item.color}`} style={{width: `${(item.count / (houses.length || 1)) * 100}%`}}></div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                          <div className="mt-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                              <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                                  <span className="font-bold text-slate-800">Catatan:</span> Data demografi ini diperbarui secara real-time berdasarkan input data warga oleh admin atau registrasi mandiri warga.
+                              </p>
+                          </div>
+                      </div>
+
+                      <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                          <h3 className="font-black text-lg text-slate-800 mb-6 flex items-center gap-2"><GraduationCap size={20} className="text-blue-500"/> Tingkat Pendidikan</h3>
+                          <div className="space-y-4">
+                              {['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2'].map((edu, idx) => {
+                                  const count = houses.filter(h => h.education === edu).length;
+                                  return (
+                                      <div key={idx} className="flex items-center justify-between">
+                                          <span className="text-sm font-bold text-slate-600">{edu}</span>
+                                          <div className="flex items-center gap-3 flex-1 mx-4">
+                                              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                  <div className="h-full bg-blue-500" style={{width: `${(count / (houses.length || 1)) * 100}%`}}></div>
+                                              </div>
+                                              <span className="text-xs font-black text-slate-800 w-8">{count}</span>
+                                          </div>
+                                      </div>
+                                  );
+                              })}
+                          </div>
+                      </div>
+
+                      <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                          <h3 className="font-black text-lg text-slate-800 mb-6 flex items-center gap-2"><ShieldCheck size={20} className="text-amber-500"/> Kepercayaan / Agama</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                              {['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'].map((rel, idx) => {
+                                  const count = houses.filter(h => h.religion === rel).length;
+                                  return (
+                                      <div key={idx} className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
+                                          <span className="text-xs font-bold text-slate-600">{rel}</span>
+                                          <span className="text-sm font-black text-slate-900">{count}</span>
+                                      </div>
+                                  );
+                              })}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          )}
+
           {activeTab === 'residents' && (
               <div className="animate-fade-in space-y-6">
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Total Warga</p><h4 className="text-2xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Occupied').reduce((acc:any, h:any) => acc + (h.occupants || 0), 0)} <span className="text-xs font-medium text-slate-400">Jiwa</span></h4></div><div className="p-2 bg-slate-50 rounded-xl"><Users size={20} className="text-slate-400"/></div></div>
-                      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Kepala Keluarga</p><h4 className="text-2xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Occupied').length} <span className="text-xs font-medium text-slate-400">KK</span></h4></div><div className="p-2 bg-slate-50 rounded-xl"><User size={20} className="text-slate-400"/></div></div>
-                      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Rumah Kosong</p><h4 className="text-2xl font-black text-slate-800">{houses.filter((h:any) => h.status === 'Empty').length} <span className="text-xs font-medium text-slate-400">Unit</span></h4></div><div className="p-2 bg-slate-50 rounded-xl"><Home size={20} className="text-slate-400"/></div></div>
-                      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div><p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Iuran Lunas</p><h4 className="text-2xl font-black text-emerald-600">{houses.filter((h:any) => h.status === 'Occupied' && h.paymentStatus === 'Lunas').length} <span className="text-xs font-medium text-slate-400">KK</span></h4></div><div className="p-2 bg-emerald-50 rounded-xl"><CheckCircle size={20} className="text-emerald-500"/></div></div>
-                  </div>
                   <Card className="border border-slate-200">
                       <div className="flex flex-col space-y-6 mb-6">
                           <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
@@ -966,6 +1101,8 @@ export const App = () => {
   const [iuranPayments, setIuranPayments] = useState<any[]>([]);
   const [residentRegistrations, setResidentRegistrations] = useState<ResidentRegistration[]>([]);
   const [guestReports, setGuestReports] = useState<any[]>([]);
+  const [inventoryLogs, setInventoryLogs] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
@@ -988,6 +1125,8 @@ export const App = () => {
     const unsubIuranPayments = subscribeToCollection('iuranPayments', (data) => setIuranPayments(data));
     const unsubResidentRegistrations = subscribeToResidentRegistrations((data) => setResidentRegistrations(data));
     const unsubGuestReports = subscribeToGuestReports((data) => setGuestReports(data));
+    const unsubInventoryLogs = subscribeToCollection('inventoryLogs', (data) => setInventoryLogs(data));
+    const unsubAuditLogs = subscribeToAuditLogs((data) => setAuditLogs(data));
     const unsubPopulationLogs = subscribeToPopulationLogs((data) => setPopulationLogs(data));
     const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
     const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
@@ -1010,7 +1149,7 @@ export const App = () => {
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
-      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
+      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery(); unsubActivePatrol();
     };
   }, []);
@@ -1028,23 +1167,25 @@ export const App = () => {
         <Routes>
             <Route path="/admin" element={
                 <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={documents} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} mapPoints={mapPoints} activePatrol={activePatrol} iuranPayments={iuranPayments} residentRegistrations={residentRegistrations} guestReports={guestReports} />
+                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={documents} bills={bills} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={MOCK_EVENTS} mapPoints={mapPoints} activePatrol={activePatrol} iuranPayments={iuranPayments} residentRegistrations={residentRegistrations} guestReports={guestReports} inventoryLogs={inventoryLogs} auditLogs={auditLogs} />
                 </AdminRouteWrapper>
             }/>
             <Route path="*" element={
                 <>
                     <PublicHeader notifications={notifications} onMarkRead={() => {}} />
-                    <Routes>
-                        <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
-                        <Route path="/voting" element={<PublicVoting polls={polls} />} />
-                        <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
-                        <Route path="/market" element={<PublicMarket items={marketItems} />} />
-                        <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
-                        <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
-                        <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
-                        <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
-                        <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={MOCK_FAQ} activePatrol={activePatrol} />} />
-                    </Routes>
+                    <div className="pb-24 md:pb-0">
+                        <Routes>
+                            <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
+                            <Route path="/voting" element={<PublicVoting polls={polls} />} />
+                            <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
+                            <Route path="/market" element={<PublicMarket items={marketItems} />} />
+                            <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
+                            <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
+                            <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
+                            <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
+                            <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={MOCK_FAQ} activePatrol={activePatrol} />} />
+                        </Routes>
+                    </div>
                     <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
                     <PanicButton />
                 </>

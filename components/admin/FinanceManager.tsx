@@ -9,13 +9,17 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb } from '../../services/databaseService';
 
+import { generateCashFlowReportPDF } from '../../services/pdfService';
+
 interface FinanceManagerProps {
   cashFlow: CashFlow[];
+  pdfConfig: any;
 }
 
-export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow }) => {
+export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfConfig }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'All' | 'Income' | 'Expense'>('All');
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' }));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
@@ -112,8 +116,26 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow }) => {
           <p className="text-slate-500 font-medium mt-1">Kelola transparansi pemasukan dan pengeluaran RT 002.</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm">
-            <Download size={18} /> Laporan
+          <div className="flex items-center gap-2 px-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <Calendar size={16} className="text-slate-400" />
+            <select 
+              className="bg-transparent py-2.5 text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer" 
+              value={selectedMonth} 
+              onChange={e => setSelectedMonth(e.target.value)}
+            >
+              {Array.from({ length: 12 }).map((_, i) => {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                const m = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                return <option key={m} value={m}>{m}</option>;
+              })}
+            </select>
+          </div>
+          <button 
+            onClick={() => generateCashFlowReportPDF(cashFlow, selectedMonth, pdfConfig)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
+          >
+            <Download size={18} /> Laporan PDF
           </button>
           <button onClick={() => { resetForm(); setIsModalOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all">
             <Plus size={18} /> Catat Transaksi

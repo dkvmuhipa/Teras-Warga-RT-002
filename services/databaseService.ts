@@ -58,6 +58,68 @@ const POPULATION_LOGS_COL = "populationLogs";
 const IURAN_PAYMENTS_COL = "iuranPayments";
 const RESIDENT_REGISTRATIONS_COL = "residentRegistrations";
 const GUEST_REPORTS_COL = "guestReports";
+const INVENTORY_LOGS_COL = "inventoryLogs";
+const AUDIT_LOGS_COL = "auditLogs";
+
+// --- AUDIT LOGS SERVICES ---
+export const logAction = async (action: string, details: string) => {
+    try {
+        const user = auth.currentUser;
+        await addDoc(collection(db, AUDIT_LOGS_COL), {
+            adminEmail: user?.email || 'System',
+            action,
+            details,
+            timestamp: new Date().toISOString()
+        });
+    } catch (e) {
+        console.error("Error logging action:", e);
+    }
+};
+
+export const subscribeToAuditLogs = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, AUDIT_LOGS_COL), orderBy("timestamp", "desc"), limit(100));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to audit logs:", error);
+    });
+};
+
+// --- INVENTORY LOGS SERVICES ---
+export const subscribeToInventoryLogs = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, INVENTORY_LOGS_COL), orderBy("date", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to inventory logs:", error);
+    });
+};
+
+export const addInventoryLogToDb = async (log: any) => {
+    try {
+        await addDoc(collection(db, INVENTORY_LOGS_COL), deepSanitize(log));
+    } catch (e) {
+        console.error("Error adding inventory log:", e);
+    }
+};
+
+export const updateInventoryLogStatus = async (id: string, status: 'Borrowed' | 'Returned') => {
+    try {
+        await updateDoc(doc(db, INVENTORY_LOGS_COL, id), { status });
+    } catch (e) {
+        console.error("Error updating inventory log status:", e);
+    }
+};
+
+export const deleteInventoryLogFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, INVENTORY_LOGS_COL, id));
+    } catch (e) {
+        console.error("Error deleting inventory log:", e);
+    }
+};
 
 // --- GUEST REPORTS SERVICES ---
 export const subscribeToGuestReports = (callback: (data: any[]) => void) => {
@@ -672,15 +734,22 @@ export const addTransactionToDb = async (transaction: any) => {
   try {
     const { id, ...data } = transaction;
     await addDoc(collection(db, CASHFLOW_COL), deepSanitize(data));
+    await logAction('Catat Keuangan', `${data.type}: ${data.description} - Rp ${data.amount.toLocaleString()}`);
   } catch (e) { console.error("Error adding transaction:", e); }
 };
 
 export const updateTransactionInDb = async (id: string, updates: any) => {
-  try { await updateDoc(doc(db, CASHFLOW_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating transaction:", e); }
+  try { 
+    await updateDoc(doc(db, CASHFLOW_COL, id), deepSanitize(updates)); 
+    await logAction('Update Keuangan', `Mengubah transaksi ID: ${id}`);
+  } catch (e) { console.error("Error updating transaction:", e); }
 };
 
 export const deleteTransactionFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, CASHFLOW_COL, id)); } catch (e) { console.error("Error deleting transaction:", e); }
+  try { 
+    await deleteDoc(doc(db, CASHFLOW_COL, id)); 
+    await logAction('Hapus Keuangan', `Menghapus transaksi ID: ${id}`);
+  } catch (e) { console.error("Error deleting transaction:", e); }
 };
 
 // --- 4. OFFICIALS ---
@@ -710,6 +779,7 @@ export const addReportToDb = async (report: any) => {
 export const updateReportStatus = async (id: string, status: string) => {
   try {
     await updateDoc(doc(db, REPORTS_COL, id), { status });
+    await logAction('Update Laporan', `Mengubah status laporan ID: ${id} menjadi ${status}`);
   } catch (e) { console.error("Error updating report:", e); }
 };
 
@@ -730,6 +800,7 @@ export const updateLetterStatus = async (id: string, status: string, letterNumbe
     const updates: any = { status };
     if (letterNumber) updates.letterNumber = letterNumber;
     await updateDoc(doc(db, LETTERS_COL, id), updates); 
+    await logAction('Update Surat', `Mengubah status surat ID: ${id} menjadi ${status}${letterNumber ? ' (No: ' + letterNumber + ')' : ''}`);
   } catch (e) { console.error("Error updating letter:", e); }
 };
 
@@ -771,15 +842,22 @@ export const addInventoryToDb = async (item: any) => {
     try {
         const { id, ...data } = item;
         await addDoc(collection(db, INVENTORY_COL), deepSanitize(data));
+        await logAction('Tambah Inventaris', `Menambahkan barang: ${data.name}`);
     } catch (e) { console.error("Error adding inventory:", e); }
 };
 
 export const updateInventoryInDb = async (id: string, updates: any) => {
-    try { await updateDoc(doc(db, INVENTORY_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating inventory:", e); }
+    try { 
+      await updateDoc(doc(db, INVENTORY_COL, id), deepSanitize(updates)); 
+      await logAction('Update Inventaris', `Mengubah data barang ID: ${id}`);
+    } catch (e) { console.error("Error updating inventory:", e); }
 };
 
 export const deleteInventoryFromDb = async (id: string) => {
-    try { await deleteDoc(doc(db, INVENTORY_COL, id)); } catch (e) { console.error("Error deleting inventory:", e); }
+    try { 
+      await deleteDoc(doc(db, INVENTORY_COL, id)); 
+      await logAction('Hapus Inventaris', `Menghapus barang ID: ${id}`);
+    } catch (e) { console.error("Error deleting inventory:", e); }
 };
 
 // --- 8. RONDA ---

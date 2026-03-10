@@ -38,7 +38,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
                   <X size={20} />
                 </button>
               </div>
-              <div className="p-6 overflow-y-auto custom-scrollbar">
+              <div className="p-6 pb-12 overflow-y-auto custom-scrollbar">
                 {children}
               </div>
             </motion.div>

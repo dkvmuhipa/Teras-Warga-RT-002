@@ -16,6 +16,8 @@ export interface House {
   block: string;
   number: string;
   headOfFamily: string; // Nama Kepala Keluarga
+  gender?: 'Laki-laki' | 'Perempuan';
+  birthDate?: string;
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
   residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan including Kost
@@ -36,6 +38,7 @@ export interface House {
   
   education?: string;
   jobCategory?: string;
+  religion?: string;
   vehicleCount?: number;
   
   // Data Demografi (Optional)
@@ -58,14 +61,18 @@ export interface House {
   familyMembers?: {
     name: string;
     nik?: string;
+    gender?: 'Laki-laki' | 'Perempuan';
     relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
     birthDate?: string;
+    job?: string;
   }[];
 }
 
 export interface ResidentRegistration {
   id: string;
   headOfFamily: string;
+  gender: 'Laki-laki' | 'Perempuan';
+  birthDate: string;
   ownerName?: string;
   block: string;
   number: string;
@@ -75,6 +82,7 @@ export interface ResidentRegistration {
   occupants: number;
   education?: string;
   jobCategory?: string;
+  religion?: string;
   vehicleCount?: number;
   pregnantCount?: number;
   babyCount?: number;
@@ -87,8 +95,10 @@ export interface ResidentRegistration {
   familyMembers?: {
     name: string;
     nik?: string;
+    gender: 'Laki-laki' | 'Perempuan';
     relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
     birthDate?: string;
+    job?: string;
   }[];
   date: string;
   approvalStatus: 'Pending' | 'Approved' | 'Rejected';
