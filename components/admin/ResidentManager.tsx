@@ -11,7 +11,7 @@ import {
 import { House, Report, Official, PdfConfig, PaymentStatus, ResidentRegistration } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF } from '../../services/pdfService';
-import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb } from '../../services/databaseService';
+import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb } from '../../services/databaseService';
 import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -47,6 +47,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<any>(null);
   const [payHouse, setPayHouse] = useState<House | null>(null);
   const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
   const [payAmount, setPayAmount] = useState('10000');
@@ -330,6 +332,24 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     e.preventDefault();
     if (!payHouse) return;
 
+    const currentMonth = new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+    
+    // Check for duplicate payment in history for the same month
+    const duplicatePayment = iuranPayments.find(p => 
+      p.houseId === payHouse.id && 
+      p.month === currentMonth &&
+      (
+        p.type === payType || 
+        p.type === 'Both' || 
+        payType === 'Both'
+      )
+    );
+
+    if (duplicatePayment) {
+      alert(`Pembayaran iuran ${duplicatePayment.type === 'Both' ? 'Air & Sampah' : duplicatePayment.type} untuk bulan ${currentMonth} sudah tercatat pada tanggal ${new Date(duplicatePayment.date).toLocaleDateString('id-ID')}.`);
+      return;
+    }
+
     const updates: any = {};
     if (payType === 'Air' || payType === 'Both') updates.paymentStatusAir = PaymentStatus.PAID;
     if (payType === 'Sampah' || payType === 'Both') updates.paymentStatusSampah = PaymentStatus.PAID;
@@ -356,6 +376,27 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     } catch (error) {
       console.error(error);
       alert('Gagal memperbarui status iuran.');
+    }
+  };
+
+  const handleUpdatePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPayment) return;
+
+    try {
+      await updateIuranPaymentInDb(editingPayment.id, {
+        amount: parseInt(payAmount),
+        type: payType,
+        date: new Date(payDate).toISOString(),
+        month: new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' })
+      });
+
+      alert('Catatan pembayaran berhasil diperbarui!');
+      setIsEditPaymentModalOpen(false);
+      setEditingPayment(null);
+    } catch (error) {
+      console.error(error);
+      alert('Gagal memperbarui catatan pembayaran.');
     }
   };
 
@@ -681,6 +722,60 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       </AnimatePresence>
 
       <AnimatePresence>
+        {isEditPaymentModalOpen && editingPayment && (
+          <Modal isOpen={isEditPaymentModalOpen} onClose={() => setIsEditPaymentModalOpen(false)} title={`Edit Catatan Iuran: ${editingPayment.headOfFamily}`}>
+            <form onSubmit={handleUpdatePayment} className="space-y-4">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Rumah</p>
+                <p className="text-sm font-black text-slate-800">Blok {editingPayment.block} No. {editingPayment.number}</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Jenis Iuran</label>
+                <select 
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                  value={payType}
+                  onChange={e => setPayType(e.target.value as any)}
+                >
+                  <option value="Both">Iuran Sampah & Air</option>
+                  <option value="Sampah">Iuran Sampah Saja</option>
+                  <option value="Air">Iuran Air Saja</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Nominal Pembayaran (Rp)</label>
+                <input 
+                  type="number"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                  value={payAmount}
+                  onChange={e => setPayAmount(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Tanggal Pembayaran</label>
+                <input 
+                  type="date"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                  value={payDate}
+                  onChange={e => setPayDate(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="pt-4">
+                <Button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
+                  Simpan Perubahan
+                </Button>
+              </div>
+            </form>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {selectedHouseForBills && (
           <BillDetailModal 
             house={selectedHouseForBills} 
@@ -891,16 +986,32 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         </td>
                         <td className="p-4 text-right font-black text-slate-800">Rp {payment.amount.toLocaleString()}</td>
                         <td className="p-4 text-center">
-                          <button 
-                            onClick={() => {
-                              if(window.confirm('Hapus catatan pembayaran ini?')) {
-                                deleteIuranPaymentFromDb(payment.id);
-                              }
-                            }}
-                            className="p-2 text-slate-300 hover:text-rose-600 transition-colors"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          <div className="flex items-center justify-center gap-2">
+                            <button 
+                              onClick={() => {
+                                setEditingPayment(payment);
+                                setPayType(payment.type);
+                                setPayAmount(payment.amount.toString());
+                                setPayDate(new Date(payment.date).toISOString().split('T')[0]);
+                                setIsEditPaymentModalOpen(true);
+                              }}
+                              className="p-2 text-slate-300 hover:text-indigo-600 transition-colors"
+                              title="Edit Catatan"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                if(window.confirm('Hapus catatan pembayaran ini?')) {
+                                  deleteIuranPaymentFromDb(payment.id);
+                                }
+                              }}
+                              className="p-2 text-slate-300 hover:text-rose-600 transition-colors"
+                              title="Hapus Catatan"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -1112,6 +1223,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                               {house.paymentStatusAir === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
                               {house.paymentStatusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
                             </span>
+                          </td>
+                          <td className="p-4 text-slate-500 font-mono text-xs">
+                            {house.paymentDate ? new Date(house.paymentDate).toLocaleDateString('id-ID') : '-'}
                           </td>
                           <td className="p-4 text-right">
                             <div className="flex justify-end gap-2">

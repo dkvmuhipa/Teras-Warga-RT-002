@@ -626,6 +626,14 @@ export const deleteIuranPaymentFromDb = async (id: string) => {
     }
 };
 
+export const updateIuranPaymentInDb = async (id: string, updates: any) => {
+    try {
+        await updateDoc(doc(db, IURAN_PAYMENTS_COL, id), deepSanitize(updates));
+    } catch (e) {
+        console.error("Error updating iuran payment:", e);
+    }
+};
+
 // --- RESIDENT REGISTRATIONS ---
 export const addResidentRegistrationToDb = async (registration: any) => {
     try {
