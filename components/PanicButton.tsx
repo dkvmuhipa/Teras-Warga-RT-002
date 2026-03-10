@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertTriangle, X, ShieldAlert, Volume2, VolumeX, MapPin } from 'lucide-react';
+import { AlertTriangle, X, ShieldAlert, Volume2, VolumeX, MapPin, CheckCircle } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { motion, AnimatePresence } from 'motion/react';
 
 export function PanicButton() {
-  const [alert, setAlert] = useState<{ message: string; sender: string; timestamp: string } | string | null>(null);
+  const [alert, setAlert] = useState<{ message: string; sender: string; timestamp: string; location?: { lat: number; lng: number } } | string | null>(null);
   const [isHolding, setIsHolding] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [isSent, setIsSent] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -73,16 +74,41 @@ export function PanicButton() {
   };
 
   const triggerPanic = () => {
+    // Try to get location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          sendPanicSignal({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          sendPanicSignal();
+        },
+        { timeout: 5000 }
+      );
+    } else {
+      sendPanicSignal();
+    }
+  };
+
+  const sendPanicSignal = (location?: { lat: number; lng: number }) => {
     socketRef.current?.emit('emergency:triggered', {
-      message: 'DARURAT! Bantuan dibutuhkan segera di lokasi ini!',
+      message: 'DARURAT! Bantuan dibutuhkan segera! Sinyal dikirim dari perangkat warga.',
       sender: 'Warga RT 002',
       timestamp: new Date().toISOString(),
+      location
     });
     
     // Vibrate if mobile
     if (navigator.vibrate) {
-      navigator.vibrate([500, 200, 500]);
+      navigator.vibrate([500, 200, 500, 200, 500]);
     }
+
+    // Show confirmation to sender
+    setIsSent(true);
+    setTimeout(() => setIsSent(false), 5000);
   };
 
   const closeAlert = () => {
@@ -103,6 +129,16 @@ export function PanicButton() {
               className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-2 shadow-xl border border-white/10"
             >
               Tahan 2 Detik...
+            </motion.div>
+          )}
+          {isSent && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-2 shadow-xl border border-emerald-400/20"
+            >
+              Sinyal Terkirim!
             </motion.div>
           )}
         </AnimatePresence>
@@ -143,13 +179,14 @@ export function PanicButton() {
             relative bg-rose-600 text-white p-4 md:p-5 rounded-full shadow-2xl 
             transition-all duration-300 flex items-center justify-center border-4 border-white/20
             ${isHolding ? 'scale-90 bg-rose-700' : 'hover:scale-110 hover:bg-rose-700'}
+            ${isSent ? 'bg-emerald-600 border-emerald-400/50' : ''}
           `}>
-            <div className={`absolute inset-0 bg-rose-600 rounded-full animate-ping opacity-20 ${isHolding ? 'hidden' : ''}`}></div>
-            <AlertTriangle size={28} className="relative z-10" />
+            <div className={`absolute inset-0 bg-rose-600 rounded-full animate-ping opacity-20 ${isHolding || isSent ? 'hidden' : ''}`}></div>
+            {isSent ? <CheckCircle size={28} className="relative z-10" /> : <AlertTriangle size={28} className="relative z-10" />}
           </div>
           
           <span className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl border border-white/10">
-            Panic Button
+            {isSent ? 'Sinyal Terkirim' : 'Panic Button'}
           </span>
         </button>
       </div>
@@ -191,7 +228,7 @@ export function PanicButton() {
                     <div className="p-2 bg-rose-100 text-rose-600 rounded-xl">
                       <AlertTriangle size={24} />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Pesan</p>
                       <p className="text-lg font-bold text-slate-800 leading-tight">
                         {typeof alert === 'string' ? alert : alert.message || 'Peringatan Darurat!'}
@@ -215,6 +252,27 @@ export function PanicButton() {
                       </p>
                     </div>
                   </div>
+
+                  {typeof alert === 'object' && alert.location && (
+                    <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                        <MapPin size={12} /> Lokasi Terdeteksi
+                      </p>
+                      <a 
+                        href={`https://www.google.com/maps?q=${alert.location.lat},${alert.location.lng}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-between group"
+                      >
+                        <span className="text-sm font-bold text-indigo-900 underline decoration-indigo-200 underline-offset-4">
+                          Buka di Google Maps
+                        </span>
+                        <div className="p-2 bg-white text-indigo-600 rounded-lg shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                          <MapPin size={16} />
+                        </div>
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3">
