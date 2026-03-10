@@ -9,6 +9,7 @@ interface HouseMapProps {
   reports?: Report[];
   officials?: Official[];
   mapPoints?: MapPoint[];
+  iuranPayments?: any[];
   onEditHouse?: (house: House) => void;
   onPayDues?: (house: House) => void;
   onReportHouse?: (house: House) => void;
@@ -20,12 +21,23 @@ interface HouseDetailModalProps {
     reports: Report[];
     isAdmin: boolean;
     officials?: Official[];
+    iuranPayments?: any[];
     onEditHouse?: (house: House) => void;
     onPayDues?: (house: House) => void;
     onReportHouse?: (house: House) => void;
 }
 
 // --- Helper Functions ---
+const getDynamicPaymentStatus = (houseId: string, type: 'Air' | 'Sampah', iuranPayments: any[] = []) => {
+    const currentMonth = new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+    const payment = iuranPayments.find(p => 
+        p.houseId === houseId && 
+        p.month === currentMonth && 
+        (p.type === type || p.type === 'Both')
+    );
+    return payment ? PaymentStatus.PAID : PaymentStatus.PENDING;
+};
+
 const shortenName = (fullName: string) => {
     const parts = fullName.trim().split(' ');
     if (parts.length <= 1) return fullName;
@@ -75,6 +87,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     reports, 
     isAdmin, 
     officials,
+    iuranPayments,
     onEditHouse, 
     onPayDues, 
     onReportHouse 
@@ -83,6 +96,9 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     const isSafe = activeReports.length === 0;
     const officialData = officials?.find(o => o.houseId === house.id);
     const displayName = shortenName(house.headOfFamily);
+
+    const statusAir = getDynamicPaymentStatus(house.id, 'Air', iuranPayments);
+    const statusSampah = getDynamicPaymentStatus(house.id, 'Sampah', iuranPayments);
     
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -129,8 +145,8 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                         <div className="space-y-3">
                             <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">Status Pembayaran Iuran</h4>
                             <div className="grid grid-cols-2 gap-2">
-                                <StatusBadge label="OP Air" status={house.paymentStatusAir || PaymentStatus.UNPAID} icon={Droplets} />
-                                <StatusBadge label="Sampah" status={house.paymentStatusSampah || PaymentStatus.UNPAID} icon={Trash2} />
+                                <StatusBadge label="OP Air" status={statusAir} icon={Droplets} />
+                                <StatusBadge label="Sampah" status={statusSampah} icon={Trash2} />
                             </div>
                         </div>
 
@@ -234,11 +250,16 @@ interface HouseCardProps {
     hasIssue: boolean;
     officialRole?: string;
     isAdmin: boolean;
+    iuranPayments?: any[];
     onClick: () => void;
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, onClick }) => {
+const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, onClick }) => {
     const formattedRole = officialRole ? formatRole(officialRole) : null;
+    
+    const statusAir = getDynamicPaymentStatus(house.id, 'Air', iuranPayments);
+    const statusSampah = getDynamicPaymentStatus(house.id, 'Sampah', iuranPayments);
+
     const getHouseColor = () => {
         if (hasIssue) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
         if (officialRole) return "bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 border-amber-400 text-white shadow-lg shadow-indigo-500/40 z-10 ring-2 ring-amber-300";
@@ -285,7 +306,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
             </div>
             {isAdmin && !officialRole && (
                 <div className="absolute top-1 right-1 flex flex-col gap-0.5">
-                    {(house.paymentStatusAir === PaymentStatus.UNPAID || house.paymentStatusSampah === PaymentStatus.UNPAID) && (
+                    {(statusAir === PaymentStatus.PENDING || statusSampah === PaymentStatus.PENDING) && (
                         <div className="w-2 h-2 rounded-full border border-white shadow-sm bg-rose-500 animate-pulse"></div>
                     )}
                 </div>
@@ -296,10 +317,10 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
 };
 
 interface BlockRendererProps {
-    blockCode: string; houses: House[]; reports: Report[]; officials: Official[]; isAdmin: boolean; onSelect: (h: House) => void; className?: string;
+    blockCode: string; houses: House[]; reports: Report[]; officials: Official[]; isAdmin: boolean; iuranPayments?: any[]; onSelect: (h: House) => void; className?: string;
 }
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, onSelect, className }) => {
+const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, onSelect, className }) => {
     const sortByNumber = (a: House, b: House) => parseInt(a.number, 10) - parseInt(b.number, 10);
     const sortByNumberDesc = (a: House, b: House) => parseInt(b.number, 10) - parseInt(a.number, 10);
     const sortedHouses = [...houses].sort(sortByNumber);
@@ -317,10 +338,10 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                  <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-300 z-0"></div>
                  <div className="flex gap-4 relative z-10 h-full">
                     <div className="flex-1 flex flex-col gap-2">
-                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} onClick={() => onSelect(house)} />))}
+                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} onClick={() => onSelect(house)} />))}
                     </div>
                      <div className="flex-1 flex flex-col gap-2">
-                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} onClick={() => onSelect(house)} />))}
+                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} onClick={() => onSelect(house)} />))}
                     </div>
                 </div>
             </div>
@@ -328,7 +349,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     );
 };
 
-export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], mapPoints = [], onEditHouse, onPayDues, onReportHouse }) => {
+export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], mapPoints = [], iuranPayments = [], onEditHouse, onPayDues, onReportHouse }) => {
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [showCheckpoints, setShowCheckpoints] = useState(false);
@@ -403,10 +424,10 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                     className={`border-[6px] border-dashed border-amber-400 bg-amber-50/50 p-6 rounded-3xl relative ${isManageMode ? 'cursor-crosshair' : ''}`}
                    >
                        <div className="grid grid-cols-4 gap-6">
-                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C5" houses={getBlockHouses('C5')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
-                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C7" houses={getBlockHouses('C7')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C8" houses={getBlockHouses('C8')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
-                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C9" houses={getBlockHouses('C9')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C10" houses={getBlockHouses('C10')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
-                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C11" houses={getBlockHouses('C11')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C12" houses={getBlockHouses('C12')} reports={reports} officials={officials} isAdmin={isAdmin} onSelect={setSelectedHouse} /></div>
+                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C5" houses={getBlockHouses('C5')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /></div>
+                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C7" houses={getBlockHouses('C7')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C8" houses={getBlockHouses('C8')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /></div>
+                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C9" houses={getBlockHouses('C9')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C10" houses={getBlockHouses('C10')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /></div>
+                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C11" houses={getBlockHouses('C11')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C12" houses={getBlockHouses('C12')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /></div>
                        </div>
                        
                        {/* Checkpoints Overlay */}
@@ -457,7 +478,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                </div>
           </div>
       </div>
-      {selectedHouse && (<HouseDetailModal house={selectedHouse} onClose={() => setSelectedHouse(null)} reports={reports} isAdmin={isAdmin} officials={officials} onEditHouse={onEditHouse} onPayDues={onPayDues} onReportHouse={onReportHouse} />)}
+      {selectedHouse && (<HouseDetailModal house={selectedHouse} onClose={() => setSelectedHouse(null)} reports={reports} isAdmin={isAdmin} officials={officials} iuranPayments={iuranPayments} onEditHouse={onEditHouse} onPayDues={onPayDues} onReportHouse={onReportHouse} />)}
     </div>
   );
 };

@@ -1042,7 +1042,7 @@ export const App = () => {
                         <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
                         <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
                         <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
-                        <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} />} />
+                        <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
                         <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={MOCK_FAQ} activePatrol={activePatrol} />} />
                     </Routes>
                     <ChatBot announcements={announcements} ronda={ronda} officials={officials} />

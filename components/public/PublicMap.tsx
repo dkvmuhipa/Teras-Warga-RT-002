@@ -7,9 +7,10 @@ interface PublicMapProps {
   reports: Report[];
   officials: Official[];
   mapPoints: MapPoint[];
+  iuranPayments?: any[];
 }
 
-export const PublicMap: React.FC<PublicMapProps> = ({ houses, reports, officials, mapPoints }) => {
+export const PublicMap: React.FC<PublicMapProps> = ({ houses, reports, officials, mapPoints, iuranPayments }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 mb-24">
       <h2 className="text-2xl font-black text-slate-800 mb-6">Peta Wilayah RT 002</h2>
@@ -19,6 +20,7 @@ export const PublicMap: React.FC<PublicMapProps> = ({ houses, reports, officials
         reports={reports} 
         officials={officials} 
         mapPoints={mapPoints}
+        iuranPayments={iuranPayments}
       />
     </div>
   );

@@ -49,7 +49,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' }));
   const [payHouse, setPayHouse] = useState<House | null>(null);
+
+  const getPaymentStatus = (houseId: string, type: 'Air' | 'Sampah') => {
+    const payment = iuranPayments.find(p => 
+      p.houseId === houseId && 
+      p.month === selectedMonth && 
+      (p.type === type || p.type === 'Both')
+    );
+    return payment ? PaymentStatus.PAID : PaymentStatus.PENDING;
+  };
   const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
   const [payAmount, setPayAmount] = useState('10000');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
@@ -364,7 +374,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         headOfFamily: payHouse.headOfFamily,
         block: payHouse.block,
         number: payHouse.number,
-        amount: parseInt(payAmount),
+        amount: parseInt(payAmount) || 0,
         type: payType,
         date: new Date(payDate).toISOString(),
         month: new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' })
@@ -385,7 +395,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
     try {
       await updateIuranPaymentInDb(editingPayment.id, {
-        amount: parseInt(payAmount),
+        amount: parseInt(payAmount) || 0,
         type: payType,
         date: new Date(payDate).toISOString(),
         month: new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' })
@@ -467,13 +477,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     const matchesSearch = h.headOfFamily.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           h.block.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const houseBills = bills.filter(b => b.houseId === h.id);
-    const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
-    const paymentStatus = isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING;
+    const statusSampah = getPaymentStatus(h.id, 'Sampah');
+    const statusAir = getPaymentStatus(h.id, 'Air');
+    const isDuesPaid = statusSampah === PaymentStatus.PAID && statusAir === PaymentStatus.PAID;
 
     let matchesStatus = true;
-    if (filterStatus === 'paid') matchesStatus = paymentStatus === PaymentStatus.PAID;
-    else if (filterStatus === 'unpaid') matchesStatus = paymentStatus === PaymentStatus.PENDING;
+    if (filterStatus === 'paid') matchesStatus = isDuesPaid;
+    else if (filterStatus === 'unpaid') matchesStatus = !isDuesPaid;
     else if (filterStatus === 'occupied') matchesStatus = h.status?.toLowerCase() === 'occupied';
     else if (filterStatus === 'empty') matchesStatus = h.status?.toLowerCase() === 'empty';
     else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business';
@@ -636,6 +646,23 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
+        <div className="flex gap-2">
+          <div className="flex items-center gap-2 px-3 bg-slate-50 border border-slate-200 rounded-xl">
+            <Calendar size={16} className="text-slate-400" />
+            <select 
+              className="bg-transparent py-3 text-sm font-bold outline-none" 
+              value={selectedMonth} 
+              onChange={e => setSelectedMonth(e.target.value)}
+            >
+              {Array.from({ length: 12 }).map((_, i) => {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                const m = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                return <option key={m} value={m}>{m}</option>;
+              })}
+            </select>
+          </div>
+        </div>
         <select className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)}>
             <option value="all">Semua Status</option>
             <option value="paid">Lunas</option>
@@ -894,6 +921,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       onDelete={handleDelete}
                       onOpenBills={setSelectedHouseForBills}
                       onOpenPay={openPayModal}
+                      dynamicStatusAir={getPaymentStatus(house.id, 'Air')}
+                      dynamicStatusSampah={getPaymentStatus(house.id, 'Sampah')}
                     />
                   ))}
                 </div>
@@ -1190,13 +1219,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       const houseBills = bills.filter(b => b.houseId === house.id);
                       const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
                       const paymentStatus = isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING;
+                      
+                      const statusSampah = getPaymentStatus(house.id, 'Sampah');
+                      const statusAir = getPaymentStatus(house.id, 'Air');
+
                       return (
                         <tr key={house.id} className="border-t border-slate-100">
                           <td className="p-4"><input type="checkbox" checked={selectedIds.has(house.id)} onChange={() => handleSelectOne(house.id)} /></td>
                           <td className="p-4 font-bold">{house.headOfFamily}</td>
                           <td className="p-4 font-mono font-black">{house.number}</td>
                           <td className="p-4 text-slate-600">{house.phone || '-'}</td>
-                          <td className="p-4 text-slate-600">{house.occupants}</td>
+                          <td className="p-4 text-slate-600">{house.occupants || 0}</td>
                           <td className="p-4">
                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                               house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
@@ -1208,20 +1241,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           </td>
                           <td className="p-4">
                             <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${
-                              house.paymentStatusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                              statusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                               'bg-rose-50 text-rose-600 border-rose-100'
                             }`}>
-                              {house.paymentStatusSampah === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
-                              {house.paymentStatusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                              {statusSampah === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
+                              {statusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
                             </span>
                           </td>
                           <td className="p-4">
                             <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${
-                              house.paymentStatusAir === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                              statusAir === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                               'bg-rose-50 text-rose-600 border-rose-100'
                             }`}>
-                              {house.paymentStatusAir === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
-                              {house.paymentStatusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                              {statusAir === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
+                              {statusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
                             </span>
                           </td>
                           <td className="p-4 text-slate-500 font-mono text-xs">
@@ -1249,6 +1282,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               isAdmin={true} 
               reports={reports} 
               officials={officials}
+              iuranPayments={iuranPayments}
               onEditHouse={(h) => openDetail(h)}
             />
           </div>
@@ -1580,7 +1614,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Penghuni</label>
-                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.occupants} onChange={e => setFormData({...formData, occupants: parseInt(e.target.value)})} min={1} />
+                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.occupants} onChange={e => setFormData({...formData, occupants: parseInt(e.target.value) || 0})} min={1} />
               </div>
             </div>
           </div>
@@ -1618,7 +1652,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Kendaraan</label>
-                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.vehicleCount} onChange={e => setFormData({...formData, vehicleCount: parseInt(e.target.value)})} min={0} />
+                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.vehicleCount} onChange={e => setFormData({...formData, vehicleCount: parseInt(e.target.value) || 0})} min={0} />
               </div>
             </div>
             

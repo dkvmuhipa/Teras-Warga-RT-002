@@ -11,14 +11,20 @@ interface ResidentCardProps {
   onDelete: (id: string) => void;
   onOpenBills: (house: House) => void;
   onOpenPay: (house: House) => void;
+  dynamicStatusAir?: PaymentStatus;
+  dynamicStatusSampah?: PaymentStatus;
 }
 
 export const ResidentCard: React.FC<ResidentCardProps> = ({ 
-  house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills, onOpenPay 
+  house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills, onOpenPay,
+  dynamicStatusAir, dynamicStatusSampah
 }) => {
   const houseBills = bills.filter(b => b.houseId === house.id);
   const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
   const paymentStatus = isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING;
+
+  const statusAir = dynamicStatusAir || house.paymentStatusAir;
+  const statusSampah = dynamicStatusSampah || house.paymentStatusSampah;
 
   return (
     <motion.div 
@@ -65,19 +71,19 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
         )}
 
         <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-          house.paymentStatusAir === PaymentStatus.PAID ? 'bg-blue-50 text-blue-600 border-blue-100' : 
+          statusAir === PaymentStatus.PAID ? 'bg-blue-50 text-blue-600 border-blue-100' : 
           'bg-rose-50 text-rose-600 border-rose-100'
         }`}>
-          {house.paymentStatusAir === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
-          Air: {house.paymentStatusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+          {statusAir === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
+          Air: {statusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
         </span>
 
         <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-          house.paymentStatusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+          statusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
           'bg-rose-50 text-rose-600 border-rose-100'
         }`}>
-          {house.paymentStatusSampah === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
-          Sampah: {house.paymentStatusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+          {statusSampah === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
+          Sampah: {statusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
         </span>
 
         {((house.pregnantCount || 0) > 0 || (house.babyCount || 0) > 0 || (house.toddlerCount || 0) > 0 || (house.elderlyCount || 0) > 0 || (house.widowCount || 0) > 0) && (
