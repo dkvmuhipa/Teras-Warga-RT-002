@@ -15,7 +15,6 @@ import { FacilityManager } from './FacilityManager';
 import { ServiceManager } from './ServiceManager';
 import { Settings } from './Settings';
 import { OfficialManagement } from './OfficialManagement';
-import { NotificationManager } from './NotificationManager';
 import { DocumentManager } from './DocumentManager';
 import { BillManager } from './BillManager';
 import { PopulationReportManager } from './PopulationReportManager';
