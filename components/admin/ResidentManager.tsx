@@ -700,6 +700,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Rumah</p>
                 <p className="text-sm font-black text-slate-800">Blok {payHouse.block} No. {payHouse.number}</p>
+                <div className="mt-3 pt-3 border-t border-slate-200">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Periode Iuran</p>
+                  <p className="text-sm font-black text-indigo-600">
+                    {new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
                 <p className="text-[10px] text-amber-600 font-bold mt-2 italic">* Pencatatan status iuran saja (Dana disetor ke OP Air/TPS3R)</p>
               </div>
 
