@@ -50,6 +50,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [payHouse, setPayHouse] = useState<House | null>(null);
   const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
   const [payAmount, setPayAmount] = useState('10000');
+  const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     if (payType === 'Both') setPayAmount('20000');
@@ -332,6 +333,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     const updates: any = {};
     if (payType === 'Air' || payType === 'Both') updates.paymentStatusAir = PaymentStatus.PAID;
     if (payType === 'Sampah' || payType === 'Both') updates.paymentStatusSampah = PaymentStatus.PAID;
+    updates.paymentDate = payDate;
 
     try {
       await updateHouseData(payHouse.id, updates);
@@ -344,8 +346,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         number: payHouse.number,
         amount: parseInt(payAmount),
         type: payType,
-        date: new Date().toISOString(),
-        month: new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' })
+        date: new Date(payDate).toISOString(),
+        month: new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' })
       });
 
       alert('Status iuran berhasil diperbarui dan dicatat!');
@@ -653,6 +655,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
                   value={payAmount}
                   onChange={e => setPayAmount(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Tanggal Pembayaran</label>
+                <input 
+                  type="date"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                  value={payDate}
+                  onChange={e => setPayDate(e.target.value)}
                   required
                 />
               </div>
@@ -1057,6 +1070,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <th className="p-4 text-left font-black text-slate-600">Status</th>
                       <th className="p-4 text-left font-black text-slate-600">Sampah</th>
                       <th className="p-4 text-left font-black text-slate-600">Air</th>
+                      <th className="p-4 text-left font-black text-slate-600">Tgl Bayar</th>
                       <th className="p-4 text-right font-black text-slate-600">Aksi</th>
                     </tr>
                   </thead>

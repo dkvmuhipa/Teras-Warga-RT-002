@@ -20,6 +20,8 @@ export interface House {
   status: 'Occupied' | 'Empty' | 'Business';
   residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan including Kost
   ownerName?: string; // NEW: Nama Pemilik Rumah (jika berbeda dengan penghuni)
+  paymentStatus?: PaymentStatus; // Status Iuran Umum
+  paymentDate?: string; // Tanggal Pembayaran Iuran
   paymentStatusAir?: PaymentStatus; // Iuran Air
   paymentStatusSampah?: PaymentStatus; // Iuran Sampah
   paymentStatusKeamanan?: PaymentStatus; // Iuran Keamanan (Opsional/Belum Ada)
