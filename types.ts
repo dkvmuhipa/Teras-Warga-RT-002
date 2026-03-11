@@ -205,6 +205,16 @@ export interface UMKM {
   description: string;
   contact: string;
   image: string;
+  address?: string;
+  houseId?: string;
+  operatingHours?: string;
+  gallery?: string[];
+  rating?: number;
+  reviewsCount?: number;
+  socialMedia?: {
+    platform: 'Instagram' | 'Facebook' | 'TikTok';
+    url: string;
+  }[];
 }
 
 export interface LetterRequest {
@@ -319,6 +329,14 @@ export interface Official {
   houseId: string;
   phone: string;
   photo?: string;
+  email?: string;
+  termStart?: string;
+  termEnd?: string;
+  duties?: string[];
+  socialMedia?: {
+    platform: 'Instagram' | 'Facebook' | 'Twitter' | 'LinkedIn';
+    url: string;
+  }[];
 }
 
 export interface PdfConfig {

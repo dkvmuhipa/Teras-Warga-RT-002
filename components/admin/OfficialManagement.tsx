@@ -20,6 +20,10 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
   const [offPhone, setOffPhone] = useState('');
   const [offHouse, setOffHouse] = useState('');
   const [offPhoto, setOffPhoto] = useState('');
+  const [offEmail, setOffEmail] = useState('');
+  const [offTermStart, setOffTermStart] = useState('');
+  const [offTermEnd, setOffTermEnd] = useState('');
+  const [offDuties, setOffDuties] = useState('');
   const [imageType, setImageType] = useState<'upload' | 'link'>('upload');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -30,6 +34,10 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     setOffPhone('');
     setOffHouse('');
     setOffPhoto('');
+    setOffEmail('');
+    setOffTermStart('');
+    setOffTermEnd('');
+    setOffDuties('');
     setImageFile(null);
     setImageType('upload');
     setEditingOfficialId(null);
@@ -42,6 +50,10 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     setOffPhone(o.phone);
     setOffHouse(o.houseId);
     setOffPhoto(o.photo || '');
+    setOffEmail(o.email || '');
+    setOffTermStart(o.termStart || '');
+    setOffTermEnd(o.termEnd || '');
+    setOffDuties(o.duties?.join('\n') || '');
     setImageType('link');
     setIsModalOpen(true);
   };
@@ -60,7 +72,11 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         role: offRole,
         phone: offPhone,
         houseId: offHouse,
-        photo: finalPhotoUrl
+        photo: finalPhotoUrl,
+        email: offEmail,
+        termStart: offTermStart,
+        termEnd: offTermEnd,
+        duties: offDuties.split('\n').filter(d => d.trim() !== '')
       };
 
       if (editingOfficialId) {
@@ -204,6 +220,28 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
           <div>
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nomor Telepon / WA</label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offPhone} onChange={e=>setOffPhone(e.target.value)} placeholder="08..." required/>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Email</label>
+            <input type="email" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offEmail} onChange={e=>setOffEmail(e.target.value)} placeholder="email@example.com"/>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Mulai Jabatan</label>
+              <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offTermStart} onChange={e=>setOffTermStart(e.target.value)}/>
+            </div>
+            <div>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Akhir Jabatan</label>
+              <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offTermEnd} onChange={e=>setOffTermEnd(e.target.value)}/>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Tugas & Tanggung Jawab</label>
+            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[100px]" value={offDuties} onChange={e=>setOffDuties(e.target.value)} placeholder="Tuliskan tugas per baris..."/>
+            <p className="text-[10px] text-slate-400 mt-1 ml-1">Pisahkan setiap tugas dengan baris baru.</p>
           </div>
           
           <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">

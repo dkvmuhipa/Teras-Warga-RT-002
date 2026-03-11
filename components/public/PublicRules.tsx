@@ -1,8 +1,10 @@
-import React from 'react';
-import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase } from 'lucide-react';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export const PublicRules: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   const rules = [
     {
       title: "Administrasi Kependudukan",
@@ -110,32 +112,57 @@ export const PublicRules: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {rules.map((rule, index) => (
-          <motion.div 
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-            className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/5 transition-all group"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:scale-110 transition-transform">
-                {rule.icon}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+        <AnimatePresence initial={false}>
+          {rules.slice(0, isExpanded ? rules.length : 4).map((rule, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.05 }}
+              className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/5 transition-all group"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:scale-110 transition-transform">
+                  {rule.icon}
+                </div>
+                <h3 className="text-lg font-black text-slate-800 leading-tight">{rule.title}</h3>
               </div>
-              <h3 className="text-lg font-black text-slate-800 leading-tight">{rule.title}</h3>
-            </div>
-            <ul className="space-y-3">
-              {rule.items.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0"></div>
-                  <span className="leading-relaxed">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        ))}
+              <ul className="space-y-3">
+                {rule.items.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0"></div>
+                    <span className="leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {!isExpanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white via-white/80 to-transparent z-10 flex items-end justify-center pb-4">
+          </div>
+        )}
+      </div>
+
+      <div className="mt-8 flex justify-center">
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-2 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95"
+        >
+          {isExpanded ? (
+            <>
+              Tampilkan Lebih Sedikit <ChevronUp size={18} />
+            </>
+          ) : (
+            <>
+              Baca Selengkapnya <ChevronDown size={18} />
+            </>
+          )}
+        </button>
       </div>
 
       <div className="mt-12 p-8 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl text-center relative overflow-hidden">

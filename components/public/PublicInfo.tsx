@@ -50,6 +50,8 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
     const [isFinanceModalOpen, setIsFinanceModalOpen] = useState(false);
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+    const [isOfficialModalOpen, setIsOfficialModalOpen] = useState(false);
+    const [selectedOfficial, setSelectedOfficial] = useState<Official | null>(null);
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
     const [checkLocation, setCheckLocation] = useState('');
     const [checkOfficer, setCheckOfficer] = useState('');
@@ -632,7 +634,11 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {sortedOfficials.map(o => (
-                        <div key={o.id} className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+                        <div 
+                            key={o.id} 
+                            onClick={() => { setSelectedOfficial(o); setIsOfficialModalOpen(true); }}
+                            className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer"
+                        >
                             <div className={`h-24 relative ${o.role.includes('Ketua') ? 'bg-gradient-to-r from-indigo-600 to-purple-600' : 'bg-slate-800'}`}>
                                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                             </div>
@@ -651,10 +657,13 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                                         <p className="text-[10px] text-slate-400 font-bold uppercase">Domisili</p>
                                         <p className="text-xs font-bold text-slate-700 flex items-center gap-1"><Home size={10}/> {o.houseId}</p>
                                     </div>
-                                    <a href={`https://wa.me/${o.phone}`} target="_blank" rel="noreferrer" className="bg-green-50 hover:bg-green-100 p-2 rounded-xl transition-colors cursor-pointer">
+                                    <div className="bg-green-50 p-2 rounded-xl">
                                         <p className="text-[10px] text-green-600 font-bold uppercase">Kontak</p>
                                         <p className="text-xs font-bold text-green-700 flex items-center gap-1"><Phone size={10}/> WhatsApp</p>
-                                    </a>
+                                    </div>
+                                </div>
+                                <div className="mt-3">
+                                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest group-hover:underline">Lihat Profil Lengkap</p>
                                 </div>
                             </div>
                         </div>
@@ -662,6 +671,87 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 </div>
             </motion.div>
         
+            <Modal isOpen={isOfficialModalOpen} onClose={() => setIsOfficialModalOpen(false)} title="Profil Pengurus RT">
+                {selectedOfficial && (
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-5 p-4 bg-slate-50 rounded-3xl border border-slate-100">
+                            <img 
+                                src={selectedOfficial.photo || `https://ui-avatars.com/api/?name=${selectedOfficial.name}&background=random&size=128`} 
+                                className="w-20 h-20 rounded-2xl object-cover shadow-md border-2 border-white" 
+                                alt={selectedOfficial.name}
+                            />
+                            <div>
+                                <h3 className="text-xl font-black text-slate-800">{selectedOfficial.name}</h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest rounded-full">
+                                        {selectedOfficial.role}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-slate-400">Blok {selectedOfficial.houseId}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Kontak Personil</p>
+                                <div className="space-y-3">
+                                    <a href={`https://wa.me/${selectedOfficial.phone}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+                                        <div className="p-2 bg-emerald-50 rounded-lg"><Phone size={14}/></div>
+                                        {selectedOfficial.phone}
+                                    </a>
+                                    {selectedOfficial.email && (
+                                        <a href={`mailto:${selectedOfficial.email}`} className="flex items-center gap-3 text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+                                            <div className="p-2 bg-indigo-50 rounded-lg"><MessageSquare size={14}/></div>
+                                            {selectedOfficial.email}
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Masa Jabatan</p>
+                                <div className="flex items-center gap-3 text-sm font-bold text-slate-700">
+                                    <div className="p-2 bg-slate-50 rounded-lg text-slate-400"><Calendar size={14}/></div>
+                                    {selectedOfficial.termStart ? new Date(selectedOfficial.termStart).getFullYear() : '2023'} - {selectedOfficial.termEnd ? new Date(selectedOfficial.termEnd).getFullYear() : '2026'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {selectedOfficial.duties && selectedOfficial.duties.length > 0 && (
+                            <div className="p-5 bg-indigo-600 rounded-[2rem] text-white shadow-xl shadow-indigo-100 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-6 opacity-10"><Target size={80}/></div>
+                                <div className="relative z-10">
+                                    <h4 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <Lightbulb size={14} /> Tugas & Tanggung Jawab
+                                    </h4>
+                                    <ul className="space-y-3">
+                                        {selectedOfficial.duties.map((duty, idx) => (
+                                            <li key={idx} className="flex items-start gap-3 text-sm font-medium text-indigo-50">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-300 mt-1.5 shrink-0" />
+                                                {duty}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
+                            <Button onClick={() => setIsOfficialModalOpen(false)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-none shadow-none">
+                                Tutup
+                            </Button>
+                            <a 
+                                href={`https://wa.me/${selectedOfficial.phone}`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="flex-[2] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
+                            >
+                                <Phone size={18} /> Hubungi via WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                )}
+            </Modal>
+
             <Modal isOpen={isCheckModalOpen} onClose={() => setIsCheckModalOpen(false)} title="Laporan Patroli Digital">
                 <div className="space-y-4">
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">

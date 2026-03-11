@@ -16,13 +16,45 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
   const [editingUmkmId, setEditingUmkmId] = useState<string | null>(null);
   
   // Form State
-  const [umkmForm, setUmkmForm] = useState({ name: '', owner: '', category: 'Kuliner', contact: '', image: '', description: '' });
+  const [umkmForm, setUmkmForm] = useState({ 
+    name: '', 
+    owner: '', 
+    category: 'Kuliner', 
+    contact: '', 
+    image: '', 
+    description: '',
+    houseId: '',
+    address: '',
+    operatingHours: '',
+    rating: 0,
+    gallery: [] as string[],
+    socialMedia: [] as { platform: 'Instagram' | 'Facebook' | 'TikTok', url: string }[]
+  });
   const [imageType, setImageType] = useState<'upload' | 'link'>('upload');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [galleryInput, setGalleryInput] = useState('');
+  const [igUrl, setIgUrl] = useState('');
+  const [ttUrl, setTtUrl] = useState('');
 
   const resetForms = () => {
-    setUmkmForm({ name: '', owner: '', category: 'Kuliner', contact: '', image: '', description: '' });
+    setUmkmForm({ 
+      name: '', 
+      owner: '', 
+      category: 'Kuliner', 
+      contact: '', 
+      image: '', 
+      description: '',
+      houseId: '',
+      address: '',
+      operatingHours: '',
+      rating: 0,
+      gallery: [],
+      socialMedia: []
+    });
+    setGalleryInput('');
+    setIgUrl('');
+    setTtUrl('');
     setImageFile(null);
     setImageType('upload');
     setEditingUmkmId(null);
@@ -36,8 +68,17 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
       category: u.category,
       contact: u.contact,
       image: u.image || '',
-      description: u.description || ''
+      description: u.description || '',
+      houseId: u.houseId || '',
+      address: u.address || '',
+      operatingHours: u.operatingHours || '',
+      rating: u.rating || 0,
+      gallery: u.gallery || [],
+      socialMedia: u.socialMedia || []
     });
+    setGalleryInput(u.gallery?.join(', ') || '');
+    setIgUrl(u.socialMedia?.find(s => s.platform === 'Instagram')?.url || '');
+    setTtUrl(u.socialMedia?.find(s => s.platform === 'TikTok')?.url || '');
     setImageType('link');
     setIsModalOpen(true);
   };
@@ -51,7 +92,16 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
         finalImageUrl = await uploadImageToStorage(imageFile, `umkm/${Date.now()}_${imageFile.name}`);
       }
 
-      const data = { ...umkmForm, image: finalImageUrl };
+      const socialMedia = [];
+      if (igUrl) socialMedia.push({ platform: 'Instagram' as const, url: igUrl });
+      if (ttUrl) socialMedia.push({ platform: 'TikTok' as const, url: ttUrl });
+
+      const data = { 
+        ...umkmForm, 
+        image: finalImageUrl,
+        gallery: galleryInput.split(',').map(s => s.trim()).filter(s => s !== ''),
+        socialMedia
+      };
 
       if (editingUmkmId) {
         await updateUMKMInDb(editingUmkmId, data);
@@ -225,6 +275,33 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
           <div>
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kontak (WhatsApp)</label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.contact} onChange={e=>setUmkmForm({...umkmForm, contact: e.target.value})} placeholder="08..." required/>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Blok Rumah</label>
+              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.houseId} onChange={e=>setUmkmForm({...umkmForm, houseId: e.target.value})} placeholder="Contoh: A-12"/>
+            </div>
+            <div>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Jam Operasional</label>
+              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.operatingHours} onChange={e=>setUmkmForm({...umkmForm, operatingHours: e.target.value})} placeholder="Contoh: 08:00 - 21:00"/>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Instagram URL</label>
+              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={igUrl} onChange={e=>setIgUrl(e.target.value)} placeholder="https://instagram.com/..."/>
+            </div>
+            <div>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">TikTok URL</label>
+              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={ttUrl} onChange={e=>setTtUrl(e.target.value)} placeholder="https://tiktok.com/..."/>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Galeri Foto (Link, pisahkan dengan koma)</label>
+            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[60px]" rows={2} value={galleryInput} onChange={e=>setGalleryInput(e.target.value)} placeholder="https://link1.com, https://link2.com..."/>
           </div>
           
           <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
