@@ -481,3 +481,40 @@ export interface PopulationReport {
   
   createdAt: string;
 }
+
+// Digital Guest Book & Presensi Kegiatan
+export interface Activity {
+  id: string;
+  title: string;
+  description: string;
+  date: string; // ISO String
+  location: string;
+  type: 'Rapat' | 'Kerja Bakti' | 'Arisan' | 'Posyandu' | 'Lainnya';
+  qrCode: string; // Activity ID or unique string
+  status: 'Upcoming' | 'Ongoing' | 'Completed';
+}
+
+export interface Attendance {
+  id: string;
+  activityId: string;
+  residentName: string;
+  houseId: string;
+  timestamp: string; // ISO String
+  note?: string;
+}
+
+// Monitoring Kesehatan / Posyandu Digital
+export interface HealthRecord {
+  id: string;
+  residentName: string;
+  houseId: string;
+  category: 'Bayi' | 'Balita' | 'Ibu Hamil' | 'Lansia';
+  date: string; // ISO String
+  weight?: number; // kg
+  height?: number; // cm
+  bloodPressure?: string; // e.g., "120/80"
+  heartRate?: number; // bpm
+  temperature?: number; // Celsius
+  notes?: string;
+  officerName: string; // Who recorded the data
+}

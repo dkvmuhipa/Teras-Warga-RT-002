@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare } from 'lucide-react';
+import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint } from '../../types';
 import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints } from '../../services/databaseService';
@@ -325,6 +325,38 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
             {/* Rules Section */}
             <motion.div variants={itemVariants}>
                 <PublicRules />
+            </motion.div>
+
+            {/* Digital Services Section */}
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Link to="/kegiatan" className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <Calendar size={120} />
+                    </div>
+                    <div className="relative z-10 flex items-center gap-6">
+                        <div className="p-4 bg-indigo-50 text-indigo-600 rounded-3xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            <CheckCircle2 size={32} />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-slate-800 mb-1">Presensi Kegiatan</h3>
+                            <p className="text-slate-500 text-sm font-medium">Digital Guest Book & Absensi QR Code untuk setiap kegiatan warga.</p>
+                        </div>
+                    </div>
+                </Link>
+                <Link to="/kesehatan" className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <Heart size={120} />
+                    </div>
+                    <div className="relative z-10 flex items-center gap-6">
+                        <div className="p-4 bg-rose-50 text-rose-600 rounded-3xl group-hover:bg-rose-600 group-hover:text-white transition-colors">
+                            <Baby size={32} />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-slate-800 mb-1">Posyandu Digital</h3>
+                            <p className="text-slate-500 text-sm font-medium">Monitoring kesehatan Balita, Ibu Hamil, dan Lansia secara digital.</p>
+                        </div>
+                    </div>
+                </Link>
             </motion.div>
 
             {/* Gallery */}

@@ -20,6 +20,8 @@ import { PopulationReportManager } from './PopulationReportManager';
 import { EventManager } from './EventManager';
 import { AssetManager } from './AssetManager';
 import { GuestManager } from './GuestManager';
+import { ActivityManagement } from './ActivityManagement';
+import { HealthManagement } from './HealthManagement';
 import { DemographicAnalytics } from './DemographicAnalytics';
 import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
@@ -105,6 +107,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <NotificationCombined notifications={notifications} />;
       case 'documents':
         return <DocumentManager documents={documents} />;
+      case 'activities':
+        return <ActivityManagement houses={houses} />;
+      case 'health':
+        return <HealthManagement houses={houses} />;
       case 'population-reports':
         return <PopulationReportManager reports={populationReports} onAddReport={(r) => setPopulationReports([...populationReports, { ...r, id: Date.now().toString(), createdAt: new Date().toISOString() }])} onDeleteReport={(id) => setPopulationReports(populationReports.filter(r => r.id !== id))} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} houses={houses} />;
       case 'settings':

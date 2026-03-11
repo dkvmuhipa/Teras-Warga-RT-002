@@ -40,6 +40,8 @@ import { PublicUMKM } from './components/public/PublicUMKM';
 import { PublicInfo } from './components/public/PublicInfo';
 import { PublicMap } from './components/public/PublicMap';
 import { PublicDocuments } from './components/public/PublicDocuments';
+import { PublicActivity } from './components/public/PublicActivity';
+import { PublicHealth } from './components/public/PublicHealth';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -1184,6 +1186,8 @@ export const App = () => {
                             <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
                             <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
                             <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={MOCK_FAQ} activePatrol={activePatrol} />} />
+                            <Route path="/kegiatan" element={<PublicActivity />} />
+                            <Route path="/kesehatan" element={<PublicHealth />} />
                         </Routes>
                     </div>
                     <ChatBot announcements={announcements} ronda={ronda} officials={officials} />

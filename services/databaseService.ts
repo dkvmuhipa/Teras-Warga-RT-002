@@ -60,6 +60,9 @@ const RESIDENT_REGISTRATIONS_COL = "residentRegistrations";
 const GUEST_REPORTS_COL = "guestReports";
 const INVENTORY_LOGS_COL = "inventoryLogs";
 const AUDIT_LOGS_COL = "auditLogs";
+const ACTIVITIES_COL = "activities";
+const ATTENDANCE_COL = "attendance";
+const HEALTH_RECORDS_COL = "healthRecords";
 
 // --- AUDIT LOGS SERVICES ---
 export const logAction = async (action: string, details: string) => {
@@ -792,6 +795,98 @@ export const deleteResidentRegistrationFromDb = async (id: string) => {
     } catch (e) {
         console.error("Error deleting resident registration:", e);
     }
+};
+
+// --- ACTIVITIES SERVICES ---
+export const subscribeToActivities = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, ACTIVITIES_COL), orderBy("date", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to activities:", error);
+        const qSimple = query(collection(db, ACTIVITIES_COL));
+        onSnapshot(qSimple, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            callback(data);
+        });
+    });
+};
+
+export const addActivityToDb = async (activity: any) => {
+    try {
+        const { id, ...data } = activity;
+        await addDoc(collection(db, ACTIVITIES_COL), deepSanitize(data));
+    } catch (e) { console.error("Error adding activity:", e); }
+};
+
+export const updateActivityInDb = async (id: string, updates: any) => {
+    try { await updateDoc(doc(db, ACTIVITIES_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating activity:", e); }
+};
+
+export const deleteActivityFromDb = async (id: string) => {
+    try { await deleteDoc(doc(db, ACTIVITIES_COL, id)); } catch (e) { console.error("Error deleting activity:", e); }
+};
+
+// --- ATTENDANCE SERVICES ---
+export const subscribeToAttendance = (activityId: string, callback: (data: any[]) => void) => {
+    const q = query(collection(db, ATTENDANCE_COL), where("activityId", "==", activityId), orderBy("timestamp", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to attendance:", error);
+        const qSimple = query(collection(db, ATTENDANCE_COL), where("activityId", "==", activityId));
+        onSnapshot(qSimple, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            data.sort((a:any, b:any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+            callback(data);
+        });
+    });
+};
+
+export const addAttendanceToDb = async (attendance: any) => {
+    try {
+        const { id, ...data } = attendance;
+        await addDoc(collection(db, ATTENDANCE_COL), deepSanitize(data));
+    } catch (e) { console.error("Error adding attendance:", e); }
+};
+
+export const deleteAttendanceFromDb = async (id: string) => {
+    try { await deleteDoc(doc(db, ATTENDANCE_COL, id)); } catch (e) { console.error("Error deleting attendance:", e); }
+};
+
+// --- HEALTH RECORDS SERVICES ---
+export const subscribeToHealthRecords = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, HEALTH_RECORDS_COL), orderBy("date", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to health records:", error);
+        const qSimple = query(collection(db, HEALTH_RECORDS_COL));
+        onSnapshot(qSimple, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            callback(data);
+        });
+    });
+};
+
+export const addHealthRecordToDb = async (record: any) => {
+    try {
+        const { id, ...data } = record;
+        await addDoc(collection(db, HEALTH_RECORDS_COL), deepSanitize(data));
+    } catch (e) { console.error("Error adding health record:", e); }
+};
+
+export const updateHealthRecordInDb = async (id: string, updates: any) => {
+    try { await updateDoc(doc(db, HEALTH_RECORDS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating health record:", e); }
+};
+
+export const deleteHealthRecordFromDb = async (id: string) => {
+    try { await deleteDoc(doc(db, HEALTH_RECORDS_COL, id)); } catch (e) { console.error("Error deleting health record:", e); }
 };
 
 // --- 3. CASHFLOW ---

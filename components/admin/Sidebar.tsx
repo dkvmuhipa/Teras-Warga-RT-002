@@ -44,6 +44,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'residents', icon: Users, label: 'Data Warga' },
         { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
         { id: 'demographics', icon: PieChart, label: 'Analitik & Demografi' },
+        { id: 'health', icon: Activity, label: 'Posyandu Digital' },
         { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },
         { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
       ] 
@@ -60,6 +61,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Operasional", 
       items: [
         { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
+        { id: 'activities', icon: Calendar, label: 'Presensi Kegiatan' },
         { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
         { id: 'content', icon: Megaphone, label: 'Konten & Informasi' },
       ] 
