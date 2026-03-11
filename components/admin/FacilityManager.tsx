@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw } from 'lucide-react';
-import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest, PatrolSession, Checkpoint } from '../../types';
+import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw, ShieldCheck } from 'lucide-react';
+import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest, PatrolSession, Checkpoint, Report, Official, MapPoint } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { HouseMap } from '../HouseMap';
 import { subscribeToCheckpoints, updateRondaSchedule, updateRondaShifts, updateRondaSwapRequestStatus } from '../../services/databaseService';
 import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
-import { QrCode } from 'lucide-react';
+import { MapPointManager } from './MapPointManager';
+import { QrCode, Info } from 'lucide-react';
 
 interface FacilityManagerProps {
   ronda: RondaSchedule[];
@@ -15,9 +17,12 @@ interface FacilityManagerProps {
   rondaSwapRequests: RondaSwapRequest[];
   houses: House[];
   activePatrol: PatrolSession | null;
+  reports: Report[];
+  officials: Official[];
+  mapPoints: MapPoint[];
 }
 
-export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol }) => {
+export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol, reports, officials, mapPoints }) => {
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [isRondaModalOpen, setIsRondaModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -27,7 +32,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints'>('schedule');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints' | 'map' | 'info-points'>('schedule');
 
   // Shift Management State
   const [shifts, setShifts] = useState<{ id: string; time: string; members: string[] }[]>([]);
@@ -158,7 +163,9 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           { id: 'schedule', label: 'Jadwal & Shift', icon: Calendar },
           { id: 'logs', label: 'Log Aktivitas', icon: Activity },
           { id: 'swaps', label: 'Tukar Jadwal', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Pending').length },
-          { id: 'checkpoints', label: 'Titik Patroli', icon: MapPin }
+          { id: 'checkpoints', label: 'Titik Patroli', icon: MapPin },
+          { id: 'info-points', label: 'Titik Informasi', icon: Info },
+          { id: 'map', label: 'Peta Patroli', icon: ShieldCheck }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -244,6 +251,28 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {activeTab === 'map' && (
+          <div className="lg:col-span-3">
+            <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                <div>
+                  <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest text-sm"><ShieldCheck size={18} className="text-indigo-600"/> Visualisasi Keamanan Lingkungan</h3>
+                  <p className="text-[10px] text-slate-400 font-bold mt-1">Pantau sebaran titik patroli dan kondisi rumah warga secara real-time.</p>
+                </div>
+              </div>
+              <div className="p-4">
+                <HouseMap 
+                  houses={houses} 
+                  isAdmin={true} 
+                  reports={reports} 
+                  officials={officials} 
+                  mapPoints={mapPoints}
+                />
+              </div>
+            </motion.div>
+          </div>
+        )}
+
         {activeTab === 'schedule' && (
           <>
             {/* Weekly Schedule */}
@@ -530,6 +559,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         {activeTab === 'checkpoints' && (
           <motion.div variants={itemVariants} className="lg:col-span-3">
             <CheckpointManager />
+          </motion.div>
+        )}
+
+        {activeTab === 'info-points' && (
+          <motion.div variants={itemVariants} className="lg:col-span-3">
+            <MapPointManager mapPoints={mapPoints} houses={houses} />
           </motion.div>
         )}
       </div>

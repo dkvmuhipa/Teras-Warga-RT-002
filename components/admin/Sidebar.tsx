@@ -54,7 +54,6 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
         { id: 'bills', icon: DollarSign, label: 'Manajemen Iuran' },
         { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
-        { id: 'map', icon: MapIcon, label: 'Denah Digital' },
       ] 
     },
     { 

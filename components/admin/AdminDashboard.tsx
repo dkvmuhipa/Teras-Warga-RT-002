@@ -25,7 +25,6 @@ import { DemographicAnalytics } from './DemographicAnalytics';
 import { AdvancedAnalytics } from './AdvancedAnalytics';
 import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
-import { MapManager } from './MapManager';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck } from 'lucide-react';
 import { CHECKPOINTS } from '../../constants';
@@ -92,7 +91,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'services':
         return <ServiceManager letters={letters} reports={reports} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       case 'facilities':
-        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} />;
+        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} />;
       case 'assets':
         return <AssetManager inventory={inventory} inventoryLogs={inventoryLogs} />;
       case 'guests':
@@ -117,8 +116,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <BillManager bills={bills} houses={houses} />;
       case 'population-reports':
         return <PopulationReportManager reports={populationReports} onAddReport={(r) => setPopulationReports([...populationReports, { ...r, id: Date.now().toString(), createdAt: new Date().toISOString() }])} onDeleteReport={(id) => setPopulationReports(populationReports.filter(r => r.id !== id))} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} houses={houses} />;
-      case 'map':
-        return <MapManager mapPoints={mapPoints} houses={houses} />;
       case 'settings':
         return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       default:

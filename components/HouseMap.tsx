@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint } from '../types';
 import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield } from 'lucide-react';
-import { subscribeToCheckpoints, updateCheckpointPosition } from '../services/databaseService';
+import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb } from '../services/databaseService';
 
 interface HouseMapProps {
   houses: House[];
@@ -356,6 +356,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const [isManageMode, setIsManageMode] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [draggingType, setDraggingType] = useState<'checkpoint' | 'mappoint' | null>(null);
 
   useEffect(() => {
     const unsub = subscribeToCheckpoints((data) => {
@@ -371,8 +372,14 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
-    await updateCheckpointPosition(draggingId, x, y);
+    if (draggingType === 'checkpoint') {
+      await updateCheckpointPosition(draggingId, x, y);
+    } else if (draggingType === 'mappoint') {
+      await updateMapPointInDb(draggingId, { x, y });
+    }
+    
     setDraggingId(null);
+    setDraggingType(null);
   };
 
   const totalHouses = houses.length;
@@ -438,9 +445,10 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                 if (isManageMode) {
                                     e.stopPropagation();
                                     setDraggingId(cp.id);
+                                    setDraggingType('checkpoint');
                                 }
                             }}
-                            className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-xs font-bold transition-all ${draggingId === cp.id ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' : 'bg-indigo-600'} text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
+                            className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-xs font-bold transition-all ${draggingId === cp.id && draggingType === 'checkpoint' ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' : 'bg-indigo-600'} text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
                             style={{ 
                                 top: cp.y !== undefined ? `${cp.y}%` : `${10 + i * 15}%`, 
                                 left: cp.x !== undefined ? `${cp.x}%` : `${10 + i * 20}%`,
@@ -448,23 +456,31 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                             }}
                            >
                                <ShieldCheck size={14}/> {cp.name}
-                               {isManageMode && draggingId === cp.id && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
+                               {isManageMode && draggingId === cp.id && draggingType === 'checkpoint' && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
                            </div>
                        ))}
 
-                       {/* Map Points Overlay (General Info) */}
+                        {/* Map Points Overlay (General Info) */}
                        {mapPoints.map((point) => (
                            <div 
                             key={point.id}
-                            className={`absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2`}
+                            onClick={(e) => {
+                                if (isManageMode) {
+                                    e.stopPropagation();
+                                    setDraggingId(point.id);
+                                    setDraggingType('mappoint');
+                                }
+                            }}
+                            className={`absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 transition-all ${draggingId === point.id && draggingType === 'mappoint' ? 'scale-125 z-40' : ''} ${isManageMode ? 'cursor-pointer hover:scale-110' : ''}`}
                             style={{ left: `${point.x}%`, top: `${point.y}%` }}
                            >
                                <div className={`p-1.5 rounded-full shadow-md ${
+                                   draggingId === point.id && draggingType === 'mappoint' ? 'bg-rose-500 ring-4 ring-rose-200' :
                                    point.type === 'Gate' ? 'bg-amber-500' :
                                    point.type === 'Security' ? 'bg-blue-500' :
                                    point.type === 'Block' ? 'bg-emerald-500' :
                                    'bg-slate-500'
-                               } text-white`}>
+                               } text-white border-2 border-white`}>
                                    {point.type === 'Gate' ? <Move size={14} /> : 
                                     point.type === 'Security' ? <Shield size={14} /> : 
                                     <MapPin size={14} />}
@@ -472,6 +488,9 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">
                                    {point.label}
                                </span>
+                               {isManageMode && draggingId === point.id && draggingType === 'mappoint' && (
+                                   <span className="absolute -bottom-6 whitespace-nowrap bg-rose-600 text-white text-[8px] px-2 py-0.5 rounded-full animate-pulse">Klik peta untuk pindah</span>
+                               )}
                            </div>
                        ))}
                    </div>
