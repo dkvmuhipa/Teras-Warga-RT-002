@@ -341,12 +341,16 @@ export const deepSanitize = (data: any, seen = new WeakSet()): any => {
   }
   
   // Avoid complex objects like Google Maps, DOM elements, or React elements
-  if (
-    data.nodeType || 
-    (data.nativeEvent && data.target) || 
-    (data.$$typeof) || // React element
-    (data.constructor && ['Y2', 'Ka', 'Map', 'Marker', 'google'].some(name => data.constructor.name.includes(name)))
-  ) {
+  try {
+    if (
+      data.nodeType || 
+      (data.nativeEvent && data.target) || 
+      (data.$$typeof) || // React element
+      (data.constructor && typeof data.constructor.name === 'string' && ['Y2', 'Ka', 'Map', 'Marker', 'google', 'HTML'].some(name => data.constructor.name.includes(name)))
+    ) {
+      return undefined;
+    }
+  } catch (e) {
     return undefined;
   }
 

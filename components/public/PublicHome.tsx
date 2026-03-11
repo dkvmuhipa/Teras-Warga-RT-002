@@ -5,8 +5,10 @@ import {
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession } from '../../types';
+import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest } from '../../types';
 import { HeroSection } from '../HeroSection';
+import { WeatherDetails } from '../WeatherDetails';
+import { ServiceStats } from '../ServiceStats';
 import { HouseMap } from '../HouseMap';
 import { Card } from '../ui/Card';
 
@@ -15,13 +17,14 @@ interface PublicHomeProps {
   announcements: Announcement[];
   ronda: RondaSchedule[];
   reports: Report[];
+  letters: LetterRequest[];
   officials: Official[];
   gallery: GalleryItem[];
   activePatrol: PatrolSession | null;
 }
 
 export const PublicHome: React.FC<PublicHomeProps> = ({ 
-  houses, announcements, ronda, reports, officials, gallery, activePatrol
+  houses, announcements, ronda, reports, letters, officials, gallery, activePatrol
 }) => {
   const navigate = useNavigate();
   const dateObj = new Date();
@@ -70,6 +73,10 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       <HeroSection />
+
+      <WeatherDetails />
+
+      <ServiceStats houses={houses} reports={reports} letters={letters} />
 
       {/* Quick Actions - Bento Style */}
       <div className="flex md:grid md:grid-cols-6 gap-4 -mt-8 relative z-10 overflow-x-auto no-scrollbar pb-4 md:pb-0 px-2 md:px-0">

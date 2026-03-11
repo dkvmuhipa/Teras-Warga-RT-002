@@ -1,86 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, Snowflake, ShieldCheck, Users } from 'lucide-react';
+import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, Snowflake, ShieldCheck, Users, Wind, Droplets, Thermometer, Wind as WindIcon, Activity } from 'lucide-react';
 import { motion } from 'motion/react';
 import { RT_NAME } from '../constants';
 
+import { useWeather } from '../hooks/useWeather';
+
 export const HeroSection = () => {
     const [date, setDate] = useState(new Date());
-    const [weather, setWeather] = useState<{ temp: number; condition: string; icon: React.ReactNode } | null>(null);
+    const { weather } = useWeather();
 
     useEffect(() => { 
         const timer = setInterval(() => setDate(new Date()), 60000); 
-        
-        const fetchWeather = () => {
-            // Fetch weather for Palu (Huntap 2 Tondo)
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-            fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,weather_code', { signal: controller.signal })
-                .then(res => {
-                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                    return res.json();
-                })
-                .then(data => {
-                    clearTimeout(timeoutId);
-                    if (!data || !data.current) throw new Error("Invalid weather data");
-
-                    const code = data.current.weather_code;
-                    let condition = 'Cerah';
-                    let icon = <Sun size={24} className="text-amber-300 animate-spin-slow" />;
-                    
-                    // WMO Weather interpretation codes (WW)
-                    if (code === 0) { 
-                        condition = 'Cerah'; 
-                        icon = <Sun size={24} className="text-amber-300 animate-spin-slow" />; 
-                    } else if (code >= 1 && code <= 3) { 
-                        condition = 'Berawan'; 
-                        icon = <Cloud size={24} className="text-slate-200" />; 
-                    } else if (code === 45 || code === 48) { 
-                        condition = 'Berkabut'; 
-                        icon = <CloudFog size={24} className="text-slate-300" />; 
-                    } else if (code >= 51 && code <= 55) { 
-                        condition = 'Gerimis'; 
-                        icon = <CloudRain size={24} className="text-blue-200" />; 
-                    } else if (code >= 61 && code <= 65) { 
-                        condition = 'Hujan'; 
-                        icon = <CloudRain size={24} className="text-blue-400" />; 
-                    } else if (code >= 80 && code <= 82) { 
-                        condition = 'Hujan Deras'; 
-                        icon = <CloudRain size={24} className="text-blue-600" />; 
-                    } else if (code >= 95) { 
-                        condition = 'Badai Petir'; 
-                        icon = <CloudLightning size={24} className="text-yellow-400" />; 
-                    } else if (code >= 71 && code <= 77) {
-                        condition = 'Salju';
-                        icon = <Snowflake size={24} className="text-white" />;
-                    }
-
-                    setWeather({
-                        temp: Math.round(data.current.temperature_2m),
-                        condition,
-                        icon
-                    });
-                })
-                .catch(err => {
-                    clearTimeout(timeoutId);
-                    console.error("Error fetching weather:", err);
-                    // Set a default/fallback state instead of just logging
-                    setWeather(prev => prev || {
-                        temp: 30,
-                        condition: 'Cerah',
-                        icon: <Sun size={24} className="text-amber-300 animate-spin-slow" />
-                    });
-                });
-        };
-
-        fetchWeather();
-        const weatherTimer = setInterval(fetchWeather, 1800000); // Update every 30 minutes
-        
-        return () => {
-            clearInterval(timer);
-            clearInterval(weatherTimer);
-        }; 
+        return () => clearInterval(timer);
     }, []);
+
+    const getWeatherIcon = (code: number | undefined) => {
+        if (code === undefined) return <Sun size={24} className="text-amber-300 animate-spin-slow" />;
+        if (code === 0) return <Sun size={24} className="text-amber-300 animate-spin-slow" />;
+        if (code >= 1 && code <= 3) return <Cloud size={24} className="text-slate-200" />;
+        if (code === 45 || code === 48) return <CloudFog size={24} className="text-slate-300" />;
+        if (code >= 51 && code <= 55) return <CloudRain size={24} className="text-blue-200" />;
+        if (code >= 61 && code <= 65) return <CloudRain size={24} className="text-blue-400" />;
+        if (code >= 80 && code <= 82) return <CloudRain size={24} className="text-blue-600" />;
+        if (code >= 95) return <CloudLightning size={24} className="text-yellow-400" />;
+        return <Sun size={24} className="text-amber-300 animate-spin-slow" />;
+    };
 
     return (
       <motion.div 
@@ -153,10 +97,10 @@ export const HeroSection = () => {
             transition={{ delay: 0.7, type: "spring" }}
             className="w-full md:w-auto"
           >
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-10 text-white w-full md:min-w-[320px] shadow-2xl relative group/card overflow-hidden">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-10 text-white w-full md:min-w-[380px] shadow-2xl relative group/card overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
               
-              <div className="relative z-10 space-y-8">
+              <div className="relative z-10 space-y-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-6xl font-black tracking-tighter mb-2 tabular-nums">
@@ -166,24 +110,68 @@ export const HeroSection = () => {
                       {date.toLocaleDateString('id-ID', { weekday: 'long' })}
                     </p>
                   </div>
-                  <div className="p-4 bg-white/10 rounded-3xl border border-white/10">
-                    {weather ? weather.icon : <Sun size={24} className="text-amber-300 animate-spin-slow" />}
+                  <div className="flex flex-col items-end gap-3">
+                    <div className="p-4 bg-white/10 rounded-3xl border border-white/10 shadow-lg">
+                      {getWeatherIcon(weather?.weatherCode)}
+                    </div>
+                    {weather?.aqi !== undefined && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/5">
+                        <Activity size={12} className={weather.aqiColor} />
+                        <span className="text-[9px] font-black uppercase tracking-wider">AQI {weather.aqi} • <span className={weather.aqiColor}>{weather.aqiLabel}</span></span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="h-px bg-gradient-to-r from-white/20 to-transparent" />
+                <div className="h-px bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Tanggal</p>
-                    <p className="text-sm font-bold text-white">{date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/5 rounded-xl">
+                        <Thermometer size={14} className="text-indigo-300" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Suhu</p>
+                        <p className="text-sm font-bold text-white">{weather ? `${weather.temp}°C` : '--'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/5 rounded-xl">
+                        <Droplets size={14} className="text-cyan-300" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kelembaban</p>
+                        <p className="text-sm font-bold text-white">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Cuaca</p>
-                    <p className="text-sm font-bold text-white">
-                      {weather ? `${weather.condition} ${weather.temp}°C` : 'Memuat...'}
-                    </p>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/5 rounded-xl">
+                        <WindIcon size={14} className="text-emerald-300" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Angin</p>
+                        <p className="text-sm font-bold text-white">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/5 rounded-xl">
+                        <Cloud size={14} className="text-slate-300" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kondisi</p>
+                        <p className="text-sm font-bold text-white truncate max-w-[80px]">{weather ? weather.condition : '--'}</p>
+                      </div>
+                    </div>
                   </div>
+                </div>
+
+                <div className="pt-2">
+                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-center">
+                    {date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
                 </div>
               </div>
             </div>

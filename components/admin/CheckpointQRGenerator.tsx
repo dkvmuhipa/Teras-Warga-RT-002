@@ -52,7 +52,7 @@ export const CheckpointQRGenerator: React.FC<CheckpointQRGeneratorProps> = ({ on
                                 <div class="qr-card">
                                     <div class="qr-title">${cp.name}</div>
                                     <div style="display: flex; justify-content: center;">
-                                       ${document.getElementById(`qr-${cp.id}`)?.outerHTML || ''}
+                                       ${document.getElementById(`qr-${cp.id}`)?.innerHTML || '<div style="color: red; font-size: 10px;">QR Code tidak ditemukan</div>'}
                                     </div>
                                     <div class="qr-footer">Scan untuk Checkpoint</div>
                                 </div>
@@ -91,15 +91,21 @@ export const CheckpointQRGenerator: React.FC<CheckpointQRGeneratorProps> = ({ on
                 <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest mb-6">{cp.name}</h3>
                 <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-inner mb-4">
                     <div id={`qr-${cp.id}`}>
-                        <QRCode 
-                            value={cp.qrCode} 
-                            size={200}
-                            level="H"
-                        />
+                        {cp.qrCode ? (
+                            <QRCode 
+                                value={cp.qrCode} 
+                                size={200}
+                                level="H"
+                            />
+                        ) : (
+                            <div className="w-[200px] h-[200px] flex items-center justify-center text-rose-500 font-bold text-xs">
+                                Kode QR Belum Diatur
+                            </div>
+                        )}
                     </div>
                 </div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Scan via Aplikasi Ronda</p>
-                <p className="text-[10px] text-slate-300 mt-1 font-mono">{cp.qrCode}</p>
+                <p className="text-[10px] text-slate-300 mt-1 font-mono">{cp.qrCode || 'N/A'}</p>
               </div>
             ))}
           </div>

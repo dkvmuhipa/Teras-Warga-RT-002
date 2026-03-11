@@ -608,7 +608,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                         const newTemplates = (pdfConfig.letterTemplates || []).filter((_, i) => i !== idx);
                         const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
                         setPdfConfig(newConfig);
-                        localStorage.setItem('pdf_config', JSON.stringify(newConfig));
+                        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
                       }}
                       className="absolute top-4 right-4 p-2 text-rose-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all"
                     >

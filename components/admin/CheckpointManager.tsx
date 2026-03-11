@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Checkpoint } from '../../types';
 import { subscribeToCheckpoints, addCheckpointToDb, updateCheckpointInDb, deleteCheckpointFromDb } from '../../services/databaseService';
 import { Button } from '../ui/Button';
-import { Plus, Trash2, Edit2, Save, X, MapPin } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, MapPin, Wand2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import toast from 'react-hot-toast';
 
@@ -106,9 +106,15 @@ export const CheckpointManager: React.FC = () => {
                             </div>
                         </div>
                         <h4 className="font-bold text-slate-800 mb-1">{cp.name}</h4>
-                        <p className="text-xs text-slate-500 font-mono bg-slate-50 p-1.5 rounded-lg inline-block border border-slate-100">
-                            {cp.qrCode}
-                        </p>
+                        {cp.qrCode ? (
+                            <p className="text-xs text-slate-500 font-mono bg-slate-50 p-1.5 rounded-lg inline-block border border-slate-100">
+                                {cp.qrCode}
+                            </p>
+                        ) : (
+                            <p className="text-[10px] text-rose-500 font-bold bg-rose-50 p-1.5 rounded-lg inline-block border border-rose-100 uppercase">
+                                Kode QR Belum Diatur
+                            </p>
+                        )}
                         <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between text-[10px] text-slate-400 font-bold uppercase">
                             <span>Posisi X: {cp.x}%</span>
                             <span>Posisi Y: {cp.y}%</span>
@@ -130,12 +136,29 @@ export const CheckpointManager: React.FC = () => {
                     </div>
                     <div>
                         <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Kode QR (Unik)</label>
-                        <input 
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none font-mono"
-                            placeholder="Contoh: GERBANG_UTAMA"
-                            value={qrCode}
-                            onChange={e => setQrCode(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
-                        />
+                        <div className="flex gap-2">
+                            <input 
+                                className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none font-mono"
+                                placeholder="Contoh: GERBANG_UTAMA"
+                                value={qrCode}
+                                onChange={e => setQrCode(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
+                            />
+                            <button 
+                                type="button"
+                                onClick={() => {
+                                    if (!name) {
+                                        toast.error("Isi nama lokasi terlebih dahulu");
+                                        return;
+                                    }
+                                    const generated = name.toUpperCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substring(2, 6).toUpperCase();
+                                    setQrCode(generated);
+                                }}
+                                className="p-3 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
+                                title="Generate Kode Otomatis"
+                            >
+                                <Wand2 size={20} />
+                            </button>
+                        </div>
                         <p className="text-[10px] text-slate-400 mt-1">* Gunakan huruf kapital dan underscore (_), tanpa spasi.</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
