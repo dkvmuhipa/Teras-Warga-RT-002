@@ -492,6 +492,9 @@ export interface Activity {
   type: 'Rapat' | 'Kerja Bakti' | 'Arisan' | 'Posyandu' | 'Lainnya';
   qrCode: string; // Activity ID or unique string
   status: 'Upcoming' | 'Ongoing' | 'Completed';
+  isMandatory?: boolean;
+  compensationAmount?: number;
+  compensationApplied?: boolean;
 }
 
 export interface Attendance {

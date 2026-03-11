@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, CheckCircle, QrCode, ArrowLeft, Clock, Info } from 'lucide-react';
+import { Calendar, MapPin, Users, CheckCircle, QrCode, ArrowLeft, Clock, Info, AlertTriangle } from 'lucide-react';
 import { Activity, Attendance, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -139,6 +139,14 @@ export const PublicActivity: React.FC = () => {
                   </div>
 
                   <h4 className="text-lg font-black text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{activity.title}</h4>
+                  {activity.isMandatory && (
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest border border-rose-100 flex items-center gap-1">
+                        <AlertTriangle size={10} /> Wajib
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400">Kompensasi Absen: Rp {activity.compensationAmount?.toLocaleString()}</span>
+                    </div>
+                  )}
                   <p className="text-xs text-slate-500 line-clamp-2 mb-4">{activity.description}</p>
 
                   <div className="space-y-2 mb-6">

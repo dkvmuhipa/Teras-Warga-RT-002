@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Calendar, MapPin, Users, QrCode, Trash2, Edit2, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Search, Calendar, MapPin, Users, QrCode, Trash2, Edit2, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Activity, Attendance, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -9,7 +9,8 @@ import {
   updateActivityInDb, 
   deleteActivityFromDb,
   subscribeToAttendance,
-  deleteAttendanceFromDb
+  deleteAttendanceFromDb,
+  addTransactionToDb
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -33,7 +34,9 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
     date: new Date().toISOString().slice(0, 16),
     location: '',
     type: 'Rapat' as Activity['type'],
-    status: 'Upcoming' as Activity['status']
+    status: 'Upcoming' as Activity['status'],
+    isMandatory: false,
+    compensationAmount: 20000
   });
 
   useEffect(() => {
@@ -76,7 +79,9 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       date: new Date().toISOString().slice(0, 16),
       location: '',
       type: 'Rapat',
-      status: 'Upcoming'
+      status: 'Upcoming',
+      isMandatory: false,
+      compensationAmount: 20000
     });
     setEditingActivityId(null);
   };
@@ -89,7 +94,9 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       date: activity.date.slice(0, 16),
       location: activity.location,
       type: activity.type,
-      status: activity.status
+      status: activity.status,
+      isMandatory: activity.isMandatory || false,
+      compensationAmount: activity.compensationAmount || 20000
     });
     setIsModalOpen(true);
   };
@@ -103,6 +110,40 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
   const handleDeleteAttendance = async (id: string) => {
     if (window.confirm('Hapus data presensi ini?')) {
       await deleteAttendanceFromDb(id);
+    }
+  };
+
+  const handleApplyCompensations = async () => {
+    if (!selectedActivity || !selectedActivity.isMandatory || selectedActivity.compensationApplied) return;
+    
+    if (!window.confirm(`Terapkan iuran kompensasi sebesar Rp ${selectedActivity.compensationAmount?.toLocaleString()} bagi warga yang tidak hadir?`)) return;
+
+    try {
+      const attendedHouseIds = new Set(attendance.map(a => a.houseId));
+      const occupiedHouses = houses.filter(h => h.status === 'Occupied');
+      const absentees = occupiedHouses.filter(h => !attendedHouseIds.has(h.id));
+
+      if (absentees.length === 0) {
+        alert('Semua warga hadir! Tidak ada kompensasi yang perlu diterapkan.');
+        return;
+      }
+
+      for (const house of absentees) {
+        await addTransactionToDb({
+          description: `Kompensasi Absen: ${selectedActivity.title} (${house.id})`,
+          amount: selectedActivity.compensationAmount || 20000,
+          type: 'Income',
+          category: 'Kompensasi Kegiatan',
+          date: new Date().toISOString().split('T')[0]
+        });
+      }
+
+      await updateActivityInDb(selectedActivity.id, { compensationApplied: true });
+      alert(`Berhasil menerapkan kompensasi untuk ${absentees.length} warga.`);
+      setSelectedActivity({ ...selectedActivity, compensationApplied: true });
+    } catch (error) {
+      console.error(error);
+      alert('Gagal menerapkan kompensasi.');
     }
   };
 
@@ -165,6 +206,14 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                 </div>
 
                 <h3 className="text-lg font-black text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{activity.title}</h3>
+                {activity.isMandatory && (
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest border border-rose-100 flex items-center gap-1">
+                      <AlertTriangle size={10} /> Wajib
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-400">Kompensasi: Rp {activity.compensationAmount?.toLocaleString()}</span>
+                  </div>
+                )}
                 <p className="text-sm text-slate-500 line-clamp-2 mb-4">{activity.description}</p>
 
                 <div className="space-y-2">
@@ -288,6 +337,37 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
               </select>
             </div>
           </div>
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-white rounded-lg text-rose-500 shadow-sm border border-slate-100">
+                  <AlertTriangle size={14} />
+                </div>
+                <div>
+                  <p className="text-xs font-black text-slate-800">Kegiatan Wajib</p>
+                  <p className="text-[10px] text-slate-500 font-medium">Berlaku iuran kompensasi bagi yang absen</p>
+                </div>
+              </div>
+              <input 
+                type="checkbox" 
+                className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                checked={form.isMandatory}
+                onChange={e => setForm({...form, isMandatory: e.target.checked})}
+              />
+            </div>
+            {form.isMandatory && (
+              <div className="animate-fade-in">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Besar Kompensasi (Rp)</label>
+                <input 
+                  type="number" 
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                  value={form.compensationAmount}
+                  onChange={e => setForm({...form, compensationAmount: parseInt(e.target.value)})}
+                  placeholder="20000"
+                />
+              </div>
+            )}
+          </div>
           <Button type="submit" className="w-full py-4 shadow-xl shadow-indigo-200 mt-4">
             {editingActivityId ? 'Simpan Perubahan' : 'Buat Kegiatan'}
           </Button>
@@ -307,6 +387,16 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                 <p className="text-xl font-black text-slate-800 leading-none">{attendance.length} Warga</p>
               </div>
             </div>
+            {selectedActivity?.isMandatory && selectedActivity?.status === 'Completed' && !selectedActivity?.compensationApplied && (
+              <Button onClick={handleApplyCompensations} size="sm" className="bg-rose-600 hover:bg-rose-700 shadow-rose-100">
+                Terapkan Sanksi
+              </Button>
+            )}
+            {selectedActivity?.compensationApplied && (
+              <div className="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-200 flex items-center gap-1">
+                <CheckCircle size={12} /> Sanksi Diterapkan
+              </div>
+            )}
           </div>
 
           <div className="max-h-[400px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
