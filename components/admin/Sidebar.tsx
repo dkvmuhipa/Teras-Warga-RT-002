@@ -23,6 +23,14 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(["Utama", "Administrasi"]);
+
+  const toggleGroup = (title: string) => {
+    setExpandedGroups(prev => 
+      prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]
+    );
+  };
+
   const navGroups = [
     { 
       title: "Utama", 
@@ -31,34 +39,36 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       ] 
     },
     { 
-      title: "Administrasi", 
+      title: "Kependudukan", 
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
-        { id: 'demographics', icon: PieChart, label: 'Demografi Warga' },
+        { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
+        { id: 'demographics', icon: PieChart, label: 'Analitik & Demografi' },
         { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },
-        { id: 'services', icon: FileText, label: 'Layanan & Surat' },
-        { id: 'finance', icon: DollarSign, label: 'Keuangan' },
+        { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
       ] 
     },
     { 
-      title: "Manajemen", 
+      title: "Layanan & Keuangan", 
+      items: [
+        { id: 'services', icon: FileText, label: 'Layanan & Surat' },
+        { id: 'finance', icon: DollarSign, label: 'Keuangan' },
+        { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
+      ] 
+    },
+    { 
+      title: "Operasional", 
       items: [
         { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
         { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
-        { id: 'events', icon: Calendar, label: 'Manajemen Acara' },
-        { id: 'audit', icon: Activity, label: 'Audit Log' },
-        { id: 'analytics', icon: BarChart3, label: 'Analitik Lanjutan' },
         { id: 'content', icon: Megaphone, label: 'Konten & Informasi' },
-        { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
-        { id: 'notifications', icon: Bell, label: 'Notifikasi' },
-        { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
-        { id: 'bills', icon: DollarSign, label: 'Manajemen Iuran' },
-        { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
       ] 
     },
     { 
-      title: "Sistem", 
+      title: "Sistem & Log", 
       items: [
+        { id: 'audit', icon: Activity, label: 'Audit Log' },
+        { id: 'notifications', icon: Bell, label: 'Notifikasi' },
         { id: 'settings', icon: Settings, label: 'Pengaturan' }
       ] 
     }
@@ -132,58 +142,79 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-8 custom-scrollbar scrollbar-hide">
+          <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-4 custom-scrollbar scrollbar-hide">
             {navGroups.map((group, idx) => (
-              <div key={idx}>
-                {!isCollapsed && (
-                  <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-4 px-3">
-                    {group.title}
-                  </h3>
-                )}
-                <div className="space-y-1.5">
-                  {group.items.map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id);
-                        setIsOpen(false);
-                      }}
-                      title={isCollapsed ? item.label : ''}
-                      className={`
-                        w-full flex items-center gap-3 rounded-xl transition-all duration-300 font-bold text-sm group relative
-                        ${isCollapsed ? 'justify-center p-3' : 'px-3 py-3'}
-                        ${activeTab === item.id 
-                          ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20' 
-                          : 'text-slate-500 hover:bg-slate-900 hover:text-slate-200'
-                        }
-                      `}
+              <div key={idx} className="space-y-1">
+                {!isCollapsed ? (
+                  <button 
+                    onClick={() => toggleGroup(group.title)}
+                    className="w-full flex items-center justify-between text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-2 px-3 hover:text-slate-400 transition-colors"
+                  >
+                    <span>{group.title}</span>
+                    <motion.div
+                      animate={{ rotate: expandedGroups.includes(group.title) ? 0 : -90 }}
+                      transition={{ duration: 0.2 }}
                     >
-                      <item.icon size={20} className={`shrink-0 transition-transform duration-300 ${activeTab === item.id ? 'text-white scale-110' : 'text-slate-500 group-hover:scale-110 group-hover:text-slate-300'}`} />
-                      {!isCollapsed && (
-                        <span className="truncate">{item.label}</span>
-                      )}
-                      
-                      {/* Badges */}
-                      {!isCollapsed && item.id === 'residents' && residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 && (
-                        <span className="ml-auto bg-indigo-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
-                          {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length}
-                        </span>
-                      )}
-                      {!isCollapsed && item.id === 'guests' && guestReports.filter(g => g.status === 'Active').length > 0 && (
-                        <span className="ml-auto bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
-                          {guestReports.filter(g => g.status === 'Active').length}
-                        </span>
-                      )}
+                      <ChevronLeft size={10} />
+                    </motion.div>
+                  </button>
+                ) : (
+                  <div className="h-px bg-slate-800/50 my-4 mx-2" />
+                )}
+                
+                <AnimatePresence initial={false}>
+                  {(isCollapsed || expandedGroups.includes(group.title)) && (
+                    <motion.div 
+                      initial={isCollapsed ? false : { height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden space-y-1"
+                    >
+                      {group.items.map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setActiveTab(item.id);
+                            setIsOpen(false);
+                          }}
+                          title={isCollapsed ? item.label : ''}
+                          className={`
+                            w-full flex items-center gap-3 rounded-xl transition-all duration-300 font-bold text-sm group relative
+                            ${isCollapsed ? 'justify-center p-3' : 'px-3 py-2.5'}
+                            ${activeTab === item.id 
+                              ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20' 
+                              : 'text-slate-500 hover:bg-slate-900 hover:text-slate-200'
+                            }
+                          `}
+                        >
+                          <item.icon size={18} className={`shrink-0 transition-transform duration-300 ${activeTab === item.id ? 'text-white scale-110' : 'text-slate-500 group-hover:scale-110 group-hover:text-slate-300'}`} />
+                          {!isCollapsed && (
+                            <span className="truncate">{item.label}</span>
+                          )}
+                          
+                          {/* Badges */}
+                          {!isCollapsed && item.id === 'residents' && residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 && (
+                            <span className="ml-auto bg-indigo-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
+                              {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length}
+                            </span>
+                          )}
+                          {!isCollapsed && item.id === 'guests' && guestReports.filter(g => g.status === 'Active').length > 0 && (
+                            <span className="ml-auto bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
+                              {guestReports.filter(g => g.status === 'Active').length}
+                            </span>
+                          )}
 
-                      {activeTab === item.id && !isCollapsed && (
-                        <motion.div 
-                          layoutId="activeTab"
-                          className="absolute right-2 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-                        />
-                      )}
-                    </button>
-                  ))}
-                </div>
+                          {activeTab === item.id && !isCollapsed && (
+                            <motion.div 
+                              layoutId="activeTab"
+                              className="absolute right-2 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+                            />
+                          )}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </nav>

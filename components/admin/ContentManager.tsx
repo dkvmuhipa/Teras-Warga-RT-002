@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Megaphone, Vote, ShoppingBag, Image, BookOpen } from 'lucide-react';
-import { Announcement, News, Poll, UMKM, GalleryItem } from '../../types';
+import { Megaphone, Vote, ShoppingBag, Image, BookOpen, Calendar } from 'lucide-react';
+import { Announcement, News, Poll, UMKM, GalleryItem, AppEvent } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnnouncementManagement } from './AnnouncementManagement';
 import { NewsManagement } from './NewsManagement';
 import { PollManagement } from './PollManagement';
 import { UmkmManagement } from './UmkmManagement';
 import { GalleryManagement } from './GalleryManagement';
+import { EventManager } from './EventManager';
 
 interface ContentManagerProps {
   announcements: Announcement[];
@@ -14,10 +15,11 @@ interface ContentManagerProps {
   polls: Poll[];
   umkm: UMKM[];
   gallery: GalleryItem[];
+  events: AppEvent[];
 }
 
-export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, news, polls, umkm, gallery }) => {
-  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery'>('announcements');
+export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, news, polls, umkm, gallery, events }) => {
+  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events'>('announcements');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -40,6 +42,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, n
             {activeTab === 'polls' && <Vote size={24} />}
             {activeTab === 'umkm' && <ShoppingBag size={24} />}
             {activeTab === 'gallery' && <Image size={24} />}
+            {activeTab === 'events' && <Calendar size={24} />}
           </div>
           <div>
             <h2 className="text-lg font-black text-slate-800 tracking-tight">
@@ -48,6 +51,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, n
               {activeTab === 'polls' && 'Konten Voting'}
               {activeTab === 'umkm' && 'Konten UMKM'}
               {activeTab === 'gallery' && 'Konten Galeri'}
+              {activeTab === 'events' && 'Konten Acara'}
             </h2>
             <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Manajemen Konten</p>
           </div>
@@ -57,6 +61,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, n
           {[
             { id: 'announcements', icon: Megaphone, label: 'Pengumuman' },
             { id: 'news', icon: BookOpen, label: 'Berita' },
+            { id: 'events', icon: Calendar, label: 'Acara' },
             { id: 'polls', icon: Vote, label: 'Voting' },
             { id: 'umkm', icon: ShoppingBag, label: 'UMKM' },
             { id: 'gallery', icon: Image, label: 'Galeri' }
@@ -91,6 +96,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, n
           {activeTab === 'polls' && <PollManagement polls={polls} />}
           {activeTab === 'umkm' && <UmkmManagement umkm={umkm} />}
           {activeTab === 'gallery' && <GalleryManagement gallery={gallery} />}
+          {activeTab === 'events' && <EventManager events={events} />}
         </motion.div>
       </AnimatePresence>
     </motion.div>

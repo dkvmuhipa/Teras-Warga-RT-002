@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, Bill, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration
+  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -16,13 +16,11 @@ import { ServiceManager } from './ServiceManager';
 import { Settings } from './Settings';
 import { OfficialManagement } from './OfficialManagement';
 import { DocumentManager } from './DocumentManager';
-import { BillManager } from './BillManager';
 import { PopulationReportManager } from './PopulationReportManager';
 import { EventManager } from './EventManager';
 import { AssetManager } from './AssetManager';
 import { GuestManager } from './GuestManager';
 import { DemographicAnalytics } from './DemographicAnalytics';
-import { AdvancedAnalytics } from './AdvancedAnalytics';
 import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
 import { motion, AnimatePresence } from 'motion/react';
@@ -48,7 +46,6 @@ interface AdminDashboardProps {
   setPdfConfig: (config: PdfConfig) => void;
   notifications: AppNotification[];
   documents: Document[];
-  bills: Bill[];
   populationReports: PopulationReport[];
   setPopulationReports: (reports: PopulationReport[]) => void;
   populationLogs: PopulationChangeLog[];
@@ -65,7 +62,7 @@ interface AdminDashboardProps {
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, bills, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs
+  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -83,9 +80,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} bills={bills} guestReports={guestReports} onTabChange={setActiveTab} />;
+        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
       case 'residents':
-        return <ResidentManager houses={houses} bills={bills} reports={reports} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} residentRegistrations={residentRegistrations} />;
+        return <ResidentManager houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} residentRegistrations={residentRegistrations} />;
       case 'finance':
         return <FinanceManager cashFlow={cashFlow} pdfConfig={pdfConfig} />;
       case 'services':
@@ -96,30 +93,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <AssetManager inventory={inventory} inventoryLogs={inventoryLogs} />;
       case 'guests':
         return <GuestManager guestReports={guestReports} pdfConfig={pdfConfig} />;
-      case 'events':
-        return <EventManager events={events} />;
-      case 'analytics':
-        return <AdvancedAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />;
       case 'demographics':
-        return <DemographicAnalytics houses={houses} />;
+        return <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />;
       case 'audit':
         return <AuditLogManager logs={auditLogs} />;
       case 'content':
-        return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} />;
+        return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} events={events} />;
       case 'officials':
         return <OfficialManagement officials={officials} />;
       case 'notifications':
         return <NotificationCombined notifications={notifications} />;
       case 'documents':
         return <DocumentManager documents={documents} />;
-      case 'bills':
-        return <BillManager bills={bills} houses={houses} />;
       case 'population-reports':
         return <PopulationReportManager reports={populationReports} onAddReport={(r) => setPopulationReports([...populationReports, { ...r, id: Date.now().toString(), createdAt: new Date().toISOString() }])} onDeleteReport={(id) => setPopulationReports(populationReports.filter(r => r.id !== id))} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} houses={houses} />;
       case 'settings':
         return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       default:
-        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} bills={bills} guestReports={guestReports} onTabChange={setActiveTab} />;
+        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
     }
   };
 

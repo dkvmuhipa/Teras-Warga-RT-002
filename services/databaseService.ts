@@ -325,7 +325,10 @@ export const updateAdminPassword = async (newPass: string) => {
 
 // --- UTILS ---
 
-export const deepSanitize = (data: any, seen = new WeakSet()): any => {
+export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any => {
+  // Prevent infinite recursion with a safety depth limit
+  if (depth > 15) return "[Depth Limit]";
+  
   if (data === null || typeof data !== 'object') {
     return data;
   }
@@ -342,12 +345,21 @@ export const deepSanitize = (data: any, seen = new WeakSet()): any => {
   
   // Avoid complex objects like Google Maps, DOM elements, or React elements
   try {
-    if (
+    const constructorName = data.constructor?.name;
+    const isComplex = 
       data.nodeType || 
+      data instanceof Element ||
       (data.nativeEvent && data.target) || 
       (data.$$typeof) || // React element
-      (data.constructor && typeof data.constructor.name === 'string' && ['Y2', 'Ka', 'Map', 'Marker', 'google', 'HTML'].some(name => data.constructor.name.includes(name)))
-    ) {
+      (typeof constructorName === 'string' && (
+        /^(Y2|Ka|Map|Marker|google|HTML|Window|Document|__)/.test(constructorName) ||
+        // Minified Google Maps classes are often 1-2 chars
+        (constructorName.length <= 2 && /^[A-Z]/.test(constructorName))
+      )) ||
+      data.gm_bindings_ || 
+      data.gm_accessors_;
+
+    if (isComplex) {
       return undefined;
     }
   } catch (e) {
@@ -357,23 +369,30 @@ export const deepSanitize = (data: any, seen = new WeakSet()): any => {
   seen.add(data);
 
   if (Array.isArray(data)) {
-    return data.map(item => deepSanitize(item, seen)).filter(i => i !== undefined);
+    return data.map(item => deepSanitize(item, seen, depth + 1)).filter(i => i !== undefined);
   }
 
   const clean: any = {};
   try {
+    // Use Object.getOwnPropertyNames to get all keys even if not enumerable
+    // but Object.keys is safer for general use. Let's stick to Object.keys
+    // but wrap in try-catch for each key access.
     Object.keys(data).forEach(key => {
-      const value = data[key];
-      // Skip functions and undefined
-      if (value !== undefined && typeof value !== 'function') {
-        const sanitized = deepSanitize(value, seen);
-        if (sanitized !== undefined) {
-          clean[key] = sanitized;
+      try {
+        const value = data[key];
+        // Skip functions and undefined
+        if (value !== undefined && typeof value !== 'function') {
+          const sanitized = deepSanitize(value, seen, depth + 1);
+          if (sanitized !== undefined) {
+            clean[key] = sanitized;
+          }
         }
+      } catch (e) {
+        // Skip properties that throw on access
       }
     });
   } catch (e) {
-    console.warn("Error sanitizing object key:", e);
+    console.warn("Error sanitizing object keys:", e);
     return "[Complex Object]";
   }
   
@@ -713,6 +732,24 @@ export const deleteIuranPaymentFromDb = async (id: string) => {
         await deleteDoc(doc(db, IURAN_PAYMENTS_COL, id));
     } catch (e) {
         console.error("Error deleting iuran payment:", e);
+    }
+};
+
+export const checkWasteRetribution = async (houseId: string): Promise<{ paid: boolean; month: string }> => {
+    try {
+        const currentMonth = new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+        const q = query(
+            collection(db, IURAN_PAYMENTS_COL), 
+            where("houseId", "==", houseId),
+            where("month", "==", currentMonth)
+        );
+        const snapshot = await getDocs(q);
+        const payments = snapshot.docs.map(doc => doc.data());
+        const isPaid = payments.some((p: any) => p.type === 'Sampah' || p.type === 'Both');
+        return { paid: isPaid, month: currentMonth };
+    } catch (e) {
+        console.error("Error checking waste retribution:", e);
+        return { paid: false, month: '' };
     }
 };
 

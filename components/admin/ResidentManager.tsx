@@ -10,7 +10,7 @@ import {
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon
 } from 'lucide-react';
-import { House, Report, Official, PdfConfig, PaymentStatus, ResidentRegistration } from '../../types';
+import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
 import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb } from '../../services/databaseService';
@@ -21,8 +21,8 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface ResidentManagerProps {
   houses: House[];
-  bills: any[];
   reports: Report[];
+  cashFlow: CashFlow[];
   officials: Official[];
   pdfConfig: PdfConfig;
   iuranPayments: any[];
@@ -32,7 +32,7 @@ interface ResidentManagerProps {
 type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business';
 
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
-  houses, bills, reports, officials, pdfConfig, iuranPayments, residentRegistrations 
+  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, residentRegistrations 
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
@@ -148,6 +148,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const handleCleanupPlaceholders = async () => {
     if (window.confirm('Aksi ini akan mengubah status semua data dengan nama default "Warga [Blok]-[Nomor]" menjadi "Kosong" (Empty) dan mengosongkan detail data mereka. Lanjutkan?')) {
+        const verification = window.prompt('Ketik "BERSIHKAN" untuk mengonfirmasi pembersihan data warga default:');
+        if (verification !== 'BERSIHKAN') {
+            if (verification !== null) alert('Verifikasi gagal. Kata kunci tidak cocok.');
+            return;
+        }
+        
         setIsGenerating(true);
         try {
             const updates = houses
@@ -568,7 +574,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setIsDrawerOpen(true);
   };
 
-  const selectedResidentBills = bills.filter(b => b.houseId === selectedResident?.id);
+  const selectedResidentBills: any[] = [];
   const isFullyPaid = selectedResidentBills.length > 0 && selectedResidentBills.every(b => b.total === 0);
 
   const maskData = (data: string | undefined) => {
@@ -850,7 +856,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         {selectedHouseForBills && (
           <BillDetailModal 
             house={selectedHouseForBills} 
-            bills={bills} 
+            bills={[]} 
             onClose={() => setSelectedHouseForBills(null)} 
           />
         )}
@@ -953,7 +959,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       <motion.div variants={itemVariants}>
         {viewMode === 'analytics' ? (
           <div className="animate-fade-in">
-            <DemographicAnalytics houses={houses} />
+            <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />
           </div>
         ) : viewMode === 'grid' ? (
           <div className="space-y-8">
@@ -973,7 +979,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     <ResidentCard 
                       key={house.id}
                       house={house}
-                      bills={bills}
+                      bills={[]}
                       onOpenDetail={openDetail}
                       onOpenEdit={handleOpenEdit}
                       onDelete={handleDelete}
@@ -1350,7 +1356,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   </thead>
                   <tbody>
                     {houses.map((house) => {
-                      const houseBills = bills.filter(b => b.houseId === house.id);
+                      const houseBills: any[] = [];
                       const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
                       const paymentStatus = isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING;
                       

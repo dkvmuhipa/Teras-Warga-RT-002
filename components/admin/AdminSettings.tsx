@@ -77,6 +77,11 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 
   const handleResetSystem = async () => {
     if (window.confirm('PERINGATAN: Semua data akan dihapus dan diganti dengan data dummy. Lanjutkan?')) {
+      const verification = window.prompt('Ketik "RESET" untuk mengonfirmasi reset database:');
+      if (verification !== 'RESET') {
+        if (verification !== null) alert('Verifikasi gagal.');
+        return;
+      }
       try {
         await seedDatabase();
         alert('Database berhasil di-reset!');

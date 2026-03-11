@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
-import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize } from '../../services/databaseService';
+import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, checkWasteRetribution } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
 import { GuestReportForm } from '../GuestReportForm';
@@ -154,7 +154,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       const updated = [item, ...localHistory]; 
       setLocalHistory(updated); 
       // Use deepSanitize to prevent circular structure errors
-      localStorage.setItem('userRequestHistory', JSON.stringify(deepSanitize(updated))); 
+      const sanitized = deepSanitize(updated);
+      localStorage.setItem('userRequestHistory', JSON.stringify(sanitized)); 
     } catch (e) { console.error("Error saving history", e); } 
   };
 
@@ -166,8 +167,16 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       return;
     }
 
-    const finalRequestType = requestType === 'Lainnya' ? customRequestType : requestType;
     const formattedHouseId = formatHouseId(houseId);
+    
+    // Check Waste Retribution (Mandatory in Palu City)
+    const retribution = await checkWasteRetribution(formattedHouseId);
+    if (!retribution.paid) {
+      alert(`PENGURUSAN DITANGGUHKAN: Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`);
+      return;
+    }
+
+    const finalRequestType = requestType === 'Lainnya' ? customRequestType : requestType;
 
     const letterData: LetterRequest = { 
       id: Date.now().toString(), 
@@ -251,6 +260,15 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       const isValid = await validateResidentAccess(mutationHouseId, accessCode);
       if (!isValid) {
         alert("Verifikasi Gagal! Kode Akses Rumah tidak valid.");
+        return;
+      }
+
+      const formattedMutationHouseId = formatHouseId(mutationHouseId);
+      
+      // Check Waste Retribution (Mandatory in Palu City)
+      const retribution = await checkWasteRetribution(formattedMutationHouseId);
+      if (!retribution.paid) {
+        alert(`PELAPORAN DITANGGUHKAN: Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`);
         return;
       }
     }
@@ -435,6 +453,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <h2 className="text-3xl font-black text-slate-900">Permohonan Surat</h2>
                   <p className="text-slate-500 font-medium mt-1">Lengkapi data untuk mendapatkan surat pengantar resmi.</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Palu City Regulation Notice */}
+            <div className="mb-12 p-6 bg-amber-50 border border-amber-100 rounded-[2rem] flex items-start gap-4 shadow-sm">
+              <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm">
+                <ShieldAlert size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-black text-amber-900 uppercase tracking-widest">Aturan Pemerintah Kota Palu</p>
+                <p className="text-sm font-medium text-amber-700 mt-1 leading-relaxed">
+                  Sesuai peraturan daerah, pembayaran <b>Retribusi Sampah</b> wajib dilunasi untuk setiap pengurusan administrasi kependudukan. Sistem akan mengecek status pembayaran bulan berjalan secara otomatis saat Anda mengirim pengajuan.
+                </p>
               </div>
             </div>
 
@@ -909,6 +940,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <h2 className="text-3xl font-black text-slate-900">Mutasi Warga</h2>
                   <p className="text-slate-500 font-medium mt-1">Laporkan warga baru, pindah, kelahiran, atau kematian.</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Palu City Regulation Notice */}
+            <div className="mb-12 p-6 bg-amber-50 border border-amber-100 rounded-[2rem] flex items-start gap-4 shadow-sm">
+              <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm">
+                <ShieldAlert size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-black text-amber-900 uppercase tracking-widest">Aturan Pemerintah Kota Palu</p>
+                <p className="text-sm font-medium text-amber-700 mt-1 leading-relaxed">
+                  Sesuai peraturan daerah, pembayaran <b>Retribusi Sampah</b> wajib dilunasi untuk setiap pengurusan administrasi kependudukan. Sistem akan mengecek status pembayaran bulan berjalan secara otomatis saat Anda mengirim laporan.
+                </p>
               </div>
             </div>
 

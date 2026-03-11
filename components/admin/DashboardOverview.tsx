@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { 
   Users, DollarSign, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Calendar, ArrowRight, Plus, Download, FileText,
-  Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles
+  Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles, Trash2
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
 } from 'recharts';
-import { House, CashFlow, Report, Announcement, Bill, PaymentStatus, GuestReport } from '../../types';
+import { House, CashFlow, Report, Announcement, PaymentStatus, GuestReport } from '../../types';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
@@ -19,12 +19,12 @@ interface DashboardOverviewProps {
   cashFlow: CashFlow[];
   reports: Report[];
   announcements: Announcement[];
-  bills: Bill[];
   guestReports: GuestReport[];
+  iuranPayments: any[];
   onTabChange: (tab: string) => void;
 }
 
-export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, cashFlow, reports, announcements, bills, guestReports, onTabChange }) => {
+export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, cashFlow, reports, announcements, guestReports, iuranPayments, onTabChange }) => {
   const [aiSummary, setAiSummary] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
 
@@ -56,8 +56,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
   const newReports = reports.filter(r => r.status === 'Baru').length;
   const activeGuests = guestReports.filter(g => g.status === 'Active').length;
   
-  // Overdue Bills
-  const overdueBills = bills.filter(b => b.total > 0 && new Date(b.dueDate) < new Date());
+  // Waste Retribution Stats (Palu City Context)
+  const currentMonth = new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+  const paidWasteCount = iuranPayments.filter(p => p.month === currentMonth && (p.type === 'Sampah' || p.type === 'Both')).length;
+  const totalOccupiedHouses = houses.filter(h => h.status === 'Occupied').length;
+  const wastePaymentPercentage = totalOccupiedHouses > 0 ? Math.round((paidWasteCount / totalOccupiedHouses) * 100) : 0;
 
   // Chart Data Preparation
   const chartData = cashFlow.slice(-7).map(c => ({
@@ -174,7 +177,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* Warga Card */}
         <motion.div variants={itemVariants} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
           <div className="absolute -right-4 -top-4 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
@@ -264,6 +267,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
             <div className="mt-4 flex items-center gap-2 text-xs font-bold text-amber-500">
               <Clock size={14} />
               <span>Menginap 1x24 Jam</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Retribusi Sampah Card (Palu City Special) */}
+        <motion.div variants={itemVariants} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
+          <div className="absolute -right-4 -top-4 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
+                <Trash2 size={24} />
+              </div>
+              <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Retribusi Sampah</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-4xl font-black text-slate-900">{wastePaymentPercentage}%</h3>
+              <span className="text-sm font-bold text-slate-400">Lunas</span>
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-xs font-bold text-indigo-500">
+              <CheckCircle2 size={14} />
+              <span>{paidWasteCount} dari {totalOccupiedHouses} Rumah ({currentMonth})</span>
             </div>
           </div>
         </motion.div>
