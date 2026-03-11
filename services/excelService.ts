@@ -25,6 +25,9 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     { header: 'BLOK (Wajib)', key: 'block', width: 15 },
     { header: 'NOMOR (Wajib)', key: 'number', width: 15 },
     { header: 'NAMA KEPALA KELUARGA (Wajib)', key: 'headOfFamily', width: 35 },
+    { header: 'JENIS KELAMIN', key: 'gender', width: 20 },
+    { header: 'TANGGAL LAHIR', key: 'birthDate', width: 20 },
+    { header: 'AGAMA', key: 'religion', width: 20 },
     { header: 'NAMA PEMILIK (Opsional)', key: 'ownerName', width: 35 },
     { header: 'TELEPON', key: 'phone', width: 20 },
     { header: 'STATUS HUNIAN (Occupied/Empty/Business)', key: 'status', width: 35 },
@@ -36,10 +39,14 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     { header: 'JUMLAH IBU HAMIL', key: 'pregnantCount', width: 25 },
     { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
     { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
+    { header: 'JUMLAH REMAJA', key: 'teenagerCount', width: 25 },
     { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
     { header: 'JUMLAH JANDA', key: 'widowCount', width: 25 },
-    { header: 'STATUS IURAN AIR (Lunas/Belum Lunas)', key: 'paymentStatusAir', width: 35 },
-    { header: 'STATUS IURAN SAMPAH (Lunas/Belum Lunas)', key: 'paymentStatusSampah', width: 35 },
+    { header: 'STATUS IURAN AIR', key: 'paymentStatusAir', width: 25 },
+    { header: 'STATUS IURAN SAMPAH', key: 'paymentStatusSampah', width: 25 },
+    { header: 'STATUS IURAN KEAMANAN', key: 'paymentStatusKeamanan', width: 25 },
+    { header: 'TANGGAL BAYAR TERAKHIR', key: 'paymentDate', width: 25 },
+    { header: 'STATUS VERIFIKASI', key: 'isVerified', width: 20 },
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
   ];
 
@@ -57,7 +64,7 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       color: { argb: 'FFFFFFFF' },
       size: 11,
     };
-    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
     cell.border = {
       top: { style: 'thin' },
       left: { style: 'thin' },
@@ -72,6 +79,9 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       block: house.block,
       number: house.number,
       headOfFamily: house.headOfFamily,
+      gender: house.gender || '-',
+      birthDate: house.birthDate || '-',
+      religion: house.religion || '-',
       ownerName: house.ownerName || '-',
       phone: house.phone || '-',
       status: house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha',
@@ -83,10 +93,14 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       pregnantCount: house.pregnantCount || 0,
       babyCount: house.babyCount || 0,
       toddlerCount: house.toddlerCount || 0,
+      teenagerCount: house.teenagerCount || 0,
       elderlyCount: house.elderlyCount || 0,
       widowCount: house.widowCount || 0,
       paymentStatusAir: house.paymentStatusAir || PaymentStatus.UNPAID,
       paymentStatusSampah: house.paymentStatusSampah || PaymentStatus.UNPAID,
+      paymentStatusKeamanan: house.paymentStatusKeamanan || '-',
+      paymentDate: house.paymentDate || '-',
+      isVerified: house.isVerified ? 'Terverifikasi' : 'Belum Verifikasi',
       accessCode: house.accessCode || '-',
     });
 
@@ -102,9 +116,9 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       };
       
       // Conditional styling for Payment Status
-      if (cell.value === PaymentStatus.PAID) {
+      if (cell.value === PaymentStatus.PAID || cell.value === 'Terverifikasi') {
         cell.font = { color: { argb: 'FF059669' }, bold: true }; // Emerald-600
-      } else if (cell.value === PaymentStatus.PENDING || cell.value === PaymentStatus.UNPAID) {
+      } else if (cell.value === PaymentStatus.PENDING || cell.value === PaymentStatus.UNPAID || cell.value === 'Belum Verifikasi') {
         cell.font = { color: { argb: 'FFDC2626' }, bold: true }; // Rose-600
       }
     });
@@ -119,10 +133,112 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     }
   });
 
+  // Add Family Members Sheet
+  const familySheet = workbook.addWorksheet('Anggota Keluarga');
+  familySheet.columns = [
+    { header: 'BLOK', key: 'block', width: 10 },
+    { header: 'NOMOR', key: 'number', width: 10 },
+    { header: 'KEPALA KELUARGA', key: 'headOfFamily', width: 30 },
+    { header: 'NAMA ANGGOTA', key: 'name', width: 30 },
+    { header: 'NIK', key: 'nik', width: 25 },
+    { header: 'HUBUNGAN', key: 'relation', width: 20 },
+    { header: 'JENIS KELAMIN', key: 'gender', width: 20 },
+    { header: 'TANGGAL LAHIR', key: 'birthDate', width: 20 },
+    { header: 'PEKERJAAN', key: 'job', width: 25 },
+  ];
+
+  const familyHeaderRow = familySheet.getRow(1);
+  familyHeaderRow.height = 30;
+  familyHeaderRow.eachCell((cell) => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+
+  sortedHouses.forEach(house => {
+    if (house.familyMembers && house.familyMembers.length > 0) {
+      house.familyMembers.forEach(member => {
+        familySheet.addRow({
+          block: house.block,
+          number: house.number,
+          headOfFamily: house.headOfFamily,
+          name: member.name,
+          nik: member.nik || '-',
+          relation: member.relation,
+          gender: member.gender || '-',
+          birthDate: member.birthDate || '-',
+          job: member.job || '-',
+        });
+      });
+    }
+  });
+
+  // Add Summary Sheet
+  const summarySheet = workbook.addWorksheet('Ringkasan Statistik');
+  summarySheet.columns = [
+    { header: 'KATEGORI', key: 'category', width: 30 },
+    { header: 'JUMLAH', key: 'value', width: 20 },
+    { header: 'SATUAN', key: 'unit', width: 15 },
+  ];
+
+  const summaryHeaderRow = summarySheet.getRow(1);
+  summaryHeaderRow.height = 30;
+  summaryHeaderRow.eachCell((cell) => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+
+  const totalJiwa = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0);
+  const totalRumah = houses.length;
+  const totalDihuni = houses.filter(h => h.status === 'Occupied').length;
+  const totalKosong = houses.filter(h => h.status === 'Empty').length;
+  const totalUsaha = houses.filter(h => h.status === 'Business').length;
+  
+  const totalLaki = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => {
+    let count = h.gender === 'Laki-laki' ? 1 : 0;
+    if (h.familyMembers) {
+      count += h.familyMembers.filter(m => m.gender === 'Laki-laki').length;
+    }
+    return acc + count;
+  }, 0);
+
+  const totalPerempuan = totalJiwa - totalLaki;
+
+  summarySheet.addRows([
+    { category: 'Total Rumah', value: totalRumah, unit: 'Unit' },
+    { category: 'Rumah Dihuni', value: totalDihuni, unit: 'Unit' },
+    { category: 'Rumah Kosong', value: totalKosong, unit: 'Unit' },
+    { category: 'Rumah Usaha', value: totalUsaha, unit: 'Unit' },
+    { category: 'Total Penduduk (Jiwa)', value: totalJiwa, unit: 'Orang' },
+    { category: 'Total Laki-laki', value: totalLaki, unit: 'Orang' },
+    { category: 'Total Perempuan', value: totalPerempuan, unit: 'Orang' },
+    { category: 'Total Kendaraan', value: houses.reduce((acc, h) => acc + (h.vehicleCount || 0), 0), unit: 'Unit' },
+    { category: 'Total Ibu Hamil', value: houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0), unit: 'Orang' },
+    { category: 'Total Bayi (0-11 bln)', value: houses.reduce((acc, h) => acc + (h.babyCount || 0), 0), unit: 'Orang' },
+    { category: 'Total Balita (1-5 thn)', value: houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0), unit: 'Orang' },
+    { category: 'Total Remaja', value: houses.reduce((acc, h) => acc + (h.teenagerCount || 0), 0), unit: 'Orang' },
+    { category: 'Total Lansia', value: houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0), unit: 'Orang' },
+    { category: 'Total Janda', value: houses.reduce((acc, h) => acc + (h.widowCount || 0), 0), unit: 'Orang' },
+  ]);
+
+  summarySheet.eachRow((row, rowNumber) => {
+    if (rowNumber > 1) {
+      row.eachCell(cell => {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      });
+    }
+  });
+
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Data_Warga_RT002_${new Date().toISOString().split('T')[0]}.xlsx`);
+  saveAs(blob, `Data_Lengkap_Warga_RT002_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
 export const generateExcelTemplate = async () => {
@@ -134,6 +250,9 @@ export const generateExcelTemplate = async () => {
     { header: 'BLOK (Wajib)', key: 'block', width: 15 },
     { header: 'NOMOR (Wajib)', key: 'number', width: 15 },
     { header: 'NAMA KEPALA KELUARGA (Wajib)', key: 'headOfFamily', width: 35 },
+    { header: 'JENIS KELAMIN (Laki-laki/Perempuan)', key: 'gender', width: 25 },
+    { header: 'TANGGAL LAHIR (YYYY-MM-DD)', key: 'birthDate', width: 25 },
+    { header: 'AGAMA', key: 'religion', width: 20 },
     { header: 'NAMA PEMILIK (Opsional)', key: 'ownerName', width: 35 },
     { header: 'TELEPON', key: 'phone', width: 20 },
     { header: 'STATUS HUNIAN (Occupied/Empty/Business)', key: 'status', width: 35 },
@@ -145,6 +264,7 @@ export const generateExcelTemplate = async () => {
     { header: 'JUMLAH IBU HAMIL', key: 'pregnantCount', width: 25 },
     { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
     { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
+    { header: 'JUMLAH REMAJA', key: 'teenagerCount', width: 25 },
     { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
     { header: 'JUMLAH JANDA', key: 'widowCount', width: 25 },
     { header: 'STATUS IURAN AIR (Lunas/Belum Lunas)', key: 'paymentStatusAir', width: 35 },
@@ -170,6 +290,9 @@ export const generateExcelTemplate = async () => {
     block: 'C5',
     number: '01',
     headOfFamily: 'Budi Santoso',
+    gender: 'Laki-laki',
+    birthDate: '1985-05-20',
+    religion: 'Islam',
     ownerName: 'Ahmad Dahlan',
     phone: '081234567890',
     status: 'Occupied',
@@ -181,6 +304,7 @@ export const generateExcelTemplate = async () => {
     pregnantCount: 0,
     babyCount: 0,
     toddlerCount: 1,
+    teenagerCount: 1,
     elderlyCount: 0,
     widowCount: 0,
     paymentStatusAir: 'Lunas',
@@ -196,12 +320,13 @@ export const generateExcelTemplate = async () => {
   worksheet.addRow(['2. Status Hunian harus diisi salah satu dari: Occupied, Empty, atau Business.']);
   worksheet.addRow(['3. Status Kepemilikan harus diisi: Tetap, Kontrak, atau Kost.']);
   worksheet.addRow(['4. Status Iuran (Air/Sampah) harus diisi: Lunas atau Belum Lunas.']);
-  worksheet.addRow(['5. Kolom Jumlah (Kendaraan, Ibu Hamil, Bayi, Balita, Lansia, Janda) diisi dengan angka.']);
+  worksheet.addRow(['5. Kolom Jumlah (Kendaraan, Ibu Hamil, Bayi, Balita, Remaja, Lansia, Janda) diisi dengan angka.']);
+  worksheet.addRow(['6. Format Tanggal adalah YYYY-MM-DD (Contoh: 1990-01-31).']);
 
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, 'Template_Data_Warga_RT002.xlsx');
+  saveAs(blob, 'Template_Data_Warga_Lengkap_RT002.xlsx');
 };
 
 export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
@@ -232,22 +357,31 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     // If block is empty or looks like an instruction row, skip
     if (!block || !number || block.startsWith('PETUNJUK') || block.match(/^\d+\./)) return;
 
-    const ownerName = row.getCell(4 + offset).text?.trim() || undefined;
-    const phone = row.getCell(5 + offset).text?.trim() || undefined;
-    const statusRaw = row.getCell(6 + offset).text?.trim() || undefined;
-    const residenceTypeRaw = row.getCell(7 + offset).text?.trim() || undefined;
-    const occupantsRaw = row.getCell(8 + offset).value;
-    const education = row.getCell(9 + offset).text?.trim() || undefined;
-    const jobCategory = row.getCell(10 + offset).text?.trim() || undefined;
-    const vehicleCountRaw = row.getCell(11 + offset).value;
-    const pregnantCountRaw = row.getCell(12 + offset).value;
-    const babyCountRaw = row.getCell(13 + offset).value;
-    const toddlerCountRaw = row.getCell(14 + offset).value;
-    const elderlyCountRaw = row.getCell(15 + offset).value;
-    const widowCountRaw = row.getCell(16 + offset).value;
-    const paymentStatusAirRaw = row.getCell(17 + offset).text?.trim() || undefined;
-    const paymentStatusSampahRaw = row.getCell(18 + offset).text?.trim() || undefined;
-    const accessCode = row.getCell(19 + offset).text?.trim() || undefined;
+    const genderRaw = row.getCell(4 + offset).text?.trim() || undefined;
+    const birthDate = row.getCell(5 + offset).text?.trim() || undefined;
+    const religion = row.getCell(6 + offset).text?.trim() || undefined;
+    const ownerName = row.getCell(7 + offset).text?.trim() || undefined;
+    const phone = row.getCell(8 + offset).text?.trim() || undefined;
+    const statusRaw = row.getCell(9 + offset).text?.trim() || undefined;
+    const residenceTypeRaw = row.getCell(10 + offset).text?.trim() || undefined;
+    const occupantsRaw = row.getCell(11 + offset).value;
+    const education = row.getCell(12 + offset).text?.trim() || undefined;
+    const jobCategory = row.getCell(13 + offset).text?.trim() || undefined;
+    const vehicleCountRaw = row.getCell(14 + offset).value;
+    const pregnantCountRaw = row.getCell(15 + offset).value;
+    const babyCountRaw = row.getCell(16 + offset).value;
+    const toddlerCountRaw = row.getCell(17 + offset).value;
+    const teenagerCountRaw = row.getCell(18 + offset).value;
+    const elderlyCountRaw = row.getCell(19 + offset).value;
+    const widowCountRaw = row.getCell(20 + offset).value;
+    const paymentStatusAirRaw = row.getCell(21 + offset).text?.trim() || undefined;
+    const paymentStatusSampahRaw = row.getCell(22 + offset).text?.trim() || undefined;
+    const accessCode = row.getCell(23 + offset).text?.trim() || undefined;
+
+    // Map gender
+    let gender: 'Laki-laki' | 'Perempuan' | undefined = undefined;
+    if (genderRaw?.toLowerCase() === 'laki-laki' || genderRaw?.toLowerCase() === 'pria') gender = 'Laki-laki';
+    else if (genderRaw?.toLowerCase() === 'perempuan' || genderRaw?.toLowerCase() === 'wanita') gender = 'Perempuan';
 
     // Map status
     let status: 'Occupied' | 'Empty' | 'Business' | undefined = undefined;
@@ -275,6 +409,9 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       block,
       number,
       headOfFamily,
+      ...(gender !== undefined && { gender }),
+      ...(birthDate !== undefined && { birthDate }),
+      ...(religion !== undefined && { religion }),
       ...(ownerName !== undefined && { ownerName }),
       ...(phone !== undefined && { phone }),
       ...(status !== undefined && { status }),
@@ -286,6 +423,7 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       ...(pregnantCountRaw !== null && pregnantCountRaw !== undefined && pregnantCountRaw !== '' && { pregnantCount: Number(pregnantCountRaw) }),
       ...(babyCountRaw !== null && babyCountRaw !== undefined && babyCountRaw !== '' && { babyCount: Number(babyCountRaw) }),
       ...(toddlerCountRaw !== null && toddlerCountRaw !== undefined && toddlerCountRaw !== '' && { toddlerCount: Number(toddlerCountRaw) }),
+      ...(teenagerCountRaw !== null && teenagerCountRaw !== undefined && teenagerCountRaw !== '' && { teenagerCount: Number(teenagerCountRaw) }),
       ...(elderlyCountRaw !== null && elderlyCountRaw !== undefined && elderlyCountRaw !== '' && { elderlyCount: Number(elderlyCountRaw) }),
       ...(widowCountRaw !== null && widowCountRaw !== undefined && widowCountRaw !== '' && { widowCount: Number(widowCountRaw) }),
       ...(paymentStatusAir !== undefined && { paymentStatusAir }),
@@ -296,3 +434,4 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
 
   return data;
 };
+

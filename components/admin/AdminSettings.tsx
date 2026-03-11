@@ -101,7 +101,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 
   const handleSaveConfig = () => {
     setPdfConfig(localConfig);
-    localStorage.setItem('pdf_config', JSON.stringify(localConfig));
+    localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(localConfig)));
     alert('Konfigurasi surat tersimpan!');
   };
 

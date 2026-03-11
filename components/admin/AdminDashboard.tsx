@@ -21,6 +21,7 @@ import { PopulationReportManager } from './PopulationReportManager';
 import { EventManager } from './EventManager';
 import { AssetManager } from './AssetManager';
 import { GuestManager } from './GuestManager';
+import { DemographicAnalytics } from './DemographicAnalytics';
 import { AdvancedAnalytics } from './AdvancedAnalytics';
 import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
@@ -100,6 +101,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <EventManager events={events} />;
       case 'analytics':
         return <AdvancedAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />;
+      case 'demographics':
+        return <DemographicAnalytics houses={houses} />;
       case 'audit':
         return <AuditLogManager logs={auditLogs} />;
       case 'content':

@@ -34,6 +34,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Administrasi", 
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
+        { id: 'demographics', icon: PieChart, label: 'Demografi Warga' },
         { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },
         { id: 'services', icon: FileText, label: 'Layanan & Surat' },
         { id: 'finance', icon: DollarSign, label: 'Keuangan' },

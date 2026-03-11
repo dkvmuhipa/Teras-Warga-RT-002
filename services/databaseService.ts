@@ -329,26 +329,50 @@ export const deepSanitize = (data: any, seen = new WeakSet()): any => {
   if (data === null || typeof data !== 'object') {
     return data;
   }
+  
+  // Handle Dates
   if (data instanceof Date) {
-    return data;
+    return data.toISOString();
   }
+
+  // Handle circular references
   if (seen.has(data)) {
-    return null;
+    return "[Circular]";
   }
-  seen.add(data);
-  if (Array.isArray(data)) {
-    return data.map(item => deepSanitize(item, seen));
-  }
-  if (data.nodeType || (data.nativeEvent && data.target)) {
+  
+  // Avoid complex objects like Google Maps, DOM elements, or React elements
+  if (
+    data.nodeType || 
+    (data.nativeEvent && data.target) || 
+    (data.$$typeof) || // React element
+    (data.constructor && ['Y2', 'Ka', 'Map', 'Marker', 'google'].some(name => data.constructor.name.includes(name)))
+  ) {
     return undefined;
   }
+
+  seen.add(data);
+
+  if (Array.isArray(data)) {
+    return data.map(item => deepSanitize(item, seen)).filter(i => i !== undefined);
+  }
+
   const clean: any = {};
-  Object.keys(data).forEach(key => {
-    const value = data[key];
-    if (value !== undefined && typeof value !== 'function') {
-      clean[key] = deepSanitize(value, seen);
-    }
-  });
+  try {
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      // Skip functions and undefined
+      if (value !== undefined && typeof value !== 'function') {
+        const sanitized = deepSanitize(value, seen);
+        if (sanitized !== undefined) {
+          clean[key] = sanitized;
+        }
+      }
+    });
+  } catch (e) {
+    console.warn("Error sanitizing object key:", e);
+    return "[Complex Object]";
+  }
+  
   return clean;
 };
 

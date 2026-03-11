@@ -416,7 +416,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   const handleUpdateLetter = async (id: string, s: string) => await updateLetterStatus(id, s);
   const handleDeleteLetter = async (id: string) => await deleteLetterFromDb(id);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof PdfConfig) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setLocalConfig(prev => ({ ...prev, [field]: reader.result as string })); reader.readAsDataURL(file); } };
-  const handleSaveConfig = () => { try { setPdfConfig(localConfig); localStorage.setItem('pdf_config', JSON.stringify(localConfig)); alert("Konfigurasi tersimpan!"); } catch (e) { alert("Gagal menyimpan."); } };
+  const handleSaveConfig = () => { try { setPdfConfig(localConfig); localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(localConfig))); alert("Konfigurasi tersimpan!"); } catch (e) { alert("Gagal menyimpan."); } };
 
   const handleDeleteMarketItem = async (id: string) => { if(confirm("Hapus iklan ini?")) await deleteMarketItem(id); };
   const handleMarkSold = async (id: string) => { if(confirm("Tandai terjual?")) await updateMarketItemStatus(id, 'Sold'); };

@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
-import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId } from '../../services/databaseService';
+import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
 import { GuestReportForm } from '../GuestReportForm';
@@ -153,7 +153,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     try { 
       const updated = [item, ...localHistory]; 
       setLocalHistory(updated); 
-      localStorage.setItem('userRequestHistory', JSON.stringify(updated)); 
+      // Use deepSanitize to prevent circular structure errors
+      localStorage.setItem('userRequestHistory', JSON.stringify(deepSanitize(updated))); 
     } catch (e) { console.error("Error saving history", e); } 
   };
 

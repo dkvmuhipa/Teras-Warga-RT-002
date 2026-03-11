@@ -12,9 +12,18 @@ export const HeroSection = () => {
         
         const fetchWeather = () => {
             // Fetch weather for Palu (Huntap 2 Tondo)
-            fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,weather_code')
-                .then(res => res.json())
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,weather_code', { signal: controller.signal })
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    return res.json();
+                })
                 .then(data => {
+                    clearTimeout(timeoutId);
+                    if (!data || !data.current) throw new Error("Invalid weather data");
+
                     const code = data.current.weather_code;
                     let condition = 'Cerah';
                     let icon = <Sun size={24} className="text-amber-300 animate-spin-slow" />;
@@ -52,7 +61,16 @@ export const HeroSection = () => {
                         icon
                     });
                 })
-                .catch(err => console.error("Error fetching weather:", err));
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    console.error("Error fetching weather:", err);
+                    // Set a default/fallback state instead of just logging
+                    setWeather(prev => prev || {
+                        temp: 30,
+                        condition: 'Cerah',
+                        icon: <Sun size={24} className="text-amber-300 animate-spin-slow" />
+                    });
+                });
         };
 
         fetchWeather();
