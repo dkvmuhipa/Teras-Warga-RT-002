@@ -23,6 +23,8 @@ export const PublicActivity: React.FC = () => {
     houseId: ''
   });
 
+  const [activityAttendance, setActivityAttendance] = useState<Attendance[]>([]);
+
   useEffect(() => {
     const unsubscribe = subscribeToActivities((data) => {
       // Filter only upcoming or ongoing activities
@@ -30,6 +32,15 @@ export const PublicActivity: React.FC = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (selectedActivity) {
+      const unsubscribe = subscribeToAttendance(selectedActivity.id, setActivityAttendance);
+      return () => unsubscribe();
+    } else {
+      setActivityAttendance([]);
+    }
+  }, [selectedActivity]);
 
   const handleScan = async (result: any) => {
     if (result && selectedActivity) {
@@ -41,11 +52,26 @@ export const PublicActivity: React.FC = () => {
           return;
         }
 
+        // Check for duplicates
+        const trimmedName = residentForm.name.trim().toLowerCase();
+        const trimmedHouseId = residentForm.houseId.trim().toLowerCase();
+
+        const isDuplicate = activityAttendance.some(
+          a => a.houseId.trim().toLowerCase() === trimmedHouseId || 
+               a.residentName.trim().toLowerCase() === trimmedName
+        );
+
+        if (isDuplicate) {
+          alert("Anda atau rumah Anda sudah tercatat hadir dalam kegiatan ini!");
+          setIsScanModalOpen(false);
+          return;
+        }
+
         try {
           await addAttendanceToDb({
             activityId: selectedActivity.id,
-            residentName: residentForm.name,
-            houseId: residentForm.houseId,
+            residentName: residentForm.name.trim(),
+            houseId: residentForm.houseId.trim(),
             timestamp: new Date().toISOString()
           });
           setIsScanModalOpen(false);
