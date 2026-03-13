@@ -353,7 +353,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
                         <div>
                             <h3 className="text-2xl font-black text-slate-800 mb-1">Posyandu Digital</h3>
-                            <p className="text-slate-500 text-sm font-medium">Monitoring kesehatan Balita, Ibu Hamil, dan Lansia secara digital.</p>
+                            <p className="text-slate-500 text-sm font-medium">Monitoring kesehatan Bayi, Balita, Remaja, Dewasa, Ibu Hamil, dan Lansia secara digital.</p>
                         </div>
                     </div>
                 </Link>

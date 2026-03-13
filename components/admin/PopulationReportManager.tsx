@@ -44,6 +44,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     pregnantCount: 0,
     babyCount: 0,
     toddlerCount: 0,
+    teenagerCount: 0,
+    adultCount: 0,
     elderlyCount: 0,
     widowCount: 0,
   });
@@ -60,6 +62,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     let currentPregnant = 0;
     let currentBaby = 0;
     let currentToddler = 0;
+    let currentTeenager = 0;
+    let currentAdult = 0;
     let currentElderly = 0;
     let currentWidow = 0;
     let currentTotal = 0;
@@ -70,6 +74,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         currentPregnant += house.pregnantCount || 0;
         currentBaby += house.babyCount || 0;
         currentToddler += house.toddlerCount || 0;
+        currentTeenager += house.teenagerCount || 0;
+        currentAdult += house.adultCount || 0;
         currentElderly += house.elderlyCount || 0;
         currentWidow += house.widowCount || 0;
       }
@@ -85,6 +91,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       pregnantCount: currentPregnant,
       babyCount: currentBaby,
       toddlerCount: currentToddler,
+      teenagerCount: currentTeenager,
+      adultCount: currentAdult,
       elderlyCount: currentElderly,
       widowCount: currentWidow,
     }));
@@ -168,7 +176,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Kelompok Rentan</span>
           </div>
           <h3 className="text-3xl font-black text-slate-900">
-            {(latestReport?.pregnantCount || 0) + (latestReport?.babyCount || 0) + (latestReport?.toddlerCount || 0) + (latestReport?.elderlyCount || 0) + (latestReport?.widowCount || 0)}
+            {(latestReport?.pregnantCount || 0) + (latestReport?.babyCount || 0) + (latestReport?.toddlerCount || 0) + (latestReport?.teenagerCount || 0) + (latestReport?.adultCount || 0) + (latestReport?.elderlyCount || 0) + (latestReport?.widowCount || 0)}
             <span className="text-xs font-bold text-slate-400"> Jiwa</span>
           </h3>
           <div className="mt-2 flex items-center gap-1 text-xs font-bold text-slate-500">
@@ -517,11 +525,13 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-2">
               <Heart size={14} /> Kelompok Rentan (Real-time)
             </h4>
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {[
                 { label: 'Hamil', key: 'pregnantCount' },
                 { label: 'Bayi', key: 'babyCount' },
                 { label: 'Balita', key: 'toddlerCount' },
+                { label: 'Remaja', key: 'teenagerCount' },
+                { label: 'Dewasa', key: 'adultCount' },
                 { label: 'Lansia', key: 'elderlyCount' },
                 { label: 'Janda', key: 'widowCount' }
               ].map(field => (

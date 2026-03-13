@@ -7,7 +7,7 @@ import {
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest } from '../../types';
 import { HeroSection } from '../HeroSection';
-import { WeatherDetails } from '../WeatherDetails';
+import { DigitalSummary } from './DigitalSummary';
 import { ServiceStats } from '../ServiceStats';
 import { HouseMap } from '../HouseMap';
 import { Card } from '../ui/Card';
@@ -74,7 +74,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
       <HeroSection />
 
-      <WeatherDetails />
+      <DigitalSummary />
 
       <ServiceStats houses={houses} reports={reports} letters={letters} />
 

@@ -46,6 +46,7 @@ export interface House {
   hasBaby?: boolean;     // Bayi
   hasToddler?: boolean;  // Balita
   hasTeenager?: boolean; // Remaja
+  hasAdult?: boolean;    // Dewasa
   hasElderly?: boolean;  // Lansia
   hasWidow?: boolean;    // Janda
 
@@ -54,6 +55,7 @@ export interface House {
   babyCount?: number;
   toddlerCount?: number;
   teenagerCount?: number;
+  adultCount?: number;
   elderlyCount?: number;
   widowCount?: number;
 
@@ -88,6 +90,7 @@ export interface ResidentRegistration {
   babyCount?: number;
   toddlerCount?: number;
   teenagerCount?: number;
+  adultCount?: number;
   elderlyCount?: number;
   widowCount?: number;
   ktpUrl?: string;
@@ -476,6 +479,8 @@ export interface PopulationReport {
   pregnantCount?: number;
   babyCount?: number;
   toddlerCount?: number;
+  teenagerCount?: number;
+  adultCount?: number;
   elderlyCount?: number;
   widowCount?: number;
   
@@ -511,13 +516,44 @@ export interface HealthRecord {
   id: string;
   residentName: string;
   houseId: string;
-  category: 'Bayi' | 'Balita' | 'Ibu Hamil' | 'Lansia';
+  category: 'Bayi' | 'Balita' | 'Remaja' | 'Dewasa' | 'Ibu Hamil' | 'Lansia';
   date: string; // ISO String
   weight?: number; // kg
   height?: number; // cm
+  headCircumference?: number; // cm (for babies)
+  lila?: number; // Lingkar Lengan Atas (cm)
   bloodPressure?: string; // e.g., "120/80"
+  bloodSugar?: number; // mg/dL (for elderly)
+  cholesterol?: number; // mg/dL (for elderly)
+  uricAcid?: number; // mg/dL (for elderly)
   heartRate?: number; // bpm
   temperature?: number; // Celsius
+  immunizationType?: string; // e.g., "BCG", "DPT"
+  vitaminA?: boolean; // Vitamin A status
+  deworming?: boolean; // Obat Cacing status
+  complaints?: string; // Keluhan (for elderly)
   notes?: string;
   officerName: string; // Who recorded the data
+}
+
+export interface UMKMOrder {
+  id: string;
+  umkmId: string;
+  umkmName?: string;
+  customerName: string;
+  customerPhone: string;
+  houseId: string;
+  customerAddress?: string;
+  items: string | {
+    name: string;
+    quantity: number;
+    price: number;
+  }[];
+  totalAmount?: number;
+  totalPrice?: number;
+  status: 'Pending' | 'Processing' | 'Completed' | 'Cancelled';
+  orderDate: string;
+  createdAt?: string;
+  pickupDate?: string;
+  notes?: string;
 }

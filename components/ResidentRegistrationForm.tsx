@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { User, Home, Phone, Users, Send, CheckCircle, ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, FileText, Camera } from 'lucide-react';
+import { User, Home, Phone, Users, Send, CheckCircle, ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, FileText, Camera, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/Button';
 import { addResidentRegistrationToDb, uploadImageToStorage } from '../services/databaseService';
 
@@ -31,6 +31,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     babyCount: 0,
     toddlerCount: 0,
     teenagerCount: 0,
+    adultCount: 0,
     elderlyCount: 0,
     widowCount: 0,
     familyMembers: [] as { name: string; nik?: string; gender: 'Laki-laki' | 'Perempuan'; relation: any; birthDate?: string; job?: string }[]
@@ -230,6 +231,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
               { label: 'Bayi', field: 'babyCount', icon: Baby },
               { label: 'Balita', field: 'toddlerCount', icon: Smile },
               { label: 'Remaja', field: 'teenagerCount', icon: Users },
+              { label: 'Dewasa', field: 'adultCount', icon: ShieldCheck },
               { label: 'Lansia', field: 'elderlyCount', icon: Accessibility },
               { label: 'Janda', field: 'widowCount', icon: User },
             ].map((item) => (

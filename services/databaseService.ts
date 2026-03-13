@@ -44,6 +44,7 @@ const REPORTS_COL = "reports";
 const LETTERS_COL = "letters"; 
 const INVENTORY_COL = "inventory";
 const UMKM_COL = "umkm"; 
+const UMKM_ORDERS_COL = "umkmOrders";
 const NOTIFICATIONS_COL = "notifications";
 const POLLS_COL = "polls";
 const RONDA_LOGS_COL = "rondaLogs";
@@ -63,6 +64,8 @@ const AUDIT_LOGS_COL = "auditLogs";
 const ACTIVITIES_COL = "activities";
 const ATTENDANCE_COL = "attendance";
 const HEALTH_RECORDS_COL = "healthRecords";
+const FAQ_COL = "faq";
+const EVENTS_COL = "events";
 
 // --- AUDIT LOGS SERVICES ---
 export const logAction = async (action: string, details: string) => {
@@ -348,7 +351,8 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
   
   // Avoid complex objects like Google Maps, DOM elements, or React elements
   try {
-    const constructorName = data.constructor?.name;
+    const constructor = data.constructor;
+    const constructorName = constructor?.name;
     const isComplex = 
       data.nodeType || 
       data instanceof Element ||
@@ -360,7 +364,12 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
         (constructorName.length <= 2 && /^[A-Z]/.test(constructorName))
       )) ||
       data.gm_bindings_ || 
-      data.gm_accessors_;
+      data.gm_accessors_ ||
+      data.__gm ||
+      (typeof constructor === 'function' && (
+        constructor.toString().includes('google.maps') ||
+        constructor.toString().includes('gm_')
+      ));
 
     if (isComplex) {
       return undefined;
@@ -889,6 +898,64 @@ export const deleteHealthRecordFromDb = async (id: string) => {
     try { await deleteDoc(doc(db, HEALTH_RECORDS_COL, id)); } catch (e) { console.error("Error deleting health record:", e); }
 };
 
+// --- FAQ SERVICES ---
+export const subscribeToFAQ = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, FAQ_COL));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to FAQ:", error);
+    });
+};
+
+export const addFAQToDb = async (faq: any) => {
+    try {
+        const { id, ...data } = faq;
+        await addDoc(collection(db, FAQ_COL), deepSanitize(data));
+    } catch (e) { console.error("Error adding FAQ:", e); }
+};
+
+export const updateFAQInDb = async (id: string, updates: any) => {
+    try { await updateDoc(doc(db, FAQ_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating FAQ:", e); }
+};
+
+export const deleteFAQFromDb = async (id: string) => {
+    try { await deleteDoc(doc(db, FAQ_COL, id)); } catch (e) { console.error("Error deleting FAQ:", e); }
+};
+
+// --- EVENTS SERVICES ---
+export const subscribeToEvents = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, EVENTS_COL), orderBy("date", "asc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to events:", error);
+        const qSimple = query(collection(db, EVENTS_COL));
+        onSnapshot(qSimple, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            data.sort((a:any, b:any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            callback(data);
+        });
+    });
+};
+
+export const addEventToDb = async (event: any) => {
+    try {
+        const { id, ...data } = event;
+        await addDoc(collection(db, EVENTS_COL), deepSanitize(data));
+    } catch (e) { console.error("Error adding event:", e); }
+};
+
+export const updateEventInDb = async (id: string, updates: any) => {
+    try { await updateDoc(doc(db, EVENTS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating event:", e); }
+};
+
+export const deleteEventFromDb = async (id: string) => {
+    try { await deleteDoc(doc(db, EVENTS_COL, id)); } catch (e) { console.error("Error deleting event:", e); }
+};
+
 // --- 3. CASHFLOW ---
 export const addTransactionToDb = async (transaction: any) => {
   try {
@@ -1074,6 +1141,33 @@ export const updateUMKMInDb = async (id: string, updates: any) => {
 
 export const deleteUMKMFromDb = async (id: string) => {
   try { await deleteDoc(doc(db, UMKM_COL, id)); } catch (e) { console.error("Error deleting UMKM:", e); }
+};
+
+export const addUMKMOrderToDb = async (order: any) => {
+  try {
+    const { id, ...data } = order;
+    await addDoc(collection(db, UMKM_ORDERS_COL), deepSanitize(data));
+  } catch (e) { console.error("Error adding UMKM order:", e); }
+};
+
+export const updateUMKMOrderStatus = async (id: string, status: string) => {
+  try { await updateDoc(doc(db, UMKM_ORDERS_COL, id), { status }); } catch (e) { console.error("Error updating UMKM order status:", e); }
+};
+
+export const subscribeToUMKMOrders = (callback: (data: any[]) => void) => {
+  const q = query(collection(db, UMKM_ORDERS_COL), orderBy("orderDate", "desc"));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    callback(data);
+  }, (error) => {
+    console.error("Error subscribing to UMKM orders:", error);
+    const qSimple = query(collection(db, UMKM_ORDERS_COL));
+    onSnapshot(qSimple, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        data.sort((a:any, b:any) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+        callback(data);
+    });
+  });
 };
 
 // --- 10. POLLS (E-VOTING) ---
@@ -1410,6 +1504,24 @@ export const seedDatabase = async (initialData?: any) => {
           for (const b of initialData.bills) {
               const { id, ...data } = b;
               await addDoc(collection(db, BILLS_COL), deepSanitize(data));
+          }
+      }
+
+      // Seed FAQ
+      const faqSnap = await getDocs(collection(db, FAQ_COL));
+      if (faqSnap.empty && initialData.faq && initialData.faq.length > 0) {
+          for (const f of initialData.faq) {
+              const { id, ...data } = f;
+              await addDoc(collection(db, FAQ_COL), deepSanitize(data));
+          }
+      }
+
+      // Seed Events
+      const eventsSnap = await getDocs(collection(db, EVENTS_COL));
+      if (eventsSnap.empty && initialData.events && initialData.events.length > 0) {
+          for (const ev of initialData.events) {
+              const { id, ...data } = ev;
+              await addDoc(collection(db, EVENTS_COL), deepSanitize(data));
           }
       }
 

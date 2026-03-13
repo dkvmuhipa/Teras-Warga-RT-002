@@ -121,6 +121,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     pregnantCount: 0,
     babyCount: 0,
     toddlerCount: 0,
+    teenagerCount: 0,
+    adultCount: 0,
     elderlyCount: 0,
     widowCount: 0,
     familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
@@ -286,6 +288,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 pregnantCount: houseData.pregnantCount || 0,
                 babyCount: houseData.babyCount || 0,
                 toddlerCount: houseData.toddlerCount || 0,
+                teenagerCount: houseData.teenagerCount || 0,
+                adultCount: houseData.adultCount || 0,
                 elderlyCount: houseData.elderlyCount || 0
               });
             }
@@ -371,6 +375,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       pregnantCount: 0,
       babyCount: 0,
       toddlerCount: 0,
+      teenagerCount: 0,
+      adultCount: 0,
       elderlyCount: 0,
       widowCount: 0,
       familyMembers: [],
@@ -482,6 +488,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       pregnantCount: house.pregnantCount || 0,
       babyCount: house.babyCount || 0,
       toddlerCount: house.toddlerCount || 0,
+      teenagerCount: house.teenagerCount || 0,
+      adultCount: house.adultCount || 0,
       elderlyCount: house.elderlyCount || 0,
       widowCount: house.widowCount || 0,
       familyMembers: house.familyMembers || [],
@@ -1277,6 +1285,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                                     babyCount: reg.babyCount,
                                     toddlerCount: reg.toddlerCount,
                                     teenagerCount: reg.teenagerCount,
+                                    adultCount: reg.adultCount,
                                     elderlyCount: reg.elderlyCount,
                                     widowCount: reg.widowCount,
                                     ktpUrl: reg.ktpUrl,
@@ -1639,15 +1648,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       </div>
                     </div>
                     
-                    {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.babyCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0 || (selectedResident.widowCount || 0) > 0) && (
+                    {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.babyCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.teenagerCount || 0) > 0 || (selectedResident.adultCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0 || (selectedResident.widowCount || 0) > 0) && (
                       <div className="p-4 bg-rose-50 border border-rose-100 rounded-3xl">
                         <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none mb-3">Kelompok Rentan</p>
                         <div className="flex flex-wrap gap-2">
                           {(selectedResident.pregnantCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.pregnantCount} Ibu Hamil</span>}
-                          {(selectedResident.babyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.babyCount} Bayi</span>}
-                          {(selectedResident.toddlerCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.toddlerCount} Balita</span>}
-                          {(selectedResident.elderlyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.elderlyCount} Lansia</span>}
-                          {(selectedResident.widowCount || 0) > 0 && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.widowCount} Janda</span>}
+                          {(selectedResident.babyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-cyan-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.babyCount} Bayi</span>}
+                          {(selectedResident.toddlerCount || 0) > 0 && <span className="px-3 py-1 bg-white text-orange-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.toddlerCount} Balita</span>}
+                          {(selectedResident.teenagerCount || 0) > 0 && <span className="px-3 py-1 bg-white text-indigo-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.teenagerCount} Remaja</span>}
+                          {(selectedResident.adultCount || 0) > 0 && <span className="px-3 py-1 bg-white text-emerald-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.adultCount} Dewasa</span>}
+                          {(selectedResident.elderlyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-purple-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.elderlyCount} Lansia</span>}
+                          {(selectedResident.widowCount || 0) > 0 && <span className="px-3 py-1 bg-white text-slate-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.widowCount} Janda</span>}
                         </div>
                       </div>
                     )}
@@ -1833,7 +1844,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
               <label className="block text-xs font-bold mb-3 text-slate-700">Kelompok Rentan (Jumlah Jiwa)</label>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Ibu Hamil</label>
                   <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.pregnantCount} onChange={e => setFormData({...formData, pregnantCount: parseInt(e.target.value) || 0})} min={0} />
@@ -1845,6 +1856,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 <div>
                   <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Balita</label>
                   <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.toddlerCount} onChange={e => setFormData({...formData, toddlerCount: parseInt(e.target.value) || 0})} min={0} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Remaja</label>
+                  <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.teenagerCount} onChange={e => setFormData({...formData, teenagerCount: parseInt(e.target.value) || 0})} min={0} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Dewasa</label>
+                  <input type="number" className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" value={formData.adultCount} onChange={e => setFormData({...formData, adultCount: parseInt(e.target.value) || 0})} min={0} />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase tracking-wider">Lansia</label>

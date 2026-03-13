@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration
+  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -27,7 +27,7 @@ import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck } from 'lucide-react';
-import { CHECKPOINTS } from '../../constants';
+import { CHECKPOINTS, RT_NAME } from '../../constants';
 
 interface AdminDashboardProps {
   houses: House[];
@@ -60,11 +60,12 @@ interface AdminDashboardProps {
   guestReports: any[];
   inventoryLogs: any[];
   auditLogs: any[];
+  faqItems: FAQItem[];
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs
+  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, faqItems
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -100,7 +101,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'audit':
         return <AuditLogManager logs={auditLogs} />;
       case 'content':
-        return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} events={events} />;
+        return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} events={events} faqItems={faqItems} />;
       case 'officials':
         return <OfficialManagement officials={officials} />;
       case 'notifications':
@@ -187,7 +188,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               
               <div className="flex items-center gap-3 pl-2">
                 <div className="hidden md:block text-right">
-                  <p className="text-sm font-bold text-slate-800 leading-none">Admin RT 002</p>
+                  <p className="text-sm font-bold text-slate-800 leading-none">Admin {RT_NAME}</p>
                   <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mt-1">Online</p>
                 </div>
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">

@@ -14,6 +14,8 @@ import { ShieldAlert } from 'lucide-react';
 import { generateDashboardSummary } from '../../services/geminiService';
 import { Button } from '../ui/Button';
 
+import { CHECKPOINTS, RT_NAME } from '../../constants';
+
 interface DashboardOverviewProps {
   houses: House[];
   cashFlow: CashFlow[];
@@ -150,7 +152,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Halo, Admin! 👋</h2>
-          <p className="text-slate-500 font-medium mt-1">Berikut adalah ringkasan aktivitas RT 002 hari ini.</p>
+          <p className="text-slate-500 font-medium mt-1">Berikut adalah ringkasan aktivitas {RT_NAME} hari ini.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={handleGenerateSummary} className="bg-indigo-600 hover:bg-indigo-700">

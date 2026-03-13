@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Search, User, MessageCircle, MapPin, Phone, Star, Clock, Instagram, Globe, Plus, ChevronRight, ExternalLink, ShoppingBag, Info } from 'lucide-react';
+import { Search, User, MessageCircle, MapPin, Phone, Star, Clock, Instagram, Globe, Plus, ChevronRight, ExternalLink, ShoppingBag, Info, Package, Send, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UMKM } from '../../types';
+import { UMKM, UMKMOrder } from '../../types';
 import { SmartImage } from '../SmartImage';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { addUMKMOrderToDb } from '../../services/databaseService';
 
 interface PublicUMKMProps {
   umkmData: UMKM[];
@@ -15,13 +16,50 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
   const [filterCategory, setFilterCategory] = useState('All');
   const [selectedUMKM, setSelectedUMKM] = useState<UMKM | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
   
+  const [orderForm, setOrderForm] = useState({
+    customerName: '',
+    customerPhone: '',
+    customerAddress: '',
+    items: '',
+    notes: ''
+  });
+
   const categories = ['All', 'Kuliner', 'Jasa', 'Fashion', 'Retail', 'Kerajinan', 'Lainnya'];
   
   const filteredUMKM = umkmData.filter(u => 
     (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.description.toLowerCase().includes(searchTerm.toLowerCase())) && 
     (filterCategory === 'All' || u.category === filterCategory)
   );
+
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUMKM) return;
+
+    const newOrder: Omit<UMKMOrder, 'id'> = {
+      umkmId: selectedUMKM.id,
+      umkmName: selectedUMKM.name,
+      customerName: orderForm.customerName,
+      customerPhone: orderForm.customerPhone,
+      customerAddress: orderForm.customerAddress,
+      houseId: orderForm.customerAddress, // Using address as houseId for now
+      items: orderForm.items,
+      totalPrice: 0, 
+      status: 'Pending',
+      orderDate: new Date().toISOString(),
+      notes: orderForm.notes
+    };
+
+    await addUMKMOrderToDb(newOrder);
+    setOrderSuccess(true);
+    setTimeout(() => {
+      setOrderSuccess(false);
+      setIsOrderModalOpen(false);
+      setOrderForm({ customerName: '', customerPhone: '', customerAddress: '', items: '', notes: '' });
+    }, 3000);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -278,26 +316,97 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button 
+                onClick={() => setIsOrderModalOpen(true)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-200 py-4 rounded-2xl flex items-center justify-center gap-3 font-black text-sm uppercase tracking-widest"
+              >
+                <ShoppingBag size={20} /> Pesan Sekarang
+              </Button>
+              <Button 
                 onClick={() => window.open(`https://wa.me/${selectedUMKM.contact.replace(/^0/, '62').replace(/\D/g, '')}?text=Halo, saya tertarik dengan produk ${selectedUMKM.name}.`, '_blank')}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-200 py-4 rounded-2xl flex items-center justify-center gap-3 font-black text-sm uppercase tracking-widest"
               >
                 <MessageCircle size={20} /> Hubungi via WhatsApp
               </Button>
-              {selectedUMKM.socialMedia && selectedUMKM.socialMedia.length > 0 && (
-                <div className="flex gap-2">
-                  {selectedUMKM.socialMedia.map((sm, i) => (
-                    <Button 
-                      key={i}
-                      onClick={() => window.open(sm.url, '_blank')}
-                      className="p-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl transition-all"
-                    >
-                      {sm.platform === 'Instagram' ? <Instagram size={20} /> : <Globe size={20} />}
-                    </Button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        title={`Pesan dari ${selectedUMKM?.name}`}
+      >
+        {orderSuccess ? (
+          <div className="py-12 text-center space-y-6">
+            <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 size={48} />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900">Pesanan Terkirim!</h3>
+            <p className="text-slate-500 font-medium">Terima kasih telah mendukung UMKM warga. Penjual akan segera menghubungi Anda.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleOrderSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Nama Lengkap</label>
+                <input 
+                  required
+                  type="text" 
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                  value={orderForm.customerName}
+                  onChange={e => setOrderForm({...orderForm, customerName: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Nomor WhatsApp</label>
+                <input 
+                  required
+                  type="tel" 
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                  value={orderForm.customerPhone}
+                  onChange={e => setOrderForm({...orderForm, customerPhone: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Alamat / Blok Rumah</label>
+                <input 
+                  required
+                  type="text" 
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                  value={orderForm.customerAddress}
+                  onChange={e => setOrderForm({...orderForm, customerAddress: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Pesanan (Item & Jumlah)</label>
+                <textarea 
+                  required
+                  rows={3}
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none"
+                  placeholder="Contoh: 2 Nasi Goreng, 1 Es Teh"
+                  value={orderForm.items}
+                  onChange={e => setOrderForm({...orderForm, items: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Catatan Tambahan (Opsional)</label>
+                <input 
+                  type="text" 
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                  value={orderForm.notes}
+                  onChange={e => setOrderForm({...orderForm, notes: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <Button 
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl flex items-center justify-center gap-3 font-black text-sm uppercase tracking-widest shadow-xl shadow-blue-200"
+            >
+              <Send size={20} /> Kirim Pesanan
+            </Button>
+          </form>
         )}
       </Modal>
     </motion.div>

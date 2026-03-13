@@ -56,6 +56,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     let totalPregnant = 0;
     let totalBabies = 0;
     let totalToddlers = 0;
+    let totalTeenagers = 0;
+    let totalAdults = 0;
     let totalElderly = 0;
     let totalWidows = 0;
 
@@ -65,6 +67,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
         totalPregnant += (h.pregnantCount || 0);
         totalBabies += (h.babyCount || 0);
         totalToddlers += (h.toddlerCount || 0);
+        totalTeenagers += (h.teenagerCount || 0);
+        totalAdults += (h.adultCount || 0);
         totalElderly += (h.elderlyCount || 0);
         totalWidows += (h.widowCount || 0);
 
@@ -111,6 +115,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
       totalPregnant,
       totalBabies,
       totalToddlers,
+      totalTeenagers,
+      totalAdults,
       totalElderly,
       totalWidows,
       totalOccupied: houses.filter(h => h.status === 'Occupied').length
@@ -120,14 +126,16 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
   const { 
     allResidents, religions, educations, jobs, 
     totalVehicles, totalPregnant, totalBabies, 
-    totalToddlers, totalElderly, totalWidows, totalOccupied 
+    totalToddlers, totalTeenagers, totalAdults,
+    totalElderly, totalWidows, totalOccupied 
   } = stats;
 
   const totalResidents = allResidents.length || 1; // Prevent division by zero
   
   // Age distribution
   const ageGroups = {
-    balita: allResidents.filter(r => r.age <= 5).length,
+    bayi: allResidents.filter(r => r.age < 1).length,
+    balita: allResidents.filter(r => r.age >= 1 && r.age <= 5).length,
     anak: allResidents.filter(r => r.age > 5 && r.age <= 12).length,
     remaja: allResidents.filter(r => r.age > 12 && r.age <= 18).length,
     dewasa: allResidents.filter(r => r.age > 18 && r.age <= 55).length,
@@ -135,7 +143,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
   };
 
   const ageDistribution = [
-    { name: 'Balita (0-5)', value: ageGroups.balita, color: '#10b981' },
+    { name: 'Bayi (0-1)', value: ageGroups.bayi, color: '#06b6d4' },
+    { name: 'Balita (1-5)', value: ageGroups.balita, color: '#10b981' },
     { name: 'Anak (6-12)', value: ageGroups.anak, color: '#3b82f6' },
     { name: 'Remaja (13-18)', value: ageGroups.remaja, color: '#6366f1' },
     { name: 'Dewasa (19-55)', value: ageGroups.dewasa, color: '#8b5cf6' },
@@ -536,10 +545,11 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
               >
                 {[
                   { label: 'Ibu Hamil', value: totalPregnant, icon: Heart, color: 'rose' },
-                  { label: 'Bayi (0-11 bln)', value: totalBabies, icon: Baby, color: 'sky' },
-                  { label: 'Balita (1-5 thn)', value: totalToddlers, icon: Sparkles, color: 'emerald' },
-                  { label: 'Remaja', value: allResidents.filter(r => r.age > 12 && r.age <= 18).length, icon: Users, color: 'indigo' },
-                  { label: 'Lansia (55+)', value: totalElderly, icon: User, color: 'amber' },
+                  { label: 'Bayi', value: totalBabies, icon: Baby, color: 'sky' },
+                  { label: 'Balita', value: totalToddlers, icon: Sparkles, color: 'emerald' },
+                  { label: 'Remaja', value: totalTeenagers, icon: Users, color: 'indigo' },
+                  { label: 'Dewasa', value: totalAdults, icon: UserCheck, color: 'emerald' },
+                  { label: 'Lansia', value: totalElderly, icon: User, color: 'amber' },
                   { label: 'Janda', value: totalWidows, icon: Heart, color: 'pink' }
                 ].map((item, i) => (
                   <div key={i} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:bg-slate-50 transition-all">
