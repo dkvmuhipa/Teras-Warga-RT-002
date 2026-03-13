@@ -36,19 +36,19 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, n
       className="space-y-8"
     >
       {/* Navigation Tabs */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm">
-        <div className="flex items-center gap-3 px-2">
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-            {activeTab === 'announcements' && <Megaphone size={24} />}
-            {activeTab === 'news' && <BookOpen size={24} />}
-            {activeTab === 'polls' && <Vote size={24} />}
-            {activeTab === 'umkm' && <ShoppingBag size={24} />}
-            {activeTab === 'gallery' && <Image size={24} />}
-            {activeTab === 'events' && <Calendar size={24} />}
-            {activeTab === 'faq' && <HelpCircle size={24} />}
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-6 bg-white p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-3 px-2 w-full lg:w-auto">
+          <div className="p-2.5 md:p-3 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl">
+            {activeTab === 'announcements' && <Megaphone size={20} className="md:w-6 md:h-6" />}
+            {activeTab === 'news' && <BookOpen size={20} className="md:w-6 md:h-6" />}
+            {activeTab === 'polls' && <Vote size={20} className="md:w-6 md:h-6" />}
+            {activeTab === 'umkm' && <ShoppingBag size={20} className="md:w-6 md:h-6" />}
+            {activeTab === 'gallery' && <Image size={20} className="md:w-6 md:h-6" />}
+            {activeTab === 'events' && <Calendar size={20} className="md:w-6 md:h-6" />}
+            {activeTab === 'faq' && <HelpCircle size={20} className="md:w-6 md:h-6" />}
           </div>
           <div>
-            <h2 className="text-lg font-black text-slate-800 tracking-tight">
+            <h2 className="text-base md:text-lg font-black text-slate-800 tracking-tight">
               {activeTab === 'announcements' && 'Konten Pengumuman'}
               {activeTab === 'news' && 'Konten Berita'}
               {activeTab === 'polls' && 'Konten Voting'}
@@ -57,11 +57,11 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, n
               {activeTab === 'events' && 'Konten Acara'}
               {activeTab === 'faq' && 'Konten FAQ'}
             </h2>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Manajemen Konten</p>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Manajemen Konten</p>
           </div>
         </div>
         
-        <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] border border-slate-200/50 shadow-inner w-full md:w-auto overflow-x-auto">
+        <div className="flex bg-slate-100 p-1 rounded-xl sm:rounded-[1.5rem] border border-slate-200/50 shadow-inner w-full lg:w-auto overflow-x-auto no-scrollbar">
           {[
             { id: 'announcements', icon: Megaphone, label: 'Pengumuman' },
             { id: 'news', icon: BookOpen, label: 'Berita' },
@@ -74,14 +74,14 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, n
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)} 
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+              className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-2xl text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                 activeTab === tab.id 
                   ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
                   : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
               }`}
             >
-              <tab.icon size={16} />
-              <span>{tab.label}</span>
+              <tab.icon size={14} className="sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
+              <span className={activeTab === tab.id ? 'inline' : 'hidden sm:inline'}>{tab.label}</span>
             </button>
           ))}
         </div>

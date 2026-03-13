@@ -41,6 +41,7 @@ import { PublicInfo } from './components/public/PublicInfo';
 import { PublicMap } from './components/public/PublicMap';
 import { PublicDocuments } from './components/public/PublicDocuments';
 import { PublicActivity } from './components/public/PublicActivity';
+import { PublicWasteBank } from './components/public/PublicWasteBank';
 import { PublicHealth } from './components/public/PublicHealth';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
@@ -269,6 +270,7 @@ export const App = () => {
                             <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
                             <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={faqItems} activePatrol={activePatrol} />} />
                             <Route path="/kegiatan" element={<PublicActivity />} />
+                            <Route path="/sampah" element={<PublicWasteBank houseId={localStorage.getItem('resident_house_id') || ''} houses={houses} />} />
                             <Route path="/kesehatan" element={<PublicHealth />} />
                         </Routes>
                     </div>

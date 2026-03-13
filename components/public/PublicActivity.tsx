@@ -19,9 +19,14 @@ export const PublicActivity: React.FC = () => {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
   const [residentForm, setResidentForm] = useState({
-    name: '',
-    houseId: ''
+    name: localStorage.getItem('resident_name') || '',
+    houseId: localStorage.getItem('resident_house_id') || ''
   });
+
+  const handleFormChange = (field: 'name' | 'houseId', value: string) => {
+    setResidentForm(prev => ({ ...prev, [field]: value }));
+    localStorage.setItem(`resident_${field === 'name' ? 'name' : 'house_id'}`, value);
+  };
 
   const [activityAttendance, setActivityAttendance] = useState<Attendance[]>([]);
 
@@ -124,7 +129,7 @@ export const PublicActivity: React.FC = () => {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                 placeholder="Masukkan nama Anda"
                 value={residentForm.name}
-                onChange={e => setResidentForm({...residentForm, name: e.target.value})}
+                onChange={e => handleFormChange('name', e.target.value)}
               />
             </div>
             <div>
@@ -134,7 +139,7 @@ export const PublicActivity: React.FC = () => {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                 placeholder="Contoh: C10-08"
                 value={residentForm.houseId}
-                onChange={e => setResidentForm({...residentForm, houseId: e.target.value})}
+                onChange={e => handleFormChange('houseId', e.target.value)}
               />
             </div>
           </div>

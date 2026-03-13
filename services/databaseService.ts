@@ -66,6 +66,9 @@ const ATTENDANCE_COL = "attendance";
 const HEALTH_RECORDS_COL = "healthRecords";
 const FAQ_COL = "faq";
 const EVENTS_COL = "events";
+const WASTE_DEPOSITS_COL = "wasteDeposits";
+const WASTE_PRICES_COL = "wastePrices";
+const WASTE_BALANCES_COL = "wasteBalances";
 
 // --- AUDIT LOGS SERVICES ---
 export const logAction = async (action: string, details: string) => {
@@ -1379,6 +1382,96 @@ export const subscribeToNews = (callback: (data: any[]) => void) => {
 
 
 // --- SEEDING & AUTO-MIGRATION ---
+// --- WASTE BANK SERVICES ---
+export const subscribeToWasteDeposits = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, WASTE_DEPOSITS_COL), orderBy("date", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to waste deposits:", error);
+    });
+};
+
+export const addWasteDepositToDb = async (deposit: any) => {
+    try {
+        await addDoc(collection(db, WASTE_DEPOSITS_COL), deepSanitize(deposit));
+        await logAction("Waste Deposit Created", `Resident: ${deposit.residentName}, Type: ${deposit.type}`);
+    } catch (e) {
+        console.error("Error adding waste deposit:", e);
+        throw e;
+    }
+};
+
+export const updateWasteDepositStatus = async (id: string, status: 'Confirmed', totalValue: number, houseId: string) => {
+    try {
+        const batch = writeBatch(db);
+        
+        // Update deposit status
+        const depositRef = doc(db, WASTE_DEPOSITS_COL, id);
+        batch.update(depositRef, { status });
+
+        // Update house balance
+        const balanceRef = doc(db, WASTE_BALANCES_COL, houseId);
+        const balanceSnap = await getDoc(balanceRef);
+        
+        if (balanceSnap.exists()) {
+            batch.update(balanceRef, {
+                totalBalance: increment(totalValue),
+                lastUpdated: new Date().toISOString()
+            });
+        } else {
+            batch.set(balanceRef, {
+                houseId,
+                totalBalance: totalValue,
+                lastUpdated: new Date().toISOString()
+            });
+        }
+
+        await batch.commit();
+        await logAction("Waste Deposit Confirmed", `ID: ${id}, Value: ${totalValue}`);
+    } catch (e) {
+        console.error("Error confirming waste deposit:", e);
+        throw e;
+    }
+};
+
+export const deleteWasteDepositFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, WASTE_DEPOSITS_COL, id));
+        await logAction("Waste Deposit Deleted", `ID: ${id}`);
+    } catch (e) {
+        console.error("Error deleting waste deposit:", e);
+        throw e;
+    }
+};
+
+export const subscribeToWastePrices = (callback: (data: any[]) => void) => {
+    return onSnapshot(collection(db, WASTE_PRICES_COL), (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    });
+};
+
+export const updateWastePriceInDb = async (id: string, pricePerUnit: number) => {
+    try {
+        await updateDoc(doc(db, WASTE_PRICES_COL, id), { pricePerUnit });
+    } catch (e) {
+        console.error("Error updating waste price:", e);
+        throw e;
+    }
+};
+
+export const subscribeToWasteBalance = (houseId: string, callback: (data: any) => void) => {
+    return onSnapshot(doc(db, WASTE_BALANCES_COL, houseId), (doc) => {
+        if (doc.exists()) {
+            callback({ ...doc.data(), id: doc.id });
+        } else {
+            callback(null);
+        }
+    });
+};
+
 export const seedDatabase = async (initialData?: any) => {
     try {
       // If no initialData provided, use dummy data or fetch from a source

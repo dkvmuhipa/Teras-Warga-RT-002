@@ -536,6 +536,33 @@ export interface HealthRecord {
   officerName: string; // Who recorded the data
 }
 
+// Bank Sampah Digital
+export interface WasteDeposit {
+  id: string;
+  houseId: string;
+  residentName: string;
+  date: string; // ISO String
+  type: 'Plastik' | 'Kertas' | 'Logam' | 'Minyak Jelantah' | 'Lainnya';
+  weight: number; // kg or liter
+  pricePerUnit: number;
+  totalValue: number;
+  status: 'Pending' | 'Confirmed';
+  officerName?: string;
+}
+
+export interface WasteBalance {
+  houseId: string;
+  totalBalance: number;
+  lastUpdated: string;
+}
+
+export interface WastePrice {
+  id: string;
+  type: string;
+  pricePerUnit: number;
+  unit: 'kg' | 'liter';
+}
+
 export interface UMKMOrder {
   id: string;
   umkmId: string;

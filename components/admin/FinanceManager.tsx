@@ -110,16 +110,16 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
       className="space-y-8"
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Keuangan & Kas</h2>
-          <p className="text-slate-500 font-medium mt-1">Kelola transparansi pemasukan dan pengeluaran RT 002.</p>
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div className="w-full lg:w-auto">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Keuangan & Kas</h2>
+          <p className="text-sm md:text-slate-500 font-medium mt-1">Kelola transparansi pemasukan dan pengeluaran RT 002.</p>
         </div>
-        <div className="flex gap-3">
-          <div className="flex items-center gap-2 px-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
-            <Calendar size={16} className="text-slate-400" />
+        <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+          <div className="flex items-center gap-2 px-3 bg-white border border-slate-200 rounded-xl shadow-sm flex-1 sm:flex-none">
+            <Calendar size={14} className="text-slate-400" />
             <select 
-              className="bg-transparent py-2.5 text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer" 
+              className="bg-transparent py-2.5 text-[10px] font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" 
               value={selectedMonth} 
               onChange={e => setSelectedMonth(e.target.value)}
             >
@@ -133,29 +133,29 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
           </div>
           <button 
             onClick={() => generateCashFlowReportPDF(cashFlow, selectedMonth, pdfConfig)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-xs transition-all shadow-sm"
           >
-            <Download size={18} /> Laporan PDF
+            <Download size={16} /> <span className="hidden sm:inline">Laporan PDF</span><span className="sm:hidden">PDF</span>
           </button>
-          <button onClick={() => { resetForm(); setIsModalOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all">
-            <Plus size={18} /> Catat Transaksi
+          <button onClick={() => { resetForm(); setIsModalOpen(true); }} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all">
+            <Plus size={16} /> <span className="hidden sm:inline">Catat Transaksi</span><span className="sm:hidden">Catat</span>
           </button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <motion.div 
           variants={itemVariants}
-          className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-[2rem] shadow-lg shadow-indigo-600/20 flex items-center gap-5 group hover:scale-[1.02] transition-transform relative overflow-hidden"
+          className="bg-gradient-to-br from-indigo-600 to-violet-700 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-lg shadow-indigo-600/20 flex items-center gap-3 sm:gap-5 group hover:scale-[1.02] transition-transform relative overflow-hidden sm:col-span-2 lg:col-span-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="p-4 bg-white/20 text-white rounded-2xl backdrop-blur-sm border border-white/20">
-            <Wallet size={24} />
+          <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="p-2.5 sm:p-4 bg-white/20 text-white rounded-xl sm:rounded-2xl backdrop-blur-sm border border-white/20">
+            <Wallet size={18} className="sm:w-6 sm:h-6" />
           </div>
           <div className="relative z-10 text-white">
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Total Saldo</p>
-            <h3 className="text-3xl font-black">Rp {balance.toLocaleString()}</h3>
+            <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-80">Total Saldo</p>
+            <h3 className="text-lg sm:text-3xl font-black">Rp {balance.toLocaleString()}</h3>
           </div>
         </motion.div>
 
@@ -166,41 +166,41 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
           <motion.div 
             key={i}
             variants={itemVariants}
-            className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 group hover:shadow-xl hover:shadow-slate-200/50 transition-all"
+            className="bg-white p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-3 sm:gap-5 group hover:shadow-xl hover:shadow-slate-200/50 transition-all"
           >
-            <div className={`p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-2xl group-hover:scale-110 transition-transform`}>
-              <stat.icon size={24} />
+            <div className={`p-2.5 sm:p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-xl sm:rounded-2xl group-hover:scale-110 transition-transform`}>
+              <stat.icon size={18} className="sm:w-6 sm:h-6" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-              <h3 className="text-2xl font-black text-slate-900">Rp {stat.value.toLocaleString()}</h3>
+              <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+              <h3 className="text-base sm:text-2xl font-black text-slate-900">Rp {stat.value.toLocaleString()}</h3>
             </div>
           </motion.div>
         ))}
       </div>
 
       {/* Charts Section */}
-      <motion.div variants={itemVariants} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-black text-slate-900 flex items-center gap-2"><TrendingUp size={20} className="text-indigo-600"/> Analitik Arus Kas</h3>
-          <div className="flex gap-2">
-             <span className="flex items-center gap-1 text-[10px] font-bold text-slate-500"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Income</span>
-             <span className="flex items-center gap-1 text-[10px] font-bold text-slate-500"><div className="w-2 h-2 rounded-full bg-rose-500"></div> Expense</span>
+      <motion.div variants={itemVariants} className="bg-white p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2"><TrendingUp size={20} className="text-indigo-600"/> Analitik Arus Kas</h3>
+          <div className="flex gap-3">
+             <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Income</span>
+             <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><div className="w-2 h-2 rounded-full bg-rose-500"></div> Expense</span>
           </div>
         </div>
-        <div className="h-[300px] w-full">
+        <div className="h-[250px] sm:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 600, fill: '#94a3b8'}} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 600, fill: '#94a3b8'}} tickFormatter={(val) => `Rp${val/1000}k`} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}} tickFormatter={(val) => `Rp${val/1000}k`} />
               <Tooltip 
                 cursor={{fill: '#f8fafc'}}
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '12px' }}
                 labelStyle={{ fontWeight: 'bold', color: '#1e293b', marginBottom: '4px' }}
               />
-              <Bar dataKey="Income" fill="#10b981" radius={[6, 6, 0, 0]} barSize={30} />
-              <Bar dataKey="Expense" fill="#f43f5e" radius={[6, 6, 0, 0]} barSize={30} />
+              <Bar dataKey="Income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar dataKey="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={20} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -208,21 +208,21 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
 
       {/* Table Section */}
       <motion.div variants={itemVariants} className="space-y-4">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm">
-          <div className="relative flex-1 md:w-80 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center bg-white p-3 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm">
+          <div className="relative flex-1 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
             <input 
               type="text" 
               placeholder="Cari transaksi..." 
-              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:border-indigo-500 outline-none transition-all"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl flex-1 sm:flex-none">
                <Filter size={14} className="text-slate-400"/>
-               <select className="bg-transparent border-none text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer" value={filterType} onChange={(e:any) => setFilterType(e.target.value)}>
+               <select className="bg-transparent border-none text-[10px] font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" value={filterType} onChange={(e:any) => setFilterType(e.target.value)}>
                  <option value="All">Semua Tipe</option>
                  <option value="Income">Pemasukan</option>
                  <option value="Expense">Pengeluaran</option>
@@ -231,17 +231,17 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
           </div>
         </div>
 
-        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-sm text-left">
+            <table className="w-full text-sm text-left min-w-[800px]">
               <thead>
                 <tr className="bg-slate-50/50 text-slate-400 font-black uppercase text-[10px] tracking-[0.15em] border-b border-slate-100">
-                  <th className="px-8 py-5">Tanggal</th>
-                  <th className="px-8 py-5">Keterangan</th>
-                  <th className="px-8 py-5">Kategori</th>
-                  <th className="px-8 py-5 text-right">Nominal</th>
-                  <th className="px-8 py-5 text-center">Tipe</th>
-                  <th className="px-8 py-5 text-center">Aksi</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5">Tanggal</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5">Keterangan</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">Kategori</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5 text-right">Nominal</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5 text-center">Tipe</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -251,44 +251,44 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
                     layout
                     className="hover:bg-slate-50/80 transition-colors group"
                   >
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-slate-100 text-slate-400 rounded-lg group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                          <Calendar size={14} />
+                    <td className="px-6 sm:px-8 py-4 sm:py-5">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-slate-100 text-slate-400 rounded-lg group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                          <Calendar size={12} className="sm:w-3.5 sm:h-3.5" />
                         </div>
-                        <span className="font-bold text-slate-500">
-                          {new Date(cf.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        <span className="font-bold text-slate-500 text-xs sm:text-sm whitespace-nowrap">
+                          {new Date(cf.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                         </span>
                       </div>
                     </td>
-                    <td className="px-8 py-5">
-                      <p className="font-black text-slate-800 text-base">{cf.description}</p>
+                    <td className="px-6 sm:px-8 py-4 sm:py-5">
+                      <p className="font-black text-slate-800 text-sm sm:text-base line-clamp-1">{cf.description}</p>
                     </td>
-                    <td className="px-8 py-5">
-                      <span className="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200">
+                    <td className="px-6 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">
+                      <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200">
                         {cf.category}
                       </span>
                     </td>
-                    <td className={`px-8 py-5 text-right font-mono font-black text-lg ${
+                    <td className={`px-6 sm:px-8 py-4 sm:py-5 text-right font-mono font-black text-sm sm:text-lg ${
                       cf.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'
                     }`}>
                       {cf.type === 'Income' ? '+' : '-'} Rp {cf.amount.toLocaleString()}
                     </td>
-                    <td className="px-8 py-5 text-center">
+                    <td className="px-6 sm:px-8 py-4 sm:py-5 text-center">
                       {cf.type === 'Income' ? (
-                        <div className="flex items-center justify-center gap-1.5 text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100 w-fit mx-auto">
-                          <TrendingUp size={14} /> Pemasukan
+                        <div className="flex items-center justify-center gap-1 text-emerald-600 bg-emerald-50 px-2 sm:px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-100 w-fit mx-auto">
+                          <TrendingUp size={12} /> <span className="hidden sm:inline">Pemasukan</span>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-1.5 text-rose-600 bg-rose-50 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-rose-100 w-fit mx-auto">
-                          <TrendingDown size={14} /> Pengeluaran
+                        <div className="flex items-center justify-center gap-1 text-rose-600 bg-rose-50 px-2 sm:px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-rose-100 w-fit mx-auto">
+                          <TrendingDown size={12} /> <span className="hidden sm:inline">Pengeluaran</span>
                         </div>
                       )}
                     </td>
-                    <td className="px-8 py-5 text-center">
-                       <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => openEdit(cf)} className="text-slate-400 hover:text-indigo-600 font-bold text-xs">Edit</button>
-                          <button onClick={() => handleDelete(cf.id)} className="text-slate-400 hover:text-rose-600 font-bold text-xs">Hapus</button>
+                    <td className="px-6 sm:px-8 py-4 sm:py-5 text-center">
+                       <div className="flex justify-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => openEdit(cf)} className="text-slate-400 hover:text-indigo-600 font-bold text-[10px] sm:text-xs">Edit</button>
+                          <button onClick={() => handleDelete(cf.id)} className="text-slate-400 hover:text-rose-600 font-bold text-[10px] sm:text-xs">Hapus</button>
                        </div>
                     </td>
                   </motion.tr>

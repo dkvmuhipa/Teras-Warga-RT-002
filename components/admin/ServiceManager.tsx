@@ -256,58 +256,60 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Layanan & Aduan</h2>
-          <p className="text-slate-500 font-medium mt-1">Pusat pengelolaan surat pengantar dan laporan warga.</p>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Layanan & Aduan</h2>
+          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">Pusat pengelolaan surat pengantar dan laporan warga.</p>
         </div>
         
-        <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] border border-slate-200/50 shadow-inner w-full md:w-auto">
-          <button 
-            onClick={() => setActiveTab('letters')} 
-            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
-              activeTab === 'letters' 
-                ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-            }`}
-          >
-            <FileText size={16} />
-            <span>Surat ({letters.filter(l => l.status === 'Pending').length})</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('reports')} 
-            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
-              activeTab === 'reports' 
-                ? 'bg-white text-rose-600 shadow-md ring-1 ring-black/5' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-            }`}
-          >
-            <AlertTriangle size={16} />
-            <span>Laporan ({reports.filter(r => r.status === 'Baru').length})</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('settings')} 
-            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
-              activeTab === 'settings' 
-                ? 'bg-white text-slate-800 shadow-md ring-1 ring-black/5' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-            }`}
-          >
-            <Settings size={16} />
-            <span>Pengaturan</span>
-          </button>
+        <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200/50 shadow-inner overflow-x-auto no-scrollbar w-full md:w-auto">
+          <div className="flex min-w-max w-full">
+            <button 
+              onClick={() => setActiveTab('letters')} 
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === 'letters' 
+                  ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+              }`}
+            >
+              <FileText size={14} className="sm:w-4 sm:h-4" />
+              <span>Surat ({letters.filter(l => l.status === 'Pending').length})</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('reports')} 
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === 'reports' 
+                  ? 'bg-white text-rose-600 shadow-md ring-1 ring-black/5' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+              }`}
+            >
+              <AlertTriangle size={14} className="sm:w-4 sm:h-4" />
+              <span>Laporan ({reports.filter(r => r.status === 'Baru').length})</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('settings')} 
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === 'settings' 
+                  ? 'bg-white text-slate-800 shadow-md ring-1 ring-black/5' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+              }`}
+            >
+              <Settings size={14} className="sm:w-4 sm:h-4" />
+              <span>Pengaturan</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {activeTab === 'reports' && (
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <p className="text-sm font-bold text-slate-600">Butuh bantuan menganalisis laporan warga?</p>
-          <Button onClick={handleAnalyzeReports} className="bg-indigo-600 hover:bg-indigo-700">
+          <Button onClick={handleAnalyzeReports} className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
             <Sparkles size={18} className="mr-2" /> {isAiLoading ? 'Menganalisis...' : 'Analisis dengan AI'}
           </Button>
         </div>
       )}
 
       {aiAnalysis && (
-        <div className="bg-slate-900 text-white p-8 rounded-[2rem] shadow-xl">
+        <div className="bg-slate-900 text-white p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl">
           <h4 className="font-bold text-lg mb-4 text-indigo-300">Hasil Analisis AI:</h4>
           <div className="prose prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
             {aiAnalysis}
@@ -316,8 +318,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
       )}
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm">
-        <div className="relative flex-1 md:w-80 group">
+      <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center bg-white p-4 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm">
+        <div className="relative flex-1 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
           <input 
             type="text" 
@@ -327,7 +329,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {activeTab === 'letters' && (
             <Button onClick={() => setIsCreatingLetter(true)} className="bg-indigo-600 hover:bg-indigo-700">
               <Plus size={18} className="mr-2" /> Buat Surat Baru
@@ -335,7 +337,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
           )}
           <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
              <Filter size={14} className="text-slate-400"/>
-             <select className="bg-transparent border-none text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer" value={filterStatus} onChange={(e:any) => setFilterStatus(e.target.value)}>
+             <select className="bg-transparent border-none text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" value={filterStatus} onChange={(e:any) => setFilterStatus(e.target.value)}>
                <option value="All">Semua Status</option>
                {activeTab === 'letters' ? (
                  <>

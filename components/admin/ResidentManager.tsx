@@ -608,81 +608,73 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       className="space-y-6 relative"
     >
       {/* Header & Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Data Warga</h2>
-          <p className="text-slate-500 font-medium mt-1">Kelola data kependudukan dan status hunian RT 002.</p>
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-6">
+        <div className="w-full lg:w-auto">
+          <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">Data Warga</h2>
+          <p className="text-[10px] sm:text-xs md:text-sm text-slate-500 font-medium mt-1">Kelola data kependudukan dan status hunian RT 002.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 w-full lg:w-auto">
           {selectedIds.size > 0 && (
-            <>
+            <div className="flex gap-2 w-full sm:w-auto">
               <button 
                 onClick={handleBulkVerify}
-                className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 font-bold text-sm transition-all shadow-sm"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl hover:bg-emerald-100 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
               >
-                <CheckCircle size={18} /> Verifikasi Terpilih
+                <CheckCircle size={14} className="md:w-4 md:h-4" /> <span>Verifikasi ({selectedIds.size})</span>
               </button>
               <button 
                 onClick={handleBulkDelete}
-                className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl hover:bg-rose-100 font-bold text-sm transition-all shadow-sm"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl hover:bg-rose-100 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
               >
-                <Trash2 size={18} /> Hapus Terpilih
+                <Trash2 size={14} className="md:w-4 md:h-4" /> <span>Hapus</span>
               </button>
-            </>
+            </div>
           )}
-          <button 
-            onClick={handleGenerateAllPins}
-            className="flex items-center gap-2 px-5 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-2xl hover:bg-amber-100 font-bold text-sm transition-all shadow-sm"
-            disabled={isGenerating}
-          >
-            {isGenerating ? 'Sedang Generate...' : 'Generate PIN Massal'}
-          </button>
-          <button 
-            onClick={handleCleanupPlaceholders}
-            className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl hover:bg-rose-100 font-bold text-sm transition-all shadow-sm"
-            disabled={isGenerating}
-          >
-            <Trash2 size={18} /> Reset Warga Default
-          </button>
-          <button 
-            onClick={() => generateProfessionalExcel(houses)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 font-bold text-sm transition-all shadow-lg shadow-emerald-600/20"
-          >
-            <Download size={18} /> Export Excel
-          </button>
           
-          {/* Import/Export Excel Actions */}
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 sm:flex flex-wrap gap-2 w-full lg:w-auto">
             <button 
-              onClick={handleDownloadTemplate}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
-              title="Download Template Excel"
+              onClick={handleGenerateAllPins}
+              className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl hover:bg-amber-100 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
+              disabled={isGenerating}
             >
-              <LayoutList size={18} /> Template
+              <Shield size={14} className="md:w-4 md:h-4" /> <span className="text-center">{isGenerating ? 'Wait...' : 'PIN Massal'}</span>
+            </button>
+            <button 
+              onClick={handleCleanupPlaceholders}
+              className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl hover:bg-rose-100 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
+              disabled={isGenerating}
+            >
+              <Trash2 size={14} className="md:w-4 md:h-4" /> <span className="text-center">Reset Default</span>
+            </button>
+            <button 
+              onClick={() => generateProfessionalExcel(houses)}
+              className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-lg shadow-emerald-600/20"
+            >
+              <Download size={14} className="md:w-4 md:h-4" /> Export
             </button>
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 font-bold text-sm transition-all shadow-sm"
+              className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
               disabled={isUploading}
-              title="Upload Data Excel"
             >
-              <Upload size={18} /> {isUploading ? 'Uploading...' : 'Import Excel'}
+              <Upload size={14} className="md:w-4 md:h-4" /> {isUploading ? '...' : 'Import'}
             </button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleUploadExcel} 
-              accept=".xlsx,.xls" 
-              className="hidden" 
-            />
           </div>
 
           <button 
             onClick={handleOpenAdd}
-            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all"
+            className="w-full lg:w-auto flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold text-xs md:text-sm shadow-lg shadow-indigo-600/20 transition-all"
           >
-            <UserPlus size={18} /> Tambah Warga
+            <UserPlus size={16} className="md:w-[18px] md:h-[18px]" /> Tambah Warga
           </button>
+          
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleUploadExcel} 
+            accept=".xlsx,.xls" 
+            className="hidden" 
+          />
         </div>
       </div>
 
@@ -690,19 +682,23 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       <ResidentAnalytics houses={houses} />
       
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-        <input 
-          type="text" 
-          placeholder="Cari warga..." 
-          className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-        />
-        <div className="flex gap-2">
+      <div className="flex flex-col lg:flex-row gap-3 bg-white p-3 md:p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
+          <input 
+            type="text" 
+            placeholder="Cari warga..." 
+            className="w-full pl-10 pr-4 py-2 md:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <div className="grid grid-cols-2 sm:flex flex-wrap gap-2">
           <div className="flex items-center gap-2 px-3 bg-slate-50 border border-slate-200 rounded-xl">
-            <Calendar size={16} className="text-slate-400" />
+            <Calendar size={14} className="text-slate-400" />
             <select 
-              className="bg-transparent py-3 text-sm font-bold outline-none" 
+              className="bg-transparent py-2 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-bold outline-none w-full" 
               value={selectedMonth} 
               onChange={e => setSelectedMonth(e.target.value)}
             >
@@ -714,34 +710,37 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               })}
             </select>
           </div>
-        </div>
-        <select className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)}>
-            <option value="all">Semua Status</option>
-            <option value="paid">Lunas</option>
-            <option value="unpaid">Belum Lunas</option>
-            <option value="occupied">Dihuni</option>
-            <option value="empty">Kosong</option>
-            <option value="business">Usaha</option>
-        </select>
-        <select className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
-            <option value="block">Urutkan Blok</option>
-            <option value="name">Urutkan Nama</option>
-        </select>
-        <div className="flex gap-2">
-            <button onClick={() => setViewMode('grid')} className={`p-3 rounded-xl ${viewMode === 'grid' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'}`}><Users size={18}/></button>
-            <button onClick={() => setViewMode('table')} className={`p-3 rounded-xl ${viewMode === 'table' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'}`} title="Tabel"><LayoutList size={18}/></button>
-            <button onClick={() => setViewMode('map')} className={`p-3 rounded-xl ${viewMode === 'map' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'}`} title="Peta"><MapPin size={18}/></button>
-            <button onClick={() => setViewMode('iuran')} className={`p-3 rounded-xl ${viewMode === 'iuran' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`} title="Laporan Iuran"><DollarSign size={18}/></button>
-            <div className="relative">
-              <button onClick={() => setViewMode('registrations')} className={`p-3 rounded-xl ${viewMode === 'registrations' ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-400'}`} title="Pendaftaran Baru">
-                <UserPlus size={18}/>
-                {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white">
-                    {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length}
-                  </span>
-                )}
-              </button>
-            </div>
+          
+          <select className="flex-1 p-2 md:p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[9px] sm:text-[10px] md:text-xs font-bold outline-none" value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)}>
+              <option value="all">Semua Status</option>
+              <option value="paid">Lunas</option>
+              <option value="unpaid">Belum Lunas</option>
+              <option value="occupied">Dihuni</option>
+              <option value="empty">Kosong</option>
+              <option value="business">Usaha</option>
+          </select>
+
+          <select className="flex-1 p-2 md:p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[9px] sm:text-[10px] md:text-xs font-bold outline-none sm:w-40" value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
+              <option value="block">Urutkan Blok</option>
+              <option value="name">Urutkan Nama</option>
+          </select>
+
+          <div className="flex gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 col-span-2 sm:col-span-1 justify-center overflow-x-auto no-scrollbar">
+              <button onClick={() => setViewMode('grid')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}><Users size={16} className="md:w-[18px] md:h-[18px]"/></button>
+              <button onClick={() => setViewMode('table')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Tabel"><LayoutList size={16} className="md:w-[18px] md:h-[18px]"/></button>
+              <button onClick={() => setViewMode('map')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'map' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Peta"><MapPin size={16} className="md:w-[18px] md:h-[18px]"/></button>
+              <button onClick={() => setViewMode('iuran')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'iuran' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Laporan Iuran"><DollarSign size={16} className="md:w-[18px] md:h-[18px]"/></button>
+              <div className="relative flex-1 sm:flex-none">
+                <button onClick={() => setViewMode('registrations')} className={`w-full p-2 rounded-lg transition-all ${viewMode === 'registrations' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Pendaftaran Baru">
+                  <UserPlus size={16} className="mx-auto md:w-[18px] md:h-[18px]"/>
+                  {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-rose-500 text-white text-[7px] md:text-[8px] font-black rounded-full flex items-center justify-center border border-white">
+                      {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length}
+                    </span>
+                  )}
+                </button>
+              </div>
+          </div>
         </div>
       </div>
 
@@ -873,15 +872,15 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div 
           variants={itemVariants}
-          className="bg-gradient-to-br from-blue-600 to-indigo-600 p-6 rounded-[2rem] shadow-lg shadow-blue-600/20 flex items-center gap-5 group hover:scale-[1.02] transition-transform relative overflow-hidden"
+          className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-lg shadow-blue-600/20 flex items-center gap-3 md:gap-5 group hover:scale-[1.02] transition-transform relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="p-4 bg-white/20 text-white rounded-2xl backdrop-blur-sm border border-white/20">
-            <Users size={24} />
+          <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="p-3 md:p-4 bg-white/20 text-white rounded-xl md:rounded-2xl backdrop-blur-sm border border-white/20">
+            <Users size={20} className="md:w-6 md:h-6" />
           </div>
           <div className="relative z-10 text-white">
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Total Warga</p>
-            <h3 className="text-2xl font-black">{totalResidents} <span className="text-xs font-bold opacity-60">Jiwa</span></h3>
+            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-80">Total Warga</p>
+            <h3 className="text-xl md:text-2xl font-black">{totalResidents} <span className="text-[10px] md:text-xs font-bold opacity-60">Jiwa</span></h3>
           </div>
         </motion.div>
 
@@ -892,14 +891,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <motion.div 
             key={i}
             variants={itemVariants}
-            className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 group hover:shadow-xl hover:shadow-slate-200/50 transition-all"
+            className="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-3 md:gap-5 group hover:shadow-xl hover:shadow-slate-200/50 transition-all"
           >
-            <div className={`p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-2xl group-hover:scale-110 transition-transform`}>
-              <stat.icon size={24} />
+            <div className={`p-3 md:p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform`}>
+              <stat.icon size={20} className="md:w-6 md:h-6" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-              <h3 className="text-2xl font-black text-slate-900">{stat.value} <span className="text-xs font-bold text-slate-400">{stat.unit}</span></h3>
+              <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+              <h3 className="text-xl md:text-2xl font-black text-slate-900">{stat.value} <span className="text-[10px] md:text-xs font-bold text-slate-400">{stat.unit}</span></h3>
             </div>
           </motion.div>
         ))}
@@ -1116,26 +1115,26 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-sm min-w-[600px]">
                     <thead className="bg-slate-50/50">
                       <tr>
-                        <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Tanggal</th>
-                        <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Nama Warga</th>
-                        <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Rumah</th>
-                        <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Jenis Iuran</th>
-                        <th className="p-4 text-right font-black text-slate-600 uppercase tracking-widest text-[10px]">Nominal</th>
-                        <th className="p-4 text-center font-black text-slate-600 uppercase tracking-widest text-[10px]">Aksi</th>
+                        <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Tanggal</th>
+                        <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Nama Warga</th>
+                        <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Rumah</th>
+                        <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px] hidden sm:table-cell">Jenis Iuran</th>
+                        <th className="p-3 md:p-4 text-right font-black text-slate-600 uppercase tracking-widest text-[10px]">Nominal</th>
+                        <th className="p-3 md:p-4 text-center font-black text-slate-600 uppercase tracking-widest text-[10px]">Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
                       {currentMonthPayments.length > 0 ? (
                         currentMonthPayments.map((payment) => (
                           <tr key={payment.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
-                            <td className="p-4 text-slate-500 font-medium">{new Date(payment.date).toLocaleDateString('id-ID')}</td>
-                            <td className="p-4 font-bold text-slate-800">{payment.headOfFamily}</td>
-                            <td className="p-4 font-mono font-black text-slate-600">{payment.block}-{payment.number}</td>
-                            <td className="p-4">
+                            <td className="p-3 md:p-4 text-slate-500 font-medium text-xs md:text-sm">{new Date(payment.date).toLocaleDateString('id-ID')}</td>
+                            <td className="p-3 md:p-4 font-bold text-slate-800 text-xs md:text-sm">{payment.headOfFamily}</td>
+                            <td className="p-3 md:p-4 font-mono font-black text-slate-600 text-xs md:text-sm">{payment.block}-{payment.number}</td>
+                            <td className="p-3 md:p-4 hidden sm:table-cell">
                               <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
                                 payment.type === 'Both' ? 'bg-indigo-50 text-indigo-600' :
                                 payment.type === 'Air' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
@@ -1143,12 +1142,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                                 {payment.type === 'Both' ? 'Air & Sampah' : payment.type === 'Air' ? 'Air Saja' : 'Sampah Saja'}
                               </span>
                             </td>
-                            <td className="p-4 text-right font-black text-slate-800">Rp {payment.amount.toLocaleString()}</td>
-                            <td className="p-4 text-center">
-                              <div className="flex items-center justify-center gap-2">
+                            <td className="p-3 md:p-4 text-right font-black text-slate-800 text-xs md:text-sm">Rp {payment.amount.toLocaleString()}</td>
+                            <td className="p-3 md:p-4 text-center">
+                              <div className="flex items-center justify-center gap-1 md:gap-2">
                                 <button 
                                   onClick={() => generateIuranReceiptPDF(payment, pdfConfig)}
-                                  className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                  className="p-1.5 md:p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                                   title="Cetak Kwitansi"
                                 >
                                   <Printer size={14} />
@@ -1161,7 +1160,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                                     setPayDate(new Date(payment.date).toISOString().split('T')[0]);
                                     setIsEditPaymentModalOpen(true);
                                   }}
-                                  className="p-2 text-slate-300 hover:text-indigo-600 transition-colors"
+                                  className="p-1.5 md:p-2 text-slate-300 hover:text-indigo-600 transition-colors"
                                   title="Edit Catatan"
                                 >
                                   <Edit2 size={14} />
@@ -1172,7 +1171,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                                       await deleteIuranPaymentFromDb(payment.id);
                                     }
                                   }}
-                                  className="p-2 text-slate-300 hover:text-rose-600 transition-colors"
+                                  className="p-1.5 md:p-2 text-slate-300 hover:text-rose-600 transition-colors"
                                   title="Hapus Catatan"
                                 >
                                   <Trash2 size={14} />
@@ -1345,112 +1344,112 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               acc[house.block].push(house);
               return acc;
             }, {} as Record<string, typeof filteredHouses>)).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'})).map(([block, houses]) => (
-              <div key={block} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="bg-slate-50 p-4 border-b border-slate-100 font-black text-slate-700">Blok {block}</div>
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-50/50">
-                    <tr>
-                      <th className="p-4"><input type="checkbox" onChange={handleSelectAll} checked={selectedIds.size === filteredHouses.length && filteredHouses.length > 0} /></th>
-                      <th className="p-4 text-left font-black text-slate-600">Nama</th>
-                      <th className="p-4 text-left font-black text-slate-600">Nomor</th>
-                      <th className="p-4 text-left font-black text-slate-600">Telepon</th>
-                      <th className="p-4 text-left font-black text-slate-600">Penghuni</th>
-                      <th className="p-4 text-left font-black text-slate-600">Status</th>
-                      <th className="p-4 text-left font-black text-slate-600">Sampah</th>
-                      <th className="p-4 text-left font-black text-slate-600">Air</th>
-                      <th className="p-4 text-left font-black text-slate-600">Tunggakan</th>
-                      <th className="p-4 text-left font-black text-slate-600">Tgl Bayar</th>
-                      <th className="p-4 text-right font-black text-slate-600">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {houses.map((house) => {
-                      const houseBills: any[] = [];
-                      const isFullyPaid = houseBills.length > 0 && houseBills.every(b => b.total === 0);
-                      const paymentStatus = isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING;
-                      
-                      const statusSampah = getPaymentStatus(house.id, 'Sampah');
-                      const statusAir = getPaymentStatus(house.id, 'Air');
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-sm min-w-[1000px]">
+                <thead className="bg-slate-50/50">
+                  <tr>
+                    <th className="p-4 w-10"><input type="checkbox" onChange={handleSelectAll} checked={selectedIds.size === filteredHouses.length && filteredHouses.length > 0} /></th>
+                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Nama</th>
+                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">No</th>
+                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Telepon</th>
+                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Jiwa</th>
+                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Status</th>
+                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Sampah</th>
+                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Air</th>
+                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Tunggakan</th>
+                    <th className="p-4 text-right font-black text-slate-600 uppercase tracking-widest text-[10px]">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {houses.map((house) => {
+                    const statusSampah = getPaymentStatus(house.id, 'Sampah');
+                    const statusAir = getPaymentStatus(house.id, 'Air');
+                    const arrears = getArrearsForHouse(house.id);
 
-                      return (
-                        <tr key={house.id} className="border-t border-slate-100">
-                          <td className="p-4"><input type="checkbox" checked={selectedIds.has(house.id)} onChange={() => handleSelectOne(house.id)} /></td>
-                          <td className="p-4 font-bold">{house.headOfFamily}</td>
-                          <td className="p-4 font-mono font-black">{house.number}</td>
-                          <td className="p-4 text-slate-600">{house.phone || '-'}</td>
-                          <td className="p-4 text-slate-600">{house.occupants || 0}</td>
-                          <td className="p-4">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                              house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                              house.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' : 
-                              'bg-amber-50 text-amber-600 border-amber-100'
-                            }`}>
-                              {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha'}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${
-                              statusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                              'bg-rose-50 text-rose-600 border-rose-100'
-                            }`}>
-                              {statusSampah === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
-                              {statusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${
-                              statusAir === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                              'bg-rose-50 text-rose-600 border-rose-100'
-                            }`}>
-                              {statusAir === PaymentStatus.PAID ? <CheckCircle size={12}/> : <XCircle size={12}/>}
-                              {statusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            {house.status === 'Occupied' ? (() => {
-                              const arrears = getArrearsForHouse(house.id);
-                              return arrears.length > 0 ? (
-                                <span className="px-2 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-lg text-[10px] font-black uppercase tracking-widest">
-                                  {arrears.length} Bln
-                                </span>
-                              ) : (
-                                <span className="text-slate-300 text-[10px] font-bold">-</span>
-                              );
-                            })() : (
-                              <span className="text-slate-300 text-[10px] font-bold">-</span>
-                            )}
-                          </td>
-                          <td className="p-4 text-slate-500 font-mono text-xs">
-                            {house.paymentDate ? new Date(house.paymentDate).toLocaleDateString('id-ID') : '-'}
-                          </td>
-                          <td className="p-4 text-right">
-                            <div className="flex justify-end gap-2">
-                              <button onClick={() => openDetail(house)} className="p-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100" title="Detail Warga"><User size={16}/></button>
-                              <button onClick={() => openPayModal(house)} className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100" title="Bayar Iuran"><DollarSign size={16}/></button>
-                              <button onClick={() => setSelectedHouseForBills(house)} className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100" title="Riwayat Tagihan"><LayoutList size={16}/></button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ))}
+                    return (
+                      <tr key={house.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4"><input type="checkbox" checked={selectedIds.has(house.id)} onChange={() => handleSelectOne(house.id)} /></td>
+                        <td className="p-4 font-bold text-slate-800">{house.headOfFamily}</td>
+                        <td className="p-4 font-mono font-black text-slate-600">{house.number}</td>
+                        <td className="p-4 text-slate-500">{house.phone || '-'}</td>
+                        <td className="p-4 text-slate-500">{house.occupants || 0}</td>
+                        <td className="p-4">
+                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                            house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-600' : 
+                            house.status === 'Empty' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-600'
+                          }`}>
+                            {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                            statusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                          }`}>
+                            {statusSampah === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
+                            {statusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                            statusAir === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                          }`}>
+                            {statusAir === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
+                            {statusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          {arrears.length > 0 ? (
+                            <span className="text-rose-600 font-black text-[10px]">{arrears.length} Bln</span>
+                          ) : (
+                            <span className="text-emerald-600 font-black text-[10px]">Nihil</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => openDetail(house)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><ChevronRight size={16}/></button>
+                            <button onClick={() => handleOpenEdit(house)} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"><Edit2 size={16}/></button>
+                            <button onClick={() => handleDelete(house.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><Trash2 size={16}/></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        ) : (
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-            <HouseMap 
-              houses={filteredHouses} 
-              isAdmin={true} 
-              reports={reports} 
-              officials={officials}
-              iuranPayments={iuranPayments}
-              onEditHouse={(h) => openDetail(h)}
-            />
-          </div>
-        )}
-      </motion.div>
+        ))}
+      </div>
+    ) : viewMode === 'map' ? (
+      <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <HouseMap 
+          houses={filteredHouses} 
+          isAdmin={true} 
+          reports={reports} 
+          officials={officials}
+          iuranPayments={iuranPayments}
+          onEditHouse={(h) => openDetail(h)}
+        />
+      </div>
+    ) : viewMode === 'iuran' ? (
+      <div className="space-y-6">
+        {/* Iuran specific content would go here */}
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
+          <p className="text-slate-500 font-bold">Laporan Iuran Sedang Dimuat...</p>
+        </div>
+      </div>
+    ) : viewMode === 'analytics' ? (
+      <div className="space-y-6">
+        <ResidentAnalytics houses={houses} />
+        <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />
+      </div>
+    ) : (
+      <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
+        <p className="text-slate-500 font-bold">Konten Sedang Dimuat...</p>
+      </div>
+    )}
+  </motion.div>
 
       {/* Resident Detail Drawer */}
       <AnimatePresence>

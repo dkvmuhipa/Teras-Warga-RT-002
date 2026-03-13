@@ -62,6 +62,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
         { id: 'activities', icon: Calendar, label: 'Presensi Kegiatan' },
+        { id: 'waste-bank', icon: Box, label: 'Bank Sampah' },
         { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
         { id: 'content', icon: Megaphone, label: 'Konten & Informasi' },
       ] 
