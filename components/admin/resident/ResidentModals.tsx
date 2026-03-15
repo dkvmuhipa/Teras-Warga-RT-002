@@ -1,0 +1,706 @@
+import React from 'react';
+import { Modal } from '../../ui/Modal';
+import { Button } from '../../ui/Button';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
+  CreditCard
+} from 'lucide-react';
+import { House } from '../../../types';
+
+interface AddEditResidentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  editingHouseId: string | null;
+  formData: any;
+  setFormData: (data: any) => void;
+  handleSaveHouse: (e: React.FormEvent) => void;
+  activeFormTab: 'basic' | 'demographics' | 'family';
+  setActiveFormTab: (tab: 'basic' | 'demographics' | 'family') => void;
+}
+
+export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
+  isOpen,
+  onClose,
+  editingHouseId,
+  formData,
+  setFormData,
+  handleSaveHouse,
+  activeFormTab,
+  setActiveFormTab
+}) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={editingHouseId ? "Edit Data Warga" : "Tambah Warga Baru"} maxWidth="max-w-7xl">
+      <form onSubmit={handleSaveHouse} className="space-y-8">
+        {/* Tab Navigation */}
+        <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] border border-slate-200">
+          <button 
+            type="button"
+            onClick={() => setActiveFormTab('basic')}
+            className={`flex-1 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${activeFormTab === 'basic' ? 'bg-white text-indigo-600 shadow-md shadow-indigo-500/10' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <div className={`p-1.5 rounded-lg ${activeFormTab === 'basic' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
+              <Home size={14} />
+            </div>
+            1. Informasi Dasar
+          </button>
+          <button 
+            type="button"
+            onClick={() => setActiveFormTab('demographics')}
+            className={`flex-1 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${activeFormTab === 'demographics' ? 'bg-white text-indigo-600 shadow-md shadow-indigo-500/10' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <div className={`p-1.5 rounded-lg ${activeFormTab === 'demographics' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
+              <Activity size={14} />
+            </div>
+            2. Demografi & Bantuan
+          </button>
+          <button 
+            type="button"
+            onClick={() => setActiveFormTab('family')}
+            className={`flex-1 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${activeFormTab === 'family' ? 'bg-white text-indigo-600 shadow-md shadow-indigo-500/10' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <div className={`p-1.5 rounded-lg ${activeFormTab === 'family' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
+              <Users size={14} />
+            </div>
+            3. Anggota Keluarga
+          </button>
+        </div>
+        <div className="min-h-[500px]">
+          <AnimatePresence mode="wait">
+            {activeFormTab === 'basic' && (
+              <motion.div 
+                key="basic"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+              >
+                {/* Section 1: Informasi Utama */}
+                <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+                  <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
+                    <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
+                      <User size={18} />
+                    </div>
+                    Informasi Utama
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kepala Keluarga (Penghuni)</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} required placeholder="Nama Lengkap..." />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Kelamin</label>
+                      <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
+                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Lahir</label>
+                      <input type="date" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nama Pemilik Rumah</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} placeholder="Nama Pemilik (Kosongkan jika sama dengan KK)" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Blok</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.block} onChange={e => setFormData({...formData, block: e.target.value})} required placeholder="A" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nomor</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} required placeholder="12" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-10">
+                  {/* Section 2: Status & Kepemilikan */}
+                  <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
+                      <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
+                        <Home size={18} />
+                      </div>
+                      Status & Kepemilikan
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Hunian</label>
+                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
+                          <option value="Occupied">Dihuni</option>
+                          <option value="Empty">Kosong</option>
+                          <option value="Business">Usaha</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Kepemilikan</label>
+                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.residenceType} onChange={e => setFormData({...formData, residenceType: e.target.value as any})}>
+                          <option value="Tetap">Pemilik (Tetap)</option>
+                          <option value="Rumah Keluarga">Rumah Keluarga</option>
+                          <option value="Kontrak">Kontrak</option>
+                          <option value="Kost">Kost</option>
+                        </select>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Penghuni (Total Jiwa)</label>
+                        <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.occupants} onChange={e => setFormData({...formData, occupants: parseInt(e.target.value) || 0})} min={1} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section: Kontak & Keamanan */}
+                  <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
+                      <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
+                        <Phone size={18} />
+                      </div>
+                      Kontak & Keamanan
+                    </h3>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Telepon / WA</label>
+                        <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="08..." />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">PIN Akses (Access Code)</label>
+                        <div className="flex gap-3">
+                          <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.accessCode} onChange={e => setFormData({...formData, accessCode: e.target.value})} placeholder="Masukkan PIN..." />
+                          <button 
+                            type="button"
+                            onClick={() => setFormData({...formData, accessCode: Math.floor(100000 + Math.random() * 900000).toString()})}
+                            className="px-6 py-4 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 whitespace-nowrap"
+                          >
+                            Generate
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeFormTab === 'demographics' && (
+              <motion.div 
+                key="demographics"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-10"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                  {/* Section 3: Data Demografi */}
+                  <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
+                      <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
+                        <Activity size={18} />
+                      </div>
+                      Demografi & Pekerjaan
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Pendidikan Terakhir</label>
+                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.education} onChange={e => setFormData({...formData, education: e.target.value})}>
+                          <option value="">Pilih...</option>
+                          <option value="SD">SD</option>
+                          <option value="SMP">SMP</option>
+                          <option value="SMA/SMK">SMA/SMK</option>
+                          <option value="D3">D3</option>
+                          <option value="S1">S1</option>
+                          <option value="S2">S2</option>
+                          <option value="S3">S3</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kategori Pekerjaan</label>
+                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.jobCategory} onChange={e => setFormData({...formData, jobCategory: e.target.value})}>
+                          <option value="">Pilih...</option>
+                          <option value="PNS">PNS / TNI / Polri</option>
+                          <option value="Pegawai Swasta">Pegawai Swasta</option>
+                          <option value="Wiraswasta">Wiraswasta / Pengusaha</option>
+                          <option value="Freelance">Pekerja Lepas / Freelance</option>
+                          <option value="Pensiunan">Pensiunan</option>
+                          <option value="Tidak Bekerja">Tidak / Belum Bekerja</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Agama</label>
+                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.religion} onChange={e => setFormData({...formData, religion: e.target.value})}>
+                          <option value="">Pilih...</option>
+                          <option value="Islam">Islam</option>
+                          <option value="Kristen">Kristen</option>
+                          <option value="Katolik">Katolik</option>
+                          <option value="Hindu">Hindu</option>
+                          <option value="Budha">Budha</option>
+                          <option value="Konghucu">Konghucu</option>
+                        </select>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Kendaraan</label>
+                        <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.vehicleCount} onChange={e => setFormData({...formData, vehicleCount: parseInt(e.target.value) || 0})} min={0} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section: Bantuan Sosial */}
+                  <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
+                      <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
+                        <DollarSign size={18} />
+                      </div>
+                      Bantuan Sosial
+                    </h3>
+                    <div className="space-y-4">
+                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
+                        <input 
+                          type="checkbox" 
+                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          checked={formData.isPKH}
+                          onChange={e => setFormData({...formData, isPKH: e.target.checked})}
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Program Keluarga Harapan (PKH)</span>
+                          <span className="text-[10px] text-slate-400 font-bold">Bantuan sosial bersyarat untuk keluarga miskin</span>
+                        </div>
+                      </label>
+                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
+                        <input 
+                          type="checkbox" 
+                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          checked={formData.isBLT}
+                          onChange={e => setFormData({...formData, isBLT: e.target.checked})}
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Bantuan Langsung Tunai (BLT)</span>
+                          <span className="text-[10px] text-slate-400 font-bold">Bantuan tunai langsung dari pemerintah</span>
+                        </div>
+                      </label>
+                      <div className="space-y-4">
+                        <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
+                          <input 
+                            type="checkbox" 
+                            className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            checked={formData.isBansosLain}
+                            onChange={e => setFormData({...formData, isBansosLain: e.target.checked})}
+                          />
+                          <div className="flex flex-col">
+                            <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Bantuan Lainnya</span>
+                            <span className="text-[10px] text-slate-400 font-bold">Sebutkan jenis bantuan sosial lainnya</span>
+                          </div>
+                        </label>
+                        {formData.isBansosLain && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                          >
+                            <input 
+                              placeholder="Sebutkan jenis bantuan..."
+                              className="w-full p-4 bg-white border border-indigo-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+                              value={formData.bansosLainName}
+                              onChange={e => setFormData({...formData, bansosLainName: e.target.value})}
+                            />
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section: Kelompok Rentan */}
+                <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+                  <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4 mb-8">
+                    <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
+                      <Users size={18} />
+                    </div>
+                    Rincian Kelompok Rentan
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6">
+                    {[
+                      { label: 'Hamil', key: 'pregnantCount' },
+                      { label: 'Bayi', key: 'babyCount' },
+                      { label: 'Balita', key: 'toddlerCount' },
+                      { label: 'Anak', key: 'childCount' },
+                      { label: 'Remaja', key: 'teenagerCount' },
+                      { label: 'Dewasa', key: 'adultCount' },
+                      { label: 'Lansia', key: 'elderlyCount' },
+                      { label: 'Janda', key: 'widowCount' },
+                    ].map((item) => (
+                      <div key={item.key} className="space-y-3">
+                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider text-center">{item.label}</label>
+                        <input 
+                          type="number" 
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-black text-center focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
+                          value={formData[item.key as keyof typeof formData] as number} 
+                          onChange={e => setFormData({...formData, [item.key]: parseInt(e.target.value) || 0})} 
+                          min={0} 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeFormTab === 'family' && (
+              <motion.div 
+                key="family"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8"
+              >
+                <div className="flex justify-between items-center bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-600/20">
+                      <Users size={24} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Daftar Anggota Keluarga</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{formData.familyMembers.length} Orang Terdaftar</p>
+                    </div>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setFormData({
+                      ...formData, 
+                      familyMembers: [...formData.familyMembers, { id: Math.random().toString(36).substr(2, 9), name: '', relation: 'Anak', nik: '', birthDate: '', gender: 'Laki-laki' }]
+                    })}
+                    className="text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 flex items-center gap-3 px-8 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-600/20 uppercase tracking-widest active:scale-95"
+                  >
+                    <UserPlus size={18} /> Tambah Anggota
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {formData.familyMembers.map((member: any, idx: number) => (
+                    <motion.div 
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      key={member.id || idx} 
+                      className="p-8 bg-white rounded-[2.5rem] border border-slate-200 space-y-6 relative group transition-all hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-500/10"
+                    >
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const newMembers = [...formData.familyMembers];
+                          newMembers.splice(idx, 1);
+                          setFormData({...formData, familyMembers: newMembers});
+                        }}
+                        className="absolute top-6 right-6 text-slate-300 hover:text-rose-500 transition-colors p-2 hover:bg-rose-50 rounded-xl"
+                      >
+                        <X size={20} />
+                      </button>
+                      
+                      <div className="space-y-5">
+                        <div>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
+                          <input 
+                            placeholder="Nama Lengkap" 
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                            value={member.name}
+                            onChange={e => {
+                              const newMembers = [...formData.familyMembers];
+                              newMembers[idx].name = e.target.value;
+                              setFormData({...formData, familyMembers: newMembers});
+                            }}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Jenis Kelamin</label>
+                            <select 
+                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                              value={member.gender || 'Laki-laki'}
+                              onChange={e => {
+                                const newMembers = [...formData.familyMembers];
+                                newMembers[idx].gender = e.target.value as any;
+                                setFormData({...formData, familyMembers: newMembers});
+                              }}
+                            >
+                              <option value="Laki-laki">Laki-laki</option>
+                              <option value="Perempuan">Perempuan</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Hubungan</label>
+                            <select 
+                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                              value={member.relation}
+                              onChange={e => {
+                                const newMembers = [...formData.familyMembers];
+                                newMembers[idx].relation = e.target.value as any;
+                                setFormData({...formData, familyMembers: newMembers});
+                              }}
+                            >
+                              <option value="Istri">Istri</option>
+                              <option value="Anak">Anak</option>
+                              <option value="Orang Tua">Orang Tua</option>
+                              <option value="Famili Lain">Famili Lain</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">NIK</label>
+                            <input 
+                              placeholder="NIK" 
+                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                              value={member.nik || ''}
+                              onChange={e => {
+                                const newMembers = [...formData.familyMembers];
+                                newMembers[idx].nik = e.target.value;
+                                setFormData({...formData, familyMembers: newMembers});
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Tgl Lahir</label>
+                            <input 
+                              type="date"
+                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                              value={member.birthDate || ''}
+                              onChange={e => {
+                                const newMembers = [...formData.familyMembers];
+                                newMembers[idx].birthDate = e.target.value;
+                                setFormData({...formData, familyMembers: newMembers});
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {formData.familyMembers.length === 0 && (
+                    <div className="md:col-span-2 xl:col-span-3 text-center p-20 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[3rem]">
+                      <div className="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center text-slate-200 mx-auto mb-8 shadow-sm">
+                        <Users size={48} />
+                      </div>
+                      <h4 className="text-lg font-black text-slate-400 uppercase tracking-widest">Belum Ada Anggota</h4>
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-2">Klik tombol di atas untuk menambahkan anggota keluarga</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="pt-10 border-t border-slate-100 flex justify-between items-center">
+          <div className="flex gap-4">
+            {activeFormTab !== 'basic' && (
+              <button 
+                type="button"
+                onClick={() => {
+                  if (activeFormTab === 'demographics') setActiveFormTab('basic');
+                  if (activeFormTab === 'family') setActiveFormTab('demographics');
+                }}
+                className="px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+              >
+                Kembali
+              </button>
+            )}
+            <button 
+              type="button" 
+              onClick={onClose}
+              className="px-8 py-4 text-xs font-black text-slate-400 hover:text-rose-500 transition-colors uppercase tracking-widest"
+            >
+              Batal
+            </button>
+          </div>
+
+          <div className="flex gap-4">
+            {activeFormTab !== 'family' ? (
+              <button 
+                type="button"
+                onClick={() => {
+                  if (activeFormTab === 'basic') setActiveFormTab('demographics');
+                  if (activeFormTab === 'demographics') setActiveFormTab('family');
+                }}
+                className="px-10 py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-100 transition-all flex items-center gap-3"
+              >
+                Lanjut <ChevronRight size={16} />
+              </button>
+            ) : (
+              <button 
+                type="submit" 
+                className="px-16 py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3"
+              >
+                <CheckCircle size={20} /> {editingHouseId ? 'Simpan Perubahan' : 'Simpan Data'}
+              </button>
+            )}
+          </div>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+interface PaymentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  payHouse: House | null;
+  payType: 'Air' | 'Sampah' | 'Both';
+  setPayType: (type: 'Air' | 'Sampah' | 'Both') => void;
+  payAmount: string;
+  setPayAmount: (amount: string) => void;
+  payDate: string;
+  setPayDate: (date: string) => void;
+  handleSavePayment: (e: React.FormEvent) => void;
+  getIndonesianMonthYear: (date: Date) => string;
+}
+
+export const PaymentModal: React.FC<PaymentModalProps> = ({
+  isOpen,
+  onClose,
+  payHouse,
+  payType,
+  setPayType,
+  payAmount,
+  setPayAmount,
+  payDate,
+  setPayDate,
+  handleSavePayment,
+  getIndonesianMonthYear
+}) => {
+  if (!payHouse) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={`Bayar Iuran: ${payHouse.headOfFamily}`}>
+      <form onSubmit={handleSavePayment} className="space-y-4">
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Rumah</p>
+          <p className="text-sm font-black text-slate-800">Blok {payHouse.block} No. {payHouse.number}</p>
+          <div className="mt-3 pt-3 border-t border-slate-200">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Periode Iuran</p>
+            <p className="text-sm font-black text-indigo-600">
+              {getIndonesianMonthYear(new Date(payDate))}
+            </p>
+          </div>
+          <p className="text-[10px] text-amber-600 font-bold mt-2 italic">* Pencatatan status iuran saja (Dana disetor ke OP Air/TPS3R)</p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Jenis Iuran</label>
+          <select 
+            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            value={payType}
+            onChange={e => setPayType(e.target.value as any)}
+          >
+            <option value="Both">Iuran Sampah & Air</option>
+            <option value="Sampah">Iuran Sampah Saja</option>
+            <option value="Air">Iuran Air Saja</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Nominal Pembayaran (Rp)</label>
+          <input 
+            type="number"
+            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            value={payAmount}
+            onChange={e => setPayAmount(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Tanggal Pembayaran</label>
+          <input 
+            type="date"
+            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            value={payDate}
+            onChange={e => setPayDate(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="pt-4">
+          <Button type="submit" className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-100">
+            Simpan Status Iuran
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+interface EditPaymentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  editingPayment: any;
+  payType: 'Air' | 'Sampah' | 'Both';
+  setPayType: (type: 'Air' | 'Sampah' | 'Both') => void;
+  payAmount: string;
+  setPayAmount: (amount: string) => void;
+  payDate: string;
+  setPayDate: (date: string) => void;
+  handleUpdatePayment: (e: React.FormEvent) => void;
+}
+
+export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
+  isOpen,
+  onClose,
+  editingPayment,
+  payType,
+  setPayType,
+  payAmount,
+  setPayAmount,
+  payDate,
+  setPayDate,
+  handleUpdatePayment
+}) => {
+  if (!editingPayment) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Catatan Iuran: ${editingPayment.headOfFamily}`}>
+      <form onSubmit={handleUpdatePayment} className="space-y-4">
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Rumah</p>
+          <p className="text-sm font-black text-slate-800">Blok {editingPayment.block} No. {editingPayment.number}</p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Jenis Iuran</label>
+          <select 
+            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            value={payType}
+            onChange={e => setPayType(e.target.value as any)}
+          >
+            <option value="Both">Iuran Sampah & Air</option>
+            <option value="Sampah">Iuran Sampah Saja</option>
+            <option value="Air">Iuran Air Saja</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Nominal Pembayaran (Rp)</label>
+          <input 
+            type="number"
+            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            value={payAmount}
+            onChange={e => setPayAmount(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Tanggal Pembayaran</label>
+          <input 
+            type="date"
+            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            value={payDate}
+            onChange={e => setPayDate(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="pt-4">
+          <Button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
+            Simpan Perubahan
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
