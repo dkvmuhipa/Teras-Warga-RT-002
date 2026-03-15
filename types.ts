@@ -454,6 +454,29 @@ export interface PopulationChangeLog {
   houseId: string;
   date: string; // ISO String
   description: string;
+  name?: string;
+  phone?: string;
+  details?: {
+    // Newcomer
+    previousAddress?: string;
+    reasonForMoving?: string;
+    familyCount?: number;
+    familyMembers?: { name: string; relationship: string; nik?: string }[];
+    residenceType?: 'Tetap' | 'Kontrak' | 'Kost';
+    vulnerability?: string[];
+    
+    // MovedOut
+    newAddress?: string;
+    
+    // Birth
+    fatherName?: string;
+    motherName?: string;
+    gender?: 'Laki-laki' | 'Perempuan';
+    
+    // Death
+    causeOfDeath?: string;
+    placeOfDeath?: string;
+  };
 }
 
 export interface PopulationReport {

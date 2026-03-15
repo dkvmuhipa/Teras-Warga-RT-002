@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
 import { generatePopulationReportPDF } from '../../services/pdfService';
+import { addPopulationLogToDb, deletePopulationLogFromDb } from '../../services/databaseService';
 import { 
   Plus, FileText, Trash2, TrendingUp, TrendingDown, 
   Users, Baby, Accessibility, Heart, User, 
@@ -27,6 +28,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   reports, onAddReport, onDeleteReport, populationLogs, setPopulationLogs, houses 
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [formData, setFormData] = useState<Omit<PopulationReport, 'id' | 'createdAt'>>({
     month: new Date().toISOString().slice(0, 7),
@@ -48,6 +50,29 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     adultCount: 0,
     elderlyCount: 0,
     widowCount: 0,
+  });
+
+  const [logFormData, setLogFormData] = useState({
+    type: 'Newcomer' as PopulationChangeLog['type'],
+    name: '',
+    phone: '',
+    houseId: '',
+    date: new Date().toISOString().split('T')[0],
+    description: '',
+    details: {
+      previousAddress: '',
+      reasonForMoving: '',
+      familyCount: 1,
+      familyMembers: [] as {name: string, relationship: string, nik?: string}[],
+      residenceType: 'Tetap' as 'Tetap' | 'Kontrak' | 'Kost',
+      vulnerability: [] as string[],
+      newAddress: '',
+      fatherName: '',
+      motherName: '',
+      gender: 'Laki-laki' as 'Laki-laki' | 'Perempuan',
+      causeOfDeath: '',
+      placeOfDeath: ''
+    }
   });
 
   const handleGenerateFromLog = () => {
@@ -105,6 +130,64 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     setIsModalOpen(false);
   };
 
+  const handleAddLog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const logData = {
+      ...logFormData,
+      id: Date.now().toString(),
+      details: logFormData.type === 'Newcomer' ? {
+        previousAddress: logFormData.details.previousAddress,
+        reasonForMoving: logFormData.details.reasonForMoving,
+        familyCount: logFormData.details.familyCount,
+        familyMembers: logFormData.details.familyCount > 1 ? logFormData.details.familyMembers : undefined,
+        residenceType: logFormData.details.residenceType,
+        vulnerability: logFormData.details.vulnerability
+      } : logFormData.type === 'MovedOut' ? {
+        newAddress: logFormData.details.newAddress,
+        reasonForMoving: logFormData.details.reasonForMoving
+      } : logFormData.type === 'Birth' ? {
+        fatherName: logFormData.details.fatherName,
+        motherName: logFormData.details.motherName,
+        gender: logFormData.details.gender
+      } : {
+        causeOfDeath: logFormData.details.causeOfDeath,
+        placeOfDeath: logFormData.details.placeOfDeath
+      }
+    };
+    
+    await addPopulationLogToDb(logData);
+    setIsLogModalOpen(false);
+    // Reset log form
+    setLogFormData({
+      type: 'Newcomer',
+      name: '',
+      phone: '',
+      houseId: '',
+      date: new Date().toISOString().split('T')[0],
+      description: '',
+      details: {
+        previousAddress: '',
+        reasonForMoving: '',
+        familyCount: 1,
+        familyMembers: [],
+        residenceType: 'Tetap',
+        vulnerability: [],
+        newAddress: '',
+        fatherName: '',
+        motherName: '',
+        gender: 'Laki-laki',
+        causeOfDeath: '',
+        placeOfDeath: ''
+      }
+    });
+  };
+
+  const handleDeleteLog = async (id: string) => {
+    if (window.confirm('Hapus log mutasi ini?')) {
+      await deletePopulationLogFromDb(id);
+    }
+  };
+
   const chartData = useMemo(() => {
     return [...reports].sort((a, b) => a.month.localeCompare(b.month)).map(r => ({
       name: r.month,
@@ -140,6 +223,12 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           <p className="text-slate-500 font-medium mt-1">Analisis pertumbuhan dan mutasi penduduk RT 02.</p>
         </div>
         <div className="flex gap-3">
+          <button 
+            onClick={() => setIsLogModalOpen(true)} 
+            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
+          >
+            <Plus size={18} /> Tambah Log Mutasi
+          </button>
           <button 
             onClick={handleGenerateFromLog} 
             className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95"
@@ -435,9 +524,69 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                       {log.houseId}
                     </div>
                   </td>
-                  <td className="p-6 text-slate-500 font-medium italic">{log.description}</td>
+                  <td className="p-6">
+                    <div className="space-y-2">
+                      <p className="text-slate-500 font-medium italic">{log.description}</p>
+                      {log.details && (
+                        <div className="text-[10px] font-bold text-slate-500 bg-slate-100/50 p-3 rounded-xl border border-slate-200/50 grid grid-cols-1 gap-1">
+                          {log.type === 'Newcomer' && (
+                            <>
+                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Asal:</span> <span className="text-blue-600">{log.details.previousAddress}</span></div>
+                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Alasan:</span> <span className="text-blue-600">{log.details.reasonForMoving}</span></div>
+                              <div className="flex justify-between"><span>Anggota:</span> <span className="text-blue-600">{log.details.familyCount} Orang</span></div>
+                              {log.details.familyMembers && log.details.familyMembers.length > 0 && (
+                                <div className="mt-2 pt-2 border-t border-slate-200/30">
+                                  <p className="text-[9px] uppercase tracking-tighter text-slate-400 mb-1">Daftar Keluarga:</p>
+                                  {log.details.familyMembers.map((m: any, i: number) => (
+                                    <div key={i} className="flex justify-between text-[9px] gap-2">
+                                      <span className="truncate">{m.name}</span>
+                                      <span className="text-slate-400 shrink-0">({m.relationship})</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {log.details.residenceType && (
+                                <div className="flex justify-between border-t border-slate-200/30 pt-1 mt-1">
+                                  <span>Status:</span> <span className="text-emerald-600">{log.details.residenceType}</span>
+                                </div>
+                              )}
+                              {log.details.vulnerability && log.details.vulnerability.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1 pt-1 border-t border-slate-200/30">
+                                  {log.details.vulnerability.map((v: string, i: number) => (
+                                    <span key={i} className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded-md text-[8px] border border-rose-100">{v}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {log.type === 'MovedOut' && (
+                            <>
+                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Tujuan:</span> <span className="text-amber-600">{log.details.newAddress}</span></div>
+                              <div className="flex justify-between"><span>Alasan:</span> <span className="text-amber-600">{log.details.reasonForMoving}</span></div>
+                            </>
+                          )}
+                          {log.type === 'Birth' && (
+                            <>
+                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Ayah:</span> <span className="text-emerald-600">{log.details.fatherName}</span></div>
+                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Ibu:</span> <span className="text-emerald-600">{log.details.motherName}</span></div>
+                              <div className="flex justify-between"><span>JK:</span> <span className="text-emerald-600">{log.details.gender}</span></div>
+                            </>
+                          )}
+                          {log.type === 'Death' && (
+                            <>
+                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Penyebab:</span> <span className="text-rose-600">{log.details.causeOfDeath}</span></div>
+                              <div className="flex justify-between"><span>Tempat:</span> <span className="text-rose-600">{log.details.placeOfDeath}</span></div>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </td>
                   <td className="p-6 text-center">
-                    <button className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
+                    <button 
+                      onClick={() => handleDeleteLog(log.id)}
+                      className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </td>
@@ -553,6 +702,309 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all active:scale-[0.98]"
           >
             Simpan Laporan Bulanan
+          </button>
+        </form>
+      </Modal>
+
+      <Modal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} title="Tambah Log Mutasi Warga" maxWidth="max-w-2xl">
+        <form onSubmit={handleAddLog} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">Jenis Mutasi</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { id: 'Newcomer', label: 'Masuk' },
+                  { id: 'MovedOut', label: 'Pindah' },
+                  { id: 'Birth', label: 'Lahir' },
+                  { id: 'Death', label: 'Wafat' }
+                ].map(type => (
+                  <button
+                    key={type.id}
+                    type="button"
+                    onClick={() => setLogFormData({ ...logFormData, type: type.id as any })}
+                    className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${logFormData.type === type.id ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-200'}`}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">Nama Warga</label>
+              <input 
+                type="text" 
+                value={logFormData.name} 
+                onChange={e => setLogFormData({ ...logFormData, name: e.target.value })} 
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                required 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">Blok Rumah</label>
+              <input 
+                type="text" 
+                value={logFormData.houseId} 
+                onChange={e => setLogFormData({ ...logFormData, houseId: e.target.value.toUpperCase() })} 
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                placeholder="C7-02"
+                required 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">No. HP</label>
+              <input 
+                type="text" 
+                value={logFormData.phone} 
+                onChange={e => setLogFormData({ ...logFormData, phone: e.target.value })} 
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">Tanggal</label>
+              <input 
+                type="date" 
+                value={logFormData.date} 
+                onChange={e => setLogFormData({ ...logFormData, date: e.target.value })} 
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                required 
+              />
+            </div>
+
+            {/* Dynamic Fields */}
+            {logFormData.type === 'Newcomer' && (
+              <>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Alamat Asal</label>
+                  <input 
+                    type="text" 
+                    value={logFormData.details.previousAddress} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, previousAddress: e.target.value } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Alasan Pindah</label>
+                  <input 
+                    type="text" 
+                    value={logFormData.details.reasonForMoving} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Anggota</label>
+                  <input 
+                    type="number" 
+                    value={logFormData.details.familyCount} 
+                    onChange={e => {
+                      const count = parseInt(e.target.value) || 1;
+                      const newMembers = count > 1 ? Array(count - 1).fill(null).map((_, i) => logFormData.details.familyMembers[i] || { name: '', relationship: '', nik: '' }) : [];
+                      setLogFormData({ 
+                        ...logFormData, 
+                        details: { 
+                          ...logFormData.details, 
+                          familyCount: count,
+                          familyMembers: newMembers
+                        } 
+                      });
+                    }} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                    min="1"
+                  />
+                </div>
+                {logFormData.details.familyCount > 1 && (
+                  <div className="col-span-2 space-y-3 p-4 bg-slate-100/50 rounded-2xl border border-slate-200">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Biodata Anggota Keluarga Lainnya</p>
+                    {logFormData.details.familyMembers.map((member, idx) => (
+                      <div key={idx} className="grid grid-cols-2 gap-2 p-3 bg-white rounded-xl border border-slate-100">
+                        <input 
+                          placeholder="Nama Lengkap"
+                          className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none"
+                          value={member.name}
+                          onChange={e => {
+                            const updated = [...logFormData.details.familyMembers];
+                            updated[idx].name = e.target.value;
+                            setLogFormData({ ...logFormData, details: { ...logFormData.details, familyMembers: updated } });
+                          }}
+                          required
+                        />
+                        <input 
+                          placeholder="Hubungan"
+                          className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none"
+                          value={member.relationship}
+                          onChange={e => {
+                            const updated = [...logFormData.details.familyMembers];
+                            updated[idx].relationship = e.target.value;
+                            setLogFormData({ ...logFormData, details: { ...logFormData.details, familyMembers: updated } });
+                          }}
+                          required
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Status Hunian</label>
+                  <select 
+                    value={logFormData.details.residenceType} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, residenceType: e.target.value as any } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                  >
+                    <option value="Tetap">Tetap</option>
+                    <option value="Kontrak">Kontrak</option>
+                    <option value="Kost">Kost</option>
+                  </select>
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Kerentanan (Pilih yang sesuai)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Ibu Hamil', 'Bayi', 'Balita', 'Lansia', 'Disabilitas', 'Janda/Duda'].map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => {
+                          const current = logFormData.details.vulnerability || [];
+                          const updated = current.includes(v) 
+                            ? current.filter(item => item !== v) 
+                            : [...current, v];
+                          setLogFormData({ ...logFormData, details: { ...logFormData.details, vulnerability: updated } });
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border transition-all ${
+                          (logFormData.details.vulnerability || []).includes(v) 
+                            ? 'bg-rose-500 text-white border-rose-500' 
+                            : 'bg-slate-50 text-slate-500 border-slate-200'
+                        }`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {logFormData.type === 'MovedOut' && (
+              <>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Alamat Tujuan</label>
+                  <input 
+                    type="text" 
+                    value={logFormData.details.newAddress} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, newAddress: e.target.value } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Alasan Pindah</label>
+                  <input 
+                    type="text" 
+                    value={logFormData.details.reasonForMoving} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+              </>
+            )}
+
+            {logFormData.type === 'Birth' && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Nama Ayah</label>
+                  <input 
+                    type="text" 
+                    value={logFormData.details.fatherName} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, fatherName: e.target.value } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Nama Ibu</label>
+                  <input 
+                    type="text" 
+                    value={logFormData.details.motherName} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, motherName: e.target.value } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Jenis Kelamin</label>
+                  <div className="flex gap-2">
+                    {['Laki-laki', 'Perempuan'].map(g => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setLogFormData({ ...logFormData, details: { ...logFormData.details, gender: g as any } })}
+                        className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${logFormData.details.gender === g ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200'}`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {logFormData.type === 'Death' && (
+              <>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Penyebab Kematian</label>
+                  <input 
+                    type="text" 
+                    value={logFormData.details.causeOfDeath} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, causeOfDeath: e.target.value } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Tempat Kematian</label>
+                  <input 
+                    type="text" 
+                    value={logFormData.details.placeOfDeath} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, placeOfDeath: e.target.value } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">
+                {logFormData.type === 'Newcomer' ? 'Catatan Kedatangan' : 
+                 logFormData.type === 'MovedOut' ? 'Catatan Kepindahan' : 
+                 logFormData.type === 'Birth' ? 'Catatan Kelahiran' : 
+                 'Catatan Kematian'}
+              </label>
+              <textarea 
+                value={logFormData.description} 
+                onChange={e => setLogFormData({ ...logFormData, description: e.target.value })} 
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all min-h-[80px] resize-none" 
+                placeholder={
+                  logFormData.type === 'Newcomer' ? 'Cth: Pindah karena tugas kerja...' : 
+                  logFormData.type === 'MovedOut' ? 'Cth: Pindah ke luar kota...' : 
+                  logFormData.type === 'Birth' ? 'Cth: Lahir normal di RS...' : 
+                  'Cth: Meninggal karena sakit...'
+                }
+              />
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-[0.98]"
+          >
+            Simpan Log Mutasi
           </button>
         </form>
       </Modal>

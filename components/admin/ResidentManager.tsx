@@ -10,10 +10,10 @@ import {
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon
 } from 'lucide-react';
-import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration } from '../../types';
+import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
-import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId } from '../../services/databaseService';
+import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId, addBillToDb, updateBillInDb } from '../../services/databaseService';
 import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -26,14 +26,60 @@ interface ResidentManagerProps {
   officials: Official[];
   pdfConfig: PdfConfig;
   iuranPayments: any[];
+  bills: Bill[];
   residentRegistrations: ResidentRegistration[];
 }
 
 type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business';
 
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
-  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, residentRegistrations 
+  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations 
 }) => {
+  const getIndonesianMonthYear = (date: Date) => {
+    const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return `${monthsId[date.getMonth()]} ${date.getFullYear()}`;
+  };
+
+  const isMonthMatch = (monthA: string, monthB: string) => {
+    if (!monthA || !monthB) return false;
+    const cleanA = monthA.trim().toLowerCase();
+    const cleanB = monthB.trim().toLowerCase();
+    if (cleanA === cleanB) return true;
+
+    const monthsId = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
+    const monthsEn = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+
+    // Helper to normalize month string (e.g. "January 2026" -> index 0, year 2026)
+    const normalize = (m: string) => {
+      const parts = m.trim().toLowerCase().split(/\s+/);
+      if (parts.length < 1) return null;
+      
+      const name = parts[0];
+      // Year is optional, if missing we just compare month index
+      const year = parts.length > 1 ? parts[1] : null;
+      
+      let index = monthsId.indexOf(name);
+      if (index === -1) index = monthsEn.indexOf(name);
+      
+      if (index === -1) return null;
+      return year ? `${index}-${year}` : `${index}`;
+    };
+
+    const normA = normalize(cleanA);
+    const normB = normalize(cleanB);
+    
+    if (!normA || !normB) return false;
+
+    // If both have years, compare both. If one is missing year, compare only month index.
+    if (normA.includes('-') && normB.includes('-')) {
+      return normA === normB;
+    }
+    
+    const indexA = normA.split('-')[0];
+    const indexB = normB.split('-')[0];
+    return indexA === indexB;
+  };
+
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
@@ -51,23 +97,37 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' }));
+  const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
   const [payHouse, setPayHouse] = useState<House | null>(null);
 
-  const getPaymentStatus = (houseId: string, type: 'Air' | 'Sampah') => {
-    const payment = iuranPayments.find(p => 
-      p.houseId === houseId && 
-      p.month === selectedMonth && 
-      (p.type === type || p.type === 'Both')
-    );
-    return payment ? PaymentStatus.PAID : PaymentStatus.PENDING;
+  const getPaymentStatus = (house: House, type: 'Air' | 'Sampah') => {
+    const houseId = house.id;
+    const payment = iuranPayments.find(p => {
+      const idMatch = String(p.houseId) === String(houseId) || 
+                      String(p.houseId) === `${house.block}-${house.number}` ||
+                      (p.block === house.block && p.number === house.number);
+      return idMatch && isMonthMatch(p.month, selectedMonth) && (p.type === type || p.type === 'Both');
+    });
+    
+    if (payment) return PaymentStatus.PAID;
+
+    // Fallback to house record if it's the current month or matches paymentDate
+    const isCurrentMonth = isMonthMatch(getIndonesianMonthYear(new Date()), selectedMonth);
+    const isDateMatch = house.paymentDate && isMonthMatch(getIndonesianMonthYear(new Date(house.paymentDate)), selectedMonth);
+    
+    if (isCurrentMonth || isDateMatch) {
+      if (type === 'Air' && house.paymentStatusAir === PaymentStatus.PAID) return PaymentStatus.PAID;
+      if (type === 'Sampah' && house.paymentStatusSampah === PaymentStatus.PAID) return PaymentStatus.PAID;
+    }
+    
+    return PaymentStatus.PENDING;
   };
   const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
   const [payAmount, setPayAmount] = useState('10000');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Calculate Iuran Summary for the selected month
-  const currentMonthPayments = iuranPayments.filter(p => p.month === selectedMonth);
+  const currentMonthPayments = iuranPayments.filter(p => isMonthMatch(p.month, selectedMonth));
   const totalCollected = currentMonthPayments.reduce((acc, p) => acc + p.amount, 0);
   const occupiedHousesList = houses.filter(h => h.status === 'Occupied');
   const paidHousesCount = new Set(currentMonthPayments.map(p => p.houseId)).size;
@@ -76,23 +136,38 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const estimatedReceivables = unpaidHousesCount * 20000;
 
   // Arrears Calculation Logic
-  const getArrearsForHouse = (houseId: string) => {
+  const getArrearsForHouse = (house: House) => {
+    const houseId = house.id;
     const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    const currentYear = 2026; // Hardcoded for this app context
-    const currentMonthIndex = new Date().getMonth(); // 0-indexed
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonthIndex = now.getMonth(); // 0-indexed
     
     const arrears: string[] = [];
     for (let i = 0; i < currentMonthIndex; i++) {
-      const monthStr = `${monthsId[i]} ${currentYear}`;
-      const hasPaid = iuranPayments.some(p => p.houseId === houseId && p.month === monthStr);
-      if (!hasPaid) {
-        arrears.push(monthStr);
+      const monthStrId = `${monthsId[i]} ${currentYear}`;
+      
+      const hasPaid = iuranPayments.some(p => {
+        const idMatch = String(p.houseId) === String(houseId) || 
+                        String(p.houseId) === `${house.block}-${house.number}` ||
+                        (p.block === house.block && p.number === house.number);
+        return idMatch && isMonthMatch(p.month, monthStrId);
+      });
+      
+      // Also check if the house record itself has a payment date for this month
+      const houseRecordPaid = house.paymentDate && 
+                             isMonthMatch(getIndonesianMonthYear(new Date(house.paymentDate)), monthStrId) &&
+                             house.paymentStatusAir === PaymentStatus.PAID &&
+                             house.paymentStatusSampah === PaymentStatus.PAID;
+
+      if (!hasPaid && !houseRecordPaid) {
+        arrears.push(monthStrId);
       }
     }
     return arrears;
   };
 
-  const totalArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h.id).length, 0);
+  const totalArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h).length, 0);
   const totalArrearsAmount = totalArrearsMonths * 20000;
 
   useEffect(() => {
@@ -389,12 +464,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     e.preventDefault();
     if (!payHouse) return;
 
-    const currentMonth = new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+    const paymentDateObj = new Date(payDate);
+    const currentMonth = getIndonesianMonthYear(paymentDateObj);
     
     // Check for duplicate payment in history for the same month
     const duplicatePayment = iuranPayments.find(p => 
       p.houseId === payHouse.id && 
-      p.month === currentMonth &&
+      isMonthMatch(p.month, currentMonth) &&
       (
         p.type === payType || 
         p.type === 'Both' || 
@@ -415,19 +491,76 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     try {
       await updateHouseData(payHouse.id, updates);
       
+      const paymentMonth = currentMonth;
+      const paymentDateIso = paymentDateObj.toISOString();
+      const amount = parseInt(payAmount) || 0;
+
       // Record iuran payment separately
       await addIuranPaymentToDb({
         houseId: payHouse.id,
         headOfFamily: payHouse.headOfFamily,
         block: payHouse.block,
         number: payHouse.number,
-        amount: parseInt(payAmount) || 0,
+        amount: amount,
         type: payType,
-        date: new Date(payDate).toISOString(),
-        month: new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' })
+        date: paymentDateIso,
+        month: paymentMonth
       });
 
-      alert('Status iuran berhasil diperbarui dan dicatat!');
+      // SYNC WITH BILLS COLLECTION
+      // Check if a bill already exists for this house and month
+      const existingBill = bills.find(b => b.houseId === payHouse.id && b.month === paymentMonth);
+      
+      const newItems = [];
+      if (payType === 'Air' || payType === 'Both') {
+        newItems.push({
+          id: Math.random().toString(36).substr(2, 9),
+          name: 'Iuran Air',
+          amount: payType === 'Both' ? amount / 2 : amount,
+          manager: 'RT 02',
+          status: 'Paid' as const,
+          paymentDate: paymentDateIso
+        });
+      }
+      if (payType === 'Sampah' || payType === 'Both') {
+        newItems.push({
+          id: Math.random().toString(36).substr(2, 9),
+          name: 'Iuran Sampah',
+          amount: payType === 'Both' ? amount / 2 : amount,
+          manager: 'RT 02',
+          status: 'Paid' as const,
+          paymentDate: paymentDateIso
+        });
+      }
+
+      if (existingBill) {
+        // Update existing bill items
+        const updatedItems = [...existingBill.items];
+        newItems.forEach(newItem => {
+          const existingItemIndex = updatedItems.findIndex(item => item.name === newItem.name);
+          if (existingItemIndex > -1) {
+            updatedItems[existingItemIndex] = { ...updatedItems[existingItemIndex], status: 'Paid', paymentDate: paymentDateIso };
+          } else {
+            updatedItems.push(newItem);
+          }
+        });
+
+        await updateBillInDb(existingBill.id, {
+          items: updatedItems,
+          total: updatedItems.reduce((acc, curr) => acc + (curr.status === 'Paid' ? 0 : curr.amount), 0)
+        });
+      } else {
+        // Create new bill
+        await addBillToDb({
+          houseId: payHouse.id,
+          month: paymentMonth,
+          dueDate: new Date(new Date(payDate).getFullYear(), new Date(payDate).getMonth(), 20).toISOString().split('T')[0],
+          items: newItems,
+          total: 0
+        });
+      }
+
+      alert('Status iuran berhasil diperbarui dan dicatat di riwayat tagihan!');
       setIsPayModalOpen(false);
       setPayHouse(null);
     } catch (error) {
@@ -445,7 +578,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         amount: parseInt(payAmount) || 0,
         type: payType,
         date: new Date(payDate).toISOString(),
-        month: new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' })
+        month: getIndonesianMonthYear(new Date(payDate))
       });
 
       alert('Catatan pembayaran berhasil diperbarui!');
@@ -534,8 +667,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     const matchesSearch = h.headOfFamily.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           h.block.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const statusSampah = getPaymentStatus(h.id, 'Sampah');
-    const statusAir = getPaymentStatus(h.id, 'Air');
+    const statusSampah = getPaymentStatus(h, 'Sampah');
+    const statusAir = getPaymentStatus(h, 'Air');
     const isDuesPaid = statusSampah === PaymentStatus.PAID && statusAir === PaymentStatus.PAID;
 
     let matchesStatus = true;
@@ -544,7 +677,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     else if (filterStatus === 'occupied') matchesStatus = h.status?.toLowerCase() === 'occupied';
     else if (filterStatus === 'empty') matchesStatus = h.status?.toLowerCase() === 'empty';
     else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business';
-    else if (filterStatus === 'arrears') matchesStatus = h.status === 'Occupied' && getArrearsForHouse(h.id).length > 0;
+    else if (filterStatus === 'arrears') matchesStatus = h.status === 'Occupied' && getArrearsForHouse(h).length > 0;
 
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
@@ -711,7 +844,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               {Array.from({ length: 12 }).map((_, i) => {
                 const d = new Date();
                 d.setMonth(d.getMonth() - i);
-                const m = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                const m = getIndonesianMonthYear(d);
                 return <option key={m} value={m}>{m}</option>;
               })}
             </select>
@@ -760,7 +893,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 <div className="mt-3 pt-3 border-t border-slate-200">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Periode Iuran</p>
                   <p className="text-sm font-black text-indigo-600">
-                    {new Date(payDate).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}
+                    {getIndonesianMonthYear(new Date(payDate))}
                   </p>
                 </div>
                 <p className="text-[10px] text-amber-600 font-bold mt-2 italic">* Pencatatan status iuran saja (Dana disetor ke OP Air/TPS3R)</p>
@@ -870,7 +1003,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <BillDetailModal 
             key="bill-detail-modal"
             house={selectedHouseForBills} 
-            bills={[]} 
+            bills={bills} 
             onClose={() => setSelectedHouseForBills(null)} 
           />
         )}
@@ -1000,9 +1133,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       onDelete={handleDelete}
                       onOpenBills={setSelectedHouseForBills}
                       onOpenPay={openPayModal}
-                      dynamicStatusAir={getPaymentStatus(house.id, 'Air')}
-                      dynamicStatusSampah={getPaymentStatus(house.id, 'Sampah')}
-                      arrears={house.status === 'Occupied' ? getArrearsForHouse(house.id) : []}
+                      dynamicStatusAir={getPaymentStatus(house, 'Air')}
+                      dynamicStatusSampah={getPaymentStatus(house, 'Sampah')}
+                      arrears={house.status === 'Occupied' ? getArrearsForHouse(house) : []}
                     />
                   ))}
                 </div>
@@ -1082,10 +1215,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   <div className="flex gap-2">
                     <button 
                       onClick={() => {
-                        const unpaidHouses = occupiedHousesList.filter(h => !currentMonthPayments.some(p => p.houseId === h.id));
+                        const unpaidHouses = occupiedHousesList.filter(h => !currentMonthPayments.some(p => 
+                          String(p.houseId) === String(h.id) || 
+                          String(p.houseId) === `${h.block}-${h.number}` ||
+                          (p.block === h.block && p.number === h.number)
+                        ));
                         const text = `*DAFTAR WARGA BELUM BAYAR IURAN*\n*Periode:* ${selectedMonth}\n\n` + 
                           unpaidHouses.map((h, i) => {
-                            const arrears = getArrearsForHouse(h.id);
+                            const arrears = getArrearsForHouse(h);
                             const arrearsText = arrears.length > 0 ? ` (+ Tunggakan ${arrears.length} bln)` : '';
                             return `${i+1}. Blok ${h.block}-${h.number} (${h.headOfFamily})${arrearsText}`;
                           }).join('\n') +
@@ -1371,9 +1508,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 </thead>
                 <tbody>
                   {houses.map((house) => {
-                    const statusSampah = getPaymentStatus(house.id, 'Sampah');
-                    const statusAir = getPaymentStatus(house.id, 'Air');
-                    const arrears = getArrearsForHouse(house.id);
+                    const statusSampah = getPaymentStatus(house, 'Sampah');
+                    const statusAir = getPaymentStatus(house, 'Air');
+                    const arrears = getArrearsForHouse(house);
 
                     return (
                       <tr key={house.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">

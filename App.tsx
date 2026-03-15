@@ -252,7 +252,40 @@ export const App = () => {
         <Routes>
             <Route path="/admin" element={
                 <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard houses={houses} announcements={announcements} news={news} cashFlow={cashFlow} officials={officials} reports={reports} letters={letters} ronda={ronda} inventory={inventory} umkm={umkm} polls={polls} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} gallery={gallery} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} notifications={notifications} documents={documents} populationReports={populationReports} setPopulationReports={setPopulationReports} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} events={events} mapPoints={mapPoints} activePatrol={activePatrol} iuranPayments={iuranPayments} residentRegistrations={residentRegistrations} guestReports={guestReports} inventoryLogs={inventoryLogs} auditLogs={auditLogs} faqItems={faqItems} />
+                    <AdminDashboard 
+                        houses={houses} 
+                        announcements={announcements} 
+                        news={news} 
+                        cashFlow={cashFlow} 
+                        officials={officials} 
+                        reports={reports} 
+                        letters={letters} 
+                        ronda={ronda} 
+                        inventory={inventory} 
+                        umkm={umkm} 
+                        polls={polls} 
+                        bills={bills}
+                        rondaLogs={rondaLogs} 
+                        rondaSwapRequests={rondaSwapRequests} 
+                        gallery={gallery} 
+                        pdfConfig={pdfConfig} 
+                        setPdfConfig={setPdfConfig} 
+                        notifications={notifications} 
+                        documents={documents} 
+                        populationReports={populationReports} 
+                        setPopulationReports={setPopulationReports} 
+                        populationLogs={populationLogs} 
+                        setPopulationLogs={setPopulationLogs} 
+                        events={events} 
+                        mapPoints={mapPoints} 
+                        activePatrol={activePatrol} 
+                        iuranPayments={iuranPayments} 
+                        residentRegistrations={residentRegistrations} 
+                        guestReports={guestReports} 
+                        inventoryLogs={inventoryLogs} 
+                        auditLogs={auditLogs} 
+                        faqItems={faqItems} 
+                    />
                 </AdminRouteWrapper>
             }/>
             <Route path="*" element={

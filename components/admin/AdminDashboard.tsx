@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
+import { addPopulationReportToDb, deletePopulationReportFromDb } from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem
+  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -42,6 +43,7 @@ interface AdminDashboardProps {
   inventory: InventoryItem[];
   umkm: UMKM[];
   polls: Poll[];
+  bills: Bill[];
   rondaLogs: RondaCheckLog[];
   rondaSwapRequests: RondaSwapRequest[];
   gallery: GalleryItem[];
@@ -66,7 +68,7 @@ interface AdminDashboardProps {
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, faqItems
+  ronda, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, faqItems
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -86,7 +88,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'overview':
         return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
       case 'residents':
-        return <ResidentManager houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} residentRegistrations={residentRegistrations} />;
+        return <ResidentManager houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} bills={bills} residentRegistrations={residentRegistrations} />;
       case 'finance':
         return <FinanceManager cashFlow={cashFlow} pdfConfig={pdfConfig} />;
       case 'services':
@@ -117,7 +119,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'health':
         return <HealthManagement houses={houses} />;
       case 'population-reports':
-        return <PopulationReportManager reports={populationReports} onAddReport={(r) => setPopulationReports([...populationReports, { ...r, id: Date.now().toString(), createdAt: new Date().toISOString() }])} onDeleteReport={(id) => setPopulationReports(populationReports.filter(r => r.id !== id))} populationLogs={populationLogs} setPopulationLogs={setPopulationLogs} houses={houses} />;
+        return (
+          <PopulationReportManager 
+            reports={populationReports} 
+            onAddReport={async (r) => {
+              await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
+            }} 
+            onDeleteReport={async (id) => {
+              if (window.confirm('Hapus laporan kependudukan ini?')) {
+                await deletePopulationReportFromDb(id);
+              }
+            }} 
+            populationLogs={populationLogs} 
+            setPopulationLogs={setPopulationLogs} 
+            houses={houses} 
+          />
+        );
       case 'settings':
         return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       default:

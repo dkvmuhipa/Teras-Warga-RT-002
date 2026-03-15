@@ -1092,6 +1092,25 @@ export const addPopulationLogToDb = async (log: any) => {
   } catch (e) { console.error("Error adding population log:", e); }
 };
 
+export const deletePopulationLogFromDb = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, POPULATION_LOGS_COL, id));
+  } catch (e) { console.error("Error deleting population log:", e); }
+};
+
+export const addPopulationReportToDb = async (report: any) => {
+  try {
+    const { id, ...data } = report;
+    await addDoc(collection(db, "populationReports"), deepSanitize(data));
+  } catch (e) { console.error("Error adding population report:", e); }
+};
+
+export const deletePopulationReportFromDb = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "populationReports", id));
+  } catch (e) { console.error("Error deleting population report:", e); }
+};
+
 export const subscribeToPopulationLogs = (callback: (data: any[]) => void) => {
   const q = query(collection(db, POPULATION_LOGS_COL), orderBy("date", "desc"));
   return onSnapshot(q, (snapshot) => {
