@@ -17,14 +17,15 @@ export const useWeather = () => {
     const [weather, setWeather] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchWeather = async () => {
+    const fetchWeather = async (signal?: AbortSignal) => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort("timeout"), 15000); // Increased timeout to 15s
 
         try {
+            const fetchSignal = signal || controller.signal;
             const [weatherRes, aqiRes] = await Promise.all([
-                fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', { signal: controller.signal }),
-                fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', { signal: controller.signal })
+                fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', { signal: fetchSignal }),
+                fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', { signal: fetchSignal })
             ]);
 
             if (!weatherRes.ok || !aqiRes.ok) throw new Error("Failed to fetch weather or AQI");
@@ -65,31 +66,46 @@ export const useWeather = () => {
                 pm2_5: aqiData.current.pm2_5,
                 pm10: aqiData.current.pm10
             });
-        } catch (err) {
+        } catch (err: any) {
             clearTimeout(timeoutId);
-            console.error("Error fetching weather/AQI:", err);
-            // Fallback
-            setWeather({
-                temp: 30,
-                condition: 'Cerah',
-                weatherCode: 0,
-                humidity: 75,
-                windSpeed: 5,
-                aqi: 25,
-                aqiLabel: 'Bagus',
-                aqiColor: 'text-emerald-400',
-                pm2_5: 5,
-                pm10: 10
-            });
+            
+            // Don't log abort errors as they are expected on unmount or timeout
+            if (err.name === 'AbortError' || err === 'timeout') {
+                console.log("Weather fetch aborted:", err);
+            } else {
+                console.error("Error fetching weather/AQI:", err);
+            }
+
+            // Fallback only if we don't have weather data yet
+            if (!weather) {
+                setWeather({
+                    temp: 30,
+                    condition: 'Cerah',
+                    weatherCode: 0,
+                    humidity: 75,
+                    windSpeed: 5,
+                    aqi: 25,
+                    aqiLabel: 'Bagus',
+                    aqiColor: 'text-emerald-400',
+                    pm2_5: 5,
+                    pm10: 10
+                });
+            }
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchWeather();
-        const timer = setInterval(fetchWeather, 1800000); // 30 mins
-        return () => clearInterval(timer);
+        const controller = new AbortController();
+        fetchWeather(controller.signal);
+        
+        const timer = setInterval(() => fetchWeather(), 1800000); // 30 mins
+        
+        return () => {
+            controller.abort();
+            clearInterval(timer);
+        };
     }, []);
 
     return { weather, loading, refresh: fetchWeather };
