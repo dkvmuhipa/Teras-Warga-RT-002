@@ -27,6 +27,7 @@ import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from './services/w
 import { AdminRouteWrapper } from './components/AdminComponents';
 import { AdminDashboard } from './components/admin/AdminDashboard'; 
 import { DocumentManager } from './components/admin/DocumentManager';
+import { FinancialProvider } from './context/FinancialContext';
 import { ResidentRegistrationForm } from './components/ResidentRegistrationForm';
 import { GuestReportForm } from './components/GuestReportForm';
 import { ChatBot } from './components/ChatBot';
@@ -252,40 +253,47 @@ export const App = () => {
         <Routes>
             <Route path="/admin" element={
                 <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <AdminDashboard 
-                        houses={houses} 
-                        announcements={announcements} 
-                        news={news} 
-                        cashFlow={cashFlow} 
-                        officials={officials} 
-                        reports={reports} 
-                        letters={letters} 
-                        ronda={ronda} 
-                        inventory={inventory} 
-                        umkm={umkm} 
-                        polls={polls} 
+                    <FinancialProvider 
+                        houses={houses}
+                        iuranPayments={iuranPayments}
+                        cashFlow={cashFlow}
                         bills={bills}
-                        rondaLogs={rondaLogs} 
-                        rondaSwapRequests={rondaSwapRequests} 
-                        gallery={gallery} 
-                        pdfConfig={pdfConfig} 
-                        setPdfConfig={setPdfConfig} 
-                        notifications={notifications} 
-                        documents={documents} 
-                        populationReports={populationReports} 
-                        setPopulationReports={setPopulationReports} 
-                        populationLogs={populationLogs} 
-                        setPopulationLogs={setPopulationLogs} 
-                        events={events} 
-                        mapPoints={mapPoints} 
-                        activePatrol={activePatrol} 
-                        iuranPayments={iuranPayments} 
-                        residentRegistrations={residentRegistrations} 
-                        guestReports={guestReports} 
-                        inventoryLogs={inventoryLogs} 
-                        auditLogs={auditLogs} 
-                        faqItems={faqItems} 
-                    />
+                    >
+                        <AdminDashboard 
+                            houses={houses} 
+                            announcements={announcements} 
+                            news={news} 
+                            cashFlow={cashFlow} 
+                            officials={officials} 
+                            reports={reports} 
+                            letters={letters} 
+                            ronda={ronda} 
+                            inventory={inventory} 
+                            umkm={umkm} 
+                            polls={polls} 
+                            bills={bills}
+                            rondaLogs={rondaLogs} 
+                            rondaSwapRequests={rondaSwapRequests} 
+                            gallery={gallery} 
+                            pdfConfig={pdfConfig} 
+                            setPdfConfig={setPdfConfig} 
+                            notifications={notifications} 
+                            documents={documents} 
+                            populationReports={populationReports} 
+                            setPopulationReports={setPopulationReports} 
+                            populationLogs={populationLogs} 
+                            setPopulationLogs={setPopulationLogs} 
+                            events={events} 
+                            mapPoints={mapPoints} 
+                            activePatrol={activePatrol} 
+                            iuranPayments={iuranPayments} 
+                            residentRegistrations={residentRegistrations} 
+                            guestReports={guestReports} 
+                            inventoryLogs={inventoryLogs} 
+                            auditLogs={auditLogs} 
+                            faqItems={faqItems} 
+                        />
+                    </FinancialProvider>
                 </AdminRouteWrapper>
             }/>
             <Route path="*" element={

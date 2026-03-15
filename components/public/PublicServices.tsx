@@ -64,7 +64,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [deathCause, setDeathCause] = useState('');
   const [deathPlace, setDeathPlace] = useState('');
   const [familyMembers, setFamilyMembers] = useState<{name: string, relationship: string, nik?: string}[]>([]);
-  const [mutationResidenceType, setMutationResidenceType] = useState<'Tetap' | 'Kontrak' | 'Kost'>('Tetap');
+  const [mutationResidenceType, setMutationResidenceType] = useState<'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga'>('Tetap');
+  const [mutationReligion, setMutationReligion] = useState('Islam');
   const [mutationVulnerability, setMutationVulnerability] = useState<string[]>([]);
 
   const [requestType, setRequestType] = useState<string>('Surat Pengantar');
@@ -305,6 +306,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
         familyCount: mutationType === 'Newcomer' ? familyCount : undefined,
         familyMembers: mutationType === 'Newcomer' && familyCount > 1 ? familyMembers : undefined,
         residenceType: mutationType === 'Newcomer' ? mutationResidenceType : undefined,
+        religion: mutationType === 'Newcomer' ? mutationReligion : undefined,
         vulnerability: mutationType === 'Newcomer' ? mutationVulnerability : undefined,
         newAddress: mutationType === 'MovedOut' ? newAddress : undefined,
         fatherName: mutationType === 'Birth' ? fatherName : undefined,
@@ -1245,13 +1247,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="group">
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Status Hunian</label>
-                            <div className="flex gap-2">
-                              {['Tetap', 'Kontrak', 'Kost'].map((type) => (
+                            <div className="flex flex-wrap gap-2">
+                              {['Tetap', 'Kontrak', 'Kost', 'Rumah Keluarga'].map((type) => (
                                 <button
                                   key={type}
                                   type="button"
                                   onClick={() => setMutationResidenceType(type as any)}
-                                  className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${mutationResidenceType === type ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-200'}`}
+                                  className={`flex-1 min-w-[80px] py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${mutationResidenceType === type ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-200'}`}
                                 >
                                   {type}
                                 </button>
@@ -1259,6 +1261,21 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             </div>
                           </div>
                           <div className="group">
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Agama</label>
+                            <select 
+                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all appearance-none"
+                              value={mutationReligion}
+                              onChange={e => setMutationReligion(e.target.value)}
+                            >
+                              <option value="Islam">Islam</option>
+                              <option value="Kristen">Kristen</option>
+                              <option value="Katolik">Katolik</option>
+                              <option value="Hindu">Hindu</option>
+                              <option value="Budha">Budha</option>
+                              <option value="Konghucu">Konghucu</option>
+                            </select>
+                          </div>
+                          <div className="group md:col-span-2">
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Kerentanan (Jika Ada)</label>
                             <div className="flex flex-wrap gap-2">
                               {['Ibu Hamil', 'Bayi', 'Balita', 'Lansia', 'Disabilitas', 'Janda/Duda'].map((v) => (

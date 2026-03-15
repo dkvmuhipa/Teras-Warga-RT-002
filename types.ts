@@ -20,7 +20,7 @@ export interface House {
   birthDate?: string;
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
-  residenceType?: 'Tetap' | 'Kontrak' | 'Kost'; // NEW: Status Kepemilikan including Kost
+  residenceType?: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga'; // NEW: Status Kepemilikan including Kost
   ownerName?: string; // NEW: Nama Pemilik Rumah (jika berbeda dengan penghuni)
   paymentStatus?: PaymentStatus; // Status Iuran Umum
   paymentDate?: string; // Tanggal Pembayaran Iuran
@@ -89,7 +89,7 @@ export interface ResidentRegistration {
   number: string;
   phone: string;
   status: 'Occupied' | 'Empty' | 'Business';
-  residenceType: 'Tetap' | 'Kontrak' | 'Kost';
+  residenceType: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga';
   occupants: number;
   education?: string;
   jobCategory?: string;
@@ -475,7 +475,8 @@ export interface PopulationChangeLog {
     reasonForMoving?: string;
     familyCount?: number;
     familyMembers?: { name: string; relationship: string; nik?: string }[];
-    residenceType?: 'Tetap' | 'Kontrak' | 'Kost';
+    residenceType?: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga';
+    religion?: string;
     vulnerability?: string[];
     
     // MovedOut

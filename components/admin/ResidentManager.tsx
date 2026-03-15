@@ -3,9 +3,14 @@ import { BillDetailModal } from './BillDetailModal';
 import { ResidentAnalytics } from './ResidentAnalytics';
 import { ResidentCard } from './ResidentCard';
 import { DemographicAnalytics } from './DemographicAnalytics';
+import { ResidentTableView } from './resident/ResidentTableView';
+import { ResidentGridView } from './resident/ResidentGridView';
+import { ResidentIuranManager } from './resident/ResidentIuranManager';
+import { ResidentRegistrationList } from './resident/ResidentRegistrationList';
+import { useFinancial } from '../../context/FinancialContext';
 import { 
   Search, Filter, Grid, List, UserPlus, Download, Upload, 
-  Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle,
+  Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle, Droplets,
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon
@@ -97,78 +102,29 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
-  const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
+  const { 
+    selectedMonth, 
+    setSelectedMonth, 
+    getPaymentStatus, 
+    getArrearsForHouse, 
+    summaries
+  } = useFinancial();
+  const { 
+    totalCollected, 
+    participationRate, 
+    paidHousesCount, 
+    unpaidHousesCount, 
+    estimatedReceivables, 
+    totalArrearsAmount, 
+    totalArrearsMonths 
+  } = summaries;
+
   const [payHouse, setPayHouse] = useState<House | null>(null);
-
-  const getPaymentStatus = (house: House, type: 'Air' | 'Sampah') => {
-    const houseId = house.id;
-    const payment = iuranPayments.find(p => {
-      const idMatch = String(p.houseId) === String(houseId) || 
-                      String(p.houseId) === `${house.block}-${house.number}` ||
-                      (p.block === house.block && p.number === house.number);
-      return idMatch && isMonthMatch(p.month, selectedMonth) && (p.type === type || p.type === 'Both');
-    });
-    
-    if (payment) return PaymentStatus.PAID;
-
-    // Fallback to house record if it's the current month or matches paymentDate
-    const isCurrentMonth = isMonthMatch(getIndonesianMonthYear(new Date()), selectedMonth);
-    const isDateMatch = house.paymentDate && isMonthMatch(getIndonesianMonthYear(new Date(house.paymentDate)), selectedMonth);
-    
-    if (isCurrentMonth || isDateMatch) {
-      if (type === 'Air' && house.paymentStatusAir === PaymentStatus.PAID) return PaymentStatus.PAID;
-      if (type === 'Sampah' && house.paymentStatusSampah === PaymentStatus.PAID) return PaymentStatus.PAID;
-    }
-    
-    return PaymentStatus.PENDING;
-  };
   const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
   const [payAmount, setPayAmount] = useState('10000');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Calculate Iuran Summary for the selected month
-  const currentMonthPayments = iuranPayments.filter(p => isMonthMatch(p.month, selectedMonth));
-  const totalCollected = currentMonthPayments.reduce((acc, p) => acc + p.amount, 0);
   const occupiedHousesList = houses.filter(h => h.status === 'Occupied');
-  const paidHousesCount = new Set(currentMonthPayments.map(p => p.houseId)).size;
-  const participationRate = occupiedHousesList.length > 0 ? Math.round((paidHousesCount / occupiedHousesList.length) * 100) : 0;
-  const unpaidHousesCount = occupiedHousesList.length - paidHousesCount;
-  const estimatedReceivables = unpaidHousesCount * 20000;
-
-  // Arrears Calculation Logic
-  const getArrearsForHouse = (house: House) => {
-    const houseId = house.id;
-    const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonthIndex = now.getMonth(); // 0-indexed
-    
-    const arrears: string[] = [];
-    for (let i = 0; i < currentMonthIndex; i++) {
-      const monthStrId = `${monthsId[i]} ${currentYear}`;
-      
-      const hasPaid = iuranPayments.some(p => {
-        const idMatch = String(p.houseId) === String(houseId) || 
-                        String(p.houseId) === `${house.block}-${house.number}` ||
-                        (p.block === house.block && p.number === house.number);
-        return idMatch && isMonthMatch(p.month, monthStrId);
-      });
-      
-      // Also check if the house record itself has a payment date for this month
-      const houseRecordPaid = house.paymentDate && 
-                             isMonthMatch(getIndonesianMonthYear(new Date(house.paymentDate)), monthStrId) &&
-                             house.paymentStatusAir === PaymentStatus.PAID &&
-                             house.paymentStatusSampah === PaymentStatus.PAID;
-
-      if (!hasPaid && !houseRecordPaid) {
-        arrears.push(monthStrId);
-      }
-    }
-    return arrears;
-  };
-
-  const totalArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h).length, 0);
-  const totalArrearsAmount = totalArrearsMonths * 20000;
 
   useEffect(() => {
     if (payType === 'Both') setPayAmount('20000');
@@ -206,6 +162,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     isBLT: false,
     isBansosLain: false,
     bansosLainName: '',
+    religion: '',
     familyMembers: [] as { id?: string; name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     accessCode: ''
   });
@@ -465,6 +422,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       isBLT: false,
       isBansosLain: false,
       bansosLainName: '',
+      religion: '',
       familyMembers: [],
       accessCode: ''
     });
@@ -642,6 +600,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       isBLT: house.isBLT || false,
       isBansosLain: house.isBansosLain || false,
       bansosLainName: house.bansosLainName || '',
+      religion: house.religion || '',
       familyMembers: (house.familyMembers || []).map(m => ({ ...m, id: m.id || Math.random().toString(36).substr(2, 9) })),
       accessCode: house.accessCode || ''
     });
@@ -1132,468 +1091,43 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />
           </div>
         ) : viewMode === 'grid' ? (
-          <div className="space-y-8">
-            {Object.entries(filteredHouses.reduce((acc, house) => {
-              if (!acc[house.block]) acc[house.block] = [];
-              acc[house.block].push(house);
-              return acc;
-            }, {} as Record<string, typeof filteredHouses>)).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'})).map(([block, houses]) => (
-              <div key={block} className="space-y-4 p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
-                <div className="flex items-center gap-3 px-2">
-                  <div className="w-1.5 h-8 bg-indigo-500 rounded-full"></div>
-                  <h3 className="text-xl font-black text-slate-800">Blok {block}</h3>
-                  <span className="text-xs font-bold text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200">{houses.length} Rumah</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {houses.map((house) => (
-                    <ResidentCard 
-                      key={house.id}
-                      house={house}
-                      bills={[]}
-                      onOpenDetail={openDetail}
-                      onOpenEdit={handleOpenEdit}
-                      onDelete={handleDelete}
-                      onOpenBills={setSelectedHouseForBills}
-                      onOpenPay={openPayModal}
-                      dynamicStatusAir={getPaymentStatus(house, 'Air')}
-                      dynamicStatusSampah={getPaymentStatus(house, 'Sampah')}
-                      arrears={house.status === 'Occupied' ? getArrearsForHouse(house) : []}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <ResidentGridView 
+            filteredHouses={filteredHouses}
+            openDetail={openDetail}
+            handleOpenEdit={handleOpenEdit}
+            handleDelete={handleDelete}
+            setSelectedHouseForBills={setSelectedHouseForBills}
+            openPayModal={openPayModal}
+          />
         ) : viewMode === 'iuran' ? (
-            <div className="space-y-6">
-              {/* Financial Summary Dashboard */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
-                    <DollarSign size={48} className="text-emerald-600" />
-                  </div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Terkumpul</p>
-                  <h4 className="text-2xl font-black text-slate-800">Rp {totalCollected.toLocaleString()}</h4>
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-md border border-emerald-100">
-                      {selectedMonth}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
-                    <Activity size={48} className="text-indigo-600" />
-                  </div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Partisipasi Warga</p>
-                  <h4 className="text-2xl font-black text-slate-800">{participationRate}%</h4>
-                  <div className="mt-4 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-indigo-500 h-full transition-all duration-1000" 
-                      style={{ width: `${participationRate}%` }}
-                    ></div>
-                  </div>
-                  <p className="mt-2 text-[10px] font-bold text-slate-400">{paidHousesCount} dari {occupiedHousesList.length} Rumah Dihuni</p>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
-                    <AlertCircle size={48} className="text-rose-600" />
-                  </div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Belum Bayar</p>
-                  <h4 className="text-2xl font-black text-rose-600">{unpaidHousesCount} <span className="text-sm text-slate-400 font-bold">Rumah</span></h4>
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-rose-50 text-rose-600 text-[10px] font-black rounded-md border border-rose-100">
-                      Bulan Ini
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
-                    <CreditCard size={48} className="text-amber-600" />
-                  </div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Estimasi Piutang</p>
-                  <h4 className="text-2xl font-black text-slate-800">Rp {estimatedReceivables.toLocaleString()}</h4>
-                  <p className="mt-4 text-[10px] font-bold text-slate-400 italic">Bulan Ini</p>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl border border-rose-100 shadow-sm relative overflow-hidden group ring-2 ring-rose-500/5">
-                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
-                    <AlertCircle size={48} className="text-rose-600" />
-                  </div>
-                  <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-1">Total Tunggakan</p>
-                  <h4 className="text-2xl font-black text-rose-600">Rp {totalArrearsAmount.toLocaleString()}</h4>
-                  <p className="mt-4 text-[10px] font-bold text-rose-400 italic">Dari {totalArrearsMonths} Bulan Unpaid</p>
-                </div>
-              </div>
-
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                  <div>
-                    <h3 className="text-xl font-black text-slate-800">Rincian Transaksi Iuran</h3>
-                    <p className="text-xs font-bold text-slate-400 mt-1">Daftar pembayaran yang masuk untuk periode {selectedMonth}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => {
-                        const unpaidHouses = occupiedHousesList.filter(h => !currentMonthPayments.some(p => 
-                          String(p.houseId) === String(h.id) || 
-                          String(p.houseId) === `${h.block}-${h.number}` ||
-                          (p.block === h.block && p.number === h.number)
-                        ));
-                        const text = `*DAFTAR WARGA BELUM BAYAR IURAN*\n*Periode:* ${selectedMonth}\n\n` + 
-                          unpaidHouses.map((h, i) => {
-                            const arrears = getArrearsForHouse(h);
-                            const arrearsText = arrears.length > 0 ? ` (+ Tunggakan ${arrears.length} bln)` : '';
-                            return `${i+1}. Blok ${h.block}-${h.number} (${h.headOfFamily})${arrearsText}`;
-                          }).join('\n') +
-                          `\n\nMohon segera melakukan pembayaran. Terima kasih.`;
-                        navigator.clipboard.writeText(text);
-                        alert('Daftar warga belum bayar berhasil disalin ke clipboard!');
-                      }}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-amber-100 transition-all"
-                    >
-                      <Mail size={16} /> Salin Daftar Belum Bayar
-                    </button>
-                    <button 
-                      onClick={() => {
-                        const csv = [
-                          ['Tanggal', 'Nama', 'Rumah', 'Jenis', 'Nominal'].join(','),
-                          ...currentMonthPayments.map(p => [
-                            new Date(p.date).toLocaleDateString('id-ID'),
-                            p.headOfFamily,
-                            `${p.block}-${p.number}`,
-                            p.type,
-                            p.amount
-                          ].join(','))
-                        ].join('\n');
-                        const blob = new Blob([csv], { type: 'text/csv' });
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `Laporan_Iuran_${selectedMonth.replace(/\s+/g, '_')}.csv`;
-                        a.click();
-                      }}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
-                    >
-                      <Download size={16} /> Ekspor Laporan
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto custom-scrollbar">
-                  <table className="w-full text-sm min-w-[600px]">
-                    <thead className="bg-slate-50/50">
-                      <tr>
-                        <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Tanggal</th>
-                        <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Nama Warga</th>
-                        <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Rumah</th>
-                        <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px] hidden sm:table-cell">Jenis Iuran</th>
-                        <th className="p-3 md:p-4 text-right font-black text-slate-600 uppercase tracking-widest text-[10px]">Nominal</th>
-                        <th className="p-3 md:p-4 text-center font-black text-slate-600 uppercase tracking-widest text-[10px]">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentMonthPayments.length > 0 ? (
-                        currentMonthPayments.map((payment) => (
-                          <tr key={payment.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
-                            <td className="p-3 md:p-4 text-slate-500 font-medium text-xs md:text-sm">{new Date(payment.date).toLocaleDateString('id-ID')}</td>
-                            <td className="p-3 md:p-4 font-bold text-slate-800 text-xs md:text-sm">{payment.headOfFamily}</td>
-                            <td className="p-3 md:p-4 font-mono font-black text-slate-600 text-xs md:text-sm">{payment.block}-{payment.number}</td>
-                            <td className="p-3 md:p-4 hidden sm:table-cell">
-                              <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                                payment.type === 'Both' ? 'bg-indigo-50 text-indigo-600' :
-                                payment.type === 'Air' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
-                              }`}>
-                                {payment.type === 'Both' ? 'Air & Sampah' : payment.type === 'Air' ? 'Air Saja' : 'Sampah Saja'}
-                              </span>
-                            </td>
-                            <td className="p-3 md:p-4 text-right font-black text-slate-800 text-xs md:text-sm">Rp {payment.amount.toLocaleString()}</td>
-                            <td className="p-3 md:p-4 text-center">
-                              <div className="flex items-center justify-center gap-1 md:gap-2">
-                                <button 
-                                  onClick={() => generateIuranReceiptPDF(payment, pdfConfig)}
-                                  className="p-1.5 md:p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                                  title="Cetak Kwitansi"
-                                >
-                                  <Printer size={14} />
-                                </button>
-                                <button 
-                                  onClick={() => {
-                                    setEditingPayment(payment);
-                                    setPayType(payment.type);
-                                    setPayAmount(payment.amount.toString());
-                                    setPayDate(new Date(payment.date).toISOString().split('T')[0]);
-                                    setIsEditPaymentModalOpen(true);
-                                  }}
-                                  className="p-1.5 md:p-2 text-slate-300 hover:text-indigo-600 transition-colors"
-                                  title="Edit Catatan"
-                                >
-                                  <Edit2 size={14} />
-                                </button>
-                                <button 
-                                  onClick={async () => {
-                                    if(window.confirm('Hapus catatan pembayaran ini?')) {
-                                      await deleteIuranPaymentFromDb(payment.id);
-                                    }
-                                  }}
-                                  className="p-1.5 md:p-2 text-slate-300 hover:text-rose-600 transition-colors"
-                                  title="Hapus Catatan"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr key="no-payments">
-                          <td colSpan={6} className="p-12 text-center">
-                            <div className="flex flex-col items-center gap-3">
-                              <div className="p-4 bg-slate-50 rounded-full text-slate-300">
-                                <DollarSign size={32} />
-                              </div>
-                              <p className="text-slate-400 font-bold italic">Belum ada catatan pembayaran iuran untuk periode {selectedMonth}.</p>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+          <ResidentIuranManager 
+            houses={houses}
+            generateIuranReceiptPDF={generateIuranReceiptPDF}
+            pdfConfig={pdfConfig}
+            deleteIuranPaymentFromDb={deleteIuranPaymentFromDb}
+            setEditingPayment={setEditingPayment}
+            setPayType={setPayType}
+            setPayAmount={setPayAmount}
+            setPayDate={setPayDate}
+            setIsEditPaymentModalOpen={setIsEditPaymentModalOpen}
+          />
         ) : viewMode === 'registrations' ? (
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="mb-8">
-              <h3 className="text-xl font-black text-slate-800">Permohonan Warga Baru</h3>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length} Menunggu Persetujuan
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {residentRegistrations.length > 0 ? (
-                residentRegistrations.map((reg) => (
-                  <div key={reg.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div className="flex gap-4">
-                      <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
-                        <User size={24} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-black text-slate-800">{reg.headOfFamily}</h4>
-                          <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                            reg.approvalStatus === 'Pending' ? 'bg-amber-100 text-amber-600' :
-                            reg.approvalStatus === 'Approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
-                          }`}>
-                            {reg.approvalStatus}
-                          </span>
-                        </div>
-                        <p className="text-xs font-bold text-slate-500 mt-1">
-                          Blok {reg.block} No. {reg.number} • {reg.residenceType} • {reg.occupants} Jiwa
-                        </p>
-                        <p className="text-[10px] text-slate-400 mt-1">{new Date(reg.date).toLocaleString('id-ID')}</p>
-                        <div className="flex gap-2 mt-2">
-                          {reg.ktpUrl && (
-                            <a href={reg.ktpUrl} target="_blank" rel="noreferrer" className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all">Lihat KTP</a>
-                          )}
-                          {reg.kkUrl && (
-                            <a href={reg.kkUrl} target="_blank" rel="noreferrer" className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all">Lihat KK</a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 w-full md:w-auto">
-                      <a 
-                        href={`https://wa.me/${reg.phone.replace(/^0/, '62')}`} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-                      >
-                        <Phone size={14} /> Hubungi
-                      </a>
-                      
-                      {reg.approvalStatus === 'Pending' && (
-                        <>
-                          <button 
-                            onClick={async () => {
-                              if(window.confirm('Tolak pendaftaran ini?')) {
-                                await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Rejected' });
-                              }
-                            }}
-                            className="flex-1 md:flex-none px-4 py-2 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all"
-                          >
-                            Tolak
-                          </button>
-                          <button 
-                            onClick={async () => {
-                              if(window.confirm('Setujui pendaftaran ini? Data akan otomatis masuk ke daftar warga.')) {
-                                try {
-                                  // 1. Add to houses
-                                  await addHouse({
-                                    headOfFamily: reg.headOfFamily,
-                                    gender: reg.gender,
-                                    birthDate: reg.birthDate,
-                                    ownerName: reg.ownerName || reg.headOfFamily,
-                                    block: reg.block,
-                                    number: reg.number,
-                                    phone: reg.phone,
-                                    status: reg.status,
-                                    residenceType: reg.residenceType,
-                                    occupants: reg.occupants,
-                                    education: reg.education,
-                                    jobCategory: reg.jobCategory,
-                                    vehicleCount: reg.vehicleCount,
-                                    pregnantCount: reg.pregnantCount,
-                                    babyCount: reg.babyCount,
-                                    toddlerCount: reg.toddlerCount,
-                                    teenagerCount: reg.teenagerCount,
-                                    adultCount: reg.adultCount,
-                                    elderlyCount: reg.elderlyCount,
-                                    widowCount: reg.widowCount,
-                                    ktpUrl: reg.ktpUrl,
-                                    kkUrl: reg.kkUrl,
-                                    familyMembers: reg.familyMembers || [],
-                                    paymentStatusAir: PaymentStatus.PENDING,
-                                    paymentStatusSampah: PaymentStatus.PENDING,
-                                    isVerified: true
-                                  });
-                                  
-                                  // 2. Update registration status
-                                  await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Approved' });
-                                  
-                                  alert('Pendaftaran disetujui dan data warga telah ditambahkan!');
-                                } catch (error) {
-                                  console.error(error);
-                                  alert('Gagal menyetujui pendaftaran.');
-                                }
-                              }
-                            }}
-                            className="flex-1 md:flex-none px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold text-xs hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
-                          >
-                            Setujui
-                          </button>
-                        </>
-                      )}
-
-                      {reg.approvalStatus !== 'Pending' && (
-                        <button 
-                          onClick={async () => {
-                            if(window.confirm('Hapus riwayat pendaftaran ini?')) {
-                              await deleteResidentRegistrationFromDb(reg.id);
-                            }
-                          }}
-                          className="p-2 text-slate-300 hover:text-rose-600 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div key="no-registrations" className="py-20 text-center">
-                  <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <UserPlus size={32} />
-                  </div>
-                  <p className="text-slate-400 font-bold italic">Belum ada permohonan pendaftaran warga baru.</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <ResidentRegistrationList 
+            residentRegistrations={residentRegistrations}
+            updateResidentRegistrationInDb={updateResidentRegistrationInDb}
+            addHouse={addHouse}
+          />
         ) : viewMode === 'table' ? (
-          <div className="space-y-8">
-            {Object.entries(filteredHouses.reduce((acc, house) => {
-              if (!acc[house.block]) acc[house.block] = [];
-              acc[house.block].push(house);
-              return acc;
-            }, {} as Record<string, typeof filteredHouses>)).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'})).map(([block, houses]) => (
-          <div key={block} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-sm min-w-[1000px]">
-                <thead className="bg-slate-50/50">
-                  <tr>
-                    <th className="p-4 w-10"><input type="checkbox" onChange={handleSelectAll} checked={selectedIds.size === filteredHouses.length && filteredHouses.length > 0} /></th>
-                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Nama</th>
-                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">No</th>
-                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Telepon</th>
-                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Jiwa</th>
-                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Status</th>
-                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Sampah</th>
-                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Air</th>
-                    <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Tunggakan</th>
-                    <th className="p-4 text-right font-black text-slate-600 uppercase tracking-widest text-[10px]">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {houses.map((house) => {
-                    const statusSampah = getPaymentStatus(house, 'Sampah');
-                    const statusAir = getPaymentStatus(house, 'Air');
-                    const arrears = getArrearsForHouse(house);
-
-                    return (
-                      <tr key={house.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
-                        <td className="p-4"><input type="checkbox" checked={selectedIds.has(house.id)} onChange={() => handleSelectOne(house.id)} /></td>
-                        <td className="p-4">
-                          <div className="font-bold text-slate-800">{house.headOfFamily}</div>
-                          {house.ownerName && house.ownerName !== house.headOfFamily && (
-                            <div className="text-[10px] text-slate-400 font-medium italic">Pemilik: {house.ownerName}</div>
-                          )}
-                        </td>
-                        <td className="p-4 font-mono font-black text-slate-600">{house.number}</td>
-                        <td className="p-4 text-slate-500">{house.phone || '-'}</td>
-                        <td className="p-4 text-slate-500">{house.occupants || 0}</td>
-                        <td className="p-4">
-                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                            house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-600' : 
-                            house.status === 'Empty' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-600'
-                          }`}>
-                            {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha'}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                            statusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
-                          }`}>
-                            {statusSampah === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
-                            {statusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                            statusAir === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
-                          }`}>
-                            {statusAir === PaymentStatus.PAID ? <CheckCircle size={10}/> : <XCircle size={10}/>}
-                            {statusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          {arrears.length > 0 ? (
-                            <span className="text-rose-600 font-black text-[10px]">{arrears.length} Bln</span>
-                          ) : (
-                            <span className="text-emerald-600 font-black text-[10px]">Nihil</span>
-                          )}
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => openDetail(house)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><ChevronRight size={16}/></button>
-                            <button onClick={() => handleOpenEdit(house)} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"><Edit2 size={16}/></button>
-                            <button onClick={() => handleDelete(house.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><Trash2 size={16}/></button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
-      </div>
-    ) : viewMode === 'map' ? (
+          <ResidentTableView 
+            filteredHouses={filteredHouses}
+            selectedIds={selectedIds}
+            handleSelectAll={handleSelectAll}
+            handleSelectOne={handleSelectOne}
+            openDetail={openDetail}
+            handleOpenEdit={handleOpenEdit}
+            handleDelete={handleDelete}
+          />
+        ) : viewMode === 'map' ? (
       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
         <HouseMap 
           houses={filteredHouses} 
@@ -1668,7 +1202,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       </div>
                       {selectedResident.status === 'Occupied' && (
                         <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-xs font-black uppercase tracking-widest">
-                          {selectedResident.residenceType === 'Kontrak' ? 'Kontrak' : selectedResident.residenceType === 'Kost' ? 'Kost' : 'Pemilik'}
+                          {selectedResident.residenceType === 'Kontrak' ? 'Kontrak' : selectedResident.residenceType === 'Kost' ? 'Kost' : selectedResident.residenceType === 'Rumah Keluarga' ? 'Rumah Keluarga' : 'Pemilik'}
                         </div>
                       )}
                     </div>
@@ -1743,37 +1277,68 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
                   <section>
                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Status Keuangan</h4>
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-                      <div className={`absolute top-0 right-0 w-2 h-full ${isFullyPaid ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-3">
-                          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                            <CreditCard size={20} />
+                    <div className="space-y-3">
+                      <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                        <div className={`absolute top-0 right-0 w-2 h-full ${isFullyPaid ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+                        <div className="flex justify-between items-center mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                              <CreditCard size={20} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-black text-slate-800">Iuran Bulanan</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Otomatis</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-black text-slate-800">Iuran Bulanan</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Otomatis</p>
-                          </div>
+                          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                            isFullyPaid ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                          }`}>
+                            {isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING}
+                          </span>
                         </div>
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                          isFullyPaid ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
-                        }`}>
-                          {isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING}
-                        </span>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => openPayModal(selectedResident)}
+                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
+                          >
+                            <DollarSign size={16} /> Bayar Iuran
+                          </button>
+                          <button 
+                            onClick={() => { setIsDrawerOpen(false); setSelectedHouseForBills(selectedResident); }}
+                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+                          >
+                            <LayoutList size={16} /> Riwayat
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => openPayModal(selectedResident)}
-                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
-                        >
-                          <DollarSign size={16} /> Bayar Iuran
-                        </button>
-                        <button 
-                          onClick={() => { setIsDrawerOpen(false); setSelectedHouseForBills(selectedResident); }}
-                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
-                        >
-                          <LayoutList size={16} /> Riwayat
-                        </button>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-4 bg-white border border-slate-100 rounded-3xl flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                              <Droplets size={14} />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Air</span>
+                          </div>
+                          <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                            getPaymentStatus(selectedResident, 'Air') === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                          }`}>
+                            {getPaymentStatus(selectedResident, 'Air') === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                          </span>
+                        </div>
+                        <div className="p-4 bg-white border border-slate-100 rounded-3xl flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                              <Trash2 size={14} />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sampah</span>
+                          </div>
+                          <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                            getPaymentStatus(selectedResident, 'Sampah') === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                          }`}>
+                            {getPaymentStatus(selectedResident, 'Sampah') === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </section>
@@ -1788,6 +1353,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Tanggal Lahir</p>
                         <p className="text-sm font-bold text-slate-800">{selectedResident.birthDate ? new Date(selectedResident.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Agama</p>
+                        <p className="text-sm font-bold text-slate-800">{selectedResident.religion || '-'}</p>
                       </div>
                       <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Pendidikan</p>
@@ -1995,6 +1564,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Kepemilikan</label>
                           <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.residenceType} onChange={e => setFormData({...formData, residenceType: e.target.value as any})}>
                             <option value="Tetap">Pemilik (Tetap)</option>
+                            <option value="Rumah Keluarga">Rumah Keluarga</option>
                             <option value="Kontrak">Kontrak</option>
                             <option value="Kost">Kost</option>
                           </select>
@@ -2079,6 +1649,18 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                             <option value="Freelance">Pekerja Lepas / Freelance</option>
                             <option value="Pensiunan">Pensiunan</option>
                             <option value="Tidak Bekerja">Tidak / Belum Bekerja</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Agama</label>
+                          <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.religion} onChange={e => setFormData({...formData, religion: e.target.value})}>
+                            <option value="">Pilih...</option>
+                            <option value="Islam">Islam</option>
+                            <option value="Kristen">Kristen</option>
+                            <option value="Katolik">Katolik</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Budha">Budha</option>
+                            <option value="Konghucu">Konghucu</option>
                           </select>
                         </div>
                         <div className="sm:col-span-2">

@@ -23,6 +23,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     phone: '',
     status: 'Occupied' as const,
     residenceType: 'Tetap' as const,
+    religion: 'Islam',
     occupants: 1,
     education: '',
     jobCategory: '',
@@ -178,6 +179,19 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                 <option value="Tetap">Milik Sendiri (Tetap)</option>
                 <option value="Kontrak">Sewa / Kontrak</option>
                 <option value="Kost">Kost / Mahasiswa</option>
+                <option value="Rumah Keluarga">Rumah Keluarga</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Agama</label>
+              <select required className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.religion} onChange={e => setFormData({...formData, religion: e.target.value})}>
+                <option value="Islam">Islam</option>
+                <option value="Kristen">Kristen</option>
+                <option value="Katolik">Katolik</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Budha">Budha</option>
+                <option value="Konghucu">Konghucu</option>
               </select>
             </div>
 

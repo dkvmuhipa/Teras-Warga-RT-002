@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
 import { generatePopulationReportPDF } from '../../services/pdfService';
-import { addPopulationLogToDb, deletePopulationLogFromDb } from '../../services/databaseService';
+import { addPopulationLogToDb, deletePopulationLogFromDb, updateHouseData } from '../../services/databaseService';
 import { 
   Plus, FileText, Trash2, TrendingUp, TrendingDown, 
   Users, Baby, Accessibility, Heart, User, 
@@ -30,6 +30,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [autoUpdateHouse, setAutoUpdateHouse] = useState(true);
   const [formData, setFormData] = useState<Omit<PopulationReport, 'id' | 'createdAt'>>({
     month: new Date().toISOString().slice(0, 7),
     year: new Date().getFullYear(),
@@ -65,7 +66,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       reasonForMoving: '',
       familyCount: 1,
       familyMembers: [] as {name: string, relationship: string, nik?: string}[],
-      residenceType: 'Tetap' as 'Tetap' | 'Kontrak' | 'Kost',
+      residenceType: 'Tetap' as 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga',
+      religion: '',
       vulnerability: [] as string[],
       newAddress: '',
       fatherName: '',
@@ -145,6 +147,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         familyCount: logFormData.details.familyCount,
         familyMembers: logFormData.details.familyCount > 1 ? logFormData.details.familyMembers : undefined,
         residenceType: logFormData.details.residenceType,
+        religion: logFormData.details.religion,
         vulnerability: logFormData.details.vulnerability
       } : logFormData.type === 'MovedOut' ? {
         newAddress: logFormData.details.newAddress,
@@ -160,6 +163,58 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     };
     
     await addPopulationLogToDb(logData);
+
+    // --- INTEGRATION: Auto Update House Data ---
+    if (autoUpdateHouse && logFormData.houseId) {
+      const house = houses.find(h => h.id === logFormData.houseId);
+      if (house) {
+        let updates: any = {};
+        
+        if (logFormData.type === 'Newcomer') {
+          updates = {
+            headOfFamily: logFormData.name,
+            phone: logFormData.phone,
+            occupants: logFormData.details.familyCount,
+            status: 'Occupied',
+            residenceType: logFormData.details.residenceType,
+            religion: logFormData.details.religion,
+            // Reset vulnerable counts based on log
+            babyCount: logFormData.details.vulnerability.includes('Bayi') ? 1 : 0,
+            toddlerCount: logFormData.details.vulnerability.includes('Balita') ? 1 : 0,
+            pregnantCount: logFormData.details.vulnerability.includes('Ibu Hamil') ? 1 : 0,
+            elderlyCount: logFormData.details.vulnerability.includes('Lansia') ? 1 : 0,
+            widowCount: logFormData.details.vulnerability.includes('Janda') ? 1 : 0,
+          };
+        } else if (logFormData.type === 'MovedOut') {
+          updates = {
+            status: 'Empty',
+            headOfFamily: '-',
+            occupants: 0,
+            phone: '',
+            babyCount: 0,
+            toddlerCount: 0,
+            pregnantCount: 0,
+            elderlyCount: 0,
+            widowCount: 0,
+          };
+        } else if (logFormData.type === 'Birth') {
+          updates = {
+            occupants: (house.occupants || 0) + 1,
+            babyCount: (house.babyCount || 0) + 1
+          };
+        } else if (logFormData.type === 'Death') {
+          updates = {
+            occupants: Math.max(0, (house.occupants || 0) - 1),
+            // We don't know who died, but we can decrease total
+          };
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await updateHouseData(house.id, updates);
+        }
+      }
+    }
+
     setIsLogModalOpen(false);
     // Reset log form
     setLogFormData({
@@ -175,6 +230,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         familyCount: 1,
         familyMembers: [],
         residenceType: 'Tetap',
+        religion: '',
         vulnerability: [],
         newAddress: '',
         fatherName: '',
@@ -853,17 +909,36 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                   </div>
                 )}
                 
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Status Hunian</label>
-                  <select 
-                    value={logFormData.details.residenceType} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, residenceType: e.target.value as any } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
-                  >
-                    <option value="Tetap">Tetap</option>
-                    <option value="Kontrak">Kontrak</option>
-                    <option value="Kost">Kost</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">Status Hunian</label>
+                    <select 
+                      value={logFormData.details.residenceType} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, residenceType: e.target.value as any } })} 
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    >
+                      <option value="Tetap">Tetap</option>
+                      <option value="Rumah Keluarga">Rumah Keluarga</option>
+                      <option value="Kontrak">Kontrak</option>
+                      <option value="Kost">Kost</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">Agama</label>
+                    <select 
+                      value={logFormData.details.religion} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, religion: e.target.value } })} 
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    >
+                      <option value="">Pilih Agama...</option>
+                      <option value="Islam">Islam</option>
+                      <option value="Kristen">Kristen</option>
+                      <option value="Katolik">Katolik</option>
+                      <option value="Hindu">Hindu</option>
+                      <option value="Budha">Budha</option>
+                      <option value="Konghucu">Konghucu</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="col-span-2">
@@ -1003,6 +1078,19 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 }
               />
             </div>
+          </div>
+
+          <div className="my-6 p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl flex items-center gap-3">
+            <input 
+              type="checkbox" 
+              id="autoUpdateHouse"
+              checked={autoUpdateHouse}
+              onChange={e => setAutoUpdateHouse(e.target.checked)}
+              className="w-5 h-5 rounded-lg text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            />
+            <label htmlFor="autoUpdateHouse" className="text-xs font-bold text-indigo-700 cursor-pointer">
+              Update data rumah otomatis? (Sinkronisasi ke Data Warga)
+            </label>
           </div>
 
           <button 
