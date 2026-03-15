@@ -59,6 +59,12 @@ export interface House {
   elderlyCount?: number;
   widowCount?: number;
 
+  // Social Assistance (Bantuan Sosial)
+  isPKH?: boolean;
+  isBLT?: boolean;
+  isBansosLain?: boolean;
+  bansosLainName?: string;
+
   // Family Members
   familyMembers?: {
     id?: string;
@@ -94,6 +100,10 @@ export interface ResidentRegistration {
   adultCount?: number;
   elderlyCount?: number;
   widowCount?: number;
+  isPKH?: boolean;
+  isBLT?: boolean;
+  isBansosLain?: boolean;
+  bansosLainName?: string;
   ktpUrl?: string;
   kkUrl?: string;
   familyMembers?: {

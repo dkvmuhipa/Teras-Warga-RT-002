@@ -93,6 +93,12 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
           </span>
         )}
 
+        {(house.isPKH || house.isBLT || house.isBansosLain) && (
+          <span className="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border bg-indigo-50 text-indigo-600 border-indigo-100">
+            Bansos
+          </span>
+        )}
+
         {arrears.length > 0 && (
           <span className="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-100 flex items-center gap-1">
             <AlertCircle size={8} className="md:w-2.5 md:h-2.5" /> {arrears.length} Bln

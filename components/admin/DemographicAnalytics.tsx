@@ -60,6 +60,9 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     let totalAdults = 0;
     let totalElderly = 0;
     let totalWidows = 0;
+    let totalPKH = 0;
+    let totalBLT = 0;
+    let totalBansosLain = 0;
 
     houses.forEach(h => {
       if (h && h.status === 'Occupied') {
@@ -71,6 +74,9 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
         totalAdults += (h.adultCount || 0);
         totalElderly += (h.elderlyCount || 0);
         totalWidows += (h.widowCount || 0);
+        if (h.isPKH) totalPKH++;
+        if (h.isBLT) totalBLT++;
+        if (h.isBansosLain) totalBansosLain++;
 
         // Add Head of Family
         const hoF = {
@@ -119,6 +125,9 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
       totalAdults,
       totalElderly,
       totalWidows,
+      totalPKH,
+      totalBLT,
+      totalBansosLain,
       totalOccupied: houses.filter(h => h.status === 'Occupied').length
     };
   }, [houses]);
@@ -127,7 +136,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     allResidents, religions, educations, jobs, 
     totalVehicles, totalPregnant, totalBabies, 
     totalToddlers, totalTeenagers, totalAdults,
-    totalElderly, totalWidows, totalOccupied 
+    totalElderly, totalWidows, totalPKH, totalBLT, totalBansosLain, totalOccupied 
   } = stats;
 
   const totalResidents = allResidents.length || 1; // Prevent division by zero
@@ -550,7 +559,10 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                   { label: 'Remaja', value: totalTeenagers, icon: Users, color: 'indigo' },
                   { label: 'Dewasa', value: totalAdults, icon: UserCheck, color: 'emerald' },
                   { label: 'Lansia', value: totalElderly, icon: User, color: 'amber' },
-                  { label: 'Janda', value: totalWidows, icon: Heart, color: 'pink' }
+                  { label: 'Janda', value: totalWidows, icon: Heart, color: 'pink' },
+                  { label: 'Penerima PKH', value: totalPKH, icon: FileText, color: 'indigo' },
+                  { label: 'Penerima BLT', value: totalBLT, icon: DollarSign, color: 'emerald' },
+                  { label: 'Bansos Lain', value: totalBansosLain, icon: Sparkles, color: 'violet' }
                 ].map((item) => (
                   <div key={item.label} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:bg-slate-50 transition-all">
                     <div className="p-4 bg-slate-50 text-slate-600 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
