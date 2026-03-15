@@ -681,8 +681,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   // Filter Logic
   const filteredHouses = houses.filter(h => {
-    const matchesSearch = h.headOfFamily.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          h.block.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = 
+      h.headOfFamily.toLowerCase().includes(searchLower) || 
+      h.block.toLowerCase().includes(searchLower) ||
+      h.number.toLowerCase().includes(searchLower) ||
+      (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) ||
+      (h.phone && h.phone.toLowerCase().includes(searchLower));
     
     const statusSampah = getPaymentStatus(h, 'Sampah');
     const statusAir = getPaymentStatus(h, 'Air');
@@ -843,7 +848,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
           <input 
             type="text" 
-            placeholder="Cari warga..." 
+            placeholder="Cari nama, pemilik, blok, nomor, atau telepon..." 
             className="w-full pl-10 pr-4 py-2 md:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
@@ -1068,7 +1073,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
             <input 
               type="text" 
-              placeholder="Cari nama, blok, atau nomor..." 
+              placeholder="Cari nama, pemilik, blok, nomor, atau telepon..." 
               className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -1532,7 +1537,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     return (
                       <tr key={house.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
                         <td className="p-4"><input type="checkbox" checked={selectedIds.has(house.id)} onChange={() => handleSelectOne(house.id)} /></td>
-                        <td className="p-4 font-bold text-slate-800">{house.headOfFamily}</td>
+                        <td className="p-4">
+                          <div className="font-bold text-slate-800">{house.headOfFamily}</div>
+                          {house.ownerName && house.ownerName !== house.headOfFamily && (
+                            <div className="text-[10px] text-slate-400 font-medium italic">Pemilik: {house.ownerName}</div>
+                          )}
+                        </td>
                         <td className="p-4 font-mono font-black text-slate-600">{house.number}</td>
                         <td className="p-4 text-slate-500">{house.phone || '-'}</td>
                         <td className="p-4 text-slate-500">{house.occupants || 0}</td>
