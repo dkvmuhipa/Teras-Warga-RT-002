@@ -96,7 +96,7 @@ export function PanicButton() {
   const sendPanicSignal = (location?: { lat: number; lng: number }) => {
     socketRef.current?.emit('emergency:triggered', {
       message: 'DARURAT! Bantuan dibutuhkan segera! Sinyal dikirim dari perangkat warga.',
-      sender: 'Warga RT 002',
+      sender: 'Warga RT 02',
       timestamp: new Date().toISOString(),
       location
     });

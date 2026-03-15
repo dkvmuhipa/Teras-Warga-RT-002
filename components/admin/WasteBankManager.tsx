@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus, CheckCircle, Search, Filter, History, DollarSign, Package, User, Home, Calendar, Clock, AlertTriangle } from 'lucide-react';
+import { Trash2, Plus, CheckCircle, Search, Filter, History, DollarSign, Package, User, Home, Calendar, Clock, AlertTriangle, Shield } from 'lucide-react';
 import { WasteDeposit, WastePrice, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -25,6 +25,9 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Pending' | 'Confirmed'>('All');
+  const [pinInput, setPinInput] = useState('');
+  const [isPinVerified, setIsPinVerified] = useState(false);
+  const [pinError, setPinError] = useState(false);
 
   // Form State
   const [form, setForm] = useState({
@@ -51,10 +54,27 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       houseId,
       residentName: house ? house.headOfFamily : ''
     });
+    setIsPinVerified(false);
+    setPinInput('');
+  };
+
+  const verifyPin = () => {
+    const house = houses.find(h => h.id === form.houseId);
+    if (house && house.accessCode === pinInput) {
+      setIsPinVerified(true);
+      setPinError(false);
+    } else {
+      setPinError(true);
+      setTimeout(() => setPinError(false), 2000);
+    }
   };
 
   const handleSaveDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isPinVerified) {
+      alert('Silakan verifikasi PIN rumah terlebih dahulu.');
+      return;
+    }
     try {
       const priceObj = prices.find(p => p.type === form.type);
       const pricePerUnit = priceObj ? priceObj.pricePerUnit : 0;
@@ -69,6 +89,8 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
 
       await addWasteDepositToDb(depositData);
       setIsDepositModalOpen(false);
+      setIsPinVerified(false);
+      setPinInput('');
       setForm({
         houseId: '',
         residentName: '',
@@ -291,7 +313,11 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       </div>
 
       {/* Input Deposit Modal */}
-      <Modal isOpen={isDepositModalOpen} onClose={() => setIsDepositModalOpen(false)} title="Input Setoran Sampah">
+      <Modal isOpen={isDepositModalOpen} onClose={() => {
+        setIsDepositModalOpen(false);
+        setIsPinVerified(false);
+        setPinInput('');
+      }} title="Input Setoran Sampah">
         <form onSubmit={handleSaveDeposit} className="space-y-4">
           <div>
             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pilih Rumah / Warga</label>
@@ -302,11 +328,68 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               onChange={e => handleHouseChange(e.target.value)}
             >
               <option value="">Pilih Rumah...</option>
-              {houses.filter(h => h.status === 'Occupied').map(h => (
-                <option key={h.id} value={h.id}>{h.block}-{h.number} - {h.headOfFamily}</option>
-              ))}
+              {[...houses]
+                .filter(h => h.status === 'Occupied')
+                .sort((a, b) => {
+                  // Urut dari C5: Blok C, D, E... lalu A, B
+                  const getBlockPriority = (block: string) => {
+                    const b = block.toUpperCase();
+                    if (b >= 'C') return 0;
+                    return 1;
+                  };
+                  const pA = getBlockPriority(a.block);
+                  const pB = getBlockPriority(b.block);
+                  if (pA !== pB) return pA - pB;
+                  if (a.block !== b.block) return a.block.localeCompare(b.block);
+                  return parseInt(a.number) - parseInt(b.number);
+                })
+                .map(h => (
+                  <option key={h.id} value={h.id}>{h.block}-{h.number} - {h.headOfFamily}</option>
+                ))}
             </select>
           </div>
+
+          {form.houseId && (
+            <div className={`p-4 rounded-2xl border transition-all ${isPinVerified ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Shield size={16} className={isPinVerified ? 'text-emerald-600' : 'text-slate-400'} />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Verifikasi PIN Rumah</span>
+                </div>
+                {isPinVerified && (
+                  <span className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                    <CheckCircle size={12} /> Terverifikasi
+                  </span>
+                )}
+              </div>
+              
+              {!isPinVerified ? (
+                <div className="flex gap-2">
+                  <input 
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={6}
+                    placeholder="Masukkan PIN"
+                    className={`flex-1 px-4 py-2 bg-white border ${pinError ? 'border-rose-500' : 'border-slate-200'} rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20`}
+                    value={pinInput}
+                    onChange={e => setPinInput(e.target.value)}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={verifyPin}
+                    className="bg-slate-800 hover:bg-slate-900 text-[10px] px-4"
+                  >
+                    Cek PIN
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-xs text-emerald-700 font-medium">PIN sesuai. Anda dapat melanjutkan pengisian data setoran.</p>
+              )}
+              {pinError && <p className="text-[9px] font-bold text-rose-500 mt-1.5 uppercase tracking-wider">PIN salah, silakan coba lagi</p>}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Jenis Sampah</label>
@@ -355,7 +438,11 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               </span>
             </div>
           </div>
-          <Button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-100 mt-4">
+          <Button 
+            type="submit" 
+            disabled={!isPinVerified}
+            className={`w-full py-4 shadow-xl mt-4 ${isPinVerified ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+          >
             Simpan Setoran
           </Button>
         </form>

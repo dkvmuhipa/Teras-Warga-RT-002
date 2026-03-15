@@ -36,7 +36,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             <Shield size={32} />
           </div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">Admin Portal</h1>
-          <p className="text-slate-500 text-sm font-medium">Masuk untuk mengelola data RT 002</p>
+          <p className="text-slate-500 text-sm font-medium">Masuk untuk mengelola data RT 02</p>
         </div>
 
         {error && (
@@ -75,7 +75,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
         </form>
         
         <p className="text-center text-[10px] text-slate-400 mt-8 font-bold uppercase tracking-widest">
-          Sistem Informasi Digital RT 002
+          Sistem Informasi Digital RT 02
         </p>
       </div>
     </div>

@@ -271,7 +271,7 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
               );
             })
           ) : (
-            <div className="bg-white rounded-[3rem] p-20 text-center border border-dashed border-slate-200">
+            <div key="no-bills-found" className="bg-white rounded-[3rem] p-20 text-center border border-dashed border-slate-200">
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                 <Search size={40} />
               </div>
@@ -285,7 +285,7 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
       {/* Create Bill Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+          <div key="bill-modal-overlay" className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

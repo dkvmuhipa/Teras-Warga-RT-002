@@ -103,8 +103,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <AuditLogManager logs={auditLogs} />;
       case 'content':
         return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} events={events} faqItems={faqItems} />;
+
       case 'officials':
-        return <OfficialManagement officials={officials} />;
+        return <OfficialManagement officials={officials} houses={houses} />;
       case 'notifications':
         return <NotificationCombined notifications={notifications} />;
       case 'documents':

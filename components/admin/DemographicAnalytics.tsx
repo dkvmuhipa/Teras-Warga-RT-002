@@ -246,7 +246,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
           </div>
           <h2 className="text-4xl font-black text-slate-900 tracking-tight">Analitik & Demografi</h2>
           <p className="text-slate-500 font-medium mt-2 max-w-2xl">
-            Pusat data terpadu RT 002 untuk memantau demografi warga, tren keuangan, dan kualitas data secara real-time.
+            Pusat data terpadu RT 02 untuk memantau demografi warga, tren keuangan, dan kualitas data secara real-time.
           </p>
         </div>
         
@@ -280,7 +280,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                 { icon: Car, label: 'Total Kendaraan', value: totalVehicles, sub: 'Mobilitas Warga', color: 'indigo' }
               ].map((stat, i) => (
                 <motion.div 
-                  key={i}
+                  key={stat.label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
@@ -345,8 +345,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                     </ResponsiveContainer>
                   </div>
                   <div className="space-y-4">
-                    {ageDistribution.map((item, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors group">
+                    {ageDistribution.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors group">
                         <div className="flex items-center gap-3">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
                           <span className="text-sm font-bold text-slate-600">{item.name}</span>
@@ -376,7 +376,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                 
                 <div className="space-y-10 relative z-10">
                   {genderDistribution.map((item, i) => (
-                    <div key={i} className="space-y-3">
+                    <div key={item.name} className="space-y-3">
                       <div className="flex justify-between items-end">
                         <div className="flex items-center gap-3">
                           <div className={`p-2 rounded-lg ${i === 0 ? 'bg-blue-400/20' : 'bg-pink-400/20'}`}>
@@ -407,7 +407,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                       <Info size={16} />
                     </div>
                     <p className="text-[10px] font-bold leading-relaxed">
-                      Rasio gender yang seimbang menunjukkan keberagaman sosial yang sehat di lingkungan RT 002.
+                      Rasio gender yang seimbang menunjukkan keberagaman sosial yang sehat di lingkungan RT 02.
                     </p>
                   </div>
                 </div>
@@ -468,8 +468,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Kualifikasi Akademik</p>
                 
                 <div className="space-y-5">
-                  {educationData.slice(0, 5).map((item, i) => (
-                    <div key={i} className="flex items-center gap-4">
+                  {educationData.slice(0, 5).map((item) => (
+                    <div key={item.name} className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
                         <GraduationCap size={20} />
                       </div>
@@ -528,7 +528,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center mt-4">
                   {religionData.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2">
+                    <div key={item.name} className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
                       <span className="text-[10px] font-bold text-slate-500">{item.name}</span>
                     </div>
@@ -551,8 +551,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                   { label: 'Dewasa', value: totalAdults, icon: UserCheck, color: 'emerald' },
                   { label: 'Lansia', value: totalElderly, icon: User, color: 'amber' },
                   { label: 'Janda', value: totalWidows, icon: Heart, color: 'pink' }
-                ].map((item, i) => (
-                  <div key={i} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:bg-slate-50 transition-all">
+                ].map((item) => (
+                  <div key={item.label} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:bg-slate-50 transition-all">
                     <div className="p-4 bg-slate-50 text-slate-600 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
                       <item.icon size={20} />
                     </div>
@@ -570,7 +570,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                 <div className="lg:col-span-2 space-y-4">
                   <h3 className="text-2xl font-black tracking-tight">Ringkasan Wawasan Demografi</h3>
                   <p className="text-slate-400 font-medium leading-relaxed">
-                    Berdasarkan data terbaru, RT 002 memiliki populasi yang didominasi oleh kelompok usia produktif (Dewasa) sebesar {Math.round((ageGroups.dewasa / totalResidents) * 100)}%. 
+                    Berdasarkan data terbaru, RT 02 memiliki populasi yang didominasi oleh kelompok usia produktif (Dewasa) sebesar {Math.round((ageGroups.dewasa / totalResidents) * 100)}%. 
                     Tingkat partisipasi ekonomi cukup tinggi dengan mayoritas warga bekerja sebagai {occupationData[0]?.name || 'Karyawan'}. 
                     Kebutuhan akan fasilitas ramah anak dan lansia tetap menjadi prioritas mengingat terdapat {ageGroups.balita + ageGroups.anak} anak-anak dan {ageGroups.lansia} lansia.
                   </p>

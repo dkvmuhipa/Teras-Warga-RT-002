@@ -47,7 +47,7 @@ export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, let
       icon: Users, 
       color: 'text-indigo-600', 
       bg: 'bg-indigo-50',
-      description: 'Jiwa terdaftar di RT 002'
+      description: 'Jiwa terdaftar di RT 02'
     },
     { 
       label: 'Rumah Terisi', 
@@ -74,7 +74,7 @@ export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, let
             Kinerja <span className="italic font-serif text-indigo-600">Pengurus</span>
           </h2>
           <p className="text-slate-500 text-sm font-medium mt-2 max-w-xl">
-            Data real-time efektivitas layanan administrasi dan penanganan laporan warga di lingkungan RT 002.
+            Data real-time efektivitas layanan administrasi dan penanganan laporan warga di lingkungan RT 02.
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">

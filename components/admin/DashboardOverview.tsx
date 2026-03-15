@@ -390,7 +390,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
             </div>
             <div className="space-y-4 md:space-y-6">
               {recentActivity.map((activity, i) => (
-                <div key={i} className="flex gap-3 md:gap-4 group cursor-pointer">
+                <div key={`${activity.type}-${activity.time.getTime()}-${i}`} className="flex gap-3 md:gap-4 group cursor-pointer">
                   <div className={`shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-${activity.color}-50 text-${activity.color}-600 flex items-center justify-center group-hover:scale-110 transition-transform`}>
                     <activity.icon size={14} className="md:w-[18px] md:h-[18px]" />
                   </div>

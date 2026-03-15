@@ -88,7 +88,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           Ekonomi Warga
         </motion.div>
         <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight mb-6">
-          UMKM <span className="text-blue-600">RT 002</span>
+          UMKM <span className="text-blue-600">RT 02</span>
         </h1>
         <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto leading-relaxed mb-8">
           Dukung usaha tetangga, majukan ekonomi warga. Temukan berbagai produk dan jasa menarik di lingkungan kita.
@@ -197,7 +197,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                       </div>
                       <div className="min-w-0">
                         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Lokasi</p>
-                        <p className="text-[10px] font-black text-slate-700 truncate">{u.houseId || 'RT 002'}</p>
+                        <p className="text-[10px] font-black text-slate-700 truncate">{u.houseId || 'RT 02'}</p>
                       </div>
                     </div>
                   </div>
@@ -207,7 +207,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                     whileTap={{ scale: 0.98 }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      window.open(`https://wa.me/${u.contact.replace(/^0/, '62').replace(/\D/g, '')}?text=Halo, saya melihat usaha Anda di Website RT 002.`, '_blank');
+                      window.open(`https://wa.me/${u.contact.replace(/^0/, '62').replace(/\D/g, '')}?text=Halo, saya melihat usaha Anda di Website RT 02.`, '_blank');
                     }}
                     className="flex items-center justify-center gap-2 w-full py-4 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm hover:shadow-emerald-500/30 font-black text-xs uppercase tracking-widest"
                   >
@@ -278,7 +278,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lokasi / Alamat</p>
-                  <p className="text-lg font-black text-slate-800">{selectedUMKM.houseId || selectedUMKM.address || 'RT 002'}</p>
+                  <p className="text-lg font-black text-slate-800">{selectedUMKM.houseId || selectedUMKM.address || 'RT 02'}</p>
                 </div>
               </div>
               <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 flex items-center gap-4">

@@ -95,7 +95,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Manajemen Aset & Inventaris</h2>
-          <p className="text-slate-500 font-medium mt-1">Kelola aset dan perlengkapan RT 002.</p>
+          <p className="text-slate-500 font-medium mt-1">Kelola aset dan perlengkapan RT 02.</p>
         </div>
         <Button onClick={() => { resetInvForm(); setIsInvModalOpen(true); }}>
           <Plus size={16} /> Tambah Aset

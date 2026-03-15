@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint } from '../types';
 import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield } from 'lucide-react';
-import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb } from '../services/databaseService';
+import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
 
 interface HouseMapProps {
   houses: House[];
@@ -94,7 +94,11 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
 }) => {
     const activeReports = reports.filter(r => r.houseId === house.id && r.status !== 'Selesai');
     const isSafe = activeReports.length === 0;
-    const officialData = officials?.find(o => o.houseId === house.id);
+    const officialData = officials?.find(o => {
+        const officialHouseId = formatHouseId(o.houseId);
+        const currentHouseId = formatHouseId(`${house.block}-${house.number}`);
+        return officialHouseId === currentHouseId;
+    });
     const displayName = shortenName(house.headOfFamily);
 
     const statusAir = getDynamicPaymentStatus(house.id, 'Air', iuranPayments);
@@ -327,7 +331,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     const splitIndex = Math.ceil(sortedHouses.length / 2);
     const leftSide = sortedHouses.slice(0, splitIndex); 
     const rightSide = sortedHouses.slice(splitIndex).sort(sortByNumberDesc); 
-    const getOfficialRole = (hid: string) => officials.find(o => o.houseId === hid)?.role;
+    const getOfficialRole = (hid: string) => officials.find(o => formatHouseId(o.houseId) === formatHouseId(hid))?.role;
 
     return (
         <div className={`flex flex-col bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg overflow-hidden ${className || 'h-full'}`}>
@@ -400,7 +404,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
       <div className="bg-white border-b border-slate-100 px-6 py-4 z-20 shadow-sm relative space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-               <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2"><MapPin className="text-brand-blue" size={24}/> Denah Digital RT 002</h3>
+               <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2"><MapPin className="text-brand-blue" size={24}/> Denah Digital RT 02</h3>
                <p className="text-xs text-slate-500 font-medium">Klik kavling rumah untuk melihat detail informasi.</p>
             </div>
             <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar">

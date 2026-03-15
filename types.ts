@@ -61,6 +61,7 @@ export interface House {
 
   // Family Members
   familyMembers?: {
+    id?: string;
     name: string;
     nik?: string;
     gender?: 'Laki-laki' | 'Perempuan';
@@ -96,6 +97,7 @@ export interface ResidentRegistration {
   ktpUrl?: string;
   kkUrl?: string;
   familyMembers?: {
+    id?: string;
     name: string;
     nik?: string;
     gender: 'Laki-laki' | 'Perempuan';

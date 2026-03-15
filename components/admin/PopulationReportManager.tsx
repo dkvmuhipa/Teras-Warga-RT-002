@@ -137,7 +137,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Laporan Kependudukan</h2>
-          <p className="text-slate-500 font-medium mt-1">Analisis pertumbuhan dan mutasi penduduk RT 002.</p>
+          <p className="text-slate-500 font-medium mt-1">Analisis pertumbuhan dan mutasi penduduk RT 02.</p>
         </div>
         <div className="flex gap-3">
           <button 

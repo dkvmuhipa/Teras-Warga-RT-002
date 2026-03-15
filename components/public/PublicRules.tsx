@@ -96,7 +96,7 @@ export const PublicRules: React.FC = () => {
         "Warga atau penghuni kontrakan yang melanggar aturan akan dikenakan teguran lisan/tertulis.",
         "Dikeluarkan dari grup komunikasi RT.",
         "Dilaporkan ke pemilik kontrakan, atau dalam kasus berat, dilaporkan ke pihak berwajib.",
-        "Aturan ini berlaku untuk seluruh warga dan penghuni RT 002 tanpa terkecuali."
+        "Aturan ini berlaku untuk seluruh warga dan penghuni RT 02 tanpa terkecuali."
       ]
     }
   ];
@@ -105,7 +105,7 @@ export const PublicRules: React.FC = () => {
     <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm mt-12">
       <div className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4">
-          Peraturan Umum <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500">TERAS RT 002</span>
+          Peraturan Umum <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500">TERAS RT 02</span>
         </h2>
         <p className="text-slate-500 font-medium max-w-2xl mx-auto">
           Teknologi | Ekraf | Rukun | Aman | Sinergi
@@ -169,11 +169,11 @@ export const PublicRules: React.FC = () => {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
         <div className="relative z-10">
           <p className="text-indigo-200 font-medium mb-6 max-w-3xl mx-auto leading-relaxed">
-            Dengan semangat TERAS RT 002 — Teknologi, Ekraf, Rukun, Aman, Sinergi, mari kita bangun lingkungan Huntap 2 Tondo RT 002 sebagai tempat tinggal yang nyaman, tertib, aman, dan penuh kekeluargaan.
+            Dengan semangat TERAS RT 02 — Teknologi, Ekraf, Rukun, Aman, Sinergi, mari kita bangun lingkungan Huntap 2 Tondo RT 02 sebagai tempat tinggal yang nyaman, tertib, aman, dan penuh kekeluargaan.
           </p>
           <div className="inline-block text-left bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-            <p className="text-white font-black text-lg mb-1">Ketua RT 002: Irfan</p>
-            <p className="text-indigo-200 text-sm mb-1">Alamat: Blok C10–08</p>
+            <p className="text-white font-black text-lg mb-1">Ketua RT 02: Irfan</p>
+            <p className="text-indigo-200 text-sm mb-1">Alamat: Blok C10 No. 08</p>
             <p className="text-indigo-200 text-sm">WhatsApp: 085961194621</p>
           </div>
         </div>

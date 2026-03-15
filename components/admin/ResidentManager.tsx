@@ -13,7 +13,7 @@ import {
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
-import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb } from '../../services/databaseService';
+import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId } from '../../services/databaseService';
 import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -125,7 +125,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     adultCount: 0,
     elderlyCount: 0,
     widowCount: 0,
-    familyMembers: [] as { name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
+    familyMembers: [] as { id?: string; name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     accessCode: ''
   });
 
@@ -492,7 +492,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       adultCount: house.adultCount || 0,
       elderlyCount: house.elderlyCount || 0,
       widowCount: house.widowCount || 0,
-      familyMembers: house.familyMembers || [],
+      familyMembers: (house.familyMembers || []).map(m => ({ ...m, id: m.id || Math.random().toString(36).substr(2, 9) })),
       accessCode: house.accessCode || ''
     });
     setIsModalOpen(true);
@@ -501,15 +501,21 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const handleSaveHouse = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const houseId = formatHouseId(`${formData.block}-${formData.number}`);
       const data = {
         ...formData,
+        id: houseId,
         location: { x: 0, y: 0 } // Default location, map editor handles this separately
       };
 
       if (editingHouseId) {
-        await updateHouseData(editingHouseId, data);
+        // If ID changed (block or number changed), delete old and create new
+        if (editingHouseId !== houseId) {
+          await deleteHouseFromDb(editingHouseId);
+        }
+        await addHouse(data); // Using addHouse because it handles setDoc with ID
         if (selectedResident?.id === editingHouseId) {
-            setSelectedResident({ ...selectedResident, ...data } as House);
+            setSelectedResident({ ...selectedResident, ...data, id: houseId } as House);
         }
       } else {
         await addHouse(data);
@@ -611,7 +617,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-6">
         <div className="w-full lg:w-auto">
           <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">Data Warga</h2>
-          <p className="text-[10px] sm:text-xs md:text-sm text-slate-500 font-medium mt-1">Kelola data kependudukan dan status hunian RT 002.</p>
+          <p className="text-[10px] sm:text-xs md:text-sm text-slate-500 font-medium mt-1">Kelola data kependudukan dan status hunian RT 02.</p>
         </div>
         <div className="flex flex-wrap gap-2 w-full lg:w-auto">
           {selectedIds.size > 0 && (
@@ -746,7 +752,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
       <AnimatePresence>
         {isPayModalOpen && payHouse && (
-          <Modal isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title={`Bayar Iuran: ${payHouse.headOfFamily}`}>
+          <Modal key="payment-modal" isOpen={isPayModalOpen} onClose={() => setIsPayModalOpen(false)} title={`Bayar Iuran: ${payHouse.headOfFamily}`}>
             <form onSubmit={handleSavePayment} className="space-y-4">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Rumah</p>
@@ -807,7 +813,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
       <AnimatePresence>
         {isEditPaymentModalOpen && editingPayment && (
-          <Modal isOpen={isEditPaymentModalOpen} onClose={() => setIsEditPaymentModalOpen(false)} title={`Edit Catatan Iuran: ${editingPayment.headOfFamily}`}>
+          <Modal key="edit-payment-modal" isOpen={isEditPaymentModalOpen} onClose={() => setIsEditPaymentModalOpen(false)} title={`Edit Catatan Iuran: ${editingPayment.headOfFamily}`}>
             <form onSubmit={handleUpdatePayment} className="space-y-4">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Rumah</p>
@@ -862,6 +868,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       <AnimatePresence>
         {selectedHouseForBills && (
           <BillDetailModal 
+            key="bill-detail-modal"
             house={selectedHouseForBills} 
             bills={[]} 
             onClose={() => setSelectedHouseForBills(null)} 
@@ -965,7 +972,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       {/* Content View */}
       <motion.div variants={itemVariants}>
         {viewMode === 'analytics' ? (
-          <div className="animate-fade-in">
+          <div className="space-y-6 animate-fade-in">
+            <ResidentAnalytics houses={houses} />
             <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />
           </div>
         ) : viewMode === 'grid' ? (
@@ -1181,7 +1189,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           </tr>
                         ))
                       ) : (
-                        <tr>
+                        <tr key="no-payments">
                           <td colSpan={6} className="p-12 text-center">
                             <div className="flex flex-col items-center gap-3">
                               <div className="p-4 bg-slate-50 rounded-full text-slate-300">
@@ -1328,7 +1336,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   </div>
                 ))
               ) : (
-                <div className="py-20 text-center">
+                <div key="no-registrations" className="py-20 text-center">
                   <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
                     <UserPlus size={32} />
                   </div>
@@ -1344,7 +1352,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               acc[house.block].push(house);
               return acc;
             }, {} as Record<string, typeof filteredHouses>)).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'})).map(([block, houses]) => (
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div key={block} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full text-sm min-w-[1000px]">
                 <thead className="bg-slate-50/50">
@@ -1432,18 +1440,6 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           onEditHouse={(h) => openDetail(h)}
         />
       </div>
-    ) : viewMode === 'iuran' ? (
-      <div className="space-y-6">
-        {/* Iuran specific content would go here */}
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
-          <p className="text-slate-500 font-bold">Laporan Iuran Sedang Dimuat...</p>
-        </div>
-      </div>
-    ) : viewMode === 'analytics' ? (
-      <div className="space-y-6">
-        <ResidentAnalytics houses={houses} />
-        <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />
-      </div>
     ) : (
       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
         <p className="text-slate-500 font-bold">Konten Sedang Dimuat...</p>
@@ -1454,7 +1450,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       {/* Resident Detail Drawer */}
       <AnimatePresence>
         {isDrawerOpen && selectedResident && (
-          <div className="fixed inset-0 z-[100] flex justify-end">
+          <div key="drawer-overlay" className="fixed inset-0 z-[100] flex justify-end">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1668,7 +1664,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     {selectedResident.familyMembers && selectedResident.familyMembers.length > 0 ? (
                       <div className="space-y-3">
                         {selectedResident.familyMembers.map((member, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                          <div key={member.id || idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                             <div>
                               <p className="font-bold text-slate-800">{member.name}</p>
                               <p className="text-xs text-slate-500">{member.relation} • {member.birthDate ? new Date(member.birthDate).toLocaleDateString('id-ID') : '-'}</p>
@@ -1886,7 +1882,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 type="button"
                 onClick={() => setFormData({
                   ...formData, 
-                  familyMembers: [...formData.familyMembers, { name: '', relation: 'Anak', nik: '', birthDate: '' }]
+                  familyMembers: [...formData.familyMembers, { id: Math.random().toString(36).substr(2, 9), name: '', relation: 'Anak', nik: '', birthDate: '' }]
                 })}
                 className="text-xs font-black text-indigo-600 hover:text-indigo-700 flex items-center gap-1 bg-indigo-50 px-2 py-1 rounded-lg transition-colors"
               >
@@ -1896,7 +1892,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             
             <div className="space-y-3">
               {formData.familyMembers.map((member, idx) => (
-                <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group transition-all hover:border-indigo-200 hover:shadow-sm">
+                <div key={member.id || idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group transition-all hover:border-indigo-200 hover:shadow-sm">
                   <button 
                     type="button"
                     onClick={() => {

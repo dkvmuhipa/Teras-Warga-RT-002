@@ -79,7 +79,7 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
       const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(deepSanitize(data), null, 2));
       const downloadAnchorNode = document.createElement('a');
       downloadAnchorNode.setAttribute("href", jsonString);
-      downloadAnchorNode.setAttribute("download", `backup_config_rt002_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchorNode.setAttribute("download", `backup_config_rt02_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchorNode);
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
@@ -132,7 +132,7 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
                   A
                 </div>
                 <div>
-                  <h4 className="text-lg font-black text-slate-800">Admin Utama RT 002</h4>
+                  <h4 className="text-lg font-black text-slate-800">Admin Utama RT 02</h4>
                   <div className="flex items-center gap-2 text-slate-400 text-xs font-bold mt-1">
                     <Mail size={12} />
                     admin@teras.id

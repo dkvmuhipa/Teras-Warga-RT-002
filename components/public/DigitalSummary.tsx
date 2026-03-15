@@ -34,7 +34,7 @@ export const DigitalSummary = () => {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-1">Agenda Mendatang</p>
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Kegiatan Warga RT 002</h3>
+                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Kegiatan Warga RT 02</h3>
                         </div>
                         <button 
                             onClick={() => navigate('/kegiatan')}

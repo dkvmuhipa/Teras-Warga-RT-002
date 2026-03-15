@@ -338,7 +338,7 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
   // Prevent infinite recursion with a safety depth limit
   if (depth > 15) return "[Depth Limit]";
   
-  if (data === null || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     return data;
   }
   
@@ -362,8 +362,8 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
       (data.nativeEvent && data.target) || 
       (data.$$typeof) || // React element
       (typeof constructorName === 'string' && (
-        /^(Y2|Ka|Map|Marker|google|HTML|Window|Document|__)/.test(constructorName) ||
-        // Minified Google Maps classes are often 1-2 chars
+        /^(Y2|Ka|Map|Marker|google|HTML|Window|Document|__)/i.test(constructorName) ||
+        // Minified classes are often 1-2 chars
         (constructorName.length <= 2 && /^[A-Z]/.test(constructorName))
       )) ||
       data.gm_bindings_ || 
@@ -372,7 +372,16 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
       (typeof constructor === 'function' && (
         constructor.toString().includes('google.maps') ||
         constructor.toString().includes('gm_')
-      ));
+      )) ||
+      data instanceof Promise ||
+      typeof data.then === 'function' ||
+      data instanceof Error ||
+      data instanceof Map ||
+      data instanceof Set ||
+      data instanceof File ||
+      data instanceof Blob ||
+      data instanceof ArrayBuffer ||
+      ArrayBuffer.isView(data);
 
     if (isComplex) {
       return undefined;
@@ -389,9 +398,6 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
 
   const clean: any = {};
   try {
-    // Use Object.getOwnPropertyNames to get all keys even if not enumerable
-    // but Object.keys is safer for general use. Let's stick to Object.keys
-    // but wrap in try-catch for each key access.
     Object.keys(data).forEach(key => {
       try {
         const value = data[key];
@@ -407,7 +413,6 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
       }
     });
   } catch (e) {
-    console.warn("Error sanitizing object keys:", e);
     return "[Complex Object]";
   }
   
@@ -500,36 +505,71 @@ export const deleteHouseFromDb = async (id: string) => {
 };
 
 export const formatHouseId = (houseId: string): string => {
-    let formattedHouseId = houseId.toUpperCase().replace(/\s+/g, '');
+    if (!houseId) return '';
     
-    if (!formattedHouseId.includes('-')) {
-        const match = formattedHouseId.match(/^([A-Z]+\d+?)(\d{1,2})$/);
+    // Remove spaces and convert to uppercase
+    let formatted = houseId.toUpperCase().replace(/\s+/g, '');
+    
+    // If it doesn't have a hyphen, try to insert one between block and number
+    if (!formatted.includes('-')) {
+        // Match pattern like C108 or C1008 or C18
+        // We assume block is [A-Z]+ followed by some digits, and number is the last 1 or 2 digits
+        const match = formatted.match(/^([A-Z]+\d+?)(\d{1,2})$/);
         if (match) {
-            formattedHouseId = `${match[1]}-${match[2]}`;
+            formatted = `${match[1]}-${match[2]}`;
         } else {
-            const match2 = formattedHouseId.match(/^([A-Z]+)(\d+)$/);
+            // Fallback for simple patterns like C8
+            const match2 = formatted.match(/^([A-Z]+)(\d+)$/);
             if (match2) {
-                formattedHouseId = `${match2[1]}-${match2[2]}`;
+                formatted = `${match2[1]}-${match2[2]}`;
             } else {
-                const match3 = formattedHouseId.match(/^([A-Z]+\d+?)(\d{1,2})([A-Z]+)$/);
+                // Another fallback for patterns like C10-08A (ignoring suffix for matching)
+                const match3 = formatted.match(/^([A-Z]+\d+?)(\d{1,2})([A-Z]+)$/);
                 if (match3) {
-                    formattedHouseId = `${match3[1]}-${match3[2]}`;
+                    formatted = `${match3[1]}-${match3[2]}`;
                 }
             }
         }
     }
 
-    const parts = formattedHouseId.split('-');
+    const parts = formatted.split('-');
     if (parts.length >= 2) {
         const block = parts[0];
         let num = parts[1];
+        // Ensure number is 2 digits
         if (num.length === 1) {
             num = `0${num}`;
+        } else if (num.length > 2) {
+            // If someone entered C10-008, take last 2 digits
+            num = num.slice(-2);
         }
-        formattedHouseId = `${block}-${num}`;
+        return `${block}-${num}`;
     }
     
-    return formattedHouseId;
+    return formatted;
+};
+
+/**
+ * Mendapatkan label tampilan rumah yang ramah pengguna (misal: Blok C10 No. 08)
+ */
+export const getHouseDisplayLabel = (houseId: string, houses?: any[]): string => {
+    if (!houseId) return '-';
+    const formattedId = formatHouseId(houseId);
+    
+    if (houses) {
+        const house = houses.find(h => formatHouseId(h.id) === formattedId);
+        if (house && house.block && house.number) {
+            return `Blok ${house.block} No. ${house.number}`;
+        }
+    }
+
+    // Fallback: Parse from ID string (e.g. C10-08)
+    const parts = formattedId.split('-');
+    if (parts.length === 2) {
+        return `Blok ${parts[0]} No. ${parts[1]}`;
+    }
+    
+    return `Blok ${formattedId}`;
 };
 
 export const validateResidentAccess = async (houseId: string, code: string): Promise<boolean> => {

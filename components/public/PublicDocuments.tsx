@@ -50,7 +50,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
           Pusat <span className="text-indigo-600">Dokumen Publik</span>
         </h1>
         <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">
-          Unduh dokumen resmi, aturan lingkungan, dan formulir administrasi RT 002.
+          Unduh dokumen resmi, aturan lingkungan, dan formulir administrasi RT 02.
         </p>
       </div>
 

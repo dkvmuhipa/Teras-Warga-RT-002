@@ -278,7 +278,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                   </motion.div>
                 ))
               ) : (
-                <motion.div variants={itemVariants} className="col-span-full py-32 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100">
+                <motion.div key="empty-umkm" variants={itemVariants} className="col-span-full py-32 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100">
                   <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-200 mx-auto mb-8">
                     <Store size={48} />
                   </div>
@@ -398,7 +398,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                   </motion.div>
                 ))
               ) : (
-                <div className="py-32 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100">
+                <div key="empty-orders" className="py-32 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100">
                   <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-200 mx-auto mb-8">
                     <ShoppingBag size={48} />
                   </div>

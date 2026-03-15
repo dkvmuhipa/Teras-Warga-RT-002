@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, User, Phone, MapPin, Briefcase, Upload } from 'lucide-react';
-import { Official } from '../../types';
+import { Plus, Edit2, Trash2, User, Phone, MapPin, Briefcase, Upload, AlertTriangle } from 'lucide-react';
+import { Official, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage } from '../../services/databaseService';
+import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface OfficialManagementProps {
   officials: Official[];
+  houses: House[];
 }
 
-export const OfficialManagement: React.FC<OfficialManagementProps> = ({ officials }) => {
+export const OfficialManagement: React.FC<OfficialManagementProps> = ({ officials, houses }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOfficialId, setEditingOfficialId] = useState<string | null>(null);
   
@@ -71,7 +72,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         name: offName,
         role: offRole,
         phone: offPhone,
-        houseId: offHouse,
+        houseId: formatHouseId(offHouse),
         photo: finalPhotoUrl,
         email: offEmail,
         termStart: offTermStart,
@@ -125,7 +126,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pengurus RT 002</h2>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pengurus RT 02</h2>
           <p className="text-slate-500 font-medium mt-1">Kelola data struktur organisasi dan personil Rukun Tetangga.</p>
         </div>
         <Button onClick={() => { resetForms(); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all hover:scale-105 active:scale-95">
@@ -181,7 +182,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
                       <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 shrink-0">
                         <MapPin size={14} />
                       </div>
-                      <span className="font-medium truncate">Blok {o.houseId || '-'}</span>
+                      <span className="font-medium truncate">{getHouseDisplayLabel(o.houseId, houses)}</span>
                     </div>
                   </div>
                 </div>
@@ -191,7 +192,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         </AnimatePresence>
         
         {officials.length === 0 && (
-          <motion.div variants={itemVariants} className="col-span-full py-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+          <motion.div key="empty-officials" variants={itemVariants} className="col-span-full py-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-300 mx-auto mb-4 shadow-sm">
               <User size={32} />
             </div>
@@ -214,7 +215,30 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
             </div>
             <div>
               <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Blok Rumah</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offHouse} onChange={e=>setOffHouse(e.target.value)} placeholder="Contoh: A-12" required/>
+              <input 
+                list="house-list"
+                className={`w-full p-3 bg-slate-50 border rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all ${
+                  offHouse && !houses.some(h => formatHouseId(h.id) === formatHouseId(offHouse)) 
+                  ? 'border-rose-300 bg-rose-50' 
+                  : 'border-slate-200'
+                }`}
+                value={offHouse} 
+                onChange={e=>setOffHouse(e.target.value)} 
+                placeholder="Contoh: C10-08" 
+                required
+              />
+              <datalist id="house-list">
+                {houses.map(h => (
+                  <option key={h.id} value={h.id}>
+                    {h.headOfFamily && h.headOfFamily !== '-' ? `${h.id} - ${h.headOfFamily}` : h.id}
+                  </option>
+                ))}
+              </datalist>
+              {offHouse && !houses.some(h => formatHouseId(h.id) === formatHouseId(offHouse)) && (
+                <p className="text-[10px] text-rose-500 font-bold mt-1 ml-1 flex items-center gap-1">
+                  <AlertTriangle size={10} /> ID Rumah tidak ditemukan
+                </p>
+              )}
             </div>
           </div>
           <div>

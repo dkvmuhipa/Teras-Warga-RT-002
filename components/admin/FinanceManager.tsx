@@ -113,7 +113,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="w-full lg:w-auto">
           <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Keuangan & Kas</h2>
-          <p className="text-sm md:text-slate-500 font-medium mt-1">Kelola transparansi pemasukan dan pengeluaran RT 002.</p>
+          <p className="text-sm md:text-slate-500 font-medium mt-1">Kelola transparansi pemasukan dan pengeluaran RT 02.</p>
         </div>
         <div className="flex flex-wrap gap-2 w-full lg:w-auto">
           <div className="flex items-center gap-2 px-3 bg-white border border-slate-200 rounded-xl shadow-sm flex-1 sm:flex-none">
@@ -162,9 +162,9 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
         {[
           { label: 'Total Pemasukan', value: totalIncome, icon: ArrowUpRight, color: 'emerald' },
           { label: 'Total Pengeluaran', value: totalExpense, icon: ArrowDownRight, color: 'rose' }
-        ].map((stat, i) => (
+        ].map((stat) => (
           <motion.div 
-            key={i}
+            key={stat.label}
             variants={itemVariants}
             className="bg-white p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-3 sm:gap-5 group hover:shadow-xl hover:shadow-slate-200/50 transition-all"
           >

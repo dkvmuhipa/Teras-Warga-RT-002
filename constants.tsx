@@ -3,11 +3,11 @@ import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaS
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TERAS";
-export const RT_NAME = "RT 002";
+export const RT_NAME = "RT 02";
 export const RW_NAME = "RW 020";
 export const FULL_RT_NAME = `${RT_NAME} ${RW_NAME}`;
 export const ADMIN_ROLE = "Admin Utama";
-export const ADMIN_TITLE = "Ketua RT 002";
+export const ADMIN_TITLE = "Ketua RT 02";
 export const ADMIN_EMAIL = "admin@teras.id";
 export const DEFAULT_DUES_AMOUNT = 25000;
 export const CURRENCY_SYMBOL = "Rp";
@@ -22,7 +22,7 @@ export const Logo = () => (
       <Home size={24} />
     </div>
     <span className="flex items-center gap-1">
-        {APP_NAME} <span className="text-brand-blue">RT 002</span>
+        {APP_NAME} <span className="text-brand-blue">RT 02</span>
     </span>
   </div>
 );
@@ -166,10 +166,10 @@ export const MOCK_RONDA: RondaSchedule[] = [
 ];
 
 export const CHECKPOINTS: Checkpoint[] = [
-    { id: 'cp1', name: 'Gerbang Utama', qrCode: 'GERBANG_UTAMA_RT002', x: 5, y: 50 },
-    { id: 'cp2', name: 'Pos Satpam', qrCode: 'POS_SATPAM_RT002', x: 10, y: 50 },
-    { id: 'cp3', name: 'Blok C5', qrCode: 'BLOK_C5_RT002', x: 25, y: 20 },
-    { id: 'cp4', name: 'Blok C10', qrCode: 'BLOK_C10_RT002', x: 75, y: 20 },
+    { id: 'cp1', name: 'Gerbang Utama', qrCode: 'GERBANG_UTAMA_RT02', x: 5, y: 50 },
+    { id: 'cp2', name: 'Pos Satpam', qrCode: 'POS_SATPAM_RT02', x: 10, y: 50 },
+    { id: 'cp3', name: 'Blok C5', qrCode: 'BLOK_C5_RT02', x: 25, y: 20 },
+    { id: 'cp4', name: 'Blok C10', qrCode: 'BLOK_C10_RT02', x: 75, y: 20 },
 ];
 
 export const MOCK_MAP_POINTS: MapPoint[] = [
@@ -202,7 +202,7 @@ export const MOCK_FAQ: FAQItem[] = [
 ];
 
 export const MOCK_DOCUMENTS: Document[] = [
-  { id: '1', title: 'SK Pengurus RT 002', category: 'SK RT', url: '#', uploadDate: '2023-01-01', uploadedBy: 'Admin' },
+  { id: '1', title: 'SK Pengurus RT 02', category: 'SK RT', url: '#', uploadDate: '2023-01-01', uploadedBy: 'Admin' },
   { id: '2', title: 'Aturan Kebersihan Lingkungan', category: 'Aturan', url: '#', uploadDate: '2023-02-15', uploadedBy: 'Admin' },
 ];
 
@@ -224,7 +224,7 @@ export const DEFAULT_PDF_CONFIG: PdfConfig = {
   logo: "", 
   stamp: "",
   signature: "",
-  rtName: "RT.002 / RW.020",
+  rtName: "RT.02 / RW.020",
   rtAddress: "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Telp. 085961194621",
   rtChairman: "IRFAN ARIANTO",
   kelurahan: "TONDO",

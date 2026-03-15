@@ -77,7 +77,7 @@ export const GuestReportForm: React.FC<GuestReportFormProps> = ({ onClose, house
             <ShieldAlert size={16} className="text-rose-500" />
             <h2 className="text-2xl font-black text-slate-800">Wajib Lapor Tamu</h2>
           </div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Ketentuan 1x24 Jam RT 002</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Ketentuan 1x24 Jam RT 02</p>
         </div>
       </div>
 

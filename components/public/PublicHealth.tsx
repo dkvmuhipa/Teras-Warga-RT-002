@@ -347,7 +347,7 @@ export const PublicHealth: React.FC = () => {
                 {[
                   { title: 'Monitoring Rutin', desc: 'Pantau tumbuh kembang anak dan kesehatan lansia setiap bulan secara akurat.', icon: Activity, color: 'text-blue-600', bg: 'bg-blue-50' },
                   { title: 'Privasi Terjamin', desc: 'Data kesehatan Anda bersifat rahasia dan hanya dapat diakses melalui pencarian warga.', icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                  { title: 'Analisis Digital', desc: 'Dapatkan catatan dan saran kesehatan langsung dari petugas Posyandu RT 002.', icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                  { title: 'Analisis Digital', desc: 'Dapatkan catatan dan saran kesehatan langsung dari petugas Posyandu RT 02.', icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50' },
                 ].map((item, i) => (
                   <motion.div 
                     key={i}

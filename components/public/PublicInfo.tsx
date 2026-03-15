@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint } from '../../types';
-import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints } from '../../services/databaseService';
+import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
@@ -205,7 +205,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         <ShieldCheck size={14} /> Transparansi & Akuntabilitas
                     </div>
                     <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-tight drop-shadow-lg">
-                        Wajah Baru <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">RT 002</span>
+                        Wajah Baru <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">RT 02</span>
                     </h1>
                     <p className="text-slate-300 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-medium drop-shadow-md">
                         Mewujudkan lingkungan yang aman, nyaman, dan harmonis melalui digitalisasi layanan dan keterbukaan informasi.
@@ -365,7 +365,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                     <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><Image size={24}/></div>
                     <h2 className="text-2xl font-black text-slate-800">Galeri Kegiatan</h2>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {galleryItems.map(g => (
                         <div key={g.id} className="group relative aspect-square rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
                             <img src={g.image} alt={g.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
@@ -405,7 +405,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
                         <h2 className="text-2xl font-black text-slate-800 mb-4">Visi Kami</h2>
                         <p className="text-slate-600 leading-relaxed">
-                            "Menjadikan RT 002 sebagai lingkungan hunian yang mandiri, aman, dan guyub rukun berbasis teknologi informasi serta gotong royong dengan semangat <strong>TERAS RT 002 : Teknologi • Ekraf • Rukun • Aman • Sinergi</strong>."
+                            "Menjadikan RT 02 sebagai lingkungan hunian yang mandiri, aman, dan guyub rukun berbasis teknologi informasi serta gotong royong dengan semangat <strong>TERAS RT 02 : Teknologi • Ekraf • Rukun • Aman • Sinergi</strong>."
                         </p>
                     </div>
                 </div>
@@ -503,7 +503,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         <div className="flex items-center justify-between mb-8">
                             <div>
                                 <p className="text-slate-400 font-medium text-sm uppercase tracking-wider mb-1">Laporan Keuangan</p>
-                                <h2 className="text-3xl font-black text-white">Kas RT 002</h2>
+                                <h2 className="text-3xl font-black text-white">Kas RT 02</h2>
                             </div>
                             <div className="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl text-sm font-bold border border-emerald-500/30">
                                 Update: {new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}
@@ -664,7 +664,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         <p className="text-sm text-slate-500">Periode Jabatan 2023 - 2026</p>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {sortedOfficials.map(o => (
                         <div 
                             key={o.id} 
@@ -687,7 +687,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                                 <div className="pt-4 border-t border-slate-50 grid grid-cols-2 gap-2 text-left">
                                     <div className="bg-slate-50 p-2 rounded-xl">
                                         <p className="text-[10px] text-slate-400 font-bold uppercase">Domisili</p>
-                                        <p className="text-xs font-bold text-slate-700 flex items-center gap-1"><Home size={10}/> {o.houseId}</p>
+                                        <p className="text-xs font-bold text-slate-700 flex items-center gap-1"><Home size={10}/> {getHouseDisplayLabel(o.houseId, houses)}</p>
                                     </div>
                                     <div className="bg-green-50 p-2 rounded-xl">
                                         <p className="text-[10px] text-green-600 font-bold uppercase">Kontak</p>
@@ -703,38 +703,38 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 </div>
             </motion.div>
         
-            <Modal isOpen={isOfficialModalOpen} onClose={() => setIsOfficialModalOpen(false)} title="Profil Pengurus RT">
+            <Modal isOpen={isOfficialModalOpen} onClose={() => setIsOfficialModalOpen(false)} title="Profil Pengurus RT" maxWidth="max-w-2xl">
                 {selectedOfficial && (
                     <div className="space-y-6">
-                        <div className="flex items-center gap-5 p-4 bg-slate-50 rounded-3xl border border-slate-100">
+                        <div className="flex flex-col sm:flex-row items-center gap-5 p-4 bg-slate-50 rounded-3xl border border-slate-100">
                             <img 
                                 src={selectedOfficial.photo || `https://ui-avatars.com/api/?name=${selectedOfficial.name}&background=random&size=128`} 
-                                className="w-20 h-20 rounded-2xl object-cover shadow-md border-2 border-white" 
+                                className="w-20 h-20 rounded-2xl object-cover shadow-md border-2 border-white shrink-0" 
                                 alt={selectedOfficial.name}
                             />
-                            <div>
+                            <div className="text-center sm:text-left">
                                 <h3 className="text-xl font-black text-slate-800">{selectedOfficial.name}</h3>
-                                <div className="flex items-center gap-2 mt-1">
+                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-1">
                                     <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest rounded-full">
                                         {selectedOfficial.role}
                                     </span>
-                                    <span className="text-[10px] font-bold text-slate-400">Blok {selectedOfficial.houseId}</span>
+                                    <span className="text-[10px] font-bold text-slate-400">{getHouseDisplayLabel(selectedOfficial.houseId, houses)}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Kontak Personil</p>
                                 <div className="space-y-3">
                                     <a href={`https://wa.me/${selectedOfficial.phone}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
-                                        <div className="p-2 bg-emerald-50 rounded-lg"><Phone size={14}/></div>
-                                        {selectedOfficial.phone}
+                                        <div className="p-2 bg-emerald-50 rounded-lg shrink-0"><Phone size={14}/></div>
+                                        <span className="truncate">{selectedOfficial.phone}</span>
                                     </a>
                                     {selectedOfficial.email && (
                                         <a href={`mailto:${selectedOfficial.email}`} className="flex items-center gap-3 text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
-                                            <div className="p-2 bg-indigo-50 rounded-lg"><MessageSquare size={14}/></div>
-                                            {selectedOfficial.email}
+                                            <div className="p-2 bg-indigo-50 rounded-lg shrink-0"><MessageSquare size={14}/></div>
+                                            <span className="truncate" title={selectedOfficial.email}>{selectedOfficial.email}</span>
                                         </a>
                                     )}
                                 </div>
@@ -742,8 +742,8 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                             <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Masa Jabatan</p>
                                 <div className="flex items-center gap-3 text-sm font-bold text-slate-700">
-                                    <div className="p-2 bg-slate-50 rounded-lg text-slate-400"><Calendar size={14}/></div>
-                                    {selectedOfficial.termStart ? new Date(selectedOfficial.termStart).getFullYear() : '2023'} - {selectedOfficial.termEnd ? new Date(selectedOfficial.termEnd).getFullYear() : '2026'}
+                                    <div className="p-2 bg-slate-50 rounded-lg text-slate-400 shrink-0"><Calendar size={14}/></div>
+                                    <span>{selectedOfficial.termStart ? new Date(selectedOfficial.termStart).getFullYear() : '2023'} - {selectedOfficial.termEnd ? new Date(selectedOfficial.termEnd).getFullYear() : '2026'}</span>
                                 </div>
                             </div>
                         </div>
@@ -767,15 +767,15 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                             </div>
                         )}
 
-                        <div className="flex gap-3 pt-2">
-                            <Button onClick={() => setIsOfficialModalOpen(false)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-none shadow-none">
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                            <Button onClick={() => setIsOfficialModalOpen(false)} className="sm:flex-1 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border-none shadow-none py-3 transition-all">
                                 Tutup
                             </Button>
                             <a 
                                 href={`https://wa.me/${selectedOfficial.phone}`} 
                                 target="_blank" 
                                 rel="noreferrer"
-                                className="flex-[2] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
+                                className="sm:flex-[2] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
                             >
                                 <Phone size={18} /> Hubungi via WhatsApp
                             </a>
@@ -942,7 +942,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                     </div>
 
                     <div className="flex gap-3">
-                        <Button type="button" variant="outline" onClick={() => setIsSwapModalOpen(false)} className="flex-1 py-3">Batal</Button>
+                        <Button type="button" variant="outline" onClick={() => setIsSwapModalOpen(false)} className="flex-1 py-3 border-rose-200 text-rose-600 hover:bg-rose-50">Batal</Button>
                         <Button type="submit" disabled={isSubmittingSwap} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
                             {isSubmittingSwap ? 'Mengirim...' : 'Kirim Permintaan'}
                         </Button>
@@ -958,6 +958,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         <span className="text-xs font-bold text-slate-400">{selectedAnnouncement && new Date(selectedAnnouncement.date).toLocaleDateString('id-ID')}</span>
                     </div>
                     <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{selectedAnnouncement?.content}</p>
+                    <Button onClick={() => setSelectedAnnouncement(null)} className="w-full mt-4 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border-none">Tutup</Button>
                 </div>
             </Modal>
 
@@ -991,18 +992,20 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                             </div>
                         ))}
                     </div>
-                    <Button onClick={() => setIsFinanceModalOpen(false)} className="w-full py-3 bg-slate-900 hover:bg-slate-800">Tutup Laporan</Button>
+                    <Button onClick={() => setIsFinanceModalOpen(false)} className="w-full py-3 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border-none">Tutup Laporan</Button>
                 </div>
             </Modal>
 
             <Modal isOpen={!!foundHouse} onClose={() => setFoundHouse(null)} title={`Status Iuran: Rumah ${foundHouse?.id}`}>
                 <div className="space-y-6">
-                    <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 text-center">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-4 shadow-sm">
+                    <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 text-center flex flex-col sm:flex-row items-center sm:text-left gap-4">
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
                             <Home size={32} />
                         </div>
-                        <h4 className="text-xl font-black text-slate-900">{foundHouse?.headOfFamily}</h4>
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Blok {foundHouse?.block} No. {foundHouse?.number}</p>
+                        <div>
+                            <h4 className="text-xl font-black text-slate-900">{foundHouse?.headOfFamily}</h4>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Blok {foundHouse?.block} No. {foundHouse?.number}</p>
+                        </div>
                     </div>
 
                     <div className="space-y-3">
@@ -1027,7 +1030,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </p>
                     </div>
 
-                    <Button onClick={() => setFoundHouse(null)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700">Tutup Detail</Button>
+                    <Button onClick={() => setFoundHouse(null)} className="w-full py-3 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border-none">Tutup Detail</Button>
                 </div>
             </Modal>
         </motion.div>

@@ -34,13 +34,19 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     adultCount: 0,
     elderlyCount: 0,
     widowCount: 0,
-    familyMembers: [] as { name: string; nik?: string; gender: 'Laki-laki' | 'Perempuan'; relation: any; birthDate?: string; job?: string }[]
+    familyMembers: [] as { id?: string; name: string; nik?: string; gender: 'Laki-laki' | 'Perempuan'; relation: any; birthDate?: string; job?: string }[]
   });
 
   const addFamilyMember = () => {
     setFormData({
       ...formData,
-      familyMembers: [...formData.familyMembers, { name: '', relation: 'Anak', gender: 'Laki-laki', birthDate: '' }]
+      familyMembers: [...formData.familyMembers, { 
+        id: Math.random().toString(36).substr(2, 9),
+        name: '', 
+        relation: 'Anak', 
+        gender: 'Laki-laki', 
+        birthDate: '' 
+      }]
     });
   };
 
@@ -112,7 +118,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         </button>
         <div>
           <h2 className="text-2xl font-black text-slate-800">Formulir Warga Baru</h2>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lengkapi Data Kependudukan RT 002</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lengkapi Data Kependudukan RT 02</p>
         </div>
       </div>
 
@@ -266,7 +272,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
           <div className="space-y-4">
             {formData.familyMembers.map((member, idx) => (
-              <div key={idx} className="p-6 bg-slate-50 border border-slate-200 rounded-[2rem] relative group">
+              <div key={member.id || idx} className="p-6 bg-slate-50 border border-slate-200 rounded-[2rem] relative group">
                 <button type="button" onClick={() => removeFamilyMember(idx)} className="absolute top-4 right-4 p-2 text-slate-300 hover:text-rose-600 transition-colors">
                   <Trash2 size={16} />
                 </button>

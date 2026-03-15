@@ -103,7 +103,7 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
             transition={{ delay: 0.3 }}
             className="text-4xl md:text-6xl font-black text-white tracking-tight drop-shadow-lg leading-tight"
           >
-            Bursa Warga <span className="text-emerald-300">RT 002</span>
+            Bursa Warga <span className="text-emerald-300">RT 02</span>
           </motion.h1>
           
           <motion.p 

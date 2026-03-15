@@ -4,7 +4,7 @@ import { House, PaymentStatus } from '../types';
 
 export const generateProfessionalExcel = async (houses: House[]) => {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Data Warga RT 002');
+  const worksheet = workbook.addWorksheet('Data Warga RT 02');
 
   // Sort houses by block and number
   const sortedHouses = [...houses].sort((a, b) => {
@@ -238,7 +238,7 @@ export const generateProfessionalExcel = async (houses: House[]) => {
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Data_Lengkap_Warga_RT002_${new Date().toISOString().split('T')[0]}.xlsx`);
+  saveAs(blob, `Data_Lengkap_Warga_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
 export const generateExcelTemplate = async () => {
@@ -326,7 +326,7 @@ export const generateExcelTemplate = async () => {
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, 'Template_Data_Warga_Lengkap_RT002.xlsx');
+  saveAs(blob, 'Template_Data_Warga_Lengkap_RT02.xlsx');
 };
 
 export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {

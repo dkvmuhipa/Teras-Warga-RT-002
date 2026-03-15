@@ -394,7 +394,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                           setPdfConfig(newConfig);
                           localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
                         }} 
-                        placeholder="RT 002 / RW 005"
+                        placeholder="RT 02 / RW 005"
                       />
                     </div>
                     <div className="space-y-2">
@@ -1055,7 +1055,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                         className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
                         value={letterNumberInput}
                         onChange={(e) => setLetterNumberInput(e.target.value)}
-                        placeholder="Contoh: 001/RT002/III/2026"
+                        placeholder="Contoh: 001/RT02/III/2026"
                       />
                       <p className="text-[10px] font-medium text-slate-400 mt-2 italic">* Nomor ini akan dicetak pada dokumen resmi.</p>
                     </div>
@@ -1311,7 +1311,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-indigo-600 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
                     value={adminLetterNumber || ''} 
                     onChange={e => setAdminLetterNumber(e.target.value)}
-                    placeholder="Contoh: SPK/001/RT002/III/2026"
+                    placeholder="Contoh: SPK/001/RT02/III/2026"
                   />
                 </div>
 

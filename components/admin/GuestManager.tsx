@@ -32,7 +32,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight">Manajemen Tamu</h2>
-          <p className="text-slate-500 font-medium">Pantau tamu yang menginap di lingkungan RT 002</p>
+          <p className="text-slate-500 font-medium">Pantau tamu yang menginap di lingkungan RT 02</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 

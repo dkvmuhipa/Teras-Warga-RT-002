@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, History, DollarSign, TrendingUp, Info, ArrowRight, Wallet, Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Package, History, DollarSign, TrendingUp, Info, ArrowRight, ArrowLeft, Wallet, Calendar, Clock, CheckCircle, AlertCircle, Shield } from 'lucide-react';
 import { WasteDeposit, WasteBalance, WastePrice, House } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
@@ -40,10 +40,29 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
   }, [selectedHouseId]);
 
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [tempHouseId, setTempHouseId] = useState('');
+  const [pinError, setPinError] = useState(false);
+
   const [depositForm, setDepositForm] = useState({
     type: '',
     weight: 0
   });
+
+  const handlePinSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const house = houses.find(h => h.id === tempHouseId);
+    if (house && house.accessCode === pinInput) {
+      handleSetHouse(tempHouseId);
+      setIsPinModalOpen(false);
+      setPinInput('');
+      setPinError(false);
+    } else {
+      setPinError(true);
+      setTimeout(() => setPinError(false), 2000);
+    }
+  };
 
   const handleDepositSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +95,24 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
   };
 
   if (!selectedHouseId) {
+    const sortedHouses = [...houses]
+      .filter(h => h.status === 'Occupied')
+      .sort((a, b) => {
+        // Urut dari C5: Blok C, D, E... lalu A, B
+        const getBlockPriority = (block: string) => {
+          const b = block.toUpperCase();
+          if (b >= 'C') return 0;
+          return 1;
+        };
+        
+        const pA = getBlockPriority(a.block);
+        const pB = getBlockPriority(b.block);
+        
+        if (pA !== pB) return pA - pB;
+        if (a.block !== b.block) return a.block.localeCompare(b.block);
+        return parseInt(a.number) - parseInt(b.number);
+      });
+
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
         <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
@@ -86,15 +123,60 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
         <div className="space-y-4">
           <select 
             className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-black focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all shadow-sm"
-            onChange={(e) => handleSetHouse(e.target.value)}
+            value={tempHouseId}
+            onChange={(e) => {
+              setTempHouseId(e.target.value);
+              if (e.target.value) setIsPinModalOpen(true);
+            }}
           >
             <option value="">Pilih Nomor Rumah...</option>
-            {houses.filter(h => h.status === 'Occupied').map(h => (
+            {sortedHouses.map(h => (
               <option key={h.id} value={h.id}>{h.block}-{h.number} - {h.headOfFamily}</option>
             ))}
           </select>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Data Anda akan tersimpan di perangkat ini.</p>
         </div>
+
+        {/* PIN Verification Modal */}
+        <Modal isOpen={isPinModalOpen} onClose={() => {
+          setIsPinModalOpen(false);
+          setTempHouseId('');
+          setPinInput('');
+        }} title="Verifikasi PIN Akses">
+          <form onSubmit={handlePinSubmit} className="space-y-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Shield size={32} />
+              </div>
+              <h3 className="text-lg font-black text-slate-800">Masukkan PIN Rumah</h3>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Masukkan kode akses untuk rumah <span className="font-bold text-emerald-600">{houses.find(h => h.id === tempHouseId)?.block}-{houses.find(h => h.id === tempHouseId)?.number}</span>
+              </p>
+            </div>
+
+            <div>
+              <input 
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                required
+                autoFocus
+                className={`w-full px-6 py-4 bg-slate-50 border ${pinError ? 'border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10'} rounded-2xl text-center text-2xl font-black tracking-[1em] outline-none transition-all`}
+                value={pinInput}
+                onChange={e => setPinInput(e.target.value)}
+                placeholder="••••••"
+              />
+              {pinError && (
+                <p className="text-center text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-2">PIN yang Anda masukkan salah</p>
+              )}
+            </div>
+
+            <Button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-100">
+              Verifikasi & Lanjutkan
+            </Button>
+          </form>
+        </Modal>
       </div>
     );
   }
@@ -123,10 +205,19 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Bank Sampah RT 002</h2>
+            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Bank Sampah RT 02</h2>
             <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-200">
               Blok {getHouseLabel(selectedHouseId)}
             </span>
+            <button 
+              onClick={() => {
+                setSelectedHouseId('');
+                localStorage.removeItem('resident_house_id');
+              }}
+              className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all"
+            >
+              <ArrowLeft size={12} /> Ganti Rumah
+            </button>
           </div>
           <p className="text-slate-500 font-medium">Ubah sampah menjadi berkah. Pantau tabungan sampah Anda di sini.</p>
         </div>

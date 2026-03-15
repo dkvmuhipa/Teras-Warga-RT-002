@@ -73,7 +73,7 @@ export const generateDashboardSummary = async (data: {
    try {
      const ai = getAiInstance();
      const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
-     Analisis data realtime dashboard RT 002 berikut:
+     Analisis data realtime dashboard RT 02 berikut:
      - Jumlah Penduduk: ${data.totalResidents} jiwa
      - Kas Keuangan: Rp ${data.cashBalance.toLocaleString('id-ID')}
      - Laporan Masalah Baru (Aktif): ${data.reportsCount}
@@ -112,7 +112,7 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     const rondaContext = contextData.ronda.map(r => `- ${r.day}: ${r.members.join(', ')}`).join('\n');
     const officialsContext = contextData.officials.map(o => `- ${o.role}: ${o.name} (Rumah: ${o.houseId}, HP: ${o.phone})`).join('\n');
 
-    const systemInstruction = `Anda adalah "Rit", Asisten Virtual Cerdas untuk RT 002 RW 020 (Aplikasi: TERAS RT 002).
+    const systemInstruction = `Anda adalah "Rit", Asisten Virtual Cerdas untuk RT 02 RW 020 (Aplikasi: TERAS RT 02).
     Slogan Aplikasi: "Teknologi | Ekraf | Rukun | Aman | Sinergi".
     
     INFORMASI WAKTU SAAT INI: ${today}
@@ -126,7 +126,7 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     STRUKTUR PENGURUS RT SAAT INI:
     ${officialsContext}
 
-    INFORMASI UMUM RT 002/020:
+    INFORMASI UMUM RT 02/020:
     - Alamat: Huntap 2 Tondo, Kel. Tondo, Kec. Mantikulore, Kota Palu.
     - Iuran: Rp 25.000/bulan (Keamanan + Sampah).
     - Jadwal Angkut Sampah: Senin dan Kamis pagi.

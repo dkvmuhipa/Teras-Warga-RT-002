@@ -25,9 +25,9 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         },
         manifest: {
-          name: 'TERAS RT 002',
+          name: 'TERAS RT 02',
           short_name: 'TERAS',
-          description: 'Sistem Informasi & Layanan Warga RT 002',
+          description: 'Sistem Informasi & Layanan Warga RT 02',
           theme_color: '#0f172a',
           background_color: '#ffffff',
           display: 'standalone',

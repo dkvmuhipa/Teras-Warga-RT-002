@@ -143,7 +143,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Berita RT</h2>
-          <p className="text-slate-500 font-medium mt-1">Dokumentasi kegiatan dan artikel untuk warga RT 002.</p>
+          <p className="text-slate-500 font-medium mt-1">Dokumentasi kegiatan dan artikel untuk warga RT 02.</p>
         </div>
         <Button onClick={() => { resetForms(); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all hover:scale-105 active:scale-95">
           <Plus size={18} className="mr-2"/> Buat Berita
@@ -209,7 +209,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
         </AnimatePresence>
 
         {filteredNews.length === 0 && (
-          <motion.div variants={itemVariants} className="py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+          <motion.div key="empty-news" variants={itemVariants} className="py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
             <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-slate-300 mx-auto mb-4 shadow-sm">
               <BookOpen size={40} />
             </div>

@@ -288,7 +288,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.setFontSize(11);
   const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
   const currentYear = new Date().getFullYear();
-  const nomorSurat = letter.letterNumber || `.../RT. 002/RW. 020/${currentMonthRoman}/${currentYear}`;
+  const nomorSurat = letter.letterNumber || `.../RT. 02/RW. 020/${currentMonthRoman}/${currentYear}`;
   doc.text(`Nomor : ${nomorSurat}`, centerX, 57, { align: "center" });
 
   let cursorY = 66;
@@ -367,7 +367,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
     doc.setFontSize(7);
     doc.setTextColor(120);
-    doc.text("VERIFIKASI DIGITAL RT 002", marginX + 25, footerY + 10);
+    doc.text("VERIFIKASI DIGITAL RT 02", marginX + 25, footerY + 10);
     doc.text(`ID Dokumen: ${letter.id.substring(0, 8).toUpperCase()}-${letter.houseId}`, marginX + 25, footerY + 14);
     doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, marginX + 25, footerY + 18);
     doc.text("Dokumen ini sah dan diverifikasi secara elektronik.", marginX + 25, footerY + 22);
@@ -669,7 +669,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const chairmanWidth = doc.getTextWidth(config.rtChairman);
     doc.line(signX - (chairmanWidth / 2), signY + 36, signX + (chairmanWidth / 2), signY + 36);
 
-    doc.save(`Laporan_Warga_RT002_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`Laporan_Warga_RT02_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
 export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfConfig) => {

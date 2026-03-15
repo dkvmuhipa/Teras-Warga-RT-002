@@ -139,7 +139,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             </div>
             <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pusat Komando Keamanan</h2>
           </div>
-          <p className="text-slate-500 text-sm md:text-base font-medium">Sistem Monitoring Siskamling Digital RT 002</p>
+          <p className="text-slate-500 text-sm md:text-base font-medium">Sistem Monitoring Siskamling Digital RT 02</p>
         </div>
         <div className="flex flex-wrap gap-2 w-full lg:w-auto">
           <Button onClick={() => setIsQRModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 hover:bg-slate-50 text-xs py-2">
@@ -236,7 +236,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           { label: 'Total Aktivitas', value: rondaLogs.length, icon: Calendar, color: 'blue', sub: 'Log Terintegrasi' },
         ].map((stat, i) => (
           <motion.div 
-            key={i}
+            key={stat.label}
             variants={itemVariants}
             className="bg-white p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group"
           >
@@ -316,7 +316,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                             <p className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isToday ? 'text-indigo-200' : 'text-slate-400'}`}>{s.time}</p>
                             <div className="flex flex-wrap gap-1.5 md:gap-2">
                               {s.members.map((m, idx) => (
-                                <span key={idx} className={`px-2 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] font-bold backdrop-blur-sm ${isToday ? 'bg-white/10' : 'bg-slate-50 text-slate-600'}`}>
+                                <span key={`${m}-${idx}`} className={`px-2 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] font-bold backdrop-blur-sm ${isToday ? 'bg-white/10' : 'bg-slate-50 text-slate-600'}`}>
                                   {m}
                                 </span>
                               ))}
@@ -325,7 +325,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                         )) : (
                           <div className="flex flex-wrap gap-1.5 md:gap-2">
                             {r.members.map((m, idx) => (
-                              <span key={idx} className={`px-2 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] font-bold backdrop-blur-sm ${isToday ? 'bg-white/10' : 'bg-slate-50 text-slate-600'}`}>
+                              <span key={`${m}-${idx}`} className={`px-2 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] font-bold backdrop-blur-sm ${isToday ? 'bg-white/10' : 'bg-slate-50 text-slate-600'}`}>
                                 {m}
                               </span>
                             ))}
@@ -362,7 +362,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     </div>
                     <div className="space-y-2 md:space-y-3">
                       {shift.members.length > 0 ? shift.members.map((m, i) => (
-                        <div key={i} className="flex items-center gap-2 md:gap-3 bg-white p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-slate-100 shadow-sm">
+                        <div key={`${m}-${i}`} className="flex items-center gap-2 md:gap-3 bg-white p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-slate-100 shadow-sm">
                           <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] md:text-xs font-black">{m.charAt(0)}</div>
                           <span className="text-xs md:text-sm font-bold text-slate-700">{m}</span>
                           <div className="ml-auto w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-500"></div>
@@ -601,7 +601,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {shift.members.map((m, mIdx) => (
-                      <div key={mIdx} className="flex items-center gap-2 bg-white pl-3 pr-1 py-1 rounded-xl border border-slate-200 shadow-sm animate-slide-in-right">
+                      <div key={`${m}-${mIdx}`} className="flex items-center gap-2 bg-white pl-3 pr-1 py-1 rounded-xl border border-slate-200 shadow-sm animate-slide-in-right">
                         <span className="text-xs font-bold text-slate-700">{m}</span>
                         <button 
                           type="button"
@@ -630,7 +630,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-48 overflow-y-auto custom-scrollbar p-2">
                         {filteredResidents.length > 0 ? filteredResidents.map((r, i) => (
                           <button
-                            key={i}
+                            key={r}
                             type="button"
                             onClick={() => handleAddMemberToShift(shift.id, r)}
                             className="w-full text-left px-4 py-3 hover:bg-indigo-50 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-between group"

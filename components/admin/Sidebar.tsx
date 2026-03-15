@@ -146,8 +146,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-4 custom-scrollbar scrollbar-hide">
-            {navGroups.map((group, idx) => (
-              <div key={idx} className="space-y-1">
+            {navGroups.map((group) => (
+              <div key={group.title} className="space-y-1">
                 {!isCollapsed ? (
                   <button 
                     onClick={() => toggleGroup(group.title)}
@@ -243,7 +243,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                     </div>
                     <div className="overflow-hidden">
                       <p className="text-xs font-bold text-white truncate">Administrator</p>
-                      <p className="text-[10px] font-medium text-slate-500 truncate">RT 002 RW 020</p>
+                      <p className="text-[10px] font-medium text-slate-500 truncate">RT 02 RW 020</p>
                     </div>
                   </div>
                 </div>

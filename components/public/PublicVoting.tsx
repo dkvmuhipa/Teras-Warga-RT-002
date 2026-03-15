@@ -160,7 +160,7 @@ export const PublicVoting: React.FC<PublicVotingProps> = ({ polls }) => {
           Demokrasi Digital
         </motion.div>
         <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight mb-6">
-          Suara Warga <span className="text-indigo-600">RT 002</span>
+          Suara Warga <span className="text-indigo-600">RT 02</span>
         </h1>
         <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto leading-relaxed">
           Salurkan aspirasi Anda dalam pengambilan keputusan lingkungan. Satu suara Anda sangat berarti untuk kemajuan bersama.

@@ -199,7 +199,7 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
         </AnimatePresence>
 
         {polls.length === 0 && (
-          <motion.div variants={itemVariants} className="col-span-full py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+          <motion.div key="empty-polls" variants={itemVariants} className="col-span-full py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
             <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-slate-300 mx-auto mb-4 shadow-sm">
               <Vote size={40} />
             </div>
@@ -228,7 +228,7 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Opsi Jawaban</label>
             <div className="space-y-3">
               {pollOptions.map((opt, idx) => (
-                <div key={idx} className="flex gap-2">
+                <div key={opt.id} className="flex gap-2">
                   <input 
                     className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" 
                     value={opt.text} 
