@@ -49,6 +49,7 @@ export interface House {
   hasAdult?: boolean;    // Dewasa
   hasElderly?: boolean;  // Lansia
   hasWidow?: boolean;    // Janda
+  hasChild?: boolean;    // Anak
 
   // Data Demografi Counts
   pregnantCount?: number;
@@ -58,6 +59,7 @@ export interface House {
   adultCount?: number;
   elderlyCount?: number;
   widowCount?: number;
+  childCount?: number;
 
   // Social Assistance (Bantuan Sosial)
   isPKH?: boolean;
@@ -100,6 +102,7 @@ export interface ResidentRegistration {
   adultCount?: number;
   elderlyCount?: number;
   widowCount?: number;
+  childCount?: number;
   isPKH?: boolean;
   isBLT?: boolean;
   isBansosLain?: boolean;
@@ -514,6 +517,7 @@ export interface PopulationReport {
   pregnantCount?: number;
   babyCount?: number;
   toddlerCount?: number;
+  childCount?: number;
   teenagerCount?: number;
   adultCount?: number;
   elderlyCount?: number;

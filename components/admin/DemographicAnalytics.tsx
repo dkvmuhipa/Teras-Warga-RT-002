@@ -56,6 +56,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     let totalPregnant = 0;
     let totalBabies = 0;
     let totalToddlers = 0;
+    let totalChildren = 0;
     let totalTeenagers = 0;
     let totalAdults = 0;
     let totalElderly = 0;
@@ -70,6 +71,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
         totalPregnant += (h.pregnantCount || 0);
         totalBabies += (h.babyCount || 0);
         totalToddlers += (h.toddlerCount || 0);
+        totalChildren += (h.childCount || 0);
         totalTeenagers += (h.teenagerCount || 0);
         totalAdults += (h.adultCount || 0);
         totalElderly += (h.elderlyCount || 0);
@@ -121,6 +123,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
       totalPregnant,
       totalBabies,
       totalToddlers,
+      totalChildren,
       totalTeenagers,
       totalAdults,
       totalElderly,
@@ -135,7 +138,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
   const { 
     allResidents, religions, educations, jobs, 
     totalVehicles, totalPregnant, totalBabies, 
-    totalToddlers, totalTeenagers, totalAdults,
+    totalToddlers, totalChildren, totalTeenagers, totalAdults,
     totalElderly, totalWidows, totalPKH, totalBLT, totalBansosLain, totalOccupied 
   } = stats;
 
@@ -556,6 +559,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                   { label: 'Ibu Hamil', value: totalPregnant, icon: Heart, color: 'rose' },
                   { label: 'Bayi', value: totalBabies, icon: Baby, color: 'sky' },
                   { label: 'Balita', value: totalToddlers, icon: Sparkles, color: 'emerald' },
+                  { label: 'Anak', value: totalChildren, icon: Users, color: 'blue' },
                   { label: 'Remaja', value: totalTeenagers, icon: Users, color: 'indigo' },
                   { label: 'Dewasa', value: totalAdults, icon: UserCheck, color: 'emerald' },
                   { label: 'Lansia', value: totalElderly, icon: User, color: 'amber' },

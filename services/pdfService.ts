@@ -103,10 +103,11 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
     addStatRow("1. Ibu Hamil", report.pregnantCount || 0);
     addStatRow("2. Bayi", report.babyCount || 0);
     addStatRow("3. Balita", report.toddlerCount || 0);
-    addStatRow("4. Remaja", report.teenagerCount || 0);
-    addStatRow("5. Dewasa", report.adultCount || 0);
-    addStatRow("6. Lansia", report.elderlyCount || 0);
-    addStatRow("7. Janda", report.widowCount || 0);
+    addStatRow("4. Anak", report.childCount || 0);
+    addStatRow("5. Remaja", report.teenagerCount || 0);
+    addStatRow("6. Dewasa", report.adultCount || 0);
+    addStatRow("7. Lansia", report.elderlyCount || 0);
+    addStatRow("8. Janda", report.widowCount || 0);
 
     // --- Signature Section ---
     y += 15;
@@ -585,6 +586,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         if(house.pregnantCount && house.pregnantCount > 0) notes.push("Hamil");
         if(house.babyCount && house.babyCount > 0) notes.push("Bayi");
         if(house.toddlerCount && house.toddlerCount > 0) notes.push("Balita");
+        if(house.childCount && house.childCount > 0) notes.push("Anak");
         if(house.teenagerCount && house.teenagerCount > 0) notes.push("Remaja");
         if(house.adultCount && house.adultCount > 0) notes.push("Dewasa");
         if(house.elderlyCount && house.elderlyCount > 0) notes.push("Lansia");
