@@ -8,7 +8,7 @@ interface FinancialContextType {
   selectedMonth: string;
   setSelectedMonth: (month: string) => void;
   getPaymentStatus: (house: House, type: 'Air' | 'Sampah', month?: string) => PaymentStatus;
-  getArrearsForHouse: (house: House) => string[];
+  getArrearsForHouse: (house: House, type?: 'Air' | 'Sampah') => string[];
   summaries: {
     totalCollected: number;
     participationRate: number;
@@ -17,6 +17,23 @@ interface FinancialContextType {
     estimatedReceivables: number;
     totalArrearsAmount: number;
     totalArrearsMonths: number;
+    totalArrearsHouseCount: number;
+    air: {
+      totalCollected: number;
+      unpaidCount: number;
+      estimatedReceivables: number;
+      totalArrearsAmount: number;
+      arrearsUnits: number;
+      arrearsHouseCount: number;
+    };
+    sampah: {
+      totalCollected: number;
+      unpaidCount: number;
+      estimatedReceivables: number;
+      totalArrearsAmount: number;
+      arrearsUnits: number;
+      arrearsHouseCount: number;
+    };
   };
 }
 
@@ -84,7 +101,7 @@ export const FinancialProvider: React.FC<{
     return PaymentStatus.PENDING;
   };
 
-  const getArrearsForHouse = (house: House) => {
+  const getArrearsForHouse = (house: House, type?: 'Air' | 'Sampah') => {
     const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -101,13 +118,10 @@ export const FinancialProvider: React.FC<{
       if (joinDate.getFullYear() === currentYear) {
         startMonth = joinDate.getMonth();
       } else if (joinDate.getFullYear() > currentYear) {
-        // Joined in future year, no arrears for current year
         return [];
       }
-      // If joined in previous year, start from January (startMonth = 0)
     }
 
-    // Only check months in the current year up to now, starting from joining month
     for (let i = startMonth; i <= currentMonthIndex; i++) {
       const monthStrId = `${monthsId[i]} ${currentYear}`;
       
@@ -115,13 +129,13 @@ export const FinancialProvider: React.FC<{
         const idMatch = String(p.houseId) === String(house.id) || 
                         String(p.houseId) === `${house.block}-${house.number}` ||
                         (p.block === house.block && p.number === house.number);
-        return idMatch && isMonthMatch(p.month, monthStrId);
+        const typeMatch = !type || p.type === type || p.type === 'Both';
+        return idMatch && isMonthMatch(p.month, monthStrId) && typeMatch;
       });
       
       const houseRecordPaid = house.paymentDate && 
                              isMonthMatch(getIndonesianMonthYear(new Date(house.paymentDate)), monthStrId) &&
-                             house.paymentStatusAir === PaymentStatus.PAID &&
-                             house.paymentStatusSampah === PaymentStatus.PAID;
+                             (!type || (type === 'Air' ? house.paymentStatusAir === PaymentStatus.PAID : house.paymentStatusSampah === PaymentStatus.PAID) || (house.paymentStatusAir === PaymentStatus.PAID && house.paymentStatusSampah === PaymentStatus.PAID));
 
       if (!hasPaid && !houseRecordPaid) {
         arrears.push(monthStrId);
@@ -140,7 +154,33 @@ export const FinancialProvider: React.FC<{
     const estimatedReceivables = unpaidHousesCount * 20000;
 
     const totalArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h).length, 0);
-    const totalArrearsAmount = totalArrearsMonths * 20000;
+    const totalArrearsAmount = totalArrearsMonths * 10000; // Since each month has 2 components, but getArrearsForHouse(h) returns months where *any* is missing. This is tricky.
+
+    // Better calculation for arrears
+    const airArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h, 'Air').length, 0);
+    const airArrearsAmount = airArrearsMonths * 10000;
+    const airArrearsHouseCount = occupiedHousesList.filter(h => getArrearsForHouse(h, 'Air').length > 0).length;
+
+    const sampahArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h, 'Sampah').length, 0);
+    const sampahArrearsAmount = sampahArrearsMonths * 10000;
+    const sampahArrearsHouseCount = occupiedHousesList.filter(h => getArrearsForHouse(h, 'Sampah').length > 0).length;
+
+    const combinedTotalArrearsAmount = airArrearsAmount + sampahArrearsAmount;
+    const totalArrearsHouseCount = occupiedHousesList.filter(h => getArrearsForHouse(h).length > 0).length;
+
+    // Air specific
+    const airPayments = currentMonthPayments.filter(p => p.type === 'Air' || p.type === 'Both');
+    const airCollected = airPayments.reduce((acc, p) => acc + (p.type === 'Both' ? p.amount / 2 : p.amount), 0);
+    const airPaidHouses = new Set(airPayments.map(p => p.houseId)).size;
+    const airUnpaidCount = occupiedHousesList.length - airPaidHouses;
+    const airEstimatedReceivables = airUnpaidCount * 10000;
+
+    // Sampah specific
+    const sampahPayments = currentMonthPayments.filter(p => p.type === 'Sampah' || p.type === 'Both');
+    const sampahCollected = sampahPayments.reduce((acc, p) => acc + (p.type === 'Both' ? p.amount / 2 : p.amount), 0);
+    const sampahPaidHouses = new Set(sampahPayments.map(p => p.houseId)).size;
+    const sampahUnpaidCount = occupiedHousesList.length - sampahPaidHouses;
+    const sampahEstimatedReceivables = sampahUnpaidCount * 10000;
 
     return {
       totalCollected,
@@ -148,8 +188,25 @@ export const FinancialProvider: React.FC<{
       paidHousesCount,
       unpaidHousesCount,
       estimatedReceivables,
-      totalArrearsAmount,
-      totalArrearsMonths
+      totalArrearsAmount: combinedTotalArrearsAmount,
+      totalArrearsMonths: airArrearsMonths + sampahArrearsMonths,
+      totalArrearsHouseCount,
+      air: {
+        totalCollected: airCollected,
+        unpaidCount: airUnpaidCount,
+        estimatedReceivables: airEstimatedReceivables,
+        totalArrearsAmount: airArrearsAmount,
+        arrearsUnits: airArrearsMonths,
+        arrearsHouseCount: airArrearsHouseCount
+      },
+      sampah: {
+        totalCollected: sampahCollected,
+        unpaidCount: sampahUnpaidCount,
+        estimatedReceivables: sampahEstimatedReceivables,
+        totalArrearsAmount: sampahArrearsAmount,
+        arrearsUnits: sampahArrearsMonths,
+        arrearsHouseCount: sampahArrearsHouseCount
+      }
     };
   }, [houses, iuranPayments, selectedMonth]);
 

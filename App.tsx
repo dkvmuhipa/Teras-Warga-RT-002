@@ -250,15 +250,15 @@ export const App = () => {
   return (
     <HashRouter>
         {activeNotification && <NotificationToast notification={activeNotification} onClose={() => setActiveNotification(null)} />}
-        <Routes>
-            <Route path="/admin" element={
-                <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                    <FinancialProvider 
-                        houses={houses}
-                        iuranPayments={iuranPayments}
-                        cashFlow={cashFlow}
-                        bills={bills}
-                    >
+        <FinancialProvider 
+            houses={houses}
+            iuranPayments={iuranPayments}
+            cashFlow={cashFlow}
+            bills={bills}
+        >
+            <Routes>
+                <Route path="/admin" element={
+                    <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
                         <AdminDashboard 
                             houses={houses} 
                             announcements={announcements} 
@@ -293,33 +293,33 @@ export const App = () => {
                             auditLogs={auditLogs} 
                             faqItems={faqItems} 
                         />
-                    </FinancialProvider>
-                </AdminRouteWrapper>
-            }/>
-            <Route path="*" element={
-                <>
-                    <PublicHeader notifications={notifications} onMarkRead={() => {}} />
-                    <div className="pb-24 md:pb-0">
-                        <Routes>
-                            <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
-                            <Route path="/voting" element={<PublicVoting polls={polls} />} />
-                            <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
-                            <Route path="/market" element={<PublicMarket items={marketItems} />} />
-                            <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
-                            <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
-                            <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
-                            <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
-                            <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={faqItems} activePatrol={activePatrol} />} />
-                            <Route path="/kegiatan" element={<PublicActivity />} />
-                            <Route path="/sampah" element={<PublicWasteBank houseId={localStorage.getItem('resident_house_id') || ''} houses={houses} />} />
-                            <Route path="/kesehatan" element={<PublicHealth />} />
-                        </Routes>
-                    </div>
-                    <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-                    <PanicButton />
-                </>
-            } />
-        </Routes>
+                    </AdminRouteWrapper>
+                }/>
+                <Route path="*" element={
+                    <>
+                        <PublicHeader notifications={notifications} onMarkRead={() => {}} />
+                        <div className="pb-24 md:pb-0">
+                            <Routes>
+                                <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
+                                <Route path="/voting" element={<PublicVoting polls={polls} />} />
+                                <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
+                                <Route path="/market" element={<PublicMarket items={marketItems} />} />
+                                <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
+                                <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
+                                <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
+                                <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
+                                <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={faqItems} activePatrol={activePatrol} />} />
+                                <Route path="/kegiatan" element={<PublicActivity />} />
+                                <Route path="/sampah" element={<PublicWasteBank houseId={localStorage.getItem('resident_house_id') || ''} houses={houses} />} />
+                                <Route path="/kesehatan" element={<PublicHealth />} />
+                            </Routes>
+                        </div>
+                        <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+                        <PanicButton />
+                    </>
+                } />
+            </Routes>
+        </FinancialProvider>
     </HashRouter>
   );
 };

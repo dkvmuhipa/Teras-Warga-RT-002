@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
-  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert
+  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest } from '../../types';
@@ -11,6 +11,7 @@ import { DigitalSummary } from './DigitalSummary';
 import { ServiceStats } from '../ServiceStats';
 import { HouseMap } from '../HouseMap';
 import { Card } from '../ui/Card';
+import { useFinancial } from '../../context/FinancialContext';
 
 interface PublicHomeProps {
   houses: House[];
@@ -27,6 +28,19 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   houses, announcements, ronda, reports, letters, officials, gallery, activePatrol
 }) => {
   const navigate = useNavigate();
+  const { summaries } = useFinancial();
+  const [statusSearchId, setStatusSearchId] = React.useState('');
+  
+  const handleCheckStatus = (e: React.FormEvent) => {
+    e.preventDefault();
+    const house = houses.find(h => h.id.toLowerCase() === statusSearchId.toLowerCase());
+    if (house) {
+      navigate(`/info?search=${statusSearchId}`);
+    } else {
+      alert("No. Rumah tidak ditemukan. Pastikan format benar (Contoh: A1-01)");
+    }
+  };
+
   const dateObj = new Date();
   const today = dateObj.toLocaleDateString('id-ID', { weekday: 'long' });
   const fullDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -50,6 +64,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     { label: 'Lapor Tamu', icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=tamu' },
     { label: 'Warga Baru', icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/register' },
     { label: 'Pasar Warga', icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', link: '/market' },
+    { label: 'Info Publik', icon: Megaphone, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', link: '/info' },
     { label: 'E-Voting', icon: Vote, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/voting' },
     { label: 'Lapor Warga', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=lapor' }
   ];
@@ -79,7 +94,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       <ServiceStats houses={houses} reports={reports} letters={letters} />
 
       {/* Quick Actions - Bento Style */}
-      <div className="flex md:grid md:grid-cols-6 gap-4 -mt-8 relative z-10 overflow-x-auto no-scrollbar pb-4 md:pb-0 px-2 md:px-0">
+      <div className="flex md:grid md:grid-cols-7 gap-4 -mt-8 relative z-10 overflow-x-auto no-scrollbar pb-4 md:pb-0 px-2 md:px-0">
         {quickActions.map((action, idx) => (
           <motion.button
             key={idx}
@@ -209,6 +224,32 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
         {/* Sidebar Widgets - Specialist Tool Style */}
         <motion.div variants={itemVariants} className="space-y-10">
+          {/* Status Check Widget */}
+          <div className="bg-indigo-600 rounded-[3rem] p-10 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
+              <CheckCircle2 size={160} />
+            </div>
+            <div className="relative z-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-200 mb-2">Layanan Mandiri</p>
+              <h3 className="text-3xl font-black mb-3 tracking-tighter leading-none">Cek Iuran Mandiri <br/><span className="italic font-serif">Air & Sampah</span></h3>
+              <p className="text-xs text-indigo-100 mb-8 font-medium leading-relaxed">Verifikasi status pembayaran iuran rumah Anda secara instan dan transparan untuk iuran air dan sampah.</p>
+              <form onSubmit={handleCheckStatus} className="space-y-4">
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    placeholder="No. Rumah (A1-01)" 
+                    className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-[1.5rem] text-sm font-bold placeholder:text-indigo-200 outline-none focus:bg-white/20 focus:border-white/40 transition-all"
+                    value={statusSearchId}
+                    onChange={e => setStatusSearchId(e.target.value)}
+                  />
+                </div>
+                <button type="submit" className="w-full py-4 bg-white text-indigo-600 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-900/20 active:scale-95">
+                  Periksa Sekarang
+                </button>
+              </form>
+            </div>
+          </div>
+
           {/* Ronda Widget - Hardware Style */}
           <div className="bg-slate-950 text-white p-10 rounded-[3rem] shadow-2xl shadow-slate-900/40 relative overflow-hidden group border border-white/5">
             <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity duration-700 rotate-12">

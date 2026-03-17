@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby } from 'lucide-react';
+import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint } from '../../types';
 import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel } from '../../services/databaseService';
@@ -8,7 +8,8 @@ import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
 import { PublicRules } from './PublicRules';
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useFinancial } from '../../context/FinancialContext';
 
 interface PublicInfoProps {
   officials: Official[];
@@ -24,6 +25,10 @@ interface PublicInfoProps {
 }
 
 export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, houses, announcements, galleryItems, faqItems, activePatrol }) => {
+    const { summaries, getPaymentStatus } = useFinancial();
+    const [searchParams] = useSearchParams();
+    const initialSearch = searchParams.get('search');
+
     const totalIncome = cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0);
     const totalExpense = cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0);
     const currentBalance = totalIncome - totalExpense;
@@ -32,6 +37,35 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + h.occupants, 0);
     const totalHouseholds = houses.filter(h => h.status === 'Occupied').length;
     const occupancyRate = Math.round((totalHouseholds / houses.length) * 100);
+
+    // Detailed Statistics
+    const occupiedCount = houses.filter(h => h.status === 'Occupied').length;
+    const emptyCount = houses.filter(h => h.status === 'Empty').length;
+    const businessCount = houses.filter(h => h.status === 'Business').length;
+
+    const tetapCount = houses.filter(h => h.residenceType === 'Tetap').length;
+    const kontrakCount = houses.filter(h => h.residenceType === 'Kontrak').length;
+    const kostCount = houses.filter(h => h.residenceType === 'Kost').length;
+
+    const pregnantTotal = houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0);
+    const babyTotal = houses.reduce((acc, h) => acc + (h.babyCount || 0), 0);
+    const toddlerTotal = houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0);
+    const elderlyTotal = houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0);
+    const vehicleTotal = houses.reduce((acc, h) => acc + (h.vehicleCount || 0), 0);
+    const pkhTotal = houses.filter(h => h.isPKH).length;
+    const bltTotal = houses.filter(h => h.isBLT).length;
+    const bansosTotal = houses.filter(h => h.isPKH || h.isBLT || h.isBansosLain).length;
+
+    const maleTotal = houses.filter(h => h.status === 'Occupied' && h.gender === 'Laki-laki').length;
+    const femaleTotal = houses.filter(h => h.status === 'Occupied' && h.gender === 'Perempuan').length;
+    // Note: gender in House is for Head of Family. For all residents we'd need familyMembers but let's use what we have.
+    
+    const totalPatrols = rondaLogs.filter(log => {
+        const logDate = new Date(log.timestamp);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return logDate >= thirtyDaysAgo;
+    }).length;
 
     const upcomingEvents = announcements
         .filter(a => a.type === 'Event' && new Date(a.date) >= new Date())
@@ -45,6 +79,9 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
         const indexB = roleHierarchy.findIndex(r => b.role.includes(r)); 
         return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB); 
     });
+
+    const airManager = officials.find(o => o.role.toLowerCase().includes('air'));
+    const sampahManager = officials.find(o => o.role.toLowerCase().includes('sampah') || o.role.toLowerCase().includes('kebersihan'));
 
     const [isCheckModalOpen, setIsCheckModalOpen] = useState(false);
     const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
@@ -67,8 +104,18 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     }, []);
 
     // Status Check State
-    const [statusSearchId, setStatusSearchId] = useState('');
+    const [statusSearchId, setStatusSearchId] = useState(initialSearch || '');
     const [foundHouse, setFoundHouse] = useState<House | null>(null);
+
+    useEffect(() => {
+        if (initialSearch) {
+            const house = houses.find(h => h.id.toLowerCase() === initialSearch.toLowerCase());
+            if (house) {
+                setFoundHouse(house);
+                setIsStatusModalOpen(true);
+            }
+        }
+    }, [initialSearch, houses]);
 
     // Swap Request Form State
     const [swapRequester, setSwapRequester] = useState('');
@@ -473,12 +520,125 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                             <p className="text-xs text-slate-400 mt-1">Tingkat Hunian</p>
                         </div>
                     </div>
+
+                    {/* Detailed Breakdown */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div className="bg-slate-50/50 p-5 rounded-[1.5rem] border border-slate-100">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Home size={12} /> Status Hunian
+                            </h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-slate-600">Dihuni</span>
+                                    <span className="text-xs font-black text-blue-600">{occupiedCount}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-slate-600">Kosong</span>
+                                    <span className="text-xs font-black text-slate-400">{emptyCount}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-slate-600">Usaha</span>
+                                    <span className="text-xs font-black text-purple-600">{businessCount}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50/50 p-5 rounded-[1.5rem] border border-slate-100">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Users size={12} /> Jenis Tinggal
+                            </h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-slate-600">Milik Sendiri</span>
+                                    <span className="text-xs font-black text-indigo-600">{tetapCount}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-slate-600">Kontrak/Sewa</span>
+                                    <span className="text-xs font-black text-amber-600">{kontrakCount}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-slate-600">Kost</span>
+                                    <span className="text-xs font-black text-cyan-600">{kostCount}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50/50 p-5 rounded-[1.5rem] border border-slate-100">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Heart size={12} /> Kelompok Khusus
+                            </h4>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-slate-500">Ibu Hamil</span>
+                                    <span className="text-xs font-black text-pink-600">{pregnantTotal}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-slate-500">Bayi</span>
+                                    <span className="text-xs font-black text-blue-500">{babyTotal}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-slate-500">Balita</span>
+                                    <span className="text-xs font-black text-emerald-500">{toddlerTotal}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-slate-500">Lansia</span>
+                                    <span className="text-xs font-black text-orange-500">{elderlyTotal}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div className="bg-slate-50/50 p-5 rounded-[1.5rem] border border-slate-100">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Users size={12} /> Demografi & Bantuan Sosial
+                            </h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Laki-laki</p>
+                                    <p className="text-lg font-black text-slate-700">{maleTotal} <span className="text-[10px] font-normal text-slate-400">KK</span></p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Perempuan</p>
+                                    <p className="text-lg font-black text-slate-700">{femaleTotal} <span className="text-[10px] font-normal text-slate-400">KK</span></p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Penerima PKH</p>
+                                    <p className="text-lg font-black text-emerald-600">{pkhTotal} <span className="text-[10px] font-normal text-slate-400">Unit</span></p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Penerima BLT</p>
+                                    <p className="text-lg font-black text-blue-600">{bltTotal} <span className="text-[10px] font-normal text-slate-400">Unit</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50/50 p-5 rounded-[1.5rem] border border-slate-100">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Shield size={12} /> Keamanan & Fasilitas
+                            </h4>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Patroli (30hr)</p>
+                                    <p className="text-lg font-black text-indigo-600">{totalPatrols} <span className="text-[10px] font-normal text-slate-400">Kali</span></p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Total Kendaraan</p>
+                                    <p className="text-lg font-black text-slate-700">{vehicleTotal} <span className="text-[10px] font-normal text-slate-400">Unit</span></p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Status Keamanan</p>
+                                    <p className="text-lg font-black text-emerald-600">Aman</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div className="lg:col-span-1 bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-indigo-200 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><CheckCircle2 size={120} /></div>
                     <div className="relative z-10">
-                        <h3 className="text-xl font-black mb-2">Cek Status Iuran</h3>
-                        <p className="text-xs text-indigo-100 mb-6 font-medium">Verifikasi status pembayaran iuran rumah Anda secara mandiri.</p>
+                        <h3 className="text-xl font-black mb-2">Cek Status Iuran Mandiri</h3>
+                        <p className="text-xs text-indigo-100 mb-6 font-medium">Verifikasi status pembayaran iuran air dan sampah rumah Anda secara mandiri.</p>
                         <form onSubmit={handleCheckStatus} className="space-y-3">
                             <input 
                                 type="text" 
@@ -491,6 +651,104 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                                 Periksa Sekarang
                             </button>
                         </form>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Air Dues Summary */}
+            <motion.div variants={itemVariants}>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600"><Receipt size={24}/></div>
+                        <h2 className="text-2xl font-bold text-slate-800">Ringkasan Iuran Air</h2>
+                    </div>
+                    {airManager && (
+                        <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100">
+                            <User size={14} className="text-blue-600" />
+                            <p className="text-[10px] font-black text-blue-700 uppercase tracking-widest">Pengurus: {airManager.name}</p>
+                        </div>
+                    )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><DollarSign size={80}/></div>
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Terkumpul (Air)</p>
+                        <h3 className="text-3xl font-black text-slate-800">Rp {summaries.air.totalCollected.toLocaleString()}</h3>
+                        <p className="text-[10px] text-blue-600 font-bold mt-2 flex items-center gap-1">
+                            <CheckCircle size={12}/> Bulan Berjalan
+                        </p>
+                    </div>
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><Users size={80}/></div>
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Belum Bayar (Air)</p>
+                        <h3 className="text-3xl font-black text-rose-600">{summaries.air.unpaidCount}</h3>
+                        <p className="text-[10px] text-slate-400 font-bold mt-2">Rumah / KK</p>
+                    </div>
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><TrendingUp size={80}/></div>
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Estimasi Piutang (Air)</p>
+                        <h3 className="text-3xl font-black text-blue-600">Rp {summaries.air.estimatedReceivables.toLocaleString()}</h3>
+                        <p className="text-[10px] text-slate-400 font-bold mt-2">Bulan Berjalan</p>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Sampah Dues Summary */}
+            <motion.div variants={itemVariants}>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-orange-100 p-2.5 rounded-xl text-orange-600"><Receipt size={24}/></div>
+                        <h2 className="text-2xl font-bold text-slate-800">Ringkasan Iuran Sampah</h2>
+                    </div>
+                    {sampahManager && (
+                        <div className="flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-2xl border border-orange-100">
+                            <User size={14} className="text-orange-600" />
+                            <p className="text-[10px] font-black text-orange-700 uppercase tracking-widest">Pengurus: {sampahManager.name}</p>
+                        </div>
+                    )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><DollarSign size={80}/></div>
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Terkumpul (Sampah)</p>
+                        <h3 className="text-3xl font-black text-slate-800">Rp {summaries.sampah.totalCollected.toLocaleString()}</h3>
+                        <p className="text-[10px] text-orange-600 font-bold mt-2 flex items-center gap-1">
+                            <CheckCircle size={12}/> Bulan Berjalan
+                        </p>
+                    </div>
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><Users size={80}/></div>
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Belum Bayar (Sampah)</p>
+                        <h3 className="text-3xl font-black text-rose-600">{summaries.sampah.unpaidCount}</h3>
+                        <p className="text-[10px] text-slate-400 font-bold mt-2">Rumah / KK</p>
+                    </div>
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><TrendingUp size={80}/></div>
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Estimasi Piutang (Sampah)</p>
+                        <h3 className="text-3xl font-black text-orange-600">Rp {summaries.sampah.estimatedReceivables.toLocaleString()}</h3>
+                        <p className="text-[10px] text-slate-400 font-bold mt-2">Bulan Berjalan</p>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Total Arrears Summary */}
+            <motion.div variants={itemVariants} className="mb-12">
+                <div className="bg-amber-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-amber-200 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700"><AlertTriangle size={120}/></div>
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-200 mb-2">Informasi Tunggakan</p>
+                            <h3 className="text-3xl font-black tracking-tight">Total Tunggakan Kolektif</h3>
+                            <p className="text-sm text-amber-100 font-medium mt-2">Akumulasi iuran air & sampah yang belum terbayar dari periode sebelumnya.</p>
+                        </div>
+                        <div className="text-right space-y-2">
+                            <h3 className="text-4xl font-black">Rp {summaries.totalArrearsAmount.toLocaleString()}</h3>
+                            <div className="flex flex-col items-end gap-1">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-amber-100">Air: {summaries.air.arrearsHouseCount} Unit Rumah (Rp {summaries.air.totalArrearsAmount.toLocaleString()})</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-amber-100">Sampah: {summaries.sampah.arrearsHouseCount} Unit Rumah (Rp {summaries.sampah.totalArrearsAmount.toLocaleString()})</p>
+                            </div>
+                            <p className="text-[10px] font-bold text-amber-200 uppercase tracking-widest">{summaries.totalArrearsHouseCount} Total Rumah Tertunggak</p>
+                        </div>
                     </div>
                 </div>
             </motion.div>
@@ -1010,8 +1268,8 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
 
                     <div className="space-y-3">
                         {[
-                            { label: 'Iuran Air', status: foundHouse?.paymentStatusAir || 'Belum Lunas' },
-                            { label: 'Iuran Sampah', status: foundHouse?.paymentStatusSampah || 'Belum Lunas' },
+                            { label: 'Iuran Air', status: foundHouse ? getPaymentStatus(foundHouse, 'Air') : 'Belum Lunas' },
+                            { label: 'Iuran Sampah', status: foundHouse ? getPaymentStatus(foundHouse, 'Sampah') : 'Belum Lunas' },
                         ].map((item, i) => (
                             <div key={i} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                                 <span className="text-sm font-bold text-slate-700">{item.label}</span>
