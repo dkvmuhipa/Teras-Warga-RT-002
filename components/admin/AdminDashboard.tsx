@@ -64,11 +64,12 @@ interface AdminDashboardProps {
   inventoryLogs: any[];
   auditLogs: any[];
   faqItems: FAQItem[];
+  settings: any;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, faqItems
+  ronda, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, faqItems, settings
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -88,7 +89,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'overview':
         return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
       case 'residents':
-        return <ResidentManager houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} bills={bills} residentRegistrations={residentRegistrations} />;
+        return <ResidentManager houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} bills={bills} residentRegistrations={residentRegistrations} settings={settings} />;
       case 'finance':
         return <FinanceManager cashFlow={cashFlow} pdfConfig={pdfConfig} />;
       case 'services':
@@ -136,7 +137,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           />
         );
       case 'settings':
-        return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
+        return <Settings pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} settings={settings} />;
       default:
         return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
     }

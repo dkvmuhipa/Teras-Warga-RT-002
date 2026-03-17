@@ -10,7 +10,9 @@ import {
   updateWasteDepositStatus, 
   deleteWasteDepositFromDb,
   subscribeToWastePrices,
-  updateWastePriceInDb
+  updateWastePriceInDb,
+  addWastePriceToDb,
+  deleteWastePriceFromDb
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -23,6 +25,8 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
   const [prices, setPrices] = useState<WastePrice[]>([]);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
+  const [newCategory, setNewCategory] = useState({ type: '', pricePerUnit: 0, unit: 'kg' as 'kg' | 'liter' });
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Pending' | 'Confirmed'>('All');
   const [pinInput, setPinInput] = useState('');
@@ -33,10 +37,16 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
   const [form, setForm] = useState({
     houseId: '',
     residentName: '',
-    type: 'Plastik' as WasteDeposit['type'],
+    type: '',
     weight: 0,
     date: new Date().toISOString().split('T')[0]
   });
+
+  useEffect(() => {
+    if (prices.length > 0 && !form.type) {
+      setForm(prev => ({ ...prev, type: prices[0].type }));
+    }
+  }, [prices]);
 
   useEffect(() => {
     const unsubDeposits = subscribeToWasteDeposits(setDeposits);
@@ -127,6 +137,29 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
     } catch (error) {
       console.error(error);
       alert('Gagal memperbarui harga.');
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategory.type) return;
+    try {
+      await addWastePriceToDb(newCategory);
+      setNewCategory({ type: '', pricePerUnit: 0, unit: 'kg' });
+      setIsAddingCategory(false);
+    } catch (error) {
+      console.error(error);
+      alert('Gagal menambah kategori.');
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (window.confirm('Hapus kategori sampah ini?')) {
+      try {
+        await deleteWastePriceFromDb(id);
+      } catch (error) {
+        console.error(error);
+        alert('Gagal menghapus kategori.');
+      }
     }
   };
 
@@ -396,13 +429,11 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               <select 
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
                 value={form.type}
-                onChange={e => setForm({...form, type: e.target.value as WasteDeposit['type']})}
+                onChange={e => setForm({...form, type: e.target.value})}
               >
-                <option value="Plastik">Plastik</option>
-                <option value="Kertas">Kertas</option>
-                <option value="Logam">Logam</option>
-                <option value="Minyak Jelantah">Minyak Jelantah</option>
-                <option value="Lainnya">Lainnya</option>
+                {prices.map(p => (
+                  <option key={p.id} value={p.type}>{p.type}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -450,33 +481,94 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
 
       {/* Manage Prices Modal */}
       <Modal isOpen={isPriceModalOpen} onClose={() => setIsPriceModalOpen(false)} title="Atur Harga Sampah">
-        <div className="space-y-4">
-          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-3 mb-4">
-            <AlertTriangle className="text-amber-500" size={20} />
+        <div className="space-y-6">
+          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-3">
+            <AlertTriangle className="text-amber-500 shrink-0" size={20} />
             <p className="text-[10px] font-bold text-amber-700 leading-tight">
               Harga ini akan digunakan sebagai dasar perhitungan nilai ekonomi setoran baru. Perubahan harga tidak mempengaruhi setoran yang sudah tersimpan.
             </p>
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
             {prices.map((price) => (
-              <div key={price.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <div>
+              <div key={price.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group/price">
+                <div className="flex-1">
                   <p className="text-sm font-black text-slate-800 leading-none mb-1">{price.type}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Per {price.unit}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-slate-400">Rp</span>
-                  <input 
-                    type="number" 
-                    className="w-24 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-black text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                    value={price.pricePerUnit}
-                    onChange={e => handleUpdatePrice(price.id, parseInt(e.target.value))}
-                  />
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-400">Rp</span>
+                    <input 
+                      type="number" 
+                      className="w-24 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-black text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                      value={price.pricePerUnit}
+                      onChange={e => handleUpdatePrice(price.id, parseInt(e.target.value))}
+                    />
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteCategory(price.id)}
+                    className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
             ))}
           </div>
-          <Button onClick={() => setIsPriceModalOpen(false)} className="w-full py-4 mt-4">Selesai</Button>
+
+          <div className="pt-4 border-t border-slate-100">
+            {!isAddingCategory ? (
+              <Button 
+                onClick={() => setIsAddingCategory(true)} 
+                variant="outline" 
+                className="w-full py-3 border-dashed border-2 border-slate-200 text-slate-500 hover:border-emerald-500 hover:text-emerald-600"
+              >
+                <Plus size={16} className="mr-2" /> Tambah Kategori Baru
+              </Button>
+            ) : (
+              <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nama Kategori</label>
+                    <input 
+                      type="text" 
+                      placeholder="Contoh: Kaca"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      value={newCategory.type}
+                      onChange={e => setNewCategory({...newCategory, type: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Satuan</label>
+                    <select 
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      value={newCategory.unit}
+                      onChange={e => setNewCategory({...newCategory, unit: e.target.value as 'kg' | 'liter'})}
+                    >
+                      <option value="kg">kg</option>
+                      <option value="liter">liter</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Harga per Satuan (Rp)</label>
+                  <input 
+                    type="number" 
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    value={newCategory.pricePerUnit}
+                    onChange={e => setNewCategory({...newCategory, pricePerUnit: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={() => setIsAddingCategory(false)} variant="outline" className="flex-1 py-2 text-xs">Batal</Button>
+                  <Button onClick={handleAddCategory} className="flex-1 py-2 text-xs bg-emerald-600 hover:bg-emerald-700">Simpan</Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Button onClick={() => setIsPriceModalOpen(false)} className="w-full py-4">Tutup</Button>
         </div>
       </Modal>
     </div>

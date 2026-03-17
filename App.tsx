@@ -104,6 +104,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   updateBillInDb,
   deleteBillFromDb,
   subscribeToNews,
+  subscribeToSettings,
   addNewsToDb,
   updateNewsInDb,
   deleteNewsFromDb,
@@ -189,6 +190,7 @@ export const App = () => {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
+  const [settings, setSettings] = useState<any>({ airFee: 10000, sampahFee: 10000 });
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -231,12 +233,13 @@ export const App = () => {
     });
     const unsubFAQ = subscribeToFAQ((data) => setFaqItems(data));
     const unsubEvents = subscribeToEvents((data) => setEvents(data));
+    const unsubSettings = subscribeToSettings((data) => setSettings(data));
 
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents();
+      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubSettings();
     };
   }, []);
 
@@ -255,6 +258,7 @@ export const App = () => {
             iuranPayments={iuranPayments}
             cashFlow={cashFlow}
             bills={bills}
+            settings={settings}
         >
             <Routes>
                 <Route path="/admin" element={
@@ -292,6 +296,7 @@ export const App = () => {
                             inventoryLogs={inventoryLogs} 
                             auditLogs={auditLogs} 
                             faqItems={faqItems} 
+                            settings={settings}
                         />
                     </AdminRouteWrapper>
                 }/>

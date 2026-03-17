@@ -45,13 +45,18 @@ export const FinancialProvider: React.FC<{
   iuranPayments: any[];
   cashFlow: CashFlow[];
   bills: Bill[];
-}> = ({ children, houses, iuranPayments, cashFlow, bills }) => {
+  settings: { airFee: number; sampahFee: number };
+}> = ({ children, houses, iuranPayments, cashFlow, bills, settings }) => {
   const getIndonesianMonthYear = (date: Date) => {
     const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     return `${monthsId[date.getMonth()]} ${date.getFullYear()}`;
   };
 
   const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
+
+  const airFee = settings?.airFee || 10000;
+  const sampahFee = settings?.sampahFee || 10000;
+  const combinedFee = airFee + sampahFee;
 
   const isMonthMatch = (monthA: string, monthB: string) => {
     if (!monthA || !monthB) return false;
@@ -151,18 +156,18 @@ export const FinancialProvider: React.FC<{
     const paidHousesCount = new Set(currentMonthPayments.map(p => p.houseId)).size;
     const participationRate = occupiedHousesList.length > 0 ? Math.round((paidHousesCount / occupiedHousesList.length) * 100) : 0;
     const unpaidHousesCount = occupiedHousesList.length - paidHousesCount;
-    const estimatedReceivables = unpaidHousesCount * 20000;
+    const estimatedReceivables = unpaidHousesCount * combinedFee;
 
     const totalArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h).length, 0);
-    const totalArrearsAmount = totalArrearsMonths * 10000; // Since each month has 2 components, but getArrearsForHouse(h) returns months where *any* is missing. This is tricky.
-
+    const totalArrearsAmount = totalArrearsMonths * (combinedFee / 2); // This is still a bit tricky if only one is unpaid, but let's use the combined logic below
+    
     // Better calculation for arrears
     const airArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h, 'Air').length, 0);
-    const airArrearsAmount = airArrearsMonths * 10000;
+    const airArrearsAmount = airArrearsMonths * airFee;
     const airArrearsHouseCount = occupiedHousesList.filter(h => getArrearsForHouse(h, 'Air').length > 0).length;
 
     const sampahArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h, 'Sampah').length, 0);
-    const sampahArrearsAmount = sampahArrearsMonths * 10000;
+    const sampahArrearsAmount = sampahArrearsMonths * sampahFee;
     const sampahArrearsHouseCount = occupiedHousesList.filter(h => getArrearsForHouse(h, 'Sampah').length > 0).length;
 
     const combinedTotalArrearsAmount = airArrearsAmount + sampahArrearsAmount;
@@ -170,17 +175,17 @@ export const FinancialProvider: React.FC<{
 
     // Air specific
     const airPayments = currentMonthPayments.filter(p => p.type === 'Air' || p.type === 'Both');
-    const airCollected = airPayments.reduce((acc, p) => acc + (p.type === 'Both' ? p.amount / 2 : p.amount), 0);
+    const airCollected = airPayments.reduce((acc, p) => acc + (p.type === 'Both' ? (p.amount * (airFee / combinedFee)) : p.amount), 0);
     const airPaidHouses = new Set(airPayments.map(p => p.houseId)).size;
     const airUnpaidCount = occupiedHousesList.length - airPaidHouses;
-    const airEstimatedReceivables = airUnpaidCount * 10000;
+    const airEstimatedReceivables = airUnpaidCount * airFee;
 
     // Sampah specific
     const sampahPayments = currentMonthPayments.filter(p => p.type === 'Sampah' || p.type === 'Both');
-    const sampahCollected = sampahPayments.reduce((acc, p) => acc + (p.type === 'Both' ? p.amount / 2 : p.amount), 0);
+    const sampahCollected = sampahPayments.reduce((acc, p) => acc + (p.type === 'Both' ? (p.amount * (sampahFee / combinedFee)) : p.amount), 0);
     const sampahPaidHouses = new Set(sampahPayments.map(p => p.houseId)).size;
     const sampahUnpaidCount = occupiedHousesList.length - sampahPaidHouses;
-    const sampahEstimatedReceivables = sampahUnpaidCount * 10000;
+    const sampahEstimatedReceivables = sampahUnpaidCount * sampahFee;
 
     return {
       totalCollected,

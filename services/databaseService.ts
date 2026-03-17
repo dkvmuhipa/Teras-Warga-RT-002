@@ -1521,6 +1521,25 @@ export const updateWastePriceInDb = async (id: string, pricePerUnit: number) => 
     }
 };
 
+export const addWastePriceToDb = async (price: any) => {
+    try {
+        const { id, ...data } = price;
+        await addDoc(collection(db, WASTE_PRICES_COL), deepSanitize(data));
+    } catch (e) {
+        console.error("Error adding waste price:", e);
+        throw e;
+    }
+};
+
+export const deleteWastePriceFromDb = async (id: string) => {
+    try {
+        await deleteDoc(doc(db, WASTE_PRICES_COL, id));
+    } catch (e) {
+        console.error("Error deleting waste price:", e);
+        throw e;
+    }
+};
+
 export const subscribeToWasteBalance = (houseId: string, callback: (data: any) => void) => {
     return onSnapshot(doc(db, WASTE_BALANCES_COL, houseId), (doc) => {
         if (doc.exists()) {
@@ -1674,6 +1693,15 @@ export const seedDatabase = async (initialData?: any) => {
           for (const ev of initialData.events) {
               const { id, ...data } = ev;
               await addDoc(collection(db, EVENTS_COL), deepSanitize(data));
+          }
+      }
+
+      // Seed Waste Prices
+      const wastePricesSnap = await getDocs(collection(db, WASTE_PRICES_COL));
+      if (wastePricesSnap.empty && initialData.wastePrices && initialData.wastePrices.length > 0) {
+          for (const wp of initialData.wastePrices) {
+              const { id, ...data } = wp;
+              await addDoc(collection(db, WASTE_PRICES_COL), deepSanitize(data));
           }
       }
 

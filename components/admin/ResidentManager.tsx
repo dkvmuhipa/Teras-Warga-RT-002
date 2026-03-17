@@ -35,12 +35,13 @@ interface ResidentManagerProps {
   iuranPayments: any[];
   bills: Bill[];
   residentRegistrations: ResidentRegistration[];
+  settings: any;
 }
 
 type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business';
 
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
-  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations 
+  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, settings
 }) => {
   const getIndonesianMonthYear = (date: Date) => {
     const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -124,16 +125,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const [payHouse, setPayHouse] = useState<House | null>(null);
   const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
-  const [payAmount, setPayAmount] = useState('10000');
+  const [payAmount, setPayAmount] = useState(String((settings?.airFee || 10000) + (settings?.sampahFee || 10000)));
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
   const [payNotes, setPayNotes] = useState('');
 
   const occupiedHousesList = houses.filter(h => h.status === 'Occupied');
 
   useEffect(() => {
-    if (payType === 'Both') setPayAmount('20000');
-    else setPayAmount('10000');
-  }, [payType]);
+    const airFee = settings?.airFee || 10000;
+    const sampahFee = settings?.sampahFee || 10000;
+    if (payType === 'Both') setPayAmount(String(airFee + sampahFee));
+    else if (payType === 'Air') setPayAmount(String(airFee));
+    else setPayAmount(String(sampahFee));
+  }, [payType, settings]);
   const [editingHouseId, setEditingHouseId] = useState<string | null>(null);
   const [activeFormTab, setActiveFormTab] = useState<'basic' | 'demographics' | 'family'>('basic');
   

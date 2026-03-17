@@ -3,7 +3,7 @@ import { Settings as SettingsIcon, Save, Download, Trash2, Shield, User, Key, Ma
 import { PdfConfig } from '../../types';
 import { motion } from 'motion/react';
 import { updateAdminPassword, seedDatabase, deepSanitize } from '../../services/databaseService';
-import { generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, INITIAL_OFFICIALS, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS } from '../../constants';
+import { generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, INITIAL_OFFICIALS, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_WASTE_PRICES, MOCK_FAQ, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS, MOCK_BILLS } from '../../constants';
 
 interface SettingsProps {
   pdfConfig: PdfConfig;
@@ -55,7 +55,13 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
                     inventory: MOCK_INVENTORY, 
                     umkm: MOCK_UMKM, 
                     polls: MOCK_POLLS, 
-                    rondaLogs: MOCK_RONDA_LOGS 
+                    rondaLogs: MOCK_RONDA_LOGS,
+                    wastePrices: MOCK_WASTE_PRICES,
+                    faq: MOCK_FAQ,
+                    events: MOCK_EVENTS,
+                    checkpoints: CHECKPOINTS,
+                    mapPoints: MOCK_MAP_POINTS,
+                    bills: MOCK_BILLS
                 };
                 await seedDatabase(initialData);
                 alert("Reset sistem berhasil. Halaman akan dimuat ulang."); 

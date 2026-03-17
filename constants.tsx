@@ -1,5 +1,5 @@
 import React from 'react';
-import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem, GalleryItem, Checkpoint, FAQItem, Document, Bill, AppEvent, MapPoint } from './types';
+import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem, GalleryItem, Checkpoint, FAQItem, Document, Bill, AppEvent, MapPoint, WastePrice } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TERAS";
@@ -204,6 +204,14 @@ export const MOCK_FAQ: FAQItem[] = [
 export const MOCK_DOCUMENTS: Document[] = [
   { id: '1', title: 'SK Pengurus RT 02', category: 'SK RT', url: '#', uploadDate: '2023-01-01', uploadedBy: 'Admin' },
   { id: '2', title: 'Aturan Kebersihan Lingkungan', category: 'Aturan', url: '#', uploadDate: '2023-02-15', uploadedBy: 'Admin' },
+];
+
+export const MOCK_WASTE_PRICES: WastePrice[] = [
+  { id: '1', type: 'Plastik', pricePerUnit: 2000, unit: 'kg' },
+  { id: '2', type: 'Kertas', pricePerUnit: 1500, unit: 'kg' },
+  { id: '3', type: 'Logam', pricePerUnit: 5000, unit: 'kg' },
+  { id: '4', type: 'Minyak Jelantah', pricePerUnit: 3000, unit: 'liter' },
+  { id: '5', type: 'Lainnya', pricePerUnit: 1000, unit: 'kg' },
 ];
 
 export const MOCK_BILLS: Bill[] = [

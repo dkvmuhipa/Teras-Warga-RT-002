@@ -583,7 +583,7 @@ export interface WasteDeposit {
   houseId: string;
   residentName: string;
   date: string; // ISO String
-  type: 'Plastik' | 'Kertas' | 'Logam' | 'Minyak Jelantah' | 'Lainnya';
+  type: string; // Dynamic waste type
   weight: number; // kg or liter
   pricePerUnit: number;
   totalValue: number;
