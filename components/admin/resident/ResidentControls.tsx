@@ -52,7 +52,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             value={selectedMonth} 
             onChange={e => setSelectedMonth(e.target.value)}
           >
-            {Array.from({ length: 12 }).map((_, i) => {
+            {Array.from({ length: new Date().getMonth() + 1 }).map((_, i) => {
               const d = new Date();
               d.setMonth(d.getMonth() - i);
               const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];

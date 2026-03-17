@@ -26,13 +26,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
   handleOpenEdit,
   handleDelete,
 }) => {
-  const { getPaymentStatus } = useFinancial();
+  const { getPaymentStatus, getArrearsForHouse } = useFinancial();
 
   if (!isOpen || !selectedResident) return null;
 
-  // Placeholder for bills logic if needed in future
-  const selectedResidentBills: any[] = [];
-  const isFullyPaid = selectedResidentBills.length > 0 && selectedResidentBills.every(b => b.total === 0);
+  const arrears = getArrearsForHouse(selectedResident);
+  const isFullyPaid = arrears.length === 0;
 
   return (
     <div key="drawer-overlay" className="fixed inset-0 z-[100] flex justify-end">
@@ -180,9 +179,23 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
                       isFullyPaid ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                     }`}>
-                      {isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PENDING}
+                      {isFullyPaid ? 'Lunas' : `${arrears.length} Tunggakan`}
                     </span>
                   </div>
+
+                  {!isFullyPaid && (
+                    <div className="mb-6 px-4 py-3 bg-rose-50 rounded-2xl border border-rose-100">
+                      <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2">Daftar Tunggakan:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {arrears.map(m => (
+                          <span key={m} className="px-2 py-1 bg-white text-rose-600 rounded-lg text-[10px] font-bold border border-rose-200">
+                            {m}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex gap-2">
                     <button 
                       onClick={() => openPayModal(selectedResident)}

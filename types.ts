@@ -32,6 +32,7 @@ export interface House {
   
   // New Fields for Professional Data Management
   isVerified?: boolean;
+  joiningDate?: string; // ISO String or YYYY-MM
   ktpUrl?: string;
   kkUrl?: string;
   role?: Role; // RBAC

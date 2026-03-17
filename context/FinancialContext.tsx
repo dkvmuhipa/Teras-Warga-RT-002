@@ -91,8 +91,26 @@ export const FinancialProvider: React.FC<{
     const currentMonthIndex = now.getMonth();
     
     const arrears: string[] = [];
-    for (let i = 0; i < currentMonthIndex; i++) {
+    
+    // Determine start month based on joiningDate (if available)
+    let startMonth = 0;
+    let startYear = currentYear;
+    
+    if (house.joiningDate) {
+      const joinDate = new Date(house.joiningDate);
+      if (joinDate.getFullYear() === currentYear) {
+        startMonth = joinDate.getMonth();
+      } else if (joinDate.getFullYear() > currentYear) {
+        // Joined in future year, no arrears for current year
+        return [];
+      }
+      // If joined in previous year, start from January (startMonth = 0)
+    }
+
+    // Only check months in the current year up to now, starting from joining month
+    for (let i = startMonth; i <= currentMonthIndex; i++) {
       const monthStrId = `${monthsId[i]} ${currentYear}`;
+      
       const hasPaid = iuranPayments.some(p => {
         const idMatch = String(p.houseId) === String(house.id) || 
                         String(p.houseId) === `${house.block}-${house.number}` ||

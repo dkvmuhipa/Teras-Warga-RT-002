@@ -110,6 +110,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               paymentStatusSampam: PaymentStatus.PENDING, // Fixed typo from original code if any, but wait, original code had paymentStatusSampah
                               paymentStatusSampah: PaymentStatus.PENDING,
                               isVerified: true,
+                              joiningDate: reg.date || new Date().toISOString(),
                               religion: reg.religion, // Added religion
                             } as any); // Use any to bypass strict type check if needed, but better to match House type
                             

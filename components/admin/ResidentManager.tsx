@@ -104,6 +104,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
+  const [targetMonth, setTargetMonth] = useState(getIndonesianMonthYear(new Date()));
   const { 
     selectedMonth, 
     setSelectedMonth, 
@@ -125,6 +126,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
   const [payAmount, setPayAmount] = useState('10000');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
+  const [payNotes, setPayNotes] = useState('');
 
   const occupiedHousesList = houses.filter(h => h.status === 'Occupied');
 
@@ -436,7 +438,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     if (!payHouse) return;
 
     const paymentDateObj = new Date(payDate);
-    const currentMonth = getIndonesianMonthYear(paymentDateObj);
+    const currentMonth = targetMonth;
     
     // Check for duplicate payment in history for the same month
     const duplicatePayment = iuranPayments.find(p => 
@@ -455,12 +457,18 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     }
 
     const updates: any = {};
-    if (payType === 'Air' || payType === 'Both') updates.paymentStatusAir = PaymentStatus.PAID;
-    if (payType === 'Sampah' || payType === 'Both') updates.paymentStatusSampah = PaymentStatus.PAID;
-    updates.paymentDate = payDate;
+    const isCurrentMonth = isMonthMatch(getIndonesianMonthYear(new Date()), currentMonth);
+    
+    if (isCurrentMonth) {
+      if (payType === 'Air' || payType === 'Both') updates.paymentStatusAir = PaymentStatus.PAID;
+      if (payType === 'Sampah' || payType === 'Both') updates.paymentStatusSampah = PaymentStatus.PAID;
+      updates.paymentDate = payDate;
+    }
 
     try {
-      await updateHouseData(payHouse.id, updates);
+      if (Object.keys(updates).length > 0) {
+        await updateHouseData(payHouse.id, updates);
+      }
       
       const paymentMonth = currentMonth;
       const paymentDateIso = paymentDateObj.toISOString();
@@ -475,7 +483,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         amount: amount,
         type: payType,
         date: paymentDateIso,
-        month: paymentMonth
+        month: paymentMonth,
+        notes: payNotes
       });
 
       // SYNC WITH BILLS COLLECTION
@@ -534,6 +543,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       alert('Status iuran berhasil diperbarui dan dicatat di riwayat tagihan!');
       setIsPayModalOpen(false);
       setPayHouse(null);
+      setPayNotes('');
     } catch (error) {
       console.error(error);
       alert('Gagal memperbarui status iuran.');
@@ -549,12 +559,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         amount: parseInt(payAmount) || 0,
         type: payType,
         date: new Date(payDate).toISOString(),
-        month: getIndonesianMonthYear(new Date(payDate))
+        month: getIndonesianMonthYear(new Date(payDate)),
+        notes: payNotes
       });
 
       alert('Catatan pembayaran berhasil diperbarui!');
       setIsEditPaymentModalOpen(false);
       setEditingPayment(null);
+      setPayNotes('');
     } catch (error) {
       console.error(error);
       alert('Gagal memperbarui catatan pembayaran.');
@@ -563,6 +575,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const openPayModal = (house: House) => {
     setPayHouse(house);
+    setTargetMonth(getIndonesianMonthYear(new Date()));
     setIsPayModalOpen(true);
   };
 
@@ -616,7 +629,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       const data = {
         ...formData,
         id: houseId,
-        location: { x: 0, y: 0 } // Default location, map editor handles this separately
+        location: { x: 0, y: 0 }, // Default location, map editor handles this separately
+        joiningDate: editingHouseId ? (houses.find(h => h.id === editingHouseId)?.joiningDate || new Date().toISOString()) : new Date().toISOString()
       };
 
       if (editingHouseId) {
@@ -825,7 +839,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         {isPayModalOpen && payHouse && (
           <PaymentModal 
             isOpen={isPayModalOpen}
-            onClose={() => setIsPayModalOpen(false)}
+            onClose={() => {
+              setIsPayModalOpen(false);
+              setPayNotes('');
+            }}
             payHouse={payHouse}
             payType={payType}
             setPayType={setPayType}
@@ -833,6 +850,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayAmount={setPayAmount}
             payDate={payDate}
             setPayDate={setPayDate}
+            payNotes={payNotes}
+            setPayNotes={setPayNotes}
+            targetMonth={targetMonth}
+            setTargetMonth={setTargetMonth}
             handleSavePayment={handleSavePayment}
             getIndonesianMonthYear={getIndonesianMonthYear}
           />
@@ -843,7 +864,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         {isEditPaymentModalOpen && editingPayment && (
           <EditPaymentModal 
             isOpen={isEditPaymentModalOpen}
-            onClose={() => setIsEditPaymentModalOpen(false)}
+            onClose={() => {
+              setIsEditPaymentModalOpen(false);
+              setPayNotes('');
+            }}
             editingPayment={editingPayment}
             payType={payType}
             setPayType={setPayType}
@@ -851,6 +875,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayAmount={setPayAmount}
             payDate={payDate}
             setPayDate={setPayDate}
+            payNotes={payNotes}
+            setPayNotes={setPayNotes}
             handleUpdatePayment={handleUpdatePayment}
           />
         )}
@@ -893,6 +919,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayType={setPayType}
             setPayAmount={setPayAmount}
             setPayDate={setPayDate}
+            setPayNotes={setPayNotes}
             setIsEditPaymentModalOpen={setIsEditPaymentModalOpen}
           />
         ) : viewMode === 'registrations' ? (

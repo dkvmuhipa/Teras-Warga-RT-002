@@ -12,6 +12,7 @@ interface ResidentIuranManagerProps {
   setPayType: (type: 'Air' | 'Sampah' | 'Both') => void;
   setPayAmount: (amount: string) => void;
   setPayDate: (date: string) => void;
+  setPayNotes: (notes: string) => void;
   setIsEditPaymentModalOpen: (open: boolean) => void;
 }
 
@@ -24,6 +25,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
   setPayType,
   setPayAmount,
   setPayDate,
+  setPayNotes,
   setIsEditPaymentModalOpen,
 }) => {
   const { 
@@ -146,9 +148,10 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             <button 
               onClick={() => {
                 const csv = [
-                  ['Tanggal', 'Nama', 'Rumah', 'Jenis', 'Nominal'].join(','),
+                  ['Tanggal Bayar', 'Bulan Iuran', 'Nama', 'Rumah', 'Jenis', 'Nominal'].join(','),
                   ...currentMonthPayments.map(p => [
                     new Date(p.date).toLocaleDateString('id-ID'),
+                    p.month,
                     p.headOfFamily,
                     `${p.block}-${p.number}`,
                     p.type,
@@ -173,7 +176,8 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
           <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-slate-50/50">
               <tr>
-                <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Tanggal</th>
+                <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Tanggal Bayar</th>
+                <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Bulan Iuran</th>
                 <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Nama Warga</th>
                 <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Rumah</th>
                 <th className="p-3 md:p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px] hidden sm:table-cell">Jenis Iuran</th>
@@ -186,6 +190,11 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                 currentMonthPayments.map((payment) => (
                   <tr key={payment.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
                     <td className="p-3 md:p-4 text-slate-500 font-medium text-xs md:text-sm">{new Date(payment.date).toLocaleDateString('id-ID')}</td>
+                    <td className="p-3 md:p-4">
+                      <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                        {payment.month}
+                      </span>
+                    </td>
                     <td className="p-3 md:p-4 font-bold text-slate-800 text-xs md:text-sm">{payment.headOfFamily}</td>
                     <td className="p-3 md:p-4 font-mono font-black text-slate-600 text-xs md:text-sm">{payment.block}-{payment.number}</td>
                     <td className="p-3 md:p-4 hidden sm:table-cell">
@@ -212,6 +221,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                             setPayType(payment.type);
                             setPayAmount(payment.amount.toString());
                             setPayDate(new Date(payment.date).toISOString().split('T')[0]);
+                            setPayNotes(payment.notes || '');
                             setIsEditPaymentModalOpen(true);
                           }}
                           className="p-1.5 md:p-2 text-slate-300 hover:text-indigo-600 transition-colors"
@@ -248,6 +258,52 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Arrears List Section */}
+      <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+            <AlertCircle size={20} />
+          </div>
+          <div>
+            <h3 className="text-xl font-black text-slate-800">Daftar Tunggakan Warga</h3>
+            <p className="text-xs font-bold text-slate-400 mt-1">Warga yang memiliki tunggakan iuran (termasuk bulan berjalan jika lewat tgl 20)</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {occupiedHousesList
+            .map(h => ({ house: h, arrears: getArrearsForHouse(h) }))
+            .filter(item => item.arrears.length > 0)
+            .sort((a, b) => b.arrears.length - a.arrears.length)
+            .map(({ house, arrears }) => (
+              <div key={house.id} className="p-5 bg-slate-50 border border-slate-100 rounded-3xl group hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-sm font-black text-slate-800">{house.headOfFamily}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blok {house.block}-{house.number}</p>
+                  </div>
+                  <span className="px-2 py-1 bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg uppercase tracking-widest">
+                    {arrears.length} Bulan
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {arrears.map(m => (
+                    <span key={m} className="px-2 py-1 bg-white text-rose-500 rounded-lg text-[9px] font-bold border border-rose-100">
+                      {m}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          {occupiedHousesList.filter(h => getArrearsForHouse(h).length > 0).length === 0 && (
+            <div className="col-span-full py-12 text-center bg-emerald-50/50 rounded-[2rem] border-2 border-dashed border-emerald-100">
+              <p className="text-emerald-600 font-black text-sm uppercase tracking-widest">Semua Warga Sudah Lunas!</p>
+              <p className="text-emerald-400 text-xs mt-1 italic">Tidak ada tunggakan iuran yang tercatat.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

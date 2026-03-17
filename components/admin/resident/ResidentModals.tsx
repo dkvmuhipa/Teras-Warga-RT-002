@@ -4,9 +4,10 @@ import { Button } from '../../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
-  CreditCard
+  CreditCard, AlertCircle, Calendar
 } from 'lucide-react';
 import { House } from '../../../types';
+import { useFinancial } from '../../../context/FinancialContext';
 
 interface AddEditResidentModalProps {
   isOpen: boolean;
@@ -546,6 +547,10 @@ interface PaymentModalProps {
   setPayAmount: (amount: string) => void;
   payDate: string;
   setPayDate: (date: string) => void;
+  targetMonth: string;
+  setTargetMonth: (month: string) => void;
+  payNotes: string;
+  setPayNotes: (notes: string) => void;
   handleSavePayment: (e: React.FormEvent) => void;
   getIndonesianMonthYear: (date: Date) => string;
 }
@@ -560,70 +565,176 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   setPayAmount,
   payDate,
   setPayDate,
+  targetMonth,
+  setTargetMonth,
+  payNotes,
+  setPayNotes,
   handleSavePayment,
   getIndonesianMonthYear
 }) => {
+  const { getArrearsForHouse } = useFinancial();
   if (!payHouse) return null;
 
+  const arrears = getArrearsForHouse(payHouse);
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Bayar Iuran: ${payHouse.headOfFamily}`}>
-      <form onSubmit={handleSavePayment} className="space-y-4">
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Rumah</p>
-          <p className="text-sm font-black text-slate-800">Blok {payHouse.block} No. {payHouse.number}</p>
-          <div className="mt-3 pt-3 border-t border-slate-200">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Periode Iuran</p>
-            <p className="text-sm font-black text-indigo-600">
-              {getIndonesianMonthYear(new Date(payDate))}
+    <Modal isOpen={isOpen} onClose={onClose} title={`Bayar Iuran: ${payHouse.headOfFamily}`} maxWidth="max-w-xl">
+      <form onSubmit={handleSavePayment} className="space-y-6">
+        {arrears.length > 0 && (
+          <div className="p-5 bg-rose-50 border border-rose-100 rounded-[2rem]">
+            <div className="flex items-center gap-3 text-rose-600 mb-4">
+              <div className="p-2 bg-rose-100 rounded-xl">
+                <AlertCircle size={18} />
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-widest">Daftar Tunggakan</p>
+                <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">Klik bulan untuk membayar tunggakan tersebut</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {arrears.map(m => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setTargetMonth(m)}
+                  className={`px-4 py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center gap-2 ${
+                    targetMonth === m 
+                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-200 scale-105' 
+                    : 'bg-white text-rose-600 border border-rose-200 hover:bg-rose-100'
+                  }`}
+                >
+                  <Calendar size={12} />
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Informasi Rumah</p>
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white rounded-2xl border border-slate-200 text-indigo-600 shadow-sm">
+                <Home size={20} />
+              </div>
+              <div>
+                <p className="text-sm font-black text-slate-800">Blok {payHouse.block} No. {payHouse.number}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{payHouse.headOfFamily}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 bg-indigo-50/50 rounded-[2rem] border border-indigo-100">
+            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Bulan Iuran (Target)</p>
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-white rounded-2xl border border-indigo-100 text-indigo-600 shadow-sm">
+                <Calendar size={20} />
+              </div>
+              <select 
+                className="flex-1 bg-transparent py-1 text-sm font-black text-indigo-600 outline-none cursor-pointer"
+                value={targetMonth}
+                onChange={e => setTargetMonth(e.target.value)}
+              >
+                {Array.from({ length: 12 }).map((_, i) => {
+                  const d = new Date();
+                  // Show current month and 11 previous months
+                  d.setMonth(d.getMonth() - i);
+                  
+                  if (payHouse.joiningDate) {
+                    const joinDate = new Date(payHouse.joiningDate);
+                    if (d.getFullYear() < joinDate.getFullYear() || (d.getFullYear() === joinDate.getFullYear() && d.getMonth() < joinDate.getMonth())) {
+                      return null;
+                    }
+                  }
+
+                  const m = getIndonesianMonthYear(d);
+                  return <option key={m} value={m}>{m}</option>;
+                })}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6 bg-slate-50/30 p-6 rounded-[2.5rem] border border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran</label>
+              <select 
+                className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+                value={payType}
+                onChange={e => setPayType(e.target.value as any)}
+              >
+                <option value="Both">Iuran Sampah & Air</option>
+                <option value="Sampah">Iuran Sampah Saja</option>
+                <option value="Air">Iuran Air Saja</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nominal (Rp)</label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</div>
+                <input 
+                  type="number"
+                  className="w-full p-4 pl-12 bg-white border border-slate-200 rounded-2xl text-sm font-black focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+                  value={payAmount}
+                  onChange={e => setPayAmount(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Transaksi (Kapan Dibayar)</label>
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <input 
+                  type="date"
+                  className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+                  value={payDate}
+                  onChange={e => setPayDate(e.target.value)}
+                  required
+                />
+              </div>
+              <button 
+                type="button"
+                onClick={() => setPayDate(new Date().toISOString().split('T')[0])}
+                className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 font-black text-[10px] uppercase tracking-widest transition-all"
+              >
+                Hari Ini
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-400 font-bold mt-2 italic px-1">
+              * Tanggal saat uang diterima oleh petugas
             </p>
           </div>
-          <p className="text-[10px] text-amber-600 font-bold mt-2 italic">* Pencatatan status iuran saja (Dana disetor ke OP Air/TPS3R)</p>
-        </div>
 
-        <div>
-          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Jenis Iuran</label>
-          <select 
-            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
-            value={payType}
-            onChange={e => setPayType(e.target.value as any)}
-          >
-            <option value="Both">Iuran Sampah & Air</option>
-            <option value="Sampah">Iuran Sampah Saja</option>
-            <option value="Air">Iuran Air Saja</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Nominal Pembayaran (Rp)</label>
-          <input 
-            type="number"
-            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
-            value={payAmount}
-            onChange={e => setPayAmount(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Tanggal Pembayaran</label>
-          <input 
-            type="date"
-            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
-            value={payDate}
-            onChange={e => setPayDate(e.target.value)}
-            required
-          />
+          <div>
+            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Catatan Tambahan (Opsional)</label>
+            <textarea 
+              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm min-h-[80px]"
+              value={payNotes}
+              onChange={e => setPayNotes(e.target.value)}
+              placeholder="Contoh: Titipan tetangga, Bayar lunas 3 bulan, dll..."
+            />
+          </div>
         </div>
 
         <div className="pt-4">
-          <Button type="submit" className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-100">
-            Simpan Status Iuran
-          </Button>
+          <button 
+            type="submit" 
+            className="w-full py-5 bg-emerald-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-emerald-700 transition-all shadow-2xl shadow-emerald-600/30 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3"
+          >
+            <CheckCircle size={20} /> Simpan Pembayaran
+          </button>
         </div>
       </form>
     </Modal>
   );
 };
+
 
 interface EditPaymentModalProps {
   isOpen: boolean;
@@ -635,6 +746,8 @@ interface EditPaymentModalProps {
   setPayAmount: (amount: string) => void;
   payDate: string;
   setPayDate: (date: string) => void;
+  payNotes: string;
+  setPayNotes: (notes: string) => void;
   handleUpdatePayment: (e: React.FormEvent) => void;
 }
 
@@ -648,57 +761,96 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
   setPayAmount,
   payDate,
   setPayDate,
+  payNotes,
+  setPayNotes,
   handleUpdatePayment
 }) => {
   if (!editingPayment) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Catatan Iuran: ${editingPayment.headOfFamily}`}>
-      <form onSubmit={handleUpdatePayment} className="space-y-4">
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Rumah</p>
-          <p className="text-sm font-black text-slate-800">Blok {editingPayment.block} No. {editingPayment.number}</p>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Catatan Iuran: ${editingPayment.headOfFamily}`} maxWidth="max-w-xl">
+      <form onSubmit={handleUpdatePayment} className="space-y-6">
+        <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Informasi Rumah</p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white rounded-2xl border border-slate-200 text-indigo-600 shadow-sm">
+              <Home size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-black text-slate-800">Blok {editingPayment.block} No. {editingPayment.number}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Bulan: {editingPayment.month}</p>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Jenis Iuran</label>
-          <select 
-            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
-            value={payType}
-            onChange={e => setPayType(e.target.value as any)}
-          >
-            <option value="Both">Iuran Sampah & Air</option>
-            <option value="Sampah">Iuran Sampah Saja</option>
-            <option value="Air">Iuran Air Saja</option>
-          </select>
-        </div>
+        <div className="space-y-6 bg-slate-50/30 p-6 rounded-[2.5rem] border border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran</label>
+              <select 
+                className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+                value={payType}
+                onChange={e => setPayType(e.target.value as any)}
+              >
+                <option value="Both">Iuran Sampah & Air</option>
+                <option value="Sampah">Iuran Sampah Saja</option>
+                <option value="Air">Iuran Air Saja</option>
+              </select>
+            </div>
 
-        <div>
-          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Nominal Pembayaran (Rp)</label>
-          <input 
-            type="number"
-            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
-            value={payAmount}
-            onChange={e => setPayAmount(e.target.value)}
-            required
-          />
-        </div>
+            <div>
+              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nominal (Rp)</label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</div>
+                <input 
+                  type="number"
+                  className="w-full p-4 pl-12 bg-white border border-slate-200 rounded-2xl text-sm font-black focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+                  value={payAmount}
+                  onChange={e => setPayAmount(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          </div>
 
-        <div>
-          <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Tanggal Pembayaran</label>
-          <input 
-            type="date"
-            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
-            value={payDate}
-            onChange={e => setPayDate(e.target.value)}
-            required
-          />
+          <div>
+            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Transaksi</label>
+            <div className="flex gap-3">
+              <input 
+                type="date"
+                className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+                value={payDate}
+                onChange={e => setPayDate(e.target.value)}
+                required
+              />
+              <button 
+                type="button"
+                onClick={() => setPayDate(new Date().toISOString().split('T')[0])}
+                className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 font-black text-[10px] uppercase tracking-widest transition-all"
+              >
+                Hari Ini
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Catatan Tambahan</label>
+            <textarea 
+              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm min-h-[80px]"
+              value={payNotes}
+              onChange={e => setPayNotes(e.target.value)}
+              placeholder="Tambahkan catatan jika diperlukan..."
+            />
+          </div>
         </div>
 
         <div className="pt-4">
-          <Button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
-            Simpan Perubahan
-          </Button>
+          <button 
+            type="submit" 
+            className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-600/30 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3"
+          >
+            <CheckCircle size={20} /> Simpan Perubahan
+          </button>
         </div>
       </form>
     </Modal>
