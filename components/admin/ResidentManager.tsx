@@ -25,6 +25,7 @@ import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../servic
 import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId, addBillToDb, updateBillInDb } from '../../services/databaseService';
 import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface ResidentManagerProps {
   houses: House[];
@@ -48,46 +49,6 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     return `${monthsId[date.getMonth()]} ${date.getFullYear()}`;
   };
 
-  const isMonthMatch = (monthA: string, monthB: string) => {
-    if (!monthA || !monthB) return false;
-    const cleanA = monthA.trim().toLowerCase();
-    const cleanB = monthB.trim().toLowerCase();
-    if (cleanA === cleanB) return true;
-
-    const monthsId = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-    const monthsEn = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
-
-    // Helper to normalize month string (e.g. "January 2026" -> index 0, year 2026)
-    const normalize = (m: string) => {
-      const parts = m.trim().toLowerCase().split(/\s+/);
-      if (parts.length < 1) return null;
-      
-      const name = parts[0];
-      // Year is optional, if missing we just compare month index
-      const year = parts.length > 1 ? parts[1] : null;
-      
-      let index = monthsId.indexOf(name);
-      if (index === -1) index = monthsEn.indexOf(name);
-      
-      if (index === -1) return null;
-      return year ? `${index}-${year}` : `${index}`;
-    };
-
-    const normA = normalize(cleanA);
-    const normB = normalize(cleanB);
-    
-    if (!normA || !normB) return false;
-
-    // If both have years, compare both. If one is missing year, compare only month index.
-    if (normA.includes('-') && normB.includes('-')) {
-      return normA === normB;
-    }
-    
-    const indexA = normA.split('-')[0];
-    const indexB = normB.split('-')[0];
-    return indexA === indexB;
-  };
-
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
@@ -109,6 +70,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const { 
     selectedMonth, 
     setSelectedMonth, 
+    isMonthMatch,
     getPaymentStatus, 
     getArrearsForHouse, 
     summaries
@@ -125,19 +87,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const [payHouse, setPayHouse] = useState<House | null>(null);
   const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
-  const [payAmount, setPayAmount] = useState(String((settings?.airFee || 10000) + (settings?.sampahFee || 10000)));
+  const [payAmount, setPayAmount] = useState('10000');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
   const [payNotes, setPayNotes] = useState('');
+  const [payerName, setPayerName] = useState('');
 
   const occupiedHousesList = houses.filter(h => h.status === 'Occupied');
 
   useEffect(() => {
-    const airFee = settings?.airFee || 10000;
-    const sampahFee = settings?.sampahFee || 10000;
-    if (payType === 'Both') setPayAmount(String(airFee + sampahFee));
-    else if (payType === 'Air') setPayAmount(String(airFee));
-    else setPayAmount(String(sampahFee));
-  }, [payType, settings]);
+    if (payType === 'Both') setPayAmount('20000');
+    else setPayAmount('10000');
+  }, [payType]);
   const [editingHouseId, setEditingHouseId] = useState<string | null>(null);
   const [activeFormTab, setActiveFormTab] = useState<'basic' | 'demographics' | 'family'>('basic');
   
@@ -168,8 +128,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     childCount: 0,
     isPKH: false,
     isBLT: false,
+    isBPNT: false,
     isBansosLain: false,
     bansosLainName: '',
+    isDisability: false,
+    disabilityCount: 0,
+    isOrphan: false,
+    orphanCount: 0,
+    economicStatus: 'Sejahtera',
     religion: '',
     familyMembers: [] as { id?: string; name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     accessCode: ''
@@ -181,13 +147,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         try {
             const count = await generateAllAccessCodes(houses);
             if (count > 0) {
-              alert(`PIN berhasil di-generate untuk ${count} warga yang belum memiliki PIN.`);
+              toast.success(`PIN berhasil di-generate untuk ${count} warga yang belum memiliki PIN.`);
             } else {
-              alert('Semua data warga sudah memiliki PIN. Tidak ada PIN baru yang di-generate.');
+              toast.info('Semua data warga sudah memiliki PIN. Tidak ada PIN baru yang di-generate.');
             }
         } catch (e) {
             console.error(e);
-            alert('Gagal meng-generate PIN.');
+            toast.error('Gagal meng-generate PIN.');
         } finally {
             setIsGenerating(false);
         }
@@ -198,7 +164,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     if (window.confirm('Aksi ini akan mengubah status semua data dengan nama default "Warga [Blok]-[Nomor]" menjadi "Kosong" (Empty) dan mengosongkan detail data mereka. Lanjutkan?')) {
         const verification = window.prompt('Ketik "BERSIHKAN" untuk mengonfirmasi pembersihan data warga default:');
         if (verification !== 'BERSIHKAN') {
-            if (verification !== null) alert('Verifikasi gagal. Kata kunci tidak cocok.');
+            if (verification !== null) toast.error('Verifikasi gagal. Kata kunci tidak cocok.');
             return;
         }
         
@@ -221,15 +187,15 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     // Check for variations with spaces (e.g. "Warga C5 - 02")
                     const matchWithSpaces = h.headOfFamily.toLowerCase().replace(/\s+/g, '') === `warga${h.block}-${paddedNum}`.toLowerCase();
                     const matchWithSpacesUnpadded = h.headOfFamily.toLowerCase().replace(/\s+/g, '') === `warga${h.block}-${unpaddedNum}`.toLowerCase();
-
+ 
                     // Check for "Warga Blok [Block] No [Number]" pattern
                     const matchVerbose = h.headOfFamily.toLowerCase() === `warga blok ${h.block} no ${paddedNum}`.toLowerCase() ||
                                          h.headOfFamily.toLowerCase() === `warga blok ${h.block} no ${unpaddedNum}`.toLowerCase();
-
+ 
                     // Check for "Rumah [Block]-[Number]" pattern (from previous resets)
                     const matchRumah = h.headOfFamily.toLowerCase() === `rumah ${h.block}-${paddedNum}`.toLowerCase() ||
                                        h.headOfFamily.toLowerCase() === `rumah ${h.block}-${unpaddedNum}`.toLowerCase();
-
+ 
                     return exactMatch || caseInsensitiveMatch || matchPadded || matchUnpadded || matchWithSpaces || matchWithSpacesUnpadded || matchVerbose || matchRumah;
                 })
                 .map(h => ({
@@ -241,17 +207,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     familyMembers: [],
                     paymentStatus: PaymentStatus.UNPAID
                 }));
-
+ 
             if (updates.length === 0) {
-                alert('Tidak ada data warga default yang ditemukan.');
+                toast.info('Tidak ada data warga default yang ditemukan.');
                 return;
             }
-
+ 
             await batchUpdateHouses(updates);
-            alert(`Berhasil mereset ${updates.length} data rumah menjadi status Kosong.`);
+            toast.success(`Berhasil mereset ${updates.length} data rumah menjadi status Kosong.`);
         } catch (e) {
             console.error(e);
-            alert('Gagal melakukan cleanup data.');
+            toast.error('Gagal melakukan cleanup data.');
         } finally {
             setIsGenerating(false);
         }
@@ -336,7 +302,15 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 toddlerCount: houseData.toddlerCount || 0,
                 teenagerCount: houseData.teenagerCount || 0,
                 adultCount: houseData.adultCount || 0,
-                elderlyCount: houseData.elderlyCount || 0
+                elderlyCount: houseData.elderlyCount || 0,
+                childCount: houseData.childCount || 0,
+                widowCount: houseData.widowCount || 0,
+                isBPNT: houseData.isBPNT || false,
+                isDisability: houseData.isDisability || false,
+                disabilityCount: houseData.disabilityCount || 0,
+                isOrphan: houseData.isOrphan || false,
+                orphanCount: houseData.orphanCount || 0,
+                economicStatus: houseData.economicStatus || 'Sejahtera'
               });
             }
           } catch (err) {
@@ -357,10 +331,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             addedCount++;
         }
 
-        alert(`Upload selesai.\nData Baru Ditambahkan: ${addedCount}\nData Diperbarui: ${updatedCount}\nGagal/Format Salah: ${failCount}\nData Tidak Berubah: ${parsedData.length - addedCount - updatedCount - failCount}`);
+        toast.success(`Upload selesai.`, {
+          description: `Data Baru Ditambahkan: ${addedCount}\nData Diperbarui: ${updatedCount}\nGagal/Format Salah: ${failCount}\nData Tidak Berubah: ${parsedData.length - addedCount - updatedCount - failCount}`
+        });
       } catch (error) {
         console.error('Excel Parse Error:', error);
-        alert('Gagal memproses file Excel.');
+        toast.error('Gagal memproses file Excel.');
       } finally {
         setIsUploading(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -376,11 +352,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         try {
             const updates = Array.from(selectedIds).map(id => ({ id, isVerified: true }));
             await batchUpdateHouses(updates);
-            alert('Warga terpilih berhasil diverifikasi.');
+            toast.success('Warga terpilih berhasil diverifikasi.');
             setSelectedIds(new Set());
         } catch (e) {
             console.error(e);
-            alert('Gagal memverifikasi warga.');
+            toast.error('Gagal memverifikasi warga.');
         }
     }
   };
@@ -392,11 +368,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             for (const id of Array.from(selectedIds)) {
                 await deleteHouseFromDb(id);
             }
-            alert('Warga terpilih berhasil dihapus.');
+            toast.success('Warga terpilih berhasil dihapus.');
             setSelectedIds(new Set());
         } catch (e) {
             console.error(e);
-            alert('Gagal menghapus warga terpilih.');
+            toast.error('Gagal menghapus warga terpilih.');
         }
     }
   };
@@ -428,8 +404,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       childCount: 0,
       isPKH: false,
       isBLT: false,
+      isBPNT: false,
       isBansosLain: false,
       bansosLainName: '',
+      isDisability: false,
+      disabilityCount: 0,
+      isOrphan: false,
+      orphanCount: 0,
+      economicStatus: 'Sejahtera' as any,
       religion: '',
       familyMembers: [],
       accessCode: ''
@@ -456,7 +438,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     );
 
     if (duplicatePayment) {
-      alert(`Pembayaran iuran ${duplicatePayment.type === 'Both' ? 'Air & Sampah' : duplicatePayment.type} untuk bulan ${currentMonth} sudah tercatat pada tanggal ${new Date(duplicatePayment.date).toLocaleDateString('id-ID')}.`);
+      toast.error(`Pembayaran iuran ${duplicatePayment.type === 'Both' ? 'Air & Sampah' : duplicatePayment.type} untuk bulan ${currentMonth} sudah tercatat pada tanggal ${new Date(duplicatePayment.date).toLocaleDateString('id-ID')}.`);
       return;
     }
 
@@ -488,7 +470,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         type: payType,
         date: paymentDateIso,
         month: paymentMonth,
-        notes: payNotes
+        notes: payNotes,
+        payerName: payerName || payHouse.headOfFamily
       });
 
       // SYNC WITH BILLS COLLECTION
@@ -544,13 +527,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         });
       }
 
-      alert('Status iuran berhasil diperbarui dan dicatat di riwayat tagihan!');
+      toast.success('Status iuran berhasil diperbarui dan dicatat di riwayat tagihan!');
       setIsPayModalOpen(false);
       setPayHouse(null);
       setPayNotes('');
     } catch (error) {
       console.error(error);
-      alert('Gagal memperbarui status iuran.');
+      toast.error('Gagal memperbarui status iuran.');
     }
   };
 
@@ -564,22 +547,28 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         type: payType,
         date: new Date(payDate).toISOString(),
         month: getIndonesianMonthYear(new Date(payDate)),
-        notes: payNotes
+        notes: payNotes,
+        payerName: payerName || editingPayment.headOfFamily
       });
 
-      alert('Catatan pembayaran berhasil diperbarui!');
+      toast.success('Catatan pembayaran berhasil diperbarui!');
       setIsEditPaymentModalOpen(false);
       setEditingPayment(null);
       setPayNotes('');
     } catch (error) {
       console.error(error);
-      alert('Gagal memperbarui catatan pembayaran.');
+      toast.error('Gagal memperbarui catatan pembayaran.');
     }
   };
 
   const openPayModal = (house: House) => {
     setPayHouse(house);
-    setTargetMonth(getIndonesianMonthYear(new Date()));
+    const arrears = getArrearsForHouse(house);
+    if (arrears.length > 0) {
+      setTargetMonth(arrears[0]);
+    } else {
+      setTargetMonth(getIndonesianMonthYear(new Date()));
+    }
     setIsPayModalOpen(true);
   };
 
@@ -617,8 +606,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       childCount: house.childCount || 0,
       isPKH: house.isPKH || false,
       isBLT: house.isBLT || false,
+      isBPNT: house.isBPNT || false,
       isBansosLain: house.isBansosLain || false,
       bansosLainName: house.bansosLainName || '',
+      isDisability: house.isDisability || false,
+      disabilityCount: house.disabilityCount || 0,
+      isOrphan: house.isOrphan || false,
+      orphanCount: house.orphanCount || 0,
+      economicStatus: house.economicStatus || 'Sejahtera',
       religion: house.religion || '',
       familyMembers: (house.familyMembers || []).map(m => ({ ...m, id: m.id || Math.random().toString(36).substr(2, 9) })),
       accessCode: house.accessCode || ''
@@ -651,10 +646,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       }
       setIsModalOpen(false);
       resetForm();
-      alert('Data warga berhasil disimpan!');
+      toast.success('Data warga berhasil disimpan!');
     } catch (error) {
       console.error(error);
-      alert('Gagal menyimpan data warga.');
+      toast.error('Gagal menyimpan data warga.');
     }
   };
 
@@ -666,7 +661,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       h.block.toLowerCase().includes(searchLower) ||
       h.number.toLowerCase().includes(searchLower) ||
       (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) ||
-      (h.phone && h.phone.toLowerCase().includes(searchLower));
+      (h.phone && h.phone.toLowerCase().includes(searchLower)) ||
+      (h.familyMembers && h.familyMembers.some(m => m.name.toLowerCase().includes(searchLower)));
     
     const statusSampah = getPaymentStatus(h, 'Sampah');
     const statusAir = getPaymentStatus(h, 'Air');
@@ -709,10 +705,16 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data warga ini?')) {
-      await deleteHouseFromDb(id);
-      if (selectedResident?.id === id) {
-        setIsDrawerOpen(false);
-        setSelectedResident(null);
+      try {
+        await deleteHouseFromDb(id);
+        toast.success('Data warga dihapus.');
+        if (selectedResident?.id === id) {
+          setIsDrawerOpen(false);
+          setSelectedResident(null);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus data warga.');
       }
     }
   };
@@ -846,6 +848,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             onClose={() => {
               setIsPayModalOpen(false);
               setPayNotes('');
+              setPayerName('');
             }}
             payHouse={payHouse}
             payType={payType}
@@ -856,6 +859,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayDate={setPayDate}
             payNotes={payNotes}
             setPayNotes={setPayNotes}
+            payerName={payerName}
+            setPayerName={setPayerName}
             targetMonth={targetMonth}
             setTargetMonth={setTargetMonth}
             handleSavePayment={handleSavePayment}
@@ -871,6 +876,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             onClose={() => {
               setIsEditPaymentModalOpen(false);
               setPayNotes('');
+              setPayerName('');
             }}
             editingPayment={editingPayment}
             payType={payType}
@@ -881,6 +887,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayDate={setPayDate}
             payNotes={payNotes}
             setPayNotes={setPayNotes}
+            payerName={payerName}
+            setPayerName={setPayerName}
             handleUpdatePayment={handleUpdatePayment}
           />
         )}
@@ -907,6 +915,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         ) : viewMode === 'grid' ? (
           <ResidentGridView 
             filteredHouses={filteredHouses}
+            selectedMonth={selectedMonth}
             openDetail={openDetail}
             handleOpenEdit={handleOpenEdit}
             handleDelete={handleDelete}
@@ -916,6 +925,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         ) : viewMode === 'iuran' ? (
           <ResidentIuranManager 
             houses={houses}
+            searchTerm={searchTerm}
             generateIuranReceiptPDF={generateIuranReceiptPDF}
             pdfConfig={pdfConfig}
             deleteIuranPaymentFromDb={deleteIuranPaymentFromDb}
@@ -924,17 +934,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayAmount={setPayAmount}
             setPayDate={setPayDate}
             setPayNotes={setPayNotes}
+            setPayerName={setPayerName}
             setIsEditPaymentModalOpen={setIsEditPaymentModalOpen}
           />
         ) : viewMode === 'registrations' ? (
           <ResidentRegistrationList 
             residentRegistrations={residentRegistrations}
+            searchTerm={searchTerm}
             updateResidentRegistrationInDb={updateResidentRegistrationInDb}
             addHouse={addHouse}
           />
         ) : viewMode === 'table' ? (
           <ResidentTableView 
             filteredHouses={filteredHouses}
+            selectedMonth={selectedMonth}
             selectedIds={selectedIds}
             handleSelectAll={handleSelectAll}
             handleSelectOne={handleSelectOne}
@@ -967,6 +980,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
             selectedResident={selectedResident}
+            selectedMonth={selectedMonth}
             openPayModal={openPayModal}
             setSelectedHouseForBills={setSelectedHouseForBills}
             handleOpenEdit={handleOpenEdit}

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { 
   Home, FileText, Megaphone, AlertTriangle, User, Users, Menu, X, 
   LayoutDashboard, Send, Bot, Trash2, Clock, CheckCircle, XCircle, Search, Edit2, Plus,
@@ -18,7 +19,7 @@ const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } =
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration } from './types';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -44,6 +45,8 @@ import { PublicDocuments } from './components/public/PublicDocuments';
 import { PublicActivity } from './components/public/PublicActivity';
 import { PublicWasteBank } from './components/public/PublicWasteBank';
 import { PublicHealth } from './components/public/PublicHealth';
+import PublicForum from './components/public/PublicForum';
+import PublicDonations from './components/public/PublicDonations';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -59,6 +62,8 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToNotifications,
   subscribeToGallery,
   subscribeToDocuments,
+  subscribeToIdeas,
+  subscribeToDonationCampaigns,
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
@@ -104,7 +109,6 @@ import { subscribeToMapPoints, subscribeToCollection,
   updateBillInDb,
   deleteBillFromDb,
   subscribeToNews,
-  subscribeToSettings,
   addNewsToDb,
   updateNewsInDb,
   deleteNewsFromDb,
@@ -123,7 +127,8 @@ import { subscribeToMapPoints, subscribeToCollection,
   deleteFAQFromDb,
   addEventToDb,
   updateEventInDb,
-  deleteEventFromDb
+  deleteEventFromDb,
+  markNotificationAsRead
 } from './services/databaseService';
 
 // --- Shared Components ---
@@ -190,7 +195,9 @@ export const App = () => {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
-  const [settings, setSettings] = useState<any>({ airFee: 10000, sampahFee: 10000 });
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
+  const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -233,13 +240,14 @@ export const App = () => {
     });
     const unsubFAQ = subscribeToFAQ((data) => setFaqItems(data));
     const unsubEvents = subscribeToEvents((data) => setEvents(data));
-    const unsubSettings = subscribeToSettings((data) => setSettings(data));
+    const unsubIdeas = subscribeToIdeas((data) => setIdeas(data));
+    const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
 
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubSettings();
+      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations();
     };
   }, []);
 
@@ -252,6 +260,7 @@ export const App = () => {
 
   return (
     <HashRouter>
+        <Toaster position="top-right" richColors />
         {activeNotification && <NotificationToast notification={activeNotification} onClose={() => setActiveNotification(null)} />}
         <FinancialProvider 
             houses={houses}
@@ -295,6 +304,7 @@ export const App = () => {
                             guestReports={guestReports} 
                             inventoryLogs={inventoryLogs} 
                             auditLogs={auditLogs} 
+                            marketItems={marketItems}
                             faqItems={faqItems} 
                             settings={settings}
                         />
@@ -302,7 +312,7 @@ export const App = () => {
                 }/>
                 <Route path="*" element={
                     <>
-                        <PublicHeader notifications={notifications} onMarkRead={() => {}} />
+                        <PublicHeader notifications={notifications} onMarkRead={markNotificationAsRead} />
                         <div className="pb-24 md:pb-0">
                             <Routes>
                                 <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
@@ -317,6 +327,8 @@ export const App = () => {
                                 <Route path="/kegiatan" element={<PublicActivity />} />
                                 <Route path="/sampah" element={<PublicWasteBank houseId={localStorage.getItem('resident_house_id') || ''} houses={houses} />} />
                                 <Route path="/kesehatan" element={<PublicHealth />} />
+                                <Route path="/forum" element={<PublicForum ideas={ideas} houses={houses} />} />
+                                <Route path="/donasi" element={<PublicDonations campaigns={donationCampaigns} houses={houses} />} />
                             </Routes>
                         </div>
                         <ChatBot announcements={announcements} ronda={ronda} officials={officials} />

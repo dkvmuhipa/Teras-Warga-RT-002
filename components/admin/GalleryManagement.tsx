@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { addGalleryItemToDb, deleteGalleryItemFromDb, uploadImageToStorage } from '../../services/databaseService';
+import { toast } from 'sonner';
 
 interface GalleryManagementProps {
   gallery: GalleryItem[];
@@ -39,8 +40,10 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
         setTitle('');
         setImageFile(null);
         setImageUrl('');
+        toast.success('Foto berhasil ditambahkan ke galeri!');
     } catch (e) {
         console.error("Error adding gallery item:", e);
+        toast.error('Gagal menambahkan foto ke galeri.');
     } finally {
         setIsUploading(false);
     }
@@ -48,7 +51,13 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Hapus foto ini dari galeri?')) {
-      await deleteGalleryItemFromDb(id);
+      try {
+        await deleteGalleryItemFromDb(id);
+        toast.success('Foto berhasil dihapus dari galeri.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus foto.');
+      }
     }
   };
 

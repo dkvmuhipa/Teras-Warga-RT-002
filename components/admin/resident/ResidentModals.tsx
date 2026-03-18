@@ -6,7 +6,7 @@ import {
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
   CreditCard, AlertCircle, Calendar
 } from 'lucide-react';
-import { House } from '../../../types';
+import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 
 interface AddEditResidentModalProps {
@@ -236,6 +236,14 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           <option value="Konghucu">Konghucu</option>
                         </select>
                       </div>
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Ekonomi</label>
+                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.economicStatus} onChange={e => setFormData({...formData, economicStatus: e.target.value as any})}>
+                          <option value="Pra-Sejahtera">Pra-Sejahtera</option>
+                          <option value="Sejahtera">Sejahtera</option>
+                          <option value="Mampu">Mampu</option>
+                        </select>
+                      </div>
                       <div className="sm:col-span-2">
                         <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Kendaraan</label>
                         <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.vehicleCount} onChange={e => setFormData({...formData, vehicleCount: parseInt(e.target.value) || 0})} min={0} />
@@ -274,6 +282,18 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         <div className="flex flex-col">
                           <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Bantuan Langsung Tunai (BLT)</span>
                           <span className="text-[10px] text-slate-400 font-bold">Bantuan tunai langsung dari pemerintah</span>
+                        </div>
+                      </label>
+                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
+                        <input 
+                          type="checkbox" 
+                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          checked={formData.isBPNT}
+                          onChange={e => setFormData({...formData, isBPNT: e.target.checked})}
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Bantuan Pangan Non-Tunai (BPNT)</span>
+                          <span className="text-[10px] text-slate-400 font-bold">Bantuan pangan non-tunai (Sembako)</span>
                         </div>
                       </label>
                       <div className="space-y-4">
@@ -315,7 +335,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     </div>
                     Rincian Kelompok Rentan
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6 mb-8">
                     {[
                       { label: 'Hamil', key: 'pregnantCount' },
                       { label: 'Bayi', key: 'babyCount' },
@@ -337,6 +357,50 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         />
                       </div>
                     ))}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-100">
+                    <div className="space-y-4">
+                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
+                        <input 
+                          type="checkbox" 
+                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          checked={formData.isDisability}
+                          onChange={e => setFormData({...formData, isDisability: e.target.checked})}
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Penyandang Disabilitas</span>
+                          <span className="text-[10px] text-slate-400 font-bold">Centang jika ada anggota keluarga disabilitas</span>
+                        </div>
+                      </label>
+                      {formData.isDisability && (
+                        <div className="pl-14">
+                          <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Jiwa Disabilitas</label>
+                          <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.disabilityCount} onChange={e => setFormData({...formData, disabilityCount: parseInt(e.target.value) || 0})} min={1} />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
+                        <input 
+                          type="checkbox" 
+                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          checked={formData.isOrphan}
+                          onChange={e => setFormData({...formData, isOrphan: e.target.checked})}
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Anak Yatim / Piatu</span>
+                          <span className="text-[10px] text-slate-400 font-bold">Centang jika ada anggota keluarga yatim/piatu</span>
+                        </div>
+                      </label>
+                      {formData.isOrphan && (
+                        <div className="pl-14">
+                          <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Jiwa Yatim/Piatu</label>
+                          <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.orphanCount} onChange={e => setFormData({...formData, orphanCount: parseInt(e.target.value) || 0})} min={1} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -551,6 +615,8 @@ interface PaymentModalProps {
   setTargetMonth: (month: string) => void;
   payNotes: string;
   setPayNotes: (notes: string) => void;
+  payerName: string;
+  setPayerName: (name: string) => void;
   handleSavePayment: (e: React.FormEvent) => void;
   getIndonesianMonthYear: (date: Date) => string;
 }
@@ -569,10 +635,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   setTargetMonth,
   payNotes,
   setPayNotes,
+  payerName,
+  setPayerName,
   handleSavePayment,
   getIndonesianMonthYear
 }) => {
-  const { getArrearsForHouse } = useFinancial();
+  const { getArrearsForHouse, getPaymentStatus } = useFinancial();
   if (!payHouse) return null;
 
   const arrears = getArrearsForHouse(payHouse);
@@ -631,27 +699,36 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               <div className="p-3 bg-white rounded-2xl border border-indigo-100 text-indigo-600 shadow-sm">
                 <Calendar size={20} />
               </div>
-              <select 
-                className="flex-1 bg-transparent py-1 text-sm font-black text-indigo-600 outline-none cursor-pointer"
-                value={targetMonth}
-                onChange={e => setTargetMonth(e.target.value)}
-              >
-                {Array.from({ length: 12 }).map((_, i) => {
-                  const d = new Date();
-                  // Show current month and 11 previous months
-                  d.setMonth(d.getMonth() - i);
-                  
-                  if (payHouse.joiningDate) {
-                    const joinDate = new Date(payHouse.joiningDate);
-                    if (d.getFullYear() < joinDate.getFullYear() || (d.getFullYear() === joinDate.getFullYear() && d.getMonth() < joinDate.getMonth())) {
-                      return null;
-                    }
-                  }
-
-                  const m = getIndonesianMonthYear(d);
-                  return <option key={m} value={m}>{m}</option>;
-                })}
-              </select>
+              <div className="flex-1">
+                <select 
+                  className="w-full bg-transparent py-1 text-sm font-black text-indigo-600 outline-none cursor-pointer"
+                  value={targetMonth}
+                  onChange={e => setTargetMonth(e.target.value)}
+                >
+                  {Array.from({ length: 36 }).map((_, i) => {
+                    const d = new Date();
+                    // Show 12 months forward and 23 months back
+                    d.setMonth(d.getMonth() + 12 - i);
+                    
+                    const m = getIndonesianMonthYear(d);
+                    return <option key={m} value={m}>{m}</option>;
+                  })}
+                </select>
+                <div className="flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-1">
+                    <div className={`w-1.5 h-1.5 rounded-full ${
+                      getPaymentStatus(payHouse, 'Air', targetMonth) === PaymentStatus.PAID ? 'bg-blue-500' : 'bg-rose-500'
+                    }`}></div>
+                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Air</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className={`w-1.5 h-1.5 rounded-full ${
+                      getPaymentStatus(payHouse, 'Sampah', targetMonth) === PaymentStatus.PAID ? 'bg-emerald-500' : 'bg-rose-500'
+                    }`}></div>
+                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Sampah</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -712,6 +789,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           </div>
 
           <div>
+            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nama Pembayar (Jika Berbeda)</label>
+            <input 
+              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+              value={payerName}
+              onChange={e => setPayerName(e.target.value)}
+              placeholder={`Default: ${payHouse.headOfFamily}`}
+            />
+          </div>
+
+          <div>
             <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Catatan Tambahan (Opsional)</label>
             <textarea 
               className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm min-h-[80px]"
@@ -748,6 +835,8 @@ interface EditPaymentModalProps {
   setPayDate: (date: string) => void;
   payNotes: string;
   setPayNotes: (notes: string) => void;
+  payerName: string;
+  setPayerName: (name: string) => void;
   handleUpdatePayment: (e: React.FormEvent) => void;
 }
 
@@ -763,6 +852,8 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
   setPayDate,
   payNotes,
   setPayNotes,
+  payerName,
+  setPayerName,
   handleUpdatePayment
 }) => {
   if (!editingPayment) return null;
@@ -831,6 +922,16 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
                 Hari Ini
               </button>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nama Pembayar</label>
+            <input 
+              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+              value={payerName}
+              onChange={e => setPayerName(e.target.value)}
+              placeholder={`Default: ${editingPayment.headOfFamily}`}
+            />
           </div>
 
           <div>

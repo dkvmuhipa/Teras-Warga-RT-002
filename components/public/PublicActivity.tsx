@@ -3,6 +3,7 @@ import { Calendar, MapPin, Users, CheckCircle, QrCode, ArrowLeft, Clock, Info, A
 import { Activity, Attendance, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { toast } from 'sonner';
 import { 
   subscribeToActivities, 
   addAttendanceToDb,
@@ -52,7 +53,7 @@ export const PublicActivity: React.FC = () => {
       const scannedId = result.getText();
       if (scannedId === selectedActivity.id) {
         if (!residentForm.name || !residentForm.houseId) {
-          alert("Mohon isi nama dan blok rumah terlebih dahulu!");
+          toast.error("Mohon isi nama dan blok rumah terlebih dahulu!");
           setIsScanModalOpen(false);
           return;
         }
@@ -67,7 +68,7 @@ export const PublicActivity: React.FC = () => {
         );
 
         if (isDuplicate) {
-          alert("Anda atau rumah Anda sudah tercatat hadir dalam kegiatan ini!");
+          toast.warning("Anda atau rumah Anda sudah tercatat hadir dalam kegiatan ini!");
           setIsScanModalOpen(false);
           return;
         }
@@ -83,10 +84,10 @@ export const PublicActivity: React.FC = () => {
           setIsSuccessModalOpen(true);
         } catch (error) {
           console.error(error);
-          alert("Gagal mencatat kehadiran.");
+          toast.error("Gagal mencatat kehadiran.");
         }
       } else {
-        alert("QR Code tidak cocok dengan kegiatan ini!");
+        toast.error("QR Code tidak cocok dengan kegiatan ini!");
       }
     }
   };

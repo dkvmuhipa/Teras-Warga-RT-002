@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign } from 'lucide-react';
+import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
-import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint } from '../../types';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus } from '../../types';
 import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -10,6 +11,7 @@ import { PublicRules } from './PublicRules';
 import { motion } from 'motion/react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useFinancial } from '../../context/FinancialContext';
+import { toast } from 'sonner';
 
 interface PublicInfoProps {
   officials: Official[];
@@ -25,7 +27,7 @@ interface PublicInfoProps {
 }
 
 export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, houses, announcements, galleryItems, faqItems, activePatrol }) => {
-    const { summaries, getPaymentStatus } = useFinancial();
+    const { summaries, getPaymentStatus, selectedMonth, setSelectedMonth } = useFinancial();
     const [searchParams] = useSearchParams();
     const initialSearch = searchParams.get('search');
 
@@ -66,6 +68,39 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         return logDate >= thirtyDaysAgo;
     }).length;
+
+    const getIndonesianMonthYear = (date: Date) => {
+        const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        return `${monthsId[date.getMonth()]} ${date.getFullYear()}`;
+    };
+
+    // Financial Chart Data
+    const expenseCategories = cashFlow
+        .filter(c => c.type === 'Expense')
+        .reduce((acc: any, curr) => {
+            const cat = curr.category || 'Lainnya';
+            acc[cat] = (acc[cat] || 0) + curr.amount;
+            return acc;
+        }, {});
+
+    const pieData = Object.keys(expenseCategories).map(name => ({
+        name,
+        value: expenseCategories[name]
+    }));
+
+    const COLORS = ['#6366f1', '#f43f5e', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
+
+    // Monthly Trend Data
+    const monthlyTrend = cashFlow.reduce((acc: any, curr) => {
+        const date = new Date(curr.date);
+        const month = date.toLocaleString('id-ID', { month: 'short' });
+        if (!acc[month]) acc[month] = { month, income: 0, expense: 0 };
+        if (curr.type === 'Income') acc[month].income += curr.amount;
+        else acc[month].expense += curr.amount;
+        return acc;
+    }, {});
+
+    const trendData = Object.values(monthlyTrend);
 
     const upcomingEvents = announcements
         .filter(a => a.type === 'Event' && new Date(a.date) >= new Date())
@@ -128,20 +163,26 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     // useEffect for activePatrol removed as it is now passed as prop
 
     const handleStartPatrol = async () => {
-        if (!checkOfficer) { alert("Nama petugas wajib diisi!"); return; }
-        if (!checkPin) { alert("PIN wajib diisi!"); return; }
+        if (!checkOfficer) { 
+            toast.error("Nama petugas wajib diisi!"); 
+            return; 
+        }
+        if (!checkPin) { 
+            toast.error("PIN wajib diisi!"); 
+            return; 
+        }
         
         // Find house/resident by name to verify PIN
         // In a real app, this would be a secure backend check
         const resident = houses.find(h => h.headOfFamily.toLowerCase() === checkOfficer.toLowerCase());
         
         if (!resident) {
-            alert("Nama petugas tidak ditemukan dalam data warga.");
+            toast.error("Nama petugas tidak ditemukan dalam data warga.");
             return;
         }
 
         if (resident.accessCode !== checkPin) {
-            alert("PIN salah! Silakan coba lagi.");
+            toast.error("PIN salah! Silakan coba lagi.");
             return;
         }
 
@@ -153,7 +194,9 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     const handleFinishPatrol = async () => {
         if (!activePatrol) return;
         if (activePatrol.visitedCheckpoints.length < checkpoints.length) {
-            alert("Patroli belum selesai! Kunjungi semua titik.");
+            toast.warning("Patroli belum selesai!", {
+                description: "Kunjungi semua titik sebelum menyelesaikan patroli."
+            });
             return;
         }
         await finishPatrolSession(activePatrol.id);
@@ -161,7 +204,10 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     };
     
     const handleCheckSubmit = async (type: 'Start' | 'End' | 'Report', status: 'Aman' | 'Mencurigakan' | 'Insiden', note?: string) => {
-        if (!checkOfficer || !checkLocation) { alert("Nama petugas dan lokasi wajib diisi!"); return; }
+        if (!checkOfficer || !checkLocation) { 
+            toast.error("Nama petugas dan lokasi wajib diisi!"); 
+            return; 
+        }
         
         const photoUrl = (window as any).tempPhoto;
         (window as any).tempPhoto = null; // Clear temp storage
@@ -176,7 +222,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
             photoUrl
         };
         await addRondaLog(newLog);
-        alert(`Laporan patroli (${type} - ${status}) tercatat!`);
+        toast.success(`Laporan patroli (${type} - ${status}) tercatat!`);
         setIsCheckModalOpen(false);
         setCheckLocation('');
     };
@@ -184,7 +230,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
     const handleSwapSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!swapRequester || !swapHouseId || !swapFromDay || !swapToDay) {
-            alert("Mohon lengkapi semua data permintaan!");
+            toast.error("Mohon lengkapi semua data permintaan!");
             return;
         }
 
@@ -199,7 +245,9 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 status: 'Pending',
                 timestamp: new Date().toISOString()
             });
-            alert("Permintaan tukar jadwal berhasil dikirim! Admin akan segera meninjau.");
+            toast.success("Permintaan tukar jadwal berhasil dikirim!", {
+                description: "Admin akan segera meninjau permintaan Anda."
+            });
             setIsSwapModalOpen(false);
             setSwapRequester('');
             setSwapHouseId('');
@@ -208,7 +256,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
             setSwapReason('');
         } catch (error) {
             console.error("Error submitting swap request:", error);
-            alert("Gagal mengirim permintaan. Silakan coba lagi.");
+            toast.error("Gagal mengirim permintaan. Silakan coba lagi.");
         } finally {
             setIsSubmittingSwap(false);
         }
@@ -220,7 +268,9 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
         if (house) {
             setFoundHouse(house);
         } else {
-            alert("No. Rumah tidak ditemukan. Pastikan format benar (Contoh: A1-01)");
+            toast.error("No. Rumah tidak ditemukan.", {
+                description: "Pastikan format benar (Contoh: A1-01)"
+            });
             setFoundHouse(null);
         }
     };
@@ -404,6 +454,212 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
                     </div>
                 </Link>
+
+                <Link to="/forum" className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <MessageSquare size={120} />
+                    </div>
+                    <div className="relative z-10 flex items-center gap-6">
+                        <div className="p-4 bg-amber-50 text-amber-600 rounded-3xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                            <Lightbulb size={32} />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-slate-800 mb-1">Musyawarah Digital</h3>
+                            <p className="text-slate-500 text-sm font-medium">Sampaikan ide, usulan, dan aspirasi Anda untuk kemajuan RT 02 secara terbuka.</p>
+                        </div>
+                    </div>
+                </Link>
+
+                <Link to="/donasi" className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <DollarSign size={120} />
+                    </div>
+                    <div className="relative z-10 flex items-center gap-6">
+                        <div className="p-4 bg-emerald-50 text-emerald-600 rounded-3xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                            <Heart size={32} />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-slate-800 mb-1">Donasi Sosial</h3>
+                            <p className="text-slate-500 text-sm font-medium">Salurkan bantuan sosial, kas kematian, dan donasi darurat untuk warga yang membutuhkan.</p>
+                        </div>
+                    </div>
+                </Link>
+            </motion.div>
+
+            {/* Bansos & Vulnerable Groups Section */}
+            <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
+                            <div className="p-2 bg-rose-50 text-rose-600 rounded-xl"><Users size={24}/></div>
+                            Manajemen Bansos & Kelompok Rentan
+                        </h2>
+                        <p className="text-slate-500 font-medium">Informasi penerima bantuan dan perlindungan warga rentan</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><ShieldCheck size={20}/></div>
+                            <h3 className="font-black text-slate-800">Penerima Bansos</h3>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">PKH (Program Keluarga Harapan)</span>
+                                <span className="font-bold text-slate-800">{houses.filter(h => h.isPKH).length} KK</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">BLT (Bantuan Langsung Tunai)</span>
+                                <span className="font-bold text-slate-800">{houses.filter(h => h.isBLT).length} KK</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Bantuan Pangan Non-Tunai</span>
+                                <span className="font-bold text-slate-800">{houses.filter(h => h.isBPNT).length} KK</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-rose-100 text-rose-600 rounded-lg"><Heart size={20}/></div>
+                            <h3 className="font-black text-slate-800">Kelompok Rentan</h3>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Lansia (60+ Tahun)</span>
+                                <span className="font-bold text-slate-800">{houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0)} Jiwa</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Penyandang Disabilitas</span>
+                                <span className="font-bold text-slate-800">{houses.reduce((acc, h) => acc + (h.disabilityCount || 0), 0)} Jiwa</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Anak Yatim/Piatu</span>
+                                <span className="font-bold text-slate-800">{houses.reduce((acc, h) => acc + (h.orphanCount || 0), 0)} Jiwa</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg"><Target size={20}/></div>
+                            <h3 className="font-black text-slate-800">Status Ekonomi</h3>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Keluarga Pra-Sejahtera</span>
+                                <span className="font-bold text-slate-800">{houses.filter(h => h.economicStatus === 'Pra-Sejahtera').length} KK</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Keluarga Sejahtera</span>
+                                <span className="font-bold text-slate-800">{houses.filter(h => h.economicStatus === 'Sejahtera').length} KK</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Keluarga Mampu</span>
+                                <span className="font-bold text-slate-800">{houses.filter(h => h.economicStatus === 'Mampu').length} KK</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-8 p-6 bg-indigo-50 rounded-3xl border border-indigo-100 flex flex-col md:flex-row items-center gap-6">
+                    <div className="p-4 bg-white text-indigo-600 rounded-2xl shadow-sm">
+                        <AlertCircle size={32} />
+                    </div>
+                    <div>
+                        <h4 className="font-black text-slate-800 mb-1">Butuh Bantuan atau Ingin Melapor?</h4>
+                        <p className="text-slate-600 text-sm">Jika Anda atau tetangga Anda membutuhkan bantuan sosial darurat atau belum terdata, silakan hubungi pengurus RT melalui fitur Lapor.</p>
+                    </div>
+                    <Link to="/lapor" className="ml-auto px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                        Lapor Sekarang
+                    </Link>
+                </div>
+            </motion.div>
+
+            {/* Financial Report */}
+            <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
+                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><TrendingUp size={24}/></div>
+                            Transparansi Keuangan
+                        </h2>
+                        <p className="text-slate-500 font-medium">Visualisasi alokasi dana dan tren kas RT 02</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+                        <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Alokasi Pengeluaran</h3>
+                        <div className="h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={pieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {pieData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip 
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        formatter={(value: number) => `Rp ${value.toLocaleString()}`}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 mt-4">
+                            {pieData.map((entry, index) => (
+                                <div key={entry.name} className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                                    <span className="text-[10px] font-bold text-slate-600 truncate">{entry.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+                        <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Tren Arus Kas Bulanan</h3>
+                        <div className="h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={trendData}>
+                                    <defs>
+                                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} tickFormatter={(value) => `Rp ${value/1000}k`} />
+                                    <Tooltip 
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        formatter={(value: number) => `Rp ${value.toLocaleString()}`}
+                                    />
+                                    <Area type="monotone" dataKey="income" stroke="#6366f1" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={3} />
+                                    <Area type="monotone" dataKey="expense" stroke="#f43f5e" fillOpacity={0} strokeWidth={3} strokeDasharray="5 5" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="flex justify-center gap-6 mt-4">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
+                                <span className="text-[10px] font-bold text-slate-600">Pemasukan</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-rose-500"></div>
+                                <span className="text-[10px] font-bold text-slate-600">Pengeluaran</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </motion.div>
 
             {/* Gallery */}
@@ -1069,9 +1325,11 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                                             const checkpoint = checkpoints.find(cp => cp.qrCode === result.getText());
                                             if (checkpoint) {
                                                 visitCheckpoint(activePatrol.id, checkpoint.id);
-                                                alert("Titik tercapai: " + checkpoint.name);
+                                                toast.success("Titik tercapai!", {
+                                                    description: checkpoint.name
+                                                });
                                             } else {
-                                                alert("QR tidak valid!");
+                                                toast.error("QR tidak valid!");
                                             }
                                         }
                                     }}
@@ -1266,20 +1524,68 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                         </div>
                     </div>
 
+                    <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border border-slate-100 rounded-[2rem]">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white text-indigo-600 rounded-xl shadow-sm">
+                                <Calendar size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Bulan Tagihan</p>
+                                <select 
+                                    className="bg-transparent text-sm font-black text-indigo-600 outline-none cursor-pointer"
+                                    value={selectedMonth}
+                                    onChange={e => setSelectedMonth(e.target.value)}
+                                >
+                                    {Array.from({ length: 36 }).map((_, i) => {
+                                        const d = new Date();
+                                        // Show 12 months forward and 23 months back
+                                        d.setMonth(d.getMonth() + 12 - i);
+                                        const m = getIndonesianMonthYear(d);
+                                        return <option key={m} value={m}>{m}</option>;
+                                    })}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="space-y-3">
                         {[
-                            { label: 'Iuran Air', status: foundHouse ? getPaymentStatus(foundHouse, 'Air') : 'Belum Lunas' },
-                            { label: 'Iuran Sampah', status: foundHouse ? getPaymentStatus(foundHouse, 'Sampah') : 'Belum Lunas' },
+                            { label: 'Iuran Air', status: foundHouse ? getPaymentStatus(foundHouse, 'Air') : PaymentStatus.PENDING },
+                            { label: 'Iuran Sampah', status: foundHouse ? getPaymentStatus(foundHouse, 'Sampah') : PaymentStatus.PENDING },
                         ].map((item, i) => (
                             <div key={i} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                                 <span className="text-sm font-bold text-slate-700">{item.label}</span>
                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                                    item.status === 'Lunas' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
+                                    item.status === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
                                 }`}>
                                     {item.status}
                                 </span>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Riwayat 6 Bulan Terakhir</p>
+                        <div className="grid grid-cols-3 gap-2">
+                            {Array.from({ length: 6 }).map((_, i) => {
+                                const d = new Date();
+                                d.setMonth(d.getMonth() - i);
+                                const m = getIndonesianMonthYear(d);
+                                const isPaid = foundHouse && 
+                                               getPaymentStatus(foundHouse, 'Air', m) === PaymentStatus.PAID && 
+                                               getPaymentStatus(foundHouse, 'Sampah', m) === PaymentStatus.PAID;
+                                return (
+                                    <div key={m} className={`p-2 rounded-xl border text-center ${
+                                        isPaid ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'
+                                    }`}>
+                                        <p className="text-[8px] font-black text-slate-400 uppercase truncate">{m.split(' ')[0]}</p>
+                                        <div className={`mt-1 flex justify-center ${isPaid ? 'text-emerald-500' : 'text-slate-300'}`}>
+                                            {isPaid ? <CheckCircle size={12} /> : <X size={12} />}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">

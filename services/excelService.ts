@@ -40,8 +40,16 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
     { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
     { header: 'JUMLAH REMAJA', key: 'teenagerCount', width: 25 },
+    { header: 'JUMLAH DEWASA', key: 'adultCount', width: 25 },
     { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
+    { header: 'JUMLAH ANAK', key: 'childCount', width: 25 },
     { header: 'JUMLAH JANDA', key: 'widowCount', width: 25 },
+    { header: 'STATUS EKONOMI (Pra-Sejahtera/Sejahtera/Mampu)', key: 'economicStatus', width: 35 },
+    { header: 'PENERIMA BPNT (Ya/Tidak)', key: 'isBPNT', width: 25 },
+    { header: 'DISABILITAS (Ya/Tidak)', key: 'isDisability', width: 25 },
+    { header: 'JUMLAH DISABILITAS', key: 'disabilityCount', width: 25 },
+    { header: 'YATIM/PIATU (Ya/Tidak)', key: 'isOrphan', width: 25 },
+    { header: 'JUMLAH YATIM/PIATU', key: 'orphanCount', width: 25 },
     { header: 'STATUS IURAN AIR', key: 'paymentStatusAir', width: 25 },
     { header: 'STATUS IURAN SAMPAH', key: 'paymentStatusSampah', width: 25 },
     { header: 'STATUS IURAN KEAMANAN', key: 'paymentStatusKeamanan', width: 25 },
@@ -94,8 +102,16 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       babyCount: house.babyCount || 0,
       toddlerCount: house.toddlerCount || 0,
       teenagerCount: house.teenagerCount || 0,
+      adultCount: house.adultCount || 0,
       elderlyCount: house.elderlyCount || 0,
+      childCount: house.childCount || 0,
       widowCount: house.widowCount || 0,
+      economicStatus: house.economicStatus || 'Sejahtera',
+      isBPNT: house.isBPNT ? 'Ya' : 'Tidak',
+      isDisability: house.isDisability ? 'Ya' : 'Tidak',
+      disabilityCount: house.disabilityCount || 0,
+      isOrphan: house.isOrphan ? 'Ya' : 'Tidak',
+      orphanCount: house.orphanCount || 0,
       paymentStatusAir: house.paymentStatusAir || PaymentStatus.UNPAID,
       paymentStatusSampah: house.paymentStatusSampah || PaymentStatus.UNPAID,
       paymentStatusKeamanan: house.paymentStatusKeamanan || '-',
@@ -265,8 +281,16 @@ export const generateExcelTemplate = async () => {
     { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
     { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
     { header: 'JUMLAH REMAJA', key: 'teenagerCount', width: 25 },
+    { header: 'JUMLAH DEWASA', key: 'adultCount', width: 25 },
     { header: 'JUMLAH LANSIA', key: 'elderlyCount', width: 25 },
+    { header: 'JUMLAH ANAK', key: 'childCount', width: 25 },
     { header: 'JUMLAH JANDA', key: 'widowCount', width: 25 },
+    { header: 'STATUS EKONOMI (Pra-Sejahtera/Sejahtera/Mampu)', key: 'economicStatus', width: 40 },
+    { header: 'PENERIMA BPNT (Ya/Tidak)', key: 'isBPNT', width: 25 },
+    { header: 'DISABILITAS (Ya/Tidak)', key: 'isDisability', width: 25 },
+    { header: 'JUMLAH DISABILITAS', key: 'disabilityCount', width: 25 },
+    { header: 'YATIM/PIATU (Ya/Tidak)', key: 'isOrphan', width: 25 },
+    { header: 'JUMLAH YATIM/PIATU', key: 'orphanCount', width: 25 },
     { header: 'STATUS IURAN AIR (Lunas/Belum Lunas)', key: 'paymentStatusAir', width: 35 },
     { header: 'STATUS IURAN SAMPAH (Lunas/Belum Lunas)', key: 'paymentStatusSampah', width: 35 },
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
@@ -305,8 +329,16 @@ export const generateExcelTemplate = async () => {
     babyCount: 0,
     toddlerCount: 1,
     teenagerCount: 1,
+    adultCount: 2,
     elderlyCount: 0,
+    childCount: 0,
     widowCount: 0,
+    economicStatus: 'Sejahtera',
+    isBPNT: 'Tidak',
+    isDisability: 'Tidak',
+    disabilityCount: 0,
+    isOrphan: 'Tidak',
+    orphanCount: 0,
     paymentStatusAir: 'Lunas',
     paymentStatusSampah: 'Belum Lunas',
     accessCode: '123456',
@@ -372,11 +404,19 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     const babyCountRaw = row.getCell(16 + offset).value;
     const toddlerCountRaw = row.getCell(17 + offset).value;
     const teenagerCountRaw = row.getCell(18 + offset).value;
-    const elderlyCountRaw = row.getCell(19 + offset).value;
-    const widowCountRaw = row.getCell(20 + offset).value;
-    const paymentStatusAirRaw = row.getCell(21 + offset).text?.trim() || undefined;
-    const paymentStatusSampahRaw = row.getCell(22 + offset).text?.trim() || undefined;
-    const accessCode = row.getCell(23 + offset).text?.trim() || undefined;
+    const adultCountRaw = row.getCell(19 + offset).value;
+    const elderlyCountRaw = row.getCell(20 + offset).value;
+    const childCountRaw = row.getCell(21 + offset).value;
+    const widowCountRaw = row.getCell(22 + offset).value;
+    const economicStatus = row.getCell(23 + offset).text?.trim() || undefined;
+    const isBPNTRaw = row.getCell(24 + offset).text?.trim() || undefined;
+    const isDisabilityRaw = row.getCell(25 + offset).text?.trim() || undefined;
+    const disabilityCountRaw = row.getCell(26 + offset).value;
+    const isOrphanRaw = row.getCell(27 + offset).text?.trim() || undefined;
+    const orphanCountRaw = row.getCell(28 + offset).value;
+    const paymentStatusAirRaw = row.getCell(29 + offset).text?.trim() || undefined;
+    const paymentStatusSampahRaw = row.getCell(30 + offset).text?.trim() || undefined;
+    const accessCode = row.getCell(31 + offset).text?.trim() || undefined;
 
     // Map gender
     let gender: 'Laki-laki' | 'Perempuan' | undefined = undefined;
@@ -424,8 +464,16 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       ...(babyCountRaw !== null && babyCountRaw !== undefined && babyCountRaw !== '' && { babyCount: Number(babyCountRaw) }),
       ...(toddlerCountRaw !== null && toddlerCountRaw !== undefined && toddlerCountRaw !== '' && { toddlerCount: Number(toddlerCountRaw) }),
       ...(teenagerCountRaw !== null && teenagerCountRaw !== undefined && teenagerCountRaw !== '' && { teenagerCount: Number(teenagerCountRaw) }),
+      ...(adultCountRaw !== null && adultCountRaw !== undefined && adultCountRaw !== '' && { adultCount: Number(adultCountRaw) }),
       ...(elderlyCountRaw !== null && elderlyCountRaw !== undefined && elderlyCountRaw !== '' && { elderlyCount: Number(elderlyCountRaw) }),
+      ...(childCountRaw !== null && childCountRaw !== undefined && childCountRaw !== '' && { childCount: Number(childCountRaw) }),
       ...(widowCountRaw !== null && widowCountRaw !== undefined && widowCountRaw !== '' && { widowCount: Number(widowCountRaw) }),
+      ...(economicStatus !== undefined && { economicStatus: economicStatus as any }),
+      ...(isBPNTRaw !== undefined && { isBPNT: isBPNTRaw.toLowerCase() === 'ya' }),
+      ...(isDisabilityRaw !== undefined && { isDisability: isDisabilityRaw.toLowerCase() === 'ya' }),
+      ...(disabilityCountRaw !== null && disabilityCountRaw !== undefined && disabilityCountRaw !== '' && { disabilityCount: Number(disabilityCountRaw) }),
+      ...(isOrphanRaw !== undefined && { isOrphan: isOrphanRaw.toLowerCase() === 'ya' }),
+      ...(orphanCountRaw !== null && orphanCountRaw !== undefined && orphanCountRaw !== '' && { orphanCount: Number(orphanCountRaw) }),
       ...(paymentStatusAir !== undefined && { paymentStatusAir }),
       ...(paymentStatusSampah !== undefined && { paymentStatusSampah }),
       ...(accessCode !== undefined && { accessCode })

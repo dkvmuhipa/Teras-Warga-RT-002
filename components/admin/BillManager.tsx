@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { FileText, AlertCircle, CheckCircle2, Plus, Trash2, Calendar, User, DollarSign, ArrowRight, Search, Filter, MoreVertical, Download, X, List } from 'lucide-react';
+import { FileText, AlertCircle, CheckCircle2, Plus, Trash2, Calendar, User, DollarSign, ArrowRight, Search, Filter, MoreVertical, Download, X, List, RefreshCw } from 'lucide-react';
 import { Bill, House, BillItem } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { addBillToDb, updateBillInDb, deleteBillFromDb } from '../../services/databaseService';
+import { addBillToDb, updateBillInDb, deleteBillFromDb, generateMonthlyBills } from '../../services/databaseService';
+import { toast } from 'sonner';
 
 interface BillManagerProps {
   bills: Bill[];
@@ -26,6 +27,7 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
     { name: 'Iuran Keamanan', amount: 25000, manager: 'Koord. Keamanan', status: 'Unpaid' },
     { name: 'Iuran Kebersihan', amount: 15000, manager: 'Petugas Kebersihan', status: 'Unpaid' }
   ]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const isLate = (dueDateStr: string) => {
     const due = new Date(dueDateStr);
@@ -63,6 +65,7 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
     try {
       await addBillToDb(newBill);
       setIsModalOpen(false);
+      toast.success("Tagihan berhasil dibuat");
       // Reset form
       setSelectedHouseId('');
       setBillItems([
@@ -71,13 +74,43 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
       ]);
     } catch (error) {
       console.error("Error adding bill:", error);
-      alert("Gagal menambahkan tagihan.");
+      toast.error("Gagal menambahkan tagihan.");
+    }
+  };
+
+  const handleGenerateMonthlyBills = async () => {
+    if (!confirm("Generate tagihan otomatis untuk semua rumah yang terisi?")) return;
+    
+    setIsGenerating(true);
+    const month = new Date().toISOString().slice(0, 7);
+    const dueDate = new Date();
+    dueDate.setDate(20);
+    const dueDateStr = dueDate.toISOString().slice(0, 10);
+    
+    const defaultItems = [
+      { name: 'Iuran Keamanan', amount: 25000, manager: 'Koord. Keamanan' },
+      { name: 'Iuran Kebersihan', amount: 15000, manager: 'Petugas Kebersihan' }
+    ];
+
+    try {
+      const success = await generateMonthlyBills(month, dueDateStr, defaultItems);
+      if (success) {
+        toast.success(`Berhasil generate tagihan untuk periode ${month}`);
+      } else {
+        toast.error("Gagal generate tagihan otomatis");
+      }
+    } catch (error) {
+      console.error("Error generating bills:", error);
+      toast.error("Terjadi kesalahan saat generate tagihan");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
   const handleDeleteBill = async (id: string) => {
     if (confirm("Hapus tagihan ini?")) {
       await deleteBillFromDb(id);
+      toast.success("Tagihan dihapus");
     }
   };
 
@@ -106,12 +139,22 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
           <h2 className="font-black text-3xl text-slate-900 tracking-tight">Manajemen Iuran Itemized</h2>
           <p className="text-slate-500 font-medium mt-1">Kelola tagihan warga secara transparan dan terperinci.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
-        >
-          <Plus size={20} /> Buat Tagihan Baru
-        </button>
+        <div className="flex flex-wrap gap-4">
+          <button 
+            onClick={handleGenerateMonthlyBills}
+            disabled={isGenerating}
+            className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-2xl text-sm font-black hover:bg-slate-50 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+          >
+            {isGenerating ? <RefreshCw className="animate-spin" size={20} /> : <Calendar size={20} />}
+            Generate Tagihan Bulanan
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
+          >
+            <Plus size={20} /> Buat Tagihan Baru
+          </button>
+        </div>
       </div>
 
       {/* Stats Grid */}

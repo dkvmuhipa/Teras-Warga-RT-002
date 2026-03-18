@@ -35,6 +35,7 @@ interface FinancialContextType {
       arrearsHouseCount: number;
     };
   };
+  isMonthMatch: (monthA: string, monthB: string) => boolean;
 }
 
 const FinancialContext = createContext<FinancialContextType | undefined>(undefined);
@@ -60,26 +61,40 @@ export const FinancialProvider: React.FC<{
 
   const isMonthMatch = (monthA: string, monthB: string) => {
     if (!monthA || !monthB) return false;
-    const cleanA = monthA.trim().toLowerCase();
-    const cleanB = monthB.trim().toLowerCase();
+    const cleanA = String(monthA).trim().toLowerCase();
+    const cleanB = String(monthB).trim().toLowerCase();
     if (cleanA === cleanB) return true;
 
     const monthsId = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
     const monthsEn = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
     const normalize = (m: string) => {
-      const parts = m.trim().toLowerCase().split(/\s+/);
-      if (parts.length < 1) return null;
-      const name = parts[0];
-      const year = parts.length > 1 ? parts[1] : null;
-      let index = monthsId.indexOf(name);
-      if (index === -1) index = monthsEn.indexOf(name);
-      if (index === -1) return null;
-      return year ? `${index}-${year}` : `${index}`;
+      const yearMatch = m.match(/\d{4}/);
+      const year = yearMatch ? yearMatch[0] : null;
+      
+      // Try finding month name anywhere in string
+      let index = monthsId.findIndex(name => m.includes(name));
+      if (index === -1) index = monthsEn.findIndex(name => m.includes(name));
+      
+      if (index !== -1) {
+        return year ? `${index}-${year}` : `${index}`;
+      }
+
+      // Try numeric month
+      const parts = m.split(/[-/\s]/);
+      for (const part of parts) {
+        const num = parseInt(part);
+        if (num >= 1 && num <= 12 && part.length <= 2) {
+          return year ? `${num - 1}-${year}` : `${num - 1}`;
+        }
+      }
+
+      return null;
     };
 
     const normA = normalize(cleanA);
     const normB = normalize(cleanB);
+    
     if (!normA || !normB) return false;
     if (normA.includes('-') && normB.includes('-')) return normA === normB;
     return normA.split('-')[0] === normB.split('-')[0];
@@ -109,27 +124,23 @@ export const FinancialProvider: React.FC<{
   const getArrearsForHouse = (house: House, type?: 'Air' | 'Sampah') => {
     const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonthIndex = now.getMonth();
     
     const arrears: string[] = [];
     
-    // Determine start month based on joiningDate (if available)
-    let startMonth = 0;
-    let startYear = currentYear;
-    
-    if (house.joiningDate) {
-      const joinDate = new Date(house.joiningDate);
-      if (joinDate.getFullYear() === currentYear) {
-        startMonth = joinDate.getMonth();
-      } else if (joinDate.getFullYear() > currentYear) {
-        return [];
-      }
-    }
-
-    for (let i = startMonth; i <= currentMonthIndex; i++) {
-      const monthStrId = `${monthsId[i]} ${currentYear}`;
+    // Check months in current year (tahun berjalan)
+    const currentMonthIndex = now.getMonth();
+    for (let i = currentMonthIndex; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthStrId = getIndonesianMonthYear(d);
       
+      // Skip if before joining date (waktu menempati hunian)
+      if (house.joiningDate) {
+        const joinDate = new Date(house.joiningDate);
+        if (d.getFullYear() < joinDate.getFullYear() || (d.getFullYear() === joinDate.getFullYear() && d.getMonth() < joinDate.getMonth())) {
+          continue;
+        }
+      }
+
       const hasPaid = iuranPayments.some(p => {
         const idMatch = String(p.houseId) === String(house.id) || 
                         String(p.houseId) === `${house.block}-${house.number}` ||
@@ -224,7 +235,8 @@ export const FinancialProvider: React.FC<{
       setSelectedMonth,
       getPaymentStatus,
       getArrearsForHouse,
-      summaries
+      summaries,
+      isMonthMatch
     }}>
       {children}
     </FinancialContext.Provider>

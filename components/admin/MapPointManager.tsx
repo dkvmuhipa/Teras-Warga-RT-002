@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { MapPoint, House } from '../../types';
 import { addMapPointToDb, updateMapPointInDb, deleteMapPointFromDb } from '../../services/databaseService';
 import { Button } from '../ui/Button';
-import { Plus, Trash2, Edit2, MapPin, Shield, Move } from 'lucide-react';
+import { Plus, Trash2, Edit2, MapPin, Shield, Move, Lightbulb, Video, Droplets, Trash } from 'lucide-react';
 import { Modal } from '../ui/Modal';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface MapPointManagerProps {
     mapPoints: MapPoint[];
@@ -17,7 +17,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
     
     // Form State
     const [label, setLabel] = useState('');
-    const [type, setType] = useState<'Gate' | 'Security' | 'Block' | 'Other'>('Other');
+    const [type, setType] = useState<MapPoint['type']>('Other');
     const [x, setX] = useState<number>(50);
     const [y, setY] = useState<number>(50);
 
@@ -69,8 +69,34 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                 await deleteMapPointFromDb(id);
                 toast.success("Titik informasi dihapus.");
             } catch (error) {
+                console.error(error);
                 toast.error("Gagal menghapus data.");
             }
+        }
+    };
+
+    const getIcon = (type: MapPoint['type']) => {
+        switch (type) {
+            case 'Gate': return <Move size={20} />;
+            case 'Security': return <Shield size={20} />;
+            case 'PJU': return <Lightbulb size={20} />;
+            case 'CCTV': return <Video size={20} />;
+            case 'Hydrant': return <Droplets size={20} />;
+            case 'Trash': return <Trash size={20} />;
+            default: return <MapPin size={20} />;
+        }
+    };
+
+    const getColor = (type: MapPoint['type']) => {
+        switch (type) {
+            case 'Gate': return 'bg-amber-500';
+            case 'Security': return 'bg-blue-500';
+            case 'Block': return 'bg-emerald-500';
+            case 'PJU': return 'bg-yellow-500';
+            case 'CCTV': return 'bg-indigo-500';
+            case 'Hydrant': return 'bg-rose-500';
+            case 'Trash': return 'bg-orange-500';
+            default: return 'bg-slate-500';
         }
     };
 
@@ -79,7 +105,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
             <div className="flex justify-between items-center">
                 <div>
                     <h3 className="text-lg font-bold text-slate-800">Manajemen Titik Informasi</h3>
-                    <p className="text-sm text-slate-500">Kelola penanda fasilitas umum di peta (Gerbang, Pos, dsb).</p>
+                    <p className="text-sm text-slate-500">Kelola penanda fasilitas umum di peta (PJU, CCTV, Gerbang, dsb).</p>
                 </div>
                 <Button onClick={handleAdd} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200">
                     <Plus size={18} className="mr-2" /> Tambah Penanda
@@ -90,15 +116,8 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                 {mapPoints.map((point) => (
                     <div key={point.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
                         <div className="flex justify-between items-start mb-3">
-                            <div className={`p-2 rounded-xl text-white ${
-                                point.type === 'Gate' ? 'bg-amber-500' :
-                                point.type === 'Security' ? 'bg-blue-500' :
-                                point.type === 'Block' ? 'bg-emerald-500' :
-                                'bg-slate-500'
-                            }`}>
-                                {point.type === 'Gate' ? <Move size={20} /> : 
-                                 point.type === 'Security' ? <Shield size={20} /> : 
-                                 <MapPin size={20} />}
+                            <div className={`p-2 rounded-xl text-white ${getColor(point.type)}`}>
+                                {getIcon(point.type)}
                             </div>
                             <div className="flex gap-1">
                                 <button onClick={() => handleEdit(point)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
@@ -125,7 +144,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                         <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Label Penanda</label>
                         <input 
                             className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                            placeholder="Contoh: Gerbang Utama"
+                            placeholder="Contoh: PJU Blok C1"
                             value={label}
                             onChange={e => setLabel(e.target.value)}
                         />
@@ -137,8 +156,12 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                             value={type}
                             onChange={e => setType(e.target.value as any)}
                         >
+                            <option value="PJU">PJU (Lampu Jalan)</option>
+                            <option value="CCTV">CCTV</option>
                             <option value="Gate">Gerbang / Portal</option>
                             <option value="Security">Pos Keamanan</option>
+                            <option value="Hydrant">Hydrant</option>
+                            <option value="Trash">Tempat Sampah Umum</option>
                             <option value="Block">Papan Blok</option>
                             <option value="Other">Lainnya</option>
                         </select>

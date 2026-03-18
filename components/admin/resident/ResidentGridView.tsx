@@ -5,6 +5,7 @@ import { useFinancial } from '../../../context/FinancialContext';
 
 interface ResidentGridViewProps {
   filteredHouses: House[];
+  selectedMonth: string;
   openDetail: (house: House) => void;
   handleOpenEdit: (house: House) => void;
   handleDelete: (id: string) => void;
@@ -14,6 +15,7 @@ interface ResidentGridViewProps {
 
 export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
   filteredHouses,
+  selectedMonth,
   openDetail,
   handleOpenEdit,
   handleDelete,
@@ -52,8 +54,8 @@ export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
                 onDelete={handleDelete}
                 onOpenBills={setSelectedHouseForBills}
                 onOpenPay={openPayModal}
-                dynamicStatusAir={getPaymentStatus(house, 'Air')}
-                dynamicStatusSampah={getPaymentStatus(house, 'Sampah')}
+                dynamicStatusAir={getPaymentStatus(house, 'Air', selectedMonth)}
+                dynamicStatusSampah={getPaymentStatus(house, 'Sampah', selectedMonth)}
                 arrears={house.status === 'Occupied' ? getArrearsForHouse(house) : []}
               />
             ))}

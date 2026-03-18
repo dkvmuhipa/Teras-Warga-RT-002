@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Vote, PieChart, History, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import { Poll, PollOption } from '../../types';
 import { submitVote } from '../../services/databaseService';
 
@@ -24,12 +25,28 @@ export const PublicVoting: React.FC<PublicVotingProps> = ({ polls }) => {
   const handleVote = async (pollId: string, optionId: string, options: PollOption[]) => {
     if (votedPolls.has(pollId)) return;
 
-    if (window.confirm("Apakah Anda yakin dengan pilihan Anda? Pilihan tidak dapat diubah.")) {
-      await submitVote(pollId, optionId, options);
-      localStorage.setItem(`voted_poll_${pollId}`, 'true');
-      setVotedPolls(prev => new Set(prev).add(pollId));
-      alert("Terima kasih! Suara Anda telah direkam.");
-    }
+    toast.info("Konfirmasi Pilihan", {
+      description: "Apakah Anda yakin dengan pilihan Anda? Pilihan tidak dapat diubah.",
+      action: {
+        label: "Ya, Pilih",
+        onClick: async () => {
+          try {
+            await submitVote(pollId, optionId, options);
+            localStorage.setItem(`voted_poll_${pollId}`, 'true');
+            setVotedPolls(prev => new Set(prev).add(pollId));
+            toast.success("Terima kasih!", {
+              description: "Suara Anda telah direkam."
+            });
+          } catch (error) {
+            toast.error("Gagal merekam suara. Coba lagi.");
+          }
+        }
+      },
+      cancel: {
+        label: "Batal",
+        onClick: () => {}
+      }
+    });
   };
 
   const activePolls = polls.filter(p => p.status === 'Open');

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Search, Plus, Lock, MessageCircle, Tag, User, Phone, Image as ImageIcon, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import { MarketItem } from '../../types';
 import { addMarketItem, validateResidentAccess, formatHouseId } from '../../services/databaseService';
 import { SmartImage } from '../SmartImage';
@@ -40,7 +41,9 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
     e.preventDefault();
     const isValid = await validateResidentAccess(postHouseId, accessCode);
     if (!isValid) {
-      alert("Verifikasi Gagal! Kode Akses Rumah tidak valid.");
+      toast.error("Verifikasi Gagal!", {
+        description: "Kode Akses Rumah tidak valid."
+      });
       return;
     }
 
@@ -60,7 +63,7 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
     };
 
     await addMarketItem(newItem);
-    alert("Iklan berhasil ditayangkan!");
+    toast.success("Iklan berhasil ditayangkan!");
     setIsPostModalOpen(false);
     setPostTitle(''); setPostDesc(''); setPostPrice(''); setPostSeller(''); setPostContact(''); setPostImage(''); setAccessCode(''); setPostHouseId('');
   };

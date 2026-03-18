@@ -4,6 +4,7 @@ import { WasteDeposit, WastePrice, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { Card } from '../ui/Card';
+import { toast } from 'sonner';
 import { 
   subscribeToWasteDeposits, 
   addWasteDepositToDb, 
@@ -82,7 +83,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
   const handleSaveDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isPinVerified) {
-      alert('Silakan verifikasi PIN rumah terlebih dahulu.');
+      toast.error('Silakan verifikasi PIN rumah terlebih dahulu.');
       return;
     }
     try {
@@ -108,9 +109,10 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
         weight: 0,
         date: new Date().toISOString().split('T')[0]
       });
+      toast.success('Setoran berhasil disimpan!');
     } catch (error) {
       console.error(error);
-      alert('Gagal menyimpan setoran.');
+      toast.error('Gagal menyimpan setoran.');
     }
   };
 
@@ -118,25 +120,33 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
     if (window.confirm(`Konfirmasi setoran ini? Saldo sebesar Rp ${deposit.totalValue.toLocaleString()} akan ditambahkan ke tabungan warga.`)) {
       try {
         await updateWasteDepositStatus(deposit.id, 'Confirmed', deposit.totalValue, deposit.houseId);
+        toast.success('Setoran berhasil dikonfirmasi!');
       } catch (error) {
         console.error(error);
-        alert('Gagal mengonfirmasi setoran.');
+        toast.error('Gagal mengonfirmasi setoran.');
       }
     }
   };
 
   const handleDeleteDeposit = async (id: string) => {
     if (window.confirm('Hapus data setoran ini?')) {
-      await deleteWasteDepositFromDb(id);
+      try {
+        await deleteWasteDepositFromDb(id);
+        toast.success('Data setoran berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus data setoran.');
+      }
     }
   };
 
   const handleUpdatePrice = async (id: string, newPrice: number) => {
     try {
       await updateWastePriceInDb(id, newPrice);
+      // Optional: toast.success('Harga diperbarui');
     } catch (error) {
       console.error(error);
-      alert('Gagal memperbarui harga.');
+      toast.error('Gagal memperbarui harga.');
     }
   };
 
@@ -146,9 +156,10 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       await addWastePriceToDb(newCategory);
       setNewCategory({ type: '', pricePerUnit: 0, unit: 'kg' });
       setIsAddingCategory(false);
+      toast.success('Kategori berhasil ditambah!');
     } catch (error) {
       console.error(error);
-      alert('Gagal menambah kategori.');
+      toast.error('Gagal menambah kategori.');
     }
   };
 
@@ -156,9 +167,10 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
     if (window.confirm('Hapus kategori sampah ini?')) {
       try {
         await deleteWastePriceFromDb(id);
+        toast.success('Kategori berhasil dihapus.');
       } catch (error) {
         console.error(error);
-        alert('Gagal menghapus kategori.');
+        toast.error('Gagal menghapus kategori.');
       }
     }
   };

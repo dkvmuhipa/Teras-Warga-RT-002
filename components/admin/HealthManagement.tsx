@@ -10,6 +10,7 @@ import {
   deleteHealthRecordFromDb 
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface HealthManagementProps {
   houses: House[];
@@ -55,14 +56,16 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
     try {
       if (editingRecordId) {
         await updateHealthRecordInDb(editingRecordId, form);
+        toast.success('Data kesehatan berhasil diperbarui!');
       } else {
         await addHealthRecordToDb(form);
+        toast.success('Data kesehatan berhasil disimpan!');
       }
       setIsModalOpen(false);
       resetForm();
     } catch (error) {
       console.error(error);
-      alert('Gagal menyimpan data kesehatan.');
+      toast.error('Gagal menyimpan data kesehatan.');
     }
   };
 
@@ -121,7 +124,13 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Hapus data kesehatan ini?')) {
-      await deleteHealthRecordFromDb(id);
+      try {
+        await deleteHealthRecordFromDb(id);
+        toast.success('Data kesehatan berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus data kesehatan.');
+      }
     }
   };
 

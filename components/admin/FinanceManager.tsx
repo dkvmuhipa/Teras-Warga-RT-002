@@ -8,7 +8,7 @@ import {
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb } from '../../services/databaseService';
-
+import { toast } from 'sonner';
 import { generateCashFlowReportPDF } from '../../services/pdfService';
 
 interface FinanceManagerProps {
@@ -76,15 +76,33 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
       date: new Date().toISOString().split('T')[0]
     };
 
-    if (editingId) await updateTransactionInDb(editingId, data);
-    else await addTransactionToDb(data);
-    
-    setIsModalOpen(false);
-    resetForm();
+    try {
+      if (editingId) {
+        await updateTransactionInDb(editingId, data);
+        toast.success('Transaksi berhasil diperbarui!');
+      } else {
+        await addTransactionToDb(data);
+        toast.success('Transaksi berhasil dicatat!');
+      }
+      
+      setIsModalOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal menyimpan transaksi.');
+    }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus transaksi ini?')) await deleteTransactionFromDb(id);
+    if (window.confirm('Hapus transaksi ini?')) {
+      try {
+        await deleteTransactionFromDb(id);
+        toast.success('Transaksi berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus transaksi.');
+      }
+    }
   };
 
   const openEdit = (cf: CashFlow) => {

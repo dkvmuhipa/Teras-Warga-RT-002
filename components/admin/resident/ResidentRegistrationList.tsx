@@ -1,30 +1,43 @@
 import React from 'react';
 import { User, Phone } from 'lucide-react';
 import { ResidentRegistration, PaymentStatus, House } from '../../../types';
+import { toast } from 'sonner';
 
 interface ResidentRegistrationListProps {
   residentRegistrations: ResidentRegistration[];
+  searchTerm: string;
   updateResidentRegistrationInDb: (id: string, data: Partial<ResidentRegistration>) => Promise<void>;
   addHouse: (house: Omit<House, 'id'>) => Promise<void>;
 }
 
 export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> = ({
   residentRegistrations,
+  searchTerm,
   updateResidentRegistrationInDb,
   addHouse,
 }) => {
+  const searchLower = searchTerm.toLowerCase();
+  const filteredRegistrations = residentRegistrations.filter(reg => {
+    return reg.headOfFamily.toLowerCase().includes(searchLower) ||
+           reg.block.toLowerCase().includes(searchLower) ||
+           reg.number.toLowerCase().includes(searchLower) ||
+           (reg.ownerName && reg.ownerName.toLowerCase().includes(searchLower)) ||
+           reg.phone.toLowerCase().includes(searchLower) ||
+           (reg.familyMembers && reg.familyMembers.some(m => m.name.toLowerCase().includes(searchLower)));
+  });
+
   return (
     <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
       <div className="mb-8">
         <h3 className="text-xl font-black text-slate-800">Permohonan Warga Baru</h3>
         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-          {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length} Menunggu Persetujuan
+          {filteredRegistrations.filter(r => r.approvalStatus === 'Pending').length} Menunggu Persetujuan
         </p>
       </div>
 
       <div className="space-y-4">
-        {residentRegistrations.length > 0 ? (
-          residentRegistrations.map((reg) => (
+        {filteredRegistrations.length > 0 ? (
+          filteredRegistrations.map((reg) => (
             <div key={reg.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div className="flex gap-4">
                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
@@ -70,7 +83,13 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                     <button 
                       onClick={async () => {
                         if(window.confirm('Tolak pendaftaran ini?')) {
-                          await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Rejected' });
+                          try {
+                            await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Rejected' });
+                            toast.success('Pendaftaran ditolak.');
+                          } catch (error) {
+                            console.error(error);
+                            toast.error('Gagal menolak pendaftaran.');
+                          }
                         }
                       }}
                       className="flex-1 md:flex-none px-4 py-2 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all"
@@ -117,10 +136,10 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             // 2. Update registration status
                             await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Approved' });
                             
-                            alert('Pendaftaran disetujui dan data warga telah ditambahkan!');
+                            toast.success('Pendaftaran disetujui dan data warga telah ditambahkan!');
                           } catch (error) {
                             console.error(error);
-                            alert('Gagal menyetujui pendaftaran.');
+                            toast.error('Gagal menyetujui pendaftaran.');
                           }
                         }
                       }}

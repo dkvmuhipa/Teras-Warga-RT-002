@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, X, ShieldAlert, Volume2, VolumeX, MapPin, CheckCircle } from 'lucide-react';
-import { io, Socket } from 'socket.io-client';
 import { motion, AnimatePresence } from 'motion/react';
+import { sendPanicAlert } from '../services/databaseService';
+import { toast } from 'sonner';
 
 export function PanicButton() {
   const [alert, setAlert] = useState<{ message: string; sender: string; timestamp: string; location?: { lat: number; lng: number } } | string | null>(null);
@@ -9,27 +10,15 @@ export function PanicButton() {
   const [holdProgress, setHoldProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isSent, setIsSent] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Initialize Socket.io
-    socketRef.current = io();
-
-    socketRef.current.on('emergency:alert', (data) => {
-      setAlert(data);
-      if (!isMuted) {
-        playSiren();
-      }
-    });
-
     // Audio for siren
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
     audioRef.current.loop = true;
 
     return () => {
-      socketRef.current?.disconnect();
       stopSiren();
     };
   }, []);
@@ -93,22 +82,34 @@ export function PanicButton() {
     }
   };
 
-  const sendPanicSignal = (location?: { lat: number; lng: number }) => {
-    socketRef.current?.emit('emergency:triggered', {
-      message: 'DARURAT! Bantuan dibutuhkan segera! Sinyal dikirim dari perangkat warga.',
-      sender: 'Warga RT 02',
-      timestamp: new Date().toISOString(),
-      location
-    });
-    
-    // Vibrate if mobile
-    if (navigator.vibrate) {
-      navigator.vibrate([500, 200, 500, 200, 500]);
-    }
+  const sendPanicSignal = async (location?: { lat: number; lng: number }) => {
+    const houseId = localStorage.getItem('resident_house_id') || 'Unknown';
+    const residentName = localStorage.getItem('resident_name') || 'Warga';
+    const locationStr = houseId;
 
-    // Show confirmation to sender
-    setIsSent(true);
-    setTimeout(() => setIsSent(false), 5000);
+    try {
+      const success = await sendPanicAlert(houseId, residentName, locationStr);
+      
+      if (success) {
+        // Vibrate if mobile
+        if (navigator.vibrate) {
+          navigator.vibrate([500, 200, 500, 200, 500]);
+        }
+
+        // Show confirmation to sender
+        setIsSent(true);
+        toast.error("Sinyal Darurat Terkirim!", {
+          description: "Petugas keamanan telah diberitahu.",
+          duration: 5000
+        });
+        setTimeout(() => setIsSent(false), 5000);
+      } else {
+        toast.error("Gagal mengirim sinyal darurat. Coba lagi.");
+      }
+    } catch (error) {
+      console.error("Panic alert error:", error);
+      toast.error("Terjadi kesalahan sistem.");
+    }
   };
 
   const closeAlert = () => {

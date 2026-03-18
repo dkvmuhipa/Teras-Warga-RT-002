@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { addPollToDb, updatePollStatus, deletePollFromDb } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface PollManagementProps {
   polls: Poll[];
@@ -44,12 +45,12 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
         totalVotes: 0,
         votedBy: []
       });
-      alert('Voting berhasil dibuat!');
+      toast.success('Voting berhasil dibuat!');
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
       console.error(error);
-      alert('Gagal membuat voting.');
+      toast.error('Gagal membuat voting.');
     }
   };
 
@@ -66,7 +67,7 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
 
   const removeOption = (idx: number) => {
     if (pollOptions.length <= 2) {
-      alert('Minimal 2 opsi jawaban.');
+      toast.error('Minimal 2 opsi jawaban.');
       return;
     }
     const newOptions = pollOptions.filter((_, i) => i !== idx);
@@ -74,25 +75,46 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
   };
 
   const handleClosePoll = async (id: string) => {
-    if (window.confirm('Tutup voting ini? Warga tidak akan bisa memilih lagi.')) {
-      try {
-        await updatePollStatus(id, 'Closed');
-      } catch (error) {
-        console.error(error);
-        alert('Gagal menutup voting.');
+    toast.info('Tutup voting ini?', {
+      description: 'Warga tidak akan bisa memilih lagi.',
+      action: {
+        label: 'Tutup',
+        onClick: async () => {
+          try {
+            await updatePollStatus(id, 'Closed');
+            toast.success('Voting berhasil ditutup.');
+          } catch (error) {
+            console.error(error);
+            toast.error('Gagal menutup voting.');
+          }
+        }
+      },
+      cancel: {
+        label: 'Batal',
+        onClick: () => {}
       }
-    }
+    });
   };
 
   const handleDeletePoll = async (id: string) => {
-    if (window.confirm('Hapus voting ini permanen?')) {
-      try {
-        await deletePollFromDb(id);
-      } catch (error) {
-        console.error(error);
-        alert('Gagal menghapus voting.');
+    toast.info('Hapus voting ini permanen?', {
+      action: {
+        label: 'Hapus',
+        onClick: async () => {
+          try {
+            await deletePollFromDb(id);
+            toast.success('Voting berhasil dihapus.');
+          } catch (error) {
+            console.error(error);
+            toast.error('Gagal menghapus voting.');
+          }
+        }
+      },
+      cancel: {
+        label: 'Batal',
+        onClick: () => {}
       }
-    }
+    });
   };
 
   const containerVariants = {

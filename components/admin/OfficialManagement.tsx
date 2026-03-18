@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface OfficialManagementProps {
   officials: Official[];
@@ -82,15 +83,16 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
 
       if (editingOfficialId) {
         await updateOfficialInDb(editingOfficialId, data);
+        toast.success('Data pengurus berhasil diperbarui!');
       } else {
         await addOfficialToDb(data);
+        toast.success('Data pengurus berhasil disimpan!');
       }
-      alert('Data pengurus berhasil disimpan!');
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
       console.error(error);
-      alert('Gagal menyimpan data pengurus.');
+      toast.error('Gagal menyimpan data pengurus.');
     } finally {
         setIsUploading(false);
     }
@@ -100,9 +102,10 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     if (window.confirm('Hapus data pengurus ini?')) {
       try {
         await deleteOfficialFromDb(id);
+        toast.success('Data pengurus berhasil dihapus.');
       } catch (error) {
         console.error(error);
-        alert('Gagal menghapus data pengurus.');
+        toast.error('Gagal menghapus data pengurus.');
       }
     }
   };

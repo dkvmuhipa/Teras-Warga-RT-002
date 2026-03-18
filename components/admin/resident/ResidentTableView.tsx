@@ -5,6 +5,7 @@ import { useFinancial } from '../../../context/FinancialContext';
 
 interface ResidentTableViewProps {
   filteredHouses: House[];
+  selectedMonth: string;
   selectedIds: Set<string>;
   handleSelectAll: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectOne: (id: string) => void;
@@ -15,6 +16,7 @@ interface ResidentTableViewProps {
 
 export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
   filteredHouses,
+  selectedMonth,
   selectedIds,
   handleSelectAll,
   handleSelectOne,
@@ -62,8 +64,8 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
               </thead>
               <tbody>
                 {houses.map((house) => {
-                  const statusSampah = getPaymentStatus(house, 'Sampah');
-                  const statusAir = getPaymentStatus(house, 'Air');
+                  const statusSampah = getPaymentStatus(house, 'Sampah', selectedMonth);
+                  const statusAir = getPaymentStatus(house, 'Air', selectedMonth);
                   const arrears = getArrearsForHouse(house);
 
                   return (

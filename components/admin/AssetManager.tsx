@@ -5,6 +5,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { InventoryItem } from '../../types';
 import { addInventoryToDb, updateInventoryInDb, deleteInventoryFromDb, addInventoryLogToDb, updateInventoryLogStatus, deleteInventoryLogFromDb } from '../../services/databaseService';
+import { toast } from 'sonner';
 
 interface AssetManagerProps {
   inventory: InventoryItem[];
@@ -45,23 +46,35 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
 
   const handleSaveInventory = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = {
-      name: invName,
-      total: parseInt(invTotal),
-      available: parseInt(invTotal), // Simplified logic
-      condition: invCondition
-    };
+    try {
+      const data = {
+        name: invName,
+        total: parseInt(invTotal),
+        available: parseInt(invTotal), // Simplified logic
+        condition: invCondition
+      };
 
-    if (editingInvId) await updateInventoryInDb(editingInvId, data);
-    else await addInventoryToDb(data);
+      if (editingInvId) await updateInventoryInDb(editingInvId, data);
+      else await addInventoryToDb(data);
 
-    setIsInvModalOpen(false);
-    resetInvForm();
+      setIsInvModalOpen(false);
+      resetInvForm();
+      toast.success(editingInvId ? 'Aset berhasil diperbarui!' : 'Aset berhasil ditambahkan!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal menyimpan aset.');
+    }
   };
 
   const handleDeleteInventory = async (id: string) => {
     if (window.confirm('Hapus barang inventaris ini?')) {
-      await deleteInventoryFromDb(id);
+      try {
+        await deleteInventoryFromDb(id);
+        toast.success('Aset berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus aset.');
+      }
     }
   };
 
@@ -69,24 +82,48 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
     e.preventDefault();
     if (!selectedAsset) return;
 
-    const log = {
-      assetId: selectedAsset.id,
-      assetName: selectedAsset.name,
-      borrowerName,
-      amount: parseInt(borrowAmount),
-      date: borrowDate,
-      expectedReturnDate: returnDate,
-      status: 'Borrowed'
-    };
+    try {
+      const log = {
+        assetId: selectedAsset.id,
+        assetName: selectedAsset.name,
+        borrowerName,
+        amount: parseInt(borrowAmount),
+        date: borrowDate,
+        expectedReturnDate: returnDate,
+        status: 'Borrowed'
+      };
 
-    await addInventoryLogToDb(log);
-    setIsBorrowModalOpen(false);
-    resetBorrowForm();
+      await addInventoryLogToDb(log);
+      setIsBorrowModalOpen(false);
+      resetBorrowForm();
+      toast.success('Peminjaman berhasil dicatat!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal mencatat peminjaman.');
+    }
   };
 
   const handleReturn = async (id: string) => {
     if (window.confirm('Tandai barang sudah dikembalikan?')) {
-      await updateInventoryLogStatus(id, 'Returned');
+      try {
+        await updateInventoryLogStatus(id, 'Returned');
+        toast.success('Barang telah dikembalikan.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal memproses pengembalian.');
+      }
+    }
+  };
+
+  const handleDeleteLog = async (id: string) => {
+    if (window.confirm('Hapus riwayat peminjaman ini?')) {
+      try {
+        await deleteInventoryLogFromDb(id);
+        toast.success('Riwayat berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus riwayat.');
+      }
     }
   };
 
@@ -180,7 +217,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                       {log.status === 'Borrowed' && (
                         <button onClick={() => handleReturn(log.id)} className="text-emerald-600 hover:text-emerald-700 font-bold text-xs">Kembali</button>
                       )}
-                      <button onClick={() => deleteInventoryLogFromDb(log.id)} className="text-slate-300 hover:text-rose-600 transition-colors">
+                      <button onClick={() => handleDeleteLog(log.id)} className="text-slate-300 hover:text-rose-600 transition-colors">
                         <Trash size={14} />
                       </button>
                     </div>

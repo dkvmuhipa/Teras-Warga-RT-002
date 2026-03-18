@@ -12,6 +12,7 @@ import {
   updateUMKMOrderStatus
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface UmkmManagementProps {
   umkm: UMKM[];
@@ -122,34 +123,45 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
       } else {
         await addUMKMToDb(data);
       }
-      alert('Data UMKM berhasil disimpan!');
+      toast.success('Data UMKM berhasil disimpan!');
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
       console.error(error);
-      alert('Gagal menyimpan data UMKM.');
+      toast.error('Gagal menyimpan data UMKM.');
     } finally {
         setIsUploading(false);
     }
   };
 
   const handleDeleteUMKM = async (id: string) => {
-    if (window.confirm('Hapus data UMKM ini?')) {
-      try {
-        await deleteUMKMFromDb(id);
-      } catch (error) {
-        console.error(error);
-        alert('Gagal menghapus data UMKM.');
+    toast.info('Hapus data UMKM ini?', {
+      action: {
+        label: 'Hapus',
+        onClick: async () => {
+          try {
+            await deleteUMKMFromDb(id);
+            toast.success('Data UMKM berhasil dihapus.');
+          } catch (error) {
+            console.error(error);
+            toast.error('Gagal menghapus data UMKM.');
+          }
+        }
+      },
+      cancel: {
+        label: 'Batal',
+        onClick: () => {}
       }
-    }
+    });
   };
 
   const handleUpdateOrderStatus = async (orderId: string, status: UMKMOrder['status']) => {
     try {
       await updateUMKMOrderStatus(orderId, status);
+      toast.success('Status pesanan diperbarui.');
     } catch (error) {
       console.error(error);
-      alert('Gagal memperbarui status pesanan.');
+      toast.error('Gagal memperbarui status pesanan.');
     }
   };
 

@@ -3,6 +3,7 @@ import { User, Phone, Calendar, Clock, Send, CheckCircle, ArrowLeft, Camera, Shi
 import { Button } from './ui/Button';
 import { addGuestReportToDb, uploadImageToStorage } from '../services/databaseService';
 import { House } from '../types';
+import { toast } from 'sonner';
 
 interface GuestReportFormProps {
   onClose: () => void;
@@ -43,7 +44,9 @@ export const GuestReportForm: React.FC<GuestReportFormProps> = ({ onClose, house
       setIsSubmitted(true);
     } catch (error) {
       console.error(error);
-      alert('Gagal mengirim laporan tamu. Silakan coba lagi.');
+      toast.error('Gagal mengirim laporan tamu.', {
+        description: 'Silakan coba lagi beberapa saat lagi.'
+      });
     } finally {
       setIsLoading(false);
     }

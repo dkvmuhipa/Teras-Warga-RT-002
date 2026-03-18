@@ -14,6 +14,7 @@ import {
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
+import { toast } from 'sonner';
 
 interface ActivityManagementProps {
   houses: House[];
@@ -66,9 +67,10 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       }
       setIsModalOpen(false);
       resetForm();
+      toast.success(editingActivityId ? 'Kegiatan berhasil diperbarui!' : 'Kegiatan berhasil dibuat!');
     } catch (error) {
       console.error(error);
-      alert('Gagal menyimpan kegiatan.');
+      toast.error('Gagal menyimpan kegiatan.');
     }
   };
 
@@ -103,13 +105,25 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Hapus kegiatan ini? Semua data presensi juga akan terhapus.')) {
-      await deleteActivityFromDb(id);
+      try {
+        await deleteActivityFromDb(id);
+        toast.success('Kegiatan berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus kegiatan.');
+      }
     }
   };
 
   const handleDeleteAttendance = async (id: string) => {
     if (window.confirm('Hapus data presensi ini?')) {
-      await deleteAttendanceFromDb(id);
+      try {
+        await deleteAttendanceFromDb(id);
+        toast.success('Data presensi berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus data presensi.');
+      }
     }
   };
 
@@ -124,7 +138,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       const absentees = occupiedHouses.filter(h => !attendedHouseIds.has(h.id));
 
       if (absentees.length === 0) {
-        alert('Semua warga hadir! Tidak ada kompensasi yang perlu diterapkan.');
+        toast.info('Semua warga hadir! Tidak ada kompensasi yang perlu diterapkan.');
         return;
       }
 
@@ -139,11 +153,11 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       }
 
       await updateActivityInDb(selectedActivity.id, { compensationApplied: true });
-      alert(`Berhasil menerapkan kompensasi untuk ${absentees.length} warga.`);
+      toast.success(`Berhasil menerapkan kompensasi untuk ${absentees.length} warga.`);
       setSelectedActivity({ ...selectedActivity, compensationApplied: true });
     } catch (error) {
       console.error(error);
-      alert('Gagal menerapkan kompensasi.');
+      toast.error('Gagal menerapkan kompensasi.');
     }
   };
 

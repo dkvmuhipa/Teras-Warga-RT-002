@@ -6,6 +6,7 @@ import { PdfConfig, House, Announcement, CashFlow, Official, Report, LetterReque
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { seedDatabase, deepSanitize } from '../../services/databaseService';
+import { toast } from 'sonner';
 
 interface AdminSettingsProps {
   pdfConfig: PdfConfig;
@@ -38,20 +39,20 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      alert('Password tidak cocok!');
+      toast.error('Password tidak cocok!');
       return;
     }
     setIsChangingPassword(true);
     try {
       if (auth.currentUser) {
         await updatePassword(auth.currentUser, newPassword);
-        alert('Password berhasil diubah!');
+        toast.success('Password berhasil diubah!');
         setNewPassword('');
         setConfirmPassword('');
       }
     } catch (error) {
       console.error(error);
-      alert('Gagal mengubah password. Login ulang mungkin diperlukan.');
+      toast.error('Gagal mengubah password. Login ulang mungkin diperlukan.');
     } finally {
       setIsChangingPassword(false);
     }
@@ -71,7 +72,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       a.click();
     } catch (e) {
       console.error("Error exporting data:", e);
-      alert('Gagal mengekspor data: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
+      toast.error('Gagal mengekspor data: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
     }
   };
 
@@ -79,16 +80,16 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     if (window.confirm('PERINGATAN: Semua data akan dihapus dan diganti dengan data dummy. Lanjutkan?')) {
       const verification = window.prompt('Ketik "RESET" untuk mengonfirmasi reset database:');
       if (verification !== 'RESET') {
-        if (verification !== null) alert('Verifikasi gagal.');
+        if (verification !== null) toast.error('Verifikasi gagal.');
         return;
       }
       try {
         await seedDatabase();
-        alert('Database berhasil di-reset!');
+        toast.success('Database berhasil di-reset!');
         window.location.reload();
       } catch (error) {
         console.error(error);
-        alert('Gagal reset database.');
+        toast.error('Gagal reset database.');
       }
     }
   };
@@ -107,7 +108,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const handleSaveConfig = () => {
     setPdfConfig(localConfig);
     localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(localConfig)));
-    alert('Konfigurasi surat tersimpan!');
+    toast.success('Konfigurasi surat tersimpan!');
   };
 
   return (
@@ -154,7 +155,47 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       <div className="space-y-8">
         <Card title="Konfigurasi Surat (PDF)" icon={FileText} action={<Button onClick={handleSaveConfig} size="sm" className="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"><Save size={16}/> Simpan</Button>}>
           <div className="space-y-6">
-            <div><label className="block text-xs font-bold mb-2 text-slate-700">Alamat RT di Kop Surat</label><input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.rtAddress} onChange={e => setLocalConfig({...localConfig, rtAddress: e.target.value})} /></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700">Nama RT (Contoh: RT 02 / RW 03)</label>
+                <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.rtName} onChange={e => setLocalConfig({...localConfig, rtName: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700">Nama Ketua RT</label>
+                <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.rtChairman} onChange={e => setLocalConfig({...localConfig, rtChairman: e.target.value})} />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-xs font-bold mb-2 text-slate-700">Alamat RT di Kop Surat</label>
+              <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.rtAddress} onChange={e => setLocalConfig({...localConfig, rtAddress: e.target.value})} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700">Kelurahan</label>
+                <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.kelurahan} onChange={e => setLocalConfig({...localConfig, kelurahan: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700">Kecamatan</label>
+                <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.kecamatan} onChange={e => setLocalConfig({...localConfig, kecamatan: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-2 text-slate-700">Kota</label>
+                <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.kota} onChange={e => setLocalConfig({...localConfig, kota: e.target.value})} />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold mb-2 text-slate-700">Nomor Surat Terakhir (Counter)</label>
+              <input 
+                type="number"
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" 
+                value={localConfig.lastLetterNumber} 
+                onChange={e => setLocalConfig({...localConfig, lastLetterNumber: parseInt(e.target.value) || 0})} 
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700">Logo</label>

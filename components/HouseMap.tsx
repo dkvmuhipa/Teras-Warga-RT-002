@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash } from 'lucide-react';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
+import { useFinancial } from '../context/FinancialContext';
 
 interface HouseMapProps {
   houses: House[];
@@ -28,16 +29,6 @@ interface HouseDetailModalProps {
 }
 
 // --- Helper Functions ---
-const getDynamicPaymentStatus = (houseId: string, type: 'Air' | 'Sampah', iuranPayments: any[] = []) => {
-    const currentMonth = new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-    const payment = iuranPayments.find(p => 
-        p.houseId === houseId && 
-        p.month === currentMonth && 
-        (p.type === type || p.type === 'Both')
-    );
-    return payment ? PaymentStatus.PAID : PaymentStatus.PENDING;
-};
-
 const shortenName = (fullName: string) => {
     const parts = fullName.trim().split(' ');
     if (parts.length <= 1) return fullName;
@@ -92,6 +83,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     onPayDues, 
     onReportHouse 
 }) => {
+    const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const activeReports = reports.filter(r => r.houseId === house.id && r.status !== 'Selesai');
     const isSafe = activeReports.length === 0;
     const officialData = officials?.find(o => {
@@ -101,8 +93,10 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     });
     const displayName = shortenName(house.headOfFamily);
 
-    const statusAir = getDynamicPaymentStatus(house.id, 'Air', iuranPayments);
-    const statusSampah = getDynamicPaymentStatus(house.id, 'Sampah', iuranPayments);
+    const statusAir = getPaymentStatus(house, 'Air');
+    const statusSampah = getPaymentStatus(house, 'Sampah');
+    const arrears = getArrearsForHouse(house);
+    const isFullyPaid = arrears.length === 0;
     
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -147,11 +141,30 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                         
                         {/* Status Iuran (NEW: Air & Sampah) */}
                         <div className="space-y-3">
-                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">Status Pembayaran Iuran</h4>
+                            <div className="flex justify-between items-center">
+                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">Status Pembayaran Iuran</h4>
+                                {!isFullyPaid && (
+                                    <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 animate-pulse">
+                                        {arrears.length} Tunggakan
+                                    </span>
+                                )}
+                            </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <StatusBadge label="OP Air" status={statusAir} icon={Droplets} />
                                 <StatusBadge label="Sampah" status={statusSampah} icon={Trash2} />
                             </div>
+                            {!isFullyPaid && (
+                                <div className="p-3 bg-rose-50/50 rounded-xl border border-rose-100/50">
+                                    <p className="text-[8px] font-black text-rose-400 uppercase tracking-widest mb-1.5">Bulan Belum Lunas:</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {arrears.map(m => (
+                                            <span key={m} className="px-2 py-0.5 bg-white text-rose-600 rounded-lg text-[9px] font-bold border border-rose-200">
+                                                {m}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Residence Info */}
@@ -259,10 +272,13 @@ interface HouseCardProps {
 }
 
 const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, onClick }) => {
+    const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const formattedRole = officialRole ? formatRole(officialRole) : null;
     
-    const statusAir = getDynamicPaymentStatus(house.id, 'Air', iuranPayments);
-    const statusSampah = getDynamicPaymentStatus(house.id, 'Sampah', iuranPayments);
+    const statusAir = getPaymentStatus(house, 'Air');
+    const statusSampah = getPaymentStatus(house, 'Sampah');
+    const arrears = getArrearsForHouse(house);
+    const hasArrears = arrears.length > 0;
 
     const getHouseColor = () => {
         if (hasIssue) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
@@ -308,11 +324,13 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                     </div>
                 )}
             </div>
-            {isAdmin && !officialRole && (
+            {!officialRole && (
                 <div className="absolute top-1 right-1 flex flex-col gap-0.5">
-                    {(statusAir === PaymentStatus.PENDING || statusSampah === PaymentStatus.PENDING) && (
-                        <div className="w-2 h-2 rounded-full border border-white shadow-sm bg-rose-500 animate-pulse"></div>
-                    )}
+                    <div className={`w-2 h-2 rounded-full border border-white shadow-sm ${
+                        (statusAir === PaymentStatus.PAID && statusSampah === PaymentStatus.PAID) 
+                        ? 'bg-emerald-500' 
+                        : 'bg-rose-500 animate-pulse'
+                    }`}></div>
                 </div>
             )}
             {hasIssue && <div className="absolute -top-2.5 -left-2.5 text-rose-600 bg-white rounded-full p-1 border border-rose-200 shadow-sm z-20"><AlertTriangle size={14} fill="#e11d48"/></div>}
@@ -483,10 +501,18 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                    point.type === 'Gate' ? 'bg-amber-500' :
                                    point.type === 'Security' ? 'bg-blue-500' :
                                    point.type === 'Block' ? 'bg-emerald-500' :
+                                   point.type === 'PJU' ? 'bg-yellow-500' :
+                                   point.type === 'CCTV' ? 'bg-indigo-500' :
+                                   point.type === 'Hydrant' ? 'bg-rose-500' :
+                                   point.type === 'Trash' ? 'bg-orange-500' :
                                    'bg-slate-500'
                                } text-white border-2 border-white`}>
                                    {point.type === 'Gate' ? <Move size={14} /> : 
                                     point.type === 'Security' ? <Shield size={14} /> : 
+                                    point.type === 'PJU' ? <Lightbulb size={14} /> :
+                                    point.type === 'CCTV' ? <Video size={14} /> :
+                                    point.type === 'Hydrant' ? <Droplets size={14} /> :
+                                    point.type === 'Trash' ? <Trash size={14} /> :
                                     <MapPin size={14} />}
                                </div>
                                <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">

@@ -4,13 +4,15 @@ import { PdfConfig } from '../../types';
 import { motion } from 'motion/react';
 import { updateAdminPassword, seedDatabase, deepSanitize } from '../../services/databaseService';
 import { generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, INITIAL_OFFICIALS, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_WASTE_PRICES, MOCK_FAQ, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS, MOCK_BILLS } from '../../constants';
+import { toast } from 'sonner';
 
 interface SettingsProps {
   pdfConfig: PdfConfig;
   setPdfConfig: (config: PdfConfig) => void;
+  settings: any;
 }
 
-export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) => {
+export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig, settings }) => {
   const [localConfig, setLocalConfig] = useState<PdfConfig>(pdfConfig);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,23 +20,23 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
-      alert("Password konfirmasi tidak cocok!");
+      toast.error("Password konfirmasi tidak cocok!");
       return;
     }
     if (newPassword.length < 6) {
-      alert("Password minimal 6 karakter.");
+      toast.error("Password minimal 6 karakter.");
       return;
     }
     
     setIsChangingPassword(true);
     try {
       await updateAdminPassword(newPassword);
-      alert("Password berhasil diubah! Silakan login ulang dengan password baru.");
+      toast.success("Password berhasil diubah! Silakan login ulang dengan password baru.");
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
       console.error(err);
-      alert("Gagal mengubah password. Pastikan Anda baru saja login (re-authentication needed).");
+      toast.error("Gagal mengubah password. Pastikan Anda baru saja login (re-authentication needed).");
     } finally {
       setIsChangingPassword(false);
     }
@@ -64,11 +66,11 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
                     bills: MOCK_BILLS
                 };
                 await seedDatabase(initialData);
-                alert("Reset sistem berhasil. Halaman akan dimuat ulang."); 
+                toast.success("Reset sistem berhasil. Halaman akan dimuat ulang."); 
                 window.location.reload();
             } catch (e) { 
                 console.error(e);
-                alert("Gagal melakukan reset sistem."); 
+                toast.error("Gagal melakukan reset sistem."); 
             }
         }
     }
@@ -91,7 +93,7 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig }) =
       downloadAnchorNode.remove();
     } catch (e) {
       console.error("Error exporting data:", e);
-      alert('Gagal mengekspor data: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
+      toast.error('Gagal mengekspor data: ' + (e instanceof Error ? e.message : 'Circular structure detected'));
     }
   };
 

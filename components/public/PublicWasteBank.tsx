@@ -11,6 +11,7 @@ import {
   addWasteDepositToDb
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface PublicWasteBankProps {
   houseId: string;
@@ -82,10 +83,12 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
 
       setIsDepositModalOpen(false);
       setDepositForm({ type: '', weight: 0 });
-      alert('Setoran berhasil diajukan! Silakan serahkan sampah ke petugas untuk dikonfirmasi.');
+      toast.success('Setoran berhasil diajukan!', {
+        description: 'Silakan serahkan sampah ke petugas untuk dikonfirmasi.'
+      });
     } catch (error) {
       console.error(error);
-      alert('Gagal mengajukan setoran.');
+      toast.error('Gagal mengajukan setoran.');
     }
   };
 

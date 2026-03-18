@@ -37,7 +37,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
         <input 
           type="text" 
-          placeholder="Cari nama, pemilik, blok, nomor, atau telepon..." 
+          placeholder="Cari nama, pemilik, blok, nomor, telepon, atau anggota keluarga..." 
           className="w-full pl-10 pr-4 py-2 md:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
@@ -52,9 +52,10 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             value={selectedMonth} 
             onChange={e => setSelectedMonth(e.target.value)}
           >
-            {Array.from({ length: new Date().getMonth() + 1 }).map((_, i) => {
+            {Array.from({ length: 36 }).map((_, i) => {
               const d = new Date();
-              d.setMonth(d.getMonth() - i);
+              // Show 12 months forward and 23 months back
+              d.setMonth(d.getMonth() + 12 - i);
               const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
               const m = `${monthsId[d.getMonth()]} ${d.getFullYear()}`;
               return <option key={m} value={m}>{m}</option>;

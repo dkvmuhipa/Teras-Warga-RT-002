@@ -69,6 +69,93 @@ const EVENTS_COL = "events";
 const WASTE_DEPOSITS_COL = "wasteDeposits";
 const WASTE_PRICES_COL = "wastePrices";
 const WASTE_BALANCES_COL = "wasteBalances";
+const IDEAS_COL = "ideas";
+const DONATION_CAMPAIGNS_COL = "donationCampaigns";
+const DONATION_RECORDS_COL = "donationRecords";
+
+// --- IDEAS SERVICES ---
+export const subscribeToIdeas = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, IDEAS_COL), orderBy("date", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    });
+};
+
+export const addIdea = async (data: any) => {
+    return await addDoc(collection(db, IDEAS_COL), {
+        ...data,
+        date: new Date().toISOString(),
+        upvotes: [],
+        status: 'Usulan'
+    });
+};
+
+export const updateIdeaStatus = async (id: string, status: string) => {
+    const docRef = doc(db, IDEAS_COL, id);
+    return await updateDoc(docRef, { status });
+};
+
+export const toggleUpvoteIdea = async (id: string, houseId: string) => {
+    const docRef = doc(db, IDEAS_COL, id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        const upvotes = docSnap.data().upvotes || [];
+        const newUpvotes = upvotes.includes(houseId) 
+            ? upvotes.filter((hid: string) => hid !== houseId)
+            : [...upvotes, houseId];
+        return await updateDoc(docRef, { upvotes: newUpvotes });
+    }
+};
+
+// --- DONATIONS SERVICES ---
+export const subscribeToDonationCampaigns = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, DONATION_CAMPAIGNS_COL), orderBy("startDate", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    });
+};
+
+export const subscribeToDonationRecords = (campaignId: string, callback: (data: any[]) => void) => {
+    const q = query(
+        collection(db, DONATION_RECORDS_COL), 
+        where("campaignId", "==", campaignId),
+        orderBy("date", "desc")
+    );
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    });
+};
+
+export const addDonationCampaign = async (data: any) => {
+    return await addDoc(collection(db, DONATION_CAMPAIGNS_COL), {
+        ...data,
+        currentAmount: 0,
+        startDate: new Date().toISOString(),
+        status: 'Aktif'
+    });
+};
+
+export const addDonationRecord = async (data: any) => {
+    const batch = writeBatch(db);
+    
+    // Add record
+    const recordRef = doc(collection(db, DONATION_RECORDS_COL));
+    batch.set(recordRef, {
+        ...data,
+        date: new Date().toISOString()
+    });
+    
+    // Update campaign amount
+    const campaignRef = doc(db, DONATION_CAMPAIGNS_COL, data.campaignId);
+    batch.update(campaignRef, {
+        currentAmount: increment(data.amount)
+    });
+    
+    return await batch.commit();
+};
 
 // --- AUDIT LOGS SERVICES ---
 export const logAction = async (action: string, details: string) => {
@@ -306,6 +393,36 @@ export const subscribeToBills = (callback: (data: any[]) => void) => {
         console.error("Error subscribing to bills:", error);
     });
 };
+
+export const generateMonthlyBills = async (month: string, dueDate: string, items: any[]) => {
+    try {
+        const housesSnap = await getDocs(collection(db, HOUSES_COL));
+        const batch = writeBatch(db);
+        
+        housesSnap.docs.forEach(houseDoc => {
+            const house = houseDoc.data();
+            if (house.status === 'Occupied') {
+                const billRef = doc(collection(db, BILLS_COL));
+                const total = items.reduce((acc, item) => acc + item.amount, 0);
+                
+                batch.set(billRef, deepSanitize({
+                    houseId: houseDoc.id,
+                    month,
+                    dueDate,
+                    items: items.map(item => ({ ...item, status: 'Unpaid' })),
+                    total,
+                    createdAt: new Date().toISOString()
+                }));
+            }
+        });
+        
+        await batch.commit();
+        return true;
+    } catch (e) {
+        console.error("Error generating monthly bills:", e);
+        return false;
+    }
+};
 export const uploadImageToStorage = async (file: File, path: string) => {
   try {
     const storageRef = ref(storage, path);
@@ -336,31 +453,35 @@ export const updateAdminPassword = async (newPass: string) => {
 
 export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any => {
   // Prevent infinite recursion with a safety depth limit
-  if (depth > 15) return "[Depth Limit]";
+  if (depth > 20) return "[Depth Limit]";
   
-  if (data === null || data === undefined || typeof data !== 'object') {
-    return data;
-  }
+  if (data === null || data === undefined) return data;
+  
+  // Handle non-objects
+  if (typeof data !== 'object') return data;
   
   // Handle Dates
-  if (data instanceof Date) {
-    return data.toISOString();
-  }
+  if (data instanceof Date) return data.toISOString();
 
   // Handle circular references
-  if (seen.has(data)) {
-    return "[Circular]";
-  }
+  if (seen.has(data)) return "[Circular]";
   
   // Avoid complex objects like Google Maps, DOM elements, or React elements
   try {
     const constructor = data.constructor;
     const constructorName = constructor?.name;
+    
+    // Detect internal/complex objects
     const isComplex = 
       data.nodeType || 
       data instanceof Element ||
-      (data.nativeEvent && data.target) || 
-      (data.$$typeof) || // React element
+      (typeof window !== 'undefined' && (
+        data instanceof window.Node || 
+        data instanceof window.Window || 
+        data instanceof window.Document ||
+        (window.Image && data instanceof window.Image)
+      )) ||
+      data.$$typeof || // React element
       (typeof constructorName === 'string' && (
         /^(Y2|Ka|Map|Marker|google|HTML|Window|Document|__)/i.test(constructorName) ||
         // Minified classes are often 1-2 chars
@@ -383,9 +504,7 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
       data instanceof ArrayBuffer ||
       ArrayBuffer.isView(data);
 
-    if (isComplex) {
-      return undefined;
-    }
+    if (isComplex) return undefined;
   } catch (e) {
     return undefined;
   }
@@ -393,25 +512,33 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
   seen.add(data);
 
   if (Array.isArray(data)) {
-    return data.map(item => deepSanitize(item, seen, depth + 1)).filter(i => i !== undefined);
+    return data
+      .map(item => deepSanitize(item, seen, depth + 1))
+      .filter(i => i !== undefined);
   }
 
   const clean: any = {};
   try {
-    Object.keys(data).forEach(key => {
+    const keys = Object.keys(data);
+    for (const key of keys) {
+      // Skip internal properties
+      if (key.startsWith('_') || key.startsWith('__') || key.startsWith('$')) continue;
+      
       try {
         const value = data[key];
-        // Skip functions and undefined
-        if (value !== undefined && typeof value !== 'function') {
-          const sanitized = deepSanitize(value, seen, depth + 1);
-          if (sanitized !== undefined) {
-            clean[key] = sanitized;
-          }
+        if (value === undefined || typeof value === 'function') continue;
+        
+        // Extra check for 'src' property which often causes circularity in DOM/Image objects
+        if (key === 'src' && typeof value === 'object') continue;
+
+        const sanitized = deepSanitize(value, seen, depth + 1);
+        if (sanitized !== undefined) {
+          clean[key] = sanitized;
         }
       } catch (e) {
         // Skip properties that throw on access
       }
-    });
+    }
   } catch (e) {
     return "[Complex Object]";
   }
@@ -476,6 +603,43 @@ export const addNotificationToDb = async (notification: any) => {
         const { id, ...data } = notification;
         await addDoc(collection(db, NOTIFICATIONS_COL), deepSanitize(data));
     } catch (e) { console.error("Error adding notification:", e); }
+};
+
+export const deleteNotificationFromDb = async (id: string) => {
+    try { await deleteDoc(doc(db, NOTIFICATIONS_COL, id)); } catch (e) { console.error("Error deleting notification:", e); }
+};
+
+export const markNotificationAsRead = async (id: string) => {
+    try { await updateDoc(doc(db, NOTIFICATIONS_COL, id), { isRead: true }); } catch (e) { console.error("Error marking notification as read:", e); }
+};
+
+export const sendPanicAlert = async (houseId: string, residentName: string, location: string) => {
+    try {
+        const notification = {
+            title: "🚨 DARURAT (PANIC BUTTON)",
+            message: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`,
+            date: new Date().toISOString(),
+            type: 'Alert',
+            target: 'All',
+            isRead: false
+        };
+        await addNotificationToDb(notification);
+        
+        // Also log it to reports for record
+        await addDoc(collection(db, REPORTS_COL), {
+            type: 'Keamanan',
+            description: `[PANIC BUTTON] Warga menekan tombol darurat dari Blok ${location}`,
+            reporterName: residentName,
+            reporterHouseId: houseId,
+            date: new Date().toISOString(),
+            status: 'Baru'
+        });
+        
+        return true;
+    } catch (e) {
+        console.error("Error sending panic alert:", e);
+        return false;
+    }
 };
 
 

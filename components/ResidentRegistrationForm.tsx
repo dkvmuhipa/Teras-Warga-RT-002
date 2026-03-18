@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { User, Home, Phone, Users, Send, CheckCircle, ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, FileText, Camera, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/Button';
 import { addResidentRegistrationToDb, uploadImageToStorage } from '../services/databaseService';
+import { toast } from 'sonner';
 
 interface ResidentRegistrationFormProps {
   onClose: () => void;
@@ -87,7 +88,9 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
       setIsSubmitted(true);
     } catch (error) {
       console.error(error);
-      alert('Gagal mengirim pendaftaran. Silakan coba lagi.');
+      toast.error('Gagal mengirim pendaftaran.', {
+        description: 'Silakan coba lagi beberapa saat lagi.'
+      });
     } finally {
       setIsLoading(false);
     }

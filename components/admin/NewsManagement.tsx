@@ -6,6 +6,7 @@ import { Modal } from '../ui/Modal';
 import { addNewsToDb, deleteNewsFromDb, updateNewsInDb } from '../../services/databaseService';
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface NewsManagementProps {
   news: News[];
@@ -64,7 +65,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
   };
 
   const handleGenerateWithAi = async () => {
-    if (!title) return alert('Masukkan judul berita terlebih dahulu');
+    if (!title) return toast.error('Masukkan judul berita terlebih dahulu');
     setIsAiLoading(true);
     const draft = await generateAnnouncementDraft(title, 'Jurnalistik');
     setContent(draft);
@@ -84,7 +85,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
     try {
       if (editingId) {
         await updateNewsInDb(editingId, { title, content, image, category });
-        alert('Berita berhasil diperbarui!');
+        toast.success('Berita berhasil diperbarui!');
       } else {
         await addNewsToDb({
           title,
@@ -93,13 +94,13 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
           category,
           date: new Date().toISOString(),
         });
-        alert('Berita berhasil dibuat!');
+        toast.success('Berita berhasil dibuat!');
       }
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
       console.error('Error saving news:', error);
-      alert('Gagal menyimpan berita.');
+      toast.error('Gagal menyimpan berita.');
     }
   };
 
@@ -113,14 +114,24 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
   };
 
   const handleDeleteNews = async (id: string) => {
-    if (window.confirm('Hapus berita ini?')) {
-      try {
-        await deleteNewsFromDb(id);
-      } catch (error) {
-        console.error(error);
-        alert('Gagal menghapus berita.');
+    toast.info('Hapus berita ini?', {
+      action: {
+        label: 'Hapus',
+        onClick: async () => {
+          try {
+            await deleteNewsFromDb(id);
+            toast.success('Berita berhasil dihapus.');
+          } catch (error) {
+            console.error(error);
+            toast.error('Gagal menghapus berita.');
+          }
+        }
+      },
+      cancel: {
+        label: 'Batal',
+        onClick: () => {}
       }
-    }
+    });
   };
 
   const containerVariants = {

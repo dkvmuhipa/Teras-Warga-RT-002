@@ -9,6 +9,7 @@ import { generateSuratPengantar } from '../../services/pdfService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { SignaturePad } from './SignaturePad';
+import { toast } from 'sonner';
 
 interface ServiceManagerProps {
   reports: Report[];
@@ -114,28 +115,34 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
 
   const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected', letter?: LetterRequest) => {
     if (window.confirm(`Ubah status surat menjadi ${status}?`)) {
-      await updateLetterStatus(id, status, status === 'Approved' ? letterNumberInput : undefined);
-      
-      if (status === 'Approved' && letter) {
-        // Generate official PDF with stamp and signature
-        const updatedLetter = { ...letter, letterNumber: letterNumberInput };
-        await generateSuratPengantar(updatedLetter, pdfConfig, false);
+      try {
+        await updateLetterStatus(id, status, status === 'Approved' ? letterNumberInput : undefined);
+        
+        if (status === 'Approved' && letter) {
+          // Generate official PDF with stamp and signature
+          const updatedLetter = { ...letter, letterNumber: letterNumberInput };
+          await generateSuratPengantar(updatedLetter, pdfConfig, false);
 
-        // Update lastLetterNumber in config based on the number used
-        const parts = letterNumberInput.split('/');
-        let nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
-        if (parts.length >= 2) {
-          const extractedNum = parseInt(parts[1]);
-          if (!isNaN(extractedNum)) nextNum = extractedNum;
+          // Update lastLetterNumber in config based on the number used
+          const parts = letterNumberInput.split('/');
+          let nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+          if (parts.length >= 2) {
+            const extractedNum = parseInt(parts[1]);
+            if (!isNaN(extractedNum)) nextNum = extractedNum;
+          }
+
+          const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
+          setPdfConfig(newConfig);
+          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
         }
-
-        const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
-        setPdfConfig(newConfig);
-        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+        
+        setSelectedLetter(null);
+        setLetterNumberInput('');
+        toast.success(`Status surat berhasil diubah menjadi ${status}`);
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal mengubah status surat.');
       }
-      
-      setSelectedLetter(null);
-      setLetterNumberInput('');
     }
   };
 
@@ -158,23 +165,35 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
         }
       }
       
-      alert("Detail surat berhasil disimpan!");
+      toast.success("Detail surat berhasil disimpan!");
     } catch (error) {
       console.error("Error saving letter details:", error);
-      alert("Gagal menyimpan detail surat.");
+      toast.error("Gagal menyimpan detail surat.");
     }
   };
 
   const handleUpdateReportStatus = async (id: string, status: 'Diproses' | 'Selesai') => {
     if (window.confirm(`Ubah status laporan menjadi ${status}?`)) {
-      await updateReportStatus(id, status);
-      setSelectedReport(null);
+      try {
+        await updateReportStatus(id, status);
+        setSelectedReport(null);
+        toast.success(`Status laporan berhasil diubah menjadi ${status}`);
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal mengubah status laporan.');
+      }
     }
   };
 
   const handleDeleteLetter = async (id: string) => {
     if (window.confirm('Hapus pengajuan surat ini secara permanen?')) {
-      await deleteLetterFromDb(id);
+      try {
+        await deleteLetterFromDb(id);
+        toast.success('Pengajuan surat berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus pengajuan surat.');
+      }
     }
   };
 
@@ -206,7 +225,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
     localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
 
     setIsCreatingLetter(false);
-    alert("Surat berhasil dibuat dan diunduh!");
+    toast.success("Surat berhasil dibuat dan diunduh!");
   };
 
   const filteredLetters = letters.filter(l => {
@@ -562,7 +581,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                           const newConfig = { ...pdfConfig, signature: dataUrl };
                           setPdfConfig(newConfig);
                           localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
-                          alert("Tanda tangan berhasil disimpan!");
+                          toast.success("Tanda tangan berhasil disimpan!");
                         }}
                       />
                     </div>
@@ -839,9 +858,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                       onClick={async () => {
                         try {
                           await generateSuratPengantar(letter, pdfConfig, false);
+                          toast.success('Surat sedang diunduh...');
                         } catch (err) {
                           console.error("Print Error:", err);
-                          alert("Gagal mencetak surat. Pastikan data lengkap.");
+                          toast.error("Gagal mencetak surat. Pastikan data lengkap.");
                         }
                       }}
                       className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100"

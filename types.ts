@@ -65,8 +65,16 @@ export interface House {
   // Social Assistance (Bantuan Sosial)
   isPKH?: boolean;
   isBLT?: boolean;
+  isBPNT?: boolean;
   isBansosLain?: boolean;
   bansosLainName?: string;
+  
+  // Vulnerable Groups & Economic Status
+  isDisability?: boolean;
+  disabilityCount?: number;
+  isOrphan?: boolean;
+  orphanCount?: number;
+  economicStatus?: 'Pra-Sejahtera' | 'Sejahtera' | 'Mampu';
 
   // Family Members
   familyMembers?: {
@@ -317,7 +325,7 @@ export interface Checkpoint {
 export interface MapPoint {
   id: string;
   label: string;
-  type: 'Gate' | 'Security' | 'Block' | 'Other';
+  type: 'Gate' | 'Security' | 'Block' | 'PJU' | 'CCTV' | 'Hydrant' | 'Trash' | 'Other';
   x: number;
   y: number;
   icon: string;
@@ -624,4 +632,42 @@ export interface UMKMOrder {
   createdAt?: string;
   pickupDate?: string;
   notes?: string;
+}
+
+// Musyawarah Digital (Forum Ide)
+export interface Idea {
+  id: string;
+  title: string;
+  description: string;
+  authorName: string;
+  houseId: string;
+  date: string;
+  upvotes: string[]; // Array of House IDs
+  status: 'Usulan' | 'Dibahas' | 'Disetujui' | 'Selesai';
+  category: 'Fasilitas' | 'Kegiatan' | 'Keamanan' | 'Lainnya';
+}
+
+// Donasi Sosial & Kas Kematian
+export interface DonationCampaign {
+  id: string;
+  title: string;
+  description: string;
+  targetAmount?: number;
+  currentAmount: number;
+  startDate: string;
+  endDate?: string;
+  status: 'Aktif' | 'Selesai';
+  type: 'Kematian' | 'Musibah' | 'Sosial' | 'Pembangunan';
+  beneficiaryName?: string;
+}
+
+export interface DonationRecord {
+  id: string;
+  campaignId: string;
+  donorName: string;
+  houseId: string;
+  amount: number;
+  date: string;
+  note?: string;
+  isAnonymous?: boolean;
 }

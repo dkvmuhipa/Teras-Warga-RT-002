@@ -6,6 +6,7 @@ import {
   Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
 import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, checkWasteRetribution } from '../../services/databaseService';
@@ -113,8 +114,6 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [searchResult, setSearchResult] = useState<any>(null);
 
   const [reportPhoto, setReportPhoto] = useState<string | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [submittedItem, setSubmittedItem] = useState<any>(null);
 
   const estimatedTimes: Record<string, string> = {
     'Surat Pengantar': '1x24 Jam',
@@ -179,7 +178,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     e.preventDefault(); 
     const isValid = await validateResidentAccess(houseId, accessCode);
     if (!isValid) {
-      alert("Verifikasi Gagal! Kode Akses Rumah tidak valid. Silakan hubungi Ketua RT jika lupa kode.");
+      toast.error("Verifikasi Gagal!", {
+        description: "Kode Akses Rumah tidak valid. Silakan hubungi Ketua RT jika lupa kode."
+      });
       return;
     }
 
@@ -188,7 +189,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     // Check Waste Retribution (Mandatory in Palu City)
     const retribution = await checkWasteRetribution(formattedHouseId);
     if (!retribution.paid) {
-      alert(`PENGURUSAN DITANGGUHKAN: Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`);
+      toast.warning("PENGURUSAN DITANGGUHKAN", {
+        description: `Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`,
+        duration: 10000
+      });
       return;
     }
 
@@ -225,8 +229,15 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     await addLetterToDb(letterData); 
     const historyItem = {...letterData, category: 'Surat', title: `Surat ${finalRequestType}`};
     saveToHistory(historyItem); 
-    setSubmittedItem(historyItem);
-    setShowSuccessModal(true);
+    
+    toast.success("Surat Berhasil Diajukan!", {
+      description: `ID: #${letterData.id.slice(-8)} | Estimasi: ${letterData.estimatedTime}`,
+      action: {
+        label: "WhatsApp RT",
+        onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20${finalRequestType}%20dengan%20ID%20${letterData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
+      },
+      duration: 10000
+    });
     
     // Reset form
     setApplicantName(''); setNik(''); setFamilyHeadName(''); setBirthPlace(''); setBirthDate(''); setJob(''); setAddressKtp(''); setHouseId(''); setPurposeDetail(''); setAccessCode('');
@@ -237,7 +248,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     e.preventDefault(); 
     const isValid = await validateResidentAccess(reporterHouseId, accessCode);
     if (!isValid) {
-      alert("Verifikasi Gagal! Kode Akses Rumah tidak valid.");
+      toast.error("Verifikasi Gagal!", {
+        description: "Kode Akses Rumah tidak valid."
+      });
       return;
     }
 
@@ -260,8 +273,15 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     await addReportToDb(reportData);
     const historyItem = {...reportData, category: 'Laporan', title: `Laporan ${reportType}`};
     saveToHistory(historyItem);
-    setSubmittedItem(historyItem);
-    setShowSuccessModal(true);
+    
+    toast.success("Laporan Berhasil Terkirim!", {
+      description: `ID: #${reportData.id.slice(-8)} | Kategori: ${reportType}`,
+      action: {
+        label: "WhatsApp RT",
+        onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20Laporan%20${reportType}%20dengan%20ID%20${reportData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
+      },
+      duration: 10000
+    });
     
     // Reset form
     setReportDesc(''); setReporterName(''); setReportHouseId(''); setReporterHouseId(''); setAccessCode('');
@@ -275,7 +295,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     if (mutationType !== 'Newcomer') {
       const isValid = await validateResidentAccess(mutationHouseId, accessCode);
       if (!isValid) {
-        alert("Verifikasi Gagal! Kode Akses Rumah tidak valid.");
+        toast.error("Verifikasi Gagal!", {
+          description: "Kode Akses Rumah tidak valid."
+        });
         return;
       }
 
@@ -284,7 +306,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       // Check Waste Retribution (Mandatory in Palu City)
       const retribution = await checkWasteRetribution(formattedMutationHouseId);
       if (!retribution.paid) {
-        alert(`PELAPORAN DITANGGUHKAN: Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`);
+        toast.warning("PELAPORAN DITANGGUHKAN", {
+          description: `Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`,
+          duration: 10000
+        });
         return;
       }
     }
@@ -326,12 +351,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       title: `${mutationType === 'Newcomer' ? 'Warga Baru' : mutationType === 'MovedOut' ? 'Warga Pindah' : mutationType === 'Birth' ? 'Kelahiran' : 'Kematian'}: ${mutationName}`
     });
     
-    setSubmittedItem({
-      ...mutationData,
-      category: 'Mutasi',
-      title: `Laporan Mutasi: ${mutationName}`
+    toast.success("Laporan Mutasi Berhasil!", {
+      description: `ID: #${mutationData.id.slice(-8)} | Jenis: ${mutationType}`,
+      action: {
+        label: "WhatsApp RT",
+        onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20Laporan%20Mutasi%20${mutationType}%20dengan%20ID%20${mutationData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
+      },
+      duration: 10000
     });
-    setShowSuccessModal(true);
 
     // Reset form
     setMutationStep(1);
@@ -1616,84 +1643,6 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               </div>
             )}
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Success Modal */}
-      <AnimatePresence>
-        {showSuccessModal && submittedItem && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white w-full max-w-lg rounded-[3.5rem] overflow-hidden shadow-2xl"
-            >
-              <div className={`p-10 text-center ${submittedItem.category === 'Surat' ? 'bg-indigo-600' : 'bg-rose-600'} text-white relative`}>
-                <button 
-                  onClick={() => setShowSuccessModal(false)}
-                  className="absolute top-8 right-8 p-2 hover:bg-white/10 rounded-full transition-colors"
-                >
-                  <XCircle size={24} />
-                </button>
-                <div className="w-20 h-20 bg-white/20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 backdrop-blur-md">
-                  <CheckCircle2 size={40} />
-                </div>
-                <h2 className="text-3xl font-black mb-2 tracking-tight">Berhasil Terkirim!</h2>
-                <p className="text-white/80 font-medium">Data Anda telah masuk ke sistem administrasi RT.</p>
-              </div>
-
-              <div className="p-10 space-y-8">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ID Pengajuan</span>
-                    <span className="text-sm font-black text-slate-900">#{submittedItem.id.slice(-8)}</span>
-                  </div>
-                  {submittedItem.category === 'Surat' && (
-                    <div className="flex justify-between items-center p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                      <div className="flex items-center gap-2">
-                        <Clock size={16} className="text-indigo-600" />
-                        <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">Estimasi Selesai</span>
-                      </div>
-                      <span className="text-sm font-black text-indigo-600">{submittedItem.estimatedTime}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest text-center">Tindakan Selanjutnya</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    <a 
-                      href={`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20${submittedItem.title}%20dengan%20ID%20${submittedItem.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-3 w-full p-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all"
-                    >
-                      <MessageCircle size={18} /> Hubungi Ketua RT (WA)
-                    </a>
-                    <Button 
-                      variant="outline"
-                      onClick={() => setShowSuccessModal(false)}
-                      className="w-full p-5 rounded-2xl font-black uppercase tracking-widest text-xs"
-                    >
-                      Tutup & Kembali
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="pt-8 border-t border-slate-100 text-center">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Berikan Rating Layanan</p>
-                  <div className="flex justify-center gap-2">
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <button key={star} className="p-2 text-slate-200 hover:text-amber-400 transition-colors">
-                        <Star size={24} fill="currentColor" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
         )}
       </AnimatePresence>
     </motion.div>

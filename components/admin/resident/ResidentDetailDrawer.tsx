@@ -11,6 +11,7 @@ interface ResidentDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   selectedResident: House | null;
+  selectedMonth: string;
   openPayModal: (house: House) => void;
   setSelectedHouseForBills: (house: House) => void;
   handleOpenEdit: (house: House) => void;
@@ -21,6 +22,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
   isOpen,
   onClose,
   selectedResident,
+  selectedMonth,
   openPayModal,
   setSelectedHouseForBills,
   handleOpenEdit,
@@ -32,6 +34,9 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
 
   const arrears = getArrearsForHouse(selectedResident);
   const isFullyPaid = arrears.length === 0;
+  
+  const statusAir = getPaymentStatus(selectedResident, 'Air', selectedMonth);
+  const statusSampah = getPaymentStatus(selectedResident, 'Sampah', selectedMonth);
 
   return (
     <div key="drawer-overlay" className="fixed inset-0 z-[100] flex justify-end">
@@ -221,9 +226,9 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Air</span>
                     </div>
                     <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-                      getPaymentStatus(selectedResident, 'Air') === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                      statusAir === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                     }`}>
-                      {getPaymentStatus(selectedResident, 'Air') === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                      {statusAir === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
                     </span>
                   </div>
                   <div className="p-4 bg-white border border-slate-100 rounded-3xl flex items-center justify-between">
@@ -234,9 +239,9 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sampah</span>
                     </div>
                     <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-                      getPaymentStatus(selectedResident, 'Sampah') === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                      statusSampah === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                     }`}>
-                      {getPaymentStatus(selectedResident, 'Sampah') === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
+                      {statusSampah === PaymentStatus.PAID ? 'Lunas' : 'Belum'}
                     </span>
                   </div>
                 </div>
@@ -274,9 +279,13 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Penghuni</p>
                   <p className="text-sm font-bold text-slate-800">{selectedResident.occupants || 0} Orang</p>
                 </div>
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status Ekonomi</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.economicStatus || 'Sejahtera'}</p>
+                </div>
               </div>
               
-              {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.babyCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.childCount || 0) > 0 || (selectedResident.teenagerCount || 0) > 0 || (selectedResident.adultCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0 || (selectedResident.widowCount || 0) > 0) && (
+              {((selectedResident.pregnantCount || 0) > 0 || (selectedResident.babyCount || 0) > 0 || (selectedResident.toddlerCount || 0) > 0 || (selectedResident.childCount || 0) > 0 || (selectedResident.teenagerCount || 0) > 0 || (selectedResident.adultCount || 0) > 0 || (selectedResident.elderlyCount || 0) > 0 || (selectedResident.widowCount || 0) > 0 || selectedResident.isDisability || selectedResident.isOrphan) && (
                 <div className="p-4 bg-rose-50 border border-rose-100 rounded-3xl">
                   <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none mb-3">Kelompok Rentan</p>
                   <div className="flex flex-wrap gap-2">
@@ -288,16 +297,19 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     {(selectedResident.adultCount || 0) > 0 && <span className="px-3 py-1 bg-white text-emerald-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.adultCount} Dewasa</span>}
                     {(selectedResident.elderlyCount || 0) > 0 && <span className="px-3 py-1 bg-white text-purple-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.elderlyCount} Lansia</span>}
                     {(selectedResident.widowCount || 0) > 0 && <span className="px-3 py-1 bg-white text-slate-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.widowCount} Janda</span>}
+                    {selectedResident.isDisability && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.disabilityCount || 1} Disabilitas</span>}
+                    {selectedResident.isOrphan && <span className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{selectedResident.orphanCount || 1} Yatim/Piatu</span>}
                   </div>
                 </div>
               )}
 
-              {(selectedResident.isPKH || selectedResident.isBLT || selectedResident.isBansosLain) && (
+              {(selectedResident.isPKH || selectedResident.isBLT || selectedResident.isBPNT || selectedResident.isBansosLain) && (
                 <div className="mt-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
                   <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-3">Penerima Bantuan Sosial</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedResident.isPKH && <span className="px-3 py-1 bg-white text-indigo-600 rounded-full text-xs font-bold shadow-sm">PKH</span>}
                     {selectedResident.isBLT && <span className="px-3 py-1 bg-white text-indigo-600 rounded-full text-xs font-bold shadow-sm">BLT</span>}
+                    {selectedResident.isBPNT && <span className="px-3 py-1 bg-white text-indigo-600 rounded-full text-xs font-bold shadow-sm">BPNT</span>}
                     {selectedResident.isBansosLain && (
                       <span className="px-3 py-1 bg-white text-indigo-600 rounded-full text-xs font-bold shadow-sm">
                         {selectedResident.bansosLainName || 'Bansos Lainnya'}

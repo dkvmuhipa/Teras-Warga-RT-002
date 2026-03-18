@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2
@@ -37,7 +38,9 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     if (house) {
       navigate(`/info?search=${statusSearchId}`);
     } else {
-      alert("No. Rumah tidak ditemukan. Pastikan format benar (Contoh: A1-01)");
+      toast.error("No. Rumah tidak ditemukan", {
+        description: "Pastikan format benar (Contoh: A1-01)"
+      });
     }
   };
 

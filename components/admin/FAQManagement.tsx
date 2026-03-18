@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, HelpCircle, Save, X } from 'lucide-react';
 import { addFAQToDb, updateFAQInDb, deleteFAQFromDb } from '../../services/databaseService';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { toast } from 'sonner';
 
 interface FAQManagementProps {
   faqItems: FAQItem[];
@@ -35,21 +36,34 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = { question, answer };
-    
-    if (editingId) {
-      await updateFAQInDb(editingId, data);
-    } else {
-      await addFAQToDb(data);
+    try {
+      const data = { question, answer };
+      
+      if (editingId) {
+        await updateFAQInDb(editingId, data);
+        toast.success('FAQ berhasil diperbarui!');
+      } else {
+        await addFAQToDb(data);
+        toast.success('FAQ berhasil ditambahkan!');
+      }
+      
+      setIsModalOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal menyimpan FAQ.');
     }
-    
-    setIsModalOpen(false);
-    resetForm();
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Hapus FAQ ini?')) {
-      await deleteFAQFromDb(id);
+    if (window.confirm('Hapus FAQ ini?')) {
+      try {
+        await deleteFAQFromDb(id);
+        toast.success('FAQ berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus FAQ.');
+      }
     }
   };
 

@@ -2,9 +2,11 @@ import React from 'react';
 import { DollarSign, Activity, AlertCircle, CreditCard, Mail, Download, Printer, Edit2, Trash2 } from 'lucide-react';
 import { House, PdfConfig } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
+import { toast } from 'sonner';
 
 interface ResidentIuranManagerProps {
   houses: House[];
+  searchTerm: string;
   generateIuranReceiptPDF: (payment: any, config: PdfConfig) => void;
   pdfConfig: PdfConfig;
   deleteIuranPaymentFromDb: (id: string) => Promise<void>;
@@ -13,11 +15,13 @@ interface ResidentIuranManagerProps {
   setPayAmount: (amount: string) => void;
   setPayDate: (date: string) => void;
   setPayNotes: (notes: string) => void;
+  setPayerName: (name: string) => void;
   setIsEditPaymentModalOpen: (open: boolean) => void;
 }
 
 export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
   houses,
+  searchTerm,
   generateIuranReceiptPDF,
   pdfConfig,
   deleteIuranPaymentFromDb,
@@ -26,13 +30,16 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
   setPayAmount,
   setPayDate,
   setPayNotes,
+  setPayerName,
   setIsEditPaymentModalOpen,
 }) => {
+  const [filterType, setFilterType] = React.useState<'All' | 'Air' | 'Sampah'>('All');
   const { 
     selectedMonth, 
     summaries, 
     iuranPayments, 
-    getArrearsForHouse 
+    getArrearsForHouse,
+    isMonthMatch
   } = useFinancial();
   
   const { 
@@ -42,19 +49,83 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
     unpaidHousesCount, 
     estimatedReceivables, 
     totalArrearsAmount, 
-    totalArrearsMonths 
+    totalArrearsMonths,
+    air,
+    sampah
   } = summaries;
 
-  const isMonthMatch = (monthA: string, monthB: string) => {
-    if (!monthA || !monthB) return false;
-    return monthA.trim().toLowerCase() === monthB.trim().toLowerCase();
-  };
+  const searchLower = searchTerm.toLowerCase();
+  const currentMonthPayments = iuranPayments.filter(p => {
+    const matchesMonth = isMonthMatch(p.month, selectedMonth);
+    const matchesSearch = 
+      p.headOfFamily.toLowerCase().includes(searchLower) || 
+      p.block.toLowerCase().includes(searchLower) ||
+      p.number.toLowerCase().includes(searchLower);
+    const matchesType = filterType === 'All' || p.type === filterType || p.type === 'Both';
+    return matchesMonth && matchesSearch && matchesType;
+  });
 
-  const currentMonthPayments = iuranPayments.filter(p => isMonthMatch(p.month, selectedMonth));
-  const occupiedHousesList = houses.filter(h => h.status === 'Occupied');
+  const occupiedHousesList = houses.filter(h => {
+    const isOccupied = h.status === 'Occupied';
+    const matchesSearch = 
+      h.headOfFamily.toLowerCase().includes(searchLower) || 
+      h.block.toLowerCase().includes(searchLower) ||
+      h.number.toLowerCase().includes(searchLower) ||
+      (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) ||
+      (h.familyMembers && h.familyMembers.some(m => m.name.toLowerCase().includes(searchLower)));
+    return isOccupied && matchesSearch;
+  });
+
+  const displayStats = filterType === 'All' ? {
+    totalCollected,
+    participationRate,
+    paidHousesCount,
+    unpaidHousesCount,
+    estimatedReceivables,
+    totalArrearsAmount,
+    totalArrearsMonths
+  } : filterType === 'Air' ? {
+    totalCollected: air.totalCollected,
+    participationRate: Math.round(((occupiedHousesList.length - air.unpaidCount) / occupiedHousesList.length) * 100) || 0,
+    paidHousesCount: occupiedHousesList.length - air.unpaidCount,
+    unpaidHousesCount: air.unpaidCount,
+    estimatedReceivables: air.estimatedReceivables,
+    totalArrearsAmount: air.totalArrearsAmount,
+    totalArrearsMonths: air.arrearsUnits
+  } : {
+    totalCollected: sampah.totalCollected,
+    participationRate: Math.round(((occupiedHousesList.length - sampah.unpaidCount) / occupiedHousesList.length) * 100) || 0,
+    paidHousesCount: occupiedHousesList.length - sampah.unpaidCount,
+    unpaidHousesCount: sampah.unpaidCount,
+    estimatedReceivables: sampah.estimatedReceivables,
+    totalArrearsAmount: sampah.totalArrearsAmount,
+    totalArrearsMonths: sampah.arrearsUnits
+  };
 
   return (
     <div className="space-y-6">
+      {/* Type Filter */}
+      <div className="flex p-1 bg-slate-100 rounded-2xl w-fit border border-slate-200">
+        <button 
+          onClick={() => setFilterType('All')}
+          className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterType === 'All' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          Semua Iuran
+        </button>
+        <button 
+          onClick={() => setFilterType('Air')}
+          className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterType === 'Air' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          Iuran Air
+        </button>
+        <button 
+          onClick={() => setFilterType('Sampah')}
+          className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterType === 'Sampah' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          Iuran Sampah
+        </button>
+      </div>
+
       {/* Financial Summary Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -62,7 +133,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             <DollarSign size={48} className="text-emerald-600" />
           </div>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Terkumpul</p>
-          <h4 className="text-2xl font-black text-slate-800">Rp {totalCollected.toLocaleString()}</h4>
+          <h4 className="text-2xl font-black text-slate-800">Rp {displayStats.totalCollected.toLocaleString()}</h4>
           <div className="mt-4 flex items-center gap-2">
             <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-md border border-emerald-100">
               {selectedMonth}
@@ -75,14 +146,14 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             <Activity size={48} className="text-indigo-600" />
           </div>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Partisipasi Warga</p>
-          <h4 className="text-2xl font-black text-slate-800">{participationRate}%</h4>
+          <h4 className="text-2xl font-black text-slate-800">{displayStats.participationRate}%</h4>
           <div className="mt-4 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
             <div 
               className="bg-indigo-500 h-full transition-all duration-1000" 
-              style={{ width: `${participationRate}%` }}
+              style={{ width: `${displayStats.participationRate}%` }}
             ></div>
           </div>
-          <p className="mt-2 text-[10px] font-bold text-slate-400">{paidHousesCount} dari {occupiedHousesList.length} Rumah Dihuni</p>
+          <p className="mt-2 text-[10px] font-bold text-slate-400">{displayStats.paidHousesCount} dari {occupiedHousesList.length} Rumah Dihuni</p>
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -90,7 +161,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             <AlertCircle size={48} className="text-rose-600" />
           </div>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Belum Bayar</p>
-          <h4 className="text-2xl font-black text-rose-600">{unpaidHousesCount} <span className="text-sm text-slate-400 font-bold">Rumah</span></h4>
+          <h4 className="text-2xl font-black text-rose-600">{displayStats.unpaidHousesCount} <span className="text-sm text-slate-400 font-bold">Rumah</span></h4>
           <div className="mt-4 flex items-center gap-2">
             <span className="px-2 py-0.5 bg-rose-50 text-rose-600 text-[10px] font-black rounded-md border border-rose-100">
               Bulan Ini
@@ -103,7 +174,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             <CreditCard size={48} className="text-amber-600" />
           </div>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Estimasi Piutang</p>
-          <h4 className="text-2xl font-black text-slate-800">Rp {estimatedReceivables.toLocaleString()}</h4>
+          <h4 className="text-2xl font-black text-slate-800">Rp {displayStats.estimatedReceivables.toLocaleString()}</h4>
           <p className="mt-4 text-[10px] font-bold text-slate-400 italic">Bulan Ini</p>
         </div>
 
@@ -112,8 +183,8 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             <AlertCircle size={48} className="text-rose-600" />
           </div>
           <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-1">Total Tunggakan</p>
-          <h4 className="text-2xl font-black text-rose-600">Rp {totalArrearsAmount.toLocaleString()}</h4>
-          <p className="mt-4 text-[10px] font-bold text-rose-400 italic">Dari {totalArrearsMonths} Bulan Unpaid</p>
+          <h4 className="text-2xl font-black text-rose-600">Rp {displayStats.totalArrearsAmount.toLocaleString()}</h4>
+          <p className="mt-4 text-[10px] font-bold text-rose-400 italic">Dari {displayStats.totalArrearsMonths} Bulan Unpaid</p>
         </div>
       </div>
 
@@ -126,20 +197,21 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
           <div className="flex gap-2">
             <button 
               onClick={() => {
+                const typeLabel = filterType === 'All' ? 'IURAN' : filterType === 'Air' ? 'IURAN AIR' : 'IURAN SAMPAH';
                 const unpaidHouses = occupiedHousesList.filter(h => !currentMonthPayments.some(p => 
                   String(p.houseId) === String(h.id) || 
                   String(p.houseId) === `${h.block}-${h.number}` ||
                   (p.block === h.block && p.number === h.number)
                 ));
-                const text = `*DAFTAR WARGA BELUM BAYAR IURAN*\n*Periode:* ${selectedMonth}\n\n` + 
+                const text = `*DAFTAR WARGA BELUM BAYAR ${typeLabel}*\n*Periode:* ${selectedMonth}\n\n` + 
                   unpaidHouses.map((h, i) => {
-                    const arrears = getArrearsForHouse(h);
+                    const arrears = getArrearsForHouse(h, filterType === 'All' ? undefined : filterType as 'Air' | 'Sampah');
                     const arrearsText = arrears.length > 0 ? ` (+ Tunggakan ${arrears.length} bln)` : '';
                     return `${i+1}. Blok ${h.block}-${h.number} (${h.headOfFamily})${arrearsText}`;
                   }).join('\n') +
                   `\n\nMohon segera melakukan pembayaran. Terima kasih.`;
                 navigator.clipboard.writeText(text);
-                alert('Daftar warga belum bayar berhasil disalin ke clipboard!');
+                toast.success(`Daftar warga belum bayar ${filterType === 'All' ? '' : filterType.toLowerCase()} berhasil disalin ke clipboard!`);
               }}
               className="flex items-center gap-2 px-5 py-2.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-amber-100 transition-all"
             >
@@ -147,6 +219,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             </button>
             <button 
               onClick={() => {
+                const typeLabel = filterType === 'All' ? 'Semua' : filterType;
                 const csv = [
                   ['Tanggal Bayar', 'Bulan Iuran', 'Nama', 'Rumah', 'Jenis', 'Nominal'].join(','),
                   ...currentMonthPayments.map(p => [
@@ -162,7 +235,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `Laporan_Iuran_${selectedMonth.replace(/\s+/g, '_')}.csv`;
+                a.download = `Laporan_Iuran_${typeLabel}_${selectedMonth.replace(/\s+/g, '_')}.csv`;
                 a.click();
               }}
               className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
@@ -195,7 +268,14 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                         {payment.month}
                       </span>
                     </td>
-                    <td className="p-3 md:p-4 font-bold text-slate-800 text-xs md:text-sm">{payment.headOfFamily}</td>
+                    <td className="p-3 md:p-4">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-800 text-xs md:text-sm">{payment.headOfFamily}</span>
+                        {payment.payerName && payment.payerName !== payment.headOfFamily && (
+                          <span className="text-[10px] text-slate-400 font-medium italic">Oleh: {payment.payerName}</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-3 md:p-4 font-mono font-black text-slate-600 text-xs md:text-sm">{payment.block}-{payment.number}</td>
                     <td className="p-3 md:p-4 hidden sm:table-cell">
                       <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
@@ -222,6 +302,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                             setPayAmount(payment.amount.toString());
                             setPayDate(new Date(payment.date).toISOString().split('T')[0]);
                             setPayNotes(payment.notes || '');
+                            setPayerName(payment.payerName || '');
                             setIsEditPaymentModalOpen(true);
                           }}
                           className="p-1.5 md:p-2 text-slate-300 hover:text-indigo-600 transition-colors"
@@ -232,7 +313,13 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                         <button 
                           onClick={async () => {
                             if(window.confirm('Hapus catatan pembayaran ini?')) {
-                              await deleteIuranPaymentFromDb(payment.id);
+                              try {
+                                await deleteIuranPaymentFromDb(payment.id);
+                                toast.success('Catatan pembayaran dihapus.');
+                              } catch (error) {
+                                console.error(error);
+                                toast.error('Gagal menghapus catatan pembayaran.');
+                              }
                             }
                           }}
                           className="p-1.5 md:p-2 text-slate-300 hover:text-rose-600 transition-colors"
@@ -275,7 +362,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {occupiedHousesList
-            .map(h => ({ house: h, arrears: getArrearsForHouse(h) }))
+            .map(h => ({ house: h, arrears: getArrearsForHouse(h, filterType === 'All' ? undefined : filterType as 'Air' | 'Sampah') }))
             .filter(item => item.arrears.length > 0)
             .sort((a, b) => b.arrears.length - a.arrears.length)
             .map(({ house, arrears }) => (

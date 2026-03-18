@@ -7,6 +7,7 @@ import { addAnnouncementToDb, deleteAnnouncementFromDb, updateAnnouncementInDb }
 import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from '../../services/whatsappService';
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface AnnouncementManagementProps {
   announcements: Announcement[];
@@ -30,7 +31,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
   );
 
   const handleGenerateWithAi = async () => {
-    if (!annTitle) return alert('Masukkan judul terlebih dahulu');
+    if (!annTitle) return toast.error('Masukkan judul terlebih dahulu');
     setIsAiLoading(true);
     const draft = await generateAnnouncementDraft(annTitle);
     setAnnContent(draft);
@@ -53,7 +54,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
           content: annContent,
           type: annType as any
         });
-        alert('Pengumuman berhasil diperbarui!');
+        toast.success('Pengumuman berhasil diperbarui!');
       } else {
         await addAnnouncementToDb({
           title: annTitle,
@@ -61,13 +62,13 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
           date: new Date().toISOString(),
           type: annType as any
         });
-        alert('Pengumuman berhasil dibuat!');
+        toast.success('Pengumuman berhasil dibuat!');
       }
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
       console.error(error);
-      alert('Gagal menyimpan pengumuman.');
+      toast.error('Gagal menyimpan pengumuman.');
     }
   };
 
@@ -80,14 +81,24 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
-    if (window.confirm('Hapus pengumuman ini?')) {
-      try {
-        await deleteAnnouncementFromDb(id);
-      } catch (error) {
-        console.error(error);
-        alert('Gagal menghapus pengumuman.');
+    toast.info('Hapus pengumuman ini?', {
+      action: {
+        label: 'Hapus',
+        onClick: async () => {
+          try {
+            await deleteAnnouncementFromDb(id);
+            toast.success('Pengumuman berhasil dihapus.');
+          } catch (error) {
+            console.error(error);
+            toast.error('Gagal menghapus pengumuman.');
+          }
+        }
+      },
+      cancel: {
+        label: 'Batal',
+        onClick: () => {}
       }
-    }
+    });
   };
 
   const containerVariants = {
