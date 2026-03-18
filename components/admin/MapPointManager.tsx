@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { Plus, Trash2, Edit2, MapPin, Shield, Move, Lightbulb, Video, Droplets, Trash } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
+import { MapLayout } from '../HouseMap';
 
 interface MapPointManagerProps {
     mapPoints: MapPoint[];
@@ -20,6 +21,16 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
     const [type, setType] = useState<MapPoint['type']>('Other');
     const [x, setX] = useState<number>(50);
     const [y, setY] = useState<number>(50);
+    const mapRef = React.useRef<HTMLDivElement>(null);
+
+    const handleMapClick = (e: React.MouseEvent) => {
+        if (!mapRef.current) return;
+        const rect = mapRef.current.getBoundingClientRect();
+        const newX = ((e.clientX - rect.left) / rect.width) * 100;
+        const newY = ((e.clientY - rect.top) / rect.height) * 100;
+        setX(Math.round(newX * 10) / 10);
+        setY(Math.round(newY * 10) / 10);
+    };
 
     const handleEdit = (point: MapPoint) => {
         setEditingPoint(point);
@@ -174,7 +185,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
                                 value={x}
                                 onChange={e => setX(Number(e.target.value))}
-                                min="0" max="100"
+                                min="0" max="100" step="0.1"
                             />
                         </div>
                         <div>
@@ -184,10 +195,45 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
                                 value={y}
                                 onChange={e => setY(Number(e.target.value))}
-                                min="0" max="100"
+                                min="0" max="100" step="0.1"
                             />
                         </div>
                     </div>
+
+                    {/* Visual Picker */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">Klik di Peta untuk Menentukan Posisi</label>
+                        <div 
+                            ref={mapRef}
+                            onClick={handleMapClick}
+                            className="relative w-full bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 overflow-hidden cursor-crosshair group p-4"
+                        >
+                            {/* Real Map Layout Preview */}
+                            <div className="opacity-20 pointer-events-none scale-90 origin-top">
+                                <MapLayout 
+                                    houses={houses}
+                                    renderBlock={(blockCode) => (
+                                        <div className="bg-slate-400 rounded-lg p-2 text-center text-[8px] font-black text-white">
+                                            {blockCode}
+                                        </div>
+                                    )}
+                                />
+                            </div>
+                            
+                            {/* Current Point Indicator */}
+                            <div 
+                                className={`absolute -translate-x-1/2 -translate-y-1/2 p-1 rounded-full shadow-lg border-2 border-white ${getColor(type)} text-white z-10 transition-all duration-300`}
+                                style={{ left: `${x}%`, top: `${y}%` }}
+                            >
+                                {getIcon(type)}
+                            </div>
+
+                            {/* Hover Indicator */}
+                            <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity"></div>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-medium italic">Tip: Klik pada area di atas untuk memindahkan penanda secara visual sesuai tata letak blok rumah.</p>
+                    </div>
+
                     <div className="flex gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1">Batal</Button>
                         <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">Simpan</Button>

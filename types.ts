@@ -387,13 +387,23 @@ export interface PdfConfig {
   fieldLabels?: Record<string, string>;
 }
 
+export interface MaintenanceLog {
+  id: string;
+  date: string;
+  description: string;
+  cost?: number;
+  performedBy?: string;
+}
+
 export interface InventoryItem {
   id: string;
   name: string;
   total: number;
   available: number;
   condition: 'Baik' | 'Perlu Perbaikan' | 'Rusak';
+  category: 'Perlengkapan Acara' | 'Alat Kebersihan' | 'Keamanan' | 'Peralatan Tukang' | 'Lainnya';
   notes?: string;
+  maintenanceHistory?: MaintenanceLog[];
 }
 
 // E-Voting Types

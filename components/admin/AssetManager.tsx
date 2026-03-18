@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Package, Plus, Edit2, Trash2, Box, CheckCircle2, History, User, Calendar, Clock, CheckCircle, Trash } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, Box, CheckCircle2, History, User, Calendar, Clock, CheckCircle, Trash, Filter, Wrench, DollarSign, ClipboardList } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { InventoryItem } from '../../types';
+import { InventoryItem, MaintenanceLog } from '../../types';
 import { addInventoryToDb, updateInventoryInDb, deleteInventoryFromDb, addInventoryLogToDb, updateInventoryLogStatus, deleteInventoryLogFromDb } from '../../services/databaseService';
 import { toast } from 'sonner';
 
@@ -12,15 +12,19 @@ interface AssetManagerProps {
   inventoryLogs: any[];
 }
 
+const CATEGORIES = ['Perlengkapan Acara', 'Alat Kebersihan', 'Keamanan', 'Peralatan Tukang', 'Lainnya'] as const;
+
 export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventoryLogs }) => {
   const [isInvModalOpen, setIsInvModalOpen] = useState(false);
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
+  const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<InventoryItem | null>(null);
   
   const [editingInvId, setEditingInvId] = useState<string | null>(null);
   const [invName, setInvName] = useState('');
   const [invTotal, setInvTotal] = useState('');
   const [invCondition, setInvCondition] = useState<'Baik' | 'Perlu Perbaikan' | 'Rusak'>('Baik');
+  const [invCategory, setInvCategory] = useState<typeof CATEGORIES[number]>('Lainnya');
 
   // Borrow Form State
   const [borrowerName, setBorrowerName] = useState('');
@@ -28,12 +32,24 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
   const [borrowDate, setBorrowDate] = useState(new Date().toISOString().split('T')[0]);
   const [returnDate, setReturnDate] = useState('');
 
+  // Maintenance Form State
+  const [maintenanceDesc, setMaintenanceDesc] = useState('');
+  const [maintenanceCost, setMaintenanceCost] = useState('');
+  const [maintenanceDate, setMaintenanceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [maintenanceBy, setMaintenanceBy] = useState('');
+
+  const [activeCategory, setActiveCategory] = useState<string>('Semua');
+
   const resetInvForm = () => {
-    setInvName(''); setInvTotal(''); setInvCondition('Baik'); setEditingInvId(null);
+    setInvName(''); setInvTotal(''); setInvCondition('Baik'); setInvCategory('Lainnya'); setEditingInvId(null);
   };
 
   const resetBorrowForm = () => {
     setBorrowerName(''); setBorrowAmount('1'); setBorrowDate(new Date().toISOString().split('T')[0]); setReturnDate(''); setSelectedAsset(null);
+  };
+
+  const resetMaintenanceForm = () => {
+    setMaintenanceDesc(''); setMaintenanceCost(''); setMaintenanceDate(new Date().toISOString().split('T')[0]); setMaintenanceBy('');
   };
 
   const handleEditInventory = (item: InventoryItem) => {
@@ -41,6 +57,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
     setInvName(item.name);
     setInvTotal(item.total.toString());
     setInvCondition(item.condition);
+    setInvCategory(item.category || 'Lainnya');
     setIsInvModalOpen(true);
   };
 
@@ -51,7 +68,8 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         name: invName,
         total: parseInt(invTotal),
         available: parseInt(invTotal), // Simplified logic
-        condition: invCondition
+        condition: invCondition,
+        category: invCategory
       };
 
       if (editingInvId) await updateInventoryInDb(editingInvId, data);
@@ -63,6 +81,34 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
     } catch (error) {
       console.error(error);
       toast.error('Gagal menyimpan aset.');
+    }
+  };
+
+  const handleAddMaintenance = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAsset) return;
+
+    try {
+      const newLog: MaintenanceLog = {
+        id: crypto.randomUUID(),
+        date: maintenanceDate,
+        description: maintenanceDesc,
+        cost: maintenanceCost ? parseInt(maintenanceCost) : undefined,
+        performedBy: maintenanceBy
+      };
+
+      const updatedHistory = [...(selectedAsset.maintenanceHistory || []), newLog];
+      
+      await updateInventoryInDb(selectedAsset.id, {
+        maintenanceHistory: updatedHistory
+      });
+
+      setIsMaintenanceModalOpen(false);
+      resetMaintenanceForm();
+      toast.success('Riwayat perawatan berhasil ditambahkan!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal menyimpan riwayat perawatan.');
     }
   };
 
@@ -139,14 +185,35 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         </Button>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {['Semua', ...CATEGORIES].map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setActiveCategory(cat)}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
+              activeCategory === cat
+                ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100'
+                : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {inventory.map((item) => (
+        {inventory
+          .filter(item => activeCategory === 'Semua' || item.category === activeCategory)
+          .map((item) => (
           <div key={item.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg transition-all group">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
                 <Box size={24} />
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => { setSelectedAsset(item); setIsMaintenanceModalOpen(true); }} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all" title="Riwayat Perawatan">
+                  <Wrench size={16} />
+                </button>
                 <button onClick={() => handleEditInventory(item)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
                   <Edit2 size={16} />
                 </button>
@@ -154,6 +221,9 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                   <Trash2 size={16} />
                 </button>
               </div>
+            </div>
+            <div className="mb-1">
+              <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{item.category || 'Lainnya'}</span>
             </div>
             <h4 className="font-black text-slate-800 text-lg">{item.name}</h4>
             <div className="flex items-center gap-2 mt-2 text-slate-500 text-sm font-bold">
@@ -243,8 +313,10 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
           </div>
           <div className="grid grid-cols-2 gap-4">
              <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Total</label>
-                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invTotal} onChange={e => setInvTotal(e.target.value)} required />
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori</label>
+                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invCategory} onChange={e => setInvCategory(e.target.value as any)}>
+                   {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                 </select>
              </div>
              <div>
                 <label className="block text-xs font-bold mb-1.5 text-slate-700">Kondisi</label>
@@ -254,6 +326,10 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                    <option value="Rusak">Rusak</option>
                  </select>
              </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Total</label>
+            <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invTotal} onChange={e => setInvTotal(e.target.value)} required />
           </div>
           <Button type="submit" className="w-full py-3 mt-2">{editingInvId ? 'Simpan Perubahan' : 'Simpan Aset'}</Button>
         </form>
@@ -282,6 +358,94 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
           </div>
           <Button type="submit" className="w-full py-3 mt-2">Konfirmasi Pinjaman</Button>
         </form>
+      </Modal>
+      {/* Maintenance Modal */}
+      <Modal isOpen={isMaintenanceModalOpen} onClose={() => setIsMaintenanceModalOpen(false)} title={`Perawatan Aset: ${selectedAsset?.name}`}>
+        <div className="space-y-6">
+          {/* Add Maintenance Form */}
+          <form onSubmit={handleAddMaintenance} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-4">
+            <h5 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+              <Plus size={14} className="text-indigo-600" /> Tambah Riwayat Baru
+            </h5>
+            <div>
+              <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Deskripsi Perbaikan</label>
+              <textarea 
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" 
+                value={maintenanceDesc} 
+                onChange={e => setMaintenanceDesc(e.target.value)} 
+                required 
+                placeholder="Contoh: Ganti oli, perbaikan kabel, dll..."
+                rows={2}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Biaya (Rp)</label>
+                <input 
+                  type="number" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" 
+                  value={maintenanceCost} 
+                  onChange={e => setMaintenanceCost(e.target.value)} 
+                  placeholder="Opsional"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Tanggal</label>
+                <input 
+                  type="date" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" 
+                  value={maintenanceDate} 
+                  onChange={e => setMaintenanceDate(e.target.value)} 
+                  required 
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Oleh / Teknisi</label>
+              <input 
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" 
+                value={maintenanceBy} 
+                onChange={e => setMaintenanceBy(e.target.value)} 
+                placeholder="Nama teknisi atau toko..."
+              />
+            </div>
+            <Button type="submit" className="w-full py-2.5 text-xs">Simpan Riwayat</Button>
+          </form>
+
+          {/* Maintenance List */}
+          <div className="space-y-3">
+            <h5 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+              <ClipboardList size={14} className="text-indigo-600" /> Riwayat Sebelumnya
+            </h5>
+            <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+              {selectedAsset?.maintenanceHistory?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((log) => (
+                <div key={log.id} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                      {new Date(log.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                    {log.cost && (
+                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1">
+                        <DollarSign size={10} /> {log.cost.toLocaleString('id-ID')}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm font-bold text-slate-800 mb-1">{log.description}</p>
+                  {log.performedBy && (
+                    <p className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                      <User size={10} /> {log.performedBy}
+                    </p>
+                  )}
+                </div>
+              ))}
+              {(!selectedAsset?.maintenanceHistory || selectedAsset.maintenanceHistory.length === 0) && (
+                <div className="py-8 text-center text-slate-400 text-xs italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  Belum ada riwayat perawatan.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </Modal>
     </motion.div>
   );

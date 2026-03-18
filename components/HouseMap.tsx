@@ -371,6 +371,36 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     );
 };
 
+interface MapLayoutProps {
+    houses: House[];
+    renderBlock: (blockCode: string, houses: House[]) => React.ReactNode;
+    className?: string;
+}
+
+export const MapLayout: React.FC<MapLayoutProps> = ({ houses, renderBlock, className }) => {
+    const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
+    
+    return (
+        <div className={`grid grid-cols-4 gap-4 md:gap-6 ${className}`}>
+            <div className="col-span-1 flex flex-col gap-4 md:gap-6">
+                {renderBlock('C5', getBlockHouses('C5'))}
+            </div>
+            <div className="col-span-1 flex flex-col gap-4 md:gap-6">
+                {renderBlock('C7', getBlockHouses('C7'))}
+                {renderBlock('C8', getBlockHouses('C8'))}
+            </div>
+            <div className="col-span-1 flex flex-col gap-4 md:gap-6">
+                {renderBlock('C9', getBlockHouses('C9'))}
+                {renderBlock('C10', getBlockHouses('C10'))}
+            </div>
+            <div className="col-span-1 flex flex-col gap-4 md:gap-6">
+                {renderBlock('C11', getBlockHouses('C11'))}
+                {renderBlock('C12', getBlockHouses('C12'))}
+            </div>
+        </div>
+    );
+};
+
 export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], mapPoints = [], iuranPayments = [], onEditHouse, onPayDues, onReportHouse }) => {
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
@@ -452,12 +482,20 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                     onClick={handleMapClick}
                     className={`border-[6px] border-dashed border-amber-400 bg-amber-50/50 p-6 rounded-3xl relative ${isManageMode ? 'cursor-crosshair' : ''}`}
                    >
-                       <div className="grid grid-cols-4 gap-6">
-                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C5" houses={getBlockHouses('C5')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /></div>
-                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C7" houses={getBlockHouses('C7')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C8" houses={getBlockHouses('C8')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /></div>
-                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C9" houses={getBlockHouses('C9')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C10" houses={getBlockHouses('C10')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /></div>
-                           <div className="col-span-1 flex flex-col gap-6"><BlockRenderer blockCode="C11" houses={getBlockHouses('C11')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /><BlockRenderer blockCode="C12" houses={getBlockHouses('C12')} reports={reports} officials={officials} isAdmin={isAdmin} iuranPayments={iuranPayments} onSelect={setSelectedHouse} /></div>
-                       </div>
+                       <MapLayout 
+                            houses={houses} 
+                            renderBlock={(blockCode, blockHouses) => (
+                                <BlockRenderer 
+                                    blockCode={blockCode} 
+                                    houses={blockHouses} 
+                                    reports={reports} 
+                                    officials={officials} 
+                                    isAdmin={isAdmin} 
+                                    iuranPayments={iuranPayments} 
+                                    onSelect={setSelectedHouse} 
+                                />
+                            )}
+                        />
                        
                        {/* Checkpoints Overlay */}
                        {showCheckpoints && checkpoints.map((cp, i) => (

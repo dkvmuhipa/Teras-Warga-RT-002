@@ -558,7 +558,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
         {activeTab === 'checkpoints' && (
           <motion.div variants={itemVariants} className="lg:col-span-3">
-            <CheckpointManager />
+            <CheckpointManager houses={houses} />
           </motion.div>
         )}
 

@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Checkpoint } from '../../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { Checkpoint, House } from '../../types';
 import { subscribeToCheckpoints, addCheckpointToDb, updateCheckpointInDb, deleteCheckpointFromDb } from '../../services/databaseService';
 import { Button } from '../ui/Button';
-import { Plus, Trash2, Edit2, Save, X, MapPin, Wand2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, MapPin, Wand2, ShieldCheck } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import toast from 'react-hot-toast';
+import { MapLayout } from '../HouseMap';
 
-export const CheckpointManager: React.FC = () => {
+interface CheckpointManagerProps {
+    houses: House[];
+}
+
+export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) => {
     const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCheckpoint, setEditingCheckpoint] = useState<Checkpoint | null>(null);
@@ -16,6 +21,16 @@ export const CheckpointManager: React.FC = () => {
     const [qrCode, setQrCode] = useState('');
     const [x, setX] = useState<number>(0);
     const [y, setY] = useState<number>(0);
+    const mapRef = useRef<HTMLDivElement>(null);
+
+    const handleMapClick = (e: React.MouseEvent) => {
+        if (!mapRef.current) return;
+        const rect = mapRef.current.getBoundingClientRect();
+        const newX = ((e.clientX - rect.left) / rect.width) * 100;
+        const newY = ((e.clientY - rect.top) / rect.height) * 100;
+        setX(Math.round(newX * 10) / 10);
+        setY(Math.round(newY * 10) / 10);
+    };
 
     useEffect(() => {
         const unsubscribe = subscribeToCheckpoints((data) => {
@@ -169,7 +184,7 @@ export const CheckpointManager: React.FC = () => {
                                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
                                 value={x}
                                 onChange={e => setX(Number(e.target.value))}
-                                min="0" max="100"
+                                min="0" max="100" step="0.1"
                             />
                         </div>
                         <div>
@@ -179,10 +194,45 @@ export const CheckpointManager: React.FC = () => {
                                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none"
                                 value={y}
                                 onChange={e => setY(Number(e.target.value))}
-                                min="0" max="100"
+                                min="0" max="100" step="0.1"
                             />
                         </div>
                     </div>
+
+                    {/* Visual Picker */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">Klik di Peta untuk Menentukan Posisi</label>
+                        <div 
+                            ref={mapRef}
+                            onClick={handleMapClick}
+                            className="relative w-full bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 overflow-hidden cursor-crosshair group p-4"
+                        >
+                            {/* Real Map Layout Preview */}
+                            <div className="opacity-20 pointer-events-none scale-90 origin-top">
+                                <MapLayout 
+                                    houses={houses}
+                                    renderBlock={(blockCode) => (
+                                        <div className="bg-slate-400 rounded-lg p-2 text-center text-[8px] font-black text-white">
+                                            {blockCode}
+                                        </div>
+                                    )}
+                                />
+                            </div>
+                            
+                            {/* Current Point Indicator */}
+                            <div 
+                                className="absolute -translate-x-1/2 -translate-y-1/2 p-1.5 rounded-full shadow-lg border-2 border-white bg-indigo-600 text-white z-10 transition-all duration-300"
+                                style={{ left: `${x}%`, top: `${y}%` }}
+                            >
+                                <ShieldCheck size={16} />
+                            </div>
+
+                            {/* Hover Indicator */}
+                            <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity"></div>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-medium italic">Tip: Klik pada area di atas untuk memindahkan penanda secara visual sesuai tata letak blok rumah.</p>
+                    </div>
+
                     <div className="flex gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1">Batal</Button>
                         <Button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white">Simpan</Button>

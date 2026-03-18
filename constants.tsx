@@ -183,7 +183,7 @@ export const MOCK_CASHFLOW: CashFlow[] = [
 ];
 
 export const MOCK_INVENTORY: InventoryItem[] = [
-    { id: '1', name: 'Tenda Terpal 4x6', total: 2, available: 2, condition: 'Baik' },
+    { id: '1', name: 'Tenda Terpal 4x6', total: 2, available: 2, condition: 'Baik', category: 'Perlengkapan Acara' },
 ];
 
 export const MOCK_POLLS: Poll[] = [];
