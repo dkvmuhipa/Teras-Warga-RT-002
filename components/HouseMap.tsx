@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash } from 'lucide-react';
+import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell } from 'lucide-react';
+import { motion } from 'motion/react';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
 import { useFinancial } from '../context/FinancialContext';
 
@@ -11,6 +12,8 @@ interface HouseMapProps {
   officials?: Official[];
   mapPoints?: MapPoint[];
   iuranPayments?: any[];
+  activePatrol?: PatrolSession | null;
+  activePanicAlerts?: PanicAlert[];
   onEditHouse?: (house: House) => void;
   onPayDues?: (house: House) => void;
   onReportHouse?: (house: House) => void;
@@ -401,7 +404,7 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, renderBlock, class
     );
 };
 
-export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], mapPoints = [], iuranPayments = [], onEditHouse, onPayDues, onReportHouse }) => {
+export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], mapPoints = [], iuranPayments = [], activePatrol, activePanicAlerts = [], onEditHouse, onPayDues, onReportHouse }) => {
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [showCheckpoints, setShowCheckpoints] = useState(false);
@@ -560,6 +563,42 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                    <span className="absolute -bottom-6 whitespace-nowrap bg-rose-600 text-white text-[8px] px-2 py-0.5 rounded-full animate-pulse">Klik peta untuk pindah</span>
                                )}
                            </div>
+                       ))}
+
+                       {/* Active Patrol Location */}
+                       {activePatrol?.currentLocation && (
+                           <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
+                            style={{ left: `${activePatrol.currentLocation.x}%`, top: `${activePatrol.currentLocation.y}%` }}
+                           >
+                               <div className="bg-indigo-600 text-white p-2 rounded-full shadow-xl shadow-indigo-200 ring-4 ring-indigo-100 animate-bounce">
+                                   <Navigation size={18} fill="currentColor" />
+                               </div>
+                               <div className="mt-1 bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm">
+                                   Petugas Ronda
+                               </div>
+                           </motion.div>
+                       )}
+
+                       {/* Active Panic Alerts */}
+                       {activePanicAlerts.map((alert) => (
+                           <motion.div 
+                            key={alert.id}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ repeat: Infinity, duration: 1.5 }}
+                            className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
+                            style={{ left: `${alert.locationCoords?.x || 50}%`, top: `${alert.locationCoords?.y || 50}%` }}
+                           >
+                               <div className="bg-rose-600 text-white p-3 rounded-full shadow-xl shadow-rose-300 ring-8 ring-rose-100/50">
+                                   <Bell size={24} className="animate-shake" />
+                               </div>
+                               <div className="mt-2 bg-rose-600 text-white px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg border-2 border-white">
+                                   DARURAT: {alert.residentName}
+                               </div>
+                           </motion.div>
                        ))}
                    </div>
                </div>

@@ -36,6 +36,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Utama", 
       items: [
         { id: 'overview', icon: LayoutDashboard, label: 'Dashboard' },
+        { id: 'analytics', icon: BarChart3, label: 'Pusat Analitik' },
       ] 
     },
     { 
@@ -43,7 +44,6 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
         { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
-        { id: 'demographics', icon: PieChart, label: 'Analitik & Demografi' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
         { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },
         { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },

@@ -72,6 +72,7 @@ const WASTE_BALANCES_COL = "wasteBalances";
 const IDEAS_COL = "ideas";
 const DONATION_CAMPAIGNS_COL = "donationCampaigns";
 const DONATION_RECORDS_COL = "donationRecords";
+const PANIC_ALERTS_COL = "panicAlerts";
 
 // --- IDEAS SERVICES ---
 export const subscribeToIdeas = (callback: (data: any[]) => void) => {
@@ -196,6 +197,20 @@ export const subscribeToInventoryLogs = (callback: (data: any[]) => void) => {
 export const addInventoryLogToDb = async (log: any) => {
     try {
         await addDoc(collection(db, INVENTORY_LOGS_COL), deepSanitize(log));
+        
+        // AUTOMATED FINANCE INTEGRATION: If it's a maintenance log with cost, add to cash flow
+        if (log.type === 'Maintenance' && log.cost && log.cost > 0) {
+            const transaction = {
+                date: log.date || new Date().toISOString().split('T')[0],
+                amount: log.cost,
+                type: 'Expense',
+                category: 'Pemeliharaan Aset',
+                description: `Biaya Pemeliharaan: ${log.description || log.itemName}`,
+                houseId: 'RT-SYSTEM',
+                status: 'Lunas'
+            };
+            await addTransactionToDb(transaction);
+        }
     } catch (e) {
         console.error("Error adding inventory log:", e);
     }
@@ -615,15 +630,25 @@ export const markNotificationAsRead = async (id: string) => {
 
 export const sendPanicAlert = async (houseId: string, residentName: string, location: string) => {
     try {
+        const timestamp = new Date().toISOString();
         const notification = {
             title: "🚨 DARURAT (PANIC BUTTON)",
             message: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`,
-            date: new Date().toISOString(),
+            date: timestamp,
             type: 'Alert',
             target: 'All',
             isRead: false
         };
         await addNotificationToDb(notification);
+        
+        // Add to panic alerts collection for real-time tracking
+        await addDoc(collection(db, PANIC_ALERTS_COL), {
+            houseId,
+            residentName,
+            location,
+            timestamp,
+            status: 'Active'
+        });
         
         // Also log it to reports for record
         await addDoc(collection(db, REPORTS_COL), {
@@ -631,7 +656,7 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
             description: `[PANIC BUTTON] Warga menekan tombol darurat dari Blok ${location}`,
             reporterName: residentName,
             reporterHouseId: houseId,
-            date: new Date().toISOString(),
+            date: timestamp,
             status: 'Baru'
         });
         
@@ -640,6 +665,23 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
         console.error("Error sending panic alert:", e);
         return false;
     }
+};
+
+export const subscribeToActivePanicAlerts = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, PANIC_ALERTS_COL), where("status", "in", ["Active", "Responding"]));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    });
+};
+
+export const updatePanicAlertStatus = async (id: string, status: string, responderName?: string) => {
+    try {
+        const updateData: any = { status };
+        if (responderName) updateData.responderName = responderName;
+        if (status === 'Resolved') updateData.resolvedAt = new Date().toISOString();
+        await updateDoc(doc(db, PANIC_ALERTS_COL, id), updateData);
+    } catch (e) { console.error("Error updating panic alert:", e); }
 };
 
 
@@ -1500,6 +1542,14 @@ export const finishPatrolSession = async (sessionId: string) => {
             status: 'Completed' 
         });
     } catch (e) { console.error("Error finishing patrol:", e); }
+};
+
+export const updatePatrolLocation = async (sessionId: string, x: number, y: number) => {
+    try {
+        await updateDoc(doc(db, PATROL_SESSIONS_COL, sessionId), { 
+            currentLocation: { x, y }
+        });
+    } catch (e) { console.error("Error updating patrol location:", e); }
 };
 
 export const subscribeToActivePatrols = (callback: (data: any[]) => void) => {

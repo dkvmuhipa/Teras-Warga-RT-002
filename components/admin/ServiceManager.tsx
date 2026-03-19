@@ -31,6 +31,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [tempSignature, setTempSignature] = useState<string | null>(null);
   
   // Admin Form State
   const [adminForm, setAdminForm] = useState<Partial<LetterRequest>>({
@@ -113,7 +114,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
     setIsAiLoading(false);
   };
 
-  const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected', letter?: LetterRequest) => {
+  const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected', letter?: LetterRequest, tempSignature?: string | null) => {
     if (window.confirm(`Ubah status surat menjadi ${status}?`)) {
       try {
         await updateLetterStatus(id, status, status === 'Approved' ? letterNumberInput : undefined);
@@ -121,7 +122,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
         if (status === 'Approved' && letter) {
           // Generate official PDF with stamp and signature
           const updatedLetter = { ...letter, letterNumber: letterNumberInput };
-          await generateSuratPengantar(updatedLetter, pdfConfig, false);
+          
+          // Use tempSignature if provided, otherwise use global pdfConfig.signature
+          const configToUse = tempSignature ? { ...pdfConfig, signature: tempSignature } : pdfConfig;
+          
+          await generateSuratPengantar(updatedLetter, configToUse, false);
 
           // Update lastLetterNumber in config based on the number used
           const parts = letterNumberInput.split('/');
@@ -138,6 +143,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
         
         setSelectedLetter(null);
         setLetterNumberInput('');
+        setTempSignature(null);
         toast.success(`Status surat berhasil diubah menjadi ${status}`);
       } catch (error) {
         console.error(error);
@@ -210,7 +216,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
     const { addLetterToDb } = await import('../../services/databaseService');
     await addLetterToDb(newLetter);
 
-    await generateSuratPengantar(newLetter, pdfConfig, false);
+    // Use tempSignature if provided, otherwise use global pdfConfig.signature
+    const configToUse = tempSignature ? { ...pdfConfig, signature: tempSignature } : pdfConfig;
+    
+    await generateSuratPengantar(newLetter, configToUse, false);
 
     // Update lastLetterNumber in config based on the number used
     const parts = adminLetterNumber.split('/');
@@ -1083,19 +1092,42 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                 </div>
 
                 {selectedLetter.status === 'Pending' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button 
-                      onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Rejected')}
-                      className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none"
-                    >
-                      <XCircle size={18} className="mr-2" /> Tolak
-                    </Button>
-                    <Button 
-                      onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Approved', selectedLetter)}
-                      className="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
-                    >
-                      <CheckCircle2 size={18} className="mr-2" /> Setujui & Cetak
-                    </Button>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Tanda Tangan Ketua RT (Opsional)</p>
+                      <div className="bg-white rounded-xl border border-indigo-200 overflow-hidden">
+                        <SignaturePad 
+                          onSave={(sig) => setTempSignature(sig)} 
+                          onClear={() => setTempSignature(null)}
+                        />
+                      </div>
+                      <p className="text-[10px] text-indigo-400 mt-2 italic">* Jika tidak diisi, akan menggunakan tanda tangan default di pengaturan.</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button 
+                        onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Rejected')}
+                        className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none"
+                      >
+                        <XCircle size={18} className="mr-2" /> Tolak
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          // If tempSignature exists, we might want to pass it to handleUpdateLetterStatus
+                          // or update pdfConfig temporarily. For now, let's just use it in the generation.
+                          handleUpdateLetterStatus(selectedLetter.id, 'Approved', {
+                            ...selectedLetter,
+                            ...editLetterData,
+                            letterNumber: letterNumberInput,
+                            // We can't easily pass tempSignature through handleUpdateLetterStatus without changing its signature
+                            // but we can use it if we modify handleUpdateLetterStatus
+                          }, tempSignature);
+                        }}
+                        className="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                      >
+                        <CheckCircle2 size={18} className="mr-2" /> Setujui & Cetak
+                      </Button>
+                    </div>
                   </div>
                 )}
 
@@ -1412,6 +1444,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="lg:col-span-2 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 mt-4">
+              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Tanda Tangan Ketua RT (Opsional)</p>
+              <div className="bg-white rounded-xl border border-indigo-200 overflow-hidden">
+                <SignaturePad 
+                  onSave={(sig) => setTempSignature(sig)} 
+                  onClear={() => setTempSignature(null)}
+                />
+              </div>
+              <p className="text-[10px] text-indigo-400 mt-2 italic">* Jika tidak diisi, akan menggunakan tanda tangan default di pengaturan.</p>
             </div>
           </div>
 

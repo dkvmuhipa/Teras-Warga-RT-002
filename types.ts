@@ -338,6 +338,19 @@ export interface PatrolSession {
   endTime?: string;
   visitedCheckpoints: string[]; // Array of Checkpoint IDs
   status: 'Ongoing' | 'Completed';
+  currentLocation?: { x: number; y: number }; // NEW for real-time tracking
+}
+
+export interface PanicAlert {
+  id: string;
+  houseId: string;
+  residentName: string;
+  location: string;
+  locationCoords?: { x: number; y: number };
+  timestamp: string;
+  status: 'Active' | 'Responding' | 'Resolved' | 'Cancelled';
+  responderName?: string;
+  resolvedAt?: string;
 }
 
 export interface CashFlow {

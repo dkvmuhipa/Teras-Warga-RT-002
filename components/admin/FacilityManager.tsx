@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw, ShieldCheck } from 'lucide-react';
-import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest, PatrolSession, Checkpoint, Report, Official, MapPoint } from '../../types';
+import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw, ShieldCheck, Eye, Navigation } from 'lucide-react';
+import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest, PatrolSession, Checkpoint, Report, Official, MapPoint, PanicAlert } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { HouseMap } from '../HouseMap';
-import { subscribeToCheckpoints, updateRondaSchedule, updateRondaShifts, updateRondaSwapRequestStatus } from '../../services/databaseService';
+import { subscribeToCheckpoints, updateRondaSchedule, updateRondaShifts, updateRondaSwapRequestStatus, updatePanicAlertStatus } from '../../services/databaseService';
 import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
 import { MapPointManager } from './MapPointManager';
@@ -20,9 +20,10 @@ interface FacilityManagerProps {
   reports: Report[];
   officials: Official[];
   mapPoints: MapPoint[];
+  activePanicAlerts: PanicAlert[];
 }
 
-export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol, reports, officials, mapPoints }) => {
+export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol, reports, officials, mapPoints, activePanicAlerts }) => {
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [isRondaModalOpen, setIsRondaModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -32,7 +33,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints' | 'map' | 'info-points'>('schedule');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints' | 'map' | 'info-points' | 'monitoring'>('monitoring');
 
   // Shift Management State
   const [shifts, setShifts] = useState<{ id: string; time: string; members: string[] }[]>([]);
@@ -123,6 +124,15 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
     visible: { opacity: 1, y: 0 }
   };
 
+  const handleRespondPanic = async (id: string) => {
+    const adminName = localStorage.getItem('admin_name') || 'Admin';
+    await updatePanicAlertStatus(id, 'Responding', adminName);
+  };
+
+  const handleResolvePanic = async (id: string) => {
+    await updatePanicAlertStatus(id, 'Resolved');
+  };
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -162,6 +172,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         {[
           { id: 'schedule', label: 'Jadwal', icon: Calendar },
           { id: 'logs', label: 'Log', icon: Activity },
+          { id: 'monitoring', label: 'Monitoring', icon: Eye, count: activePanicAlerts.length },
           { id: 'swaps', label: 'Tukar', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Pending').length },
           { id: 'checkpoints', label: 'Titik', icon: MapPin },
           { id: 'info-points', label: 'Info', icon: Info },
@@ -251,6 +262,104 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        {activeTab === 'monitoring' && (
+          <div className="lg:col-span-3 space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+              {/* Live Map */}
+              <div className="xl:col-span-3">
+                <motion.div variants={itemVariants} className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+                  <div className="p-5 md:p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                    <div>
+                      <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest text-xs md:text-sm">
+                        <Navigation size={18} className="text-indigo-600 animate-pulse"/> Live Tracking
+                      </h3>
+                      <p className="text-[9px] md:text-[10px] text-slate-400 font-bold mt-1">Pantau posisi petugas dan alarm darurat secara real-time.</p>
+                    </div>
+                  </div>
+                  <div className="p-2 md:p-4">
+                    <HouseMap 
+                      houses={houses} 
+                      isAdmin={true} 
+                      reports={reports} 
+                      officials={officials} 
+                      mapPoints={mapPoints}
+                      activePatrol={activePatrol}
+                      activePanicAlerts={activePanicAlerts}
+                    />
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Panic Alerts List */}
+              <div className="xl:col-span-1 space-y-4">
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest px-2">Alarm Darurat Aktif</h3>
+                {activePanicAlerts.length > 0 ? (
+                  activePanicAlerts.map((alert) => (
+                    <motion.div 
+                      key={alert.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className={`p-5 rounded-3xl border shadow-lg ${
+                        alert.status === 'Active' ? 'bg-rose-50 border-rose-200 shadow-rose-100' : 'bg-amber-50 border-amber-200 shadow-amber-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-xl ${alert.status === 'Active' ? 'bg-rose-600 text-white animate-bounce' : 'bg-amber-500 text-white'}`}>
+                          <AlertTriangle size={20} />
+                        </div>
+                        <div>
+                          <h4 className="font-black text-slate-900 text-sm">{alert.residentName}</h4>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Blok {alert.location}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 mb-5">
+                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                          <span className="text-slate-400">Status</span>
+                          <span className={alert.status === 'Active' ? 'text-rose-600' : 'text-amber-600'}>{alert.status}</span>
+                        </div>
+                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                          <span className="text-slate-400">Waktu</span>
+                          <span className="text-slate-700">{new Date(alert.timestamp).toLocaleTimeString('id-ID')}</span>
+                        </div>
+                        {alert.responderName && (
+                          <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                            <span className="text-slate-400">Merespon</span>
+                            <span className="text-slate-700">{alert.responderName}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        {alert.status === 'Active' ? (
+                          <Button 
+                            onClick={() => handleRespondPanic(alert.id)}
+                            className="flex-1 bg-rose-600 hover:bg-rose-700 text-[10px] font-black uppercase py-2.5"
+                          >
+                            Respon
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => handleResolvePanic(alert.id)}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-[10px] font-black uppercase py-2.5"
+                          >
+                            Selesai
+                          </Button>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="bg-slate-50 border border-dashed border-slate-200 rounded-3xl p-8 text-center">
+                    <ShieldCheck size={32} className="text-slate-200 mx-auto mb-3" />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tidak ada alarm aktif</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'map' && (
           <div className="lg:col-span-3">
             <motion.div variants={itemVariants} className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">

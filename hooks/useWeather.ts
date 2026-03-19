@@ -18,23 +18,17 @@ export const useWeather = () => {
     const [loading, setLoading] = useState(true);
 
     const fetchWeather = async (signal?: AbortSignal) => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort("timeout"), 15000); // Increased timeout to 15s
-
         try {
-            const fetchSignal = signal || controller.signal;
             const [weatherRes, aqiRes] = await Promise.all([
-                fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', { signal: fetchSignal }),
-                fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', { signal: fetchSignal })
+                fetch('/api/weather', { signal }),
+                fetch('/api/aqi', { signal })
             ]);
 
-            if (!weatherRes.ok || !aqiRes.ok) throw new Error("Failed to fetch weather or AQI");
+            if (!weatherRes.ok || !aqiRes.ok) throw new Error("Failed to fetch weather or AQI from proxy");
 
             const weatherData = await weatherRes.json();
             const aqiData = await aqiRes.json();
             
-            clearTimeout(timeoutId);
-
             const aqi = aqiData.current.us_aqi;
             let aqiLabel = 'Bagus';
             let aqiColor = 'text-emerald-400';
@@ -67,8 +61,6 @@ export const useWeather = () => {
                 pm10: aqiData.current.pm10
             });
         } catch (err: any) {
-            clearTimeout(timeoutId);
-            
             // Don't log abort errors as they are expected on unmount or timeout
             if (err.name === 'AbortError' || err === 'timeout') {
                 console.log("Weather fetch aborted:", err);

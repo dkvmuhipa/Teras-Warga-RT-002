@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
-import { addPopulationReportToDb, deletePopulationReportFromDb } from '../../services/databaseService';
+import { addPopulationReportToDb, deletePopulationReportFromDb, subscribeToActivePanicAlerts } from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem
+  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -24,11 +24,11 @@ import { GuestManager } from './GuestManager';
 import { ActivityManagement } from './ActivityManagement';
 import { WasteBankManager } from './WasteBankManager';
 import { HealthManagement } from './HealthManagement';
-import { DemographicAnalytics } from './DemographicAnalytics';
 import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
+import { AdminAnalytics } from './AdminAnalytics';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck } from 'lucide-react';
+import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME } from '../../constants';
 
 interface AdminDashboardProps {
@@ -74,7 +74,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const unsubscribe = subscribeToActivePanicAlerts((data) => {
+      setActivePanicAlerts(data as PanicAlert[]);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -96,13 +104,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'services':
         return <ServiceManager letters={letters} reports={reports} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       case 'facilities':
-        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} />;
+        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
       case 'assets':
         return <AssetManager inventory={inventory} inventoryLogs={inventoryLogs} />;
       case 'guests':
         return <GuestManager guestReports={guestReports} pdfConfig={pdfConfig} />;
-      case 'demographics':
-        return <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />;
       case 'audit':
         return <AuditLogManager logs={auditLogs} />;
       case 'content':
@@ -157,6 +163,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             notifications={notifications}
           />
         );
+      case 'analytics':
+        return (
+          <AdminAnalytics 
+            rondaLogs={rondaLogs}
+            reports={reports}
+            houses={houses}
+            officials={officials}
+          />
+        );
       default:
         return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
     }
@@ -195,6 +210,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2 md:gap-6">
+            {activePanicAlerts.length > 0 && (
+              <div 
+                onClick={() => setActiveTab('facilities')}
+                className="flex items-center gap-3 bg-rose-600 border border-rose-500 rounded-2xl px-4 py-2 cursor-pointer animate-pulse shadow-lg shadow-rose-200"
+              >
+                <AlertTriangle size={20} className="text-white" />
+                <div className="hidden sm:block">
+                  <p className="text-[10px] font-black text-rose-100 uppercase tracking-widest leading-none mb-0.5">Darurat Aktif!</p>
+                  <p className="text-xs font-bold text-white leading-none">{activePanicAlerts.length} Laporan</p>
+                </div>
+              </div>
+            )}
+
             {activePatrol && (
               <div className="hidden xl:flex items-center gap-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-2">
                 <div className="relative">

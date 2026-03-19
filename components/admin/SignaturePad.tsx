@@ -5,14 +5,16 @@ import { Button } from '../ui/Button';
 
 interface SignaturePadProps {
   onSave: (signatureDataUrl: string) => void;
+  onClear?: () => void;
   initialValue?: string;
 }
 
-export const SignaturePad: React.FC<SignaturePadProps> = ({ onSave, initialValue }) => {
+export const SignaturePad: React.FC<SignaturePadProps> = ({ onSave, onClear, initialValue }) => {
   const sigCanvas = useRef<SignatureCanvas>(null);
 
   const clear = () => {
     sigCanvas.current?.clear();
+    if (onClear) onClear();
   };
 
   const save = () => {

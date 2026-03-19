@@ -14,6 +14,48 @@ async function startServer() {
 
   const PORT = 3000;
 
+  // Weather Proxy
+  app.get("/api/weather", async (req, res) => {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeout);
+      
+      if (!response.ok) throw new Error(`Weather API responded with ${response.status}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      console.error("Weather proxy error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // AQI Proxy
+  app.get("/api/aqi", async (req, res) => {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+
+      const response = await fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', {
+        signal: controller.signal
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) throw new Error(`AQI API responded with ${response.status}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      console.error("AQI proxy error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Socket.io logic
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);

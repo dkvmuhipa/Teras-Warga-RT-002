@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, X, ShieldAlert, Volume2, VolumeX, MapPin, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { sendPanicAlert } from '../services/databaseService';
+import { sendPanicAlert, subscribeToActivePanicAlerts, updatePanicAlertStatus } from '../services/databaseService';
 import { toast } from 'sonner';
+import { PanicAlert } from '../types';
 
 export function PanicButton() {
   const [alert, setAlert] = useState<{ message: string; sender: string; timestamp: string; location?: { lat: number; lng: number } } | string | null>(null);
+  const [activeAlerts, setActiveAlerts] = useState<PanicAlert[]>([]);
   const [isHolding, setIsHolding] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -18,10 +20,30 @@ export function PanicButton() {
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
     audioRef.current.loop = true;
 
+    // Subscribe to active alerts
+    const unsubscribe = subscribeToActivePanicAlerts((data) => {
+      setActiveAlerts(data as PanicAlert[]);
+      
+      // If there's a new alert from someone else, show it
+      const myHouseId = localStorage.getItem('resident_house_id');
+      const latestAlert = data[data.length - 1];
+      if (latestAlert && latestAlert.houseId !== myHouseId && latestAlert.status === 'Active') {
+        setAlert({
+          message: `Warga ${latestAlert.residentName} (Blok ${latestAlert.location}) butuh bantuan!`,
+          sender: latestAlert.residentName,
+          timestamp: latestAlert.timestamp
+        });
+        playSiren();
+      }
+    });
+
     return () => {
       stopSiren();
+      unsubscribe();
     };
   }, []);
+
+  const myActiveAlert = activeAlerts.find(a => a.houseId === localStorage.getItem('resident_house_id'));
 
   const playSiren = () => {
     if (audioRef.current) {
@@ -117,11 +139,47 @@ export function PanicButton() {
     stopSiren();
   };
 
+  const handleCancelAlert = async () => {
+    if (myActiveAlert) {
+      await updatePanicAlertStatus(myActiveAlert.id, 'Cancelled');
+      toast.success("Sinyal Darurat Dibatalkan");
+    }
+  };
+
   return (
     <>
       {/* Panic Trigger Button */}
       <div className="fixed bottom-24 left-4 md:bottom-8 md:left-8 z-50 flex flex-col items-center gap-2">
         <AnimatePresence>
+          {myActiveAlert && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="flex flex-col items-center gap-2 mb-2"
+            >
+              <div className={`
+                px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl border
+                ${myActiveAlert.status === 'Active' ? 'bg-rose-600 text-white border-rose-400/20 animate-pulse' : 
+                  myActiveAlert.status === 'Responding' ? 'bg-amber-500 text-white border-amber-400/20' : 
+                  'bg-emerald-600 text-white border-emerald-400/20'}
+              `}>
+                {myActiveAlert.status === 'Active' ? 'Mencari Bantuan...' : 
+                 myActiveAlert.status === 'Responding' ? `Petugas ${myActiveAlert.responderName || ''} Menuju Lokasi` : 
+                 'Bantuan Tiba'}
+              </div>
+              
+              {myActiveAlert.status === 'Active' && (
+                <button 
+                  onClick={handleCancelAlert}
+                  className="bg-slate-900/80 hover:bg-slate-900 text-white text-[9px] font-bold uppercase tracking-tighter px-3 py-1 rounded-full backdrop-blur-sm transition-all"
+                >
+                  Batalkan Sinyal
+                </button>
+              )}
+            </motion.div>
+          )}
+          
           {isHolding && (
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
