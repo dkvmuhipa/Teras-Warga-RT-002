@@ -500,28 +500,78 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                             )}
                         />
                        
+                       {/* Patrol Path SVG Layer */}
+                       {showCheckpoints && checkpoints.length > 1 && (
+                           <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
+                               <defs>
+                                   <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                       <feGaussianBlur stdDeviation="2" result="blur" />
+                                       <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                   </filter>
+                               </defs>
+                               {/* Base Path (Dashed) */}
+                               <polyline
+                                   points={checkpoints.map(cp => `${cp.x}%,${cp.y}%`).join(' ')}
+                                   fill="none"
+                                   stroke="rgba(79, 70, 229, 0.2)"
+                                   strokeWidth="3"
+                                   strokeDasharray="8,8"
+                                   style={{ vectorEffect: 'non-scaling-stroke' }}
+                               />
+                               {/* Active/Visited Path (Solid) */}
+                               {activePatrol && activePatrol.visitedCheckpoints.length > 1 && (
+                                   <motion.polyline
+                                       initial={{ pathLength: 0 }}
+                                       animate={{ pathLength: 1 }}
+                                       points={checkpoints
+                                           .filter(cp => activePatrol.visitedCheckpoints.includes(cp.id))
+                                           .map(cp => `${cp.x}%,${cp.y}%`)
+                                           .join(' ')}
+                                       fill="none"
+                                       stroke="#4f46e5"
+                                       strokeWidth="4"
+                                       strokeLinecap="round"
+                                       strokeLinejoin="round"
+                                       filter="url(#glow)"
+                                       style={{ vectorEffect: 'non-scaling-stroke' }}
+                                   />
+                               )}
+                           </svg>
+                       )}
+
                        {/* Checkpoints Overlay */}
-                       {showCheckpoints && checkpoints.map((cp, i) => (
-                           <div 
-                            key={cp.id} 
-                            onClick={(e) => {
-                                if (isManageMode) {
-                                    e.stopPropagation();
-                                    setDraggingId(cp.id);
-                                    setDraggingType('checkpoint');
-                                }
-                            }}
-                            className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-xs font-bold transition-all ${draggingId === cp.id && draggingType === 'checkpoint' ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' : 'bg-indigo-600'} text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
-                            style={{ 
-                                top: cp.y !== undefined ? `${cp.y}%` : `${10 + i * 15}%`, 
-                                left: cp.x !== undefined ? `${cp.x}%` : `${10 + i * 20}%`,
-                                transform: 'translate(-50%, -50%)'
-                            }}
-                           >
-                               <ShieldCheck size={14}/> {cp.name}
-                               {isManageMode && draggingId === cp.id && draggingType === 'checkpoint' && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
-                           </div>
-                       ))}
+                       {showCheckpoints && checkpoints.map((cp, i) => {
+                           const isVisited = activePatrol?.visitedCheckpoints.includes(cp.id);
+                           return (
+                               <div 
+                                key={cp.id} 
+                                onClick={(e) => {
+                                    if (isManageMode) {
+                                        e.stopPropagation();
+                                        setDraggingId(cp.id);
+                                        setDraggingType('checkpoint');
+                                    }
+                                }}
+                                className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-[10px] md:text-xs font-bold transition-all ${
+                                    draggingId === cp.id && draggingType === 'checkpoint' 
+                                        ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' 
+                                        : isVisited 
+                                            ? 'bg-emerald-500 ring-4 ring-emerald-100' 
+                                            : 'bg-indigo-600'
+                                } text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
+                                style={{ 
+                                    top: cp.y !== undefined ? `${cp.y}%` : `${10 + i * 15}%`, 
+                                    left: cp.x !== undefined ? `${cp.x}%` : `${10 + i * 20}%`,
+                                    transform: 'translate(-50%, -50%)'
+                                }}
+                               >
+                                   {isVisited ? <CheckCircle size={14}/> : <ShieldCheck size={14}/>} 
+                                   <span className="hidden md:inline">{cp.name}</span>
+                                   <span className="md:hidden">{i + 1}</span>
+                                   {isManageMode && draggingId === cp.id && draggingType === 'checkpoint' && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
+                               </div>
+                           );
+                       })}
 
                         {/* Map Points Overlay (General Info) */}
                        {mapPoints.map((point) => (
@@ -573,11 +623,14 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                             className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
                             style={{ left: `${activePatrol.currentLocation.x}%`, top: `${activePatrol.currentLocation.y}%` }}
                            >
-                               <div className="bg-indigo-600 text-white p-2 rounded-full shadow-xl shadow-indigo-200 ring-4 ring-indigo-100 animate-bounce">
-                                   <Navigation size={18} fill="currentColor" />
+                               <div className="relative">
+                                   <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-25 scale-150"></div>
+                                   <div className="bg-indigo-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-indigo-300 ring-4 ring-white relative z-10">
+                                       <Navigation size={24} fill="currentColor" className="animate-pulse" />
+                                   </div>
                                </div>
-                               <div className="mt-1 bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm">
-                                   Petugas Ronda
+                               <div className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg border-2 border-white whitespace-nowrap">
+                                   Petugas: {activePatrol.officerName}
                                </div>
                            </motion.div>
                        )}
@@ -587,15 +640,18 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                            <motion.div 
                             key={alert.id}
                             initial={{ scale: 0 }}
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ repeat: Infinity, duration: 1.5 }}
+                            animate={{ scale: [1, 1.3, 1] }}
+                            transition={{ repeat: Infinity, duration: 1 }}
                             className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
                             style={{ left: `${alert.locationCoords?.x || 50}%`, top: `${alert.locationCoords?.y || 50}%` }}
                            >
-                               <div className="bg-rose-600 text-white p-3 rounded-full shadow-xl shadow-rose-300 ring-8 ring-rose-100/50">
-                                   <Bell size={24} className="animate-shake" />
+                               <div className="relative">
+                                   <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50 scale-200"></div>
+                                   <div className="bg-rose-600 text-white p-4 md:p-5 rounded-full shadow-2xl shadow-rose-400 ring-4 ring-white relative z-10">
+                                       <Bell size={32} className="animate-shake" />
+                                   </div>
                                </div>
-                               <div className="mt-2 bg-rose-600 text-white px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg border-2 border-white">
+                               <div className="mt-3 bg-rose-600 text-white px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl border-2 border-white animate-bounce">
                                    DARURAT: {alert.residentName}
                                </div>
                            </motion.div>
