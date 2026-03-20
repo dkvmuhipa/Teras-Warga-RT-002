@@ -66,8 +66,8 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex bg-slate-100 p-1.5 rounded-2xl shrink-0 border border-slate-200/50">
-          {(['All', 'SK RT', 'Aturan', 'Formulir', 'Lainnya'] as const).map((cat) => (
+        <div className="flex bg-slate-100 p-1.5 rounded-2xl shrink-0 border border-slate-200/50 overflow-x-auto no-scrollbar">
+          {(['All', 'SK RT', 'Aturan', 'Formulir', 'Notulensi', 'Lainnya'] as const).map((cat) => (
             <button
               key={cat}
               onClick={() => setFilterCategory(cat)}

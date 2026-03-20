@@ -73,6 +73,7 @@ const IDEAS_COL = "ideas";
 const DONATION_CAMPAIGNS_COL = "donationCampaigns";
 const DONATION_RECORDS_COL = "donationRecords";
 const PANIC_ALERTS_COL = "panicAlerts";
+const UPDATE_REQUESTS_COL = "updateRequests";
 
 // --- IDEAS SERVICES ---
 export const subscribeToIdeas = (callback: (data: any[]) => void) => {
@@ -682,6 +683,82 @@ export const updatePanicAlertStatus = async (id: string, status: string, respond
         if (status === 'Resolved') updateData.resolvedAt = new Date().toISOString();
         await updateDoc(doc(db, PANIC_ALERTS_COL, id), updateData);
     } catch (e) { console.error("Error updating panic alert:", e); }
+};
+
+// --- UPDATE REQUESTS SERVICES ---
+export const subscribeToUpdateRequests = (callback: (data: any[]) => void) => {
+    const q = query(collection(db, UPDATE_REQUESTS_COL), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to update requests:", error);
+        // Fallback
+        const qSimple = query(collection(db, UPDATE_REQUESTS_COL));
+        onSnapshot(qSimple, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            data.sort((a:any, b:any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            callback(data);
+        });
+    });
+};
+
+export const subscribeToHouseUpdateRequests = (houseId: string, callback: (data: any[]) => void) => {
+    const q = query(
+        collection(db, UPDATE_REQUESTS_COL), 
+        where("houseId", "==", houseId)
+    );
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        data.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to house update requests:", error);
+    });
+};
+
+export const addUpdateRequest = async (data: any) => {
+    return await addDoc(collection(db, UPDATE_REQUESTS_COL), {
+        ...deepSanitize(data),
+        status: 'Pending',
+        createdAt: new Date().toISOString()
+    });
+};
+
+export const updateRequestStatus = async (id: string, status: 'Approved' | 'Rejected', notes?: string) => {
+    const docRef = doc(db, UPDATE_REQUESTS_COL, id);
+    return await updateDoc(docRef, { 
+        status, 
+        notes,
+        updatedAt: new Date().toISOString()
+    });
+};
+
+// --- GUEST REPORTS FOR RESIDENT ---
+export const subscribeToHouseGuestReports = (houseId: string, callback: (data: any[]) => void) => {
+    const q = query(
+        collection(db, GUEST_REPORTS_COL), 
+        where("residentHouseId", "==", houseId)
+    );
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        // Sort on client side to avoid composite index requirement
+        data.sort((a: any, b: any) => {
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
+            return dateB - dateA;
+        });
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to house guest reports:", error);
+        // Fallback
+        const qSimple = query(collection(db, GUEST_REPORTS_COL), where("residentHouseId", "==", houseId));
+        onSnapshot(qSimple, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            data.sort((a:any, b:any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            callback(data);
+        });
+    });
 };
 
 

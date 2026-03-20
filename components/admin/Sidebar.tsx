@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert,
-  PieChart, Activity
+  PieChart, Activity, FileEdit
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -16,10 +16,11 @@ interface SidebarProps {
   onLogout: () => void;
   residentRegistrations?: any[];
   guestReports?: any[];
+  updateRequests?: any[];
 }
 
 export const AdminSidebar: React.FC<SidebarProps> = ({ 
-  activeTab, setActiveTab, isOpen, setIsOpen, onLogout, residentRegistrations = [], guestReports = []
+  activeTab, setActiveTab, isOpen, setIsOpen, onLogout, residentRegistrations = [], guestReports = [], updateRequests = []
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -43,6 +44,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Kependudukan", 
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
+        { id: 'update-requests', icon: FileEdit, label: 'Update Data' },
         { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
         { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },

@@ -20,7 +20,7 @@ async function startServer() {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
       
-      const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', {
+      const response = await fetch('http://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', {
         signal: controller.signal
       });
       
@@ -41,7 +41,7 @@ async function startServer() {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', {
+      const response = await fetch('http://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', {
         signal: controller.signal
       });
 

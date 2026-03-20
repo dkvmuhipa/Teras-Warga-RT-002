@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
-  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2
+  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest } from '../../types';
@@ -63,6 +63,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   };
 
   const quickActions = [
+    { label: 'Dashboard', icon: User, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/resident' },
     { label: 'Buat Surat', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', link: '/services' },
     { label: 'Lapor Tamu', icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=tamu' },
     { label: 'Warga Baru', icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/register' },
@@ -97,7 +98,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       <ServiceStats houses={houses} reports={reports} letters={letters} />
 
       {/* Quick Actions - Bento Style */}
-      <div className="flex md:grid md:grid-cols-7 gap-4 -mt-8 relative z-10 overflow-x-auto no-scrollbar pb-4 md:pb-0 px-2 md:px-0">
+      <div className="flex md:grid md:grid-cols-8 gap-4 -mt-8 relative z-10 overflow-x-auto no-scrollbar pb-4 md:pb-0 px-2 md:px-0">
         {quickActions.map((action, idx) => (
           <motion.button
             key={idx}

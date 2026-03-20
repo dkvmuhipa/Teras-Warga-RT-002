@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, ZoomIn, ZoomOut, Maximize, MousePointer2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
 import { useFinancial } from '../context/FinancialContext';
+import { TransformWrapper, TransformComponent, useTransformContext } from 'react-zoom-pan-pinch';
 
 interface HouseMapProps {
   houses: House[];
@@ -355,11 +356,11 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     const getOfficialRole = (hid: string) => officials.find(o => formatHouseId(o.houseId) === formatHouseId(hid))?.role;
 
     return (
-        <div className={`flex flex-col bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg overflow-hidden ${className || 'h-full'}`}>
+        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg overflow-hidden ${className || 'h-full'}`}>
             <div className="bg-rose-600 text-white text-center py-1.5 border-b-2 border-slate-800 relative overflow-hidden shrink-0">
                  <h3 className="text-xl font-black tracking-tighter relative z-10 drop-shadow-md">{blockCode}</h3>
             </div>
-            <div className="flex-1 bg-slate-100 p-2 relative overflow-y-auto custom-scrollbar">
+            <div className="flex-1 bg-slate-100 p-2 relative">
                  <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-300 z-0"></div>
                  <div className="flex gap-4 relative z-10 h-full">
                     <div className="flex-1 flex flex-col gap-2">
@@ -451,13 +452,14 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
   
   return (
-    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[750px]">
+    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[750px] relative">
       <div className="bg-white border-b border-slate-100 px-6 py-4 z-20 shadow-sm relative space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
+            <div className="flex-1">
                <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2"><MapPin className="text-brand-blue" size={24}/> Denah Digital RT 02</h3>
                <p className="text-xs text-slate-500 font-medium">Klik kavling rumah untuk melihat detail informasi.</p>
             </div>
+            
             <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar">
                <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-2 whitespace-nowrap ${showCheckpoints ? 'text-indigo-600' : 'text-slate-500'}`}>
                    <ShieldCheck size={12}/> {showCheckpoints ? 'Sembunyikan' : 'Tampilkan'} Patroli
@@ -477,187 +479,186 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
             </div>
         </div>
       </div>
-      <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-auto bg-slate-50 relative custom-scrollbar p-4 md:p-8 scroll-smooth">
-               <div className="min-w-[900px] relative">
-                   <div 
-                    ref={mapRef}
-                    onClick={handleMapClick}
-                    className={`border-[6px] border-dashed border-amber-400 bg-amber-50/50 p-6 rounded-3xl relative ${isManageMode ? 'cursor-crosshair' : ''}`}
-                   >
-                       <MapLayout 
-                            houses={houses} 
-                            renderBlock={(blockCode, blockHouses) => (
-                                <BlockRenderer 
-                                    blockCode={blockCode} 
-                                    houses={blockHouses} 
-                                    reports={reports} 
-                                    officials={officials} 
-                                    isAdmin={isAdmin} 
-                                    iuranPayments={iuranPayments} 
-                                    onSelect={setSelectedHouse} 
-                                />
-                            )}
-                        />
-                       
-                       {/* Patrol Path SVG Layer */}
-                       {showCheckpoints && checkpoints.length > 1 && (
-                           <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
-                               <defs>
-                                   <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                                       <feGaussianBlur stdDeviation="2" result="blur" />
-                                       <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                                   </filter>
-                               </defs>
-                               {/* Base Path (Dashed) */}
-                               <polyline
-                                   points={checkpoints.map(cp => `${cp.x}%,${cp.y}%`).join(' ')}
-                                   fill="none"
-                                   stroke="rgba(79, 70, 229, 0.2)"
-                                   strokeWidth="3"
-                                   strokeDasharray="8,8"
-                                   style={{ vectorEffect: 'non-scaling-stroke' }}
-                               />
-                               {/* Active/Visited Path (Solid) */}
-                               {activePatrol && activePatrol.visitedCheckpoints.length > 1 && (
-                                   <motion.polyline
-                                       initial={{ pathLength: 0 }}
-                                       animate={{ pathLength: 1 }}
-                                       points={checkpoints
-                                           .filter(cp => activePatrol.visitedCheckpoints.includes(cp.id))
-                                           .map(cp => `${cp.x}%,${cp.y}%`)
-                                           .join(' ')}
-                                       fill="none"
-                                       stroke="#4f46e5"
-                                       strokeWidth="4"
-                                       strokeLinecap="round"
-                                       strokeLinejoin="round"
-                                       filter="url(#glow)"
-                                       style={{ vectorEffect: 'non-scaling-stroke' }}
-                                   />
-                               )}
-                           </svg>
-                       )}
 
-                       {/* Checkpoints Overlay */}
-                       {showCheckpoints && checkpoints.map((cp, i) => {
-                           const isVisited = activePatrol?.visitedCheckpoints.includes(cp.id);
-                           return (
-                               <div 
-                                key={cp.id} 
-                                onClick={(e) => {
-                                    if (isManageMode) {
-                                        e.stopPropagation();
-                                        setDraggingId(cp.id);
-                                        setDraggingType('checkpoint');
-                                    }
-                                }}
-                                className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-[10px] md:text-xs font-bold transition-all ${
-                                    draggingId === cp.id && draggingType === 'checkpoint' 
-                                        ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' 
-                                        : isVisited 
-                                            ? 'bg-emerald-500 ring-4 ring-emerald-100' 
-                                            : 'bg-indigo-600'
-                                } text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
-                                style={{ 
-                                    top: cp.y !== undefined ? `${cp.y}%` : `${10 + i * 15}%`, 
-                                    left: cp.x !== undefined ? `${cp.x}%` : `${10 + i * 20}%`,
-                                    transform: 'translate(-50%, -50%)'
-                                }}
-                               >
-                                   {isVisited ? <CheckCircle size={14}/> : <ShieldCheck size={14}/>} 
-                                   <span className="hidden md:inline">{cp.name}</span>
-                                   <span className="md:hidden">{i + 1}</span>
-                                   {isManageMode && draggingId === cp.id && draggingType === 'checkpoint' && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
-                               </div>
-                           );
-                       })}
+      <div className="flex-1 overflow-auto bg-slate-100 p-8 md:p-12 lg:p-16 flex items-center justify-center">
+          <div className="min-w-[1000px] relative">
+              <div 
+                  ref={mapRef}
+                  onClick={handleMapClick}
+                  className={`border-[8px] border-dashed border-amber-400/30 bg-amber-50/20 p-8 rounded-[40px] relative transition-all duration-500 ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
+              >
+                  <MapLayout 
+                      houses={houses} 
+                      renderBlock={(blockCode, blockHouses) => (
+                          <BlockRenderer 
+                              blockCode={blockCode} 
+                              houses={blockHouses} 
+                              reports={reports} 
+                              officials={officials} 
+                              isAdmin={isAdmin} 
+                              iuranPayments={iuranPayments} 
+                              onSelect={setSelectedHouse} 
+                          />
+                      )}
+                  />
+                  
+                  {/* Patrol Path SVG Layer */}
+                  {showCheckpoints && checkpoints.length > 1 && (
+                      <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
+                          <defs>
+                              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                  <feGaussianBlur stdDeviation="2" result="blur" />
+                                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                              </filter>
+                          </defs>
+                          {/* Base Path (Dashed) */}
+                          <polyline
+                              points={checkpoints.map(cp => `${cp.x}%,${cp.y}%`).join(' ')}
+                              fill="none"
+                              stroke="rgba(79, 70, 229, 0.2)"
+                              strokeWidth="3"
+                              strokeDasharray="8,8"
+                              style={{ vectorEffect: 'non-scaling-stroke' }}
+                          />
+                          {/* Active/Visited Path (Solid) */}
+                          {activePatrol && activePatrol.visitedCheckpoints.length > 1 && (
+                              <motion.polyline
+                                  initial={{ pathLength: 0 }}
+                                  animate={{ pathLength: 1 }}
+                                  points={checkpoints
+                                      .filter(cp => activePatrol.visitedCheckpoints.includes(cp.id))
+                                      .map(cp => `${cp.x}%,${cp.y}%`)
+                                      .join(' ')}
+                                  fill="none"
+                                  stroke="#4f46e5"
+                                  strokeWidth="4"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  filter="url(#glow)"
+                                  style={{ vectorEffect: 'non-scaling-stroke' }}
+                              />
+                          )}
+                      </svg>
+                  )}
 
-                        {/* Map Points Overlay (General Info) */}
-                       {mapPoints.map((point) => (
-                           <div 
-                            key={point.id}
-                            onClick={(e) => {
-                                if (isManageMode) {
-                                    e.stopPropagation();
-                                    setDraggingId(point.id);
-                                    setDraggingType('mappoint');
-                                }
-                            }}
-                            className={`absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 transition-all ${draggingId === point.id && draggingType === 'mappoint' ? 'scale-125 z-40' : ''} ${isManageMode ? 'cursor-pointer hover:scale-110' : ''}`}
-                            style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                           >
-                               <div className={`p-1.5 rounded-full shadow-md ${
-                                   draggingId === point.id && draggingType === 'mappoint' ? 'bg-rose-500 ring-4 ring-rose-200' :
-                                   point.type === 'Gate' ? 'bg-amber-500' :
-                                   point.type === 'Security' ? 'bg-blue-500' :
-                                   point.type === 'Block' ? 'bg-emerald-500' :
-                                   point.type === 'PJU' ? 'bg-yellow-500' :
-                                   point.type === 'CCTV' ? 'bg-indigo-500' :
-                                   point.type === 'Hydrant' ? 'bg-rose-500' :
-                                   point.type === 'Trash' ? 'bg-orange-500' :
-                                   'bg-slate-500'
-                               } text-white border-2 border-white`}>
-                                   {point.type === 'Gate' ? <Move size={14} /> : 
-                                    point.type === 'Security' ? <Shield size={14} /> : 
-                                    point.type === 'PJU' ? <Lightbulb size={14} /> :
-                                    point.type === 'CCTV' ? <Video size={14} /> :
-                                    point.type === 'Hydrant' ? <Droplets size={14} /> :
-                                    point.type === 'Trash' ? <Trash size={14} /> :
-                                    <MapPin size={14} />}
-                               </div>
-                               <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">
-                                   {point.label}
-                               </span>
-                               {isManageMode && draggingId === point.id && draggingType === 'mappoint' && (
-                                   <span className="absolute -bottom-6 whitespace-nowrap bg-rose-600 text-white text-[8px] px-2 py-0.5 rounded-full animate-pulse">Klik peta untuk pindah</span>
-                               )}
-                           </div>
-                       ))}
+                  {/* Checkpoints Overlay */}
+                  {showCheckpoints && checkpoints.map((cp, i) => {
+                      const isVisited = activePatrol?.visitedCheckpoints.includes(cp.id);
+                      return (
+                          <div 
+                              key={cp.id} 
+                              onClick={(e) => {
+                                  if (isManageMode) {
+                                      e.stopPropagation();
+                                      setDraggingId(cp.id);
+                                      setDraggingType('checkpoint');
+                                  }
+                              }}
+                              className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-[10px] md:text-xs font-bold transition-all ${
+                                  draggingId === cp.id && draggingType === 'checkpoint' 
+                                      ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' 
+                                      : isVisited 
+                                          ? 'bg-emerald-500 ring-4 ring-emerald-100' 
+                                          : 'bg-indigo-600'
+                              } text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
+                              style={{ 
+                                  top: cp.y !== undefined ? `${cp.y}%` : `${10 + i * 15}%`, 
+                                  left: cp.x !== undefined ? `${cp.x}%` : `${10 + i * 20}%`,
+                                  transform: 'translate(-50%, -50%)'
+                              }}
+                          >
+                              {isVisited ? <CheckCircle size={14}/> : <ShieldCheck size={14}/>} 
+                              <span className="hidden md:inline">{cp.name}</span>
+                              <span className="md:hidden">{i + 1}</span>
+                              {isManageMode && draggingId === cp.id && draggingType === 'checkpoint' && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
+                          </div>
+                      );
+                  })}
 
-                       {/* Active Patrol Location */}
-                       {activePatrol?.currentLocation && (
-                           <motion.div 
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
-                            style={{ left: `${activePatrol.currentLocation.x}%`, top: `${activePatrol.currentLocation.y}%` }}
-                           >
-                               <div className="relative">
-                                   <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-25 scale-150"></div>
-                                   <div className="bg-indigo-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-indigo-300 ring-4 ring-white relative z-10">
-                                       <Navigation size={24} fill="currentColor" className="animate-pulse" />
-                                   </div>
-                               </div>
-                               <div className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg border-2 border-white whitespace-nowrap">
-                                   Petugas: {activePatrol.officerName}
-                               </div>
-                           </motion.div>
-                       )}
+                  {/* Map Points Overlay (General Info) */}
+                  {mapPoints.map((point) => (
+                      <div 
+                          key={point.id}
+                          onClick={(e) => {
+                              if (isManageMode) {
+                                  e.stopPropagation();
+                                  setDraggingId(point.id);
+                                  setDraggingType('mappoint');
+                              }
+                          }}
+                          className={`absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 transition-all ${draggingId === point.id && draggingType === 'mappoint' ? 'scale-125 z-40' : ''} ${isManageMode ? 'cursor-pointer hover:scale-110' : ''}`}
+                          style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                      >
+                          <div className={`p-1.5 rounded-full shadow-md ${
+                              draggingId === point.id && draggingType === 'mappoint' ? 'bg-rose-500 ring-4 ring-rose-200' :
+                              point.type === 'Gate' ? 'bg-amber-500' :
+                              point.type === 'Security' ? 'bg-blue-500' :
+                              point.type === 'Block' ? 'bg-emerald-500' :
+                              point.type === 'PJU' ? 'bg-yellow-500' :
+                              point.type === 'CCTV' ? 'bg-indigo-500' :
+                              point.type === 'Hydrant' ? 'bg-rose-500' :
+                              point.type === 'Trash' ? 'bg-orange-500' :
+                              'bg-slate-500'
+                          } text-white border-2 border-white`}>
+                              {point.type === 'Gate' ? <Move size={14} /> : 
+                               point.type === 'Security' ? <Shield size={14} /> : 
+                               point.type === 'PJU' ? <Lightbulb size={14} /> :
+                               point.type === 'CCTV' ? <Video size={14} /> :
+                               point.type === 'Hydrant' ? <Droplets size={14} /> :
+                               point.type === 'Trash' ? <Trash size={14} /> :
+                               <MapPin size={14} />}
+                          </div>
+                          <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">
+                              {point.label}
+                          </span>
+                          {isManageMode && draggingId === point.id && draggingType === 'mappoint' && (
+                              <span className="absolute -bottom-6 whitespace-nowrap bg-rose-600 text-white text-[8px] px-2 py-0.5 rounded-full animate-pulse">Klik peta untuk pindah</span>
+                          )}
+                      </div>
+                  ))}
 
-                       {/* Active Panic Alerts */}
-                       {activePanicAlerts.map((alert) => (
-                           <motion.div 
-                            key={alert.id}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: [1, 1.3, 1] }}
-                            transition={{ repeat: Infinity, duration: 1 }}
-                            className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
-                            style={{ left: `${alert.locationCoords?.x || 50}%`, top: `${alert.locationCoords?.y || 50}%` }}
-                           >
-                               <div className="relative">
-                                   <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50 scale-200"></div>
-                                   <div className="bg-rose-600 text-white p-4 md:p-5 rounded-full shadow-2xl shadow-rose-400 ring-4 ring-white relative z-10">
-                                       <Bell size={32} className="animate-shake" />
-                                   </div>
-                               </div>
-                               <div className="mt-3 bg-rose-600 text-white px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl border-2 border-white animate-bounce">
-                                   DARURAT: {alert.residentName}
-                               </div>
-                           </motion.div>
-                       ))}
-                   </div>
-               </div>
+                  {/* Active Patrol Location */}
+                  {activePatrol?.currentLocation && (
+                      <motion.div 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
+                          style={{ left: `${activePatrol.currentLocation.x}%`, top: `${activePatrol.currentLocation.y}%` }}
+                      >
+                          <div className="relative">
+                              <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-25 scale-150"></div>
+                              <div className="bg-indigo-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-indigo-300 ring-4 ring-white relative z-10">
+                                  <Navigation size={24} fill="currentColor" className="animate-pulse" />
+                              </div>
+                          </div>
+                          <div className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg border-2 border-white whitespace-nowrap">
+                              Petugas: {activePatrol.officerName}
+                          </div>
+                      </motion.div>
+                  )}
+
+                  {/* Active Panic Alerts */}
+                  {activePanicAlerts.map((alert) => (
+                      <motion.div 
+                          key={alert.id}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: [1, 1.3, 1] }}
+                          transition={{ repeat: Infinity, duration: 1 }}
+                          className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
+                          style={{ left: `${alert.locationCoords?.x || 50}%`, top: `${alert.locationCoords?.y || 50}%` }}
+                      >
+                          <div className="relative">
+                              <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50 scale-200"></div>
+                              <div className="bg-rose-600 text-white p-4 md:p-5 rounded-full shadow-2xl shadow-rose-400 ring-4 ring-white relative z-10">
+                                  <Bell size={32} className="animate-shake" />
+                              </div>
+                          </div>
+                          <div className="mt-3 bg-rose-600 text-white px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl border-2 border-white animate-bounce">
+                              DARURAT: {alert.residentName}
+                          </div>
+                      </motion.div>
+                  ))}
+              </div>
           </div>
       </div>
       {selectedHouse && (<HouseDetailModal house={selectedHouse} onClose={() => setSelectedHouse(null)} reports={reports} isAdmin={isAdmin} officials={officials} iuranPayments={iuranPayments} onEditHouse={onEditHouse} onPayDues={onPayDues} onReportHouse={onReportHouse} />)}

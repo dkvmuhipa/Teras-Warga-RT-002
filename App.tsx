@@ -19,7 +19,7 @@ const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } =
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign } from './types';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -41,6 +41,7 @@ import { PublicServices } from './components/public/PublicServices';
 import { PublicUMKM } from './components/public/PublicUMKM';
 import { PublicInfo } from './components/public/PublicInfo';
 import { PublicMap } from './components/public/PublicMap';
+import { PublicResidentDashboard } from './components/public/PublicResidentDashboard';
 import { PublicDocuments } from './components/public/PublicDocuments';
 import { PublicActivity } from './components/public/PublicActivity';
 import { PublicWasteBank } from './components/public/PublicWasteBank';
@@ -64,6 +65,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToDocuments,
   subscribeToIdeas,
   subscribeToDonationCampaigns,
+  subscribeToUpdateRequests,
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
@@ -197,6 +199,7 @@ export const App = () => {
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
+  const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
   const [isAdmin, setIsAdmin] = useState(false);
@@ -242,12 +245,13 @@ export const App = () => {
     const unsubEvents = subscribeToEvents((data) => setEvents(data));
     const unsubIdeas = subscribeToIdeas((data) => setIdeas(data));
     const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
+    const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
 
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations();
+      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations(); unsubUpdateRequests();
     };
   }, []);
 
@@ -297,6 +301,7 @@ export const App = () => {
                             populationLogs={populationLogs} 
                             setPopulationLogs={setPopulationLogs} 
                             events={events} 
+                            updateRequests={updateRequests}
                             mapPoints={mapPoints} 
                             activePatrol={activePatrol} 
                             iuranPayments={iuranPayments} 
@@ -329,6 +334,7 @@ export const App = () => {
                                 <Route path="/kesehatan" element={<PublicHealth />} />
                                 <Route path="/forum" element={<PublicForum ideas={ideas} houses={houses} />} />
                                 <Route path="/donasi" element={<PublicDonations campaigns={donationCampaigns} houses={houses} />} />
+                                <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
                             </Routes>
                         </div>
                         <ChatBot announcements={announcements} ronda={ronda} officials={officials} />

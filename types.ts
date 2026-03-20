@@ -469,7 +469,7 @@ export interface FAQItem {
 export interface Document {
   id: string;
   title: string;
-  category: 'SK RT' | 'Aturan' | 'Formulir' | 'Lainnya';
+  category: 'SK RT' | 'Aturan' | 'Formulir' | 'Notulensi' | 'Lainnya';
   url: string;
   uploadDate: string;
   uploadedBy: string;
@@ -693,4 +693,23 @@ export interface DonationRecord {
   date: string;
   note?: string;
   isAnonymous?: boolean;
+}
+
+export interface UpdateRequest {
+  id: string;
+  houseId: string;
+  headOfFamily: string;
+  phone: string;
+  occupants: number;
+  familyMembers?: {
+    name: string;
+    relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
+    birthDate?: string;
+    job?: string;
+  }[];
+  reason: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  adminNote?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
