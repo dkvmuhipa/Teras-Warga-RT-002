@@ -65,6 +65,8 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     if (house && house.accessCode === pinInput) {
       setSelectedHouseId(tempHouseId);
       localStorage.setItem('resident_house_id', tempHouseId);
+      localStorage.setItem('resident_name', house.headOfFamily);
+      localStorage.setItem('resident_location', `Blok ${house.block}-${house.number}`);
       setIsPinModalOpen(false);
       setPinInput('');
       setPinError(false);

@@ -338,7 +338,7 @@ export const App = () => {
                             </Routes>
                         </div>
                         <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
-                        <PanicButton />
+                        <PanicButton houses={houses} />
                     </>
                 } />
             </Routes>

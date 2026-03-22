@@ -3,9 +3,9 @@ import { AlertTriangle, X, ShieldAlert, Volume2, VolumeX, MapPin, CheckCircle } 
 import { motion, AnimatePresence } from 'motion/react';
 import { sendPanicAlert, subscribeToActivePanicAlerts, updatePanicAlertStatus } from '../services/databaseService';
 import { toast } from 'sonner';
-import { PanicAlert } from '../types';
+import { PanicAlert, House } from '../types';
 
-export function PanicButton() {
+export function PanicButton({ houses = [] }: { houses?: House[] }) {
   const [alert, setAlert] = useState<{ message: string; sender: string; timestamp: string; location?: { lat: number; lng: number } } | string | null>(null);
   const [activeAlerts, setActiveAlerts] = useState<PanicAlert[]>([]);
   const [isHolding, setIsHolding] = useState(false);
@@ -106,8 +106,10 @@ export function PanicButton() {
 
   const sendPanicSignal = async (location?: { lat: number; lng: number }) => {
     const houseId = localStorage.getItem('resident_house_id') || 'Unknown';
-    const residentName = localStorage.getItem('resident_name') || 'Warga';
-    const locationStr = houseId;
+    const house = houses.find(h => h.id === houseId);
+    
+    const residentName = house ? house.headOfFamily : (localStorage.getItem('resident_name') || 'Warga');
+    const locationStr = house ? `Blok ${house.block}-${house.number}` : (localStorage.getItem('resident_location') || houseId);
 
     try {
       const success = await sendPanicAlert(houseId, residentName, locationStr);
