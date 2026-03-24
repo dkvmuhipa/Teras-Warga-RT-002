@@ -38,14 +38,26 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
     }
 
     try {
+      // Check if in iframe
+      if (window.self !== window.top) {
+        toast.error('Notifikasi tidak bisa diaktifkan di dalam frame. Silakan buka aplikasi di tab baru (klik ikon panah di pojok kanan atas).', {
+          duration: 6000
+        });
+        return;
+      }
+
       const status = await Notification.requestPermission();
       setPermission(status);
 
       if (status === 'granted') {
+        // Register service worker manually if needed, or ensure it's ready
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        console.log('Service Worker registered with scope:', registration.scope);
+
         // Get FCM Token
-        // NOTE: Replace with your actual VAPID key from Firebase Console
         const token = await getToken(messaging, {
-          vapidKey: 'BNSRlNOcVZgnWv9VtH-tqMT5bA-oF6iHnvQYsBsrUAByoNAcE0DL7QwQ6MImWMtnZ6oFlWLJ7svp4pIJREUbi0U' 
+          vapidKey: 'BNSRlNOcVZgnWv9VtH-tqMT5bA-oF6iHnvQYsBsrUAByoNAcE0DL7QwQ6MImWMtnZ6oFlWLJ7svp4pIJREUbi0U',
+          serviceWorkerRegistration: registration
         });
 
         if (token) {
@@ -53,12 +65,14 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
           setIsTokenSaved(true);
           toast.success('Notifikasi push berhasil diaktifkan!');
         } else {
-          console.warn('No registration token available. Request permission to generate one.');
+          toast.error('Gagal mendapatkan token notifikasi.');
         }
+      } else if (status === 'denied') {
+        toast.error('Izin notifikasi ditolak. Silakan aktifkan melalui pengaturan browser Anda.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error requesting notification permission:', error);
-      toast.error('Gagal mengaktifkan notifikasi.');
+      toast.error(`Gagal mengaktifkan notifikasi: ${error.message || 'Error tidak diketahui'}`);
     }
   };
 
