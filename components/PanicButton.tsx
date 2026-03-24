@@ -111,8 +111,21 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
     const residentName = house ? house.headOfFamily : (localStorage.getItem('resident_name') || 'Warga');
     const locationStr = house ? `Blok ${house.block}-${house.number}` : (localStorage.getItem('resident_location') || houseId);
 
+    // Determine location coords for the map
+    const BLOCK_COORDS: Record<string, { x: number, y: number }> = {
+      'C5': { x: 12.5, y: 50 },
+      'C7': { x: 37.5, y: 25 },
+      'C8': { x: 37.5, y: 75 },
+      'C9': { x: 62.5, y: 25 },
+      'C10': { x: 62.5, y: 75 },
+      'C11': { x: 87.5, y: 25 },
+      'C12': { x: 87.5, y: 75 },
+    };
+    
+    const locationCoords = house ? BLOCK_COORDS[house.block] : undefined;
+
     try {
-      const success = await sendPanicAlert(houseId, residentName, locationStr);
+      const success = await sendPanicAlert(houseId, residentName, locationStr, locationCoords);
       
       if (success) {
         // Vibrate if mobile
@@ -155,6 +168,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
         <AnimatePresence>
           {myActiveAlert && (
             <motion.div 
+              key={`active-alert-${myActiveAlert.id}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -184,6 +198,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
           
           {isHolding && (
             <motion.div 
+              key="hold-indicator"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -194,6 +209,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
           )}
           {isSent && (
             <motion.div 
+              key="sent-indicator"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}

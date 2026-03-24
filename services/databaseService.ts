@@ -629,7 +629,7 @@ export const markNotificationAsRead = async (id: string) => {
     try { await updateDoc(doc(db, NOTIFICATIONS_COL, id), { isRead: true }); } catch (e) { console.error("Error marking notification as read:", e); }
 };
 
-export const sendPanicAlert = async (houseId: string, residentName: string, location: string) => {
+export const sendPanicAlert = async (houseId: string, residentName: string, location: string, locationCoords?: { x: number, y: number }) => {
     try {
         const timestamp = new Date().toISOString();
         const notification = {
@@ -647,6 +647,7 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
             houseId,
             residentName,
             location,
+            locationCoords,
             timestamp,
             status: 'Active'
         });

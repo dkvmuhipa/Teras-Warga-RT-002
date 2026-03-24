@@ -272,10 +272,11 @@ interface HouseCardProps {
     officialRole?: string;
     isAdmin: boolean;
     iuranPayments?: any[];
+    activePanicAlert?: PanicAlert;
     onClick: () => void;
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, onClick }) => {
+const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, activePanicAlert, onClick }) => {
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const formattedRole = officialRole ? formatRole(officialRole) : null;
     
@@ -338,15 +339,35 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 </div>
             )}
             {hasIssue && <div className="absolute -top-2.5 -left-2.5 text-rose-600 bg-white rounded-full p-1 border border-rose-200 shadow-sm z-20"><AlertTriangle size={14} fill="#e11d48"/></div>}
+            
+            {activePanicAlert && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+                    <div className="absolute inset-0 bg-rose-500/20 animate-pulse rounded-lg"></div>
+                    <motion.div 
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: [1, 1.2, 1], opacity: 1 }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                        className="relative"
+                    >
+                        <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50"></div>
+                        <div className="bg-rose-600 text-white p-1.5 rounded-full shadow-lg border-2 border-white relative z-10">
+                            <Bell size={16} className="animate-shake" fill="currentColor" />
+                        </div>
+                    </motion.div>
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-rose-600 text-white px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl border border-white whitespace-nowrap z-50 animate-bounce">
+                        {activePanicAlert.residentName} ({house.block}-{house.number})
+                    </div>
+                </div>
+            )}
         </button>
     );
 };
 
 interface BlockRendererProps {
-    blockCode: string; houses: House[]; reports: Report[]; officials: Official[]; isAdmin: boolean; iuranPayments?: any[]; onSelect: (h: House) => void; className?: string;
+    blockCode: string; houses: House[]; reports: Report[]; officials: Official[]; isAdmin: boolean; iuranPayments?: any[]; activePanicAlerts?: PanicAlert[]; onSelect: (h: House) => void; className?: string;
 }
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, onSelect, className }) => {
+const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, activePanicAlerts = [], onSelect, className }) => {
     const sortByNumber = (a: House, b: House) => parseInt(a.number, 10) - parseInt(b.number, 10);
     const sortByNumberDesc = (a: House, b: House) => parseInt(b.number, 10) - parseInt(a.number, 10);
     const sortedHouses = [...houses].sort(sortByNumber);
@@ -354,6 +375,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     const leftSide = sortedHouses.slice(0, splitIndex); 
     const rightSide = sortedHouses.slice(splitIndex).sort(sortByNumberDesc); 
     const getOfficialRole = (hid: string) => officials.find(o => formatHouseId(o.houseId) === formatHouseId(hid))?.role;
+    const getPanicAlert = (hid: string) => activePanicAlerts.find(a => a.houseId === hid);
 
     return (
         <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg overflow-hidden ${className || 'h-full'}`}>
@@ -364,10 +386,10 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                  <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-300 z-0"></div>
                  <div className="flex gap-4 relative z-10 h-full">
                     <div className="flex-1 flex flex-col gap-2">
-                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} onClick={() => onSelect(house)} />))}
+                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} />))}
                     </div>
                      <div className="flex-1 flex flex-col gap-2">
-                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} onClick={() => onSelect(house)} />))}
+                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} />))}
                     </div>
                 </div>
             </div>
@@ -377,29 +399,35 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
 
 interface MapLayoutProps {
     houses: House[];
-    renderBlock: (blockCode: string, houses: House[]) => React.ReactNode;
+    reports?: Report[];
+    officials?: Official[];
+    isAdmin?: boolean;
+    iuranPayments?: any[];
+    activePanicAlerts?: PanicAlert[];
+    onSelect?: (h: House) => void;
+    renderBlock: (blockCode: string, houses: House[], reports: Report[], officials: Official[], isAdmin: boolean, iuranPayments: any[], activePanicAlerts: PanicAlert[], onSelect: (h: House) => void) => React.ReactNode;
     className?: string;
 }
 
-export const MapLayout: React.FC<MapLayoutProps> = ({ houses, renderBlock, className }) => {
+export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], officials = [], isAdmin = false, iuranPayments = [], activePanicAlerts = [], onSelect = () => {}, renderBlock, className }) => {
     const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
     
     return (
         <div className={`grid grid-cols-4 gap-4 md:gap-6 ${className}`}>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C5', getBlockHouses('C5'))}
+                {renderBlock('C5', getBlockHouses('C5'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C7', getBlockHouses('C7'))}
-                {renderBlock('C8', getBlockHouses('C8'))}
+                {renderBlock('C7', getBlockHouses('C7'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
+                {renderBlock('C8', getBlockHouses('C8'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C9', getBlockHouses('C9'))}
-                {renderBlock('C10', getBlockHouses('C10'))}
+                {renderBlock('C9', getBlockHouses('C9'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
+                {renderBlock('C10', getBlockHouses('C10'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C11', getBlockHouses('C11'))}
-                {renderBlock('C12', getBlockHouses('C12'))}
+                {renderBlock('C11', getBlockHouses('C11'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
+                {renderBlock('C12', getBlockHouses('C12'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
             </div>
         </div>
     );
@@ -488,18 +516,25 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                   className={`border-[8px] border-dashed border-amber-400/30 bg-amber-50/20 p-8 rounded-[40px] relative transition-all duration-500 ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
               >
                   <MapLayout 
-                      houses={houses} 
-                      renderBlock={(blockCode, blockHouses) => (
-                          <BlockRenderer 
-                              blockCode={blockCode} 
-                              houses={blockHouses} 
-                              reports={reports} 
-                              officials={officials} 
-                              isAdmin={isAdmin} 
-                              iuranPayments={iuranPayments} 
-                              onSelect={setSelectedHouse} 
-                          />
-                      )}
+                    houses={houses} 
+                    reports={reports}
+                    officials={officials}
+                    isAdmin={isAdmin}
+                    iuranPayments={iuranPayments}
+                    activePanicAlerts={activePanicAlerts}
+                    onSelect={setSelectedHouse}
+                    renderBlock={(code, bHouses, bReports, bOfficials, bIsAdmin, bIuran, bAlerts, bOnSelect) => (
+                      <BlockRenderer 
+                        blockCode={code} 
+                        houses={bHouses} 
+                        reports={bReports}
+                        officials={bOfficials}
+                        isAdmin={bIsAdmin}
+                        iuranPayments={bIuran}
+                        activePanicAlerts={bAlerts}
+                        onSelect={bOnSelect}
+                      />
+                    )} 
                   />
                   
                   {/* Patrol Path SVG Layer */}
@@ -637,8 +672,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                       </motion.div>
                   )}
 
-                  {/* Active Panic Alerts */}
-                  {activePanicAlerts.map((alert) => (
+                  {/* Active Panic Alerts (Overlay for unknown locations) */}
+                  {activePanicAlerts.filter(a => !a.houseId || a.houseId === 'Unknown').map((alert) => (
                       <motion.div 
                           key={alert.id}
                           initial={{ scale: 0 }}
@@ -651,10 +686,10 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                               <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50 scale-200"></div>
                               <div className="bg-rose-600 text-white p-4 md:p-5 rounded-full shadow-2xl shadow-rose-400 ring-4 ring-white relative z-10">
                                   <Bell size={32} className="animate-shake" />
-                              </div>
+                               </div>
                           </div>
                           <div className="mt-3 bg-rose-600 text-white px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl border-2 border-white animate-bounce">
-                              DARURAT: {alert.residentName}
+                              DARURAT: {alert.residentName} ({alert.location})
                           </div>
                       </motion.div>
                   ))}
