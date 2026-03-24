@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertTriangle, X, ShieldAlert, Volume2, VolumeX, MapPin, CheckCircle } from 'lucide-react';
+import { AlertTriangle, X, ShieldAlert, Volume2, VolumeX, MapPin, CheckCircle, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { sendPanicAlert, subscribeToActivePanicAlerts, updatePanicAlertStatus } from '../services/databaseService';
 import { toast } from 'sonner';
@@ -12,12 +12,16 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
   const [holdProgress, setHoldProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [showIdentifyPrompt, setShowIdentifyPrompt] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const residentHouseId = localStorage.getItem('resident_house_id');
+  const isIdentified = !!residentHouseId;
+
   useEffect(() => {
-    // Audio for siren - Using a War/Air Raid Siren for more intensity
-    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+    // Audio for siren - Using a standard Emergency Siren for a more common feel
+    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3');
     audioRef.current.loop = true;
 
     // Subscribe to active alerts
@@ -59,6 +63,10 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
   };
 
   const startHolding = () => {
+    if (!isIdentified) {
+      setShowIdentifyPrompt(true);
+      return;
+    }
     setIsHolding(true);
     setHoldProgress(0);
     const startTime = Date.now();
@@ -169,6 +177,38 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
       {/* Panic Trigger Button */}
       <div className="fixed bottom-24 left-4 md:bottom-8 md:left-8 z-50 flex flex-col items-center gap-2">
         <AnimatePresence>
+          {showIdentifyPrompt && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.9 }}
+              className="bg-white p-4 rounded-2xl shadow-2xl border-2 border-indigo-500 w-64 mb-2 text-center"
+            >
+              <div className="bg-indigo-50 text-indigo-600 p-2 rounded-xl w-fit mx-auto mb-2">
+                <ShieldAlert size={20} />
+              </div>
+              <h4 className="text-xs font-black text-slate-800 uppercase tracking-tight mb-1">Identitas Diperlukan</h4>
+              <p className="text-[10px] text-slate-500 font-medium leading-tight mb-3">
+                Silakan identifikasi diri Anda sebagai warga di Dashboard Warga untuk menggunakan fitur ini.
+              </p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setShowIdentifyPrompt(false)}
+                  className="flex-1 py-2 bg-slate-100 text-slate-600 text-[9px] font-bold uppercase rounded-lg"
+                >
+                  Nanti Saja
+                </button>
+                <a 
+                  href="#/resident"
+                  onClick={() => setShowIdentifyPrompt(false)}
+                  className="flex-1 py-2 bg-indigo-600 text-white text-[9px] font-bold uppercase rounded-lg flex items-center justify-center"
+                >
+                  Ke Dashboard
+                </a>
+              </div>
+            </motion.div>
+          )}
+          
           {myActiveAlert && (
             <motion.div 
               key={`active-alert-${myActiveAlert.id}`}
@@ -260,9 +300,12 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
             transition-all duration-300 flex items-center justify-center border-4 border-white/20
             ${isHolding ? 'scale-90 bg-rose-700' : 'hover:scale-110 hover:bg-rose-700'}
             ${isSent ? 'bg-emerald-600 border-emerald-400/50' : ''}
+            ${!isIdentified ? 'grayscale opacity-80' : ''}
           `}>
-            <div className={`absolute inset-0 bg-rose-600 rounded-full animate-ping opacity-20 ${isHolding || isSent ? 'hidden' : ''}`}></div>
-            {isSent ? <CheckCircle size={28} className="relative z-10" /> : <AlertTriangle size={28} className="relative z-10" />}
+            <div className={`absolute inset-0 bg-rose-600 rounded-full animate-ping opacity-20 ${isHolding || isSent || !isIdentified ? 'hidden' : ''}`}></div>
+            {isSent ? <CheckCircle size={28} className="relative z-10" /> : 
+             !isIdentified ? <Lock size={28} className="relative z-10" /> :
+             <AlertTriangle size={28} className="relative z-10" />}
           </div>
           
           <span className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl border border-white/10">

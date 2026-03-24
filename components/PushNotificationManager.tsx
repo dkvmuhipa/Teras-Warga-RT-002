@@ -28,6 +28,10 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
       });
     });
 
+    // Check if we already have a token saved in this session/local storage
+    const savedToken = localStorage.getItem(`fcm_token_saved_${userId}`);
+    if (savedToken) setIsTokenSaved(true);
+
     return () => unsubscribe();
   }, [userId]);
 
@@ -63,6 +67,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
         if (token) {
           await saveFCMToken(userId, token);
           setIsTokenSaved(true);
+          localStorage.setItem(`fcm_token_saved_${userId}`, 'true');
           toast.success('Notifikasi push berhasil diaktifkan!');
         } else {
           toast.error('Gagal mendapatkan token notifikasi.');
@@ -76,26 +81,68 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
     }
   };
 
-  if (permission === 'granted' && isTokenSaved) return null;
+  // This component now only handles the logic and foreground messages
+  // It doesn't render the floating button anymore
+  return null;
+};
+
+export const NotificationToggle: React.FC<{ userId: string; variant?: 'compact' | 'full' }> = ({ userId, variant = 'full' }) => {
+  const [permission, setPermission] = useState<NotificationPermission>(
+    typeof window !== 'undefined' ? Notification.permission : 'default'
+  );
+  
+  const requestPermission = async () => {
+    if (!messaging) return;
+    
+    if (window.self !== window.top) {
+      toast.error('Buka aplikasi di tab baru untuk mengaktifkan notifikasi.');
+      return;
+    }
+
+    const status = await Notification.requestPermission();
+    setPermission(status);
+
+    if (status === 'granted') {
+      try {
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        const token = await getToken(messaging, {
+          vapidKey: 'BNSRlNOcVZgnWv9VtH-tqMT5bA-oF6iHnvQYsBsrUAByoNAcE0DL7QwQ6MImWMtnZ6oFlWLJ7svp4pIJREUbi0U',
+          serviceWorkerRegistration: registration
+        });
+
+        if (token) {
+          await saveFCMToken(userId, token);
+          localStorage.setItem(`fcm_token_saved_${userId}`, 'true');
+          toast.success('Notifikasi aktif!');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  if (permission === 'granted') {
+    return (
+      <div className={`flex items-center gap-2 text-emerald-600 ${variant === 'compact' ? 'p-1' : 'p-3 bg-emerald-50 rounded-xl border border-emerald-100'}`}>
+        <ShieldCheck size={variant === 'compact' ? 14 : 18} />
+        <span className={`${variant === 'compact' ? 'text-[10px]' : 'text-xs'} font-bold uppercase tracking-widest`}>Notifikasi Aktif</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed bottom-20 right-4 z-[60] animate-bounce">
-      <button
-        onClick={requestPermission}
-        className="flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-full shadow-xl hover:bg-rose-700 transition-all border-2 border-white"
-      >
-        {permission === 'denied' ? (
-          <>
-            <BellOff size={18} />
-            <span className="text-xs font-bold">Aktifkan Notifikasi</span>
-          </>
-        ) : (
-          <>
-            <Bell size={18} />
-            <span className="text-xs font-bold">Aktifkan Notifikasi Darurat</span>
-          </>
-        )}
-      </button>
-    </div>
+    <button
+      onClick={requestPermission}
+      className={`flex items-center justify-center gap-2 transition-all ${
+        variant === 'compact' 
+        ? 'text-rose-500 hover:text-rose-600 p-1' 
+        : 'w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-lg shadow-rose-100'
+      }`}
+    >
+      {permission === 'denied' ? <BellOff size={variant === 'compact' ? 14 : 18} /> : <Bell size={variant === 'compact' ? 14 : 18} />}
+      <span className={`${variant === 'compact' ? 'text-[10px]' : 'text-xs'} font-black uppercase tracking-widest`}>
+        {permission === 'denied' ? 'Izin Ditolak' : 'Aktifkan Notifikasi'}
+      </span>
+    </button>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { AppNotification } from '../types';
+import { NotificationToggle } from './PushNotificationManager';
 
 interface NotificationCenterProps {
   notifications: AppNotification[];
@@ -41,7 +42,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifica
         <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 animate-fade-in origin-top-right">
           <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
             <h4 className="font-bold text-sm text-slate-800">Notifikasi</h4>
-            {unreadCount > 0 && <span className="text-[10px] font-bold px-2 py-0.5 bg-rose-100 text-rose-600 rounded-full">{unreadCount} Baru</span>}
+            <div className="flex items-center gap-2">
+              <NotificationToggle userId={localStorage.getItem('resident_house_id') || 'guest_user'} variant="compact" />
+              {unreadCount > 0 && <span className="text-[10px] font-bold px-2 py-0.5 bg-rose-100 text-rose-600 rounded-full">{unreadCount} Baru</span>}
+            </div>
           </div>
           <div className="max-h-80 overflow-y-auto custom-scrollbar">
             {notifications.length > 0 ? notifications.map(n => (

@@ -26,6 +26,7 @@ import {
   addUpdateRequest,
   subscribeToHouseUpdateRequests
 } from '../../services/databaseService';
+import { NotificationToggle } from '../PushNotificationManager';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
@@ -323,9 +324,15 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 <p className="text-xs text-indigo-700 font-medium leading-relaxed mb-4">
                   Gunakan QR Code di atas untuk verifikasi identitas saat kegiatan RT, pengambilan bantuan, atau akses fasilitas lingkungan.
                 </p>
-                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-[10px] font-black uppercase tracking-widest">
-                  Unduh Kartu (PDF)
-                </Button>
+                <div className="space-y-3">
+                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-[10px] font-black uppercase tracking-widest">
+                    Unduh Kartu (PDF)
+                  </Button>
+                  <div className="pt-2 border-t border-indigo-200/50">
+                    <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Pengaturan Notifikasi</p>
+                    <NotificationToggle userId={selectedHouseId} />
+                  </div>
+                </div>
               </Card>
             </div>
           </motion.div>
