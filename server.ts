@@ -5,16 +5,23 @@ import { createServer as createViteServer } from "vite";
 import admin from "firebase-admin";
 
 // Initialize Firebase Admin
-// Note: In a real environment, you'd use a service account key.
-// Here we assume the environment has the necessary credentials or we use the project ID.
 if (!admin.apps.length) {
   try {
-    admin.initializeApp({
-      projectId: "teras-warga",
-      // If you have a service account JSON, you would use:
-      // credential: admin.credential.cert(serviceAccount)
-    });
-    console.log("Firebase Admin initialized");
+    const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
+    
+    if (serviceAccountVar) {
+      const serviceAccount = JSON.parse(serviceAccountVar);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: "teras-warga"
+      });
+      console.log("Firebase Admin initialized with Service Account");
+    } else {
+      admin.initializeApp({
+        projectId: "teras-warga"
+      });
+      console.log("Firebase Admin initialized with Project ID (Default Credentials)");
+    }
   } catch (error) {
     console.error("Firebase Admin initialization error:", error);
   }
@@ -48,6 +55,15 @@ async function startServer() {
       });
       
       console.log(`Successfully sent ${response.successCount} messages; ${response.failureCount} errors.`);
+      
+      if (response.failureCount > 0) {
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            console.error(`Token ${tokens[idx]} failed with error:`, resp.error);
+          }
+        });
+      }
+
       res.json({ success: true, response });
     } catch (error: any) {
       console.error("Error sending push notification:", error);

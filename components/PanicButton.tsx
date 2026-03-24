@@ -16,8 +16,8 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Audio for siren
-    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+    // Audio for siren - Using a more distinct emergency siren
+    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     audioRef.current.loop = true;
 
     // Subscribe to active alerts
@@ -125,9 +125,9 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
     const locationCoords = house ? BLOCK_COORDS[house.block] : undefined;
 
     try {
-      const success = await sendPanicAlert(houseId, residentName, locationStr, locationCoords);
+      const result = await sendPanicAlert(houseId, residentName, locationStr, locationCoords);
       
-      if (success) {
+      if (result === true) {
         // Vibrate if mobile
         if (navigator.vibrate) {
           navigator.vibrate([500, 200, 500, 200, 500]);
@@ -135,17 +135,20 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
 
         // Show confirmation to sender
         setIsSent(true);
-        toast.error("Sinyal Darurat Terkirim!", {
+        playSiren(); // Play siren for the sender too
+        toast.success("Sinyal Darurat Terkirim!", {
           description: "Petugas keamanan telah diberitahu.",
           duration: 5000
         });
         setTimeout(() => setIsSent(false), 5000);
       } else {
-        toast.error("Gagal mengirim sinyal darurat. Coba lagi.");
+        // If result is an error message or false
+        const errorMessage = typeof result === 'string' ? result : "Gagal mengirim sinyal darurat. Coba lagi.";
+        toast.error(errorMessage);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Panic alert error:", error);
-      toast.error("Terjadi kesalahan sistem.");
+      toast.error(`Terjadi kesalahan sistem: ${error.message || 'Error tidak diketahui'}`);
     }
   };
 

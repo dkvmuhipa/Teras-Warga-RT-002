@@ -643,6 +643,9 @@ export const markNotificationAsRead = async (id: string) => {
 };
 
 export const sendPanicAlert = async (houseId: string, residentName: string, location: string, locationCoords?: { x: number, y: number }) => {
+    if (!isFirebaseConfigured) {
+        return "Firebase belum terkonfigurasi dengan benar. Hubungi admin.";
+    }
     try {
         const timestamp = new Date().toISOString();
         const notification = {
@@ -701,9 +704,9 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
         }
         
         return true;
-    } catch (e) {
+    } catch (e: any) {
         console.error("Error sending panic alert:", e);
-        return false;
+        return e.message || "Gagal mengirim sinyal darurat.";
     }
 };
 
