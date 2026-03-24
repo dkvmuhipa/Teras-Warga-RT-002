@@ -3,24 +3,44 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { createServer as createViteServer } from "vite";
 import admin from "firebase-admin";
+import fs from "fs";
+import path from "path";
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
   try {
     const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
+    const serviceAccountPath = path.join(process.cwd(), "firebase-service-account.json");
     
     if (serviceAccountVar) {
-      const serviceAccount = JSON.parse(serviceAccountVar);
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        projectId: "teras-warga"
-      });
-      console.log("Firebase Admin initialized with Service Account");
+      try {
+        const serviceAccount = JSON.parse(serviceAccountVar);
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: "teras-warga"
+        });
+        console.log("✅ Firebase Admin initialized with Service Account (Env Var)");
+      } catch (parseError) {
+        console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:", parseError);
+        admin.initializeApp({ projectId: "teras-warga" });
+      }
+    } else if (fs.existsSync(serviceAccountPath)) {
+      try {
+        const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: "teras-warga"
+        });
+        console.log("✅ Firebase Admin initialized with Service Account (Local File)");
+      } catch (fileError) {
+        console.error("❌ Failed to read or parse firebase-service-account.json:", fileError);
+        admin.initializeApp({ projectId: "teras-warga" });
+      }
     } else {
+      console.warn("⚠️ No Service Account found (Env Var or Local File). Using default credentials.");
       admin.initializeApp({
         projectId: "teras-warga"
       });
-      console.log("Firebase Admin initialized with Project ID (Default Credentials)");
     }
   } catch (error) {
     console.error("Firebase Admin initialization error:", error);

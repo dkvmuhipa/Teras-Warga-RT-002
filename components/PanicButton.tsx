@@ -16,8 +16,8 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Audio for siren - Using a more distinct emergency siren
-    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    // Audio for siren - Using a War/Air Raid Siren for more intensity
+    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
     audioRef.current.loop = true;
 
     // Subscribe to active alerts
