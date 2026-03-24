@@ -51,13 +51,14 @@ import PublicDonations from './components/public/PublicDonations';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
+import { PushNotificationManager } from './components/PushNotificationManager';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { Button } from './components/ui/Button';
 import { Card } from './components/ui/Card';
 import { Modal } from './components/ui/Modal';
 
 // Firebase imports
-import { auth } from './services/firebaseConfig';
+import { auth, messaging } from './services/firebaseConfig';
 import { onAuthStateChanged } from "firebase/auth";
 import { subscribeToMapPoints, subscribeToCollection, 
   subscribeToNotifications,
@@ -98,6 +99,8 @@ import { subscribeToMapPoints, subscribeToCollection,
   deletePollFromDb,
   updatePollStatus,
   submitVote,
+  saveFCMToken,
+  getFCMTokens,
   addRondaLog,
   subscribeToRondaLogs,
   subscribeToRondaSwapRequests,
@@ -339,6 +342,7 @@ export const App = () => {
                         </div>
                         <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
                         <PanicButton houses={houses} />
+                        <PushNotificationManager userId={localStorage.getItem('resident_house_id') || 'guest_user'} />
                     </>
                 } />
             </Routes>

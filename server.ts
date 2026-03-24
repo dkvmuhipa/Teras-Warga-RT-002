@@ -2,9 +2,27 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { createServer as createViteServer } from "vite";
+import admin from "firebase-admin";
+
+// Initialize Firebase Admin
+// Note: In a real environment, you'd use a service account key.
+// Here we assume the environment has the necessary credentials or we use the project ID.
+if (!admin.apps.length) {
+  try {
+    admin.initializeApp({
+      projectId: "teras-warga",
+      // If you have a service account JSON, you would use:
+      // credential: admin.credential.cert(serviceAccount)
+    });
+    console.log("Firebase Admin initialized");
+  } catch (error) {
+    console.error("Firebase Admin initialization error:", error);
+  }
+}
 
 async function startServer() {
   const app = express();
+  app.use(express.json()); // Add JSON body parser
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
@@ -13,6 +31,29 @@ async function startServer() {
   });
 
   const PORT = 3000;
+
+  // Push Notification Endpoint
+  app.post("/api/push/send", async (req, res) => {
+    const { tokens, notification, data } = req.body;
+    
+    if (!tokens || !tokens.length) {
+      return res.status(400).json({ error: "No tokens provided" });
+    }
+
+    try {
+      const response = await admin.messaging().sendEachForMulticast({
+        tokens,
+        notification,
+        data: data || {},
+      });
+      
+      console.log(`Successfully sent ${response.successCount} messages; ${response.failureCount} errors.`);
+      res.json({ success: true, response });
+    } catch (error: any) {
+      console.error("Error sending push notification:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   // Weather Proxy
   app.get("/api/weather", async (req, res) => {

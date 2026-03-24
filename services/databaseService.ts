@@ -74,8 +74,21 @@ const DONATION_CAMPAIGNS_COL = "donationCampaigns";
 const DONATION_RECORDS_COL = "donationRecords";
 const PANIC_ALERTS_COL = "panicAlerts";
 const UPDATE_REQUESTS_COL = "updateRequests";
+const FCM_TOKENS_COL = "fcmTokens";
 
-// --- IDEAS SERVICES ---
+// --- FCM TOKEN SERVICES ---
+export const saveFCMToken = async (userId: string, token: string) => {
+    const docRef = doc(db, FCM_TOKENS_COL, userId);
+    return await setDoc(docRef, {
+        token,
+        updatedAt: new Date().toISOString()
+    }, { merge: true });
+};
+
+export const getFCMTokens = async () => {
+    const snapshot = await getDocs(collection(db, FCM_TOKENS_COL));
+    return snapshot.docs.map(doc => doc.data().token);
+};
 export const subscribeToIdeas = (callback: (data: any[]) => void) => {
     const q = query(collection(db, IDEAS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
@@ -661,6 +674,31 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
             date: timestamp,
             status: 'Baru'
         });
+
+        // Trigger Push Notifications
+        try {
+            const tokens = await getFCMTokens();
+            if (tokens.length > 0) {
+                fetch('/api/push/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tokens,
+                        notification: {
+                            title: "🚨 DARURAT (PANIC BUTTON)",
+                            body: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`
+                        },
+                        data: {
+                            type: 'PanicAlert',
+                            houseId,
+                            location
+                        }
+                    })
+                }).catch(err => console.error("Push API fetch error:", err));
+            }
+        } catch (e) {
+            console.error("Error triggering push notifications:", e);
+        }
         
         return true;
     } catch (e) {

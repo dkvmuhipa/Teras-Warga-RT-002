@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { getMessaging } from "firebase/messaging";
 
 // --- KONFIGURASI FIREBASE ---
 // Project: TerasWarga (teras-warga)
@@ -19,6 +20,7 @@ let app: any;
 let db: any;
 let auth: any;
 let storage: any;
+let messaging: any;
 let isFirebaseConfigured = false;
 
 try {
@@ -27,9 +29,15 @@ try {
   db = getFirestore(app);
   auth = getAuth(app);
   storage = getStorage(app);
+  
+  // Messaging only works in browser and if supported
+  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    messaging = getMessaging(app);
+  }
+  
   isFirebaseConfigured = true;
 } catch (error) {
   console.error("Firebase initialization failed:", error);
 }
 
-export { app, db, auth, storage, isFirebaseConfigured };
+export { app, db, auth, storage, messaging, isFirebaseConfigured };
