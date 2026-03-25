@@ -441,9 +441,20 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
     const securityPost = mapPoints.find(p => p.type === 'Security');
     
     return (
-        <div className={`grid grid-cols-4 gap-4 md:gap-6 ${className}`}>
-            {/* SVG Overlay for Emergency Paths */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none z-40 overflow-visible">
+        <div className="flex flex-col gap-2">
+            {/* Main Road - North Side */}
+            <div className="flex items-center justify-center py-2 bg-amber-400/20 rounded-xl border-2 border-amber-400/40 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-400/10 via-transparent to-transparent opacity-50"></div>
+                <div className="flex items-center gap-3 relative z-10">
+                    <div className="h-0.5 w-8 bg-amber-400/50 rounded-full"></div>
+                    <span className="text-xs font-black uppercase tracking-[0.3em] text-amber-700 drop-shadow-sm">Jl. Pue Lombe</span>
+                    <div className="h-0.5 w-8 bg-amber-400/50 rounded-full"></div>
+                </div>
+            </div>
+
+            <div className={`grid grid-cols-4 gap-4 md:gap-6 relative ${className}`}>
+                {/* SVG Overlay for Emergency Paths */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none z-40 overflow-visible">
               {activePanicAlerts.map(alert => {
                 if (!securityPost) return null;
                 const houseId = alert.houseId;
@@ -495,7 +506,17 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
                 {renderBlock('C12', getBlockHouses('C12'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
             </div>
         </div>
-    );
+
+        {/* Alternative Road - South Side */}
+        <div className="flex items-center justify-center py-1.5 bg-amber-400/10 rounded-lg border border-amber-400/20 relative overflow-hidden">
+            <div className="flex items-center gap-2 relative z-10">
+                <div className="h-px w-4 bg-amber-300"></div>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Jalan Alternatif</span>
+                <div className="h-px w-4 bg-amber-300"></div>
+            </div>
+        </div>
+    </div>
+);
 };
 
 export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [], officials = [], mapPoints = [], iuranPayments = [], activePatrol, activePanicAlerts = [], onEditHouse, onPayDues, onReportHouse }) => {
@@ -823,7 +844,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
               <div 
                   ref={mapRef}
                   onClick={handleMapClick}
-                  className={`border-[8px] border-dashed border-amber-400/30 bg-amber-50/20 p-8 rounded-[40px] relative transition-all duration-500 print:border-none print:bg-white print:p-0 print:rounded-none ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
+                  className={`border-[4px] border-amber-400/20 bg-amber-50/10 p-10 rounded-[48px] relative transition-all duration-500 print:border-none print:bg-white print:p-0 print:rounded-none ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
               >
                           <MapLayout 
                             houses={filteredHouses} 
