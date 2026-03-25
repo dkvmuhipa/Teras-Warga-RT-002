@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User, ChevronDown, LayoutGrid, Wallet, Users, Info } from 'lucide-react';
-import { RT_NAME } from '../constants';
+import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
 import { NotificationCenter } from './NotificationCenter';
 import { MobileBottomNav } from './MobileBottomNav';
@@ -57,8 +57,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center cursor-pointer font-black text-xl text-slate-800" onClick={() => navigate('/')}>
-              <span className="text-blue-600 mr-1">TERAS</span> {RT_NAME}
+            <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+              <Logo showText={false} imageSize="h-14" />
             </div>
             
             <div className="flex items-center gap-2">

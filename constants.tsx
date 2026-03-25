@@ -15,17 +15,47 @@ export const CURRENCY_SYMBOL = "Rp";
 // Updated Address per Letter Reference
 export const RT_ADDRESS = "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu";
 
+// --- LOGO CONFIGURATION ---
+// Replace the empty string with your logo URL (e.g., "https://yourdomain.com/logo.png")
+export const LOGO_URL = "/logo-rt.svg"; 
+
 // --- LOGO COMPONENT ---
-export const Logo = () => (
-  <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-slate-800">
-    <div className="bg-brand-blue text-white p-1.5 rounded-lg">
-      <Home size={24} />
+export const Logo = ({ className = "", iconSize = 24, imageSize = "h-10", showText = true, dark = false }) => {
+  const textColor = dark ? "text-white" : "text-slate-800";
+  const subTextColor = dark ? "text-slate-400" : "text-brand-blue";
+  const imageFilter = dark ? "brightness-0 invert" : "";
+
+  if (LOGO_URL) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <img 
+          src={LOGO_URL} 
+          alt={APP_NAME} 
+          className={`${imageSize} w-auto object-contain ${imageFilter}`} 
+          referrerPolicy="no-referrer"
+        />
+        {showText && (
+          <span className={`font-bold text-xl tracking-tight ${textColor}`}>
+            {APP_NAME} <span className={subTextColor}>{RT_NAME}</span>
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex items-center gap-2 font-bold text-xl tracking-tight ${textColor} ${className}`}>
+      <div className="bg-brand-blue text-white p-1.5 rounded-lg shrink-0">
+        <Home size={iconSize} />
+      </div>
+      {showText && (
+        <span className="flex items-center gap-1">
+            {APP_NAME} <span className={subTextColor}>{RT_NAME}</span>
+        </span>
+      )}
     </div>
-    <span className="flex items-center gap-1">
-        {APP_NAME} <span className="text-brand-blue">RT 02</span>
-    </span>
-  </div>
-);
+  );
+};
 
 // --- DATA DUMMY (MOCK DATA) ---
 

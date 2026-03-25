@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, Snowflake, ShieldCheck, Users, Wind, Droplets, Thermometer, Wind as WindIcon, Activity } from 'lucide-react';
 import { motion } from 'motion/react';
-import { RT_NAME } from '../constants';
+import { RT_NAME, LOGO_URL, Logo } from '../constants';
 
 import { useWeather } from '../hooks/useWeather';
 
@@ -52,6 +52,17 @@ export const HeroSection = () => {
               <span className="w-2 h-2 bg-indigo-400 rounded-full animate-ping" />
               Smart Neighborhood Platform
             </motion.div>
+            
+            {LOGO_URL && (
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="mb-6"
+              >
+                <Logo dark showText={false} imageSize="h-16 md:h-24" />
+              </motion.div>
+            )}
             
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}

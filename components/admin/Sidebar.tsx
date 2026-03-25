@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert,
   PieChart, Activity, FileEdit
 } from 'lucide-react';
+import { Logo } from '../../constants';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface SidebarProps {
@@ -109,19 +110,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className={`p-6 border-b border-slate-800/50 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="bg-gradient-to-br from-indigo-500 to-violet-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20 shrink-0">
-              <Shield size={24} className="text-white" />
-            </div>
-            {!isCollapsed && (
-              <motion.div 
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="overflow-hidden whitespace-nowrap"
-              >
-                <h1 className="font-black text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">TERAS Admin</h1>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Panel Pengurus</p>
-              </motion.div>
-            )}
+            <Logo dark showText={!isCollapsed} imageSize={isCollapsed ? "h-10" : "h-12"} />
             {!isCollapsed && (
               <button 
                 onClick={() => setIsOpen(false)} 
