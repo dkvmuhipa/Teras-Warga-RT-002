@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, ZoomIn, ZoomOut, Maximize, MousePointer2 } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
 import { useFinancial } from '../context/FinancialContext';
-import { TransformWrapper, TransformComponent, useTransformContext } from 'react-zoom-pan-pinch';
 
 interface HouseMapProps {
   houses: House[];
@@ -274,9 +274,11 @@ interface HouseCardProps {
     iuranPayments?: any[];
     activePanicAlert?: PanicAlert;
     onClick: () => void;
+    showHeatmap?: boolean;
+    activeLayers?: string[];
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, activePanicAlert, onClick }) => {
+const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, activePanicAlert, onClick, showHeatmap = false, activeLayers = ['Security', 'Social', 'Financial'] }) => {
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const formattedRole = officialRole ? formatRole(officialRole) : null;
     
@@ -286,7 +288,15 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
     const hasArrears = arrears.length > 0;
 
     const getHouseColor = () => {
-        if (hasIssue) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
+        if (showHeatmap) {
+          const occupants = house.occupants || 0;
+          if (occupants > 5) return "bg-rose-500 border-rose-700 text-white";
+          if (occupants > 3) return "bg-orange-400 border-orange-600 text-white";
+          if (occupants > 0) return "bg-emerald-400 border-emerald-600 text-white";
+          return "bg-slate-200 border-slate-300 text-slate-400";
+        }
+
+        if (hasIssue && activeLayers.includes('Security')) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
         if (officialRole) return "bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 border-amber-400 text-white shadow-lg shadow-indigo-500/40 z-10 ring-2 ring-amber-300";
         if (house.status === 'Empty') return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
         if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
@@ -295,9 +305,31 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
         return "bg-gradient-to-br from-emerald-100 to-teal-200 border-emerald-500 text-emerald-900";
     };
 
+    const showSocial = activeLayers.includes('Social');
+    const showFinancial = activeLayers.includes('Financial');
+
     return (
         <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-200 min-h-[60px] w-full hover:shadow-md hover:-translate-y-0.5 ${getHouseColor()}`}>
             <span className={`font-black leading-none drop-shadow-sm ${officialRole ? 'text-lg' : 'text-sm'}`}>{house.number}</span>
+            
+            {house.isOutOfTown && (
+              <div className="absolute -top-1 -right-1 bg-amber-500 text-white p-1 rounded-full shadow-lg border border-white z-30 animate-bounce">
+                <Shield size={10} fill="currentColor" />
+              </div>
+            )}
+
+            {house.hasGuest && (
+              <div className="absolute -top-1 -left-1 bg-indigo-500 text-white p-1 rounded-full shadow-lg border border-white z-30">
+                <UserPlus size={10} fill="currentColor" />
+              </div>
+            )}
+
+            {house.isIsoman && (
+              <div className="absolute top-1/2 -translate-y-1/2 -right-1 bg-rose-600 text-white p-1 rounded-full shadow-lg border border-white z-30 animate-pulse">
+                <Thermometer size={10} />
+              </div>
+            )}
+
             <div className="flex items-center justify-center mt-1 w-full gap-0.5">
                 {formattedRole ? (
                     <div className="flex flex-col items-center w-full px-1">
@@ -311,25 +343,33 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                          house.residenceType === 'Kontrak' ? <Key size={10} className="opacity-80 text-amber-800" /> : 
                          <Home size={10} className="opacity-80"/>}
                         
-                        {(house.hasBaby || (house.babyCount || 0) > 0) && (
-                            <Baby size={10} className="text-rose-500" />
+                        {house.paymentStatusSampah === PaymentStatus.PAID && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm" title="Iuran Sampah Lunas" />
                         )}
-                        {(house.hasToddler || (house.toddlerCount || 0) > 0) && (
-                            <Baby size={10} className="text-orange-500" />
-                        )}
-                        {(house.hasElderly || (house.elderlyCount || 0) > 0) && (
-                            <Accessibility size={10} className="text-indigo-500" />
-                        )}
-                        {(house.hasPregnant || (house.pregnantCount || 0) > 0) && (
-                            <Heart size={10} className="text-rose-400" fill="currentColor" />
-                        )}
-                        {(house.hasWidow || (house.widowCount || 0) > 0) && (
-                            <User size={10} className="text-slate-600" />
+                        
+                        {showSocial && (
+                          <>
+                            {(house.hasBaby || (house.babyCount || 0) > 0) && (
+                                <Baby size={10} className="text-rose-500" />
+                            )}
+                            {(house.hasToddler || (house.toddlerCount || 0) > 0) && (
+                                <Baby size={10} className="text-orange-500" />
+                            )}
+                            {(house.hasElderly || (house.elderlyCount || 0) > 0) && (
+                                <Accessibility size={10} className="text-indigo-500" />
+                            )}
+                            {(house.hasPregnant || (house.pregnantCount || 0) > 0) && (
+                                <Heart size={10} className="text-rose-400" fill="currentColor" />
+                            )}
+                            {(house.hasWidow || (house.widowCount || 0) > 0) && (
+                                <User size={10} className="text-slate-600" />
+                            )}
+                          </>
                         )}
                     </div>
                 )}
             </div>
-            {!officialRole && (
+            {!officialRole && showFinancial && (
                 <div className="absolute top-1 right-1 flex flex-col gap-0.5">
                     <div className={`w-2 h-2 rounded-full border border-white shadow-sm ${
                         (statusAir === PaymentStatus.PAID && statusSampah === PaymentStatus.PAID) 
@@ -338,7 +378,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                     }`}></div>
                 </div>
             )}
-            {hasIssue && <div className="absolute -top-2.5 -left-2.5 text-rose-600 bg-white rounded-full p-1 border border-rose-200 shadow-sm z-20"><AlertTriangle size={14} fill="#e11d48"/></div>}
+            {hasIssue && activeLayers.includes('Security') && <div className="absolute -top-2.5 -left-2.5 text-rose-600 bg-white rounded-full p-1 border border-rose-200 shadow-sm z-20"><AlertTriangle size={14} fill="#e11d48"/></div>}
             
             {activePanicAlert && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
@@ -365,9 +405,11 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
 
 interface BlockRendererProps {
     blockCode: string; houses: House[]; reports: Report[]; officials: Official[]; isAdmin: boolean; iuranPayments?: any[]; activePanicAlerts?: PanicAlert[]; onSelect: (h: House) => void; className?: string;
+    showHeatmap?: boolean;
+    activeLayers?: string[];
 }
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, activePanicAlerts = [], onSelect, className }) => {
+const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, activePanicAlerts = [], onSelect, className, showHeatmap, activeLayers }) => {
     const sortByNumber = (a: House, b: House) => parseInt(a.number, 10) - parseInt(b.number, 10);
     const sortByNumberDesc = (a: House, b: House) => parseInt(b.number, 10) - parseInt(a.number, 10);
     const sortedHouses = [...houses].sort(sortByNumber);
@@ -386,10 +428,10 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                  <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-300 z-0"></div>
                  <div className="flex gap-4 relative z-10 h-full">
                     <div className="flex-1 flex flex-col gap-2">
-                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} />))}
+                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} />))}
                     </div>
                      <div className="flex-1 flex flex-col gap-2">
-                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} />))}
+                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} />))}
                     </div>
                 </div>
             </div>
@@ -405,29 +447,70 @@ interface MapLayoutProps {
     iuranPayments?: any[];
     activePanicAlerts?: PanicAlert[];
     onSelect?: (h: House) => void;
-    renderBlock: (blockCode: string, houses: House[], reports: Report[], officials: Official[], isAdmin: boolean, iuranPayments: any[], activePanicAlerts: PanicAlert[], onSelect: (h: House) => void) => React.ReactNode;
+    renderBlock: (blockCode: string, houses: House[], reports: Report[], officials: Official[], isAdmin: boolean, iuranPayments: any[], activePanicAlerts: PanicAlert[], onSelect: (h: House) => void, showHeatmap?: boolean, activeLayers?: string[]) => React.ReactNode;
     className?: string;
+    showHeatmap?: boolean;
+    activeLayers?: string[];
+    mapPoints?: MapPoint[];
 }
 
-export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], officials = [], isAdmin = false, iuranPayments = [], activePanicAlerts = [], onSelect = () => {}, renderBlock, className }) => {
+export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], officials = [], isAdmin = false, iuranPayments = [], activePanicAlerts = [], onSelect = () => {}, renderBlock, className, showHeatmap, activeLayers, mapPoints = [] }) => {
     const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
+    const securityPost = mapPoints.find(p => p.type === 'Security');
     
     return (
         <div className={`grid grid-cols-4 gap-4 md:gap-6 ${className}`}>
+            {/* SVG Overlay for Emergency Paths */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-40 overflow-visible">
+              {activePanicAlerts.map(alert => {
+                if (!securityPost) return null;
+                const houseId = alert.houseId;
+                const houseEl = document.getElementById(`house-${houseId}`);
+                const securityEl = document.getElementById(`mappoint-${securityPost.id}`);
+                
+                if (houseEl && securityEl) {
+                  const mapRect = houseEl.closest('.relative')?.getBoundingClientRect();
+                  if (!mapRect) return null;
+                  
+                  const hRect = houseEl.getBoundingClientRect();
+                  const sRect = securityEl.getBoundingClientRect();
+                  
+                  const x1 = sRect.left - mapRect.left + sRect.width / 2;
+                  const y1 = sRect.top - mapRect.top + sRect.height / 2;
+                  const x2 = hRect.left - mapRect.left + hRect.width / 2;
+                  const y2 = hRect.top - mapRect.top + hRect.height / 2;
+
+                  return (
+                    <motion.line 
+                      key={alert.id}
+                      x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke="#e11d48"
+                      strokeWidth="4"
+                      strokeDasharray="8 8"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    />
+                  );
+                }
+                return null;
+              })}
+            </svg>
+
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C5', getBlockHouses('C5'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
+                {renderBlock('C5', getBlockHouses('C5'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C7', getBlockHouses('C7'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
-                {renderBlock('C8', getBlockHouses('C8'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
+                {renderBlock('C7', getBlockHouses('C7'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
+                {renderBlock('C8', getBlockHouses('C8'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C9', getBlockHouses('C9'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
-                {renderBlock('C10', getBlockHouses('C10'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
+                {renderBlock('C9', getBlockHouses('C9'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
+                {renderBlock('C10', getBlockHouses('C10'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C11', getBlockHouses('C11'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
-                {renderBlock('C12', getBlockHouses('C12'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect)}
+                {renderBlock('C11', getBlockHouses('C11'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
+                {renderBlock('C12', getBlockHouses('C12'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
             </div>
         </div>
     );
@@ -477,15 +560,84 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const totalPregnant = houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0);
   const totalWidow = houses.reduce((acc, h) => acc + (h.widowCount || 0), 0);
 
-  const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeLayers, setActiveLayers] = useState<string[]>(['Security', 'Social', 'Financial']);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<MapPoint | null>(null);
+  const [activeCctv, setActiveCctv] = useState<MapPoint | null>(null);
+
+  const handleDownload = async () => {
+    if (!mapRef.current) return;
+    
+    try {
+      // Hide non-print elements temporarily if needed, but html2canvas captures the DOM as is.
+      // We can use the 'ignoreElements' option if needed.
+      const canvas = await html2canvas(mapRef.current, {
+        useCORS: true,
+        scale: 2, // Higher quality
+        backgroundColor: '#ffffff',
+        ignoreElements: (element) => element.classList.contains('no-print')
+      });
+      
+      const link = document.createElement('a');
+      link.download = `denah-digital-rt02-${new Date().toISOString().split('T')[0]}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
+  const filteredHouses = useMemo(() => {
+    if (!searchQuery) return houses;
+    const query = searchQuery.toLowerCase();
+    return houses.filter(h => 
+      h.number.toLowerCase().includes(query) || 
+      h.headOfFamily.toLowerCase().includes(query) ||
+      h.block.toLowerCase().includes(query)
+    );
+  }, [houses, searchQuery]);
+
+  const getBlockHouses = (code: string) => filteredHouses.filter(h => h.block === code);
   
   return (
-    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[750px] relative">
-      <div className="bg-white border-b border-slate-100 px-6 py-4 z-20 shadow-sm relative space-y-4">
+    <div ref={mapRef} className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[500px] md:h-[750px] relative">
+      <div className="bg-white border-b border-slate-100 px-6 py-4 z-20 shadow-sm relative space-y-4 no-print">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex-1">
                <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2"><MapPin className="text-brand-blue" size={24}/> Denah Digital RT 02</h3>
-               <p className="text-xs text-slate-500 font-medium">Klik kavling rumah untuk melihat detail informasi.</p>
+               <div className="flex flex-col md:flex-row gap-3 mt-2">
+                 <div className="relative flex-1 max-w-md">
+                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                   <input 
+                     type="text" 
+                     placeholder="Cari nomor rumah atau nama warga..." 
+                     className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20 transition-all"
+                     value={searchQuery}
+                     onChange={(e) => setSearchQuery(e.target.value)}
+                   />
+                 </div>
+                 <div className="flex gap-2">
+                   <button 
+                     onClick={() => setShowHeatmap(!showHeatmap)}
+                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${showHeatmap ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                   >
+                     <Lightbulb size={14} /> Heatmap
+                   </button>
+                   <button 
+                     onClick={() => window.print()}
+                     className="px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2"
+                   >
+                     <Printer size={14} /> Cetak Denah
+                   </button>
+                   <button 
+                     onClick={handleDownload}
+                     className="px-4 py-2 bg-indigo-600 text-white border border-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-2"
+                   >
+                     <Download size={14} /> Unduh Gambar
+                   </button>
+                 </div>
+               </div>
             </div>
             
             <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar">
@@ -508,195 +660,478 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-slate-100 p-8 md:p-12 lg:p-16 flex items-center justify-center">
-          <div className="min-w-[1000px] relative">
+      <div className="flex-1 bg-slate-100 flex overflow-hidden">
+        {/* Sidebar for Info & Controls */}
+        <div className="w-64 bg-white border-r border-slate-200 overflow-y-auto p-6 hidden lg:flex flex-col gap-8 shrink-0 no-print">
+          {/* Compass Section */}
+          <div className="flex flex-col items-center gap-2 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="w-12 h-12 bg-white rounded-full shadow-lg border-2 border-slate-200 flex items-center justify-center">
+              <Compass size={28} className="text-rose-600" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Orientasi Utara</span>
+          </div>
+
+          {/* Filter Layer Section */}
+          <div>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+              <Settings2 size={12} /> Filter Layer
+            </h4>
+            <div className="space-y-2">
+              {[
+                { id: 'Security', label: 'Keamanan', desc: 'CCTV, APAR, Pos Satpam' },
+                { id: 'Social', label: 'Sosial', desc: 'Status Mudik, Tamu, Isoman' },
+                { id: 'Financial', label: 'Keuangan', desc: 'Status Iuran Sampah' }
+              ].map(layer => (
+                <label key={layer.id} className={`flex flex-col gap-1 p-3 rounded-xl cursor-pointer transition-all border ${activeLayers.includes(layer.id) ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="checkbox" 
+                      checked={activeLayers.includes(layer.id)}
+                      onChange={() => {
+                        setActiveLayers(prev => prev.includes(layer.id) ? prev.filter(l => l !== layer.id) : [...prev, layer.id]);
+                      }}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className={`text-xs font-bold ${activeLayers.includes(layer.id) ? 'text-indigo-700' : 'text-slate-600'}`}>
+                      {layer.label}
+                    </span>
+                  </div>
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter ml-7">
+                    {layer.desc}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Map Legend Section */}
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Status Rumah</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-amber-500 animate-bounce"></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Keluar Kota / Mudik</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Ada Tamu</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-rose-600 animate-pulse"></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Isolasi Mandiri</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Iuran Sampah Lunas</span>
+                </div>
+              </div>
+            </div>
+
+            {showHeatmap && (
+              <div>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Kepadatan Penghuni</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded bg-rose-500"></div>
+                    <span className="text-[10px] font-bold text-slate-600 uppercase">&gt; 5 Orang</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded bg-orange-400"></div>
+                    <span className="text-[10px] font-bold text-slate-600 uppercase">3 - 5 Orang</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded bg-emerald-400"></div>
+                    <span className="text-[10px] font-bold text-slate-600 uppercase">1 - 2 Orang</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Fasilitas & Keamanan</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-orange-600 flex items-center justify-center">
+                    <Flame size={8} className="text-white" />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Titik APAR</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-indigo-500 flex items-center justify-center">
+                    <Video size={8} className="text-white" />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Kamera CCTV</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Kelompok Rentan</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <Baby size={12} className="text-rose-500" />
+                  <span className="text-[9px] font-bold text-slate-500 uppercase">Bayi</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Baby size={12} className="text-orange-500" />
+                  <span className="text-[9px] font-bold text-slate-500 uppercase">Balita</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Accessibility size={12} className="text-indigo-500" />
+                  <span className="text-[9px] font-bold text-slate-500 uppercase">Lansia</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Heart size={12} className="text-rose-400" />
+                  <span className="text-[9px] font-bold text-slate-500 uppercase">Hamil</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Help Section */}
+          <div className="mt-auto pt-6 border-t border-slate-100">
+            <div className="p-4 bg-slate-800 rounded-2xl text-white">
+              <h5 className="text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+                <Info size={12} className="text-brand-blue" /> Tips Navigasi
+              </h5>
+              <p className="text-[9px] font-bold text-slate-400 leading-relaxed uppercase tracking-tighter">
+                Klik pada kotak rumah untuk melihat detail warga, status iuran, dan riwayat laporan.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Map Container */}
+        <div className="flex-1 relative overflow-auto p-4 md:p-8">
+          <div className="min-w-[1000px] mx-auto relative">
               <div 
                   ref={mapRef}
                   onClick={handleMapClick}
                   className={`border-[8px] border-dashed border-amber-400/30 bg-amber-50/20 p-8 rounded-[40px] relative transition-all duration-500 ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
               >
-                  <MapLayout 
-                    houses={houses} 
-                    reports={reports}
-                    officials={officials}
-                    isAdmin={isAdmin}
-                    iuranPayments={iuranPayments}
-                    activePanicAlerts={activePanicAlerts}
-                    onSelect={setSelectedHouse}
-                    renderBlock={(code, bHouses, bReports, bOfficials, bIsAdmin, bIuran, bAlerts, bOnSelect) => (
-                      <BlockRenderer 
-                        blockCode={code} 
-                        houses={bHouses} 
-                        reports={bReports}
-                        officials={bOfficials}
-                        isAdmin={bIsAdmin}
-                        iuranPayments={bIuran}
-                        activePanicAlerts={bAlerts}
-                        onSelect={bOnSelect}
-                      />
-                    )} 
-                  />
-                  
-                  {/* Patrol Path SVG Layer */}
-                  {showCheckpoints && checkpoints.length > 1 && (
-                      <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
-                          <defs>
-                              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                                  <feGaussianBlur stdDeviation="2" result="blur" />
-                                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                              </filter>
-                          </defs>
-                          {/* Base Path (Dashed) */}
-                          <polyline
-                              points={checkpoints.map(cp => `${cp.x}%,${cp.y}%`).join(' ')}
-                              fill="none"
-                              stroke="rgba(79, 70, 229, 0.2)"
-                              strokeWidth="3"
-                              strokeDasharray="8,8"
-                              style={{ vectorEffect: 'non-scaling-stroke' }}
-                          />
-                          {/* Active/Visited Path (Solid) */}
-                          {activePatrol && activePatrol.visitedCheckpoints.length > 1 && (
-                              <motion.polyline
-                                  initial={{ pathLength: 0 }}
-                                  animate={{ pathLength: 1 }}
-                                  points={checkpoints
-                                      .filter(cp => activePatrol.visitedCheckpoints.includes(cp.id))
-                                      .map(cp => `${cp.x}%,${cp.y}%`)
-                                      .join(' ')}
-                                  fill="none"
-                                  stroke="#4f46e5"
-                                  strokeWidth="4"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  filter="url(#glow)"
-                                  style={{ vectorEffect: 'non-scaling-stroke' }}
+                          <MapLayout 
+                            houses={filteredHouses} 
+                            reports={reports} 
+                            officials={officials} 
+                            isAdmin={isAdmin} 
+                            iuranPayments={iuranPayments} 
+                            activePanicAlerts={activePanicAlerts} 
+                            onSelect={setSelectedHouse} 
+                            showHeatmap={showHeatmap}
+                            activeLayers={activeLayers}
+                            mapPoints={mapPoints}
+                            renderBlock={(code, bHouses, bReports, bOfficials, bIsAdmin, bIuran, bAlerts, bOnSelect, bHeatmap, bLayers) => (
+                              <BlockRenderer 
+                                blockCode={code} 
+                                houses={bHouses} 
+                                reports={bReports}
+                                officials={bOfficials}
+                                isAdmin={bIsAdmin}
+                                iuranPayments={bIuran}
+                                activePanicAlerts={bAlerts}
+                                onSelect={bOnSelect}
+                                showHeatmap={bHeatmap}
+                                activeLayers={bLayers}
                               />
+                            )} 
+                          />
+                          
+                          {/* Patrol Path SVG Layer */}
+                          {showCheckpoints && checkpoints.length > 1 && (
+                              <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
+                                  <defs>
+                                      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                          <feGaussianBlur stdDeviation="2" result="blur" />
+                                          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                      </filter>
+                                  </defs>
+                                  {/* Base Path (Dashed) */}
+                                  <polyline
+                                      points={checkpoints.map(cp => `${cp.x}%,${cp.y}%`).join(' ')}
+                                      fill="none"
+                                      stroke="rgba(79, 70, 229, 0.2)"
+                                      strokeWidth="3"
+                                      strokeDasharray="8,8"
+                                      style={{ vectorEffect: 'non-scaling-stroke' }}
+                                  />
+                                  {/* Active/Visited Path (Solid) */}
+                                  {activePatrol && activePatrol.visitedCheckpoints.length > 1 && (
+                                      <motion.polyline
+                                          initial={{ pathLength: 0 }}
+                                          animate={{ pathLength: 1 }}
+                                          points={checkpoints
+                                              .filter(cp => activePatrol.visitedCheckpoints.includes(cp.id))
+                                              .map(cp => `${cp.x}%,${cp.y}%`)
+                                              .join(' ')}
+                                          fill="none"
+                                          stroke="#4f46e5"
+                                          strokeWidth="4"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          filter="url(#glow)"
+                                          style={{ vectorEffect: 'non-scaling-stroke' }}
+                                      />
+                                  )}
+                              </svg>
                           )}
-                      </svg>
-                  )}
 
-                  {/* Checkpoints Overlay */}
-                  {showCheckpoints && checkpoints.map((cp, i) => {
-                      const isVisited = activePatrol?.visitedCheckpoints.includes(cp.id);
-                      return (
-                          <div 
-                              key={cp.id} 
-                              onClick={(e) => {
-                                  if (isManageMode) {
-                                      e.stopPropagation();
-                                      setDraggingId(cp.id);
-                                      setDraggingType('checkpoint');
-                                  }
-                              }}
-                              className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-[10px] md:text-xs font-bold transition-all ${
-                                  draggingId === cp.id && draggingType === 'checkpoint' 
-                                      ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' 
-                                      : isVisited 
-                                          ? 'bg-emerald-500 ring-4 ring-emerald-100' 
-                                          : 'bg-indigo-600'
-                              } text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
-                              style={{ 
-                                  top: cp.y !== undefined ? `${cp.y}%` : `${10 + i * 15}%`, 
-                                  left: cp.x !== undefined ? `${cp.x}%` : `${10 + i * 20}%`,
-                                  transform: 'translate(-50%, -50%)'
-                              }}
-                          >
-                              {isVisited ? <CheckCircle size={14}/> : <ShieldCheck size={14}/>} 
-                              <span className="hidden md:inline">{cp.name}</span>
-                              <span className="md:hidden">{i + 1}</span>
-                              {isManageMode && draggingId === cp.id && draggingType === 'checkpoint' && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
-                          </div>
-                      );
-                  })}
+                          {/* Checkpoints Overlay */}
+                          {showCheckpoints && checkpoints.map((cp, i) => {
+                              const isVisited = activePatrol?.visitedCheckpoints.includes(cp.id);
+                              return (
+                                  <div 
+                                      key={cp.id} 
+                                      onClick={(e) => {
+                                          if (isManageMode) {
+                                              e.stopPropagation();
+                                              setDraggingId(cp.id);
+                                              setDraggingType('checkpoint');
+                                          }
+                                      }}
+                                      className={`absolute z-30 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg text-[10px] md:text-xs font-bold transition-all ${
+                                          draggingId === cp.id && draggingType === 'checkpoint' 
+                                              ? 'bg-rose-500 scale-110 ring-4 ring-rose-200' 
+                                              : isVisited 
+                                                  ? 'bg-emerald-500 ring-4 ring-emerald-100' 
+                                                  : 'bg-indigo-600'
+                                      } text-white ${isManageMode ? 'cursor-pointer hover:scale-105' : ''}`} 
+                                      style={{ 
+                                          top: cp.y !== undefined ? `${cp.y}%` : `${10 + i * 15}%`, 
+                                          left: cp.x !== undefined ? `${cp.x}%` : `${10 + i * 20}%`,
+                                          transform: 'translate(-50%, -50%)'
+                                      }}
+                                  >
+                                      {isVisited ? <CheckCircle size={14}/> : <ShieldCheck size={14}/>} 
+                                      <span className="hidden md:inline">{cp.name}</span>
+                                      <span className="md:hidden">{i + 1}</span>
+                                      {isManageMode && draggingId === cp.id && draggingType === 'checkpoint' && <span className="ml-2 animate-pulse text-[10px]">(Klik di peta untuk pindah)</span>}
+                                  </div>
+                              );
+                          })}
 
-                  {/* Map Points Overlay (General Info) */}
-                  {mapPoints.map((point) => (
-                      <div 
-                          key={point.id}
-                          onClick={(e) => {
-                              if (isManageMode) {
-                                  e.stopPropagation();
-                                  setDraggingId(point.id);
-                                  setDraggingType('mappoint');
-                              }
-                          }}
-                          className={`absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 transition-all ${draggingId === point.id && draggingType === 'mappoint' ? 'scale-125 z-40' : ''} ${isManageMode ? 'cursor-pointer hover:scale-110' : ''}`}
-                          style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                      >
-                          <div className={`p-1.5 rounded-full shadow-md ${
-                              draggingId === point.id && draggingType === 'mappoint' ? 'bg-rose-500 ring-4 ring-rose-200' :
-                              point.type === 'Gate' ? 'bg-amber-500' :
-                              point.type === 'Security' ? 'bg-blue-500' :
-                              point.type === 'Block' ? 'bg-emerald-500' :
-                              point.type === 'PJU' ? 'bg-yellow-500' :
-                              point.type === 'CCTV' ? 'bg-indigo-500' :
-                              point.type === 'Hydrant' ? 'bg-rose-500' :
-                              point.type === 'Trash' ? 'bg-orange-500' :
-                              'bg-slate-500'
-                          } text-white border-2 border-white`}>
-                              {point.type === 'Gate' ? <Move size={14} /> : 
-                               point.type === 'Security' ? <Shield size={14} /> : 
-                               point.type === 'PJU' ? <Lightbulb size={14} /> :
-                               point.type === 'CCTV' ? <Video size={14} /> :
-                               point.type === 'Hydrant' ? <Droplets size={14} /> :
-                               point.type === 'Trash' ? <Trash size={14} /> :
-                               <MapPin size={14} />}
-                          </div>
-                          <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">
-                              {point.label}
-                          </span>
-                          {isManageMode && draggingId === point.id && draggingType === 'mappoint' && (
-                              <span className="absolute -bottom-6 whitespace-nowrap bg-rose-600 text-white text-[8px] px-2 py-0.5 rounded-full animate-pulse">Klik peta untuk pindah</span>
-                          )}
-                      </div>
-                  ))}
+                          {/* Map Points Overlay (General Info) */}
+                          {mapPoints.map((point) => {
+                              // Filter by layer
+                              if (point.type === 'CCTV' && !activeLayers.includes('Security')) return null;
+                              if (point.type === 'PJU' && !activeLayers.includes('Security')) return null;
+                              if (point.type === 'Hydrant' && !activeLayers.includes('Security')) return null;
+                              if (point.type === 'APAR' && !activeLayers.includes('Security')) return null;
+                              if (point.type === 'Security' && !activeLayers.includes('Security')) return null;
+                              if (point.type === 'Trash' && !activeLayers.includes('Social')) return null;
 
-                  {/* Active Patrol Location */}
-                  {activePatrol?.currentLocation && (
-                      <motion.div 
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
-                          style={{ left: `${activePatrol.currentLocation.x}%`, top: `${activePatrol.currentLocation.y}%` }}
-                      >
-                          <div className="relative">
-                              <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-25 scale-150"></div>
-                              <div className="bg-indigo-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-indigo-300 ring-4 ring-white relative z-10">
-                                  <Navigation size={24} fill="currentColor" className="animate-pulse" />
+                              return (
+                              <div 
+                                  key={point.id}
+                                  id={`mappoint-${point.id}`}
+                                  onClick={(e) => {
+                                      if (isManageMode) {
+                                          e.stopPropagation();
+                                          setDraggingId(point.id);
+                                          setDraggingType('mappoint');
+                                      } else {
+                                          e.stopPropagation();
+                                          if (point.type === 'CCTV') setActiveCctv(point);
+                                          else setSelectedFacility(point);
+                                      }
+                                  }}
+                                  className={`absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 transition-all ${draggingId === point.id && draggingType === 'mappoint' ? 'scale-125 z-40' : ''} ${isManageMode ? 'cursor-pointer hover:scale-110' : 'cursor-pointer'}`}
+                                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                              >
+                                  <div className={`p-1.5 rounded-full shadow-md ${
+                                      draggingId === point.id && draggingType === 'mappoint' ? 'bg-rose-500 ring-4 ring-rose-200' :
+                                      point.type === 'Gate' ? 'bg-amber-500' :
+                                      point.type === 'Security' ? 'bg-blue-500' :
+                                      point.type === 'Block' ? 'bg-emerald-500' :
+                                      point.type === 'PJU' ? 'bg-yellow-500' :
+                                      point.type === 'CCTV' ? 'bg-indigo-500' :
+                                      point.type === 'Hydrant' ? 'bg-rose-500' :
+                                      point.type === 'APAR' ? 'bg-orange-600' :
+                                      point.type === 'Trash' ? 'bg-orange-500' :
+                                      'bg-slate-500'
+                                  } text-white border-2 border-white`}>
+                                      {point.type === 'Gate' ? <Move size={14} /> : 
+                                       point.type === 'Security' ? <Shield size={14} /> : 
+                                       point.type === 'PJU' ? <Lightbulb size={14} /> :
+                                       point.type === 'CCTV' ? <Video size={14} /> :
+                                       point.type === 'Hydrant' ? <Droplets size={14} /> :
+                                       point.type === 'APAR' ? <Flame size={14} /> :
+                                       point.type === 'Trash' ? <Trash size={14} /> :
+                                       <MapPin size={14} />}
+                                  </div>
+                                  <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">
+                                      {point.label}
+                                  </span>
+                                  {isManageMode && draggingId === point.id && draggingType === 'mappoint' && (
+                                      <span className="absolute -bottom-6 whitespace-nowrap bg-rose-600 text-white text-[8px] px-2 py-0.5 rounded-full animate-pulse">Klik peta untuk pindah</span>
+                                  )}
                               </div>
-                          </div>
-                          <div className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg border-2 border-white whitespace-nowrap">
-                              Petugas: {activePatrol.officerName}
-                          </div>
-                      </motion.div>
-                  )}
+                              );
+                          })}
 
-                  {/* Active Panic Alerts (Overlay for unknown locations) */}
-                  {activePanicAlerts.filter(a => !a.houseId || a.houseId === 'Unknown').map((alert) => (
-                      <motion.div 
-                          key={alert.id}
-                          initial={{ scale: 0 }}
-                          animate={{ scale: [1, 1.3, 1] }}
-                          transition={{ repeat: Infinity, duration: 1 }}
-                          className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
-                          style={{ left: `${alert.locationCoords?.x || 50}%`, top: `${alert.locationCoords?.y || 50}%` }}
-                      >
-                          <div className="relative">
-                              <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50 scale-200"></div>
-                              <div className="bg-rose-600 text-white p-4 md:p-5 rounded-full shadow-2xl shadow-rose-400 ring-4 ring-white relative z-10">
-                                  <Bell size={32} className="animate-shake" />
-                               </div>
-                          </div>
-                          <div className="mt-3 bg-rose-600 text-white px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl border-2 border-white animate-bounce">
-                              DARURAT: {alert.residentName} ({alert.location})
-                          </div>
-                      </motion.div>
-                  ))}
+                          {/* Active Patrol Location */}
+                          {activePatrol?.currentLocation && (
+                              <motion.div 
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
+                                  style={{ left: `${activePatrol.currentLocation.x}%`, top: `${activePatrol.currentLocation.y}%` }}
+                              >
+                                  <div className="relative">
+                                      <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-25 scale-150"></div>
+                                      <div className="bg-indigo-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-indigo-300 ring-4 ring-white relative z-10">
+                                          <Navigation size={24} fill="currentColor" className="animate-pulse" />
+                                      </div>
+                                  </div>
+                                  <div className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg border-2 border-white whitespace-nowrap">
+                                      Petugas: {activePatrol.officerName}
+                                  </div>
+                              </motion.div>
+                          )}
+
+                          {/* Active Panic Alerts (Overlay for unknown locations) */}
+                          {activePanicAlerts.filter(a => !a.houseId || a.houseId === 'Unknown').map((alert) => (
+                              <motion.div 
+                                  key={alert.id}
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: [1, 1.3, 1] }}
+                                  transition={{ repeat: Infinity, duration: 1 }}
+                                  className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
+                                  style={{ left: `${alert.locationCoords?.x || 50}%`, top: `${alert.locationCoords?.y || 50}%` }}
+                              >
+                                  <div className="relative">
+                                      <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50 scale-200"></div>
+                                      <div className="bg-rose-600 text-white p-4 md:p-5 rounded-full shadow-2xl shadow-rose-400 ring-4 ring-white relative z-10">
+                                          <Bell size={32} className="animate-shake" />
+                                       </div>
+                                  </div>
+                                  <div className="mt-3 bg-rose-600 text-white px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl border-2 border-white animate-bounce">
+                                      DARURAT: {alert.residentName} ({alert.location})
+                                  </div>
+                              </motion.div>
+                          ))}
+                      </div>
+                  </div>
               </div>
-          </div>
       </div>
       {selectedHouse && (<HouseDetailModal house={selectedHouse} onClose={() => setSelectedHouse(null)} reports={reports} isAdmin={isAdmin} officials={officials} iuranPayments={iuranPayments} onEditHouse={onEditHouse} onPayDues={onPayDues} onReportHouse={onReportHouse} />)}
+      
+      {/* CCTV Modal */}
+      {activeCctv && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border-4 border-slate-800"
+          >
+            <div className="bg-slate-800 p-4 flex justify-between items-center text-white">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-700 rounded-lg">
+                  <Video size={20} className="text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="font-black uppercase tracking-tighter text-lg">{activeCctv.label}</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live Surveillance Feed</p>
+                </div>
+              </div>
+              <button onClick={() => setActiveCctv(null)} className="p-2 hover:bg-slate-700 rounded-full transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="aspect-video bg-black relative flex items-center justify-center group">
+              {activeCctv.cctvUrl ? (
+                <iframe 
+                  src={activeCctv.cctvUrl} 
+                  className="w-full h-full"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="text-center p-8">
+                  <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-slate-700">
+                    <VideoOff size={32} className="text-slate-500" />
+                  </div>
+                  <p className="text-slate-400 font-black uppercase tracking-widest text-sm">Signal Lost / Camera Offline</p>
+                  <p className="text-slate-600 text-xs mt-2 font-bold italic">Check connection or contact security administrator</p>
+                </div>
+              )}
+              <div className="absolute top-4 left-4 flex items-center gap-2 bg-rose-600 px-2 py-1 rounded text-[10px] font-black text-white uppercase tracking-widest animate-pulse">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+                Live
+              </div>
+            </div>
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+              <div className="flex items-center gap-4 text-slate-500">
+                <div className="flex items-center gap-1">
+                  <Activity size={14} className="text-emerald-500" />
+                  <span className="text-[10px] font-bold uppercase">Bitrate: 4.2 Mbps</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock size={14} />
+                  <span className="text-[10px] font-bold uppercase">{new Date().toLocaleTimeString()}</span>
+                </div>
+              </div>
+              <button className="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all shadow-lg">
+                Full Screen
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Facility Info Modal */}
+      {selectedFacility && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border-4 border-slate-800"
+          >
+            <div className="bg-indigo-600 p-6 text-white relative overflow-hidden">
+              <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="relative z-10 flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30">
+                    <Info size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-black uppercase tracking-tighter text-2xl leading-none">{selectedFacility.label}</h3>
+                    <p className="text-xs text-indigo-100 font-bold uppercase tracking-widest mt-1">Informasi Fasilitas Umum</p>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedFacility(null)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-100 mb-6">
+                <p className="text-slate-700 font-bold italic leading-relaxed">
+                  {selectedFacility.facilityInfo || "Informasi detail mengenai fasilitas ini belum tersedia. Silakan hubungi pengurus RT untuk informasi lebih lanjut."}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                  <p className="text-[10px] text-emerald-600 font-black uppercase tracking-widest mb-1">Status</p>
+                  <p className="text-emerald-700 font-black uppercase text-sm">Aktif / Tersedia</p>
+                </div>
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-100">
+                  <p className="text-[10px] text-amber-600 font-black uppercase tracking-widest mb-1">Terakhir Update</p>
+                  <p className="text-amber-700 font-black uppercase text-sm">Hari Ini</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 bg-slate-50 border-t border-slate-200">
+              <button 
+                onClick={() => setSelectedFacility(null)}
+                className="w-full bg-slate-800 text-white py-3 rounded-xl font-black uppercase tracking-widest hover:bg-slate-700 transition-all shadow-lg"
+              >
+                Tutup Informasi
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

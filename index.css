@@ -73,4 +73,44 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    body {
+      background-color: white !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .bg-white {
+      background-color: white !important;
+    }
+
+    .bg-slate-50, .bg-slate-100 {
+      background-color: transparent !important;
+    }
+
+    .shadow-xl, .shadow-sm, .shadow-lg {
+      box-shadow: none !important;
+    }
+
+    .border, .border-slate-200, .border-slate-100 {
+      border: none !important;
+    }
+
+    /* Ensure the map container is visible and takes full space */
+    .flex-1 {
+      flex: 1 1 auto !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    /* Hide any fixed elements that might overlap */
+    nav, header, footer {
+      display: none !important;
+    }
+  }
 }

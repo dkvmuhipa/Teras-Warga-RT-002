@@ -29,6 +29,9 @@ export interface House {
   paymentStatusKeamanan?: PaymentStatus; // Iuran Keamanan (Opsional/Belum Ada)
   phone?: string;
   accessCode?: string; // NEW: Kode Akses Unik untuk Verifikasi
+  isOutOfTown?: boolean; // NEW: Status Keluar Kota
+  hasGuest?: boolean; // NEW: Status Ada Tamu
+  isIsoman?: boolean; // NEW: Status Isolasi Mandiri
   
   // New Fields for Professional Data Management
   isVerified?: boolean;
@@ -325,10 +328,12 @@ export interface Checkpoint {
 export interface MapPoint {
   id: string;
   label: string;
-  type: 'Gate' | 'Security' | 'Block' | 'PJU' | 'CCTV' | 'Hydrant' | 'Trash' | 'Other';
+  type: 'Gate' | 'Security' | 'Block' | 'PJU' | 'CCTV' | 'Hydrant' | 'Trash' | 'APAR' | 'Other';
   x: number;
   y: number;
   icon: string;
+  facilityInfo?: string; // NEW: Jadwal/Info Fasilitas
+  cctvUrl?: string; // NEW: Link/Mock Stream CCTV
 }
 
 export interface PatrolSession {
