@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
 import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
 import { useFinancial } from '../context/FinancialContext';
@@ -570,18 +570,21 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
     if (!mapRef.current) return;
     
     try {
-      // Hide non-print elements temporarily if needed, but html2canvas captures the DOM as is.
-      // We can use the 'ignoreElements' option if needed.
-      const canvas = await html2canvas(mapRef.current, {
-        useCORS: true,
-        scale: 2, // Higher quality
+      // modern-screenshot handles modern CSS features like oklch much better
+      const dataUrl = await domToPng(mapRef.current, {
+        scale: 2,
         backgroundColor: '#ffffff',
-        ignoreElements: (element) => element.classList.contains('no-print')
+        filter: (node) => {
+          if (node instanceof HTMLElement) {
+            return !node.classList.contains('no-print');
+          }
+          return true;
+        }
       });
       
       const link = document.createElement('a');
       link.download = `denah-digital-rt02-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = dataUrl;
       link.click();
     } catch (error) {
       console.error('Download failed:', error);
