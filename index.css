@@ -79,17 +79,24 @@
       display: none !important;
     }
     
+    @page {
+      size: landscape;
+      margin: 10mm;
+    }
+
     body {
       background-color: white !important;
       padding: 0 !important;
       margin: 0 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .bg-white {
       background-color: white !important;
     }
 
-    .bg-slate-50, .bg-slate-100 {
+    .bg-slate-50, .bg-slate-100, .bg-amber-50\/20 {
       background-color: transparent !important;
     }
 
@@ -106,11 +113,23 @@
       flex: 1 1 auto !important;
       height: auto !important;
       overflow: visible !important;
+      display: block !important;
     }
 
     /* Hide any fixed elements that might overlap */
-    nav, header, footer {
+    nav, header, footer, aside {
       display: none !important;
+    }
+
+    /* Force visibility of the map and its content */
+    .relative {
+      position: relative !important;
+      overflow: visible !important;
+    }
+
+    /* Ensure text is dark for printing */
+    .text-slate-400, .text-slate-500 {
+      color: #64748b !important;
     }
   }
 }

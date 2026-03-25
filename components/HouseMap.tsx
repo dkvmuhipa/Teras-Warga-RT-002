@@ -312,24 +312,6 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
         <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-200 min-h-[60px] w-full hover:shadow-md hover:-translate-y-0.5 ${getHouseColor()}`}>
             <span className={`font-black leading-none drop-shadow-sm ${officialRole ? 'text-lg' : 'text-sm'}`}>{house.number}</span>
             
-            {house.isOutOfTown && (
-              <div className="absolute -top-1 -right-1 bg-amber-500 text-white p-1 rounded-full shadow-lg border border-white z-30 animate-bounce">
-                <Shield size={10} fill="currentColor" />
-              </div>
-            )}
-
-            {house.hasGuest && (
-              <div className="absolute -top-1 -left-1 bg-indigo-500 text-white p-1 rounded-full shadow-lg border border-white z-30">
-                <UserPlus size={10} fill="currentColor" />
-              </div>
-            )}
-
-            {house.isIsoman && (
-              <div className="absolute top-1/2 -translate-y-1/2 -right-1 bg-rose-600 text-white p-1 rounded-full shadow-lg border border-white z-30 animate-pulse">
-                <Thermometer size={10} />
-              </div>
-            )}
-
             <div className="flex items-center justify-center mt-1 w-full gap-0.5">
                 {formattedRole ? (
                     <div className="flex flex-col items-center w-full px-1">
@@ -521,6 +503,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [showCheckpoints, setShowCheckpoints] = useState(false);
   const [isManageMode, setIsManageMode] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [draggingType, setDraggingType] = useState<'checkpoint' | 'mappoint' | null>(null);
@@ -567,20 +550,41 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const [activeCctv, setActiveCctv] = useState<MapPoint | null>(null);
 
   const handleDownload = async () => {
-    if (!mapRef.current) return;
+    if (!containerRef.current) return;
     
     try {
-      // modern-screenshot handles modern CSS features like oklch much better
-      const dataUrl = await domToPng(mapRef.current, {
+      // To prevent cut-off and ensure legend is visible, we temporarily adjust styles
+      const originalHeight = containerRef.current.style.height;
+      const originalOverflow = containerRef.current.style.overflow;
+      const originalWidth = containerRef.current.style.width;
+      
+      // Force dimensions for a complete capture
+      containerRef.current.style.height = 'auto';
+      containerRef.current.style.overflow = 'visible';
+      containerRef.current.style.width = '1200px'; 
+      
+      // Add a temporary class to show the print-only legend
+      const printLegend = containerRef.current.querySelector('.print-only-legend');
+      if (printLegend) printLegend.classList.remove('hidden');
+
+      const dataUrl = await domToPng(containerRef.current, {
         scale: 2,
         backgroundColor: '#ffffff',
         filter: (node) => {
           if (node instanceof HTMLElement) {
-            return !node.classList.contains('no-print');
+            // Exclude UI elements like search, buttons, and sidebar
+            if (node.classList.contains('no-print')) return false;
+            return true;
           }
           return true;
         }
       });
+
+      // Restore original styles and hide legend again
+      containerRef.current.style.height = originalHeight;
+      containerRef.current.style.overflow = originalOverflow;
+      containerRef.current.style.width = originalWidth;
+      if (printLegend) printLegend.classList.add('hidden');
       
       const link = document.createElement('a');
       link.download = `denah-digital-rt02-${new Date().toISOString().split('T')[0]}.png`;
@@ -604,12 +608,12 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const getBlockHouses = (code: string) => filteredHouses.filter(h => h.block === code);
   
   return (
-    <div ref={mapRef} className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[500px] md:h-[750px] relative">
-      <div className="bg-white border-b border-slate-100 px-6 py-4 z-20 shadow-sm relative space-y-4 no-print">
+    <div ref={containerRef} className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[500px] md:h-[750px] relative print:h-auto print:overflow-visible print:border-none print:shadow-none">
+      <div className="bg-white border-b border-slate-100 px-6 py-4 z-20 shadow-sm relative space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex-1">
                <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2"><MapPin className="text-brand-blue" size={24}/> Denah Digital RT 02</h3>
-               <div className="flex flex-col md:flex-row gap-3 mt-2">
+               <div className="flex flex-col md:flex-row gap-3 mt-2 no-print">
                  <div className="relative flex-1 max-w-md">
                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                    <input 
@@ -627,38 +631,42 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                    >
                      <Lightbulb size={14} /> Heatmap
                    </button>
-                   <button 
-                     onClick={() => window.print()}
+                   {isAdmin && (
+                     <button 
+                       onClick={() => window.print()}
                      className="px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2"
                    >
                      <Printer size={14} /> Cetak Denah
                    </button>
-                   <button 
-                     onClick={handleDownload}
+                   )}
+                   {isAdmin && (
+                     <button 
+                       onClick={handleDownload}
                      className="px-4 py-2 bg-indigo-600 text-white border border-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-2"
                    >
                      <Download size={14} /> Unduh Gambar
                    </button>
+                   )}
                  </div>
                </div>
             </div>
             
-            <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar">
-               <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-2 whitespace-nowrap ${showCheckpoints ? 'text-indigo-600' : 'text-slate-500'}`}>
+            <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar print:bg-white print:border-none print:p-0">
+               <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-2 whitespace-nowrap no-print ${showCheckpoints ? 'text-indigo-600' : 'text-slate-500'}`}>
                    <ShieldCheck size={12}/> {showCheckpoints ? 'Sembunyikan' : 'Tampilkan'} Patroli
                </button>
                {isAdmin && showCheckpoints && (
-                 <button onClick={() => setIsManageMode(!isManageMode)} className={`flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap ${isManageMode ? 'text-rose-600' : 'text-slate-500'}`}>
+                 <button onClick={() => setIsManageMode(!isManageMode)} className={`flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap no-print ${isManageMode ? 'text-rose-600' : 'text-slate-500'}`}>
                     {isManageMode ? <Save size={12}/> : <Settings2 size={12}/>} {isManageMode ? 'Selesai Atur' : 'Atur Titik'}
                  </button>
                )}
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Droplets size={12} className="text-blue-500"/> OP Air</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Trash2 size={12} className="text-slate-500"/> Sampah</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Baby size={12} className="text-rose-500"/> {totalBaby} Bayi</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Baby size={12} className="text-orange-500"/> {totalToddler} Balita</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Accessibility size={12} className="text-indigo-500"/> {totalElderly} Lansia</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Heart size={12} className="text-rose-400" fill="currentColor"/> {totalPregnant} Hamil</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><User size={12} className="text-slate-600"/> {totalWidow} Janda</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Droplets size={12} className="text-blue-500"/> OP Air</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Trash2 size={12} className="text-slate-500"/> Sampah</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Baby size={12} className="text-rose-500"/> {totalBaby} Bayi</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Baby size={12} className="text-orange-500"/> {totalToddler} Balita</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Accessibility size={12} className="text-indigo-500"/> {totalElderly} Lansia</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Heart size={12} className="text-rose-400" fill="currentColor"/> {totalPregnant} Hamil</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><User size={12} className="text-slate-600"/> {totalWidow} Janda</div>
             </div>
         </div>
       </div>
@@ -710,23 +718,45 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
           {/* Map Legend Section */}
           <div className="space-y-6">
             <div>
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Status Rumah</h4>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Fasilitas & Keamanan</h4>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-amber-500 animate-bounce"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Keluar Kota / Mudik</span>
+                  <div className="w-3 h-3 rounded-full bg-rose-600 flex items-center justify-center shadow-sm shadow-rose-200"><Video size={8} className="text-white"/></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Titik CCTV</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Ada Tamu</span>
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm shadow-emerald-200"><Shield size={8} className="text-white"/></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Pos Keamanan</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-rose-600 animate-pulse"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Isolasi Mandiri</span>
+                  <div className="w-3 h-3 rounded-full bg-orange-500 flex items-center justify-center shadow-sm shadow-orange-200"><Flame size={8} className="text-white"/></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Titik APAR</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Iuran Sampah Lunas</span>
+                  <div className="w-3 h-3 rounded-full bg-blue-500 flex items-center justify-center shadow-sm shadow-blue-200"><Droplets size={8} className="text-white"/></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Hydrant / Air</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Status Hunian</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded bg-gradient-to-br from-emerald-100 to-teal-200 border border-emerald-500"></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Tetap</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded bg-gradient-to-br from-amber-100 to-orange-200 border border-amber-500"></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kontrak</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded bg-gradient-to-br from-cyan-100 to-blue-200 border border-cyan-500"></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kost</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded bg-slate-100 border border-slate-300 border-dashed"></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kosong</span>
                 </div>
               </div>
             </div>
@@ -750,24 +780,6 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                 </div>
               </div>
             )}
-
-            <div>
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Fasilitas & Keamanan</h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-orange-600 flex items-center justify-center">
-                    <Flame size={8} className="text-white" />
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Titik APAR</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-indigo-500 flex items-center justify-center">
-                    <Video size={8} className="text-white" />
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Kamera CCTV</span>
-                </div>
-              </div>
-            </div>
 
             <div>
               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Kelompok Rentan</h4>
@@ -806,12 +818,12 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
         </div>
 
         {/* Map Container */}
-        <div className="flex-1 relative overflow-auto p-4 md:p-8">
-          <div className="min-w-[1000px] mx-auto relative">
+        <div className="flex-1 relative overflow-auto p-4 md:p-8 print:p-0">
+          <div className="min-w-[1000px] mx-auto relative print:min-w-0 print:w-full">
               <div 
                   ref={mapRef}
                   onClick={handleMapClick}
-                  className={`border-[8px] border-dashed border-amber-400/30 bg-amber-50/20 p-8 rounded-[40px] relative transition-all duration-500 ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
+                  className={`border-[8px] border-dashed border-amber-400/30 bg-amber-50/20 p-8 rounded-[40px] relative transition-all duration-500 print:border-none print:bg-white print:p-0 print:rounded-none ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
               >
                           <MapLayout 
                             houses={filteredHouses} 
@@ -878,6 +890,50 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                   )}
                               </svg>
                           )}
+
+                          {/* Legend for Print & Download */}
+                          <div className="hidden print:block print-only-legend mt-8 border-t border-slate-200 pt-6">
+                            <div className="grid grid-cols-4 gap-6">
+                                <div>
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Fasilitas & Keamanan</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-rose-600 flex items-center justify-center"><Video size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Titik CCTV</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500 flex items-center justify-center"><Shield size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Pos Keamanan</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-orange-500 flex items-center justify-center"><Flame size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Titik APAR</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500 flex items-center justify-center"><Droplets size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Hydrant / Air</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Status Hunian</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-100 border border-emerald-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Tetap</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-amber-100 border border-amber-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kontrak</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-cyan-100 border border-cyan-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kost</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-100 border border-slate-300 border-dashed"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kosong</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Demografi</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2"><Baby size={10} className="text-rose-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Bayi</span></div>
+                                        <div className="flex items-center gap-2"><Baby size={10} className="text-orange-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Balita</span></div>
+                                        <div className="flex items-center gap-2"><Accessibility size={10} className="text-indigo-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Lansia</span></div>
+                                        <div className="flex items-center gap-2"><Heart size={10} className="text-rose-400"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Hamil</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Keterangan</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2"><Droplets size={10} className="text-blue-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">OP Air</span></div>
+                                        <div className="flex items-center gap-2"><Trash2 size={10} className="text-slate-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Sampah</span></div>
+                                        <div className="flex items-center gap-2"><Compass size={10} className="text-rose-600"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Orientasi Utara</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-6 text-[8px] text-slate-400 font-bold uppercase tracking-widest text-center">
+                                Dicetak pada {new Date().toLocaleString('id-ID')} - Teras Warga RT 02
+                            </div>
+                          </div>
 
                           {/* Checkpoints Overlay */}
                           {showCheckpoints && checkpoints.map((cp, i) => {
