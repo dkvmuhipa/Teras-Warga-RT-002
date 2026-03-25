@@ -441,10 +441,10 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
     const securityPost = mapPoints.find(p => p.type === 'Security');
     
     return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4 pt-4 md:pt-8">
             {/* Main Road - North Side */}
-            <div className="flex items-center justify-center py-2 bg-amber-400/20 rounded-xl border-2 border-amber-400/40 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-400/10 via-transparent to-transparent opacity-50"></div>
+            <div className="flex items-center justify-start px-8 md:px-12 py-3 bg-amber-400/20 rounded-xl border-2 border-amber-400/40 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,_var(--tw-gradient-stops))] from-amber-400/10 via-transparent to-transparent opacity-50"></div>
                 <div className="flex items-center gap-3 relative z-10">
                     <div className="h-0.5 w-8 bg-amber-400/50 rounded-full"></div>
                     <span className="text-xs font-black uppercase tracking-[0.3em] text-amber-700 drop-shadow-sm">Jl. Pue Lombe</span>
@@ -508,7 +508,7 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
         </div>
 
         {/* Alternative Road - South Side */}
-        <div className="flex items-center justify-center py-1.5 bg-amber-400/10 rounded-lg border border-amber-400/20 relative overflow-hidden">
+        <div className="flex items-center justify-start px-12 py-2 bg-amber-400/10 rounded-lg border border-amber-400/20 relative overflow-hidden">
             <div className="flex items-center gap-2 relative z-10">
                 <div className="h-px w-4 bg-amber-300"></div>
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Jalan Alternatif</span>
@@ -629,65 +629,60 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const getBlockHouses = (code: string) => filteredHouses.filter(h => h.block === code);
   
   return (
-    <div ref={containerRef} className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[500px] md:h-[750px] relative print:h-auto print:overflow-visible print:border-none print:shadow-none">
-      <div className="bg-white border-b border-slate-100 px-6 py-4 z-20 shadow-sm relative space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex-1">
-               <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2"><MapPin className="text-brand-blue" size={24}/> Denah Digital RT 02</h3>
-               <div className="flex flex-col md:flex-row gap-3 mt-2 no-print">
-                 <div className="relative flex-1 max-w-md">
-                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+    <div ref={containerRef} className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[600px] md:h-[800px] relative print:h-auto print:overflow-visible print:border-none print:shadow-none">
+      <div className="bg-white border-b border-slate-100 px-4 py-3 md:px-6 md:py-4 z-20 shadow-sm relative space-y-3 md:space-y-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
+            <div className="flex-1 w-full">
+               <h3 className="text-lg md:text-xl font-extrabold text-slate-800 flex items-center gap-2"><MapPin className="text-brand-blue" size={20}/> Denah Digital RT 02</h3>
+               <div className="flex flex-col md:flex-row gap-2 md:gap-3 mt-2 no-print">
+                 <div className="relative flex-1 w-full max-w-md">
+                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                    <input 
                      type="text" 
                      placeholder="Cari nomor rumah atau nama warga..." 
-                     className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20 transition-all"
+                     className="w-full pl-9 pr-4 py-1.5 md:py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20 transition-all"
                      value={searchQuery}
                      onChange={(e) => setSearchQuery(e.target.value)}
                    />
                  </div>
-                 <div className="flex gap-2">
+                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
                    <button 
                      onClick={() => setShowHeatmap(!showHeatmap)}
-                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${showHeatmap ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                     className={`px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[10px] md:text-xs font-bold border transition-all flex items-center gap-2 whitespace-nowrap ${showHeatmap ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
                    >
-                     <Lightbulb size={14} /> Heatmap
+                     <Lightbulb size={12} /> Heatmap
                    </button>
                    {isAdmin && (
                      <button 
                        onClick={() => window.print()}
-                     className="px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2"
+                     className="px-3 py-1.5 md:px-4 md:py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] md:text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2 whitespace-nowrap"
                    >
-                     <Printer size={14} /> Cetak Denah
+                     <Printer size={12} /> Cetak
                    </button>
                    )}
                    {isAdmin && (
                      <button 
                        onClick={handleDownload}
-                     className="px-4 py-2 bg-indigo-600 text-white border border-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-2"
+                     className="px-3 py-1.5 md:px-4 md:py-2 bg-indigo-600 text-white border border-indigo-600 rounded-xl text-[10px] md:text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 whitespace-nowrap"
                    >
-                     <Download size={14} /> Unduh Gambar
+                     <Download size={12} /> Unduh
                    </button>
                    )}
                  </div>
                </div>
             </div>
             
-            <div className="flex gap-4 text-[10px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar print:bg-white print:border-none print:p-0">
-               <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-2 whitespace-nowrap no-print ${showCheckpoints ? 'text-indigo-600' : 'text-slate-500'}`}>
+            <div className="flex gap-3 text-[9px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar w-full md:w-auto no-print print:hidden">
+               <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-2 whitespace-nowrap ${showCheckpoints ? 'text-indigo-600' : 'text-slate-500'}`}>
                    <ShieldCheck size={12}/> {showCheckpoints ? 'Sembunyikan' : 'Tampilkan'} Patroli
                </button>
                {isAdmin && showCheckpoints && (
-                 <button onClick={() => setIsManageMode(!isManageMode)} className={`flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap no-print ${isManageMode ? 'text-rose-600' : 'text-slate-500'}`}>
-                    {isManageMode ? <Save size={12}/> : <Settings2 size={12}/>} {isManageMode ? 'Selesai Atur' : 'Atur Titik'}
+                 <button onClick={() => setIsManageMode(!isManageMode)} className={`flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap ${isManageMode ? 'text-rose-600' : 'text-slate-500'}`}>
+                    {isManageMode ? <Save size={12}/> : <Settings2 size={12}/>} {isManageMode ? 'Selesai' : 'Atur'}
                  </button>
                )}
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Droplets size={12} className="text-blue-500"/> OP Air</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Trash2 size={12} className="text-slate-500"/> Sampah</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Baby size={12} className="text-rose-500"/> {totalBaby} Bayi</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Baby size={12} className="text-orange-500"/> {totalToddler} Balita</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Accessibility size={12} className="text-indigo-500"/> {totalElderly} Lansia</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><Heart size={12} className="text-rose-400" fill="currentColor"/> {totalPregnant} Hamil</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap print:border-none"><User size={12} className="text-slate-600"/> {totalWidow} Janda</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Droplets size={12} className="text-blue-500"/> OP Air</div>
+               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Trash2 size={12} className="text-slate-500"/> Sampah</div>
             </div>
         </div>
       </div>
@@ -844,7 +839,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
               <div 
                   ref={mapRef}
                   onClick={handleMapClick}
-                  className={`border-[4px] border-amber-400/20 bg-amber-50/10 p-10 rounded-[48px] relative transition-all duration-500 print:border-none print:bg-white print:p-0 print:rounded-none ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
+                  className={`border-[4px] border-amber-400/20 bg-amber-50/10 p-12 md:p-16 rounded-[48px] relative transition-all duration-500 print:border-none print:bg-white print:p-0 print:rounded-none ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
               >
                           <MapLayout 
                             houses={filteredHouses} 
