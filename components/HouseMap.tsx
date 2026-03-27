@@ -330,23 +330,38 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                         )}
                         
                         {showSocial && (
-                          <>
-                            {(house.hasBaby || (house.babyCount || 0) > 0) && (
-                                <Baby size={10} className="text-rose-500" />
+                          <div className="flex flex-wrap items-center justify-center gap-1 mt-1 bg-white/40 backdrop-blur-[2px] rounded-md px-1 py-0.5 border border-white/20">
+                            {((house.babyCount || 0) > 0) && (
+                                <div className="flex items-center gap-0.5" title="Bayi">
+                                    <Baby size={10} className="text-rose-500" />
+                                    <span className="text-[8px] font-black text-rose-600">{house.babyCount}</span>
+                                </div>
                             )}
-                            {(house.hasToddler || (house.toddlerCount || 0) > 0) && (
-                                <Baby size={10} className="text-orange-500" />
+                            {((house.toddlerCount || 0) > 0) && (
+                                <div className="flex items-center gap-0.5" title="Balita">
+                                    <Baby size={10} className="text-orange-500" />
+                                    <span className="text-[8px] font-black text-orange-600">{house.toddlerCount}</span>
+                                </div>
                             )}
-                            {(house.hasElderly || (house.elderlyCount || 0) > 0) && (
-                                <Accessibility size={10} className="text-indigo-500" />
+                            {((house.elderlyCount || 0) > 0) && (
+                                <div className="flex items-center gap-0.5" title="Lansia">
+                                    <Accessibility size={10} className="text-indigo-500" />
+                                    <span className="text-[8px] font-black text-indigo-600">{house.elderlyCount}</span>
+                                </div>
                             )}
-                            {(house.hasPregnant || (house.pregnantCount || 0) > 0) && (
-                                <Heart size={10} className="text-rose-400" fill="currentColor" />
+                            {((house.pregnantCount || 0) > 0) && (
+                                <div className="flex items-center gap-0.5" title="Ibu Hamil">
+                                    <Heart size={10} className="text-rose-400" fill="currentColor" />
+                                    <span className="text-[8px] font-black text-rose-500">{house.pregnantCount}</span>
+                                </div>
                             )}
-                            {(house.hasWidow || (house.widowCount || 0) > 0) && (
-                                <User size={10} className="text-slate-600" />
+                            {((house.widowCount || 0) > 0) && (
+                                <div className="flex items-center gap-0.5" title="Janda">
+                                    <User size={10} className="text-slate-600" />
+                                    <span className="text-[8px] font-black text-slate-700">{house.widowCount}</span>
+                                </div>
                             )}
-                          </>
+                          </div>
                         )}
                     </div>
                 )}
@@ -442,13 +457,27 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
     
     return (
         <div className="flex flex-col gap-4 pt-4 md:pt-8">
-            {/* Main Road - North Side */}
-            <div className="flex items-center justify-start px-8 md:px-12 py-3 bg-amber-400/20 rounded-xl border-2 border-amber-400/40 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,_var(--tw-gradient-stops))] from-amber-400/10 via-transparent to-transparent opacity-50"></div>
-                <div className="flex items-center gap-3 relative z-10">
-                    <div className="h-0.5 w-8 bg-amber-400/50 rounded-full"></div>
-                    <span className="text-xs font-black uppercase tracking-[0.3em] text-amber-700 drop-shadow-sm">Jl. Pue Lombe</span>
-                    <div className="h-0.5 w-8 bg-amber-400/50 rounded-full"></div>
+            {/* Main Road - North Side (Highway Style) */}
+            <div className="flex items-center justify-center px-8 md:px-12 py-6 bg-slate-800 rounded-2xl border-y-4 border-slate-700 relative overflow-hidden group shadow-2xl shadow-slate-900/20">
+                {/* Asphalt Texture */}
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-40 pointer-events-none"></div>
+                
+                {/* Lane Markings - Top & Bottom Shoulder */}
+                <div className="absolute top-1 left-0 right-0 h-0.5 bg-white/30"></div>
+                <div className="absolute bottom-1 left-0 right-0 h-0.5 bg-white/30"></div>
+                
+                {/* Center Lane Divider (Dashed) */}
+                <div className="absolute top-1/2 left-0 right-0 h-1 border-t-2 border-dashed border-amber-400/60 -translate-y-1/2"></div>
+                
+                <div className="flex items-center gap-6 relative z-10">
+                    <div className="flex flex-col items-center">
+                        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/90 drop-shadow-md mb-1">Jl. Pue Lombe</span>
+                        <div className="flex items-center gap-1">
+                            <ChevronRight size={10} className="text-amber-400 animate-pulse" />
+                            <ChevronRight size={10} className="text-amber-400 animate-pulse delay-75" />
+                            <ChevronRight size={10} className="text-amber-400 animate-pulse delay-150" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -507,12 +536,12 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
             </div>
         </div>
 
-        {/* Alternative Road - South Side */}
-        <div className="flex items-center justify-start px-12 py-2 bg-amber-400/10 rounded-lg border border-amber-400/20 relative overflow-hidden">
-            <div className="flex items-center gap-2 relative z-10">
-                <div className="h-px w-4 bg-amber-300"></div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Jalan Alternatif</span>
-                <div className="h-px w-4 bg-amber-300"></div>
+        {/* Alternative Road - South Side (Secondary Road Style) */}
+        <div className="flex items-center justify-center px-12 py-4 bg-slate-700 rounded-xl border-y-2 border-slate-600 relative overflow-hidden shadow-lg">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-20 pointer-events-none"></div>
+            <div className="absolute top-1/2 left-0 right-0 h-0.5 border-t border-dashed border-slate-500/50 -translate-y-1/2"></div>
+            <div className="flex items-center gap-3 relative z-10">
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-300">Jalan Alternatif</span>
             </div>
         </div>
     </div>
@@ -629,8 +658,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const getBlockHouses = (code: string) => filteredHouses.filter(h => h.block === code);
   
   return (
-    <div ref={containerRef} className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[600px] md:h-[800px] relative print:h-auto print:overflow-visible print:border-none print:shadow-none">
-      <div className="bg-white border-b border-slate-100 px-4 py-3 md:px-6 md:py-4 z-20 shadow-sm relative space-y-3 md:space-y-4">
+    <div ref={containerRef} className="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-200 overflow-hidden flex flex-col h-[600px] md:h-[800px] relative print:fixed print:inset-0 print:z-[9999] print:h-screen print:w-screen print:rounded-none print:border-none print:shadow-none print:bg-white">
+      <div className="bg-white border-b border-slate-100 px-4 py-3 md:px-6 md:py-4 z-20 shadow-sm relative space-y-3 md:space-y-4 print:pb-2 print:mb-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
             <div className="flex-1 w-full">
                <h3 className="text-lg md:text-xl font-extrabold text-slate-800 flex items-center gap-2"><MapPin className="text-brand-blue" size={20}/> Denah Digital RT 02</h3>
@@ -652,22 +681,18 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                    >
                      <Lightbulb size={12} /> Heatmap
                    </button>
-                   {isAdmin && (
-                     <button 
-                       onClick={() => window.print()}
+                   <button 
+                     onClick={() => window.print()}
                      className="px-3 py-1.5 md:px-4 md:py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] md:text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2 whitespace-nowrap"
                    >
                      <Printer size={12} /> Cetak
                    </button>
-                   )}
-                   {isAdmin && (
-                     <button 
-                       onClick={handleDownload}
+                   <button 
+                     onClick={handleDownload}
                      className="px-3 py-1.5 md:px-4 md:py-2 bg-indigo-600 text-white border border-indigo-600 rounded-xl text-[10px] md:text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 whitespace-nowrap"
                    >
                      <Download size={12} /> Unduh
                    </button>
-                   )}
                  </div>
                </div>
             </div>
@@ -799,22 +824,41 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
 
             <div>
               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Kelompok Rentan</h4>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2">
-                  <Baby size={12} className="text-rose-500" />
-                  <span className="text-[9px] font-bold text-slate-500 uppercase">Bayi</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center justify-between p-2 bg-rose-50 rounded-xl border border-rose-100">
+                  <div className="flex items-center gap-2">
+                    <Baby size={12} className="text-rose-500" />
+                    <span className="text-[9px] font-bold text-slate-500 uppercase">Bayi</span>
+                  </div>
+                  <span className="text-[10px] font-black text-rose-600">{totalBaby}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Baby size={12} className="text-orange-500" />
-                  <span className="text-[9px] font-bold text-slate-500 uppercase">Balita</span>
+                <div className="flex items-center justify-between p-2 bg-orange-50 rounded-xl border border-orange-100">
+                  <div className="flex items-center gap-2">
+                    <Baby size={12} className="text-orange-500" />
+                    <span className="text-[9px] font-bold text-slate-500 uppercase">Balita</span>
+                  </div>
+                  <span className="text-[10px] font-black text-orange-600">{totalToddler}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Accessibility size={12} className="text-indigo-500" />
-                  <span className="text-[9px] font-bold text-slate-500 uppercase">Lansia</span>
+                <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-xl border border-indigo-100">
+                  <div className="flex items-center gap-2">
+                    <Accessibility size={12} className="text-indigo-500" />
+                    <span className="text-[9px] font-bold text-slate-500 uppercase">Lansia</span>
+                  </div>
+                  <span className="text-[10px] font-black text-indigo-600">{totalElderly}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Heart size={12} className="text-rose-400" />
-                  <span className="text-[9px] font-bold text-slate-500 uppercase">Hamil</span>
+                <div className="flex items-center justify-between p-2 bg-rose-50 rounded-xl border border-rose-100">
+                  <div className="flex items-center gap-2">
+                    <Heart size={12} className="text-rose-400" />
+                    <span className="text-[9px] font-bold text-slate-500 uppercase">Hamil</span>
+                  </div>
+                  <span className="text-[10px] font-black text-rose-600">{totalPregnant}</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-slate-50 rounded-xl border border-slate-100 col-span-2">
+                  <div className="flex items-center gap-2">
+                    <User size={12} className="text-slate-500" />
+                    <span className="text-[9px] font-bold text-slate-500 uppercase">Janda / Duda</span>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-600">{totalWidow}</span>
                 </div>
               </div>
             </div>
@@ -834,8 +878,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
         </div>
 
         {/* Map Container */}
-        <div className="flex-1 relative overflow-auto p-4 md:p-8 print:p-0">
-          <div className="min-w-[1000px] mx-auto relative print:min-w-0 print:w-full">
+        <div className="flex-1 relative overflow-auto p-4 md:p-8 print:p-0 print:overflow-visible print:h-auto">
+          <div className="min-w-[1000px] mx-auto relative print:min-w-0 print:w-full print:transform print:scale-[0.85] print:origin-top">
               <div 
                   ref={mapRef}
                   onClick={handleMapClick}
