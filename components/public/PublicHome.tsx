@@ -31,6 +31,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   houses, announcements, ronda, reports, letters, officials, gallery, activePatrol
 }) => {
   const navigate = useNavigate();
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const { summaries } = useFinancial();
   const [statusSearchId, setStatusSearchId] = React.useState('');
   
@@ -89,6 +90,10 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
   const filteredAnnouncements = announcements.filter(a => filterType === 'All' || a.type === filterType);
 
+  const handleExplore = () => {
+    contentRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -103,10 +108,10 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         <div className="absolute bottom-[10%] right-[-5%] w-[25%] h-[25%] bg-amber-200/10 blur-[80px] rounded-full" />
       </div>
 
-      <HeroSection />
+      <HeroSection onExplore={handleExplore} />
 
       {/* Personalized Greeting */}
-      <div className="text-center md:text-left">
+      <div ref={contentRef} className="text-center md:text-left">
         <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter">
           {getGreeting()}, Warga! 👋
         </h2>
@@ -276,9 +281,13 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                     onChange={e => setStatusSearchId(e.target.value)}
                   />
                 </div>
-                <button type="submit" className="w-full py-4 bg-white text-indigo-600 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-900/20 active:scale-95">
+                <Button 
+                  type="submit" 
+                  variant="secondary" 
+                  className="w-full py-4 rounded-[1.5rem]"
+                >
                   Periksa Sekarang
-                </button>
+                </Button>
               </form>
             </div>
           </div>
@@ -370,12 +379,13 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                 )}
               </div>
 
-              <button 
+              <Button 
                 onClick={() => navigate('/info')} 
-                className="mt-10 w-full py-5 bg-white text-slate-950 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] hover:bg-indigo-50 transition-all duration-500 flex items-center justify-center gap-3 shadow-xl shadow-white/5"
+                variant="secondary"
+                className="mt-10 w-full py-5 rounded-[2rem] text-[10px] tracking-[0.3em] gap-3"
               >
                 Selengkapnya <ChevronRight size={16} strokeWidth={3}/>
-              </button>
+              </Button>
             </div>
           </div>
 

@@ -122,12 +122,22 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                 <NotificationCenter notifications={notifications} onMarkRead={onMarkRead} />
 
                 <div className="hidden md:block h-6 w-px bg-slate-200 mx-2"></div>
-                <Button onClick={() => navigate('/admin')} variant="secondary" className="hidden md:flex ml-2 text-xs h-9 font-bold rounded-xl">
+                <Button 
+                  onClick={() => navigate('/admin')} 
+                  variant="secondary" 
+                  className="hidden md:flex ml-2 text-xs h-9 font-bold rounded-xl px-4"
+                >
                   Panel Admin
                 </Button>
             </div>
             <div className="flex items-center lg:hidden gap-2">
-               <button onClick={() => navigate('/admin')} className="p-2 text-slate-400 hover:text-blue-600"><User size={20}/></button>
+               <Button 
+                 onClick={() => navigate('/admin')} 
+                 variant="ghost" 
+                 className="p-2 text-slate-400 hover:text-blue-600"
+               >
+                 <User size={20}/>
+               </Button>
             </div>
           </div>
         </div>

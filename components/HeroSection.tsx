@@ -1,77 +1,124 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, Snowflake, ShieldCheck, Users, Wind, Droplets, Thermometer, Wind as WindIcon, Activity } from 'lucide-react';
+import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-import { RT_NAME, LOGO_URL, Logo } from '../constants';
+import { RT_NAME } from '../constants';
+import { Button } from './ui/Button';
 
 import { useWeather } from '../hooks/useWeather';
 
-export const HeroSection = () => {
+interface HeroSectionProps {
+    onExplore?: () => void;
+}
+
+export const HeroSection = ({ onExplore }: HeroSectionProps) => {
     const [date, setDate] = useState(new Date());
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const { weather } = useWeather();
 
     useEffect(() => { 
         const timer = setInterval(() => setDate(new Date()), 60000); 
-        return () => clearInterval(timer);
+        const handleMouseMove = (e: MouseEvent) => {
+            const rect = document.getElementById('hero-container')?.getBoundingClientRect();
+            if (rect) {
+                setMousePos({
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                });
+            }
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => {
+            clearInterval(timer);
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
     }, []);
 
     const getWeatherIcon = (code: number | undefined) => {
-        if (code === undefined) return <Sun size={24} className="text-amber-300 animate-spin-slow" />;
-        if (code === 0) return <Sun size={24} className="text-amber-300 animate-spin-slow" />;
-        if (code >= 1 && code <= 3) return <Cloud size={24} className="text-slate-200" />;
-        if (code === 45 || code === 48) return <CloudFog size={24} className="text-slate-300" />;
-        if (code >= 51 && code <= 55) return <CloudRain size={24} className="text-blue-200" />;
-        if (code >= 61 && code <= 65) return <CloudRain size={24} className="text-blue-400" />;
-        if (code >= 80 && code <= 82) return <CloudRain size={24} className="text-blue-600" />;
-        if (code >= 95) return <CloudLightning size={24} className="text-yellow-400" />;
-        return <Sun size={24} className="text-amber-300 animate-spin-slow" />;
+        if (code === undefined) return <Sun size={28} className="text-amber-400 animate-spin-slow" />;
+        if (code === 0) return <Sun size={28} className="text-amber-400 animate-spin-slow" />;
+        if (code >= 1 && code <= 3) return <Cloud size={28} className="text-slate-400" />;
+        if (code === 45 || code === 48) return <CloudFog size={28} className="text-slate-500" />;
+        if (code >= 51 && code <= 55) return <CloudRain size={28} className="text-blue-400" />;
+        if (code >= 61 && code <= 65) return <CloudRain size={28} className="text-blue-500" />;
+        if (code >= 80 && code <= 82) return <CloudRain size={28} className="text-blue-600" />;
+        if (code >= 95) return <CloudLightning size={28} className="text-amber-500" />;
+        return <Sun size={28} className="text-amber-400 animate-spin-slow" />;
     };
 
     return (
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative bg-slate-900 rounded-[3rem] overflow-hidden mb-12 shadow-2xl shadow-indigo-500/10 group min-h-[400px] flex items-center"
+        id="hero-container"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        className="relative bg-slate-950 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden mb-12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.3)] group min-h-[320px] flex items-center border border-white/10"
       >
-        {/* Immersive Background */}
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1558036117-15db5275d42b?auto=format&fit=crop&q=80')] opacity-20 bg-cover bg-center mix-blend-overlay group-hover:scale-110 transition-transform duration-[30s] ease-linear"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/40 via-slate-900/80 to-slate-950"></div>
-        
-        {/* Animated Orbs */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/20 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-cyan-500/20 blur-[100px] rounded-full" />
-
-        <div className="relative w-full px-8 py-12 md:px-16 md:py-20 flex flex-col md:flex-row items-center justify-between gap-12">
-          <div className="text-center md:text-left text-white max-w-3xl">
+        {/* Colorful Mesh Gradient Background */}
+        <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 bg-[#020617]" />
             <motion.div 
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
+                animate={{ 
+                    scale: [1, 1.2, 1],
+                    x: [0, 50, 0],
+                    y: [0, -30, 0]
+                }}
+                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-indigo-600/30 blur-[140px] rounded-full" 
+            />
+            <motion.div 
+                animate={{ 
+                    scale: [1.2, 1, 1.2],
+                    x: [0, -40, 0],
+                    y: [0, 40, 0]
+                }}
+                transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-emerald-500/20 blur-[130px] rounded-full" 
+            />
+            <motion.div 
+                animate={{ 
+                    scale: [1, 1.3, 1],
+                    x: [0, 30, 0],
+                    y: [0, 60, 0]
+                }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute top-[20%] right-[10%] w-[40%] h-[40%] bg-violet-600/20 blur-[120px] rounded-full" 
+            />
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.05] mix-blend-overlay"></div>
+        </div>
+        
+        {/* Interactive Mouse Glow */}
+        <motion.div 
+            className="absolute pointer-events-none w-[800px] h-[800px] bg-blue-500/10 blur-[150px] rounded-full z-0"
+            animate={{
+                x: mousePos.x - 400,
+                y: mousePos.y - 400,
+            }}
+            transition={{ type: "spring", damping: 40, stiffness: 120 }}
+        />
+
+        <div className="relative w-full px-8 py-8 md:px-16 md:py-12 flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="text-center lg:text-left max-w-2xl z-10">
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-white/10 text-indigo-200"
+              className="inline-flex items-center gap-2.5 px-5 py-2 bg-white/5 backdrop-blur-2xl rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-4 border border-white/10 text-blue-400 shadow-2xl"
             >
-              <span className="w-2 h-2 bg-indigo-400 rounded-full animate-ping" />
-              Smart Neighborhood Platform
+              <div className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
+              </div>
+              Sistem Informasi Digital
             </motion.div>
             
-            {LOGO_URL && (
-              <motion.div
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="mb-6"
-              >
-                <Logo dark showText={true} imageSize="h-12 md:h-16" />
-              </motion.div>
-            )}
-            
             <motion.h1 
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-5xl md:text-8xl font-black mb-6 leading-[0.85] tracking-tighter"
+              transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 leading-[0.9] tracking-tighter text-white"
             >
-              TERAS <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-indigo-400 bg-[length:200%_auto] animate-gradient-x">
+              TERAS <br className="hidden md:block"/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-violet-400 to-emerald-400 drop-shadow-[0_8px_8px_rgba(0,0,0,0.3)]">
                 {RT_NAME}
               </span>
             </motion.h1>
@@ -80,109 +127,116 @@ export const HeroSection = () => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-xl mb-8 font-serif italic opacity-80"
+              className="text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-lg mb-6"
             >
-              "Teknologi, Ekraf, Rukun, Aman, Sinergi — Mewujudkan harmoni tetangga dalam satu genggaman digital."
+              Harmoni lingkungan dalam genggaman. Platform digital modern untuk mewujudkan <span className="text-white font-medium">RT 02 yang Sinergis, Aman, dan Transparan.</span>
             </motion.p>
 
             <motion.div 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-wrap justify-center md:justify-start gap-4"
+              className="flex flex-wrap justify-center lg:justify-start gap-4"
             >
-              <div className="flex items-center gap-3 px-6 py-3 bg-white text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/10">
-                <ShieldCheck size={18} className="text-indigo-600" />
-                Lingkungan Aman
-              </div>
-              <div className="flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-md text-white rounded-2xl font-black text-[10px] uppercase tracking-widest border border-white/10">
-                <Users size={18} className="text-cyan-400" />
-                Warga Rukun
-              </div>
+              <Button 
+                variant="primary" 
+                size="lg" 
+                onClick={onExplore}
+                className="gap-3"
+              >
+                Mulai Jelajahi
+                <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+              </Button>
+              <Button 
+                variant="glass" 
+                size="lg" 
+                className="cursor-default gap-3"
+              >
+                <ShieldCheck size={22} className="text-emerald-400" />
+                Smart Env
+              </Button>
             </motion.div>
           </div>
 
           <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.7, type: "spring" }}
-            className="w-full md:w-auto"
+            initial={{ scale: 0.9, opacity: 0, x: 30 }}
+            animate={{ scale: 1, opacity: 1, x: 0 }}
+            transition={{ delay: 0.7, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full lg:w-auto z-10"
           >
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-10 text-white w-full md:min-w-[380px] shadow-2xl relative group/card overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
+            <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-6 md:p-8 text-white w-full lg:min-w-[340px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)] relative group/widget overflow-hidden hover:border-white/20 transition-all duration-700">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-emerald-500/10 opacity-0 group-hover/widget:opacity-100 transition-opacity duration-1000" />
               
               <div className="relative z-10 space-y-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-6xl font-black tracking-tighter mb-2 tabular-nums">
+                    <p className="text-4xl md:text-5xl font-black tracking-tighter mb-1 tabular-nums text-white drop-shadow-2xl">
                       {date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                     </p>
-                    <p className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em]">
-                      {date.toLocaleDateString('id-ID', { weekday: 'long' })}
+                    <p className="text-xs font-bold text-blue-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                      <Sparkles size={12} />
+                      {date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-3">
-                    <div className="p-4 bg-white/10 rounded-3xl border border-white/10 shadow-lg">
+                    <motion.div 
+                        whileHover={{ scale: 1.1, rotate: 10 }}
+                        className="p-4 bg-white/5 rounded-[1.5rem] border border-white/10 shadow-2xl backdrop-blur-xl"
+                    >
                       {getWeatherIcon(weather?.weatherCode)}
-                    </div>
+                    </motion.div>
                     {weather?.aqi !== undefined && (
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/5">
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 backdrop-blur-md">
                         <Activity size={12} className={weather.aqiColor} />
-                        <span className="text-[9px] font-black uppercase tracking-wider">AQI {weather.aqi} • <span className={weather.aqiColor}>{weather.aqiLabel}</span></span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-white/80">AQI {weather.aqi}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="h-px bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
+                <div className="h-px bg-gradient-to-r from-white/20 via-white/5 to-transparent" />
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/5 rounded-xl">
-                        <Thermometer size={14} className="text-indigo-300" />
+                    <div className="flex items-center gap-3 group/item">
+                      <div className="p-2.5 bg-rose-500/20 rounded-xl text-rose-400 group-hover/item:scale-110 group-hover/item:bg-rose-500/30 transition-all duration-300">
+                        <Thermometer size={18} />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Suhu</p>
-                        <p className="text-sm font-bold text-white">{weather ? `${weather.temp}°C` : '--'}</p>
+                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Suhu</p>
+                        <p className="text-lg font-bold text-white leading-none mt-1">{weather ? `${weather.temp}°C` : '--'}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/5 rounded-xl">
-                        <Droplets size={14} className="text-cyan-300" />
+                    <div className="flex items-center gap-3 group/item">
+                      <div className="p-2.5 bg-blue-500/20 rounded-xl text-blue-400 group-hover/item:scale-110 group-hover/item:bg-blue-500/30 transition-all duration-300">
+                        <Droplets size={18} />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kelembaban</p>
-                        <p className="text-sm font-bold text-white">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
+                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Lembab</p>
+                        <p className="text-lg font-bold text-white leading-none mt-1">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
                       </div>
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/5 rounded-xl">
-                        <WindIcon size={14} className="text-emerald-300" />
+                    <div className="flex items-center gap-3 group/item">
+                      <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400 group-hover/item:scale-110 group-hover/item:bg-emerald-500/30 transition-all duration-300">
+                        <WindIcon size={18} />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Angin</p>
-                        <p className="text-sm font-bold text-white">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
+                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Angin</p>
+                        <p className="text-lg font-bold text-white leading-none mt-1">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/5 rounded-xl">
-                        <Cloud size={14} className="text-slate-300" />
+                    <div className="flex items-center gap-3 group/item">
+                      <div className="p-2.5 bg-slate-500/20 rounded-xl text-slate-400 group-hover/item:scale-110 group-hover/item:bg-slate-500/30 transition-all duration-300">
+                        <Cloud size={18} />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kondisi</p>
-                        <p className="text-sm font-bold text-white truncate max-w-[80px]">{weather ? weather.condition : '--'}</p>
+                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Kondisi</p>
+                        <p className="text-lg font-bold text-white leading-none mt-1 truncate max-w-[100px]">{weather ? weather.condition : '--'}</p>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="pt-2">
-                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-center">
-                    {date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </p>
                 </div>
               </div>
             </div>
