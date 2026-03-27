@@ -3,6 +3,7 @@ import { Shield, Lock, Loader2 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/services/firebaseConfig';
 import { Button } from './ui/Button';
+import { Logo } from '../constants';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -32,8 +33,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
       <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-slate-100">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-slate-200">
-            <Shield size={32} />
+          <div className="inline-flex p-4 bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-50 mb-4">
+            <Logo showText={true} imageSize="h-10" />
           </div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">Admin Portal</h1>
           <p className="text-slate-500 text-sm font-medium">Masuk untuk mengelola data RT 02</p>

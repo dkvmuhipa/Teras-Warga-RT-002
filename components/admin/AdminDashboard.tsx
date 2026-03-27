@@ -30,7 +30,7 @@ import { NotificationCombined } from './NotificationCombined';
 import { AdminAnalytics } from './AdminAnalytics';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle } from 'lucide-react';
-import { CHECKPOINTS, RT_NAME } from '../../constants';
+import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 
 interface AdminDashboardProps {
   houses: House[];
@@ -197,18 +197,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Modern Top Bar */}
         <header className="h-16 md:h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-3 md:gap-6">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
               className="md:hidden p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-600"
             >
               <Menu size={20} />
             </button>
-            <div className="hidden sm:flex items-center gap-2 text-sm font-bold text-slate-400">
-              <span>Admin</span>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-800 capitalize truncate max-w-[100px] md:max-w-none">{activeTab.replace('-', ' ')}</span>
+            
+            <div className="flex items-center gap-3">
+              <Logo showText={true} imageSize="h-8 md:h-10" className="hidden sm:flex" />
+              <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+              <div className="hidden sm:flex items-center gap-2 text-sm font-bold text-slate-400">
+                <span>Admin</span>
+                <span className="text-slate-300">/</span>
+                <span className="text-slate-800 capitalize truncate max-w-[100px] md:max-w-none">{activeTab.replace('-', ' ')}</span>
+              </div>
             </div>
+            
             <div className="sm:hidden font-black text-slate-800 text-sm truncate max-w-[120px]">
               {activeTab.replace('-', ' ')}
             </div>

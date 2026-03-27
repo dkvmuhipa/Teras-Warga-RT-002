@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Lock, Mail, Loader2, AlertCircle, ArrowLeft, Info, Key, CheckCircle2, ShieldAlert, HelpCircle } from 'lucide-react';
 import { loginAdmin } from '../services/databaseService';
 import { isFirebaseConfigured } from '../services/firebaseConfig';
-import { FULL_RT_NAME, ADMIN_EMAIL, ADMIN_TITLE } from '../constants';
+import { FULL_RT_NAME, ADMIN_EMAIL, ADMIN_TITLE, Logo } from '../constants';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -78,10 +78,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
       <div className="w-full max-w-[440px] relative z-10">
         {/* Header Section */}
         <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex p-4 bg-white rounded-[2rem] shadow-2xl shadow-slate-200 border border-slate-100 mb-6 group hover:scale-105 transition-all duration-500">
-            <div className="bg-slate-900 text-white p-4 rounded-[1.5rem] shadow-lg shadow-slate-900/20 group-hover:rotate-12 transition-transform">
-              <Shield size={36} strokeWidth={2.5} />
-            </div>
+          <div className="inline-flex p-5 bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-slate-100 mb-6 group hover:scale-105 transition-all duration-500">
+            <Logo showText={true} imageSize="h-12" />
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Portal Administrasi</h1>
           <p className="text-slate-500 text-sm font-medium">Khusus Pengurus {FULL_RT_NAME}</p>

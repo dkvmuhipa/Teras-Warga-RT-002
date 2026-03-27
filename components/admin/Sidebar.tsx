@@ -109,17 +109,17 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className={`p-6 border-b border-slate-800/50 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-            <Logo dark showText={!isCollapsed} imageSize={isCollapsed ? "h-10" : "h-12"} />
-            {!isCollapsed && (
-              <button 
-                onClick={() => setIsOpen(false)} 
-                className="ml-auto md:hidden text-slate-400 hover:text-white p-1"
-              >
-                <X size={20} />
-              </button>
-            )}
-          </div>
+            <div className={`p-6 border-b border-slate-800/50 flex items-center ${isCollapsed ? 'justify-center' : 'gap-4'}`}>
+              <Logo dark showText={!isCollapsed} imageSize={isCollapsed ? "h-10" : "h-10"} />
+              {!isCollapsed && (
+                <button 
+                  onClick={() => setIsOpen(false)} 
+                  className="ml-auto md:hidden text-slate-400 hover:text-white p-1"
+                >
+                  <X size={20} />
+                </button>
+              )}
+            </div>
 
           {/* Quick Search (Only when not collapsed) */}
           {!isCollapsed && (
@@ -234,7 +234,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                     </div>
                     <div className="overflow-hidden">
                       <p className="text-xs font-bold text-white truncate">Administrator</p>
-                      <p className="text-[10px] font-medium text-slate-500 truncate">RT 02 RW 020</p>
+                      <p className="text-[10px] font-medium text-slate-500 truncate">RW 020</p>
                     </div>
                   </div>
                 </div>

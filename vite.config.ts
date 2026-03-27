@@ -34,13 +34,13 @@ export default defineConfig(({ mode }) => {
           orientation: 'portrait',
           icons: [
             {
-              src: 'logo.svg',
+              src: 'logo-rt.svg',
               sizes: '192x192 512x512',
               type: 'image/svg+xml',
               purpose: 'any'
             },
             {
-              src: 'logo.svg',
+              src: 'logo-rt.svg',
               sizes: '192x192 512x512',
               type: 'image/svg+xml',
               purpose: 'maskable'

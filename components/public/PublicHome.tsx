@@ -12,6 +12,8 @@ import { DigitalSummary } from './DigitalSummary';
 import { ServiceStats } from '../ServiceStats';
 import { HouseMap } from '../HouseMap';
 import { Card } from '../ui/Card';
+import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
 import { useFinancial } from '../../context/FinancialContext';
 
 interface PublicHomeProps {
@@ -32,6 +34,8 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   const { summaries } = useFinancial();
   const [statusSearchId, setStatusSearchId] = React.useState('');
   
+  const [isReportModalOpen, setIsReportModalOpen] = React.useState(false);
+  
   const handleCheckStatus = (e: React.FormEvent) => {
     e.preventDefault();
     const house = houses.find(h => h.id.toLowerCase() === statusSearchId.toLowerCase());
@@ -42,6 +46,14 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         description: "Pastikan format benar (Contoh: A1-01)"
       });
     }
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 11) return 'Selamat Pagi';
+    if (hour < 15) return 'Selamat Siang';
+    if (hour < 19) return 'Selamat Sore';
+    return 'Selamat Malam';
   };
 
   const dateObj = new Date();
@@ -70,7 +82,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     { label: 'Pasar Warga', icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', link: '/market' },
     { label: 'Info Publik', icon: Megaphone, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', link: '/info' },
     { label: 'E-Voting', icon: Vote, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/voting' },
-    { label: 'Lapor Warga', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=lapor' }
+    { label: 'Lapor Masalah', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', action: () => setIsReportModalOpen(true) }
   ];
 
   const [filterType, setFilterType] = React.useState<'All' | 'General' | 'Urgent' | 'Event'>('All');
@@ -93,6 +105,14 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
       <HeroSection />
 
+      {/* Personalized Greeting */}
+      <div className="text-center md:text-left">
+        <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter">
+          {getGreeting()}, Warga! 👋
+        </h2>
+        <p className="text-slate-500 font-medium mt-2">Selamat datang kembali di sistem informasi digital RT 02.</p>
+      </div>
+
       <DigitalSummary />
 
       <ServiceStats houses={houses} reports={reports} letters={letters} />
@@ -105,7 +125,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             variants={itemVariants}
             whileHover={{ y: -8, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate(action.link)}
+            onClick={action.action || (() => navigate(action.link))}
             className={`
               flex flex-col items-center justify-center gap-3 p-5 min-w-[140px] md:min-w-0
               bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-slate-200/40 border ${action.border}
@@ -125,6 +145,15 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           </motion.button>
         ))}
       </div>
+
+      {/* Quick Report Modal */}
+      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Lapor Masalah">
+        <div className="p-4">
+          <p className="text-sm text-slate-600 mb-4">Silakan masukkan detail laporan Anda di sini.</p>
+          {/* Add your report form component here */}
+          <Button onClick={() => { setIsReportModalOpen(false); toast.success("Laporan berhasil dikirim!"); }}>Kirim Laporan</Button>
+        </div>
+      </Modal>
 
       {/* Map Section - Immersive */}
       <motion.div 

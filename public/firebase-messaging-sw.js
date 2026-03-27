@@ -17,7 +17,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/logo.svg',
+    icon: '/logo-rt.svg',
     data: payload.data,
     vibrate: [200, 100, 200],
     tag: 'panic-alert',

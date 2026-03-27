@@ -60,7 +60,7 @@ export const HeroSection = () => {
                 transition={{ delay: 0.2 }}
                 className="mb-6"
               >
-                <Logo dark showText={false} imageSize="h-16 md:h-24" />
+                <Logo dark showText={true} imageSize="h-12 md:h-16" />
               </motion.div>
             )}
             
