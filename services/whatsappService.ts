@@ -11,6 +11,69 @@ export const sendWhatsAppMessage = (phone: string, message: string) => {
   window.open(url, '_blank');
 };
 
+/**
+ * Send WhatsApp message via the server-side gateway (Automatic)
+ */
+export const sendWhatsAppViaGateway = async (target: string, message: string) => {
+  try {
+    const response = await fetch('/api/whatsapp/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ target, message }),
+    });
+    
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Failed to send WhatsApp via gateway:', error);
+    return { success: false, error: 'Network error' };
+  }
+};
+
+/**
+ * Broadcast message to multiple numbers via gateway
+ */
+export const broadcastWhatsApp = async (phones: string[], message: string) => {
+  // Join targets with comma (server handles splitting for Sidobe)
+  const target = phones.map(p => {
+    // If it's a group ID (contains @), don't format it as a phone number
+    if (p.includes('@')) return p;
+    
+    let formatted = p.replace(/[^0-9]/g, '');
+    if (formatted.startsWith('0')) formatted = '62' + formatted.substring(1);
+    return formatted;
+  }).join(',');
+
+  return sendWhatsAppViaGateway(target, message);
+};
+
+/**
+ * Fetch list of WhatsApp groups from gateway
+ */
+export const getWhatsAppGroups = async () => {
+  try {
+    const response = await fetch('/api/whatsapp/groups', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const result = await response.json();
+      return result;
+    } else {
+      return { success: false, error: `Server error (${response.status})` };
+    }
+  } catch (error) {
+    console.error('Failed to fetch WhatsApp groups:', error);
+    return { success: false, error: 'Network error' };
+  }
+};
+
 export const formatAnnouncementForWhatsApp = (title: string, content: string) => {
   return `*PENGUMUMAN RESMI RT 02*
 ------------------------------------------

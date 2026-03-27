@@ -395,6 +395,8 @@ export interface PdfConfig {
   kecamatan?: string;
   kota?: string;
   lastLetterNumber: number;
+  whatsappGroupId?: string; // NEW: Group ID for WhatsApp Broadcast
+  whatsappGroupName?: string; // NEW: Group Name for display
   letterTemplates?: {
     type: string;
     suggestion: string;

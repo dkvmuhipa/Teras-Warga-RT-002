@@ -133,6 +133,93 @@ async function startServer() {
     }
   });
 
+  // WhatsApp Gateway Endpoint (Sidobe)
+  app.post("/api/whatsapp/send", async (req, res) => {
+    const { target, message } = req.body;
+    const apiKey = process.env.WHATSAPP_GATEWAY_TOKEN;
+
+    if (!apiKey) {
+      console.warn('⚠️ WHATSAPP_GATEWAY_TOKEN is not set.');
+      return res.status(500).json({ error: "WhatsApp Gateway Token not configured" });
+    }
+
+    if (!target || !message) {
+      return res.status(400).json({ error: "Target and message are required" });
+    }
+
+    const targets = target.split(',').map((t: string) => t.trim());
+    const results = [];
+
+    try {
+      for (const phone of targets) {
+        // Sidobe uses the same endpoint for groups, but the 'phone' field contains the Group ID
+        const response = await fetch('https://api.sidobe.com/v1/send-message', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            phone: phone, // This can be a phone number or a Group ID (e.g., 123456789@g.us)
+            message,
+          }),
+        });
+
+        const result = await response.json();
+        results.push({ target: phone, result });
+      }
+      
+      res.json({ success: true, results });
+    } catch (error: any) {
+      console.error("WhatsApp Gateway error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+  // WhatsApp Groups Endpoint (Sidobe)
+  app.get("/api/whatsapp/groups", async (req, res) => {
+    const apiKey = process.env.WHATSAPP_GATEWAY_TOKEN;
+
+    if (!apiKey) {
+      return res.status(500).json({ error: "WhatsApp Gateway Token not configured" });
+    }
+
+    try {
+      const response = await fetch('https://api.sidobe.com/v1/groups', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const result = await response.json();
+        res.json(result);
+      } else {
+        const text = await response.text();
+        console.error(`WhatsApp Groups error: Received non-JSON response (Status ${response.status}):`, text.substring(0, 200));
+        
+        // If it's a 404, it might be the wrong endpoint
+        if (response.status === 404) {
+          return res.status(404).json({ 
+            error: "Endpoint API tidak ditemukan (404). Silakan hubungi pengembang.",
+            success: false 
+          });
+        }
+        
+        res.status(response.status).json({ 
+          error: `Gateway mengembalikan respon non-JSON (Status ${response.status})`,
+          success: false
+        });
+      }
+    } catch (error: any) {
+      console.error("WhatsApp Groups error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Socket.io logic
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);

@@ -268,5 +268,7 @@ export const DEFAULT_PDF_CONFIG: PdfConfig = {
   kelurahan: "TONDO",
   kecamatan: "MANTIKULORE",
   kota: "PALU",
-  lastLetterNumber: 0
+  lastLetterNumber: 0,
+  whatsappGroupId: "",
+  whatsappGroupName: ""
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Megaphone, Vote, ShoppingBag, Image, BookOpen, Calendar, HelpCircle } from 'lucide-react';
-import { Announcement, News, Poll, UMKM, GalleryItem, AppEvent, FAQItem } from '../../types';
+import { Announcement, News, Poll, UMKM, GalleryItem, AppEvent, FAQItem, House, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnnouncementManagement } from './AnnouncementManagement';
 import { NewsManagement } from './NewsManagement';
@@ -18,9 +18,11 @@ interface ContentManagerProps {
   gallery: GalleryItem[];
   events: AppEvent[];
   faqItems: FAQItem[];
+  houses: House[];
+  pdfConfig: PdfConfig;
 }
 
-export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, news, polls, umkm, gallery, events, faqItems }) => {
+export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, news, polls, umkm, gallery, events, faqItems, houses, pdfConfig }) => {
   const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq'>('announcements');
 
   const containerVariants = {
@@ -96,7 +98,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, n
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
-          {activeTab === 'announcements' && <AnnouncementManagement announcements={announcements} />}
+          {activeTab === 'announcements' && <AnnouncementManagement announcements={announcements} houses={houses} pdfConfig={pdfConfig} />}
           {activeTab === 'news' && <NewsManagement news={news} />}
           {activeTab === 'polls' && <PollManagement polls={polls} />}
           {activeTab === 'umkm' && <UmkmManagement umkm={umkm} />}

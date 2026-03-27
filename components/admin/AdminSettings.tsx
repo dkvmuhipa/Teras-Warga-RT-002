@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { User, Lock, Eye, EyeOff, Database, Download, AlertTriangle, Trash, FileText, Save, Image as ImageIcon, ShieldCheck, Edit2 } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, Database, Download, AlertTriangle, Trash, FileText, Save, Image as ImageIcon, ShieldCheck, Edit2, MessageCircle, Search, CheckCircle2, XCircle } from 'lucide-react';
 import { updatePassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { PdfConfig, House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, MarketItem, AppNotification } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { seedDatabase, deepSanitize } from '../../services/databaseService';
+import { getWhatsAppGroups } from '../../services/whatsappService';
 import { toast } from 'sonner';
 
 interface AdminSettingsProps {
@@ -35,6 +36,9 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [localConfig, setLocalConfig] = useState<PdfConfig>(pdfConfig);
+  const [isVerifyingGroup, setIsVerifyingGroup] = useState(false);
+  const [availableGroups, setAvailableGroups] = useState<{id: string, name: string}[]>([]);
+  const [showGroupList, setShowGroupList] = useState(false);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +113,52 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     setPdfConfig(localConfig);
     localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(localConfig)));
     toast.success('Konfigurasi surat tersimpan!');
+  };
+
+  const handleVerifyGroup = async () => {
+    setIsVerifyingGroup(true);
+    try {
+      const result = await getWhatsAppGroups();
+      if (result.success && Array.isArray(result.data)) {
+        // Sidobe usually returns data in result.data
+        setAvailableGroups(result.data.map((g: any) => ({
+          id: g.id || g.jid,
+          name: g.name || g.subject
+        })));
+        setShowGroupList(true);
+        toast.success(`Ditemukan ${result.data.length} grup.`);
+      } else if (result.error) {
+        toast.error(`Gagal: ${result.error}`);
+      } else {
+        // Fallback if data structure is different
+        const data = result.data || result;
+        if (Array.isArray(data)) {
+          setAvailableGroups(data.map((g: any) => ({
+            id: g.id || g.jid,
+            name: g.name || g.subject
+          })));
+          setShowGroupList(true);
+          toast.success(`Ditemukan ${data.length} grup.`);
+        } else {
+          toast.error('Gagal mengambil daftar grup. Pastikan API Key benar.');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Terjadi kesalahan saat verifikasi.');
+    } finally {
+      setIsVerifyingGroup(false);
+    }
+  };
+
+  const selectGroup = (id: string, name: string) => {
+    setLocalConfig(prev => ({
+      ...prev,
+      whatsappGroupId: id,
+      whatsappGroupName: name
+    }));
+    setShowGroupList(false);
+    toast.success(`Grup "${name}" terpilih.`);
   };
 
   return (
@@ -194,6 +244,71 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 value={localConfig.lastLetterNumber} 
                 onChange={e => setLocalConfig({...localConfig, lastLetterNumber: parseInt(e.target.value) || 0})} 
               />
+            </div>
+
+            <div className="p-4 bg-brand-blue/5 rounded-2xl border border-brand-blue/10">
+              <div className="flex items-center gap-2 mb-3">
+                <MessageCircle size={16} className="text-brand-blue" />
+                <h4 className="font-bold text-sm text-slate-700">Integrasi WhatsApp</h4>
+              </div>
+              <label className="block text-xs font-bold mb-2 text-slate-700">WhatsApp Group ID (JID)</label>
+              <div className="flex gap-2 mb-4">
+                <input 
+                  className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none font-mono" 
+                  placeholder="Contoh: 1234567890@g.us"
+                  value={localConfig.whatsappGroupId || ''} 
+                  onChange={e => setLocalConfig({...localConfig, whatsappGroupId: e.target.value})} 
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleVerifyGroup}
+                  disabled={isVerifyingGroup}
+                  className="shrink-0"
+                >
+                  {isVerifyingGroup ? '...' : <Search size={16} />}
+                </Button>
+              </div>
+
+              {showGroupList && availableGroups.length > 0 && (
+                <div className="mb-4 p-3 bg-white border border-indigo-100 rounded-xl shadow-inner max-h-40 overflow-y-auto space-y-2">
+                  <p className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Pilih dari Grup Anda:</p>
+                  {availableGroups.map(group => (
+                    <button
+                      key={group.id}
+                      type="button"
+                      onClick={() => selectGroup(group.id, group.name)}
+                      className="w-full text-left p-2 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-between group"
+                    >
+                      <div className="overflow-hidden">
+                        <p className="text-xs font-bold text-slate-700 truncate">{group.name}</p>
+                        <p className="text-[9px] text-slate-400 truncate">{group.id}</p>
+                      </div>
+                      <CheckCircle2 size={14} className="text-indigo-400 opacity-0 group-hover:opacity-100" />
+                    </button>
+                  ))}
+                  <button 
+                    type="button" 
+                    onClick={() => setShowGroupList(false)}
+                    className="w-full text-center py-1 text-[10px] text-slate-400 hover:text-slate-600"
+                  >
+                    Tutup Daftar
+                  </button>
+                </div>
+              )}
+
+              <label className="block text-xs font-bold mb-2 text-slate-700">Nama Grup WhatsApp (Display)</label>
+              <input 
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" 
+                placeholder="Contoh: Warga RT 02 Official"
+                value={localConfig.whatsappGroupName || ''} 
+                onChange={e => setLocalConfig({...localConfig, whatsappGroupName: e.target.value})} 
+              />
+              <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                ID Grup diperlukan untuk mengirim pengumuman ke grup WhatsApp warga secara otomatis. 
+                Anda bisa mendapatkan ID ini dari dashboard Sidobe atau melalui bot helper.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

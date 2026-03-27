@@ -24,6 +24,7 @@ import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
 import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId, addBillToDb, updateBillInDb } from '../../services/databaseService';
 import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
+import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
@@ -724,6 +725,26 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setIsDrawerOpen(true);
   };
 
+  const handleSendWhatsApp = async (house: House) => {
+    if (!house.phone) return toast.error('Nomor WhatsApp tidak tersedia.');
+    
+    const message = window.prompt(`Kirim pesan WhatsApp ke ${house.headOfFamily}:`, `Halo Bapak/Ibu ${house.headOfFamily}, ada informasi dari pengurus RT 02...`);
+    
+    if (message) {
+      try {
+        const result = await sendWhatsAppViaGateway(house.phone, message);
+        if (result.success) {
+          toast.success(`Pesan berhasil dikirim ke ${house.headOfFamily}`);
+        } else {
+          toast.error(`Gagal mengirim pesan: ${result.error || 'Terjadi kesalahan'}`);
+        }
+      } catch (error) {
+        console.error('WA error:', error);
+        toast.error('Gagal mengirim pesan WhatsApp via gateway.');
+      }
+    }
+  };
+
   const maskData = (data: string | undefined) => {
     if (!data) return '-';
     return data.replace(/.(?=.{4})/g, '*');
@@ -921,6 +942,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             handleDelete={handleDelete}
             setSelectedHouseForBills={setSelectedHouseForBills}
             openPayModal={openPayModal}
+            onSendWhatsApp={handleSendWhatsApp}
           />
         ) : viewMode === 'iuran' ? (
           <ResidentIuranManager 
@@ -936,6 +958,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayNotes={setPayNotes}
             setPayerName={setPayerName}
             setIsEditPaymentModalOpen={setIsEditPaymentModalOpen}
+            onSendWhatsApp={handleSendWhatsApp}
           />
         ) : viewMode === 'registrations' ? (
           <ResidentRegistrationList 
@@ -954,6 +977,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             openDetail={openDetail}
             handleOpenEdit={handleOpenEdit}
             handleDelete={handleDelete}
+            onSendWhatsApp={handleSendWhatsApp}
           />
         ) : viewMode === 'map' ? (
       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">

@@ -11,6 +11,7 @@ interface ResidentGridViewProps {
   handleDelete: (id: string) => void;
   setSelectedHouseForBills: (house: House) => void;
   openPayModal: (house: House) => void;
+  onSendWhatsApp?: (house: House) => void;
 }
 
 export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
@@ -21,6 +22,7 @@ export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
   handleDelete,
   setSelectedHouseForBills,
   openPayModal,
+  onSendWhatsApp,
 }) => {
   const { getPaymentStatus, getArrearsForHouse } = useFinancial();
   
@@ -54,6 +56,7 @@ export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
                 onDelete={handleDelete}
                 onOpenBills={setSelectedHouseForBills}
                 onOpenPay={openPayModal}
+                onSendWhatsApp={onSendWhatsApp}
                 dynamicStatusAir={getPaymentStatus(house, 'Air', selectedMonth)}
                 dynamicStatusSampah={getPaymentStatus(house, 'Sampah', selectedMonth)}
                 arrears={house.status === 'Occupied' ? getArrearsForHouse(house) : []}

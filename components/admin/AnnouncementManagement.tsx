@@ -1,23 +1,29 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle, Sparkles } from 'lucide-react';
-import { Announcement } from '../../types';
+import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle, Sparkles, Send } from 'lucide-react';
+import { Announcement, House, PdfConfig } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { addAnnouncementToDb, deleteAnnouncementFromDb, updateAnnouncementInDb } from '../../services/databaseService';
-import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from '../../services/whatsappService';
+import { sendWhatsAppMessage, formatAnnouncementForWhatsApp, broadcastWhatsApp } from '../../services/whatsappService';
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
 interface AnnouncementManagementProps {
   announcements: Announcement[];
+  houses: House[];
+  pdfConfig: PdfConfig;
 }
 
-export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ announcements }) => {
+export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ announcements, houses, pdfConfig }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
+  const [selectedAnnForBroadcast, setSelectedAnnForBroadcast] = useState<Announcement | null>(null);
+  const [broadcastTargets, setBroadcastTargets] = useState({ group: true, individual: true });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
+  const [isBroadcasting, setIsBroadcasting] = useState<string | null>(null);
   
   // Form State
   const [annTitle, setAnnTitle] = useState('');
@@ -30,12 +36,64 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
     (a.title.toLowerCase().includes(searchTerm.toLowerCase()) || a.content.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleGenerateWithAi = async () => {
-    if (!annTitle) return toast.error('Masukkan judul terlebih dahulu');
-    setIsAiLoading(true);
-    const draft = await generateAnnouncementDraft(annTitle);
-    setAnnContent(draft);
-    setIsAiLoading(false);
+  const handleBroadcast = (ann: Announcement) => {
+    setSelectedAnnForBroadcast(ann);
+    setIsBroadcastModalOpen(true);
+  };
+
+  const executeBroadcast = async () => {
+    if (!selectedAnnForBroadcast) return;
+    
+    const ann = selectedAnnForBroadcast;
+    const phoneNumbers = houses
+      .map(h => h.phone)
+      .filter((p): p is string => !!p && p.length > 5);
+
+    const hasGroup = !!pdfConfig.whatsappGroupId;
+    const sendToGroup = broadcastTargets.group && hasGroup;
+    const sendToIndividual = broadcastTargets.individual && phoneNumbers.length > 0;
+
+    if (!sendToGroup && !sendToIndividual) {
+      return toast.error('Pilih setidaknya satu target broadcast yang valid.');
+    }
+
+    setIsBroadcasting(ann.id);
+    setIsBroadcastModalOpen(false);
+    
+    const message = formatAnnouncementForWhatsApp(ann.title, ann.content);
+    
+    try {
+      let successCount = 0;
+      let totalCount = 0;
+
+      // 1. Send to Group
+      if (sendToGroup) {
+        totalCount++;
+        const groupResult = await broadcastWhatsApp([pdfConfig.whatsappGroupId!], message);
+        if (groupResult.success) successCount++;
+      }
+
+      // 2. Send to individual numbers
+      if (sendToIndividual) {
+        const result = await broadcastWhatsApp(phoneNumbers, message);
+        if (result.success) {
+          successCount += phoneNumbers.length;
+        }
+        totalCount += phoneNumbers.length;
+      }
+
+      if (successCount > 0) {
+        toast.success(`Broadcast berhasil dikirim! (${successCount}/${totalCount} target)`);
+      } else {
+        toast.error(`Gagal mengirim broadcast. Periksa konfigurasi gateway.`);
+      }
+    } catch (error) {
+      console.error('Broadcast error:', error);
+      toast.error('Gagal mengirim broadcast. Pastikan gateway sudah terkonfigurasi.');
+    } finally {
+      setIsBroadcasting(null);
+      setSelectedAnnForBroadcast(null);
+    }
   };
 
   const resetForms = () => {
@@ -127,6 +185,21 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
     }
   };
 
+  const handleGenerateWithAi = async () => {
+    if (!annTitle) return toast.error('Isi judul pengumuman terlebih dahulu.');
+    setIsAiLoading(true);
+    try {
+      const draft = await generateAnnouncementDraft(annTitle, annType);
+      setAnnContent(draft);
+      toast.success('Draft pengumuman berhasil dibuat!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal membuat draft pengumuman.');
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -197,9 +270,17 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                 
                 <div className="flex items-start gap-2">
                   <button 
+                    onClick={() => handleBroadcast(a)} 
+                    disabled={isBroadcasting === a.id}
+                    className={`p-3 rounded-xl transition-all ${isBroadcasting === a.id ? 'text-indigo-400 bg-indigo-50 animate-pulse' : 'text-slate-300 hover:text-indigo-600 hover:bg-indigo-50'}`}
+                    title="Broadcast via WA Gateway"
+                  >
+                    <Send size={20}/>
+                  </button>
+                  <button 
                     onClick={() => sendWhatsAppMessage('081234567890', formatAnnouncementForWhatsApp(a.title, a.content))} 
                     className="p-3 rounded-xl text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
-                    title="Bagikan ke WhatsApp"
+                    title="Bagikan ke WhatsApp (Personal)"
                   >
                     <MessageCircle size={20}/>
                   </button>
@@ -271,6 +352,79 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
             {editingId ? 'Simpan Perubahan' : 'Terbitkan Pengumuman'}
           </Button>
         </form>
+      </Modal>
+
+      <Modal 
+        isOpen={isBroadcastModalOpen} 
+        onClose={() => setIsBroadcastModalOpen(false)} 
+        title="Opsi Broadcast WhatsApp"
+      >
+        <div className="space-y-6">
+          <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+            <p className="text-sm font-bold text-indigo-900 mb-1">Pilih Target Broadcast</p>
+            <p className="text-xs text-indigo-600/70">Tentukan ke mana pengumuman ini akan dikirimkan.</p>
+          </div>
+
+          <div className="space-y-3">
+            <label className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${broadcastTargets.group ? 'bg-white border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${broadcastTargets.group ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
+                  <MessageCircle size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-slate-800">{pdfConfig.whatsappGroupName || 'Grup WhatsApp'}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    {pdfConfig.whatsappGroupId ? `ID: ${pdfConfig.whatsappGroupId.substring(0, 15)}...` : 'Belum dikonfigurasi'}
+                  </p>
+                </div>
+              </div>
+              <input 
+                type="checkbox" 
+                className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                checked={broadcastTargets.group}
+                disabled={!pdfConfig.whatsappGroupId}
+                onChange={(e) => setBroadcastTargets(prev => ({ ...prev, group: e.target.checked }))}
+              />
+            </label>
+
+            <label className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${broadcastTargets.individual ? 'bg-white border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${broadcastTargets.individual ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
+                  <Send size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-slate-800">Warga Individual</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    {houses.filter(h => !!h.phone).length} Nomor Terdaftar
+                  </p>
+                </div>
+              </div>
+              <input 
+                type="checkbox" 
+                className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                checked={broadcastTargets.individual}
+                onChange={(e) => setBroadcastTargets(prev => ({ ...prev, individual: e.target.checked }))}
+              />
+            </label>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsBroadcastModalOpen(false)}
+              className="flex-1 py-3"
+            >
+              Batal
+            </Button>
+            <Button 
+              onClick={executeBroadcast}
+              className="flex-[2] py-3 shadow-lg shadow-indigo-200"
+              disabled={!broadcastTargets.group && !broadcastTargets.individual}
+            >
+              Kirim Broadcast Sekarang
+            </Button>
+          </div>
+        </div>
       </Modal>
     </motion.div>
   );

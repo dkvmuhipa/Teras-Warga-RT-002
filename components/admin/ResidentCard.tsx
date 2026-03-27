@@ -1,6 +1,6 @@
 import React from 'react';
 import { House, PaymentStatus, Bill } from '../../types';
-import { Phone, CheckCircle, XCircle, DollarSign, Edit2, Trash2, LayoutList, AlertCircle } from 'lucide-react';
+import { Phone, CheckCircle, XCircle, DollarSign, Edit2, Trash2, LayoutList, AlertCircle, MessageCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface ResidentCardProps {
@@ -11,13 +11,14 @@ interface ResidentCardProps {
   onDelete: (id: string) => void;
   onOpenBills: (house: House) => void;
   onOpenPay: (house: House) => void;
+  onSendWhatsApp?: (house: House) => void;
   dynamicStatusAir?: PaymentStatus;
   dynamicStatusSampah?: PaymentStatus;
   arrears?: string[];
 }
 
 export const ResidentCard: React.FC<ResidentCardProps> = ({ 
-  house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills, onOpenPay,
+  house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills, onOpenPay, onSendWhatsApp,
   dynamicStatusAir, dynamicStatusSampah, arrears = []
 }) => {
   const houseBills = bills.filter(b => b.houseId === house.id);
@@ -124,6 +125,9 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
 
       <div className="flex gap-1.5 pt-3 border-t border-slate-100">
         <button onClick={() => onOpenDetail(house)} className="flex-1 py-1.5 md:py-2 bg-slate-50 text-slate-600 rounded-lg font-bold text-[9px] md:text-[10px] hover:bg-slate-100 transition-all">Detail</button>
+        {onSendWhatsApp && (
+          <button onClick={() => onSendWhatsApp(house)} className="p-1.5 md:p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="Kirim WhatsApp"><MessageCircle size={12} className="md:w-3.5 md:h-3.5" /></button>
+        )}
         <button onClick={() => onOpenPay(house)} className="p-1.5 md:p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="Bayar Iuran"><DollarSign size={12} className="md:w-3.5 md:h-3.5" /></button>
         <button onClick={() => onOpenBills(house)} className="p-1.5 md:p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all" title="Riwayat Tagihan"><LayoutList size={12} className="md:w-3.5 md:h-3.5" /></button>
         <button onClick={() => onOpenEdit(house)} className="p-1.5 md:p-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-all"><Edit2 size={12} className="md:w-3.5 md:h-3.5" /></button>

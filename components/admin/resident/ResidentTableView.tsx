@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, XCircle, ChevronRight, Edit2, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, Edit2, Trash2, MessageCircle } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 
@@ -12,6 +12,7 @@ interface ResidentTableViewProps {
   openDetail: (house: House) => void;
   handleOpenEdit: (house: House) => void;
   handleDelete: (id: string) => void;
+  onSendWhatsApp?: (house: House) => void;
 }
 
 export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
@@ -23,6 +24,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
   openDetail,
   handleOpenEdit,
   handleDelete,
+  onSendWhatsApp,
 }) => {
   const { getPaymentStatus, getArrearsForHouse } = useFinancial();
   
@@ -119,6 +121,11 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {onSendWhatsApp && (
+                            <button onClick={() => onSendWhatsApp(house)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Kirim WhatsApp">
+                              <MessageCircle size={16}/>
+                            </button>
+                          )}
                           <button onClick={() => openDetail(house)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
                             <ChevronRight size={16}/>
                           </button>

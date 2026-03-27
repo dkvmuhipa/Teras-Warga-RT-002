@@ -17,6 +17,7 @@ interface ResidentIuranManagerProps {
   setPayNotes: (notes: string) => void;
   setPayerName: (name: string) => void;
   setIsEditPaymentModalOpen: (open: boolean) => void;
+  onSendWhatsApp?: (house: House, message?: string) => void;
 }
 
 export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
@@ -32,6 +33,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
   setPayNotes,
   setPayerName,
   setIsEditPaymentModalOpen,
+  onSendWhatsApp,
 }) => {
   const [filterType, setFilterType] = React.useState<'All' | 'Air' | 'Sampah'>('All');
   const { 
@@ -372,9 +374,23 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                     <p className="text-sm font-black text-slate-800">{house.headOfFamily}</p>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blok {house.block}-{house.number}</p>
                   </div>
-                  <span className="px-2 py-1 bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg uppercase tracking-widest">
-                    {arrears.length} Bulan
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="px-2 py-1 bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg uppercase tracking-widest">
+                      {arrears.length} Bulan
+                    </span>
+                    {onSendWhatsApp && (
+                      <button 
+                        onClick={() => {
+                          const msg = `Halo Bapak/Ibu ${house.headOfFamily} (Blok ${house.block}-${house.number}),\n\nMohon maaf mengganggu, kami ingin menginfokan bahwa terdapat tunggakan iuran ${filterType === 'All' ? 'Air & Sampah' : 'Iuran ' + filterType} sebanyak ${arrears.length} bulan (${arrears.join(', ')}).\n\nMohon segera melakukan pembayaran. Terima kasih.`;
+                          onSendWhatsApp(house, msg);
+                        }}
+                        className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all"
+                        title="Kirim Pengingat WA"
+                      >
+                        <Mail size={14} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {arrears.map(m => (
