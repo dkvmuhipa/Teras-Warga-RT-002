@@ -631,9 +631,11 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
       });
 
       // Restore original styles and hide legend again
-      containerRef.current.style.height = originalHeight;
-      containerRef.current.style.overflow = originalOverflow;
-      containerRef.current.style.width = originalWidth;
+      if (containerRef.current) {
+        containerRef.current.style.height = originalHeight;
+        containerRef.current.style.overflow = originalOverflow;
+        containerRef.current.style.width = originalWidth;
+      }
       if (printLegend) printLegend.classList.add('hidden');
       
       const link = document.createElement('a');
