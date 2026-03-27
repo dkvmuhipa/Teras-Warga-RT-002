@@ -80,66 +80,76 @@
   }
 
   @media print {
-    .no-print, nav, header, footer, aside, #panic-button, #chatbot-container, .fixed-bottom-nav {
+    /* Hide all main layout elements that are not the map */
+    nav, 
+    header, 
+    footer, 
+    aside, 
+    #panic-button, 
+    #chatbot-container, 
+    .fixed-bottom-nav,
+    .no-print,
+    button:not(.print-only),
+    .PublicHeader,
+    .MobileBottomNav,
+    .ChatBot,
+    .PanicButton {
       display: none !important;
     }
-    
-    @page {
-      size: landscape;
-      margin: 0;
+
+    /* Hide everything in the body except the root */
+    body > *:not(#root) {
+      display: none !important;
     }
 
+    /* Hide everything by default using visibility to avoid layout shifts but keep it clean */
+    body * {
+      visibility: hidden !important;
+    }
+    
     body {
       background-color: white !important;
-      padding: 0 !important;
       margin: 0 !important;
+      padding: 0 !important;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-      overflow: visible !important;
     }
 
-    #root {
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-
-    /* Ensure the map container is visible and takes full space */
-    .flex-1 {
-      flex: 1 1 auto !important;
-      height: auto !important;
-      overflow: visible !important;
-    }
-
-    /* Force visibility of the map and its content */
-    .relative {
-      position: relative !important;
-      overflow: visible !important;
-    }
-
-    .shadow-xl, .shadow-sm, .shadow-lg, .shadow-2xl {
-      box-shadow: none !important;
-    }
-
-    .border, .border-slate-200, .border-slate-100 {
-      border: none !important;
-    }
-
-    /* Ensure text is dark for printing */
-    .text-slate-400, .text-slate-500 {
-      color: #334155 !important;
-    }
-
-    /* Specific fix for the map to fill the page */
+    /* The map container becomes the entire page */
     .print\:fixed {
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
-      z-index: 99999 !important;
+      margin: 0 !important;
+      padding: 20px !important; /* Give some breathing room */
+      z-index: 999999 !important;
       background: white !important;
       display: flex !important;
       flex-direction: column !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      visibility: visible !important;
+    }
+
+    /* Ensure all parents of the map are visible but don't interfere with layout */
+    .print\:fixed * {
+      visibility: visible !important;
+    }
+
+    /* Hide specific UI elements inside the map */
+    .print\:fixed .no-print,
+    .print\:fixed button,
+    .print\:fixed .absolute.top-4.right-4,
+    .print\:fixed .absolute.bottom-4.left-4:not(.print-only-legend) {
+      display: none !important;
+    }
+
+    @page {
+      size: landscape;
+      margin: 0;
     }
   }
 }

@@ -975,20 +975,45 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Demografi</h4>
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Demografi (Total)</h4>
                                     <div className="space-y-2">
-                                        <div className="flex items-center gap-2"><Baby size={10} className="text-rose-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Bayi</span></div>
-                                        <div className="flex items-center gap-2"><Baby size={10} className="text-orange-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Balita</span></div>
-                                        <div className="flex items-center gap-2"><Accessibility size={10} className="text-indigo-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Lansia</span></div>
-                                        <div className="flex items-center gap-2"><Heart size={10} className="text-rose-400"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Hamil</span></div>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-2"><Baby size={10} className="text-rose-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Bayi</span></div>
+                                            <span className="text-[10px] font-black text-rose-600">{totalBaby}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-2"><Baby size={10} className="text-orange-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Balita</span></div>
+                                            <span className="text-[10px] font-black text-orange-600">{totalToddler}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-2"><Accessibility size={10} className="text-indigo-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Lansia</span></div>
+                                            <span className="text-[10px] font-black text-indigo-600">{totalElderly}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-2"><Heart size={10} className="text-rose-400"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Hamil</span></div>
+                                            <span className="text-[10px] font-black text-rose-600">{totalPregnant}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-2"><User size={10} className="text-slate-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Janda/Duda</span></div>
+                                            <span className="text-[10px] font-black text-slate-600">{totalWidow}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Keterangan</h4>
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Keterangan & Heatmap</h4>
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2"><Droplets size={10} className="text-blue-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">OP Air</span></div>
                                         <div className="flex items-center gap-2"><Trash2 size={10} className="text-slate-500"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Sampah</span></div>
-                                        <div className="flex items-center gap-2"><Compass size={10} className="text-rose-600"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Orientasi Utara</span></div>
+                                        <div className="flex items-center gap-2"><Compass size={10} className="text-rose-600"/> <span className="text-[10px] font-bold text-slate-600 uppercase">Utara</span></div>
+                                        
+                                        {showHeatmap && (
+                                          <div className="mt-2 pt-2 border-t border-slate-100 space-y-1">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Kepadatan:</p>
+                                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded bg-rose-500"></div> <span className="text-[8px] font-bold text-slate-500 uppercase">&gt; 5 Jiwa</span></div>
+                                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded bg-orange-400"></div> <span className="text-[8px] font-bold text-slate-500 uppercase">3-5 Jiwa</span></div>
+                                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded bg-emerald-400"></div> <span className="text-[8px] font-bold text-slate-500 uppercase">1-2 Jiwa</span></div>
+                                          </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
