@@ -12,7 +12,8 @@ import {
   updateRondaShifts, 
   updateRondaSwapRequestStatus, 
   updatePanicAlertStatus,
-  addRondaAttendance
+  addRondaAttendance,
+  updateHouseData
 } from '../../services/databaseService';
 import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
@@ -47,7 +48,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints' | 'map' | 'info-points' | 'monitoring' | 'attendance'>('monitoring');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints' | 'map' | 'info-points' | 'monitoring' | 'attendance' | 'leaderboard'>('monitoring');
 
   // Shift Management State
   const [shifts, setShifts] = useState<{ id: string; time: string; members: string[] }[]>([]);
@@ -106,27 +107,55 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   };
 
   const handleAutoRotate = async () => {
-    if (!window.confirm("Sistem akan mengacak ulang seluruh jadwal ronda berdasarkan daftar kepala keluarga yang ada. Lanjutkan?")) return;
+    if (!window.confirm("Sistem akan mengacak ulang seluruh jadwal ronda berdasarkan daftar kepala keluarga yang ada dengan prinsip keadilan (berdasarkan jumlah tugas) dan keragaman blok. Lanjutkan?")) return;
 
-    const allResidents = houses
-      .filter(h => h.status === 'Occupied')
-      .map(h => h.headOfFamily)
-      .filter(name => name && name !== '-' && name !== 'Kosong');
+    // Filter residents: Occupied, not exempt, has headOfFamily
+    const eligibleHouses = houses
+      .filter(h => h.status === 'Occupied' && !h.rondaExempt && h.headOfFamily && h.headOfFamily !== '-' && h.headOfFamily !== 'Kosong');
 
-    if (allResidents.length === 0) {
+    if (eligibleHouses.length === 0) {
       toast.error("Tidak ada warga yang dapat ditugaskan.");
       return;
     }
 
-    // Shuffle residents
-    const shuffled = [...allResidents].sort(() => Math.random() - 0.5);
+    // Sort by fairness: lowest duty count first, then oldest last duty
+    const sortedResidents = [...eligibleHouses].sort((a, b) => {
+      const countA = a.rondaDutyCount || 0;
+      const countB = b.rondaDutyCount || 0;
+      if (countA !== countB) return countA - countB;
+      
+      const lastA = a.rondaLastDuty ? new Date(a.rondaLastDuty).getTime() : 0;
+      const lastB = b.rondaLastDuty ? new Date(b.rondaLastDuty).getTime() : 0;
+      return lastA - lastB;
+    });
+
+    // To ensure block diversity, we can group by block and then pick round-robin
+    const blocks: Record<string, House[]> = {};
+    sortedResidents.forEach(h => {
+      if (!blocks[h.block]) blocks[h.block] = [];
+      blocks[h.block].push(h);
+    });
+
+    const blockNames = Object.keys(blocks);
+    const finalShuffled: string[] = [];
+    let blockIndex = 0;
+    let residentsAdded = 0;
+    const totalToPick = sortedResidents.length;
+
+    while (residentsAdded < totalToPick) {
+      const currentBlock = blockNames[blockIndex % blockNames.length];
+      const house = blocks[currentBlock].shift();
+      if (house) {
+        finalShuffled.push(house.headOfFamily);
+        residentsAdded++;
+      }
+      blockIndex++;
+    }
     
     // Distribute to 7 days
     const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-    
-    // Calculate base members per day
-    const basePerDay = Math.floor(shuffled.length / 7);
-    const extraDays = shuffled.length % 7;
+    const basePerDay = Math.floor(finalShuffled.length / 7);
+    const extraDays = finalShuffled.length % 7;
     
     let currentIndex = 0;
     
@@ -136,10 +165,9 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       if (!schedule || !schedule.id) continue;
 
       const membersCount = basePerDay + (i < extraDays ? 1 : 0);
-      const dayMembers = shuffled.slice(currentIndex, currentIndex + membersCount);
+      const dayMembers = finalShuffled.slice(currentIndex, currentIndex + membersCount);
       currentIndex += membersCount;
       
-      // Split into 2 shifts
       const mid = Math.ceil(dayMembers.length / 2);
       const shift1 = dayMembers.slice(0, mid);
       const shift2 = dayMembers.slice(mid);
@@ -152,8 +180,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         ]
       });
     }
-    
-    toast.success("Jadwal berhasil dirotasi otomatis!");
+
+    toast.success("Jadwal berhasil dirotasi secara adil!");
   };
 
   const handleShareToWhatsApp = () => {
@@ -266,9 +294,38 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       timestamp: new Date().toISOString()
     });
 
-    toast.success("Absensi berhasil disimpan!");
+    // Update Points and Duty Count for present members
+    for (const memberName of presentMembers) {
+      const house = houses.find(h => h.headOfFamily === memberName);
+      if (house) {
+        await updateHouseData(house.id, {
+          rondaPoints: (house.rondaPoints || 0) + 10, // 10 points per duty
+          rondaDutyCount: (house.rondaDutyCount || 0) + 1,
+          rondaLastDuty: new Date().toISOString()
+        });
+      }
+    }
+
+    toast.success("Absensi berhasil disimpan dan poin telah ditambahkan!");
     setPresentMembers([]);
     setAttendanceNotes('');
+  };
+
+  const handleSendTomorrowReminder = async () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const day = tomorrow.toLocaleDateString('id-ID', { weekday: 'long' });
+    const schedule = ronda.find(r => r.day === day);
+    
+    if (!schedule) {
+      toast.error("Jadwal besok tidak ditemukan.");
+      return;
+    }
+
+    const message = `*PENGINGAT RONDA BESOK*\n\nHari: ${day}\nTanggal: ${tomorrow.toLocaleDateString('id-ID')}\n\nPetugas:\n${schedule.members.map((m, i) => `${i+1}. ${m}`).join('\n')}\n\nMohon kehadirannya tepat waktu. Terima kasih!`;
+    
+    sendWhatsAppMessage('', message); // Send to general or specific group if configured
+    toast.success("Pesan pengingat telah disiapkan!");
   };
 
   return (
@@ -292,6 +349,9 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         <div className="flex flex-wrap gap-2 w-full lg:w-auto">
           <Button onClick={() => setIsQRModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 hover:bg-slate-50 text-xs py-2">
             <QrCode size={16} className="mr-1.5" /> <span className="hidden sm:inline">Cetak QR</span><span className="sm:hidden">QR</span>
+          </Button>
+          <Button onClick={handleSendTomorrowReminder} variant="outline" className="flex-1 sm:flex-none border-green-200 text-green-600 hover:bg-green-50 text-xs py-2">
+            <Bell size={16} className="mr-1.5" /> <span className="hidden sm:inline">Ingatkan Besok</span><span className="sm:hidden">Ingat</span>
           </Button>
           <Button onClick={handleShareToWhatsApp} variant="outline" className="flex-1 sm:flex-none border-emerald-200 text-emerald-600 hover:bg-emerald-50 text-xs py-2">
             <Share2 size={16} className="mr-1.5" /> <span className="hidden sm:inline">Bagikan WA</span><span className="sm:hidden">WA</span>
@@ -319,6 +379,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           { id: 'monitoring', label: 'Monitoring', icon: Eye, count: activePanicAlerts.length },
           { id: 'swaps', label: 'Tukar', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Pending').length },
           { id: 'attendance', label: 'Absensi', icon: UserCheck },
+          { id: 'leaderboard', label: 'Peringkat', icon: ShieldCheck },
           { id: 'checkpoints', label: 'Titik', icon: MapPin },
           { id: 'info-points', label: 'Info', icon: Info },
           { id: 'map', label: 'Peta', icon: ShieldCheck }
@@ -947,6 +1008,87 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     <p className="text-slate-400 font-bold">Belum ada data absensi</p>
                   </div>
                 )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'leaderboard' && (
+          <motion.div variants={itemVariants} className="lg:col-span-3 space-y-8">
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden p-8">
+              <div className="flex justify-between items-center mb-10">
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">Peringkat Keaktifan Ronda</h3>
+                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Warga paling berdedikasi menjaga keamanan lingkungan.</p>
+                </div>
+                <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl">
+                  <ShieldCheck size={28} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                {houses
+                  .filter(h => (h.rondaPoints || 0) > 0)
+                  .sort((a, b) => (b.rondaPoints || 0) - (a.rondaPoints || 0))
+                  .slice(0, 3)
+                  .map((h, i) => (
+                    <div key={h.id} className={`p-8 rounded-[2rem] border relative overflow-hidden ${i === 0 ? 'bg-indigo-600 text-white border-indigo-700 shadow-xl shadow-indigo-200' : 'bg-slate-50 border-slate-100'}`}>
+                      <div className="relative z-10">
+                        <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${i === 0 ? 'text-indigo-200' : 'text-slate-400'}`}>Juara {i + 1}</p>
+                        <h4 className="text-xl font-black mb-1">{h.headOfFamily}</h4>
+                        <p className={`text-xs font-bold ${i === 0 ? 'text-indigo-100' : 'text-slate-500'}`}>Blok {h.block}-{h.number}</p>
+                        <div className="mt-6 flex items-end gap-2">
+                          <span className="text-3xl font-black">{h.rondaPoints || 0}</span>
+                          <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${i === 0 ? 'text-indigo-200' : 'text-slate-400'}`}>Poin</span>
+                        </div>
+                      </div>
+                      <div className={`absolute -right-4 -bottom-4 opacity-10 ${i === 0 ? 'text-white' : 'text-indigo-600'}`}>
+                        <ShieldCheck size={120} />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest px-2">Daftar Keaktifan Seluruh Warga</h4>
+                <div className="bg-slate-50 rounded-[2rem] border border-slate-100 overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Warga</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Blok</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Tugas</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Poin</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Terakhir Ronda</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {houses
+                        .filter(h => h.status === 'Occupied')
+                        .sort((a, b) => (b.rondaPoints || 0) - (a.rondaPoints || 0))
+                        .map((h) => (
+                          <tr key={h.id} className="border-b border-slate-100 hover:bg-white transition-colors group">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black uppercase">
+                                  {h.headOfFamily.charAt(0)}
+                                </div>
+                                <span className="text-xs font-bold text-slate-700">{h.headOfFamily}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-xs font-medium text-slate-500">Blok {h.block}-{h.number}</td>
+                            <td className="px-6 py-4 text-xs font-black text-slate-700 text-center">{h.rondaDutyCount || 0}x</td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black">{h.rondaPoints || 0}</span>
+                            </td>
+                            <td className="px-6 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                              {h.rondaLastDuty ? new Date(h.rondaLastDuty).toLocaleDateString('id-ID') : '-'}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </motion.div>

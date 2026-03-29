@@ -93,6 +93,12 @@ export interface House {
   isOrphan?: boolean;
   orphanCount?: number;
   economicStatus?: 'Pra-Sejahtera' | 'Sejahtera' | 'Mampu';
+  
+  // Ronda Management
+  rondaExempt?: boolean; // NEW: Pengecualian Ronda (Lansia, Sakit, dll)
+  rondaPoints?: number; // NEW: Sistem Poin Keaktifan
+  rondaDutyCount?: number; // NEW: Jumlah Tugas dalam sebulan/periode
+  rondaLastDuty?: string; // NEW: Tanggal Tugas Terakhir (ISO)
 
   // Family Members
   familyMembers?: {
@@ -323,6 +329,8 @@ export interface RondaSwapRequest {
   requesterHouseId: string;
   fromDay: string;
   toDay: string;
+  targetMemberName?: string; // NEW: Target warga yang diajak tukar
+  targetHouseId?: string; // NEW: ID rumah target
   status: 'Pending' | 'Approved' | 'Rejected';
   reason?: string;
   timestamp: string;

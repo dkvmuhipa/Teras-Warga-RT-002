@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { 
   X, Phone, MapPin, FileText, CreditCard, DollarSign, 
-  LayoutList, Droplets, Trash2, Users, Activity 
+  LayoutList, Droplets, Trash2, Users, Activity, Shield 
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -104,6 +104,11 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 {selectedResident.status === 'Occupied' && (
                   <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-xs font-black uppercase tracking-widest">
                     {selectedResident.residenceType === 'Kontrak' ? 'Kontrak' : selectedResident.residenceType === 'Kost' ? 'Kost' : selectedResident.residenceType === 'Rumah Keluarga' ? 'Rumah Keluarga' : 'Pemilik'}
+                  </div>
+                )}
+                {selectedResident.rondaExempt && (
+                  <div className="px-4 py-2 bg-rose-500/20 backdrop-blur-md rounded-2xl border border-rose-500/30 text-[10px] font-black uppercase tracking-widest text-rose-100 flex items-center gap-2">
+                    <Shield size={12} /> Bebas Ronda
                   </div>
                 )}
               </div>

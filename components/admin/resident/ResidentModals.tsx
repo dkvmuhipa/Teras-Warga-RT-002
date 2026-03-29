@@ -97,6 +97,18 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">No. Kartu Keluarga (KK)</label>
                       <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.kkNumber} onChange={e => setFormData({...formData, kkNumber: e.target.value})} placeholder="16 Digit No. KK..." />
                     </div>
+                    <div className="sm:col-span-2 flex items-center gap-4 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                      <input 
+                        type="checkbox" 
+                        id="rondaExempt"
+                        className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer"
+                        checked={formData.rondaExempt}
+                        onChange={e => setFormData({...formData, rondaExempt: e.target.checked})}
+                      />
+                      <label htmlFor="rondaExempt" className="text-xs font-bold text-slate-700 cursor-pointer">
+                        Pengecualian Ronda (Lansia, Sakit, atau Alasan Khusus Lainnya)
+                      </label>
+                    </div>
                     <div>
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Kelamin</label>
                       <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
