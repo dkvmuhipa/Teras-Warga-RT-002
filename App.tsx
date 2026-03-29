@@ -19,7 +19,7 @@ const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } =
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest } from './types';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest, RondaAttendance } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -87,6 +87,8 @@ import { subscribeToMapPoints, subscribeToCollection,
   updateInventoryInDb,
   deleteInventoryFromDb,
   updateRondaSchedule,
+  addRondaAttendance,
+  getRondaAttendance,
   addUMKMToDb,
   updateUMKMInDb,
   deleteUMKMFromDb,
@@ -183,6 +185,7 @@ export const App = () => {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
   const [rondaLogs, setRondaLogs] = useState<RondaCheckLog[]>([]);
+  const [rondaAttendance, setRondaAttendance] = useState<RondaAttendance[]>([]);
   const [rondaSwapRequests, setRondaSwapRequests] = useState<RondaSwapRequest[]>([]);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [mapPoints, setMapPoints] = useState<MapPoint[]>([]);
@@ -231,6 +234,7 @@ export const App = () => {
     const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
     const unsubDocuments = subscribeToDocuments((data) => setDocuments(data));
     const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
+    const unsubRondaAttendance = getRondaAttendance((data) => setRondaAttendance(data));
     const unsubSwapRequests = subscribeToRondaSwapRequests((data) => setRondaSwapRequests(data));
     const unsubGallery = subscribeToGallery((data) => setGallery(data));
     const unsubActivePatrol = subscribeToActivePatrols((data) => {
@@ -252,7 +256,7 @@ export const App = () => {
 
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
-      unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); 
+      unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations(); unsubUpdateRequests();
     };
@@ -288,6 +292,7 @@ export const App = () => {
                             reports={reports} 
                             letters={letters} 
                             ronda={ronda} 
+                            rondaAttendance={rondaAttendance}
                             inventory={inventory} 
                             umkm={umkm} 
                             polls={polls} 

@@ -1,3 +1,5 @@
+import { RondaSchedule } from '../types';
+
 export const sendWhatsAppMessage = (phone: string, message: string) => {
   let formattedPhone = phone.replace(/[^0-9]/g, '');
   
@@ -110,4 +112,35 @@ ${footer}
 
 Terima kasih telah menggunakan layanan digital RT 02.
 _Pesan otomatis dari Pengurus RT 02_`;
+};
+
+export const formatRondaScheduleForWhatsApp = (ronda: RondaSchedule[]) => {
+  let message = `*JADWAL RONDA RT 02*
+------------------------------------------
+
+Yth. Bapak/Ibu Warga RT 02,
+
+Berikut adalah jadwal ronda mingguan terbaru:
+
+`;
+
+  ronda.forEach(day => {
+    message += `*${day.day.toUpperCase()}*\n`;
+    if (day.shifts && day.shifts.length > 0) {
+      day.shifts.forEach(shift => {
+        message += `• ${shift.time}: ${shift.members.join(', ') || '-'}\n`;
+      });
+    } else {
+      message += `• Petugas: ${day.members.join(', ') || '-'}\n`;
+    }
+    message += `\n`;
+  });
+
+  message += `------------------------------------------
+Mohon kehadiran dan kerjasamanya demi keamanan lingkungan kita bersama.
+
+Terima kasih.
+_Pesan otomatis dari Pengurus RT 02_`;
+
+  return message;
 };

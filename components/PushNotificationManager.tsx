@@ -11,7 +11,7 @@ interface PushNotificationManagerProps {
 
 export const PushNotificationManager: React.FC<PushNotificationManagerProps> = ({ userId }) => {
   const [permission, setPermission] = useState<NotificationPermission>(
-    typeof window !== 'undefined' ? Notification.permission : 'default'
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
   const [isTokenSaved, setIsTokenSaved] = useState(false);
 
@@ -50,30 +50,34 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
         return;
       }
 
-      const status = await Notification.requestPermission();
-      setPermission(status);
-
-      if (status === 'granted') {
-        // Register service worker manually if needed, or ensure it's ready
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        console.log('Service Worker registered with scope:', registration.scope);
-
-        // Get FCM Token
-        const token = await getToken(messaging, {
-          vapidKey: 'BNSRlNOcVZgnWv9VtH-tqMT5bA-oF6iHnvQYsBsrUAByoNAcE0DL7QwQ6MImWMtnZ6oFlWLJ7svp4pIJREUbi0U',
-          serviceWorkerRegistration: registration
-        });
-
-        if (token) {
-          await saveFCMToken(userId, token);
-          setIsTokenSaved(true);
-          localStorage.setItem(`fcm_token_saved_${userId}`, 'true');
-          toast.success('Notifikasi push berhasil diaktifkan!');
-        } else {
-          toast.error('Gagal mendapatkan token notifikasi.');
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        const status = await Notification.requestPermission();
+        setPermission(status);
+  
+        if (status === 'granted') {
+          // Register service worker manually if needed, or ensure it's ready
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          console.log('Service Worker registered with scope:', registration.scope);
+  
+          // Get FCM Token
+          const token = await getToken(messaging, {
+            vapidKey: 'BNSRlNOcVZgnWv9VtH-tqMT5bA-oF6iHnvQYsBsrUAByoNAcE0DL7QwQ6MImWMtnZ6oFlWLJ7svp4pIJREUbi0U',
+            serviceWorkerRegistration: registration
+          });
+  
+          if (token) {
+            await saveFCMToken(userId, token);
+            setIsTokenSaved(true);
+            localStorage.setItem(`fcm_token_saved_${userId}`, 'true');
+            toast.success('Notifikasi push berhasil diaktifkan!');
+          } else {
+            toast.error('Gagal mendapatkan token notifikasi.');
+          }
+        } else if (status === 'denied') {
+          toast.error('Izin notifikasi ditolak. Silakan aktifkan melalui pengaturan browser Anda.');
         }
-      } else if (status === 'denied') {
-        toast.error('Izin notifikasi ditolak. Silakan aktifkan melalui pengaturan browser Anda.');
+      } else {
+        toast.error('Browser ini tidak mendukung notifikasi push.');
       }
     } catch (error: any) {
       console.error('Error requesting notification permission:', error);
@@ -88,7 +92,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
 
 export const NotificationToggle: React.FC<{ userId: string; variant?: 'compact' | 'full' }> = ({ userId, variant = 'full' }) => {
   const [permission, setPermission] = useState<NotificationPermission>(
-    typeof window !== 'undefined' ? Notification.permission : 'default'
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
   
   const requestPermission = async () => {
@@ -99,25 +103,29 @@ export const NotificationToggle: React.FC<{ userId: string; variant?: 'compact' 
       return;
     }
 
-    const status = await Notification.requestPermission();
-    setPermission(status);
-
-    if (status === 'granted') {
-      try {
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        const token = await getToken(messaging, {
-          vapidKey: 'BNSRlNOcVZgnWv9VtH-tqMT5bA-oF6iHnvQYsBsrUAByoNAcE0DL7QwQ6MImWMtnZ6oFlWLJ7svp4pIJREUbi0U',
-          serviceWorkerRegistration: registration
-        });
-
-        if (token) {
-          await saveFCMToken(userId, token);
-          localStorage.setItem(`fcm_token_saved_${userId}`, 'true');
-          toast.success('Notifikasi aktif!');
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      const status = await Notification.requestPermission();
+      setPermission(status);
+  
+      if (status === 'granted') {
+        try {
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          const token = await getToken(messaging, {
+            vapidKey: 'BNSRlNOcVZgnWv9VtH-tqMT5bA-oF6iHnvQYsBsrUAByoNAcE0DL7QwQ6MImWMtnZ6oFlWLJ7svp4pIJREUbi0U',
+            serviceWorkerRegistration: registration
+          });
+  
+          if (token) {
+            await saveFCMToken(userId, token);
+            localStorage.setItem(`fcm_token_saved_${userId}`, 'true');
+            toast.success('Notifikasi aktif!');
+          }
+        } catch (e) {
+          console.error(e);
         }
-      } catch (e) {
-        console.error(e);
       }
+    } else {
+      toast.error('Browser ini tidak mendukung notifikasi push.');
     }
   };
 

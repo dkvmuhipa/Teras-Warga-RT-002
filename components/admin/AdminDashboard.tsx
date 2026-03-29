@@ -5,7 +5,7 @@ import { auth } from '../../services/firebaseConfig';
 import { addPopulationReportToDb, deletePopulationReportFromDb, subscribeToActivePanicAlerts } from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest
+  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -61,6 +61,7 @@ interface AdminDashboardProps {
   activePatrol: PatrolSession | null;
   iuranPayments: any[];
   residentRegistrations: ResidentRegistration[];
+  rondaAttendance: RondaAttendance[];
   guestReports: any[];
   inventoryLogs: any[];
   auditLogs: any[];
@@ -72,7 +73,7 @@ interface AdminDashboardProps {
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, settings
+  ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, settings
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -108,7 +109,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'services':
         return <ServiceManager letters={letters} reports={reports} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
       case 'facilities':
-        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
+        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaAttendance={rondaAttendance} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
       case 'assets':
         return <AssetManager inventory={inventory} inventoryLogs={inventoryLogs} />;
       case 'guests':

@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import { getMessaging } from "firebase/messaging";
+import { getMessaging, isSupported } from "firebase/messaging";
 
 // --- KONFIGURASI FIREBASE ---
 // Project: TerasWarga (teras-warga)
@@ -20,7 +20,7 @@ let app: any;
 let db: any;
 let auth: any;
 let storage: any;
-let messaging: any;
+let messaging: any = null;
 let isFirebaseConfigured = false;
 
 try {
@@ -32,7 +32,13 @@ try {
   
   // Messaging only works in browser and if supported
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-    messaging = getMessaging(app);
+    isSupported().then(supported => {
+      if (supported) {
+        messaging = getMessaging(app);
+      }
+    }).catch(err => {
+      console.warn("Firebase Messaging support check failed:", err);
+    });
   }
   
   isFirebaseConfigured = true;

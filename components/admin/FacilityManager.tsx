@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw, ShieldCheck, Eye, Navigation } from 'lucide-react';
-import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest, PatrolSession, Checkpoint, Report, Official, MapPoint, PanicAlert } from '../../types';
+import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest, PatrolSession, Checkpoint, Report, Official, MapPoint, PanicAlert, RondaAttendance } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { HouseMap } from '../HouseMap';
-import { subscribeToCheckpoints, updateRondaSchedule, updateRondaShifts, updateRondaSwapRequestStatus, updatePanicAlertStatus } from '../../services/databaseService';
+import { 
+  subscribeToCheckpoints, 
+  updateRondaSchedule, 
+  updateRondaScheduleFull, 
+  updateRondaShifts, 
+  updateRondaSwapRequestStatus, 
+  updatePanicAlertStatus,
+  addRondaAttendance
+} from '../../services/databaseService';
 import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
 import { MapPointManager } from './MapPointManager';
-import { QrCode, Info } from 'lucide-react';
+import { QrCode, Info, Share2 } from 'lucide-react';
+import { sendWhatsAppMessage, formatRondaScheduleForWhatsApp } from '../../services/whatsappService';
+import { toast } from 'sonner';
 
 interface FacilityManagerProps {
   ronda: RondaSchedule[];
@@ -21,19 +31,23 @@ interface FacilityManagerProps {
   officials: Official[];
   mapPoints: MapPoint[];
   activePanicAlerts: PanicAlert[];
+  rondaAttendance: RondaAttendance[];
 }
 
-export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol, reports, officials, mapPoints, activePanicAlerts }) => {
+export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol, reports, officials, mapPoints, activePanicAlerts, rondaAttendance }) => {
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [isRondaModalOpen, setIsRondaModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
+  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [presentMembers, setPresentMembers] = useState<string[]>([]);
+  const [attendanceNotes, setAttendanceNotes] = useState('');
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [editingRonda, setEditingRonda] = useState<RondaSchedule | null>(null);
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints' | 'map' | 'info-points' | 'monitoring'>('monitoring');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints' | 'map' | 'info-points' | 'monitoring' | 'attendance'>('monitoring');
 
   // Shift Management State
   const [shifts, setShifts] = useState<{ id: string; time: string; members: string[] }[]>([]);
@@ -62,8 +76,10 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
     
     // Save legacy members for backward compatibility
     const members = shifts.flatMap(s => s.members);
-    await updateRondaSchedule(editingRonda.id, members);
-    await updateRondaShifts(editingRonda.id, shifts);
+    await updateRondaScheduleFull(editingRonda.id, {
+      members,
+      shifts
+    });
     
     setIsRondaModalOpen(false);
   };
@@ -89,10 +105,103 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
     await updateRondaSwapRequestStatus(id, status);
   };
 
-  const handleAutoRotate = () => {
-    // Simple rotation logic: shift everyone one day forward
-    // In a real app, this would be more complex
-    alert("Fitur Rotasi Otomatis sedang diproses. Sistem akan mengacak jadwal berdasarkan ketersediaan warga.");
+  const handleAutoRotate = async () => {
+    if (!window.confirm("Sistem akan mengacak ulang seluruh jadwal ronda berdasarkan daftar kepala keluarga yang ada. Lanjutkan?")) return;
+
+    const allResidents = houses
+      .filter(h => h.status === 'Occupied')
+      .map(h => h.headOfFamily)
+      .filter(name => name && name !== '-' && name !== 'Kosong');
+
+    if (allResidents.length === 0) {
+      toast.error("Tidak ada warga yang dapat ditugaskan.");
+      return;
+    }
+
+    // Shuffle residents
+    const shuffled = [...allResidents].sort(() => Math.random() - 0.5);
+    
+    // Distribute to 7 days
+    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    
+    // Calculate base members per day
+    const basePerDay = Math.floor(shuffled.length / 7);
+    const extraDays = shuffled.length % 7;
+    
+    let currentIndex = 0;
+    
+    for (let i = 0; i < days.length; i++) {
+      const day = days[i];
+      const schedule = ronda.find(r => r.day === day);
+      if (!schedule || !schedule.id) continue;
+
+      const membersCount = basePerDay + (i < extraDays ? 1 : 0);
+      const dayMembers = shuffled.slice(currentIndex, currentIndex + membersCount);
+      currentIndex += membersCount;
+      
+      // Split into 2 shifts
+      const mid = Math.ceil(dayMembers.length / 2);
+      const shift1 = dayMembers.slice(0, mid);
+      const shift2 = dayMembers.slice(mid);
+      
+      await updateRondaScheduleFull(schedule.id, {
+        members: dayMembers,
+        shifts: [
+          { id: '1', time: '22:00 - 01:00', members: shift1 },
+          { id: '2', time: '01:00 - 04:00', members: shift2 }
+        ]
+      });
+    }
+    
+    toast.success("Jadwal berhasil dirotasi otomatis!");
+  };
+
+  const handleShareToWhatsApp = () => {
+    const message = formatRondaScheduleForWhatsApp(ronda);
+    // Open WhatsApp with the message
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+  };
+
+  const handleDownloadCSV = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Hari,Shift,Petugas\n";
+
+    ronda.forEach(day => {
+      if (day.shifts && day.shifts.length > 0) {
+        day.shifts.forEach(shift => {
+          csvContent += `${day.day},${shift.time},"${shift.members.join(', ')}"\n`;
+        });
+      } else {
+        csvContent += `${day.day},-, "${day.members.join(', ')}"\n`;
+      }
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `jadwal_ronda_rt02_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Jadwal berhasil diunduh sebagai CSV");
+  };
+
+  const handleClearSchedule = async () => {
+    if (!window.confirm("Sistem akan mengosongkan seluruh jadwal ronda. Lanjutkan?")) return;
+    
+    for (const schedule of ronda) {
+      if (schedule.id) {
+        await updateRondaScheduleFull(schedule.id, {
+          members: [],
+          shifts: [
+            { id: '1', time: '22:00 - 01:00', members: [] },
+            { id: '2', time: '01:00 - 04:00', members: [] }
+          ]
+        });
+      }
+    }
+    alert("Jadwal berhasil dikosongkan!");
   };
 
   const residents = houses
@@ -130,7 +239,36 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   };
 
   const handleResolvePanic = async (id: string) => {
-    await updatePanicAlertStatus(id, 'Resolved');
+    const adminName = localStorage.getItem('admin_name') || 'Admin';
+    await updatePanicAlertStatus(id, 'Resolved', adminName);
+  };
+
+  const handleSaveAttendance = async () => {
+    const day = new Date(attendanceDate).toLocaleDateString('id-ID', { weekday: 'long' });
+    const schedule = ronda.find(r => r.day === day);
+    if (!schedule) {
+      toast.error("Jadwal tidak ditemukan untuk hari ini.");
+      return;
+    }
+
+    const allMembers = schedule.members || [];
+    const absent = allMembers.filter(m => !presentMembers.includes(m));
+
+    const adminName = localStorage.getItem('admin_name') || 'Admin';
+
+    await addRondaAttendance({
+      date: attendanceDate,
+      day,
+      presentMembers,
+      absentMembers: absent,
+      notes: attendanceNotes,
+      recordedBy: adminName,
+      timestamp: new Date().toISOString()
+    });
+
+    toast.success("Absensi berhasil disimpan!");
+    setPresentMembers([]);
+    setAttendanceNotes('');
   };
 
   return (
@@ -155,11 +293,17 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           <Button onClick={() => setIsQRModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 hover:bg-slate-50 text-xs py-2">
             <QrCode size={16} className="mr-1.5" /> <span className="hidden sm:inline">Cetak QR</span><span className="sm:hidden">QR</span>
           </Button>
+          <Button onClick={handleShareToWhatsApp} variant="outline" className="flex-1 sm:flex-none border-emerald-200 text-emerald-600 hover:bg-emerald-50 text-xs py-2">
+            <Share2 size={16} className="mr-1.5" /> <span className="hidden sm:inline">Bagikan WA</span><span className="sm:hidden">WA</span>
+          </Button>
           <Button onClick={handleAutoRotate} variant="outline" className="flex-1 sm:flex-none border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-xs py-2">
             <RefreshCw size={16} className="mr-1.5" /> <span className="hidden sm:inline">Rotasi Otomatis</span><span className="sm:hidden">Rotasi</span>
           </Button>
-          <Button variant="outline" className="flex-1 sm:flex-none border-slate-200 hover:bg-slate-50 text-xs py-2">
-            <Download size={16} className="mr-1.5" /> <span className="hidden sm:inline">Export</span><span className="sm:hidden">Export</span>
+          <Button onClick={handleClearSchedule} variant="outline" className="flex-1 sm:flex-none border-rose-200 text-rose-600 hover:bg-rose-50 text-xs py-2">
+            <Trash2 size={16} className="mr-1.5" /> <span className="hidden sm:inline">Kosongkan</span><span className="sm:hidden">Kosong</span>
+          </Button>
+          <Button onClick={handleDownloadCSV} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-600 hover:bg-slate-50 text-xs py-2">
+            <Download size={16} className="mr-1.5" /> <span className="hidden sm:inline">Unduh CSV</span><span className="sm:hidden">CSV</span>
           </Button>
           <Button onClick={() => setIsReportModalOpen(true)} className="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-200 text-xs py-2">
             <AlertTriangle size={16} className="mr-1.5" /> <span className="hidden sm:inline">Laporkan Insiden</span><span className="sm:hidden">Lapor</span>
@@ -174,6 +318,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           { id: 'logs', label: 'Log', icon: Activity },
           { id: 'monitoring', label: 'Monitoring', icon: Eye, count: activePanicAlerts.length },
           { id: 'swaps', label: 'Tukar', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Pending').length },
+          { id: 'attendance', label: 'Absensi', icon: UserCheck },
           { id: 'checkpoints', label: 'Titik', icon: MapPin },
           { id: 'info-points', label: 'Info', icon: Info },
           { id: 'map', label: 'Peta', icon: ShieldCheck }
@@ -661,6 +806,148 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   <p className="text-xs text-slate-400 mt-1">Belum ada warga yang mengajukan tukar jadwal.</p>
                 </div>
               )}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'attendance' && (
+          <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6">
+            <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] border border-slate-100 shadow-sm p-5 md:p-8">
+              <div className="flex justify-between items-center mb-6 md:mb-8">
+                <div>
+                  <h3 className="text-lg md:text-xl font-black text-slate-900">Pencatatan Absensi Ronda</h3>
+                  <p className="text-[10px] md:text-xs font-medium text-slate-400 mt-1">Catat kehadiran warga yang bertugas malam ini</p>
+                </div>
+                <div className="p-2.5 md:p-3 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl">
+                  <UserCheck size={20} className="md:w-6 md:h-6" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Pilih Tanggal</label>
+                    <input 
+                      type="date" 
+                      value={attendanceDate}
+                      onChange={(e) => setAttendanceDate(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Catatan Tambahan</label>
+                    <textarea 
+                      value={attendanceNotes}
+                      onChange={(e) => setAttendanceNotes(e.target.value)}
+                      placeholder="Contoh: Warga A sakit, digantikan oleh Warga B"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all h-24 resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="lg:col-span-2">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Daftar Petugas (Centang yang Hadir)</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {(() => {
+                      const day = new Date(attendanceDate).toLocaleDateString('id-ID', { weekday: 'long' });
+                      const schedule = ronda.find(r => r.day === day);
+                      if (!schedule) return <p className="text-slate-400 text-xs italic">Tidak ada jadwal untuk hari {day}</p>;
+                      
+                      const allMembers = schedule.members || [];
+                      return allMembers.map((member, idx) => (
+                        <div 
+                          key={`${member}-${idx}`}
+                          onClick={() => {
+                            if (presentMembers.includes(member)) {
+                              setPresentMembers(presentMembers.filter(m => m !== member));
+                            } else {
+                              setPresentMembers([...presentMembers, member]);
+                            }
+                          }}
+                          className={`flex items-center gap-3 p-3 rounded-xl md:rounded-2xl border transition-all cursor-pointer ${
+                            presentMembers.includes(member)
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                            : 'bg-slate-50 border-slate-100 text-slate-600 hover:border-slate-200'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
+                            presentMembers.includes(member)
+                            ? 'bg-emerald-500 border-emerald-500 text-white'
+                            : 'bg-white border-slate-200'
+                          }`}>
+                            {presentMembers.includes(member) && <Check size={12} strokeWidth={4} />}
+                          </div>
+                          <span className="text-xs md:text-sm font-black">{member}</span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+
+                  <div className="mt-8 flex justify-end">
+                    <Button 
+                      onClick={handleSaveAttendance}
+                      disabled={presentMembers.length === 0}
+                      className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 px-8 py-3 rounded-2xl"
+                    >
+                      Simpan Absensi
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] border border-slate-100 shadow-sm p-5 md:p-8">
+              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-6 md:mb-8">Riwayat Absensi</h3>
+              <div className="space-y-4">
+                {rondaAttendance.length > 0 ? rondaAttendance.map((record) => (
+                  <div key={record.id} className="p-4 md:p-6 rounded-[1.5rem] md:rounded-3xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all group">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex flex-col items-center justify-center shadow-sm">
+                          <p className="text-[8px] font-black text-slate-400 uppercase">{record.day.substring(0, 3)}</p>
+                          <p className="text-sm font-black text-indigo-600">{new Date(record.date).getDate()}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-black text-slate-900 text-sm md:text-base">{new Date(record.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</h4>
+                          <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dicatat oleh: {record.recordedBy}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-4 w-full md:w-auto">
+                        <div className="flex-1 md:flex-none text-center px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                          <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Hadir</p>
+                          <p className="text-sm font-black text-emerald-700">{record.presentMembers.length}</p>
+                        </div>
+                        <div className="flex-1 md:flex-none text-center px-4 py-2 bg-rose-50 rounded-xl border border-rose-100">
+                          <p className="text-[8px] font-black text-rose-600 uppercase tracking-widest mb-0.5">Absen</p>
+                          <p className="text-sm font-black text-rose-700">{record.absentMembers.length}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Daftar Hadir</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {record.presentMembers.map((m: string, i: number) => (
+                            <span key={i} className="px-2 py-0.5 bg-white border border-slate-100 rounded-lg text-[10px] font-bold text-slate-600">{m}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {record.notes && (
+                        <div>
+                          <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Catatan</p>
+                          <p className="text-xs text-slate-500 italic">"{record.notes}"</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )) : (
+                  <div className="text-center py-12 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200">
+                    <p className="text-slate-400 font-bold">Belum ada data absensi</p>
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         )}

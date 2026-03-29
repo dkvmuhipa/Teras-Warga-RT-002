@@ -32,7 +32,7 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog } from "../types";
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -1479,6 +1479,31 @@ export const updateRondaSchedule = async (id: string, members: string[]) => {
     try {
         await updateDoc(doc(db, RONDA_COL, id), { members });
     } catch (e) { console.error("Error updating ronda:", e); }
+};
+
+export const updateRondaScheduleFull = async (id: string, data: Partial<RondaSchedule>) => {
+    try {
+        const { id: _, ...cleanData } = data;
+        await updateDoc(doc(db, RONDA_COL, id), deepSanitize(cleanData));
+    } catch (e) { console.error("Error updating ronda full:", e); }
+};
+
+export const addRondaAttendance = async (data: Omit<RondaAttendance, 'id'>) => {
+    try {
+        const docRef = await addDoc(collection(db, "rondaAttendance"), deepSanitize(data));
+        return docRef.id;
+    } catch (e) { 
+        console.error("Error adding attendance:", e);
+        return null;
+    }
+};
+
+export const getRondaAttendance = (callback: (data: RondaAttendance[]) => void) => {
+    const q = query(collection(db, "rondaAttendance"), orderBy('date', 'desc'), limit(100));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RondaAttendance));
+        callback(data);
+    });
 };
 
 export const updateRondaShifts = async (id: string, shifts: any[]) => {

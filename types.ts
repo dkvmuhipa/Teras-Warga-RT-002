@@ -348,6 +348,17 @@ export interface Checkpoint {
   y?: number; // Position Y in percentage (0-100)
 }
 
+export interface RondaAttendance {
+  id: string;
+  date: string; // YYYY-MM-DD
+  day: string; // Senin, Selasa, etc.
+  presentMembers: string[];
+  absentMembers: string[];
+  notes?: string;
+  recordedBy: string; // Admin or Officer name
+  timestamp: string;
+}
+
 export interface MapPoint {
   id: string;
   label: string;
