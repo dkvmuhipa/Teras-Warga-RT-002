@@ -16,9 +16,16 @@ interface ServiceManagerProps {
   letters: LetterRequest[];
   pdfConfig: PdfConfig;
   setPdfConfig: (config: PdfConfig) => void;
+  onDeleteReport?: (id: string) => void;
 }
 
-export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters, pdfConfig, setPdfConfig }) => {
+export const ServiceManager: React.FC<ServiceManagerProps> = ({ 
+  reports, 
+  letters, 
+  pdfConfig, 
+  setPdfConfig,
+  onDeleteReport
+}) => {
   const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'settings'>('letters');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -934,10 +941,19 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ reports, letters
                 <div className="flex items-center gap-3 w-full md:w-auto">
                   <button 
                     onClick={() => setSelectedReport(report)}
-                    className="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap flex items-center gap-2 w-full md:w-auto justify-center"
+                    className="flex-1 md:flex-none px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap flex items-center gap-2 justify-center"
                   >
                     <Eye size={14} /> Lihat Detail
                   </button>
+                  {onDeleteReport && (
+                    <button 
+                      onClick={() => onDeleteReport(report.id)}
+                      className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100"
+                      title="Hapus Laporan"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               </motion.div>
             ))}

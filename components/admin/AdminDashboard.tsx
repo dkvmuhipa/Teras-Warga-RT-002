@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
-import { addPopulationReportToDb, deletePopulationReportFromDb, subscribeToActivePanicAlerts } from '../../services/databaseService';
+import { addPopulationReportToDb, deletePopulationReportFromDb, subscribeToActivePanicAlerts, deleteNotificationFromDb, deleteReportFromDb } from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
   RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance
@@ -107,7 +107,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'finance':
         return <FinanceManager cashFlow={cashFlow} pdfConfig={pdfConfig} />;
       case 'services':
-        return <ServiceManager letters={letters} reports={reports} pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />;
+        return (
+          <ServiceManager 
+            letters={letters} 
+            reports={reports} 
+            pdfConfig={pdfConfig} 
+            setPdfConfig={setPdfConfig} 
+            onDeleteReport={async (id) => {
+              if (window.confirm('Hapus laporan warga ini?')) {
+                await deleteReportFromDb(id);
+              }
+            }}
+          />
+        );
       case 'facilities':
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaAttendance={rondaAttendance} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
       case 'assets':
@@ -122,7 +134,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'officials':
         return <OfficialManagement officials={officials} houses={houses} />;
       case 'notifications':
-        return <NotificationCombined notifications={notifications} />;
+        return (
+          <NotificationCombined 
+            notifications={notifications} 
+            onDeleteNotification={async (id) => {
+              if (window.confirm('Hapus notifikasi ini?')) {
+                await deleteNotificationFromDb(id);
+              }
+            }}
+          />
+        );
       case 'documents':
         return <DocumentManager documents={documents} />;
       case 'activities':

@@ -11,9 +11,10 @@ import { motion, AnimatePresence } from 'motion/react';
 interface PublicHeaderProps {
   notifications: AppNotification[];
   onMarkRead: (id: string) => void;
+  onDeleteNotification?: (id: string) => void;
 }
 
-export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMarkRead }) => {
+export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMarkRead, onDeleteNotification }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -119,7 +120,11 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                   ))}
                 </div>
                 
-                <NotificationCenter notifications={notifications} onMarkRead={onMarkRead} />
+                <NotificationCenter 
+                  notifications={notifications} 
+                  onMarkRead={onMarkRead} 
+                  onDelete={onDeleteNotification}
+                />
 
                 <div className="hidden md:block h-6 w-px bg-slate-200 mx-2"></div>
                 <Button 

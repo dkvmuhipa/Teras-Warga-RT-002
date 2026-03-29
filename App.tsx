@@ -135,7 +135,8 @@ import { subscribeToMapPoints, subscribeToCollection,
   addEventToDb,
   updateEventInDb,
   deleteEventFromDb,
-  markNotificationAsRead
+  markNotificationAsRead,
+  deleteNotificationFromDb
 } from './services/databaseService';
 
 // --- Shared Components ---
@@ -325,7 +326,15 @@ export const App = () => {
                 }/>
                 <Route path="*" element={
                     <>
-                        <PublicHeader notifications={notifications} onMarkRead={markNotificationAsRead} />
+                        <PublicHeader 
+                            notifications={notifications} 
+                            onMarkRead={markNotificationAsRead} 
+                            onDeleteNotification={async (id) => {
+                                if (window.confirm('Hapus notifikasi ini?')) {
+                                    await deleteNotificationFromDb(id);
+                                }
+                            }}
+                        />
                         <div className="pb-24 md:pb-0">
                             <Routes>
                                 <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />

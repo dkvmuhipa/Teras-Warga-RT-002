@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Trash2 } from 'lucide-react';
 import { AppNotification } from '../types';
 import { NotificationToggle } from './PushNotificationManager';
 
 interface NotificationCenterProps {
   notifications: AppNotification[];
   onMarkRead: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications, onMarkRead }) => {
+export const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications, onMarkRead, onDelete }) => {
   const [isOpen, setIsOpen] = useState(false);
   const unreadCount = notifications.filter(n => !n.isRead).length;
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,8 +53,21 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifica
               <div key={n.id} onClick={() => onMarkRead(n.id)} className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${n.isRead ? 'opacity-60' : 'bg-blue-50/30'}`}>
                 <div className="flex gap-3">
                   <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${n.type === 'Alert' ? 'bg-rose-500' : n.type === 'Success' ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
-                  <div>
-                    <h5 className={`text-xs font-bold ${n.isRead ? 'text-slate-600' : 'text-slate-900'}`}>{n.title}</h5>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h5 className={`text-xs font-bold ${n.isRead ? 'text-slate-600' : 'text-slate-900'}`}>{n.title}</h5>
+                      {onDelete && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(n.id);
+                          }}
+                          className="p-1 text-slate-300 hover:text-rose-500 transition-colors"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-500 mt-1 line-clamp-2">{n.message}</p>
                     <p className="text-[10px] text-slate-400 mt-2">{new Date(n.date).toLocaleDateString()} • {new Date(n.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>

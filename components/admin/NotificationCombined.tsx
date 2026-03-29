@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Bell, Shield, DollarSign, Megaphone, Calendar, Info, AlertCircle, CheckCircle } from 'lucide-react';
+import { Bell, Shield, DollarSign, Megaphone, Calendar, Info, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '../ui/Button';
 import { AppNotification } from '../../types';
 
 interface NotificationCombinedProps {
   notifications: AppNotification[];
+  onDeleteNotification?: (id: string) => void;
 }
 
-export const NotificationCombined: React.FC<NotificationCombinedProps> = ({ notifications }) => {
+export const NotificationCombined: React.FC<NotificationCombinedProps> = ({ notifications, onDeleteNotification }) => {
   const [activeSubTab, setActiveSubTab] = useState<'list' | 'settings'>('list');
   const [settings, setSettings] = useState({
     announcements: true,
@@ -52,10 +53,21 @@ export const NotificationCombined: React.FC<NotificationCombinedProps> = ({ noti
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-slate-800">{n.title}</h4>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">{new Date(n.date).toLocaleString()}</span>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-slate-800">{n.title}</h4>
+                        <p className="text-sm text-slate-600 mt-1">{n.message}</p>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase mt-2 block">{new Date(n.date).toLocaleString()}</span>
+                      </div>
+                      {onDeleteNotification && (
+                        <button 
+                          onClick={() => onDeleteNotification(n.id)}
+                          className="p-2 text-slate-300 hover:text-rose-500 transition-colors"
+                          title="Hapus Notifikasi"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
-                    <p className="text-sm text-slate-600 mt-1">{n.message}</p>
                   </div>
                 </div>
               ))
