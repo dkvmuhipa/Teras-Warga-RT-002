@@ -29,6 +29,7 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     { header: 'TANGGAL LAHIR', key: 'birthDate', width: 20 },
     { header: 'AGAMA', key: 'religion', width: 20 },
     { header: 'NAMA PEMILIK (Opsional)', key: 'ownerName', width: 35 },
+    { header: 'KONTAK PEMILIK (Opsional)', key: 'ownerPhone', width: 25 },
     { header: 'TELEPON', key: 'phone', width: 20 },
     { header: 'STATUS HUNIAN (Occupied/Empty/Business)', key: 'status', width: 35 },
     { header: 'STATUS KEPEMILIKAN (Tetap/Kontrak/Kost)', key: 'residenceType', width: 40 },
@@ -91,6 +92,7 @@ export const generateProfessionalExcel = async (houses: House[]) => {
       birthDate: house.birthDate || '-',
       religion: house.religion || '-',
       ownerName: house.ownerName || '-',
+      ownerPhone: house.ownerPhone || '-',
       phone: house.phone || '-',
       status: house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha',
       residenceType: house.residenceType || '-',
@@ -270,6 +272,7 @@ export const generateExcelTemplate = async () => {
     { header: 'TANGGAL LAHIR (YYYY-MM-DD)', key: 'birthDate', width: 25 },
     { header: 'AGAMA', key: 'religion', width: 20 },
     { header: 'NAMA PEMILIK (Opsional)', key: 'ownerName', width: 35 },
+    { header: 'KONTAK PEMILIK (Opsional)', key: 'ownerPhone', width: 25 },
     { header: 'TELEPON', key: 'phone', width: 20 },
     { header: 'STATUS HUNIAN (Occupied/Empty/Business)', key: 'status', width: 35 },
     { header: 'STATUS KEPEMILIKAN (Tetap/Kontrak/Kost)', key: 'residenceType', width: 40 },
@@ -318,6 +321,7 @@ export const generateExcelTemplate = async () => {
     birthDate: '1985-05-20',
     religion: 'Islam',
     ownerName: 'Ahmad Dahlan',
+    ownerPhone: '081299887766',
     phone: '081234567890',
     status: 'Occupied',
     residenceType: 'Kontrak',
@@ -393,30 +397,31 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     const birthDate = row.getCell(5 + offset).text?.trim() || undefined;
     const religion = row.getCell(6 + offset).text?.trim() || undefined;
     const ownerName = row.getCell(7 + offset).text?.trim() || undefined;
-    const phone = row.getCell(8 + offset).text?.trim() || undefined;
-    const statusRaw = row.getCell(9 + offset).text?.trim() || undefined;
-    const residenceTypeRaw = row.getCell(10 + offset).text?.trim() || undefined;
-    const occupantsRaw = row.getCell(11 + offset).value;
-    const education = row.getCell(12 + offset).text?.trim() || undefined;
-    const jobCategory = row.getCell(13 + offset).text?.trim() || undefined;
-    const vehicleCountRaw = row.getCell(14 + offset).value;
-    const pregnantCountRaw = row.getCell(15 + offset).value;
-    const babyCountRaw = row.getCell(16 + offset).value;
-    const toddlerCountRaw = row.getCell(17 + offset).value;
-    const teenagerCountRaw = row.getCell(18 + offset).value;
-    const adultCountRaw = row.getCell(19 + offset).value;
-    const elderlyCountRaw = row.getCell(20 + offset).value;
-    const childCountRaw = row.getCell(21 + offset).value;
-    const widowCountRaw = row.getCell(22 + offset).value;
-    const economicStatus = row.getCell(23 + offset).text?.trim() || undefined;
-    const isBPNTRaw = row.getCell(24 + offset).text?.trim() || undefined;
-    const isDisabilityRaw = row.getCell(25 + offset).text?.trim() || undefined;
-    const disabilityCountRaw = row.getCell(26 + offset).value;
-    const isOrphanRaw = row.getCell(27 + offset).text?.trim() || undefined;
-    const orphanCountRaw = row.getCell(28 + offset).value;
-    const paymentStatusAirRaw = row.getCell(29 + offset).text?.trim() || undefined;
-    const paymentStatusSampahRaw = row.getCell(30 + offset).text?.trim() || undefined;
-    const accessCode = row.getCell(31 + offset).text?.trim() || undefined;
+    const ownerPhone = row.getCell(8 + offset).text?.trim() || undefined;
+    const phone = row.getCell(9 + offset).text?.trim() || undefined;
+    const statusRaw = row.getCell(10 + offset).text?.trim() || undefined;
+    const residenceTypeRaw = row.getCell(11 + offset).text?.trim() || undefined;
+    const occupantsRaw = row.getCell(12 + offset).value;
+    const education = row.getCell(13 + offset).text?.trim() || undefined;
+    const jobCategory = row.getCell(14 + offset).text?.trim() || undefined;
+    const vehicleCountRaw = row.getCell(15 + offset).value;
+    const pregnantCountRaw = row.getCell(16 + offset).value;
+    const babyCountRaw = row.getCell(17 + offset).value;
+    const toddlerCountRaw = row.getCell(18 + offset).value;
+    const teenagerCountRaw = row.getCell(19 + offset).value;
+    const adultCountRaw = row.getCell(20 + offset).value;
+    const elderlyCountRaw = row.getCell(21 + offset).value;
+    const childCountRaw = row.getCell(22 + offset).value;
+    const widowCountRaw = row.getCell(23 + offset).value;
+    const economicStatus = row.getCell(24 + offset).text?.trim() || undefined;
+    const isBPNTRaw = row.getCell(25 + offset).text?.trim() || undefined;
+    const isDisabilityRaw = row.getCell(26 + offset).text?.trim() || undefined;
+    const disabilityCountRaw = row.getCell(27 + offset).value;
+    const isOrphanRaw = row.getCell(28 + offset).text?.trim() || undefined;
+    const orphanCountRaw = row.getCell(29 + offset).value;
+    const paymentStatusAirRaw = row.getCell(30 + offset).text?.trim() || undefined;
+    const paymentStatusSampahRaw = row.getCell(31 + offset).text?.trim() || undefined;
+    const accessCode = row.getCell(32 + offset).text?.trim() || undefined;
 
     // Map gender
     let gender: 'Laki-laki' | 'Perempuan' | undefined = undefined;
@@ -453,6 +458,7 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       ...(birthDate !== undefined && { birthDate }),
       ...(religion !== undefined && { religion }),
       ...(ownerName !== undefined && { ownerName }),
+      ...(ownerPhone !== undefined && { ownerPhone }),
       ...(phone !== undefined && { phone }),
       ...(status !== undefined && { status }),
       ...(occupantsRaw !== null && occupantsRaw !== undefined && occupantsRaw !== '' && { occupants: Number(occupantsRaw) }),

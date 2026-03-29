@@ -4,7 +4,7 @@ import { Button } from '../../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
-  CreditCard, AlertCircle, Calendar
+  CreditCard, AlertCircle, Calendar, FileText
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -90,6 +90,14 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} required placeholder="Nama Lengkap..." />
                     </div>
                     <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">NIK (Kepala Keluarga)</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.nik} onChange={e => setFormData({...formData, nik: e.target.value})} placeholder="16 Digit NIK..." />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">No. Kartu Keluarga (KK)</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.kkNumber} onChange={e => setFormData({...formData, kkNumber: e.target.value})} placeholder="16 Digit No. KK..." />
+                    </div>
+                    <div>
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Kelamin</label>
                       <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
                         <option value="Laki-laki">Laki-laki</option>
@@ -97,12 +105,47 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       </select>
                     </div>
                     <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tempat Lahir</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthPlace} onChange={e => setFormData({...formData, birthPlace: e.target.value})} placeholder="Kota/Kabupaten..." />
+                    </div>
+                    <div>
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Lahir</label>
                       <input type="date" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Perkawinan</label>
+                      <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.maritalStatus} onChange={e => setFormData({...formData, maritalStatus: e.target.value as any})}>
+                        <option value="Belum Kawin">Belum Kawin</option>
+                        <option value="Kawin">Kawin</option>
+                        <option value="Cerai Hidup">Cerai Hidup</option>
+                        <option value="Cerai Mati">Cerai Mati</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Golongan Darah</label>
+                      <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.bloodType} onChange={e => setFormData({...formData, bloodType: e.target.value as any})}>
+                        <option value="-">-</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kewarganegaraan</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.nationality} onChange={e => setFormData({...formData, nationality: e.target.value})} placeholder="WNI / WNA..." />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Alamat Sesuai KTP</label>
+                      <textarea className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.addressKtp} onChange={e => setFormData({...formData, addressKtp: e.target.value})} placeholder="Alamat lengkap sesuai KTP..." rows={2} />
                     </div>
                     <div className="sm:col-span-2">
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nama Pemilik Rumah</label>
                       <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} placeholder="Nama Pemilik (Kosongkan jika sama dengan KK)" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kontak Pemilik Rumah</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.ownerPhone} onChange={e => setFormData({...formData, ownerPhone: e.target.value})} placeholder="No. HP/WA Pemilik Rumah..." />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Blok</label>
@@ -145,6 +188,20 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <div className="sm:col-span-2">
                         <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Penghuni (Total Jiwa)</label>
                         <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.occupants} onChange={e => setFormData({...formData, occupants: parseInt(e.target.value) || 0})} min={1} />
+                      </div>
+                      <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all">
+                          <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked={formData.isOutOfTown} onChange={e => setFormData({...formData, isOutOfTown: e.target.checked})} />
+                          <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Luar Kota</span>
+                        </label>
+                        <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all">
+                          <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked={formData.hasGuest} onChange={e => setFormData({...formData, hasGuest: e.target.checked})} />
+                          <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Ada Tamu</span>
+                        </label>
+                        <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all">
+                          <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked={formData.isIsoman} onChange={e => setFormData({...formData, isIsoman: e.target.checked})} />
+                          <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Isoman</span>
+                        </label>
                       </div>
                     </div>
                   </div>
@@ -225,6 +282,10 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         </select>
                       </div>
                       <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Pekerjaan Spesifik</label>
+                        <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.job} onChange={e => setFormData({...formData, job: e.target.value})} placeholder="Contoh: Guru, Arsitek..." />
+                      </div>
+                      <div>
                         <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Agama</label>
                         <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.religion} onChange={e => setFormData({...formData, religion: e.target.value})}>
                           <option value="">Pilih...</option>
@@ -244,7 +305,16 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           <option value="Mampu">Mampu</option>
                         </select>
                       </div>
-                      <div className="sm:col-span-2">
+                      <div>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status BPJS</label>
+                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.bpjsStatus} onChange={e => setFormData({...formData, bpjsStatus: e.target.value as any})}>
+                          <option value="Tidak Ada">Tidak Ada</option>
+                          <option value="PPU">PPU (Pekerja Penerima Upah)</option>
+                          <option value="PBPU">PBPU (Mandiri)</option>
+                          <option value="PBI">PBI (Pemerintah)</option>
+                        </select>
+                      </div>
+                      <div>
                         <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Kendaraan</label>
                         <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.vehicleCount} onChange={e => setFormData({...formData, vehicleCount: parseInt(e.target.value) || 0})} min={0} />
                       </div>
@@ -403,6 +473,54 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     </div>
                   </div>
                 </div>
+
+                {/* Section: Dokumen & Catatan */}
+                <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+                  <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4 mb-8">
+                    <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
+                      <FileText size={18} />
+                    </div>
+                    Dokumen & Catatan
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Vaksinasi</label>
+                      <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.vaccinationStatus} onChange={e => setFormData({...formData, vaccinationStatus: e.target.value as any})}>
+                        <option value="Belum">Belum</option>
+                        <option value="Dosis 1">Dosis 1</option>
+                        <option value="Dosis 2">Dosis 2</option>
+                        <option value="Booster 1">Booster 1</option>
+                        <option value="Booster 2">Booster 2</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Bergabung</label>
+                      <input type="date" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.joiningDate} onChange={e => setFormData({...formData, joiningDate: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Foto KTP (URL)</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.ktpUrl} onChange={e => setFormData({...formData, ktpUrl: e.target.value})} placeholder="https://..." />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Foto KK (URL)</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.kkUrl} onChange={e => setFormData({...formData, kkUrl: e.target.value})} placeholder="https://..." />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Foto Rumah (URL)</label>
+                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.housePhotoUrl} onChange={e => setFormData({...formData, housePhotoUrl: e.target.value})} placeholder="https://..." />
+                    </div>
+                    <div className="flex items-end pb-2">
+                      <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all w-full">
+                        <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked={formData.isVerified} onChange={e => setFormData({...formData, isVerified: e.target.checked})} />
+                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Warga Terverifikasi</span>
+                      </label>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Catatan Khusus</label>
+                      <textarea className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.specialNotes} onChange={e => setFormData({...formData, specialNotes: e.target.value})} placeholder="Catatan tambahan mengenai warga..." rows={3} />
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             )}
 
@@ -528,6 +646,19 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               onChange={e => {
                                 const newMembers = [...formData.familyMembers];
                                 newMembers[idx].birthDate = e.target.value;
+                                setFormData({...formData, familyMembers: newMembers});
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pekerjaan</label>
+                            <input 
+                              placeholder="Pekerjaan" 
+                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                              value={member.job || ''}
+                              onChange={e => {
+                                const newMembers = [...formData.familyMembers];
+                                newMembers[idx].job = e.target.value;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
                             />

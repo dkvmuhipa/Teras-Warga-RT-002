@@ -56,6 +56,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                   <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Nama</th>
                   <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">No</th>
                   <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Telepon</th>
+                  <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Pemilik</th>
                   <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Jiwa</th>
                   <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Status</th>
                   <th className="p-4 text-left font-black text-slate-600 uppercase tracking-widest text-[10px]">Sampah</th>
@@ -87,6 +88,16 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                       </td>
                       <td className="p-4 font-mono font-black text-slate-600">{house.number}</td>
                       <td className="p-4 text-slate-500">{house.phone || '-'}</td>
+                      <td className="p-4">
+                        {house.ownerName ? (
+                          <div className="space-y-1">
+                            <div className="font-bold text-slate-700 text-[10px]">{house.ownerName}</div>
+                            <div className="text-[10px] text-slate-400">{house.ownerPhone || '-'}</div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-[10px]">-</span>
+                        )}
+                      </td>
                       <td className="p-4 text-slate-500">{house.occupants || 0}</td>
                       <td className="p-4">
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${

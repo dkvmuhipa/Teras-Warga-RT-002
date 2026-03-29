@@ -70,6 +70,16 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
 
           {/* Profile Header */}
           <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2.5rem] p-8 text-center mb-10 text-white relative overflow-hidden shadow-xl shadow-indigo-600/20">
+            {selectedResident.housePhotoUrl && (
+              <div className="absolute inset-0 opacity-20">
+                <img 
+                  src={selectedResident.housePhotoUrl} 
+                  alt="Foto Rumah" 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
             <div className="relative z-10">
               <div className="w-28 h-28 mx-auto bg-white/20 backdrop-blur-md text-white rounded-[2rem] flex items-center justify-center text-4xl font-black mb-6 border-4 border-white/30 shadow-2xl">
@@ -114,6 +124,17 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <p className="text-base font-bold text-slate-800">{selectedResident.phone || 'N/A'}</p>
                   </div>
                 </div>
+                {selectedResident.ownerPhone && (
+                  <div className="flex items-center gap-4 p-5 bg-indigo-50/30 border border-indigo-100/50 rounded-3xl group hover:bg-white hover:shadow-lg hover:shadow-indigo-200/50 transition-all">
+                    <div className="p-3 bg-white rounded-2xl text-indigo-600 shadow-sm group-hover:scale-110 transition-transform">
+                      <Phone size={20} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest leading-none mb-1">Kontak Pemilik</p>
+                      <p className="text-base font-bold text-slate-800">{selectedResident.ownerPhone}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center gap-4 p-5 bg-slate-50 border border-slate-100 rounded-3xl group hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all">
                   <div className="p-3 bg-white rounded-2xl text-emerald-600 shadow-sm group-hover:scale-110 transition-transform">
                     <MapPin size={20} />
@@ -246,6 +267,74 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   </div>
                 </div>
               </div>
+            </section>
+
+            <section>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Identitas & Dokumen</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">NIK</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.nik || '-'}</p>
+                </div>
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">No. KK</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.kkNumber || '-'}</p>
+                </div>
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Tempat Lahir</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.birthPlace || '-'}</p>
+                </div>
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status Perkawinan</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.maritalStatus || '-'}</p>
+                </div>
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Golongan Darah</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.bloodType || '-'}</p>
+                </div>
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Kewarganegaraan</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.nationality || '-'}</p>
+                </div>
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status BPJS</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.bpjsStatus || '-'}</p>
+                </div>
+              </div>
+              {selectedResident.addressKtp && (
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl mb-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Alamat KTP</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.addressKtp}</p>
+                </div>
+              )}
+            </section>
+
+            <section>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Kesehatan & Lainnya</h4>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Vaksinasi</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.vaccinationStatus || '-'}</p>
+                </div>
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Tgl Bergabung</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedResident.joiningDate ? new Date(selectedResident.joiningDate).toLocaleDateString('id-ID') : '-'}</p>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedResident.isVerified && <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">Terverifikasi</span>}
+                {selectedResident.isOutOfTown && <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">Luar Kota</span>}
+                {selectedResident.hasGuest && <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">Ada Tamu</span>}
+                {selectedResident.isIsoman && <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-rose-100">Isoman</span>}
+              </div>
+
+              {selectedResident.specialNotes && (
+                <div className="p-4 bg-amber-50 border border-amber-100 rounded-3xl">
+                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest leading-none mb-2">Catatan Khusus</p>
+                  <p className="text-sm font-medium text-slate-700 italic">"{selectedResident.specialNotes}"</p>
+                </div>
+              )}
             </section>
 
             <section>

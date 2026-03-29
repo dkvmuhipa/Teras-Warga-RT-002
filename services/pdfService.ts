@@ -955,14 +955,16 @@ export const generateGuestReportPDF = async (guestReports: any[], customConfig?:
     let y = 65;
     const rowHeight = 8;
     const cols = [
-        { header: "No", width: 10, x: margin },
-        { header: "Nama Tamu", width: 50, x: margin + 10 },
-        { header: "Hubungan", width: 30, x: margin + 60 },
-        { header: "Rumah Dikunjungi", width: 60, x: margin + 90 },
-        { header: "Tgl Masuk", width: 30, x: margin + 150 },
-        { header: "Durasi", width: 25, x: margin + 180 },
-        { header: "No. HP", width: 35, x: margin + 205 },
-        { header: "Status", width: 35, x: margin + 240 },
+        { header: "No", width: 8, x: margin },
+        { header: "Nama Tamu", width: 38, x: margin + 8 },
+        { header: "NIK", width: 35, x: margin + 46 },
+        { header: "Hubungan", width: 25, x: margin + 81 },
+        { header: "Rumah Dikunjungi", width: 38, x: margin + 106 },
+        { header: "Keperluan", width: 40, x: margin + 144 },
+        { header: "Tgl Masuk", width: 25, x: margin + 184 },
+        { header: "Durasi", width: 20, x: margin + 209 },
+        { header: "No. HP", width: 30, x: margin + 229 },
+        { header: "Status", width: 18, x: margin + 259 },
     ];
 
     // Table Header
@@ -990,12 +992,14 @@ export const generateGuestReportPDF = async (guestReports: any[], customConfig?:
 
         doc.text((index + 1).toString(), cols[0].x + 2, y + 5);
         doc.text(guest.guestName, cols[1].x + 2, y + 5);
-        doc.text(guest.relationship, cols[2].x + 2, y + 5);
-        doc.text(guest.residentName, cols[3].x + 2, y + 5);
-        doc.text(new Date(guest.arrivalDate).toLocaleDateString('id-ID'), cols[4].x + 2, y + 5);
-        doc.text(guest.stayDuration, cols[5].x + 2, y + 5);
-        doc.text(guest.phone, cols[6].x + 2, y + 5);
-        doc.text(guest.status === 'Active' ? 'Menginap' : 'Pulang', cols[7].x + 2, y + 5);
+        doc.text(guest.guestNik || '-', cols[2].x + 2, y + 5);
+        doc.text(guest.relationship, cols[3].x + 2, y + 5);
+        doc.text(guest.residentName, cols[4].x + 2, y + 5);
+        doc.text(guest.purpose || '-', cols[5].x + 2, y + 5);
+        doc.text(new Date(guest.arrivalDate).toLocaleDateString('id-ID'), cols[6].x + 2, y + 5);
+        doc.text(guest.stayDuration, cols[7].x + 2, y + 5);
+        doc.text(guest.phone, cols[8].x + 2, y + 5);
+        doc.text(guest.status === 'Active' ? 'Aktif' : 'Pulang', cols[9].x + 2, y + 5);
 
         doc.rect(margin, y, contentWidth, rowHeight);
         y += rowHeight;

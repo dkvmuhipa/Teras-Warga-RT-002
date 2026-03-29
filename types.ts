@@ -22,6 +22,7 @@ export interface House {
   status: 'Occupied' | 'Empty' | 'Business';
   residenceType?: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga'; // NEW: Status Kepemilikan including Kost
   ownerName?: string; // NEW: Nama Pemilik Rumah (jika berbeda dengan penghuni)
+  ownerPhone?: string; // NEW: Kontak Pemilik Rumah
   paymentStatus?: PaymentStatus; // Status Iuran Umum
   paymentDate?: string; // Tanggal Pembayaran Iuran
   paymentStatusAir?: PaymentStatus; // Iuran Air
@@ -32,6 +33,9 @@ export interface House {
   isOutOfTown?: boolean; // NEW: Status Keluar Kota
   hasGuest?: boolean; // NEW: Status Ada Tamu
   isIsoman?: boolean; // NEW: Status Isolasi Mandiri
+  vaccinationStatus?: 'Belum' | 'Dosis 1' | 'Dosis 2' | 'Booster 1' | 'Booster 2'; // NEW: Status Vaksinasi
+  specialNotes?: string; // NEW: Catatan Khusus
+  housePhotoUrl?: string; // NEW: Foto Rumah
   
   // New Fields for Professional Data Management
   isVerified?: boolean;
@@ -42,8 +46,19 @@ export interface House {
   
   education?: string;
   jobCategory?: string;
+  job?: string; // NEW: Pekerjaan Spesifik
   religion?: string;
   vehicleCount?: number;
+  
+  // New Identity Fields
+  nik?: string; // NEW: NIK Kepala Keluarga
+  birthPlace?: string; // NEW: Tempat Lahir
+  maritalStatus?: 'Belum Kawin' | 'Kawin' | 'Cerai Hidup' | 'Cerai Mati'; // NEW: Status Perkawinan
+  bloodType?: 'A' | 'B' | 'AB' | 'O' | '-'; // NEW: Golongan Darah
+  nationality?: string; // NEW: Kewarganegaraan
+  addressKtp?: string; // NEW: Alamat sesuai KTP
+  bpjsStatus?: 'PPU' | 'PBPU' | 'PBI' | 'Tidak Ada'; // NEW: Status BPJS
+  kkNumber?: string; // NEW: Nomor Kartu Keluarga
   
   // Data Demografi (Optional)
   hasPregnant?: boolean; // Ibu Hamil
@@ -103,6 +118,7 @@ export interface ResidentRegistration {
   status: 'Occupied' | 'Empty' | 'Business';
   residenceType: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga';
   occupants: number;
+  kkNumber?: string;
   education?: string;
   jobCategory?: string;
   religion?: string;
@@ -140,9 +156,16 @@ export interface GuestReport {
   residentName: string;
   residentHouseId: string;
   guestName: string;
+  guestNik?: string; // NEW: NIK Tamu
+  guestJob?: string; // NEW: Pekerjaan Tamu
+  guestAddress?: string; // NEW: Alamat Asal
+  gender?: 'Laki-laki' | 'Perempuan'; // NEW: Jenis Kelamin
   relationship: string;
+  purpose?: string; // NEW: Keperluan
   stayDuration: string;
   arrivalDate: string;
+  departureDate?: string; // NEW: Rencana Kepulangan
+  vehicleInfo?: string; // NEW: Info Kendaraan
   ktpUrl?: string;
   phone: string;
   status: 'Active' | 'Departed';

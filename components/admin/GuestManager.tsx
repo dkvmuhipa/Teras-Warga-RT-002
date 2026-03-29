@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, User, Calendar, Clock, Phone, Trash2, CheckCircle, ExternalLink, MapPin, History } from 'lucide-react';
+import { ShieldAlert, User, Calendar, Clock, Phone, Trash2, CheckCircle, ExternalLink, MapPin, History, Info, FileText, Car, UserCheck } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { updateGuestReportStatus, deleteGuestReportFromDb } from '../../services/databaseService';
@@ -12,6 +12,7 @@ interface GuestManagerProps {
 }
 
 export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfConfig }) => {
+  const [selectedGuest, setSelectedGuest] = React.useState<GuestReport | null>(null);
   const activeGuests = guestReports.filter(g => g.status === 'Active');
   const departedGuests = guestReports.filter(g => g.status === 'Departed');
 
@@ -95,16 +96,12 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                 </div>
 
                 <div className="flex gap-2">
-                  {guest.ktpUrl && (
-                    <a 
-                      href={guest.ktpUrl} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 transition-all"
-                    >
-                      <ExternalLink size={12} /> KTP
-                    </a>
-                  )}
+                  <button 
+                    onClick={() => setSelectedGuest(guest)}
+                    className="flex-1 py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-100 transition-all"
+                  >
+                    <Info size={12} /> Detail
+                  </button>
                   <button 
                     onClick={() => handleStatusUpdate(guest.id, 'Departed')}
                     className="flex-1 py-3 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-100 transition-all"
@@ -158,12 +155,22 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                       <span className="px-3 py-1 bg-slate-200 text-slate-600 text-[8px] font-black uppercase tracking-widest rounded-full">Sudah Pulang</span>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <button 
-                        onClick={() => handleDelete(guest.id)}
-                        className="p-2 text-slate-300 hover:text-rose-600 transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => setSelectedGuest(guest)}
+                          className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"
+                          title="Detail"
+                        >
+                          <Info size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(guest.id)}
+                          className="p-2 text-slate-300 hover:text-rose-600 transition-colors"
+                          title="Hapus"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -177,6 +184,182 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
           </div>
         </Card>
       </div>
+
+      {/* Detail Modal */}
+      {selectedGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] flex flex-col">
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">
+                  <User size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-800 tracking-tight">Detail Laporan Tamu</h3>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">ID: {selectedGuest.id}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedGuest(null)}
+                className="w-10 h-10 bg-white border border-slate-200 text-slate-400 rounded-xl flex items-center justify-center hover:text-slate-900 transition-all"
+              >
+                <Trash2 size={20} className="rotate-45" />
+              </button>
+            </div>
+
+            <div className="p-8 overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Guest Info */}
+                <div className="space-y-6">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Informasi Tamu</h4>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <User className="text-indigo-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nama Lengkap</p>
+                        <p className="font-bold text-slate-800">{selectedGuest.guestName}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <FileText className="text-indigo-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">NIK Tamu</p>
+                        <p className="font-bold text-slate-800">{selectedGuest.guestNik || '-'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <FileText className="text-indigo-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pekerjaan Tamu</p>
+                        <p className="font-bold text-slate-800">{selectedGuest.guestJob || '-'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <UserCheck className="text-indigo-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Jenis Kelamin</p>
+                        <p className="font-bold text-slate-800">{selectedGuest.gender || '-'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <Phone className="text-indigo-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nomor HP</p>
+                        <p className="font-bold text-slate-800">{selectedGuest.phone}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <MapPin className="text-indigo-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Alamat Asal</p>
+                        <p className="font-bold text-slate-800 text-sm leading-relaxed">{selectedGuest.guestAddress || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Visit Info */}
+                <div className="space-y-6">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Informasi Kunjungan</h4>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="text-emerald-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Rumah Dikunjungi</p>
+                        <p className="font-bold text-slate-800">{selectedGuest.residentName}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <UserCheck className="text-emerald-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Hubungan</p>
+                        <p className="font-bold text-slate-800">{selectedGuest.relationship}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <Calendar className="text-emerald-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Rencana Menginap</p>
+                        <p className="font-bold text-slate-800">{new Date(selectedGuest.arrivalDate).toLocaleDateString('id-ID')} s/d {selectedGuest.departureDate ? new Date(selectedGuest.departureDate).toLocaleDateString('id-ID') : '-'}</p>
+                        <p className="text-xs text-slate-500 mt-1">Durasi: {selectedGuest.stayDuration}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <Info className="text-emerald-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Keperluan</p>
+                        <p className="font-bold text-slate-800 text-sm leading-relaxed">{selectedGuest.purpose || '-'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <Car className="text-emerald-500 mt-1" size={18} />
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Informasi Kendaraan</p>
+                        <p className="font-bold text-slate-800">{selectedGuest.vehicleInfo || 'Tidak membawa kendaraan'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* KTP Image */}
+              {selectedGuest.ktpUrl && (
+                <div className="mt-10 pt-8 border-t border-slate-100">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Identitas (KTP)</h4>
+                  <div className="relative group rounded-3xl overflow-hidden border border-slate-200 bg-slate-50 aspect-video flex items-center justify-center">
+                    <img 
+                      src={selectedGuest.ktpUrl} 
+                      alt="KTP Tamu" 
+                      className="max-w-full max-h-full object-contain"
+                      referrerPolicy="no-referrer"
+                    />
+                    <a 
+                      href={selectedGuest.ktpUrl} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-white font-black uppercase tracking-widest text-xs gap-2"
+                    >
+                      <ExternalLink size={20} /> Lihat Ukuran Penuh
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-8 bg-slate-50 border-t border-slate-100 flex gap-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setSelectedGuest(null)}
+                className="flex-1"
+              >
+                Tutup
+              </Button>
+              {selectedGuest.status === 'Active' && (
+                <Button 
+                  onClick={() => {
+                    handleStatusUpdate(selectedGuest.id, 'Departed');
+                    setSelectedGuest(null);
+                  }}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Tamu Sudah Pulang
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
