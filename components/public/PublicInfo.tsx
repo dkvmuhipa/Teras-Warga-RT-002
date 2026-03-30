@@ -242,7 +242,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 fromDay: swapFromDay,
                 toDay: swapToDay,
                 reason: swapReason,
-                status: 'Menunggu',
+                status: 'Pending',
                 timestamp: new Date().toISOString()
             });
             toast.success("Permintaan tukar jadwal berhasil dikirim!", {
@@ -1538,6 +1538,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                                 >
                                     {Array.from({ length: 36 }).map((_, i) => {
                                         const d = new Date();
+                                        d.setDate(1); // Set to 1st to avoid rollover issues
                                         // Show 12 months forward and 23 months back
                                         d.setMonth(d.getMonth() + 12 - i);
                                         const m = getIndonesianMonthYear(d);

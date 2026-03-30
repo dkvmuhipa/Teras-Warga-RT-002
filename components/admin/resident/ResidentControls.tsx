@@ -54,6 +54,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           >
             {Array.from({ length: 36 }).map((_, i) => {
               const d = new Date();
+              d.setDate(1); // Set to 1st to avoid rollover issues (e.g. March 30 -> Feb 30 -> March 2)
               // Show 12 months forward and 23 months back
               d.setMonth(d.getMonth() + 12 - i);
               const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];

@@ -850,6 +850,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 >
                   {Array.from({ length: 36 }).map((_, i) => {
                     const d = new Date();
+                    d.setDate(1); // Set to 1st to avoid rollover issues
                     // Show 12 months forward and 23 months back
                     d.setMonth(d.getMonth() + 12 - i);
                     

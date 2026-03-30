@@ -143,6 +143,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
             >
               {Array.from({ length: 12 }).map((_, i) => {
                 const d = new Date();
+                d.setDate(1); // Set to 1st to avoid rollover issues
                 d.setMonth(d.getMonth() - i);
                 const m = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
                 return <option key={m} value={m}>{m}</option>;
