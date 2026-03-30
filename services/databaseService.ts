@@ -32,7 +32,7 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM } from "../types";
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -1869,6 +1869,20 @@ export const subscribeToNews = (callback: (data: any[]) => void) => {
 
 // --- SEEDING & AUTO-MIGRATION ---
 // --- WASTE BANK SERVICES ---
+export const subscribeToPolls = (callback: (data: Poll[]) => void) => {
+    return onSnapshot(collection(db, POLLS_COL), (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Poll));
+        callback(data);
+    });
+};
+
+export const subscribeToUMKM = (callback: (data: UMKM[]) => void) => {
+    return onSnapshot(collection(db, UMKM_COL), (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UMKM));
+        callback(data);
+    });
+};
+
 export const subscribeToWasteDeposits = (callback: (data: any[]) => void) => {
     const q = query(collection(db, WASTE_DEPOSITS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {

@@ -68,6 +68,12 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToIdeas,
   subscribeToDonationCampaigns,
   subscribeToUpdateRequests,
+  subscribeToWasteDeposits,
+  subscribeToNews,
+  subscribeToEvents,
+  subscribeToPolls,
+  subscribeToUMKM,
+  subscribeToMarketItems,
   subscribeToPdfConfig,
   updatePdfConfig,
   deepSanitize,
@@ -111,7 +117,6 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToRondaLogs,
   subscribeToRondaSwapRequests,
   validateResidentAccess,
-  subscribeToMarketItems,
   addMarketItem,
   deleteMarketItem,
   updateMarketItemStatus,
@@ -119,7 +124,6 @@ import { subscribeToMapPoints, subscribeToCollection,
   addBillToDb,
   updateBillInDb,
   deleteBillFromDb,
-  subscribeToNews,
   addNewsToDb,
   updateNewsInDb,
   deleteNewsFromDb,
@@ -131,7 +135,6 @@ import { subscribeToMapPoints, subscribeToCollection,
   deleteGuestReportFromDb,
   subscribeToAuditLogs,
   subscribeToFAQ,
-  subscribeToEvents,
   addFAQToDb,
   updateFAQInDb,
   deleteFAQFromDb,
@@ -207,6 +210,7 @@ export const App = () => {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
+  const [wasteDeposits, setWasteDeposits] = useState<any[]>([]);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
@@ -265,6 +269,7 @@ export const App = () => {
     });
     const unsubFAQ = subscribeToFAQ((data) => setFaqItems(data));
     const unsubEvents = subscribeToEvents((data) => setEvents(data));
+    const unsubWasteDeposits = subscribeToWasteDeposits((data) => setWasteDeposits(data));
     const unsubIdeas = subscribeToIdeas((data) => setIdeas(data));
     const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
     const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
@@ -279,7 +284,7 @@ export const App = () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations(); unsubUpdateRequests(); unsubPdfConfig();
+      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations(); unsubUpdateRequests(); unsubPdfConfig(); unsubWasteDeposits();
     };
   }, []);
 
@@ -380,7 +385,26 @@ export const App = () => {
                                 <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
                                 <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
                                 <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
-                                <Route path="/info" element={<PublicInfo officials={officials} cashFlow={cashFlow} ronda={ronda} rondaLogs={rondaLogs} rondaSwapRequests={rondaSwapRequests} houses={houses} announcements={announcements} galleryItems={gallery} faqItems={faqItems} activePatrol={activePatrol} />} />
+                                <Route path="/info" element={<PublicInfo 
+                                    officials={officials} 
+                                    cashFlow={cashFlow} 
+                                    ronda={ronda} 
+                                    rondaLogs={rondaLogs} 
+                                    rondaSwapRequests={rondaSwapRequests} 
+                                    houses={houses} 
+                                    announcements={announcements} 
+                                    galleryItems={gallery} 
+                                    faqItems={faqItems} 
+                                    activePatrol={activePatrol} 
+                                    events={events}
+                                    news={news}
+                                    umkmData={umkm}
+                                    documents={documents}
+                                    polls={polls}
+                                    ideas={ideas}
+                                    donationCampaigns={donationCampaigns}
+                                    wasteDeposits={wasteDeposits}
+                                />} />
                                 <Route path="/kegiatan" element={<PublicActivity />} />
                                 <Route path="/sampah" element={<PublicWasteBank houseId={localStorage.getItem('resident_house_id') || ''} houses={houses} />} />
                                 <Route path="/kesehatan" element={<PublicHealth />} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X } from 'lucide-react';
+import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { 
@@ -7,7 +7,7 @@ import {
   generateMonthOptions, 
   isMonthMatch 
 } from '../../src/utils/dateUtils';
-import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus } from '../../types';
+import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, Idea, DonationCampaign, News } from '../../types';
 import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -29,9 +29,21 @@ interface PublicInfoProps {
   galleryItems: GalleryItem[];
   faqItems: FAQItem[];
   activePatrol: PatrolSession | null;
+  events: AppEvent[];
+  news: News[];
+  umkmData: UMKM[];
+  documents: Document[];
+  polls: Poll[];
+  ideas: Idea[];
+  donationCampaigns: DonationCampaign[];
+  wasteDeposits: any[];
 }
 
-export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, houses, announcements, galleryItems, faqItems, activePatrol }) => {
+export const PublicInfo: React.FC<PublicInfoProps> = ({ 
+  officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, 
+  houses, announcements, galleryItems, faqItems, activePatrol,
+  events, news, umkmData, documents, polls, ideas, donationCampaigns, wasteDeposits
+}) => {
     const { summaries, getPaymentStatus, selectedMonth, setSelectedMonth } = useFinancial();
     const [searchParams] = useSearchParams();
     const initialSearch = searchParams.get('search');
@@ -102,10 +114,23 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
 
     const trendData = Object.values(monthlyTrend);
 
-    const upcomingEvents = announcements
-        .filter(a => a.type === 'Event' && new Date(a.date) >= new Date())
+    const upcomingEventsList = events
+        .filter(e => new Date(e.date) >= new Date())
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .slice(0, 3);
+
+    const latestNews = news
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 3);
+
+    const activePolls = polls.filter(p => p.status === 'Open');
+    const trendingIdeas = ideas.sort((a, b) => (b.upvotes?.length || 0) - (a.upvotes?.length || 0)).slice(0, 3);
+    const activeDonations = donationCampaigns.filter(c => c.status === 'Aktif');
+    const featuredUMKM = umkmData.slice(0, 4);
+
+    const totalWasteCollected = wasteDeposits
+        .filter(d => d.status === 'Confirmed')
+        .reduce((acc, d) => acc + (d.weight || 0), 0);
 
     const dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
     const roleHierarchy = ['Ketua RT', 'Sekretaris', 'Bendahara', 'Bendahara RW', 'Koord. Keamanan', 'Seksi'];
@@ -325,33 +350,36 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                     <EmergencyContacts />
                 </motion.div>
 
-                {/* Upcoming Events */}
+                {/* Upcoming Events (New Event Management) */}
                 <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden h-full">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
                             <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><Calendar size={24}/></div>
-                            Agenda Kegiatan
+                            Agenda & Event Warga
                         </h2>
-                        <Link to="/" className="text-xs font-bold text-indigo-600 hover:underline uppercase tracking-wider">Lihat Semua</Link>
+                        <Link to="/kegiatan" className="text-xs font-bold text-indigo-600 hover:underline uppercase tracking-wider">Lihat Semua</Link>
                     </div>
                     
-                    {upcomingEvents.length > 0 ? (
+                    {upcomingEventsList.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {upcomingEvents.map((event) => (
+                            {upcomingEventsList.map((event) => (
                                 <div key={event.id} className="p-5 rounded-3xl bg-slate-50 border border-slate-100 hover:border-amber-200 hover:bg-amber-50/30 transition-all group relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-24 h-24 bg-amber-100 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                     <div className="relative z-10">
-                                        <span className="inline-block px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-wide mb-3">
-                                            {new Date(event.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                                        </span>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-wide">
+                                                {new Date(event.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                                            </span>
+                                            <span className="text-[10px] font-bold text-slate-400">Agenda</span>
+                                        </div>
                                         <h3 className="text-lg font-black text-slate-800 mb-2 line-clamp-2 group-hover:text-amber-700 transition-colors">{event.title}</h3>
-                                        <p className="text-xs text-slate-500 line-clamp-2 mb-4">{event.content}</p>
+                                        <p className="text-xs text-slate-500 line-clamp-2 mb-4">{event.description}</p>
                                         <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
                                             <Clock size={14} />
-                                            <span>08:00 WIB</span>
+                                            <span>{new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</span>
                                             <span className="mx-1">•</span>
                                             <MapPin size={14} />
-                                            <span>Balai Warga</span>
+                                            <span>{event.location}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -369,7 +397,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 </motion.div>
             </div>
 
-            {/* News & Announcements Feed */}
+            {/* News & Announcements Feed (Direct Communication) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Pengumuman (Urgent) */}
                 <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
@@ -393,28 +421,176 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                     </div>
                 </motion.div>
 
-                {/* Berita & Kegiatan (General/Event) */}
+                {/* Berita Terbaru (News) */}
                 <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><Megaphone size={24}/></div>
-                        <h2 className="text-2xl font-black text-slate-800">Berita & Kegiatan</h2>
+                        <h2 className="text-2xl font-black text-slate-800">Berita Terkini</h2>
                     </div>
                     <div className="space-y-4">
-                        {announcements.filter(a => a.type !== 'Urgent').map(a => (
-                            <div key={a.id} onClick={() => setSelectedAnnouncement(a)} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-indigo-100 transition-colors group cursor-pointer">
+                        {latestNews.map(n => (
+                            <div key={n.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-indigo-100 transition-colors group cursor-pointer">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide ${a.type === 'Event' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
-                                        {a.type}
+                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide bg-indigo-100 text-indigo-700">
+                                        {n.category}
                                     </span>
-                                    <span className="text-xs font-bold text-slate-400">{new Date(a.date).toLocaleDateString('id-ID')}</span>
+                                    <span className="text-xs font-bold text-slate-400">{new Date(n.date).toLocaleDateString('id-ID')}</span>
                                 </div>
-                                <h4 className="font-black text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{a.title}</h4>
-                                <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">{a.content}</p>
+                                <h4 className="font-black text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{n.title}</h4>
+                                <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">{n.content}</p>
                             </div>
                         ))}
-                        {announcements.filter(a => a.type !== 'Urgent').length === 0 && (
-                            <p className="text-sm text-slate-400 italic">Tidak ada berita atau kegiatan saat ini.</p>
+                        {latestNews.length === 0 && (
+                            <p className="text-sm text-slate-400 italic">Belum ada berita terbaru.</p>
                         )}
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* UMKM & Waste Bank Summary */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* UMKM Highlights */}
+                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                    <div className="flex justify-between items-center mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><Store size={24}/></div>
+                            <h2 className="text-2xl font-black text-slate-800">Produk Unggulan Warga</h2>
+                        </div>
+                        <Link to="/umkm" className="text-xs font-bold text-indigo-600 hover:underline uppercase tracking-wider">Lihat Semua</Link>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {featuredUMKM.map(item => (
+                            <div key={item.id} className="group cursor-pointer">
+                                <div className="aspect-square rounded-3xl overflow-hidden mb-3 border border-slate-100 shadow-sm group-hover:shadow-md transition-all">
+                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                                </div>
+                                <h4 className="font-black text-slate-800 text-sm truncate group-hover:text-indigo-600 transition-colors">{item.name}</h4>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Waste Bank Summary */}
+                <motion.div variants={itemVariants} className="bg-indigo-600 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
+                        <Trash2 size={120} />
+                    </div>
+                    <div className="relative z-10 h-full flex flex-col">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-white/20 rounded-xl"><Trash2 size={24}/></div>
+                            <h2 className="text-2xl font-black">Bank Sampah</h2>
+                        </div>
+                        <div className="flex-1 space-y-6">
+                            <div>
+                                <p className="text-indigo-100 text-xs font-bold uppercase tracking-widest mb-1">Total Sampah Terkelola</p>
+                                <h3 className="text-4xl font-black">{totalWasteCollected.toFixed(1)} <span className="text-xl">Kg</span></h3>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] font-bold text-indigo-200 uppercase mb-1">Organik</p>
+                                    <p className="text-lg font-black">{wasteDeposits.filter(d => d.type === 'Organik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
+                                </div>
+                                <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] font-bold text-indigo-200 uppercase mb-1">Anorganik</p>
+                                    <p className="text-lg font-black">{wasteDeposits.filter(d => d.type === 'Anorganik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
+                                </div>
+                            </div>
+                        </div>
+                        <Link to="/sampah" className="mt-8 w-full py-3 bg-white text-indigo-600 rounded-2xl font-black text-center hover:bg-indigo-50 transition-colors">
+                            Setor Sampah
+                        </Link>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Polls, Forum & Donations Summary */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Active Polls */}
+                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-black text-slate-800 flex items-center gap-3">
+                            <div className="p-2 bg-purple-50 text-purple-600 rounded-xl"><Vote size={20}/></div>
+                            E-Voting
+                        </h2>
+                        <Link to="/voting" className="text-[10px] font-bold text-indigo-600 hover:underline uppercase tracking-wider">Ikut Memilih</Link>
+                    </div>
+                    <div className="space-y-4">
+                        {activePolls.slice(0, 2).map(poll => (
+                            <div key={poll.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <h4 className="font-bold text-slate-800 text-sm mb-3">{poll.title}</h4>
+                                <div className="space-y-2">
+                                    {poll.options.slice(0, 2).map(opt => {
+                                        const percentage = poll.totalVotes > 0 ? Math.round((opt.votes / poll.totalVotes) * 100) : 0;
+                                        return (
+                                            <div key={opt.id} className="space-y-1">
+                                                <div className="flex justify-between text-[10px] font-bold text-slate-500">
+                                                    <span>{opt.text}</span>
+                                                    <span>{percentage}%</span>
+                                                </div>
+                                                <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-purple-500" style={{ width: `${percentage}%` }}></div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                        {activePolls.length === 0 && <p className="text-xs text-slate-400 italic">Tidak ada voting aktif.</p>}
+                    </div>
+                </motion.div>
+
+                {/* Trending Ideas */}
+                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-black text-slate-800 flex items-center gap-3">
+                            <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><Lightbulb size={20}/></div>
+                            Aspirasi Warga
+                        </h2>
+                        <Link to="/forum" className="text-[10px] font-bold text-indigo-600 hover:underline uppercase tracking-wider">Beri Ide</Link>
+                    </div>
+                    <div className="space-y-4">
+                        {trendingIdeas.map(idea => (
+                            <div key={idea.id} className="flex items-start gap-3 p-3 hover:bg-slate-50 rounded-2xl transition-colors cursor-pointer group">
+                                <div className="p-2 bg-amber-100 text-amber-600 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                                    <ArrowUpRight size={16} />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-slate-800 text-sm line-clamp-1">{idea.title}</h4>
+                                    <p className="text-[10px] text-slate-400 font-medium">{idea.upvotes?.length || 0} Dukungan • {idea.category}</p>
+                                </div>
+                            </div>
+                        ))}
+                        {trendingIdeas.length === 0 && <p className="text-xs text-slate-400 italic">Belum ada aspirasi.</p>}
+                    </div>
+                </motion.div>
+
+                {/* Active Donations */}
+                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-black text-slate-800 flex items-center gap-3">
+                            <div className="p-2 bg-rose-50 text-rose-600 rounded-xl"><Heart size={20}/></div>
+                            Donasi Sosial
+                        </h2>
+                        <Link to="/donasi" className="text-[10px] font-bold text-indigo-600 hover:underline uppercase tracking-wider">Donasi</Link>
+                    </div>
+                    <div className="space-y-4">
+                        {activeDonations.slice(0, 2).map(campaign => {
+                            const progress = campaign.targetAmount ? Math.min(100, Math.round((campaign.currentAmount / campaign.targetAmount) * 100)) : 100;
+                            return (
+                                <div key={campaign.id} className="p-4 bg-rose-50/30 rounded-2xl border border-rose-100">
+                                    <h4 className="font-bold text-slate-800 text-sm mb-2 line-clamp-1">{campaign.title}</h4>
+                                    <div className="flex justify-between text-[10px] font-black text-rose-600 mb-1">
+                                        <span>Rp {campaign.currentAmount.toLocaleString()}</span>
+                                        <span>{progress}%</span>
+                                    </div>
+                                    <div className="h-1.5 bg-rose-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-rose-500" style={{ width: `${progress}%` }}></div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {activeDonations.length === 0 && <p className="text-xs text-slate-400 italic">Tidak ada kampanye donasi aktif.</p>}
                     </div>
                 </motion.div>
             </div>
