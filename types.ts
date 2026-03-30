@@ -153,7 +153,7 @@ export interface ResidentRegistration {
     job?: string;
   }[];
   date: string;
-  approvalStatus: 'Pending' | 'Approved' | 'Rejected';
+  approvalStatus: 'Pending' | 'Approved' | 'Rejected' | 'Menunggu' | 'Disetujui' | 'Ditolak';
   notes?: string;
 }
 
@@ -254,6 +254,7 @@ export interface Report {
   houseId?: string; // Optional: Link report to specific house (e.g., "Rumah C1-05 kotor")
   reporterHouseId?: string;
   photoUrl?: string; // NEW: Photo evidence
+  archived?: boolean; // NEW: Archive status
 }
 
 export interface UMKM {
@@ -303,12 +304,13 @@ export interface LetterRequest {
   familyStatus: 'Kepala Keluarga' | 'Istri' | 'Anak' | 'Lainnya';
   bloodType: 'A' | 'B' | 'AB' | 'O' | '-';
   
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Menunggu' | 'Disetujui' | 'Ditolak';
   date: string;
   letterNumber?: string;
   estimatedTime?: string; // NEW: Estimated processing time
   rating?: number; // NEW: User feedback
   feedback?: string; // NEW: User feedback
+  archived?: boolean; // NEW: Archive status
 }
 
 // New Types
@@ -331,7 +333,7 @@ export interface RondaSwapRequest {
   toDay: string;
   targetMemberName?: string; // NEW: Target warga yang diajak tukar
   targetHouseId?: string; // NEW: ID rumah target
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Menunggu' | 'Disetujui' | 'Ditolak';
   reason?: string;
   timestamp: string;
 }
@@ -670,7 +672,7 @@ export interface WasteDeposit {
   weight: number; // kg or liter
   pricePerUnit: number;
   totalValue: number;
-  status: 'Pending' | 'Confirmed';
+  status: 'Pending' | 'Confirmed' | 'Menunggu' | 'Disetujui' | 'Ditolak';
   officerName?: string;
 }
 
@@ -760,7 +762,7 @@ export interface UpdateRequest {
     job?: string;
   }[];
   reason: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Menunggu' | 'Disetujui' | 'Ditolak';
   adminNote?: string;
   createdAt: string;
   updatedAt?: string;

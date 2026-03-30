@@ -146,7 +146,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
           const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
           setPdfConfig(newConfig);
-          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
         }
         
         setSelectedLetter(null);
@@ -175,7 +174,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         if (!isNaN(extractedNum) && extractedNum > (pdfConfig.lastLetterNumber || 0)) {
           const newConfig = { ...pdfConfig, lastLetterNumber: extractedNum };
           setPdfConfig(newConfig);
-          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
         }
       }
       

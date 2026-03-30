@@ -5,8 +5,9 @@ import { auth } from '../../services/firebaseConfig';
 import { PdfConfig, House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, MarketItem, AppNotification } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { seedDatabase, deepSanitize } from '../../services/databaseService';
+import { seedDatabase, deepSanitize, updatePdfConfig } from '../../services/databaseService';
 import { getWhatsAppGroups } from '../../services/whatsappService';
+import { SignaturePad } from './SignaturePad';
 import { toast } from 'sonner';
 
 interface AdminSettingsProps {
@@ -109,10 +110,15 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     }
   };
 
-  const handleSaveConfig = () => {
-    setPdfConfig(localConfig);
-    localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(localConfig)));
-    toast.success('Konfigurasi surat tersimpan!');
+  const handleSaveConfig = async () => {
+    try {
+      await updatePdfConfig(localConfig);
+      setPdfConfig(localConfig);
+      toast.success('Konfigurasi surat tersimpan di cloud!');
+    } catch (error) {
+      console.error("Error saving PDF config:", error);
+      toast.error('Gagal menyimpan konfigurasi ke cloud.');
+    }
   };
 
   const handleVerifyGroup = async () => {
@@ -329,9 +335,12 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
             </div>
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-700">Tanda Tangan Ketua RT</label>
-              <div className="relative h-24 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden cursor-pointer">
-                {localConfig.signature ? <img src={localConfig.signature} className="h-full w-full object-contain p-2" /> : <Edit2 size={20} className="text-slate-300"/>}
-                <input type="file" onChange={e => handleFileChange(e, 'signature')} className="absolute inset-0 opacity-0 cursor-pointer"/>
+              <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                <SignaturePad 
+                  initialValue={localConfig.signature}
+                  onSave={(sig) => setLocalConfig({...localConfig, signature: sig})}
+                  onClear={() => setLocalConfig({...localConfig, signature: ''})}
+                />
               </div>
             </div>
           </div>

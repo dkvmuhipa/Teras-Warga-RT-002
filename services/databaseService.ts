@@ -75,6 +75,7 @@ const DONATION_RECORDS_COL = "donationRecords";
 const PANIC_ALERTS_COL = "panicAlerts";
 const UPDATE_REQUESTS_COL = "updateRequests";
 const FCM_TOKENS_COL = "fcmTokens";
+const CONFIGS_COL = "configs";
 
 // --- FCM TOKEN SERVICES ---
 export const saveFCMToken = async (userId: string, token: string) => {
@@ -89,6 +90,30 @@ export const getFCMTokens = async () => {
     const snapshot = await getDocs(collection(db, FCM_TOKENS_COL));
     return snapshot.docs.map(doc => doc.data().token);
 };
+export const subscribeToPdfConfig = (callback: (data: any) => void) => {
+    const docRef = doc(db, CONFIGS_COL, "pdf");
+    return onSnapshot(docRef, (snapshot) => {
+        if (snapshot.exists()) {
+            callback(snapshot.data().data);
+        } else {
+            callback(null);
+        }
+    });
+};
+
+export const updatePdfConfig = async (config: any) => {
+    try {
+        const docRef = doc(db, CONFIGS_COL, "pdf");
+        await setDoc(docRef, {
+            type: "pdf",
+            data: deepSanitize(config),
+            updatedAt: new Date().toISOString()
+        });
+    } catch (e) {
+        console.error("Error updating PDF config:", e);
+    }
+};
+
 export const subscribeToIdeas = (callback: (data: any[]) => void) => {
     const q = query(collection(db, IDEAS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {

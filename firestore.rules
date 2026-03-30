@@ -66,6 +66,12 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Configs: Public can read pdf config, only admins can write.
+    match /configs/pdf {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Default Deny
     match /{document=**} {
       allow read, write: if isAdmin();

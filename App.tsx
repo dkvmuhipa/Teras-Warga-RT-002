@@ -68,6 +68,9 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToIdeas,
   subscribeToDonationCampaigns,
   subscribeToUpdateRequests,
+  subscribeToPdfConfig,
+  updatePdfConfig,
+  deepSanitize,
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
@@ -120,7 +123,6 @@ import { subscribeToMapPoints, subscribeToCollection,
   addNewsToDb,
   updateNewsInDb,
   deleteNewsFromDb,
-  deepSanitize,
   subscribeToPopulationLogs,
   subscribeToActivePatrols,
   subscribeToResidentRegistrations,
@@ -209,7 +211,17 @@ export const App = () => {
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
-  const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
+  const [pdfConfig, setPdfConfigState] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
+
+  const setPdfConfig = (newConfig: PdfConfig | ((prev: PdfConfig) => PdfConfig)) => {
+    setPdfConfigState(prev => {
+      const next = typeof newConfig === 'function' ? newConfig(prev) : newConfig;
+      localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(next)));
+      updatePdfConfig(next);
+      return next;
+    });
+  };
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminRole, setAdminRole] = useState<Role | null>(null);
 
@@ -256,12 +268,18 @@ export const App = () => {
     const unsubIdeas = subscribeToIdeas((data) => setIdeas(data));
     const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
     const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
+    const unsubPdfConfig = subscribeToPdfConfig((data) => {
+        if (data) {
+            setPdfConfigState(data);
+            localStorage.setItem('pdf_config', JSON.stringify(data));
+        }
+    });
 
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations(); unsubUpdateRequests();
+      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations(); unsubUpdateRequests(); unsubPdfConfig();
     };
   }, []);
 
