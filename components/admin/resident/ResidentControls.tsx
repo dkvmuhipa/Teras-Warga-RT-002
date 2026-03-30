@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Calendar, Users, LayoutList, MapPin, DollarSign, UserPlus, Activity } from 'lucide-react';
+import { generateMonthOptions } from '../../../src/utils/dateUtils';
 import { ResidentRegistration } from '../../../types';
 
 interface ResidentControlsProps {
@@ -7,7 +8,6 @@ interface ResidentControlsProps {
   setSearchTerm: (term: string) => void;
   selectedMonth: string;
   setSelectedMonth: (month: string) => void;
-  getIndonesianMonthYear: (date: Date) => string;
   filterStatus: string;
   setFilterStatus: (status: any) => void;
   sortBy: 'name' | 'block';
@@ -22,7 +22,6 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
   setSearchTerm,
   selectedMonth,
   setSelectedMonth,
-  getIndonesianMonthYear,
   filterStatus,
   setFilterStatus,
   sortBy,
@@ -52,15 +51,9 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             value={selectedMonth} 
             onChange={e => setSelectedMonth(e.target.value)}
           >
-            {Array.from({ length: 36 }).map((_, i) => {
-              const d = new Date();
-              d.setDate(1); // Set to 1st to avoid rollover issues (e.g. March 30 -> Feb 30 -> March 2)
-              // Show 12 months forward and 23 months back
-              d.setMonth(d.getMonth() + 12 - i);
-              const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-              const m = `${monthsId[d.getMonth()]} ${d.getFullYear()}`;
-              return <option key={m} value={m}>{m}</option>;
-            })}
+            {generateMonthOptions(12, 36).map((m: string) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
           </select>
         </div>
         

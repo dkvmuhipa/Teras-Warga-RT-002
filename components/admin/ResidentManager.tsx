@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  getIndonesianMonthYear, 
+  generateMonthOptions, 
+  isMonthMatch 
+} from '../../src/utils/dateUtils';
 import { BillDetailModal } from './BillDetailModal';
 import { ResidentAnalytics } from './ResidentAnalytics';
 import { ResidentCard } from './ResidentCard';
@@ -45,11 +50,6 @@ type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
   houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, settings
 }) => {
-  const getIndonesianMonthYear = (date: Date) => {
-    const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    return `${monthsId[date.getMonth()]} ${date.getFullYear()}`;
-  };
-
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
@@ -1032,7 +1032,6 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         setSearchTerm={setSearchTerm}
         selectedMonth={selectedMonth}
         setSelectedMonth={setSelectedMonth}
-        getIndonesianMonthYear={getIndonesianMonthYear}
         filterStatus={filterStatus}
         setFilterStatus={setFilterStatus}
         sortBy={sortBy}

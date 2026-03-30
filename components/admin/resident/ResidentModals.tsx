@@ -8,6 +8,11 @@ import {
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
+import { 
+  getIndonesianMonthYear, 
+  generateMonthOptions, 
+  isMonthMatch 
+} from '../../../src/utils/dateUtils';
 
 interface AddEditResidentModalProps {
   isOpen: boolean;
@@ -848,15 +853,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   value={targetMonth}
                   onChange={e => setTargetMonth(e.target.value)}
                 >
-                  {Array.from({ length: 36 }).map((_, i) => {
-                    const d = new Date();
-                    d.setDate(1); // Set to 1st to avoid rollover issues
-                    // Show 12 months forward and 23 months back
-                    d.setMonth(d.getMonth() + 12 - i);
-                    
-                    const m = getIndonesianMonthYear(d);
-                    return <option key={m} value={m}>{m}</option>;
-                  })}
+                  {generateMonthOptions(12, 36).map((m: string) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
                 </select>
                 <div className="flex items-center gap-3 mt-1">
                   <div className="flex items-center gap-1">

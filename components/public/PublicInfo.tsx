@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { 
+  getIndonesianMonthYear, 
+  generateMonthOptions, 
+  isMonthMatch 
+} from '../../src/utils/dateUtils';
 import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus } from '../../types';
 import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
@@ -68,11 +73,6 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         return logDate >= thirtyDaysAgo;
     }).length;
-
-    const getIndonesianMonthYear = (date: Date) => {
-        const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        return `${monthsId[date.getMonth()]} ${date.getFullYear()}`;
-    };
 
     // Financial Chart Data
     const expenseCategories = cashFlow
@@ -1536,14 +1536,9 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                                     value={selectedMonth}
                                     onChange={e => setSelectedMonth(e.target.value)}
                                 >
-                                    {Array.from({ length: 36 }).map((_, i) => {
-                                        const d = new Date();
-                                        d.setDate(1); // Set to 1st to avoid rollover issues
-                                        // Show 12 months forward and 23 months back
-                                        d.setMonth(d.getMonth() + 12 - i);
-                                        const m = getIndonesianMonthYear(d);
-                                        return <option key={m} value={m}>{m}</option>;
-                                    })}
+                                    {generateMonthOptions(12, 36).map((m: string) => (
+                                        <option key={m} value={m}>{m}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

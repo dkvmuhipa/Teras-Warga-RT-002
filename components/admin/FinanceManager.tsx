@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DollarSign, Plus, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Filter, Search, Download, PieChart, Wallet } from 'lucide-react';
 import { CashFlow } from '../../types';
+import { getIndonesianMonthYear, generateMonthOptions } from '../../src/utils/dateUtils';
 import { motion } from 'motion/react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, AreaChart, Area
@@ -19,7 +20,7 @@ interface FinanceManagerProps {
 export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfConfig }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'All' | 'Income' | 'Expense'>('All');
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' }));
+  const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
@@ -141,13 +142,9 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
               value={selectedMonth} 
               onChange={e => setSelectedMonth(e.target.value)}
             >
-              {Array.from({ length: 12 }).map((_, i) => {
-                const d = new Date();
-                d.setDate(1); // Set to 1st to avoid rollover issues
-                d.setMonth(d.getMonth() - i);
-                const m = d.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-                return <option key={m} value={m}>{m}</option>;
-              })}
+              {generateMonthOptions(0, 12).map((m: string) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
             </select>
           </div>
           <button 

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
 import { House, CashFlow, Bill, PaymentStatus } from '../types';
+import { getIndonesianMonthYear, isMonthMatch } from '../src/utils/dateUtils';
 
 interface FinancialContextType {
   iuranPayments: any[];
@@ -48,57 +49,11 @@ export const FinancialProvider: React.FC<{
   bills: Bill[];
   settings: { airFee: number; sampahFee: number };
 }> = ({ children, houses, iuranPayments, cashFlow, bills, settings }) => {
-  const getIndonesianMonthYear = (date: Date) => {
-    const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    return `${monthsId[date.getMonth()]} ${date.getFullYear()}`;
-  };
-
   const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
 
   const airFee = settings?.airFee || 10000;
   const sampahFee = settings?.sampahFee || 10000;
   const combinedFee = airFee + sampahFee;
-
-  const isMonthMatch = (monthA: string, monthB: string) => {
-    if (!monthA || !monthB) return false;
-    const cleanA = String(monthA).trim().toLowerCase();
-    const cleanB = String(monthB).trim().toLowerCase();
-    if (cleanA === cleanB) return true;
-
-    const monthsId = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-    const monthsEn = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
-
-    const normalize = (m: string) => {
-      const yearMatch = m.match(/\d{4}/);
-      const year = yearMatch ? yearMatch[0] : null;
-      
-      // Try finding month name anywhere in string
-      let index = monthsId.findIndex(name => m.includes(name));
-      if (index === -1) index = monthsEn.findIndex(name => m.includes(name));
-      
-      if (index !== -1) {
-        return year ? `${index}-${year}` : `${index}`;
-      }
-
-      // Try numeric month
-      const parts = m.split(/[-/\s]/);
-      for (const part of parts) {
-        const num = parseInt(part);
-        if (num >= 1 && num <= 12 && part.length <= 2) {
-          return year ? `${num - 1}-${year}` : `${num - 1}`;
-        }
-      }
-
-      return null;
-    };
-
-    const normA = normalize(cleanA);
-    const normB = normalize(cleanB);
-    
-    if (!normA || !normB) return false;
-    if (normA.includes('-') && normB.includes('-')) return normA === normB;
-    return normA.split('-')[0] === normB.split('-')[0];
-  };
 
   const getPaymentStatus = (house: House, type: 'Air' | 'Sampah', month: string = selectedMonth) => {
     const payment = iuranPayments.find(p => {
@@ -122,7 +77,6 @@ export const FinancialProvider: React.FC<{
   };
 
   const getArrearsForHouse = (house: House, type?: 'Air' | 'Sampah') => {
-    const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const now = new Date();
     
     const arrears: string[] = [];
