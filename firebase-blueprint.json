@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "House": {
+      "title": "House",
+      "description": "Data rumah warga",
+      "type": "object",
+      "properties": {
+        "block": { "type": "string" },
+        "number": { "type": "string" },
+        "headOfFamily": { "type": "string" },
+        "nik": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["Admin", "Bendahara", "Sekretaris", "Warga"] },
+        "isVerified": { "type": "boolean" }
+      },
+      "required": ["block", "number", "headOfFamily"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "Laporan warga (Keamanan, Kebersihan, dll)",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "description": { "type": "string" },
+        "reporterName": { "type": "string" },
+        "status": { "type": "string", "enum": ["Baru", "Diproses", "Selesai"] },
+        "date": { "type": "string" }
+      },
+      "required": ["type", "description", "reporterName", "status", "date"]
+    },
+    "LetterRequest": {
+      "title": "LetterRequest",
+      "description": "Permohonan surat warga",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "applicantName": { "type": "string" },
+        "nik": { "type": "string" },
+        "status": { "type": "string", "enum": ["Menunggu", "Disetujui", "Ditolak"] },
+        "date": { "type": "string" }
+      },
+      "required": ["type", "applicantName", "nik", "status", "date"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Log aktivitas sistem",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "user": { "type": "string" },
+        "targetId": { "type": "string" }
+      },
+      "required": ["action", "timestamp", "user"]
+    }
+  },
+  "firestore": {
+    "/houses/{houseId}": {
+      "schema": "House",
+      "description": "Koleksi data rumah"
+    },
+    "/reports/{reportId}": {
+      "schema": "Report",
+      "description": "Koleksi laporan warga"
+    },
+    "/letters/{letterId}": {
+      "schema": "LetterRequest",
+      "description": "Koleksi permohonan surat"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Koleksi log audit"
+    },
+    "/residentRegistrations/{regId}": {
+      "schema": "ResidentRegistration",
+      "description": "Pendaftaran warga baru"
+    },
+    "/updateRequests/{reqId}": {
+      "schema": "UpdateRequest",
+      "description": "Permohonan update data warga"
+    },
+    "/guestReports/{guestId}": {
+      "schema": "GuestReport",
+      "description": "Laporan tamu menginap"
+    }
+  }
+}

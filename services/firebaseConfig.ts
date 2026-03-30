@@ -7,12 +7,12 @@ import { getMessaging, isSupported } from "firebase/messaging";
 // --- KONFIGURASI FIREBASE ---
 // Project: TerasWarga (teras-warga)
 const firebaseConfig = {
-  apiKey: "AIzaSyCeNdStL8oM7KHx8w69-0tJHE_qUDo1CyE",
-  authDomain: "teras-warga.firebaseapp.com",
-  projectId: "teras-warga",
-  storageBucket: "teras-warga.firebasestorage.app",
-  messagingSenderId: "710981295516",
-  appId: "1:710981295516:web:97bee73b"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase

@@ -242,7 +242,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({ officials, cashFlow, ron
                 fromDay: swapFromDay,
                 toDay: swapToDay,
                 reason: swapReason,
-                status: 'Pending',
+                status: 'Menunggu',
                 timestamp: new Date().toISOString()
             });
             toast.success("Permintaan tukar jadwal berhasil dikirim!", {

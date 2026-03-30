@@ -370,7 +370,7 @@ export interface RondaAttendance {
 export interface MapPoint {
   id: string;
   label: string;
-  type: 'Gate' | 'Security' | 'Block' | 'PJU' | 'CCTV' | 'Hydrant' | 'Trash' | 'APAR' | 'Other';
+  type: 'Gate' | 'Security' | 'Block' | 'PJU' | 'CCTV' | 'Hydrant' | 'Trash' | 'APAR' | 'AssemblyPoint' | 'EvacuationRoute' | 'Other';
   x: number;
   y: number;
   icon: string;
@@ -559,6 +559,9 @@ export interface PopulationChangeLog {
     residenceType?: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga';
     religion?: string;
     vulnerability?: string[];
+    kkNumber?: string;
+    jobCategory?: string;
+    education?: string;
     
     // MovedOut
     newAddress?: string;

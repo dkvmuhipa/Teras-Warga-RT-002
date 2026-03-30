@@ -205,6 +205,9 @@ export const CHECKPOINTS: Checkpoint[] = [
 export const MOCK_MAP_POINTS: MapPoint[] = [
     { id: 'mp1', label: 'Gerbang Utama', type: 'Gate', x: 5, y: 50, icon: 'Move' },
     { id: 'mp2', label: 'Pos Satpam', type: 'Security', x: 10, y: 50, icon: 'Shield' },
+    { id: 'mp3', label: 'APAR Blok C5', type: 'APAR', x: 25, y: 20, icon: 'Flame' },
+    { id: 'mp4', label: 'Titik Kumpul Lapangan', type: 'AssemblyPoint', x: 50, y: 50, icon: 'Users' },
+    { id: 'mp5', label: 'Jalur Evakuasi Utara', type: 'EvacuationRoute', x: 50, y: 10, icon: 'ArrowRight' },
 ];
 
 export const MOCK_CASHFLOW: CashFlow[] = [

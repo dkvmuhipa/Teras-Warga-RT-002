@@ -119,7 +119,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     setIsVerifyingGroup(true);
     try {
       const result = await getWhatsAppGroups();
-      if (result.success && Array.isArray(result.data)) {
+      if (result?.success && Array.isArray(result?.data)) {
         // Sidobe usually returns data in result.data
         setAvailableGroups(result.data.map((g: any) => ({
           id: g.id || g.jid,
@@ -127,11 +127,11 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         })));
         setShowGroupList(true);
         toast.success(`Ditemukan ${result.data.length} grup.`);
-      } else if (result.error) {
-        toast.error(`Gagal: ${result.error}`);
+      } else if (result?.error) {
+        toast.error(`Gagal: ${result?.error}`);
       } else {
         // Fallback if data structure is different
-        const data = result.data || result;
+        const data = result?.data || result;
         if (Array.isArray(data)) {
           setAvailableGroups(data.map((g: any) => ({
             id: g.id || g.jid,

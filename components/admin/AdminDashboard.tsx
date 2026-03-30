@@ -5,7 +5,7 @@ import { auth } from '../../services/firebaseConfig';
 import { addPopulationReportToDb, deletePopulationReportFromDb, subscribeToActivePanicAlerts, deleteNotificationFromDb, deleteReportFromDb } from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance
+  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance, Role
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -33,6 +33,7 @@ import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 
 interface AdminDashboardProps {
+  role: Role;
   houses: House[];
   announcements: Announcement[];
   news: News[];
@@ -72,6 +73,7 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
+  role,
   houses, announcements, news, cashFlow, officials, reports, letters, 
   ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, settings
 }) => {
@@ -196,6 +198,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             reports={reports}
             houses={houses}
             officials={officials}
+            letters={letters}
           />
         );
       default:
@@ -206,6 +209,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   return (
     <div className="h-screen h-[100dvh] bg-[#F8FAFC] font-sans text-slate-600 flex overflow-hidden">
       <AdminSidebar 
+        role={role}
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         isOpen={isSidebarOpen} 
@@ -294,7 +298,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="flex items-center gap-2 md:gap-3 pl-1 md:pl-2">
                 <div className="hidden md:block text-right">
                   <p className="text-sm font-bold text-slate-800 leading-none">Admin {RT_NAME}</p>
-                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mt-1">Online</p>
+                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mt-1">{role}</p>
                 </div>
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
                   <User size={18} />

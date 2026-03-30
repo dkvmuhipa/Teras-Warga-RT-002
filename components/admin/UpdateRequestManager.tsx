@@ -28,7 +28,7 @@ interface UpdateRequestManagerProps {
 
 export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requests, houses }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Approved' | 'Rejected'>('All');
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Menunggu' | 'Disetujui' | 'Ditolak'>('All');
   const [selectedRequest, setSelectedRequest] = useState<UpdateRequest | null>(null);
   const [adminNote, setAdminNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -53,7 +53,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
       });
 
       // 2. Update the request status
-      await updateRequestStatus(req.id, 'Approved', adminNote);
+      await updateRequestStatus(req.id, 'Disetujui', adminNote);
       
       toast.success('Permohonan disetujui dan data warga telah diperbarui.');
       setSelectedRequest(null);
@@ -73,7 +73,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
     }
     setIsProcessing(true);
     try {
-      await updateRequestStatus(req.id, 'Rejected', adminNote);
+      await updateRequestStatus(req.id, 'Ditolak', adminNote);
       toast.success('Permohonan telah ditolak.');
       setSelectedRequest(null);
       setAdminNote('');
@@ -106,7 +106,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
           />
         </div>
         <div className="flex bg-white p-1 border border-slate-200 rounded-2xl shadow-sm">
-          {['All', 'Pending', 'Approved', 'Rejected'].map((status) => (
+          {['All', 'Menunggu', 'Disetujui', 'Ditolak'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status as any)}
@@ -116,7 +116,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                 : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              {status === 'All' ? 'Semua' : status === 'Pending' ? 'Menunggu' : status === 'Approved' ? 'Disetujui' : 'Ditolak'}
+              {status === 'All' ? 'Semua' : status === 'Menunggu' ? 'Menunggu' : status === 'Disetujui' ? 'Disetujui' : 'Ditolak'}
             </button>
           ))}
         </div>
@@ -131,8 +131,8 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                   <div className="flex items-center gap-4">
                     <div className={`p-4 rounded-2xl ${
-                      req.status === 'Approved' ? 'bg-emerald-50 text-emerald-600' :
-                      req.status === 'Rejected' ? 'bg-rose-50 text-rose-600' :
+                      req.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600' :
+                      req.status === 'Ditolak' ? 'bg-rose-50 text-rose-600' :
                       'bg-amber-50 text-amber-600'
                     }`}>
                       <FileEdit size={24} />
@@ -141,8 +141,8 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-black text-slate-800">{req.headOfFamily}</h4>
                         <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
-                          req.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' :
-                          req.status === 'Rejected' ? 'bg-rose-100 text-rose-600' :
+                          req.status === 'Disetujui' ? 'bg-emerald-100 text-emerald-600' :
+                          req.status === 'Ditolak' ? 'bg-rose-100 text-rose-600' :
                           'bg-amber-100 text-amber-600'
                         }`}>
                           {req.status}
@@ -235,7 +235,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
               />
             </div>
 
-            {selectedRequest.status === 'Pending' ? (
+            {selectedRequest.status === 'Menunggu' ? (
               <div className="flex gap-3 pt-2">
                 <Button 
                   onClick={() => handleReject(selectedRequest)}
@@ -254,9 +254,9 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
               </div>
             ) : (
               <div className={`p-4 rounded-2xl flex items-center gap-3 ${
-                selectedRequest.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
+                selectedRequest.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
               }`}>
-                {selectedRequest.status === 'Approved' ? <CheckCircle size={20} /> : <XCircle size={20} />}
+                {selectedRequest.status === 'Disetujui' ? <CheckCircle size={20} /> : <XCircle size={20} />}
                 <div>
                   <p className="text-xs font-black uppercase tracking-widest">Permohonan {selectedRequest.status}</p>
                   {selectedRequest.adminNote && <p className="text-[10px] font-medium mt-0.5">{selectedRequest.adminNote}</p>}

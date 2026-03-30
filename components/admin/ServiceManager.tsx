@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize } from '../../services/databaseService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -29,6 +29,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'settings'>('letters');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
+  const [showArchived, setShowArchived] = useState(false);
   
   const [selectedLetter, setSelectedLetter] = useState<LetterRequest | null>(null);
   const [isCreatingLetter, setIsCreatingLetter] = useState(false);
@@ -81,7 +82,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         type: selectedLetter.type
       });
 
-      if (selectedLetter.status === 'Pending') {
+      if (selectedLetter.status === 'Menunggu') {
         const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
         const currentYear = new Date().getFullYear();
         const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
@@ -121,12 +122,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     setIsAiLoading(false);
   };
 
-  const handleUpdateLetterStatus = async (id: string, status: 'Approved' | 'Rejected', letter?: LetterRequest, tempSignature?: string | null) => {
+  const handleUpdateLetterStatus = async (id: string, status: 'Disetujui' | 'Ditolak', letter?: LetterRequest, tempSignature?: string | null) => {
     if (window.confirm(`Ubah status surat menjadi ${status}?`)) {
       try {
-        await updateLetterStatus(id, status, status === 'Approved' ? letterNumberInput : undefined);
+        await updateLetterStatus(id, status, status === 'Disetujui' ? letterNumberInput : undefined);
         
-        if (status === 'Approved' && letter) {
+        if (status === 'Disetujui' && letter) {
           // Generate official PDF with stamp and signature
           const updatedLetter = { ...letter, letterNumber: letterNumberInput };
           
@@ -198,6 +199,47 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     }
   };
 
+  const handleArchiveReport = async (id: string) => {
+    if (window.confirm('Arsipkan laporan ini? Laporan tidak akan muncul di daftar utama.')) {
+      try {
+        await updateReportStatus(id, 'Selesai'); // Ensure it's finished
+        await updateLetterInDb(id, { archived: true } as any); // Reusing updateLetterInDb for generic update if possible, or I should have added updateReportInDb
+        // Actually I'll just use updateDoc directly in a new function or use the one I added
+        const { updateDoc, doc } = await import('firebase/firestore');
+        const { db } = await import('../../services/firebaseConfig');
+        await updateDoc(doc(db, 'reports', id), { archived: true });
+        toast.success('Laporan berhasil diarsipkan.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal mengarsipkan laporan.');
+      }
+    }
+  };
+
+  const handleArchiveLetter = async (id: string) => {
+    if (window.confirm('Arsipkan surat ini? Surat tidak akan muncul di daftar utama.')) {
+      try {
+        await updateLetterInDb(id, { archived: true });
+        toast.success('Surat berhasil diarsipkan.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal mengarsipkan surat.');
+      }
+    }
+  };
+
+  const handleAutoArchive = async () => {
+    const toastId = toast.loading('Sedang mengarsipkan data lama...');
+    try {
+      const archivedLetters = await archiveOldLetters(30);
+      const archivedReports = await archiveOldReports(30);
+      toast.success(`Berhasil mengarsipkan ${archivedLetters} surat dan ${archivedReports} laporan lama.`, { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal menjalankan auto-arsip.', { id: toastId });
+    }
+  };
+
   const handleDeleteLetter = async (id: string) => {
     if (window.confirm('Hapus pengajuan surat ini secara permanen?')) {
       try {
@@ -215,7 +257,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     const newLetter: LetterRequest = {
       ...adminForm as LetterRequest,
       id: Date.now().toString(),
-      status: 'Approved',
+      status: 'Disetujui',
       date: new Date().toISOString().split('T')[0],
       letterNumber: adminLetterNumber
     };
@@ -248,14 +290,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     const matchSearch = l.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                         l.type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = filterStatus === 'All' || l.status === filterStatus;
-    return matchSearch && matchStatus;
+    const matchArchived = showArchived ? l.archived === true : !l.archived;
+    return matchSearch && matchStatus && matchArchived;
   });
 
   const filteredReports = reports.filter(r => {
     const matchSearch = r.reporterName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                         r.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = filterStatus === 'All' || r.status === filterStatus;
-    return matchSearch && matchStatus;
+    const matchArchived = showArchived ? r.archived === true : !r.archived;
+    return matchSearch && matchStatus && matchArchived;
   });
 
   const containerVariants = {
@@ -306,7 +350,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               }`}
             >
               <FileText size={14} className="sm:w-4 sm:h-4" />
-              <span>Surat ({letters.filter(l => l.status === 'Pending').length})</span>
+              <span>Surat ({letters.filter(l => l.status === 'Menunggu').length})</span>
             </button>
             <button 
               onClick={() => setActiveTab('reports')} 
@@ -376,9 +420,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                <option value="All">Semua Status</option>
                {activeTab === 'letters' ? (
                  <>
-                   <option value="Pending">Pending</option>
-                   <option value="Approved">Disetujui</option>
-                   <option value="Rejected">Ditolak</option>
+                   <option value="Menunggu">Menunggu</option>
+                   <option value="Disetujui">Disetujui</option>
+                   <option value="Ditolak">Ditolak</option>
                  </>
                ) : (
                  <>
@@ -389,6 +433,27 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                )}
              </select>
           </div>
+          <button 
+            onClick={() => setShowArchived(!showArchived)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all text-[10px] font-black uppercase tracking-widest ${
+              showArchived 
+                ? 'bg-indigo-600 text-white border-indigo-600' 
+                : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <Archive size={14} />
+            {showArchived ? 'Lihat Aktif' : 'Lihat Arsip'}
+          </button>
+          {!showArchived && (
+            <button 
+              onClick={handleAutoArchive}
+              className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-2xl hover:bg-amber-100 transition-all text-[10px] font-black uppercase tracking-widest"
+              title="Arsipkan data yang sudah selesai lebih dari 30 hari"
+            >
+              <Archive size={14} />
+              Auto Arsip
+            </button>
+          )}
         </div>
       </div>
 
@@ -833,13 +898,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/50 transition-all group relative overflow-hidden"
               >
                 <div className={`absolute top-0 right-0 w-24 h-24 rounded-bl-[2.5rem] flex items-center justify-center ${
-                  letter.status === 'Pending' ? 'bg-amber-50 text-amber-600' :
-                  letter.status === 'Approved' ? 'bg-emerald-50 text-emerald-600' :
+                  letter.status === 'Menunggu' ? 'bg-amber-50 text-amber-600' :
+                  letter.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600' :
                   'bg-rose-50 text-rose-600'
                 }`}>
-                  {letter.status === 'Pending' && <Clock size={24} />}
-                  {letter.status === 'Approved' && <CheckCircle2 size={24} />}
-                  {letter.status === 'Rejected' && <XCircle size={24} />}
+                  {letter.status === 'Menunggu' && <Clock size={24} />}
+                  {letter.status === 'Disetujui' && <CheckCircle2 size={24} />}
+                  {letter.status === 'Ditolak' && <XCircle size={24} />}
                 </div>
 
                 <div className="mb-6 relative z-10">
@@ -869,7 +934,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <Eye size={14} /> Detail
                   </button>
                   
-                  {letter.status === 'Approved' && (
+                  {letter.status === 'Disetujui' && (
                     <button 
                       onClick={async () => {
                         try {
@@ -894,6 +959,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   >
                     <Trash2 size={16} />
                   </button>
+
+                  {!letter.archived && (letter.status === 'Disetujui' || letter.status === 'Ditolak') && (
+                    <button 
+                      onClick={() => handleArchiveLetter(letter.id)}
+                      className="p-3 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors border border-amber-100"
+                      title="Arsipkan"
+                    >
+                      <Archive size={16} />
+                    </button>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -954,6 +1029,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       <Trash2 size={16} />
                     </button>
                   )}
+                  {!report.archived && report.status === 'Selesai' && (
+                    <button 
+                      onClick={() => handleArchiveReport(report.id)}
+                      className="p-3 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors border border-amber-100"
+                      title="Arsipkan"
+                    >
+                      <Archive size={16} />
+                    </button>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -981,8 +1065,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Saat Ini</p>
                       <span className={`inline-block px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
-                        selectedLetter.status === 'Pending' ? 'bg-amber-100 text-amber-700' :
-                        selectedLetter.status === 'Approved' ? 'bg-emerald-100 text-emerald-700' :
+                        selectedLetter.status === 'Menunggu' ? 'bg-amber-100 text-amber-700' :
+                        selectedLetter.status === 'Disetujui' ? 'bg-emerald-100 text-emerald-700' :
                         'bg-rose-100 text-rose-700'
                       }`}>
                         {selectedLetter.status}
@@ -1107,7 +1191,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   </div>
                 </div>
 
-                {selectedLetter.status === 'Pending' && (
+                {selectedLetter.status === 'Menunggu' && (
                   <div className="space-y-4">
                     <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
                       <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Tanda Tangan Ketua RT (Opsional)</p>
@@ -1122,7 +1206,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     <div className="grid grid-cols-2 gap-4">
                       <Button 
-                        onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Rejected')}
+                        onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Ditolak')}
                         className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none"
                       >
                         <XCircle size={18} className="mr-2" /> Tolak
@@ -1131,7 +1215,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         onClick={() => {
                           // If tempSignature exists, we might want to pass it to handleUpdateLetterStatus
                           // or update pdfConfig temporarily. For now, let's just use it in the generation.
-                          handleUpdateLetterStatus(selectedLetter.id, 'Approved', {
+                          handleUpdateLetterStatus(selectedLetter.id, 'Disetujui', {
                             ...selectedLetter,
                             ...editLetterData,
                             letterNumber: letterNumberInput,

@@ -220,7 +220,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       education,
       familyStatus,
       bloodType,
-      status: 'Pending', 
+      status: 'Menunggu', 
       date: new Date().toISOString().split('T')[0],
       estimatedTime: estimatedTimes[finalRequestType] || estimatedTimes['Lainnya']
     }; 
@@ -1604,8 +1604,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                            item.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' :
-                            item.status === 'Rejected' ? 'bg-rose-100 text-rose-600' :
+                            (item.status === 'Disetujui' || item.status === 'Approved') ? 'bg-emerald-100 text-emerald-600' :
+                            (item.status === 'Ditolak' || item.status === 'Rejected') ? 'bg-rose-100 text-rose-600' :
                             'bg-amber-100 text-amber-600'
                           }`}>
                             {item.status || 'Terkirim'}

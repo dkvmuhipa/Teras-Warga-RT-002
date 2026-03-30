@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
 import { generatePopulationReportPDF } from '../../services/pdfService';
 import { addPopulationLogToDb, deletePopulationLogFromDb, updateHouseData } from '../../services/databaseService';
+import { toast } from 'sonner';
 import { 
   Plus, FileText, Trash2, TrendingUp, TrendingDown, 
   Users, Baby, Accessibility, Heart, User, 
@@ -69,6 +70,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       residenceType: 'Tetap' as 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga',
       religion: '',
       vulnerability: [] as string[],
+      kkNumber: '',
+      jobCategory: '',
+      education: '',
       newAddress: '',
       fatherName: '',
       motherName: '',
@@ -78,14 +82,130 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     }
   });
 
-  const handleGenerateFromLog = () => {
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const logsThisMonth = populationLogs.filter(log => log.date.startsWith(currentMonth));
+  const handleSyncAllResidents = async () => {
+    let syncCount = 0;
+    for (const house of houses) {
+      if (house.status === 'Occupied' && house.joiningDate) {
+        const hasLog = populationLogs.some(l => l.type === 'Newcomer' && l.houseId === house.id);
+        if (!hasLog) {
+          const vulnerability = [];
+          if (house.isPKH) vulnerability.push('PKH');
+          if (house.isBLT) vulnerability.push('BLT');
+          if (house.isBPNT) vulnerability.push('BPNT');
+          if (house.isBansosLain) vulnerability.push(house.bansosLainName || 'Bansos Lainnya');
+          if (house.isDisability) vulnerability.push('Disabilitas');
+          if (house.isOrphan) vulnerability.push('Yatim/Piatu');
+
+          const newLog = {
+            id: Date.now().toString() + Math.random().toString(36).substring(7),
+            type: 'Newcomer' as const,
+            name: house.headOfFamily,
+            phone: house.phone,
+            houseId: house.id,
+            date: house.joiningDate.split('T')[0],
+            description: 'Warga baru ditambahkan melalui Data Warga (Manual Sync)',
+            details: {
+              previousAddress: '-',
+              reasonForMoving: '-',
+              familyCount: house.occupants || 1,
+              familyMembers: house.familyMembers || [],
+              residenceType: house.residenceType || 'Tetap',
+              religion: house.religion || '-',
+              vulnerability: vulnerability,
+              kkNumber: house.kkNumber || '-',
+              jobCategory: house.jobCategory || '-',
+              education: house.education || '-'
+            }
+          };
+          await addPopulationLogToDb(newLog);
+          syncCount++;
+        }
+      }
+    }
+    if (syncCount > 0) {
+      toast.success(`Berhasil menyinkronkan ${syncCount} data warga ke log mutasi.`);
+    } else {
+      toast.info('Semua data warga sudah sinkron dengan log mutasi.');
+    }
+  };
+
+  const handleGenerateFromLog = async () => {
+    const targetMonth = formData.month; // Use the month selected in the form
+    
+    // Auto-sync missing newcomers and moved out from houses
+    const missingLogs: any[] = [];
+    for (const house of houses) {
+      if (house.status === 'Occupied' && house.joiningDate?.startsWith(targetMonth)) {
+        const hasLog = populationLogs.some(l => l.type === 'Newcomer' && l.houseId === house.id);
+        if (!hasLog) {
+          const vulnerability = [];
+          if (house.isPKH) vulnerability.push('PKH');
+          if (house.isBLT) vulnerability.push('BLT');
+          if (house.isBPNT) vulnerability.push('BPNT');
+          if (house.isBansosLain) vulnerability.push(house.bansosLainName || 'Bansos Lainnya');
+          if (house.isDisability) vulnerability.push('Disabilitas');
+          if (house.isOrphan) vulnerability.push('Yatim/Piatu');
+
+          const newLog = {
+            id: Date.now().toString() + Math.random().toString(36).substring(7),
+            type: 'Newcomer' as const,
+            name: house.headOfFamily,
+            phone: house.phone,
+            houseId: house.id,
+            date: house.joiningDate.split('T')[0],
+            description: 'Warga baru ditambahkan melalui Data Warga (Auto-Sync)',
+            details: {
+              previousAddress: '-',
+              reasonForMoving: '-',
+              familyCount: house.occupants || 1,
+              familyMembers: house.familyMembers || [],
+              residenceType: house.residenceType || 'Tetap',
+              religion: house.religion || '-',
+              vulnerability: vulnerability,
+              kkNumber: house.kkNumber || '-',
+              jobCategory: house.jobCategory || '-',
+              education: house.education || '-'
+            }
+          };
+          missingLogs.push(newLog);
+          await addPopulationLogToDb(newLog);
+        }
+      } else if (house.status === 'Empty') {
+        // Check if there's a recent newcomer log that doesn't have a corresponding moved out log
+        const newcomerLogs = populationLogs.filter(l => l.type === 'Newcomer' && l.houseId === house.id);
+        const movedOutLogs = populationLogs.filter(l => l.type === 'MovedOut' && l.houseId === house.id);
+        
+        if (newcomerLogs.length > movedOutLogs.length) {
+           // Find the latest newcomer log to get the name and details
+           const latestNewcomer = newcomerLogs.sort((a, b) => b.date.localeCompare(a.date))[0];
+           
+           const newLog = {
+            id: Date.now().toString() + Math.random().toString(36).substring(7),
+            type: 'MovedOut' as const,
+            name: latestNewcomer.name || `Warga ${house.block}-${house.number}`,
+            phone: latestNewcomer.phone || '',
+            houseId: house.id,
+            date: new Date().toISOString().split('T')[0],
+            description: 'Warga pindah keluar (Auto-Sync)',
+            details: {
+              newAddress: '-',
+              reasonForMoving: '-',
+              familyCount: latestNewcomer.details?.familyCount || 1
+            }
+          };
+          missingLogs.push(newLog);
+          await addPopulationLogToDb(newLog);
+        }
+      }
+    }
+
+    const allLogs = [...populationLogs, ...missingLogs];
+    const logsThisMonth = allLogs.filter(log => log.date.startsWith(targetMonth));
     
     const birthCount = logsThisMonth.filter(l => l.type === 'Birth').length;
     const deathCount = logsThisMonth.filter(l => l.type === 'Death').length;
-    const newcomerCount = logsThisMonth.filter(l => l.type === 'Newcomer').length;
-    const movedOutCount = logsThisMonth.filter(l => l.type === 'MovedOut').length;
+    const newcomerCount = logsThisMonth.filter(l => l.type === 'Newcomer').reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
+    const movedOutCount = logsThisMonth.filter(l => l.type === 'MovedOut').reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
 
     let currentPregnant = 0;
     let currentBaby = 0;
@@ -96,6 +216,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     let currentElderly = 0;
     let currentWidow = 0;
     let currentTotal = 0;
+    let currentMale = 0;
+    let currentFemale = 0;
 
     houses.forEach(house => {
       if (house.status === 'Occupied') {
@@ -108,16 +230,34 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         currentAdult += house.adultCount || 0;
         currentElderly += house.elderlyCount || 0;
         currentWidow += house.widowCount || 0;
+        
+        // Count gender from family members if available, otherwise estimate
+        if (house.familyMembers && house.familyMembers.length > 0) {
+          house.familyMembers.forEach(m => {
+            if (m.gender === 'Laki-laki') currentMale++;
+            else if (m.gender === 'Perempuan') currentFemale++;
+          });
+        } else {
+          // Fallback: assume head of family gender or split
+          currentMale += Math.ceil((house.occupants || 0) / 2);
+          currentFemale += Math.floor((house.occupants || 0) / 2);
+        }
       }
     });
 
+    if (missingLogs.length > 0) {
+      toast.success(`Berhasil menyinkronkan ${missingLogs.length} data warga baru ke dalam log mutasi.`);
+    }
+
     setFormData(prev => ({
       ...prev,
-      month: currentMonth,
+      month: targetMonth,
       birthCount,
       deathCount,
       newcomerCount,
       movedOutCount,
+      maleCount: currentMale,
+      femaleCount: currentFemale,
       pregnantCount: currentPregnant,
       babyCount: currentBaby,
       toddlerCount: currentToddler,
@@ -126,6 +266,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       adultCount: currentAdult,
       elderlyCount: currentElderly,
       widowCount: currentWidow,
+      initialPopulation: currentTotal - (newcomerCount - movedOutCount) // Estimate initial population
     }));
     setIsModalOpen(true);
   };
@@ -148,10 +289,14 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         familyMembers: logFormData.details.familyCount > 1 ? logFormData.details.familyMembers : undefined,
         residenceType: logFormData.details.residenceType,
         religion: logFormData.details.religion,
-        vulnerability: logFormData.details.vulnerability
+        vulnerability: logFormData.details.vulnerability,
+        kkNumber: logFormData.details.kkNumber,
+        jobCategory: logFormData.details.jobCategory,
+        education: logFormData.details.education
       } : logFormData.type === 'MovedOut' ? {
         newAddress: logFormData.details.newAddress,
-        reasonForMoving: logFormData.details.reasonForMoving
+        reasonForMoving: logFormData.details.reasonForMoving,
+        familyCount: logFormData.details.familyCount
       } : logFormData.type === 'Birth' ? {
         fatherName: logFormData.details.fatherName,
         motherName: logFormData.details.motherName,
@@ -232,6 +377,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         residenceType: 'Tetap',
         religion: '',
         vulnerability: [],
+        kkNumber: '',
+        jobCategory: '',
+        education: '',
         newAddress: '',
         fatherName: '',
         motherName: '',
@@ -539,7 +687,15 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               <p className="text-xs text-slate-500 font-medium">Daftar kejadian kependudukan real-time</p>
             </div>
           </div>
-          <button className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline">Lihat Semua Log</button>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={handleSyncAllResidents}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-slate-200"
+            >
+              <Activity size={14} /> Sync Data Warga
+            </button>
+            <button className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline">Lihat Semua Log</button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -610,6 +766,16 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                                   <span>Status:</span> <span className="text-emerald-600">{log.details.residenceType}</span>
                                 </div>
                               )}
+                              {log.details.kkNumber && (
+                                <div className="flex justify-between border-t border-slate-200/30 pt-1 mt-1">
+                                  <span>No. KK:</span> <span className="text-slate-600">{log.details.kkNumber}</span>
+                                </div>
+                              )}
+                              {log.details.jobCategory && (
+                                <div className="flex justify-between border-t border-slate-200/30 pt-1 mt-1">
+                                  <span>Pekerjaan:</span> <span className="text-slate-600">{log.details.jobCategory}</span>
+                                </div>
+                              )}
                               {log.details.vulnerability && log.details.vulnerability.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-1 pt-1 border-t border-slate-200/30">
                                   {log.details.vulnerability.map((v: string, i: number) => (
@@ -667,224 +833,367 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       </motion.div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tambah Laporan Bulanan">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
+          {/* Header Info */}
+          <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-3xl text-white shadow-lg shadow-indigo-600/20">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+                <FileText size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black tracking-tight">Formulir Laporan Bulanan</h3>
+                <p className="text-indigo-100 text-xs font-medium opacity-80">Silakan lengkapi data kependudukan periode ini.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Periode Section */}
           <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
             <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
               <Calendar size={14} /> Periode Laporan
             </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1.5">Bulan (YYYY-MM)</label>
-                <input 
-                  type="text" 
-                  value={formData.month} 
-                  onChange={e => setFormData({...formData, month: e.target.value})} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none" 
-                  required 
-                />
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Bulan (YYYY-MM)</label>
+                <div className="relative">
+                  <input 
+                    type="month" 
+                    value={formData.month} 
+                    onChange={e => setFormData({...formData, month: e.target.value})} 
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" 
+                    required 
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1.5">Tahun</label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tahun</label>
                 <input 
                   type="number" 
                   value={formData.year} 
                   onChange={e => setFormData({...formData, year: parseInt(e.target.value)})} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" 
                   required 
                 />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
+          {/* Data Utama Section */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-5 shadow-sm">
             <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
-              <TrendingUp size={14} /> Angka Perubahan
+              <TrendingUp size={14} /> Angka Perubahan & Mutasi
+            </h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="col-span-full bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Penduduk Awal Bulan</label>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400"><Users size={18} /></div>
+                  <input 
+                    type="number" 
+                    value={formData.initialPopulation} 
+                    onChange={e => setFormData({...formData, initialPopulation: parseInt(e.target.value)})} 
+                    className="flex-1 p-2 bg-transparent text-lg font-black text-slate-800 outline-none" 
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+                  <label className="block text-[10px] font-bold text-emerald-600 mb-1.5 uppercase">Kelahiran (+)</label>
+                  <input type="number" value={formData.birthCount} onChange={e => setFormData({...formData, birthCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-emerald-700 outline-none" required />
+                </div>
+                <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
+                  <label className="block text-[10px] font-bold text-blue-600 mb-1.5 uppercase">Pendatang (+)</label>
+                  <input type="number" value={formData.newcomerCount} onChange={e => setFormData({...formData, newcomerCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-blue-700 outline-none" required />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-100">
+                  <label className="block text-[10px] font-bold text-rose-600 mb-1.5 uppercase">Kematian (-)</label>
+                  <input type="number" value={formData.deathCount} onChange={e => setFormData({...formData, deathCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-rose-700 outline-none" required />
+                </div>
+                <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100">
+                  <label className="block text-[10px] font-bold text-amber-600 mb-1.5 uppercase">Pindah Keluar (-)</label>
+                  <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-amber-700 outline-none" required />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Demografi Section */}
+          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
+            <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+              <Accessibility size={14} /> Demografi Akhir Bulan
             </h4>
             <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <label className="block text-xs font-bold text-slate-500 mb-1.5">Penduduk Awal</label>
-                <input 
-                  type="number" 
-                  value={formData.initialPopulation} 
-                  onChange={e => setFormData({...formData, initialPopulation: parseInt(e.target.value)})} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none" 
-                  required 
-                />
+              <div className="bg-white p-4 rounded-2xl border border-slate-200">
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Laki-laki</label>
+                <input type="number" value={formData.maleCount} onChange={e => setFormData({...formData, maleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-black text-slate-800 outline-none" required />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1.5">Lahir</label>
-                <input type="number" value={formData.birthCount} onChange={e => setFormData({...formData, birthCount: parseInt(e.target.value)})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" required />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1.5">Meninggal</label>
-                <input type="number" value={formData.deathCount} onChange={e => setFormData({...formData, deathCount: parseInt(e.target.value)})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" required />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1.5">Pendatang</label>
-                <input type="number" value={formData.newcomerCount} onChange={e => setFormData({...formData, newcomerCount: parseInt(e.target.value)})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" required />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1.5">Pindah Keluar</label>
-                <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value)})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" required />
+              <div className="bg-white p-4 rounded-2xl border border-slate-200">
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Perempuan</label>
+                <input type="number" value={formData.femaleCount} onChange={e => setFormData({...formData, femaleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-black text-slate-800 outline-none" required />
               </div>
             </div>
           </div>
 
-          <div className="bg-rose-50/50 p-6 rounded-3xl border border-rose-100 space-y-4">
-            <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-2">
-              <Heart size={14} /> Kelompok Rentan (Real-time)
+          {/* Musiman Section */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-4 shadow-sm">
+            <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
+              <Clock size={14} /> Warga Musiman / Kontrak
             </h4>
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <label className="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Total</label>
+                <input type="number" value={formData.seasonalCount} onChange={e => setFormData({...formData, seasonalCount: parseInt(e.target.value)})} className="w-full bg-transparent font-bold text-slate-800 outline-none" />
+              </div>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <label className="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Laki-laki</label>
+                <input type="number" value={formData.seasonalMaleCount} onChange={e => setFormData({...formData, seasonalMaleCount: parseInt(e.target.value)})} className="w-full bg-transparent font-bold text-slate-800 outline-none" />
+              </div>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <label className="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Perempuan</label>
+                <input type="number" value={formData.seasonalFemaleCount} onChange={e => setFormData({...formData, seasonalFemaleCount: parseInt(e.target.value)})} className="w-full bg-transparent font-bold text-slate-800 outline-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Kelompok Rentan Section */}
+          <div className="bg-rose-50/30 p-6 rounded-[2rem] border border-rose-100 space-y-4">
+            <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-2">
+              <Heart size={14} /> Kelompok Rentan & Prioritas
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Hamil', key: 'pregnantCount' },
-                { label: 'Bayi', key: 'babyCount' },
-                { label: 'Balita', key: 'toddlerCount' },
-                { label: 'Anak', key: 'childCount' },
-                { label: 'Remaja', key: 'teenagerCount' },
-                { label: 'Dewasa', key: 'adultCount' },
-                { label: 'Lansia', key: 'elderlyCount' },
-                { label: 'Janda', key: 'widowCount' }
+                { label: 'Hamil', key: 'pregnantCount', icon: <Activity size={12}/> },
+                { label: 'Bayi', key: 'babyCount', icon: <Baby size={12}/> },
+                { label: 'Balita', key: 'toddlerCount', icon: <Baby size={12}/> },
+                { label: 'Anak', key: 'childCount', icon: <User size={12}/> },
+                { label: 'Remaja', key: 'teenagerCount', icon: <User size={12}/> },
+                { label: 'Dewasa', key: 'adultCount', icon: <User size={12}/> },
+                { label: 'Lansia', key: 'elderlyCount', icon: <Accessibility size={12}/> },
+                { label: 'Janda', key: 'widowCount', icon: <Heart size={12}/> }
               ].map(field => (
-                <div key={field.key}>
-                  <label className="block text-[9px] font-black text-slate-400 mb-1 uppercase tracking-tighter">{field.label}</label>
+                <div key={field.key} className="bg-white p-3 rounded-2xl border border-rose-100 shadow-sm">
+                  <div className="flex items-center gap-1.5 mb-1 text-rose-400">
+                    {field.icon}
+                    <label className="block text-[9px] font-black uppercase tracking-tighter">{field.label}</label>
+                  </div>
                   <input 
                     type="number" 
                     value={(formData as any)[field.key]} 
                     onChange={e => setFormData({...formData, [field.key]: parseInt(e.target.value) || 0})} 
-                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-rose-500/20 outline-none" 
+                    className="w-full bg-transparent text-sm font-black text-slate-800 outline-none" 
                   />
                 </div>
               ))}
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all active:scale-[0.98]"
-          >
-            Simpan Laporan Bulanan
-          </button>
+          {/* Summary Card */}
+          <div className="bg-slate-900 p-6 rounded-[2rem] text-white">
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kalkulasi Akhir</p>
+              <div className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold">Otomatis</div>
+            </div>
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-3xl font-black">
+                  {formData.initialPopulation + formData.birthCount + formData.newcomerCount - formData.movedOutCount - (formData.deathCount || 0)}
+                  <span className="text-sm font-bold text-slate-400 ml-2">Jiwa</span>
+                </p>
+                <p className="text-xs text-slate-500 font-medium mt-1">Total penduduk yang akan dilaporkan</p>
+              </div>
+              <TrendingUp className="text-emerald-500 mb-2" size={32} />
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button 
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+            >
+              Batal
+            </button>
+            <button 
+              type="submit" 
+              className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+            >
+              Simpan Laporan
+            </button>
+          </div>
         </form>
       </Modal>
 
       <Modal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} title="Tambah Log Mutasi Warga" maxWidth="max-w-2xl">
-        <form onSubmit={handleAddLog} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="block text-xs font-bold text-slate-500 mb-1.5">Jenis Mutasi</label>
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { id: 'Newcomer', label: 'Masuk' },
-                  { id: 'MovedOut', label: 'Pindah' },
-                  { id: 'Birth', label: 'Lahir' },
-                  { id: 'Death', label: 'Wafat' }
-                ].map(type => (
-                  <button
-                    key={type.id}
-                    type="button"
-                    onClick={() => setLogFormData({ ...logFormData, type: type.id as any })}
-                    className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${logFormData.type === type.id ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-200'}`}
-                  >
-                    {type.label}
-                  </button>
-                ))}
+        <form onSubmit={handleAddLog} className="space-y-6 max-h-[85vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
+          {/* Header Info */}
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 p-6 rounded-3xl text-white shadow-lg shadow-emerald-600/20">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+                <Activity size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black tracking-tight">Catat Mutasi Penduduk</h3>
+                <p className="text-emerald-100 text-xs font-medium opacity-80">Rekam setiap perubahan status warga secara real-time.</p>
               </div>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1.5">Nama Warga</label>
-              <input 
-                type="text" 
-                value={logFormData.name} 
-                onChange={e => setLogFormData({ ...logFormData, name: e.target.value })} 
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                required 
-              />
+          {/* Jenis Mutasi Section */}
+          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
+            <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
+              <Filter size={14} /> Jenis Mutasi
+            </h4>
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { id: 'Newcomer', label: 'Masuk', color: 'emerald' },
+                { id: 'MovedOut', label: 'Pindah', color: 'amber' },
+                { id: 'Birth', label: 'Lahir', color: 'blue' },
+                { id: 'Death', label: 'Wafat', color: 'rose' }
+              ].map(type => (
+                <button
+                  key={type.id}
+                  type="button"
+                  onClick={() => setLogFormData({ ...logFormData, type: type.id as any })}
+                  className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all flex flex-col items-center gap-1 ${
+                    logFormData.type === type.id 
+                      ? `bg-${type.color}-600 text-white border-${type.color}-600 shadow-md scale-105` 
+                      : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'
+                  }`}
+                >
+                  {type.label}
+                </button>
+              ))}
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1.5">Blok Rumah</label>
-              <input 
-                type="text" 
-                value={logFormData.houseId} 
-                onChange={e => setLogFormData({ ...logFormData, houseId: e.target.value.toUpperCase() })} 
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                placeholder="C7-02"
-                required 
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1.5">No. HP</label>
-              <input 
-                type="text" 
-                value={logFormData.phone} 
-                onChange={e => setLogFormData({ ...logFormData, phone: e.target.value })} 
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1.5">Tanggal</label>
-              <input 
-                type="date" 
-                value={logFormData.date} 
-                onChange={e => setLogFormData({ ...logFormData, date: e.target.value })} 
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                required 
-              />
-            </div>
+          </div>
 
-            {/* Dynamic Fields */}
-            {logFormData.type === 'Newcomer' && (
-              <>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Alamat Asal</label>
+          {/* Data Identitas Section */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-5 shadow-sm">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <User size={14} /> Identitas Utama
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="col-span-full">
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Lengkap Warga</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><User size={16} /></div>
                   <input 
                     type="text" 
-                    value={logFormData.details.previousAddress} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, previousAddress: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    value={logFormData.name} 
+                    onChange={e => setLogFormData({ ...logFormData, name: e.target.value })} 
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
+                    placeholder="Contoh: Budi Santoso"
                     required 
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Alasan Pindah</label>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Blok & Nomor Rumah</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><LayoutGrid size={16} /></div>
                   <input 
                     type="text" 
-                    value={logFormData.details.reasonForMoving} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    value={logFormData.houseId} 
+                    onChange={e => setLogFormData({ ...logFormData, houseId: e.target.value.toUpperCase() })} 
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
+                    placeholder="C7-02"
                     required 
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Anggota</label>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">No. WhatsApp</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><Activity size={16} /></div>
                   <input 
-                    type="number" 
-                    value={logFormData.details.familyCount} 
-                    onChange={e => {
-                      const count = parseInt(e.target.value) || 1;
-                      const newMembers = count > 1 ? Array(count - 1).fill(null).map((_, i) => logFormData.details.familyMembers[i] || { name: '', relationship: '', nik: '' }) : [];
-                      setLogFormData({ 
-                        ...logFormData, 
-                        details: { 
-                          ...logFormData.details, 
-                          familyCount: count,
-                          familyMembers: newMembers
-                        } 
-                      });
-                    }} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                    required 
-                    min="1"
+                    type="text" 
+                    value={logFormData.phone} 
+                    onChange={e => setLogFormData({ ...logFormData, phone: e.target.value })} 
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
+                    placeholder="0812..."
                   />
                 </div>
+              </div>
+              <div className="col-span-full">
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tanggal Kejadian</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><Calendar size={16} /></div>
+                  <input 
+                    type="date" 
+                    value={logFormData.date} 
+                    onChange={e => setLogFormData({ ...logFormData, date: e.target.value })} 
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
+                    required 
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dynamic Details Section */}
+          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-5">
+            <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+              <List size={14} /> Detail Informasi Tambahan
+            </h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {logFormData.type === 'Newcomer' && (
+                <>
+                  <div className="col-span-full">
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alamat Asal</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.previousAddress} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, previousAddress: e.target.value } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alasan Pindah</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.reasonForMoving} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Jumlah Anggota Keluarga</label>
+                    <input 
+                      type="number" 
+                      value={logFormData.details.familyCount} 
+                      onChange={e => {
+                        const count = parseInt(e.target.value) || 1;
+                        const newMembers = count > 1 ? Array(count - 1).fill(null).map((_, i) => logFormData.details.familyMembers[i] || { name: '', relationship: '', nik: '' }) : [];
+                        setLogFormData({ 
+                          ...logFormData, 
+                          details: { 
+                            ...logFormData.details, 
+                            familyCount: count,
+                            familyMembers: newMembers
+                          } 
+                        });
+                      }} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                      min="1"
+                    />
+                  </div>
                 {logFormData.details.familyCount > 1 && (
                   <div className="col-span-2 space-y-3 p-4 bg-slate-100/50 rounded-2xl border border-slate-200">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Biodata Anggota Keluarga Lainnya</p>
                     {logFormData.details.familyMembers.map((member, idx) => (
-                      <div key={idx} className="grid grid-cols-2 gap-2 p-3 bg-white rounded-xl border border-slate-100">
+                      <div key={idx} className="grid grid-cols-2 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                         <input 
                           placeholder="Nama Lengkap"
-                          className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none"
+                          className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500"
                           value={member.name}
                           onChange={e => {
                             const updated = [...logFormData.details.familyMembers];
@@ -893,9 +1202,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                           }}
                           required
                         />
-                        <input 
-                          placeholder="Hubungan"
-                          className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none"
+                        <select 
+                          className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500"
                           value={member.relationship}
                           onChange={e => {
                             const updated = [...logFormData.details.familyMembers];
@@ -903,7 +1211,13 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                             setLogFormData({ ...logFormData, details: { ...logFormData.details, familyMembers: updated } });
                           }}
                           required
-                        />
+                        >
+                          <option value="">Hubungan</option>
+                          <option value="Istri">Istri</option>
+                          <option value="Anak">Anak</option>
+                          <option value="Orang Tua">Orang Tua</option>
+                          <option value="Lainnya">Lainnya</option>
+                        </select>
                       </div>
                     ))}
                   </div>
@@ -941,6 +1255,55 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">No. KK</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.kkNumber} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, kkNumber: e.target.value } })} 
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">Pendidikan</label>
+                    <select 
+                      value={logFormData.details.education} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, education: e.target.value } })} 
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    >
+                      <option value="">Pilih Pendidikan...</option>
+                      <option value="SD">SD</option>
+                      <option value="SMP">SMP</option>
+                      <option value="SMA/SMK">SMA/SMK</option>
+                      <option value="D3">D3</option>
+                      <option value="S1">S1</option>
+                      <option value="S2">S2</option>
+                      <option value="S3">S3</option>
+                      <option value="Tidak Sekolah">Tidak Sekolah</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">Kategori Pekerjaan</label>
+                    <select 
+                      value={logFormData.details.jobCategory} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, jobCategory: e.target.value } })} 
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    >
+                      <option value="">Pilih Pekerjaan...</option>
+                      <option value="PNS">PNS</option>
+                      <option value="TNI/POLRI">TNI/POLRI</option>
+                      <option value="Karyawan Swasta">Karyawan Swasta</option>
+                      <option value="Wiraswasta">Wiraswasta</option>
+                      <option value="Buruh">Buruh</option>
+                      <option value="Petani">Petani</option>
+                      <option value="Ibu Rumah Tangga">Ibu Rumah Tangga</option>
+                      <option value="Pelajar/Mahasiswa">Pelajar/Mahasiswa</option>
+                      <option value="Tidak Bekerja">Tidak Bekerja</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-slate-500 mb-1.5">Kerentanan (Pilih yang sesuai)</label>
                   <div className="flex flex-wrap gap-2">
@@ -969,95 +1332,103 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               </>
             )}
 
-            {logFormData.type === 'MovedOut' && (
-              <>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Alamat Tujuan</label>
-                  <input 
-                    type="text" 
-                    value={logFormData.details.newAddress} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, newAddress: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                    required 
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Alasan Pindah</label>
-                  <input 
-                    type="text" 
-                    value={logFormData.details.reasonForMoving} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                    required 
-                  />
-                </div>
-              </>
-            )}
-
-            {logFormData.type === 'Birth' && (
-              <>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Nama Ayah</label>
-                  <input 
-                    type="text" 
-                    value={logFormData.details.fatherName} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, fatherName: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Nama Ibu</label>
-                  <input 
-                    type="text" 
-                    value={logFormData.details.motherName} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, motherName: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                    required 
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Jenis Kelamin</label>
-                  <div className="flex gap-2">
-                    {['Laki-laki', 'Perempuan'].map(g => (
-                      <button
-                        key={g}
-                        type="button"
-                        onClick={() => setLogFormData({ ...logFormData, details: { ...logFormData.details, gender: g as any } })}
-                        className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${logFormData.details.gender === g ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200'}`}
-                      >
-                        {g}
-                      </button>
-                    ))}
+              {logFormData.type === 'MovedOut' && (
+                <>
+                  <div className="col-span-full">
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alamat Tujuan</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.newAddress} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, newAddress: e.target.value } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    />
                   </div>
+                  <div className="col-span-full">
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alasan Pindah</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.reasonForMoving} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    />
+                  </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Anggota Pindah</label>
+                  <input 
+                    type="number" 
+                    value={logFormData.details.familyCount} 
+                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, familyCount: parseInt(e.target.value) || 1 } })} 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    required 
+                    min="1"
+                  />
                 </div>
               </>
             )}
 
-            {logFormData.type === 'Death' && (
-              <>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Penyebab Kematian</label>
-                  <input 
-                    type="text" 
-                    value={logFormData.details.causeOfDeath} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, causeOfDeath: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                    required 
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">Tempat Kematian</label>
-                  <input 
-                    type="text" 
-                    value={logFormData.details.placeOfDeath} 
-                    onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, placeOfDeath: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                    required 
-                  />
-                </div>
+              {logFormData.type === 'Birth' && (
+                <>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Ayah</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.fatherName} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, fatherName: e.target.value } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Ibu</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.motherName} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, motherName: e.target.value } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Jenis Kelamin</label>
+                    <select 
+                      value={logFormData.details.gender} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, gender: e.target.value as any } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    >
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                  </div>
               </>
             )}
+
+              {logFormData.type === 'Death' && (
+                <>
+                  <div className="col-span-full">
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Penyebab Wafat</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.causeOfDeath} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, causeOfDeath: e.target.value } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    />
+                  </div>
+                  <div className="col-span-full">
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tempat Wafat</label>
+                    <input 
+                      type="text" 
+                      value={logFormData.details.placeOfDeath} 
+                      onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, placeOfDeath: e.target.value } })} 
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                      required 
+                    />
+                  </div>
+                </>
+              )}
 
             <div className="col-span-2">
               <label className="block text-xs font-bold text-slate-500 mb-1.5">
@@ -1091,14 +1462,24 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             <label htmlFor="autoUpdateHouse" className="text-xs font-bold text-indigo-700 cursor-pointer">
               Update data rumah otomatis? (Sinkronisasi ke Data Warga)
             </label>
+            </div>
           </div>
 
-          <button 
-            type="submit" 
-            className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-[0.98]"
-          >
-            Simpan Log Mutasi
-          </button>
+          <div className="flex gap-3 pt-4">
+            <button 
+              type="button"
+              onClick={() => setIsLogModalOpen(false)}
+              className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+            >
+              Batal
+            </button>
+            <button 
+              type="submit" 
+              className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+            >
+              Simpan Mutasi
+            </button>
+          </div>
         </form>
       </Modal>
     </motion.div>

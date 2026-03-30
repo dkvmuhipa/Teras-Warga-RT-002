@@ -362,8 +362,8 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   <Card key={req.id} className="p-6 bg-white border-slate-100 shadow-sm flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className={`p-3 rounded-2xl ${
-                        req.status === 'Approved' ? 'bg-emerald-50 text-emerald-600' :
-                        req.status === 'Rejected' ? 'bg-rose-50 text-rose-600' :
+                        req.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600' :
+                        req.status === 'Ditolak' ? 'bg-rose-50 text-rose-600' :
                         'bg-amber-50 text-amber-600'
                       }`}>
                         <Clock size={20} />
@@ -372,11 +372,11 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-black text-slate-800">Permohonan Update Data</h4>
                           <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
-                            req.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' :
-                            req.status === 'Rejected' ? 'bg-rose-100 text-rose-600' :
+                            req.status === 'Disetujui' ? 'bg-emerald-100 text-emerald-600' :
+                            req.status === 'Ditolak' ? 'bg-rose-100 text-rose-600' :
                             'bg-amber-100 text-amber-600'
                           }`}>
-                            {req.status === 'Pending' ? 'Menunggu Review' : req.status === 'Approved' ? 'Disetujui' : 'Ditolak'}
+                            {req.status === 'Menunggu' ? 'Menunggu Review' : req.status === 'Disetujui' ? 'Disetujui' : 'Ditolak'}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 font-medium">{req.reason}</p>
@@ -385,7 +385,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         </p>
                       </div>
                     </div>
-                    {req.status === 'Approved' && (
+                    {req.status === 'Disetujui' && (
                       <div className="text-emerald-600">
                         <CheckCircle size={24} />
                       </div>

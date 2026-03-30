@@ -19,7 +19,7 @@ const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } =
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest, RondaAttendance } from './types';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -58,8 +58,9 @@ import { Card } from './components/ui/Card';
 import { Modal } from './components/ui/Modal';
 
 // Firebase imports
-import { auth, messaging } from './services/firebaseConfig';
+import { auth, messaging, db } from './services/firebaseConfig';
 import { onAuthStateChanged } from "firebase/auth";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { subscribeToMapPoints, subscribeToCollection, 
   subscribeToNotifications,
   subscribeToGallery,
@@ -210,6 +211,7 @@ export const App = () => {
   const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
   const [pdfConfig, setPdfConfig] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminRole, setAdminRole] = useState<Role | null>(null);
 
   useEffect(() => {
     const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data));
@@ -264,8 +266,22 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsAdmin(!!user);
+      if (user && user.email) {
+        // Fetch role from officials
+        const q = query(collection(db, "officials"), where("email", "==", user.email));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          const officialData = snapshot.docs[0].data() as Official;
+          setAdminRole(officialData.role as Role);
+        } else {
+          // Default to ADMIN if not found in officials (for the main admin account)
+          setAdminRole(Role.ADMIN);
+        }
+      } else {
+        setAdminRole(null);
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -285,6 +301,7 @@ export const App = () => {
                 <Route path="/admin" element={
                     <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
                         <AdminDashboard 
+                            role={adminRole || Role.ADMIN}
                             houses={houses} 
                             announcements={announcements} 
                             news={news} 

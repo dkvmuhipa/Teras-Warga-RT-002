@@ -7,7 +7,7 @@ import {
   Sparkles, FileText, ChevronRight, Info, GraduationCap, Briefcase,
   LayoutDashboard
 } from 'lucide-react';
-import { RondaCheckLog, Report, House, Official, CashFlow } from '../../types';
+import { RondaCheckLog, Report, House, Official, CashFlow, LetterRequest } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFinancial } from '../../context/FinancialContext';
 
@@ -16,9 +16,10 @@ interface AdminAnalyticsProps {
   reports: Report[];
   houses: House[];
   officials: Official[];
+  letters: LetterRequest[];
 }
 
-export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, reports, houses, officials }) => {
+export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, reports, houses, officials, letters }) => {
   const { cashFlow, getArrearsForHouse } = useFinancial();
   const [activeTab, setActiveTab] = useState<'overview' | 'demographics' | 'operational'>('overview');
 
@@ -111,6 +112,42 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, repor
 
     return { income, expense, balance, trend, housesWithArrears, collectionRate };
   }, [cashFlow, houses, getArrearsForHouse]);
+
+  // --- Letter Analytics ---
+  const letterStats = useMemo(() => {
+    const totalLetters = letters.length;
+    const pendingLetters = letters.filter(l => l.status === 'Menunggu').length;
+    const approvedLetters = letters.filter(l => l.status === 'Disetujui').length;
+    
+    // Group by type
+    const types: Record<string, number> = {};
+    letters.forEach(l => {
+      types[l.type] = (types[l.type] || 0) + 1;
+    });
+    const typeData = Object.entries(types).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+
+    // Monthly trend
+    const last6Months = [...Array(6)].map((_, i) => {
+      const d = new Date();
+      d.setMonth(d.getMonth() - (5 - i));
+      return d;
+    });
+
+    const trend = last6Months.map(date => {
+      const month = date.getMonth();
+      const year = date.getFullYear();
+      const monthLabel = date.toLocaleDateString('id-ID', { month: 'short' });
+
+      const count = letters.filter(l => {
+        const d = new Date(l.date);
+        return d.getMonth() === month && d.getFullYear() === year;
+      }).length;
+
+      return { name: monthLabel, count };
+    });
+
+    return { totalLetters, pendingLetters, approvedLetters, typeData, trend };
+  }, [letters]);
 
   // --- Resident Demographics (Unified) ---
   const demographicStats = useMemo(() => {
@@ -580,6 +617,53 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, repor
                 </div>
               </div>
             </motion.div>
+
+            {/* Quality Alerts (From DemographicAnalytics) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-6">Layanan Surat Menyurat</h3>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="p-4 bg-indigo-50 rounded-2xl">
+                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Total Pengajuan</p>
+                    <p className="text-2xl font-black text-indigo-600">{letterStats.totalLetters}</p>
+                  </div>
+                  <div className="p-4 bg-amber-50 rounded-2xl">
+                    <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Menunggu</p>
+                    <p className="text-2xl font-black text-amber-600">{letterStats.pendingLetters}</p>
+                  </div>
+                </div>
+                <div className="h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={letterStats.trend}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#94a3b8'}} />
+                      <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '10px', fontWeight: 'bold' }} />
+                      <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1' }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-6">Jenis Surat Terpopuler</h3>
+                <div className="space-y-4">
+                  {letterStats.typeData.slice(0, 5).map((item, idx) => (
+                    <div key={item.name} className="space-y-2">
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-slate-600">{item.name}</span>
+                        <span className="text-slate-900">{item.value}</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-indigo-500 rounded-full" 
+                          style={{ width: `${(item.value / letterStats.totalLetters) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             {/* Quality Alerts (From DemographicAnalytics) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

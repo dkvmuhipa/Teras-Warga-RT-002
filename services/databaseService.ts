@@ -762,12 +762,12 @@ export const subscribeToHouseUpdateRequests = (houseId: string, callback: (data:
 export const addUpdateRequest = async (data: any) => {
     return await addDoc(collection(db, UPDATE_REQUESTS_COL), {
         ...deepSanitize(data),
-        status: 'Pending',
+        status: 'Menunggu',
         createdAt: new Date().toISOString()
     });
 };
 
-export const updateRequestStatus = async (id: string, status: 'Approved' | 'Rejected', notes?: string) => {
+export const updateRequestStatus = async (id: string, status: 'Disetujui' | 'Ditolak', notes?: string) => {
     const docRef = doc(db, UPDATE_REQUESTS_COL, id);
     return await updateDoc(docRef, { 
         status, 
@@ -1378,6 +1378,28 @@ export const updateReportStatus = async (id: string, status: string) => {
   } catch (e) { console.error("Error updating report:", e); }
 };
 
+export const archiveOldReports = async (days: number = 30) => {
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    const cutoffStr = cutoffDate.toISOString();
+
+    const q = query(collection(db, REPORTS_COL), where("date", "<", cutoffStr), where("status", "==", "Selesai"));
+    const snapshot = await getDocs(q);
+    
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(doc => {
+      batch.update(doc.ref, { archived: true });
+    });
+    
+    await batch.commit();
+    return snapshot.size;
+  } catch (e) {
+    console.error("Error archiving old reports:", e);
+    return 0;
+  }
+};
+
 export const deleteReportFromDb = async (id: string) => {
   try { await deleteDoc(doc(db, REPORTS_COL, id)); } catch (e) { console.error("Error deleting report:", e); }
 };
@@ -1403,6 +1425,28 @@ export const updateLetterInDb = async (id: string, updates: Partial<LetterReques
   try {
     await updateDoc(doc(db, LETTERS_COL, id), deepSanitize(updates));
   } catch (e) { console.error("Error updating letter in DB:", e); }
+};
+
+export const archiveOldLetters = async (days: number = 30) => {
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    const cutoffStr = cutoffDate.toISOString();
+
+    const q = query(collection(db, LETTERS_COL), where("date", "<", cutoffStr), where("status", "in", ["Disetujui", "Ditolak"]));
+    const snapshot = await getDocs(q);
+    
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(doc => {
+      batch.update(doc.ref, { archived: true });
+    });
+    
+    await batch.commit();
+    return snapshot.size;
+  } catch (e) {
+    console.error("Error archiving old letters:", e);
+    return 0;
+  }
 };
 
 export const deleteLetterFromDb = async (id: string) => {

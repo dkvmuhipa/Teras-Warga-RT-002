@@ -22,7 +22,7 @@ import {
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
-import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId, addBillToDb, updateBillInDb } from '../../services/databaseService';
+import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId, addBillToDb, updateBillInDb, addPopulationLogToDb } from '../../services/databaseService';
 import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
@@ -388,7 +388,25 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     if (window.confirm(`PERINGATAN: Apakah Anda yakin ingin MENGHAPUS PERMANEN ${selectedIds.size} warga terpilih?`)) {
         try {
             for (const id of Array.from(selectedIds)) {
+                const houseToDelete = houses.find(h => h.id === id);
                 await deleteHouseFromDb(id);
+                
+                if (houseToDelete && houseToDelete.status === 'Occupied') {
+                  await addPopulationLogToDb({
+                    id: Date.now().toString() + Math.random().toString(36).substring(7),
+                    type: 'MovedOut',
+                    name: houseToDelete.headOfFamily,
+                    phone: houseToDelete.phone,
+                    houseId: houseToDelete.id,
+                    date: new Date().toISOString().split('T')[0],
+                    description: 'Data warga dihapus dari sistem (Bulk Delete)',
+                    details: {
+                      newAddress: '-',
+                      reasonForMoving: '-',
+                      familyCount: houseToDelete.occupants || 1
+                    }
+                  });
+                }
             }
             toast.success('Warga terpilih berhasil dihapus.');
             setSelectedIds(new Set());
@@ -696,6 +714,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         joiningDate: editingHouseId ? (houses.find(h => h.id === editingHouseId)?.joiningDate || new Date().toISOString()) : new Date().toISOString()
       };
 
+      const oldHouse = editingHouseId ? houses.find(h => h.id === editingHouseId) : null;
+
       if (editingHouseId) {
         // If ID changed (block or number changed), delete old and create new
         if (editingHouseId !== houseId) {
@@ -708,6 +728,84 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       } else {
         await addHouse(data);
       }
+
+      // --- AUTO GENERATE LOG MUTASI ---
+      const logDate = data.joiningDate.split('T')[0];
+      
+      const vulnerability = [];
+      if (data.isPKH) vulnerability.push('PKH');
+      if (data.isBLT) vulnerability.push('BLT');
+      if (data.isBPNT) vulnerability.push('BPNT');
+      if (data.isBansosLain) vulnerability.push(data.bansosLainName || 'Bansos Lainnya');
+      if (data.isDisability) vulnerability.push('Disabilitas');
+      if (data.isOrphan) vulnerability.push('Yatim/Piatu');
+      
+      if (!oldHouse && data.status === 'Occupied') {
+        // 1. New house added and immediately occupied
+        await addPopulationLogToDb({
+          id: Date.now().toString(),
+          type: 'Newcomer',
+          name: data.headOfFamily,
+          phone: data.phone,
+          houseId: data.id,
+          date: logDate,
+          description: 'Warga baru ditambahkan melalui Data Warga',
+          details: {
+            previousAddress: '-',
+            reasonForMoving: '-',
+            familyCount: data.occupants || 1,
+            familyMembers: data.familyMembers || [],
+            residenceType: data.residenceType || 'Tetap',
+            religion: data.religion || '-',
+            vulnerability: vulnerability,
+            kkNumber: data.kkNumber || '-',
+            jobCategory: data.jobCategory || '-',
+            education: data.education || '-'
+          }
+        });
+      } else if (oldHouse) {
+        if (oldHouse.status === 'Empty' && data.status === 'Occupied') {
+          // 2. House status changed from Empty to Occupied
+          await addPopulationLogToDb({
+            id: Date.now().toString(),
+            type: 'Newcomer',
+            name: data.headOfFamily,
+            phone: data.phone,
+            houseId: data.id,
+            date: logDate,
+            description: 'Rumah kosong diisi oleh warga baru',
+            details: {
+              previousAddress: '-',
+              reasonForMoving: '-',
+              familyCount: data.occupants || 1,
+              familyMembers: data.familyMembers || [],
+              residenceType: data.residenceType || 'Tetap',
+              religion: data.religion || '-',
+              vulnerability: vulnerability,
+              kkNumber: data.kkNumber || '-',
+              jobCategory: data.jobCategory || '-',
+              education: data.education || '-'
+            }
+          });
+        } else if (oldHouse.status === 'Occupied' && data.status === 'Empty') {
+          // 3. House status changed from Occupied to Empty
+          await addPopulationLogToDb({
+            id: Date.now().toString(),
+            type: 'MovedOut',
+            name: oldHouse.headOfFamily,
+            phone: oldHouse.phone,
+            houseId: data.id,
+            date: new Date().toISOString().split('T')[0], // Use current date for moving out
+            description: 'Warga pindah keluar (Update Data Warga)',
+            details: {
+              newAddress: '-',
+              reasonForMoving: '-',
+              familyCount: oldHouse.occupants || 1
+            }
+          });
+        }
+      }
+
       setIsModalOpen(false);
       resetForm();
       toast.success('Data warga berhasil disimpan!');
@@ -770,7 +868,26 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const handleDelete = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data warga ini?')) {
       try {
+        const houseToDelete = houses.find(h => h.id === id);
         await deleteHouseFromDb(id);
+        
+        if (houseToDelete && houseToDelete.status === 'Occupied') {
+          await addPopulationLogToDb({
+            id: Date.now().toString(),
+            type: 'MovedOut',
+            name: houseToDelete.headOfFamily,
+            phone: houseToDelete.phone,
+            houseId: houseToDelete.id,
+            date: new Date().toISOString().split('T')[0],
+            description: 'Data warga dihapus dari sistem',
+            details: {
+              newAddress: '-',
+              reasonForMoving: '-',
+              familyCount: houseToDelete.occupants || 1
+            }
+          });
+        }
+
         toast.success('Data warga dihapus.');
         if (selectedResident?.id === id) {
           setIsDrawerOpen(false);
@@ -796,10 +913,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     if (message) {
       try {
         const result = await sendWhatsAppViaGateway(house.phone, message);
-        if (result.success) {
+        if (result?.success) {
           toast.success(`Pesan berhasil dikirim ke ${house.headOfFamily}`);
         } else {
-          toast.error(`Gagal mengirim pesan: ${result.error || 'Terjadi kesalahan'}`);
+          toast.error(`Gagal mengirim pesan: ${result?.error || 'Terjadi kesalahan'}`);
         }
       } catch (error) {
         console.error('WA error:', error);

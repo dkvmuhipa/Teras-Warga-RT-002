@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MapPoint, House } from '../../types';
 import { addMapPointToDb, updateMapPointInDb, deleteMapPointFromDb } from '../../services/databaseService';
 import { Button } from '../ui/Button';
-import { Plus, Trash2, Edit2, MapPin, Shield, Move, Lightbulb, Video, Droplets, Trash } from 'lucide-react';
+import { Plus, Trash2, Edit2, MapPin, Shield, Move, Lightbulb, Video, Droplets, Trash, Flame, Users, ArrowRight } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
 import { MapLayout } from '../HouseMap';
@@ -94,6 +94,9 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
             case 'CCTV': return <Video size={20} />;
             case 'Hydrant': return <Droplets size={20} />;
             case 'Trash': return <Trash size={20} />;
+            case 'APAR': return <Flame size={20} />;
+            case 'AssemblyPoint': return <Users size={20} />;
+            case 'EvacuationRoute': return <ArrowRight size={20} />;
             default: return <MapPin size={20} />;
         }
     };
@@ -107,6 +110,9 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
             case 'CCTV': return 'bg-indigo-500';
             case 'Hydrant': return 'bg-rose-500';
             case 'Trash': return 'bg-orange-500';
+            case 'APAR': return 'bg-red-600';
+            case 'AssemblyPoint': return 'bg-green-600';
+            case 'EvacuationRoute': return 'bg-teal-500';
             default: return 'bg-slate-500';
         }
     };
@@ -173,6 +179,9 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                             <option value="Security">Pos Keamanan</option>
                             <option value="Hydrant">Hydrant</option>
                             <option value="Trash">Tempat Sampah Umum</option>
+                            <option value="APAR">APAR (Alat Pemadam Api Ringan)</option>
+                            <option value="AssemblyPoint">Titik Kumpul (Assembly Point)</option>
+                            <option value="EvacuationRoute">Jalur Evakuasi</option>
                             <option value="Block">Papan Blok</option>
                             <option value="Other">Lainnya</option>
                         </select>

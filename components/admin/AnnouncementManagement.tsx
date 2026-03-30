@@ -70,13 +70,13 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
       if (sendToGroup) {
         totalCount++;
         const groupResult = await broadcastWhatsApp([pdfConfig.whatsappGroupId!], message);
-        if (groupResult.success) successCount++;
+        if (groupResult?.success) successCount++;
       }
 
       // 2. Send to individual numbers
       if (sendToIndividual) {
         const result = await broadcastWhatsApp(phoneNumbers, message);
-        if (result.success) {
+        if (result?.success) {
           successCount += phoneNumbers.length;
         }
         totalCount += phoneNumbers.length;

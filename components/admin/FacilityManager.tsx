@@ -102,7 +102,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
     ));
   };
 
-  const handleUpdateSwapStatus = async (id: string, status: 'Approved' | 'Rejected') => {
+  const handleUpdateSwapStatus = async (id: string, status: 'Disetujui' | 'Ditolak') => {
     await updateRondaSwapRequestStatus(id, status);
   };
 
@@ -377,7 +377,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           { id: 'schedule', label: 'Jadwal', icon: Calendar },
           { id: 'logs', label: 'Log', icon: Activity },
           { id: 'monitoring', label: 'Monitoring', icon: Eye, count: activePanicAlerts.length },
-          { id: 'swaps', label: 'Tukar', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Pending').length },
+          { id: 'swaps', label: 'Tukar', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Menunggu').length },
           { id: 'attendance', label: 'Absensi', icon: UserCheck },
           { id: 'leaderboard', label: 'Peringkat', icon: ShieldCheck },
           { id: 'checkpoints', label: 'Titik', icon: MapPin },
@@ -814,8 +814,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       </div>
                     </div>
                     <span className={`px-2.5 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest border ${
-                      request.status === 'Pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                      request.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                      request.status === 'Menunggu' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                      request.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                       'bg-rose-50 text-rose-600 border-rose-100'
                     }`}>
                       {request.status}
@@ -840,16 +840,16 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     <p className="text-[10px] md:text-xs text-slate-500 italic mb-4 md:mb-6">"{request.reason}"</p>
                   )}
 
-                  {request.status === 'Pending' && (
+                  {request.status === 'Menunggu' && (
                     <div className="flex gap-2 md:gap-3">
                       <Button 
-                        onClick={() => handleUpdateSwapStatus(request.id, 'Approved')}
+                        onClick={() => handleUpdateSwapStatus(request.id, 'Disetujui')}
                         className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-9 md:h-10 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black"
                       >
                         <Check size={12} className="md:w-3.5 md:h-3.5 mr-1.5 md:mr-2" /> Setujui
                       </Button>
                       <Button 
-                        onClick={() => handleUpdateSwapStatus(request.id, 'Rejected')}
+                        onClick={() => handleUpdateSwapStatus(request.id, 'Ditolak')}
                         variant="outline" 
                         className="flex-1 border-rose-100 text-rose-600 hover:bg-rose-50 h-9 md:h-10 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black"
                       >

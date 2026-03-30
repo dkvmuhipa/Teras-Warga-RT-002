@@ -7,9 +7,11 @@ import {
   PieChart, Activity, FileEdit
 } from 'lucide-react';
 import { Logo } from '../../constants';
+import { Role } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface SidebarProps {
+  role: Role;
   activeTab: string;
   setActiveTab: (tab: string) => void;
   isOpen: boolean;
@@ -21,6 +23,7 @@ interface SidebarProps {
 }
 
 export const AdminSidebar: React.FC<SidebarProps> = ({ 
+  role,
   activeTab, setActiveTab, isOpen, setIsOpen, onLogout, residentRegistrations = [], guestReports = [], updateRequests = []
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -80,6 +83,30 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     }
   ];
 
+  // Filter navGroups based on role
+  const filteredNavGroups = navGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => {
+      if (role === Role.ADMIN) return true;
+      
+      if (role === Role.TREASURER) {
+        const allowed = ['overview', 'analytics', 'finance', 'waste-bank', 'settings', 'notifications'];
+        return allowed.includes(item.id);
+      }
+      
+      if (role === Role.SECRETARY) {
+        const allowed = [
+          'overview', 'analytics', 'residents', 'update-requests', 'population-reports', 
+          'health', 'guests', 'officials', 'services', 'documents', 'activities', 
+          'assets', 'content', 'audit', 'notifications', 'settings'
+        ];
+        return allowed.includes(item.id);
+      }
+      
+      return false;
+    })
+  })).filter(group => group.items.length > 0);
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -137,7 +164,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-4 custom-scrollbar scrollbar-hide">
-            {navGroups.map((group) => (
+            {filteredNavGroups.map((group) => (
               <div key={group.title} className="space-y-1">
                 {!isCollapsed ? (
                   <button 

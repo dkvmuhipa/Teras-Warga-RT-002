@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download } from 'lucide-react';
+import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
@@ -772,8 +772,16 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                   <span className="text-[10px] font-bold text-slate-600 uppercase">Pos Keamanan</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-orange-500 flex items-center justify-center shadow-sm shadow-orange-200"><Flame size={8} className="text-white"/></div>
+                  <div className="w-3 h-3 rounded-full bg-red-600 flex items-center justify-center shadow-sm shadow-red-200"><Flame size={8} className="text-white"/></div>
                   <span className="text-[10px] font-bold text-slate-600 uppercase">Titik APAR</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center shadow-sm shadow-green-200"><Users size={8} className="text-white"/></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Titik Kumpul</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-teal-500 flex items-center justify-center shadow-sm shadow-teal-200"><ArrowRight size={8} className="text-white"/></div>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Jalur Evakuasi</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-blue-500 flex items-center justify-center shadow-sm shadow-blue-200"><Droplets size={8} className="text-white"/></div>
@@ -961,7 +969,9 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-rose-600 flex items-center justify-center"><Video size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Titik CCTV</span></div>
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500 flex items-center justify-center"><Shield size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Pos Keamanan</span></div>
-                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-orange-500 flex items-center justify-center"><Flame size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Titik APAR</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-600 flex items-center justify-center"><Flame size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Titik APAR</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center"><Users size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Titik Kumpul</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-teal-500 flex items-center justify-center"><ArrowRight size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Jalur Evakuasi</span></div>
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500 flex items-center justify-center"><Droplets size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Hydrant / Air</span></div>
                                     </div>
                                 </div>
@@ -1092,7 +1102,9 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                       point.type === 'PJU' ? 'bg-yellow-500' :
                                       point.type === 'CCTV' ? 'bg-indigo-500' :
                                       point.type === 'Hydrant' ? 'bg-rose-500' :
-                                      point.type === 'APAR' ? 'bg-orange-600' :
+                                      point.type === 'APAR' ? 'bg-red-600' :
+                                      point.type === 'AssemblyPoint' ? 'bg-green-600' :
+                                      point.type === 'EvacuationRoute' ? 'bg-teal-500' :
                                       point.type === 'Trash' ? 'bg-orange-500' :
                                       'bg-slate-500'
                                   } text-white border-2 border-white`}>
@@ -1102,6 +1114,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                        point.type === 'CCTV' ? <Video size={14} /> :
                                        point.type === 'Hydrant' ? <Droplets size={14} /> :
                                        point.type === 'APAR' ? <Flame size={14} /> :
+                                       point.type === 'AssemblyPoint' ? <Users size={14} /> :
+                                       point.type === 'EvacuationRoute' ? <ArrowRight size={14} /> :
                                        point.type === 'Trash' ? <Trash size={14} /> :
                                        <MapPin size={14} />}
                                   </div>
