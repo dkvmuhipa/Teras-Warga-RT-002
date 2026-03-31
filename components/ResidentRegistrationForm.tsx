@@ -151,7 +151,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Kepala Keluarga / Penghuni Utama</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Kepala Keluarga / Penghuni Utama <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input required type="text" placeholder="Contoh: Budi Santoso" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} />
@@ -159,7 +159,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jenis Kelamin</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jenis Kelamin <span className="text-rose-500">*</span></label>
               <select required className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
                 <option value="Laki-laki">Laki-laki</option>
                 <option value="Perempuan">Perempuan</option>
@@ -167,12 +167,12 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal Lahir</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal Lahir <span className="text-rose-500">*</span></label>
               <input required type="date" className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor WhatsApp Aktif</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor WhatsApp Aktif <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input required type="tel" placeholder="0812xxxx" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
@@ -180,18 +180,18 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Blok Rumah</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Blok Rumah <span className="text-rose-500">*</span></label>
               <input required type="text" placeholder="Contoh: A" className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.block} onChange={e => setFormData({...formData, block: e.target.value})} />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor Rumah</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor Rumah <span className="text-rose-500">*</span></label>
               <input required type="text" placeholder="Contoh: 12" className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status Kepemilikan</label>
-              <select className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.residenceType} onChange={e => setFormData({...formData, residenceType: e.target.value as any})}>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status Kepemilikan <span className="text-rose-500">*</span></label>
+              <select required className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.residenceType} onChange={e => setFormData({...formData, residenceType: e.target.value as any})}>
                 <option value="Tetap">Milik Sendiri (Tetap)</option>
                 <option value="Kontrak">Sewa / Kontrak</option>
                 <option value="Kost">Kost / Mahasiswa</option>
@@ -200,7 +200,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Agama</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Agama <span className="text-rose-500">*</span></label>
               <select required className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.religion} onChange={e => setFormData({...formData, religion: e.target.value})}>
                 <option value="Islam">Islam</option>
                 <option value="Kristen">Kristen</option>
@@ -212,7 +212,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jumlah Penghuni (Total)</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jumlah Penghuni (Total) <span className="text-rose-500">*</span></label>
               <input required type="number" min="1" className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.occupants} onChange={e => setFormData({...formData, occupants: parseInt(e.target.value)})} />
             </div>
           </div>
@@ -229,17 +229,17 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pendidikan Terakhir</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pendidikan Terakhir <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input type="text" placeholder="Contoh: S1" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.education} onChange={e => setFormData({...formData, education: e.target.value})} />
+                <input required type="text" placeholder="Contoh: S1" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.education} onChange={e => setFormData({...formData, education: e.target.value})} />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Pekerjaan</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Pekerjaan <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input type="text" placeholder="Contoh: Karyawan Swasta" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.jobCategory} onChange={e => setFormData({...formData, jobCategory: e.target.value})} />
+                <input required type="text" placeholder="Contoh: Karyawan Swasta" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" value={formData.jobCategory} onChange={e => setFormData({...formData, jobCategory: e.target.value})} />
               </div>
             </div>
             <div className="space-y-2">
@@ -308,23 +308,23 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap <span className="text-rose-500">*</span></label>
                     <input required type="text" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.name} onChange={e => updateFamilyMember(idx, 'name', e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jenis Kelamin</label>
-                    <select className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.gender} onChange={e => updateFamilyMember(idx, 'gender', e.target.value)}>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jenis Kelamin <span className="text-rose-500">*</span></label>
+                    <select required className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.gender} onChange={e => updateFamilyMember(idx, 'gender', e.target.value)}>
                       <option value="Laki-laki">Laki-laki</option>
                       <option value="Perempuan">Perempuan</option>
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal Lahir</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal Lahir <span className="text-rose-500">*</span></label>
                     <input required type="date" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.birthDate || ''} onChange={e => updateFamilyMember(idx, 'birthDate', e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hubungan</label>
-                    <select className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.relation} onChange={e => updateFamilyMember(idx, 'relation', e.target.value)}>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hubungan <span className="text-rose-500">*</span></label>
+                    <select required className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.relation} onChange={e => updateFamilyMember(idx, 'relation', e.target.value)}>
                       <option value="Istri">Istri</option>
                       <option value="Anak">Anak</option>
                       <option value="Orang Tua">Orang Tua</option>
@@ -336,8 +336,8 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     <input type="text" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.nik || ''} onChange={e => updateFamilyMember(idx, 'nik', e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pekerjaan</label>
-                    <input type="text" placeholder="Contoh: Pelajar" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.job || ''} onChange={e => updateFamilyMember(idx, 'job', e.target.value)} />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pekerjaan <span className="text-rose-500">*</span></label>
+                    <input required type="text" placeholder="Contoh: Pelajar" className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none" value={member.job || ''} onChange={e => updateFamilyMember(idx, 'job', e.target.value)} />
                   </div>
                 </div>
               </div>

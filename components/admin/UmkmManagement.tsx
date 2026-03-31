@@ -426,17 +426,17 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingUmkmId ? "Edit UMKM" : "Tambah UMKM Baru"}>
         <form onSubmit={handleSaveUMKM} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nama Usaha</label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nama Usaha <span className="text-rose-500">*</span></label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.name} onChange={e=>setUmkmForm({...umkmForm, name: e.target.value})} placeholder="Contoh: Warung Makan Bu Siti" required/>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Pemilik</label>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Pemilik <span className="text-rose-500">*</span></label>
               <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.owner} onChange={e=>setUmkmForm({...umkmForm, owner: e.target.value})} placeholder="Nama Pemilik" required/>
             </div>
             <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kategori</label>
-              <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.category} onChange={e=>setUmkmForm({...umkmForm, category: e.target.value})}>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kategori <span className="text-rose-500">*</span></label>
+              <select required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.category} onChange={e=>setUmkmForm({...umkmForm, category: e.target.value})}>
                 <option>Kuliner</option>
                 <option>Jasa</option>
                 <option>Retail</option>
@@ -447,11 +447,11 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Deskripsi Usaha</label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Deskripsi Usaha <span className="text-rose-500">*</span></label>
             <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[80px]" rows={3} value={umkmForm.description} onChange={e=>setUmkmForm({...umkmForm, description: e.target.value})} placeholder="Jelaskan produk atau jasa yang ditawarkan..." required/>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kontak (WhatsApp)</label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kontak (WhatsApp) <span className="text-rose-500">*</span></label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.contact} onChange={e=>setUmkmForm({...umkmForm, contact: e.target.value})} placeholder="08..." required/>
           </div>
 

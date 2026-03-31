@@ -91,16 +91,16 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="sm:col-span-2">
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kepala Keluarga (Penghuni)</label>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kepala Keluarga (Penghuni) <span className="text-rose-500">*</span></label>
                       <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} required placeholder="Nama Lengkap..." />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">NIK (Kepala Keluarga)</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.nik} onChange={e => setFormData({...formData, nik: e.target.value})} placeholder="16 Digit NIK..." />
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">NIK (Kepala Keluarga) <span className="text-rose-500">*</span></label>
+                      <input required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.nik} onChange={e => setFormData({...formData, nik: e.target.value})} placeholder="16 Digit NIK..." />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">No. Kartu Keluarga (KK)</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.kkNumber} onChange={e => setFormData({...formData, kkNumber: e.target.value})} placeholder="16 Digit No. KK..." />
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">No. Kartu Keluarga (KK) <span className="text-rose-500">*</span></label>
+                      <input required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.kkNumber} onChange={e => setFormData({...formData, kkNumber: e.target.value})} placeholder="16 Digit No. KK..." />
                     </div>
                     <div className="sm:col-span-2 flex items-center gap-4 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
                       <input 
@@ -115,19 +115,19 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       </label>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Kelamin</label>
-                      <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Kelamin <span className="text-rose-500">*</span></label>
+                      <select required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
                         <option value="Laki-laki">Laki-laki</option>
                         <option value="Perempuan">Perempuan</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tempat Lahir</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthPlace} onChange={e => setFormData({...formData, birthPlace: e.target.value})} placeholder="Kota/Kabupaten..." />
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tempat Lahir <span className="text-rose-500">*</span></label>
+                      <input required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthPlace} onChange={e => setFormData({...formData, birthPlace: e.target.value})} placeholder="Kota/Kabupaten..." />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Lahir</label>
-                      <input type="date" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Lahir <span className="text-rose-500">*</span></label>
+                      <input required type="date" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Perkawinan</label>
@@ -153,8 +153,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.nationality} onChange={e => setFormData({...formData, nationality: e.target.value})} placeholder="WNI / WNA..." />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Alamat Sesuai KTP</label>
-                      <textarea className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.addressKtp} onChange={e => setFormData({...formData, addressKtp: e.target.value})} placeholder="Alamat lengkap sesuai KTP..." rows={2} />
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Alamat Sesuai KTP <span className="text-rose-500">*</span></label>
+                      <textarea required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.addressKtp} onChange={e => setFormData({...formData, addressKtp: e.target.value})} placeholder="Alamat lengkap sesuai KTP..." rows={2} />
                     </div>
                     <div className="sm:col-span-2">
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nama Pemilik Rumah</label>
@@ -165,11 +165,11 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.ownerPhone} onChange={e => setFormData({...formData, ownerPhone: e.target.value})} placeholder="No. HP/WA Pemilik Rumah..." />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Blok</label>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Blok <span className="text-rose-500">*</span></label>
                       <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.block} onChange={e => setFormData({...formData, block: e.target.value})} required placeholder="A" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nomor</label>
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nomor <span className="text-rose-500">*</span></label>
                       <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} required placeholder="12" />
                     </div>
                   </div>
@@ -203,8 +203,15 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         </select>
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Penghuni (Total Jiwa)</label>
-                        <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.occupants} onChange={e => setFormData({...formData, occupants: parseInt(e.target.value) || 0})} min={1} />
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Penghuni (Total Jiwa) <span className="text-rose-500">*</span></label>
+                        <input 
+                          type="number" 
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
+                          value={formData.occupants} 
+                          onChange={e => setFormData({...formData, occupants: parseInt(e.target.value) || 0})} 
+                          min={1} 
+                          required
+                        />
                       </div>
                       <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all">
@@ -274,8 +281,13 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Pendidikan Terakhir</label>
-                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.education} onChange={e => setFormData({...formData, education: e.target.value})}>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Pendidikan Terakhir <span className="text-rose-500">*</span></label>
+                        <select 
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
+                          value={formData.education} 
+                          onChange={e => setFormData({...formData, education: e.target.value})}
+                          required
+                        >
                           <option value="">Pilih...</option>
                           <option value="SD">SD</option>
                           <option value="SMP">SMP</option>
@@ -287,8 +299,13 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kategori Pekerjaan</label>
-                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.jobCategory} onChange={e => setFormData({...formData, jobCategory: e.target.value})}>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kategori Pekerjaan <span className="text-rose-500">*</span></label>
+                        <select 
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
+                          value={formData.jobCategory} 
+                          onChange={e => setFormData({...formData, jobCategory: e.target.value})}
+                          required
+                        >
                           <option value="">Pilih...</option>
                           <option value="PNS">PNS / TNI / Polri</option>
                           <option value="Pegawai Swasta">Pegawai Swasta</option>
@@ -303,7 +320,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.job} onChange={e => setFormData({...formData, job: e.target.value})} placeholder="Contoh: Guru, Arsitek..." />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Agama</label>
+                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Agama <span className="text-rose-500">*</span></label>
                         <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.religion} onChange={e => setFormData({...formData, religion: e.target.value})}>
                           <option value="">Pilih...</option>
                           <option value="Islam">Islam</option>
@@ -594,7 +611,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       
                       <div className="space-y-5">
                         <div>
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Lengkap <span className="text-rose-500">*</span></label>
                           <input 
                             placeholder="Nama Lengkap" 
                             className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
@@ -604,11 +621,12 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               newMembers[idx].name = e.target.value;
                               setFormData({...formData, familyMembers: newMembers});
                             }}
+                            required
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Jenis Kelamin</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Jenis Kelamin <span className="text-rose-500">*</span></label>
                             <select 
                               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
                               value={member.gender || 'Laki-laki'}
@@ -617,13 +635,14 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 newMembers[idx].gender = e.target.value as any;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
+                              required
                             >
                               <option value="Laki-laki">Laki-laki</option>
                               <option value="Perempuan">Perempuan</option>
                             </select>
                           </div>
                           <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Hubungan</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Hubungan <span className="text-rose-500">*</span></label>
                             <select 
                               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
                               value={member.relation}
@@ -632,6 +651,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 newMembers[idx].relation = e.target.value as any;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
+                              required
                             >
                               <option value="Istri">Istri</option>
                               <option value="Anak">Anak</option>
@@ -642,7 +662,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">NIK</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">NIK <span className="text-rose-500">*</span></label>
                             <input 
                               placeholder="NIK" 
                               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
@@ -652,10 +672,11 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 newMembers[idx].nik = e.target.value;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
+                              required
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Tgl Lahir</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Tgl Lahir <span className="text-rose-500">*</span></label>
                             <input 
                               type="date"
                               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
@@ -665,10 +686,11 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 newMembers[idx].birthDate = e.target.value;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
+                              required
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pekerjaan</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pekerjaan <span className="text-rose-500">*</span></label>
                             <input 
                               placeholder="Pekerjaan" 
                               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
@@ -678,6 +700,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 newMembers[idx].job = e.target.value;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
+                              required
                             />
                           </div>
                         </div>
@@ -879,8 +902,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <div className="space-y-6 bg-slate-50/30 p-6 rounded-[2.5rem] border border-slate-100">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran</label>
+              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran <span className="text-rose-500">*</span></label>
               <select 
+                required
                 className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
                 value={payType}
                 onChange={e => setPayType(e.target.value as any)}
@@ -892,7 +916,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nominal (Rp)</label>
+              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nominal (Rp) <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</div>
                 <input 
@@ -907,7 +931,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Transaksi (Kapan Dibayar)</label>
+            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Transaksi (Kapan Dibayar) <span className="text-rose-500">*</span></label>
             <div className="flex gap-3">
               <div className="relative flex-1">
                 <input 
@@ -1020,8 +1044,9 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
         <div className="space-y-6 bg-slate-50/30 p-6 rounded-[2.5rem] border border-slate-100">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran</label>
+              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran <span className="text-rose-500">*</span></label>
               <select 
+                required
                 className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
                 value={payType}
                 onChange={e => setPayType(e.target.value as any)}
@@ -1033,7 +1058,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nominal (Rp)</label>
+              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nominal (Rp) <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</div>
                 <input 
@@ -1048,7 +1073,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Transaksi</label>
+            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Transaksi <span className="text-rose-500">*</span></label>
             <div className="flex gap-3">
               <input 
                 type="date"

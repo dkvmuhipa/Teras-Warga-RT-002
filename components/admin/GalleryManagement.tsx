@@ -119,7 +119,7 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tambah Foto Galeri">
         <form onSubmit={handleAddGallery} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Judul Kegiatan</label>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Judul Kegiatan <span className="text-rose-500">*</span></label>
             <input 
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
               value={title}
@@ -136,7 +136,7 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
 
           {imageType === 'upload' ? (
             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Pilih Foto</label>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Pilih Foto <span className="text-rose-500">*</span></label>
                 <div className="relative">
                     <input 
                         type="file"
@@ -154,7 +154,7 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
             </div>
           ) : (
             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">URL Foto</label>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">URL Foto <span className="text-rose-500">*</span></label>
                 <input 
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
                   value={imageUrl}

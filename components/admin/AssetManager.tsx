@@ -308,19 +308,19 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
       <Modal isOpen={isInvModalOpen} onClose={() => setIsInvModalOpen(false)} title={editingInvId ? "Edit Aset" : "Tambah Aset Baru"}>
         <form onSubmit={handleSaveInventory} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Aset</label>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Aset <span className="text-rose-500">*</span></label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invName} onChange={e => setInvName(e.target.value)} required />
           </div>
           <div className="grid grid-cols-2 gap-4">
              <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori</label>
-                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invCategory} onChange={e => setInvCategory(e.target.value as any)}>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori <span className="text-rose-500">*</span></label>
+                <select required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invCategory} onChange={e => setInvCategory(e.target.value as any)}>
                    {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                  </select>
              </div>
              <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kondisi</label>
-                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invCondition} onChange={e => setInvCondition(e.target.value as any)}>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kondisi <span className="text-rose-500">*</span></label>
+                <select required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invCondition} onChange={e => setInvCondition(e.target.value as any)}>
                    <option value="Baik">Baik</option>
                    <option value="Perlu Perbaikan">Perlu Perbaikan</option>
                    <option value="Rusak">Rusak</option>
@@ -328,7 +328,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
              </div>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Total</label>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Total <span className="text-rose-500">*</span></label>
             <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invTotal} onChange={e => setInvTotal(e.target.value)} required />
           </div>
           <Button type="submit" className="w-full py-3 mt-2">{editingInvId ? 'Simpan Perubahan' : 'Simpan Aset'}</Button>
@@ -339,16 +339,16 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
       <Modal isOpen={isBorrowModalOpen} onClose={() => setIsBorrowModalOpen(false)} title={`Pinjamkan: ${selectedAsset?.name}`}>
         <form onSubmit={handleBorrow} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Peminjam</label>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Peminjam <span className="text-rose-500">*</span></label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={borrowerName} onChange={e => setBorrowerName(e.target.value)} required placeholder="Nama lengkap warga..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
              <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Pinjam</label>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Pinjam <span className="text-rose-500">*</span></label>
                 <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={borrowAmount} onChange={e => setBorrowAmount(e.target.value)} required min="1" max={selectedAsset?.total} />
              </div>
              <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Tanggal Pinjam</label>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700">Tanggal Pinjam <span className="text-rose-500">*</span></label>
                 <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={borrowDate} onChange={e => setBorrowDate(e.target.value)} required />
              </div>
           </div>
@@ -368,7 +368,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
               <Plus size={14} className="text-indigo-600" /> Tambah Riwayat Baru
             </h5>
             <div>
-              <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Deskripsi Perbaikan</label>
+              <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Deskripsi Perbaikan <span className="text-rose-500">*</span></label>
               <textarea 
                 className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" 
                 value={maintenanceDesc} 
@@ -390,7 +390,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Tanggal</label>
+                <label className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Tanggal <span className="text-rose-500">*</span></label>
                 <input 
                   type="date" 
                   className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold" 

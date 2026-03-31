@@ -233,11 +233,11 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Berita" : "Buat Berita Baru"}>
         <form onSubmit={handleSaveNews} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Judul Berita</label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Judul Berita <span className="text-rose-500">*</span></label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Contoh: Suksesnya Acara Kerja Bakti" required/>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kategori</label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kategori <span className="text-rose-500">*</span></label>
             <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={category} onChange={e=>setCategory(e.target.value as any)}>
               <option value="Kegiatan">Kegiatan</option>
               <option value="Pengumuman">Pengumuman</option>
@@ -260,7 +260,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Isi Berita</label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Isi Berita <span className="text-rose-500">*</span></label>
             <Button type="button" onClick={handleGenerateWithAi} className="mb-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 shadow-none text-xs py-2 px-3">
               <Sparkles size={14} className="mr-2" /> {isAiLoading ? 'Memproses...' : 'Buat dengan AI'}
             </Button>

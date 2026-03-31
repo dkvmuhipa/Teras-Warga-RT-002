@@ -281,7 +281,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingActivityId ? "Edit Kegiatan" : "Buat Kegiatan Baru"}>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Judul Kegiatan</label>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Judul Kegiatan <span className="text-rose-500">*</span></label>
             <input 
               type="text" 
               required
@@ -302,7 +302,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal & Waktu</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal & Waktu <span className="text-rose-500">*</span></label>
               <input 
                 type="datetime-local" 
                 required
@@ -312,7 +312,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Lokasi</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Lokasi <span className="text-rose-500">*</span></label>
               <input 
                 type="text" 
                 required

@@ -1050,11 +1050,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Surat</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Surat <span className="text-rose-500">*</span></p>
                       <select 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
                         value={editLetterData.type || ''}
                         onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
+                        required
                       >
                         {(pdfConfig.letterTemplates || []).map(t => <option key={t.type}>{t.type}</option>)}
                         <option>Lainnya</option>
@@ -1071,29 +1072,32 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       </span>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nama Pemohon</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nama Pemohon <span className="text-rose-500">*</span></p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
                         value={editLetterData.applicantName || ''}
                         onChange={e => setEditLetterData({...editLetterData, applicantName: e.target.value})}
+                        required
                       />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">NIK</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">NIK <span className="text-rose-500">*</span></p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
                         value={editLetterData.nik || ''}
                         onChange={e => setEditLetterData({...editLetterData, nik: e.target.value})}
+                        required
                       />
                     </div>
                     
                     {/* New Fields */}
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">No. HP / WA</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">No. HP / WA <span className="text-rose-500">*</span></p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
                         value={editLetterData.phone || ''}
                         onChange={e => setEditLetterData({...editLetterData, phone: e.target.value})}
+                        required
                       />
                     </div>
                     <div>
@@ -1105,11 +1109,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pendidikan</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pendidikan <span className="text-rose-500">*</span></p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
                         value={editLetterData.education || ''}
                         onChange={e => setEditLetterData({...editLetterData, education: e.target.value})}
+                        required
                       />
                     </div>
                     <div>
@@ -1127,11 +1132,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       </select>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Keluarga</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Keluarga <span className="text-rose-500">*</span></p>
                       <select 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
                         value={editLetterData.familyStatus || ''}
                         onChange={e => setEditLetterData({...editLetterData, familyStatus: e.target.value as any})}
+                        required
                       >
                         <option value="Kepala Keluarga">Kepala Keluarga</option>
                         <option value="Istri">Istri</option>
@@ -1140,38 +1146,42 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       </select>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pekerjaan</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pekerjaan <span className="text-rose-500">*</span></p>
                       <input 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
                         value={editLetterData.job || ''}
                         onChange={e => setEditLetterData({...editLetterData, job: e.target.value})}
+                        required
                       />
                     </div>
 
                     <div className="col-span-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat KTP</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat KTP <span className="text-rose-500">*</span></p>
                       <textarea 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-16 resize-none"
                         value={editLetterData.addressKtp || ''}
                         onChange={e => setEditLetterData({...editLetterData, addressKtp: e.target.value})}
+                        required
                       />
                     </div>
 
                     <div className="col-span-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat Domisili Saat Ini</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat Domisili Saat Ini <span className="text-rose-500">*</span></p>
                       <textarea 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-16 resize-none"
                         value={editLetterData.currentAddress || ''}
                         onChange={e => setEditLetterData({...editLetterData, currentAddress: e.target.value})}
+                        required
                       />
                     </div>
 
                     <div className="col-span-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan <span className="text-rose-500">*</span></p>
                       <textarea 
                         className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-20 resize-none"
                         value={editLetterData.purposeDetail || ''}
                         onChange={e => setEditLetterData({...editLetterData, purposeDetail: e.target.value})}
+                        required
                       />
                     </div>
 
@@ -1272,7 +1282,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               
               <div className="space-y-4">
                 <div className="group">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Lengkap</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Lengkap <span className="text-rose-500">*</span></label>
                   <input 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-300" 
                     value={adminForm.applicantName || ''} 
@@ -1284,7 +1294,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">NIK</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">NIK <span className="text-rose-500">*</span></label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
                       value={adminForm.nik || ''} 
@@ -1294,7 +1304,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     />
                   </div>
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Kepala Keluarga</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Kepala Keluarga <span className="text-rose-500">*</span></label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
                       value={adminForm.familyHeadName || ''} 
@@ -1307,7 +1317,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tempat Lahir</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tempat Lahir <span className="text-rose-500">*</span></label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
                       value={adminForm.birthPlace || ''} 
@@ -1316,7 +1326,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     />
                   </div>
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tanggal Lahir</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tanggal Lahir <span className="text-rose-500">*</span></label>
                     <input 
                       type="date" 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
@@ -1329,7 +1339,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Kelamin</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Kelamin <span className="text-rose-500">*</span></label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
                       value={adminForm.gender || 'Laki-laki'} 
@@ -1340,7 +1350,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </select>
                   </div>
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Agama</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Agama <span className="text-rose-500">*</span></label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
                       value={adminForm.religion || 'Islam'} 
@@ -1353,7 +1363,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pekerjaan</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pekerjaan <span className="text-rose-500">*</span></label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
                       value={adminForm.job || ''} 
@@ -1375,7 +1385,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pendidikan</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pendidikan <span className="text-rose-500">*</span></label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
                       value={adminForm.education || 'SMA/Sederajat'} 
@@ -1385,7 +1395,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </select>
                   </div>
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Hubungan Keluarga</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Hubungan Keluarga <span className="text-rose-500">*</span></label>
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
                       value={adminForm.familyStatus || 'Kepala Keluarga'} 
@@ -1423,7 +1433,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">No. HP / WhatsApp</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">No. HP / WhatsApp <span className="text-rose-500">*</span></label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
                       value={adminForm.phone || ''} 
@@ -1466,7 +1476,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </div>
 
                 <div className="group">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Surat</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Surat <span className="text-rose-500">*</span></label>
                   <div className="relative">
                     <select 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all appearance-none" 
@@ -1485,7 +1495,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </div>
 
                 <div className="group">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Blok / Nomor Rumah</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Blok / Nomor Rumah <span className="text-rose-500">*</span></label>
                   <div className="relative">
                     <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
@@ -1500,7 +1510,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                 <div className="group">
                   <div className="flex justify-between items-end mb-1.5 ml-1">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Keperluan</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Keperluan <span className="text-rose-500">*</span></label>
                     <button 
                       type="button"
                       onClick={() => {
@@ -1522,7 +1532,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </div>
 
                 <div className="group">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Lengkap (Sesuai KTP)</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Lengkap (Sesuai KTP) <span className="text-rose-500">*</span></label>
                   <textarea 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed" 
                     value={adminForm.addressKtp || ''} 
@@ -1533,7 +1543,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </div>
 
                 <div className="group">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Domisili Saat Ini</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Domisili Saat Ini <span className="text-rose-500">*</span></label>
                   <textarea 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed" 
                     value={adminForm.currentAddress || ''} 

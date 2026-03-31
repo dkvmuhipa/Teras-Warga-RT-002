@@ -326,12 +326,12 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Transaksi" : "Catat Transaksi Baru"}>
          <form onSubmit={handleSave} className="space-y-4">
             <div>
-               <label className="block text-xs font-bold mb-1.5 text-slate-700">Keterangan</label>
+               <label className="block text-xs font-bold mb-1.5 text-slate-700">Keterangan <span className="text-rose-500">*</span></label>
                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={desc} onChange={e => setDesc(e.target.value)} required placeholder="Contoh: Iuran Sampah..." />
             </div>
             <div className="grid grid-cols-2 gap-4">
                <div>
-                  <label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp)</label>
+                  <label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp) <span className="text-rose-500">*</span></label>
                   <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={amount} onChange={e => setAmount(e.target.value)} required />
                </div>
                <div>
@@ -343,8 +343,8 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
                </div>
             </div>
             <div>
-               <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori</label>
-               <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={category} onChange={e => setCategory(e.target.value)} list="cat-suggestions" />
+               <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori <span className="text-rose-500">*</span></label>
+               <input required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={category} onChange={e => setCategory(e.target.value)} list="cat-suggestions" />
                <datalist id="cat-suggestions">
                   <option value="Iuran Warga"/>
                   <option value="Sumbangan"/>

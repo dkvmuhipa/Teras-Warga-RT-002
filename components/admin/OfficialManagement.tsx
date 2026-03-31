@@ -208,16 +208,16 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingOfficialId ? "Edit Pengurus" : "Tambah Pengurus Baru"}>
         <form onSubmit={handleSaveOfficial} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nama Lengkap</label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nama Lengkap <span className="text-rose-500">*</span></label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offName} onChange={e=>setOffName(e.target.value)} placeholder="Nama lengkap..." required/>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Jabatan</label>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Jabatan <span className="text-rose-500">*</span></label>
               <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offRole} onChange={e=>setOffRole(e.target.value)} placeholder="Contoh: Ketua RT" required/>
             </div>
             <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Blok Rumah</label>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Blok Rumah <span className="text-rose-500">*</span></label>
               <input 
                 list="house-list"
                 className={`w-full p-3 bg-slate-50 border rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all ${
@@ -245,7 +245,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nomor Telepon / WA</label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nomor Telepon / WA <span className="text-rose-500">*</span></label>
             <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offPhone} onChange={e=>setOffPhone(e.target.value)} placeholder="08..." required/>
           </div>
 

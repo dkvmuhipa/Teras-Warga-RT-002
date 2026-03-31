@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
-import { addPopulationReportToDb, deletePopulationReportFromDb, subscribeToActivePanicAlerts, deleteNotificationFromDb, deleteReportFromDb } from '../../services/databaseService';
+import { addPopulationReportToDb, updatePopulationReportToDb, deletePopulationReportFromDb, subscribeToActivePanicAlerts, deleteNotificationFromDb, deleteReportFromDb } from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
   RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance, Role
@@ -161,6 +161,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onAddReport={async (r) => {
               await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
             }} 
+            onUpdateReport={async (id, r) => {
+              await updatePopulationReportToDb(id, r);
+            }}
             onDeleteReport={async (id) => {
               if (window.confirm('Hapus laporan kependudukan ini?')) {
                 await deletePopulationReportFromDb(id);

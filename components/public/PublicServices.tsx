@@ -291,30 +291,27 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const handleSubmitMutasi = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Only validate PIN for existing residents (MovedOut, Birth, Death)
-    if (mutationType !== 'Newcomer') {
-      const isValid = await validateResidentAccess(mutationHouseId, accessCode);
-      if (!isValid) {
-        toast.error("Verifikasi Gagal!", {
-          description: "Kode Akses Rumah tidak valid."
-        });
-        return;
-      }
-
-      const formattedMutationHouseId = formatHouseId(mutationHouseId);
-      
-      // Check Waste Retribution (Mandatory in Palu City)
-      const retribution = await checkWasteRetribution(formattedMutationHouseId);
-      if (!retribution.paid) {
-        toast.warning("PELAPORAN DITANGGUHKAN", {
-          description: `Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`,
-          duration: 10000
-        });
-        return;
-      }
+    // Validate PIN for all mutation types (Newcomer, MovedOut, Birth, Death)
+    // As per guidance, Mutasi is for active houses which must have a PIN.
+    const isValid = await validateResidentAccess(mutationHouseId, accessCode);
+    if (!isValid) {
+      toast.error("Verifikasi Gagal!", {
+        description: "Kode Akses Rumah tidak valid."
+      });
+      return;
     }
 
     const formattedMutationHouseId = formatHouseId(mutationHouseId);
+    
+    // Check Waste Retribution (Mandatory in Palu City)
+    const retribution = await checkWasteRetribution(formattedMutationHouseId);
+    if (!retribution.paid) {
+      toast.warning("PELAPORAN DITANGGUHKAN", {
+        description: `Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`,
+        duration: 10000
+      });
+      return;
+    }
 
     const mutationData = {
       id: Date.now().toString(),
@@ -1113,7 +1110,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Warga Terkait</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Warga Terkait <span className="text-rose-500">*</span></label>
                       <input 
                         className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                         value={mutationName} 
@@ -1123,19 +1120,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       />
                     </div>
 
-                    <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">No. HP / WhatsApp</label>
-                      <input 
-                        className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
-                        value={mutationPhone} 
-                        onChange={e=>setMutationPhone(e.target.value)} 
-                        required 
-                        placeholder="08..."
-                      />
-                    </div>
+                      <div className="group">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">No. HP / WhatsApp <span className="text-rose-500">*</span></label>
+                        <input 
+                          className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
+                          value={mutationPhone} 
+                          onChange={e=>setMutationPhone(e.target.value)} 
+                          required 
+                          placeholder="08..."
+                        />
+                      </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tanggal Kejadian</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tanggal Kejadian <span className="text-rose-500">*</span></label>
                       <input 
                         type="date"
                         className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
@@ -1146,7 +1143,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Blok & No. Rumah</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Blok & No. Rumah <span className="text-rose-500">*</span></label>
                       <input 
                         className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                         value={mutationHouseId} 
@@ -1195,7 +1192,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {mutationType === 'Newcomer' && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="group">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Asal</label>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Asal <span className="text-rose-500">*</span></label>
                           <input 
                             className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                             value={prevAddress} 
@@ -1206,7 +1203,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="group">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alasan Pindah</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alasan Pindah <span className="text-rose-500">*</span></label>
                             <input 
                               className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                               value={moveReason} 
@@ -1216,7 +1213,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             />
                           </div>
                           <div className="group">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jumlah Anggota Keluarga</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jumlah Anggota Keluarga <span className="text-rose-500">*</span></label>
                             <input 
                               type="number"
                               className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
@@ -1286,7 +1283,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="group">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Status Hunian</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Status Hunian <span className="text-rose-500">*</span></label>
                             <div className="flex flex-wrap gap-2">
                               {['Tetap', 'Kontrak', 'Kost', 'Rumah Keluarga'].map((type) => (
                                 <button
@@ -1343,7 +1340,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {mutationType === 'MovedOut' && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="group">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Tujuan</label>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Tujuan <span className="text-rose-500">*</span></label>
                           <input 
                             className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                             value={newAddress} 
@@ -1369,7 +1366,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="group">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Ayah</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Ayah <span className="text-rose-500">*</span></label>
                             <input 
                               className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                               value={fatherName} 
@@ -1379,7 +1376,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             />
                           </div>
                           <div className="group">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Ibu</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Ibu <span className="text-rose-500">*</span></label>
                             <input 
                               className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                               value={motherName} 
@@ -1390,7 +1387,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           </div>
                         </div>
                         <div className="group">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jenis Kelamin</label>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jenis Kelamin <span className="text-rose-500">*</span></label>
                           <div className="flex gap-4">
                             {['Laki-laki', 'Perempuan'].map((g) => (
                               <button
@@ -1411,7 +1408,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="group">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Penyebab Kematian</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Penyebab Kematian <span className="text-rose-500">*</span></label>
                             <input 
                               className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                               value={deathCause} 
@@ -1421,7 +1418,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             />
                           </div>
                           <div className="group">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tempat Kematian</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tempat Kematian <span className="text-rose-500">*</span></label>
                             <input 
                               className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all" 
                               value={deathPlace} 
@@ -1473,16 +1470,16 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       
                       <div className="group">
                         <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 ml-1">
-                          {mutationType === 'Newcomer' ? 'PIN (Opsional)' : 'PIN Akses'}
+                          PIN Akses
                         </label>
                         <div className="relative">
                           <input 
                             type={showPin ? "text" : "password"} 
-                            placeholder={mutationType === 'Newcomer' ? 'Kosongkan' : 'Masukkan PIN Rumah'} 
-                            className={`w-full p-5 bg-white border border-emerald-100 rounded-2xl text-sm font-black focus:border-emerald-500 outline-none transition-all text-center shadow-sm ${mutationType === 'Newcomer' ? 'opacity-50' : ''}`} 
+                            placeholder="Masukkan PIN Rumah" 
+                            className="w-full p-5 bg-white border border-emerald-100 rounded-2xl text-sm font-black focus:border-emerald-500 outline-none transition-all text-center shadow-sm" 
                             value={accessCode} 
                             onChange={e=>setAccessCode(e.target.value)} 
-                            required={mutationType !== 'Newcomer'}
+                            required
                           />
                           <button
                             type="button"

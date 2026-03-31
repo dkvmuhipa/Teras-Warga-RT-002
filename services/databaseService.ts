@@ -1529,6 +1529,13 @@ export const addPopulationLogToDb = async (log: any) => {
   } catch (e) { console.error("Error adding population log:", e); }
 };
 
+export const updatePopulationLogToDb = async (id: string, updates: any) => {
+  try {
+    const { id: _, ...data } = updates;
+    await updateDoc(doc(db, POPULATION_LOGS_COL, id), deepSanitize(data));
+  } catch (e) { console.error("Error updating population log:", e); }
+};
+
 export const deletePopulationLogFromDb = async (id: string) => {
   try {
     await deleteDoc(doc(db, POPULATION_LOGS_COL, id));
@@ -1540,6 +1547,13 @@ export const addPopulationReportToDb = async (report: any) => {
     const { id, ...data } = report;
     await addDoc(collection(db, "populationReports"), deepSanitize(data));
   } catch (e) { console.error("Error adding population report:", e); }
+};
+
+export const updatePopulationReportToDb = async (id: string, updates: any) => {
+  try {
+    const { id: _, ...data } = updates;
+    await updateDoc(doc(db, "populationReports", id), deepSanitize(data));
+  } catch (e) { console.error("Error updating population report:", e); }
 };
 
 export const deletePopulationReportFromDb = async (id: string) => {
