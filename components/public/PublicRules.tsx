@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const PublicRules: React.FC = () => {
@@ -14,92 +14,110 @@ export const PublicRules: React.FC = () => {
         "Menyerahkan fotokopi KTP dan KK (untuk warga tetap) atau KTP, KTM, dan surat kontrakan (untuk mahasiswa).",
         "Menuliskan nomor WhatsApp aktif di bagian belakang dokumen KK/KTP.",
         "Mengisi Formulir Data Warga yang disediakan pengurus RT.",
-        "Wajib melapor kepada Ketua RT jika terjadi perpindahan keluar, perubahan status keluarga (pernikahan, perceraian, meninggal dunia), atau kedatangan tamu menginap lebih dari 1 malam."
+        "Wajib melapor jika terjadi perpindahan keluar, perubahan status keluarga (pernikahan, meninggal dunia), atau tamu menginap lebih dari 1 malam."
       ]
     },
     {
-      title: "Aturan bagi Warga, Mahasiswa & Penghuni Kontrakan",
+      title: "Aturan bagi Warga & Penghuni Kontrakan",
       icon: <Users className="text-emerald-500" size={24} />,
       items: [
         "Wajib lapor diri dalam 1×24 jam setelah menempati rumah kontrakan.",
-        "Wajib menyerahkan dokumen (KTP, KTM, surat kontrak) dan mengisi formulir pendatang.",
         "Wajib menjaga sopan santun dan etika sosial terhadap warga sekitar.",
-        "Diharapkan aktif dalam ronda malam (khusus mahasiswa laki-laki), gotong royong, peringatan hari besar, dan kegiatan kebersamaan.",
-        "Menjaga kebersihan lingkungan tempat tinggal.",
-        "Penghuni kontrakan dilarang mengadakan pesta/acara musik melewati pukul 23.59 WITA, membawa tamu menginap tanpa izin, dan bersikap tidak sopan.",
+        "Diharapkan aktif dalam ronda malam (khusus laki-laki), gotong royong, dan kegiatan kebersamaan.",
+        "Penghuni kontrakan dilarang mengadakan pesta/acara musik melewati pukul 23.59 WITA.",
         "Tanggung jawab pribadi atas keamanan rumah, perilaku tamu, dan tertib berkendara (tidak ugal-ugalan/knalpot bising)."
       ]
     },
     {
-      title: "Ketentuan Tentang Keramaian dan Tamu",
+      title: "Ketentuan Keramaian & Tamu",
       icon: <Calendar className="text-amber-500" size={24} />,
       items: [
         "Kegiatan hiburan/keramaian diizinkan selama berakhir maksimal pukul 23.59 WITA.",
-        "Tamu menjaga ketertiban dan tidak parkir sembarangan yang menghalangi jalan umum.",
         "Jika mengadakan keramaian, wajib izin dan memberitahu Ketua RT minimal H-3.",
-        "Bersedia menanggung segala risiko jika ada gangguan terhadap warga sekitar.",
-        "Bila melanggar, Pengurus RT berhak memberikan teguran langsung atau berkoordinasi dengan pihak keamanan setempat."
+        "Tamu wajib menjaga ketertiban dan tidak parkir sembarangan yang menghalangi jalan umum.",
+        "Bila melanggar, Pengurus RT berhak memberikan teguran langsung atau berkoordinasi dengan pihak keamanan."
       ]
     },
     {
-      title: "Keamanan dan Ketertiban",
+      title: "Keamanan, Ketertiban & Parkir",
       icon: <Shield className="text-rose-500" size={24} />,
       items: [
-        "Warga diimbau menutup pagar rumah pada malam hari.",
-        "Melaporkan jika ada kegiatan mencurigakan.",
-        "Saling menjaga keamanan rumah dan tetangga.",
-        "Pengaturan jadwal ronda malam dikelola oleh pengurus RT.",
-        "Kendaraan warga dan tamu tidak boleh menghalangi akses jalan umum."
+        "Warga diimbau menutup pagar rumah pada malam hari dan melaporkan kegiatan mencurigakan.",
+        "Dilarang keras memarkir kendaraan di bahu jalan yang dapat menghambat akses darurat (Pemadam/Ambulans).",
+        "Warga wajib mengarahkan tamu agar parkir tidak menutupi akses pagar rumah tetangga.",
+        "Pengaturan jadwal ronda malam dikelola secara digital melalui sistem RT.",
+        "Gunakan fitur Panic Button di aplikasi hanya untuk keadaan darurat yang sebenarnya."
       ]
     },
     {
-      title: "Kebersihan dan Lingkungan",
+      title: "Kebersihan & Bank Sampah",
       icon: <Trash2 className="text-teal-500" size={24} />,
       items: [
-        "Setiap rumah bertanggung jawab atas kebersihan halaman dan saluran air sekitarnya.",
-        "Gotong royong lingkungan dilakukan minimal 1 minggu sekali.",
+        "Warga diwajibkan memilah sampah organik and anorganik dari rumah.",
+        "Aktif menyetorkan sampah anorganik ke Bank Sampah RT 02 melalui aplikasi untuk saldo digital.",
+        "Setiap rumah bertanggung jawab atas kebersihan halaman and saluran air sekitarnya.",
         "Dilarang keras membuang sampah di saluran air, lahan kosong, atau bahu jalan.",
-        "Sampah harus dibungkus rapi dan diletakkan pada tempat yang ditentukan sebelum jam angkut.",
-        "Dukung pengelolaan TPS3R (Tempat Pengolahan Sampah Reduce, Reuse, Recycle) yang sudah tersedia."
+        "Dukung pengelolaan TPS3R untuk lingkungan yang lebih sehat."
       ]
     },
     {
-      title: "Sosial dan Kemasyarakatan",
+      title: "Sosial & Kemasyarakatan",
       icon: <Home className="text-blue-500" size={24} />,
       items: [
-        "Warga diwajibkan mengikuti kegiatan sosial: pengajian, arisan RT, halal bihalal, posyandu, 17 Agustus, dll.",
-        "Memberikan kabar jika berhalangan hadir.",
+        "Warga diwajibkan mengikuti kegiatan sosial: pengajian, arisan RT, posyandu, dan kerja bakti.",
+        "Memberikan kabar jika berhalangan hadir dalam kegiatan warga.",
         "Membayar iuran bulanan RT sesuai kesepakatan musyawarah.",
-        "Bersedia menyumbang sukarela untuk bantuan duka, bencana, atau musibah."
+        "Bersedia menyumbang sukarela untuk bantuan duka, bencana, atau musibah warga."
       ]
     },
     {
-      title: "Usaha dan UMKM",
-      icon: <Briefcase className="text-orange-500" size={24} />,
+      title: "Hewan Peliharaan",
+      icon: <Heart className="text-pink-500" size={24} />,
       items: [
-        "Usaha rumahan diperbolehkan selama tidak mengganggu tetangga (asap, bau, suara) dan tetap menjaga ketertiban dan kebersihan.",
-        "Wajib melaporkan jenis usahanya ke pengurus RT untuk keperluan pendataan dan pemberdayaan UMKM lokal."
+        "Pemilik hewan wajib memastikan peliharaannya tidak mengganggu ketenangan (suara) and keamanan warga.",
+        "Wajib segera membersihkan kotoran hewan peliharaan jika berada di area publik atau jalan umum.",
+        "Memastikan hewan peliharaan dalam kondisi sehat and tidak membahayakan lingkungan."
       ]
     },
     {
-      title: "Digitalisasi dan Komunikasi",
+      title: "Etika Digital & Privasi",
       icon: <Smartphone className="text-violet-500" size={24} />,
       items: [
-        "Warga dianjurkan bergabung dalam Grup WhatsApp RT 02 untuk informasi penting, darurat, musyawarah, dan menyampaikan aspirasi.",
-        "RT 02 juga membuka kanal saran dan masukan yang dapat diakses setiap saat melalui kotak saran atau pengurus langsung."
+        "Dilarang menyebarkan berita hoaks atau informasi yang belum terverifikasi di grup komunikasi warga.",
+        "Dilarang menyebarkan data pribadi warga lain (No HP, Foto KTP, dll) tanpa izin yang bersangkutan.",
+        "Sampaikan aspirasi, ide, and laporan melalui fitur Musyawarah Digital di aplikasi.",
+        "Menjaga kesantunan dalam berkomunikasi di ruang digital warga."
+      ]
+    },
+    {
+      title: "Penghijauan & Estetika",
+      icon: <Leaf className="text-emerald-500" size={24} />,
+      items: [
+        "Setiap rumah diimbau memiliki minimal satu tanaman hijau di area depan rumah untuk keasrian lingkungan.",
+        "Menjaga keindahan and kerapian fasad rumah agar lingkungan tetap harmonis.",
+        "Dilarang menumpuk material bangunan atau barang bekas di bahu jalan dalam waktu lama."
+      ]
+    },
+    {
+      title: "Usaha & UMKM",
+      icon: <Briefcase className="text-orange-500" size={24} />,
+      items: [
+        "Usaha rumahan diperbolehkan selama tidak mengganggu tetangga (asap, bau, suara) and menjaga kebersihan.",
+        "Wajib melaporkan jenis usahanya ke pengurus RT untuk pendataan and promosi di fitur UMKM aplikasi."
       ]
     },
     {
       title: "Sanksi",
       icon: <Scale className="text-slate-500" size={24} />,
       items: [
-        "Warga atau penghuni kontrakan yang melanggar aturan akan dikenakan teguran lisan/tertulis.",
-        "Dikeluarkan dari grup komunikasi RT.",
-        "Dilaporkan ke pemilik kontrakan, atau dalam kasus berat, dilaporkan ke pihak berwajib.",
+        "Warga yang melanggar aturan akan dikenakan teguran lisan atau tertulis.",
+        "Pelanggaran berulang dapat mengakibatkan pencabutan akses grup komunikasi RT.",
+        "Dalam kasus berat, pelanggaran akan dilaporkan ke pemilik kontrakan atau pihak berwajib.",
         "Aturan ini berlaku untuk seluruh warga dan penghuni RT 02 tanpa terkecuali."
       ]
     }
   ];
+;
 
   return (
     <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm mt-12">

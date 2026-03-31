@@ -753,10 +753,47 @@ export interface UpdateRequest {
   id: string;
   houseId: string;
   headOfFamily: string;
+  gender?: 'Laki-laki' | 'Perempuan';
+  birthPlace?: string;
+  birthDate?: string;
   phone: string;
   occupants: number;
+  residenceType?: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga';
+  nik?: string;
+  kkNumber?: string;
+  maritalStatus?: 'Belum Kawin' | 'Kawin' | 'Cerai Hidup' | 'Cerai Mati';
+  religion?: string;
+  education?: string;
+  job?: string;
+  jobCategory?: string;
+  bloodType?: 'A' | 'B' | 'AB' | 'O' | '-';
+  nationality?: string;
+  addressKtp?: string;
+  bpjsStatus?: 'PPU' | 'PBPU' | 'PBI' | 'Tidak Ada';
+  vehicleCount?: number;
+  
+  // Social Assistance
+  isPKH?: boolean;
+  isBLT?: boolean;
+  isBPNT?: boolean;
+  isBansosLain?: boolean;
+  bansosLainName?: string;
+  economicStatus?: 'Pra-Sejahtera' | 'Sejahtera' | 'Mampu';
+
+  // Demographic Counts
+  pregnantCount?: number;
+  babyCount?: number;
+  toddlerCount?: number;
+  teenagerCount?: number;
+  adultCount?: number;
+  elderlyCount?: number;
+  widowCount?: number;
+  childCount?: number;
+
   familyMembers?: {
     name: string;
+    nik?: string;
+    gender?: 'Laki-laki' | 'Perempuan';
     relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
     birthDate?: string;
     job?: string;

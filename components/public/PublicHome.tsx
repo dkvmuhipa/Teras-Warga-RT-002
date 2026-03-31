@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
-  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User
+  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
+  Camera, Send, Home, Phone, Info
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest } from '../../types';
@@ -15,6 +16,7 @@ import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { useFinancial } from '../../context/FinancialContext';
+import { addReportToDb } from '../../services/databaseService';
 
 interface PublicHomeProps {
   houses: House[];
@@ -36,6 +38,46 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   const [statusSearchId, setStatusSearchId] = React.useState('');
   
   const [isReportModalOpen, setIsReportModalOpen] = React.useState(false);
+  const [reportForm, setReportForm] = React.useState({
+    type: 'Keamanan' as Report['type'],
+    description: '',
+    reporterName: '',
+    reporterHouseId: '',
+    reporterPhone: ''
+  });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleSubmitReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportForm.description || !reportForm.reporterName) {
+      toast.error("Mohon lengkapi data laporan");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await addReportToDb({
+        ...reportForm,
+        date: new Date().toISOString(),
+        status: 'Baru'
+      });
+      toast.success("Laporan berhasil dikirim!", {
+        description: "Terima kasih atas laporannya. Pengurus RT akan segera menindaklanjuti."
+      });
+      setIsReportModalOpen(false);
+      setReportForm({
+        type: 'Keamanan',
+        description: '',
+        reporterName: '',
+        reporterHouseId: '',
+        reporterPhone: ''
+      });
+    } catch (error) {
+      toast.error("Gagal mengirim laporan");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   const handleCheckStatus = (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,11 +194,113 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       {/* Quick Report Modal */}
-      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Lapor Masalah">
-        <div className="p-4">
-          <p className="text-sm text-slate-600 mb-4">Silakan masukkan detail laporan Anda di sini.</p>
-          {/* Add your report form component here */}
-          <Button onClick={() => { setIsReportModalOpen(false); toast.success("Laporan berhasil dikirim!"); }}>Kirim Laporan</Button>
+      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Lapor Masalah Warga" maxWidth="max-w-xl">
+        <div className="p-6">
+          <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-6 flex gap-3">
+            <div className="p-2 bg-rose-100 text-rose-600 rounded-xl h-fit">
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-rose-900 uppercase tracking-tight">Layanan Pengaduan Cepat</h4>
+              <p className="text-xs text-rose-700 font-medium leading-relaxed">
+                Gunakan formulir ini untuk melaporkan masalah keamanan, kebersihan, atau fasilitas di lingkungan RT 02. Laporan Anda akan diteruskan ke pengurus RT.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmitReport} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Laporan</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                  value={reportForm.type}
+                  onChange={e => setReportForm({...reportForm, type: e.target.value as any})}
+                >
+                  <option value="Keamanan">Keamanan</option>
+                  <option value="Kebersihan">Kebersihan</option>
+                  <option value="Fasilitas">Fasilitas</option>
+                  <option value="Sosial">Sosial</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Pelapor</label>
+                <div className="relative">
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Nama Lengkap"
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    value={reportForm.reporterName}
+                    onChange={e => setReportForm({...reportForm, reporterName: e.target.value})}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. Rumah (Opsional)</label>
+                <div className="relative">
+                  <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Contoh: A1-05"
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    value={reportForm.reporterHouseId}
+                    onChange={e => setReportForm({...reportForm, reporterHouseId: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. WhatsApp</label>
+                <div className="relative">
+                  <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="0812..."
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    value={reportForm.reporterPhone}
+                    onChange={e => setReportForm({...reportForm, reporterPhone: e.target.value})}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Deskripsi Masalah</label>
+              <textarea 
+                rows={4}
+                placeholder="Jelaskan secara detail masalah yang Anda temukan..."
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none"
+                value={reportForm.description}
+                onChange={e => setReportForm({...reportForm, description: e.target.value})}
+              />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest"
+                onClick={() => setIsReportModalOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="flex-[2] py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-100"
+              >
+                {isSubmitting ? 'Mengirim...' : (
+                  <span className="flex items-center gap-2">
+                    <Send size={16} /> Kirim Laporan
+                  </span>
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
       </Modal>
 

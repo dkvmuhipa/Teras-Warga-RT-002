@@ -377,7 +377,7 @@ export const App = () => {
                         />
                         <div className="pb-24 md:pb-0">
                             <Routes>
-                                <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
+                                <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} polls={polls} umkm={umkm} events={events} donationCampaigns={donationCampaigns} />} />
                                 <Route path="/voting" element={<PublicVoting polls={polls} />} />
                                 <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
                                 <Route path="/market" element={<PublicMarket items={marketItems} />} />

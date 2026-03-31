@@ -1389,6 +1389,20 @@ export const deleteOfficialFromDb = async (id: string) => {
 };
 
 // --- 5. REPORTS ---
+export const subscribeToHouseReports = (houseId: string, callback: (data: any[]) => void) => {
+    const q = query(
+        collection(db, REPORTS_COL), 
+        where("reporterHouseId", "==", houseId),
+        orderBy("date", "desc")
+    );
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        console.error("Error subscribing to house reports:", error);
+    });
+};
+
 export const addReportToDb = async (report: any) => {
   try {
     const { id, ...data } = report;
