@@ -296,7 +296,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   const handleEditLog = (log: PopulationChangeLog) => {
     setLogFormData({
       type: log.type,
-      name: log.name,
+      name: log.name || '',
       phone: log.phone || '',
       houseId: log.houseId,
       date: log.date,

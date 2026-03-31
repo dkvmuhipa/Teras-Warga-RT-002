@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
-  Camera, Send, Home, Phone, Info
+  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest } from '../../types';
@@ -16,7 +16,7 @@ import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { useFinancial } from '../../context/FinancialContext';
-import { addReportToDb } from '../../services/databaseService';
+import { addReportToDb, validateResidentAccess, formatHouseId } from '../../services/databaseService';
 
 interface PublicHomeProps {
   houses: House[];
@@ -43,21 +43,36 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     description: '',
     reporterName: '',
     reporterHouseId: '',
-    reporterPhone: ''
+    reporterPhone: '',
+    pin: ''
   });
+  const [showPin, setShowPin] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmitReport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reportForm.description || !reportForm.reporterName) {
-      toast.error("Mohon lengkapi data laporan");
+    if (!reportForm.description || !reportForm.reporterName || !reportForm.reporterHouseId || !reportForm.pin) {
+      toast.error("Mohon lengkapi data laporan dan verifikasi");
       return;
     }
 
     setIsSubmitting(true);
     try {
+      // Validate PIN
+      const isValid = await validateResidentAccess(reportForm.reporterHouseId, reportForm.pin);
+      if (!isValid) {
+        toast.error("Verifikasi Gagal!", {
+          description: "Kode Akses Rumah (PIN) tidak valid."
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const formattedHouseId = formatHouseId(reportForm.reporterHouseId);
+
       await addReportToDb({
         ...reportForm,
+        reporterHouseId: formattedHouseId,
         date: new Date().toISOString(),
         status: 'Baru'
       });
@@ -70,7 +85,8 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         description: '',
         reporterName: '',
         reporterHouseId: '',
-        reporterPhone: ''
+        reporterPhone: '',
+        pin: ''
       });
     } catch (error) {
       toast.error("Gagal mengirim laporan");
@@ -241,7 +257,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. Rumah (Opsional)</label>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. Rumah Pelapor</label>
                 <div className="relative">
                   <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
@@ -250,21 +266,44 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                     value={reportForm.reporterHouseId}
                     onChange={e => setReportForm({...reportForm, reporterHouseId: e.target.value})}
+                    required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. WhatsApp</label>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PIN Akses Rumah</label>
                 <div className="relative">
-                  <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
-                    type="text" 
-                    placeholder="0812..."
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                    value={reportForm.reporterPhone}
-                    onChange={e => setReportForm({...reportForm, reporterPhone: e.target.value})}
+                    type={showPin ? "text" : "password"} 
+                    placeholder="••••••"
+                    className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    value={reportForm.pin}
+                    onChange={e => setReportForm({...reportForm, pin: e.target.value})}
+                    required
                   />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors"
+                  >
+                    {showPin ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. WhatsApp</label>
+              <div className="relative">
+                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="0812..."
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                  value={reportForm.reporterPhone}
+                  onChange={e => setReportForm({...reportForm, reporterPhone: e.target.value})}
+                />
               </div>
             </div>
 
