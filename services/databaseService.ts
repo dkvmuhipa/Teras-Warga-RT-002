@@ -32,7 +32,30 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo } from "../types";
+
+const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map((provider: any) => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+};
 
 // Collection References
 const HOUSES_COL = "houses";
@@ -79,16 +102,24 @@ const CONFIGS_COL = "configs";
 
 // --- FCM TOKEN SERVICES ---
 export const saveFCMToken = async (userId: string, token: string) => {
-    const docRef = doc(db, FCM_TOKENS_COL, userId);
-    return await setDoc(docRef, {
-        token,
-        updatedAt: new Date().toISOString()
-    }, { merge: true });
+    try {
+        const docRef = doc(db, FCM_TOKENS_COL, userId);
+        return await setDoc(docRef, {
+            token,
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `${FCM_TOKENS_COL}/${userId}`);
+    }
 };
 
 export const getFCMTokens = async () => {
-    const snapshot = await getDocs(collection(db, FCM_TOKENS_COL));
-    return snapshot.docs.map(doc => doc.data().token);
+    try {
+        const snapshot = await getDocs(collection(db, FCM_TOKENS_COL));
+        return snapshot.docs.map(doc => doc.data().token);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.GET, FCM_TOKENS_COL);
+    }
 };
 export const subscribeToPdfConfig = (callback: (data: any) => void) => {
     const docRef = doc(db, CONFIGS_COL, "pdf");
@@ -98,6 +129,8 @@ export const subscribeToPdfConfig = (callback: (data: any) => void) => {
         } else {
             callback(null);
         }
+    }, (error) => {
+        handleFirestoreError(error, OperationType.GET, `${CONFIGS_COL}/pdf`);
     });
 };
 
@@ -109,8 +142,8 @@ export const updatePdfConfig = async (config: any) => {
             data: deepSanitize(config),
             updatedAt: new Date().toISOString()
         });
-    } catch (e) {
-        console.error("Error updating PDF config:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `${CONFIGS_COL}/pdf`);
     }
 };
 
@@ -119,32 +152,46 @@ export const subscribeToIdeas = (callback: (data: any[]) => void) => {
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, IDEAS_COL);
     });
 };
 
 export const addIdea = async (data: any) => {
-    return await addDoc(collection(db, IDEAS_COL), {
-        ...data,
-        date: new Date().toISOString(),
-        upvotes: [],
-        status: 'Usulan'
-    });
+    try {
+        return await addDoc(collection(db, IDEAS_COL), {
+            ...data,
+            date: new Date().toISOString(),
+            upvotes: [],
+            status: 'Usulan'
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, IDEAS_COL);
+    }
 };
 
 export const updateIdeaStatus = async (id: string, status: string) => {
-    const docRef = doc(db, IDEAS_COL, id);
-    return await updateDoc(docRef, { status });
+    try {
+        const docRef = doc(db, IDEAS_COL, id);
+        return await updateDoc(docRef, { status });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${IDEAS_COL}/${id}`);
+    }
 };
 
 export const toggleUpvoteIdea = async (id: string, houseId: string) => {
-    const docRef = doc(db, IDEAS_COL, id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        const upvotes = docSnap.data().upvotes || [];
-        const newUpvotes = upvotes.includes(houseId) 
-            ? upvotes.filter((hid: string) => hid !== houseId)
-            : [...upvotes, houseId];
-        return await updateDoc(docRef, { upvotes: newUpvotes });
+    try {
+        const docRef = doc(db, IDEAS_COL, id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const upvotes = docSnap.data().upvotes || [];
+            const newUpvotes = upvotes.includes(houseId) 
+                ? upvotes.filter((hid: string) => hid !== houseId)
+                : [...upvotes, houseId];
+            return await updateDoc(docRef, { upvotes: newUpvotes });
+        }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${IDEAS_COL}/${id}`);
     }
 };
 
@@ -154,6 +201,8 @@ export const subscribeToDonationCampaigns = (callback: (data: any[]) => void) =>
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, DONATION_CAMPAIGNS_COL);
     });
 };
 
@@ -166,35 +215,45 @@ export const subscribeToDonationRecords = (campaignId: string, callback: (data: 
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, DONATION_RECORDS_COL);
     });
 };
 
 export const addDonationCampaign = async (data: any) => {
-    return await addDoc(collection(db, DONATION_CAMPAIGNS_COL), {
-        ...data,
-        currentAmount: 0,
-        startDate: new Date().toISOString(),
-        status: 'Aktif'
-    });
+    try {
+        return await addDoc(collection(db, DONATION_CAMPAIGNS_COL), {
+            ...data,
+            currentAmount: 0,
+            startDate: new Date().toISOString(),
+            status: 'Aktif'
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, DONATION_CAMPAIGNS_COL);
+    }
 };
 
 export const addDonationRecord = async (data: any) => {
-    const batch = writeBatch(db);
-    
-    // Add record
-    const recordRef = doc(collection(db, DONATION_RECORDS_COL));
-    batch.set(recordRef, {
-        ...data,
-        date: new Date().toISOString()
-    });
-    
-    // Update campaign amount
-    const campaignRef = doc(db, DONATION_CAMPAIGNS_COL, data.campaignId);
-    batch.update(campaignRef, {
-        currentAmount: increment(data.amount)
-    });
-    
-    return await batch.commit();
+    try {
+        const batch = writeBatch(db);
+        
+        // Add record
+        const recordRef = doc(collection(db, DONATION_RECORDS_COL));
+        batch.set(recordRef, {
+            ...data,
+            date: new Date().toISOString()
+        });
+        
+        // Update campaign amount
+        const campaignRef = doc(db, DONATION_CAMPAIGNS_COL, data.campaignId);
+        batch.update(campaignRef, {
+            currentAmount: increment(data.amount)
+        });
+        
+        return await batch.commit();
+    } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, DONATION_RECORDS_COL);
+    }
 };
 
 // --- AUDIT LOGS SERVICES ---
@@ -207,8 +266,8 @@ export const logAction = async (action: string, details: string) => {
             details,
             timestamp: new Date().toISOString()
         });
-    } catch (e) {
-        console.error("Error logging action:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, AUDIT_LOGS_COL);
     }
 };
 
@@ -218,7 +277,7 @@ export const subscribeToAuditLogs = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to audit logs:", error);
+        handleFirestoreError(error, OperationType.LIST, AUDIT_LOGS_COL);
     });
 };
 
@@ -229,7 +288,7 @@ export const subscribeToInventoryLogs = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to inventory logs:", error);
+        handleFirestoreError(error, OperationType.LIST, INVENTORY_LOGS_COL);
     });
 };
 
@@ -250,24 +309,24 @@ export const addInventoryLogToDb = async (log: any) => {
             };
             await addTransactionToDb(transaction);
         }
-    } catch (e) {
-        console.error("Error adding inventory log:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, INVENTORY_LOGS_COL);
     }
 };
 
 export const updateInventoryLogStatus = async (id: string, status: 'Borrowed' | 'Returned') => {
     try {
         await updateDoc(doc(db, INVENTORY_LOGS_COL, id), { status });
-    } catch (e) {
-        console.error("Error updating inventory log status:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${INVENTORY_LOGS_COL}/${id}`);
     }
 };
 
 export const deleteInventoryLogFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, INVENTORY_LOGS_COL, id));
-    } catch (e) {
-        console.error("Error deleting inventory log:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${INVENTORY_LOGS_COL}/${id}`);
     }
 };
 
@@ -278,31 +337,31 @@ export const subscribeToGuestReports = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to guest reports:", error);
+        handleFirestoreError(error, OperationType.LIST, GUEST_REPORTS_COL);
     });
 };
 
 export const addGuestReportToDb = async (data: any) => {
     try {
         await addDoc(collection(db, GUEST_REPORTS_COL), deepSanitize(data));
-    } catch (e) {
-        console.error("Error adding guest report:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, GUEST_REPORTS_COL);
     }
 };
 
 export const updateGuestReportStatus = async (id: string, status: 'Active' | 'Departed') => {
     try {
         await updateDoc(doc(db, GUEST_REPORTS_COL, id), { status });
-    } catch (e) {
-        console.error("Error updating guest report status:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${GUEST_REPORTS_COL}/${id}`);
     }
 };
 
 export const deleteGuestReportFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, GUEST_REPORTS_COL, id));
-    } catch (e) {
-        console.error("Error deleting guest report:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${GUEST_REPORTS_COL}/${id}`);
     }
 };
 
@@ -313,13 +372,7 @@ export const subscribeToDocuments = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to documents:", error);
-        const qSimple = query(collection(db, DOCUMENTS_COL));
-        onSnapshot(qSimple, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            data.sort((a:any, b:any) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
-            callback(data);
-        });
+        handleFirestoreError(error, OperationType.LIST, DOCUMENTS_COL);
     });
 };
 
@@ -327,16 +380,16 @@ export const addDocumentToDb = async (docData: any) => {
     try {
         const { id, ...data } = docData;
         await addDoc(collection(db, DOCUMENTS_COL), deepSanitize(data));
-    } catch (e) {
-        console.error("Error adding document:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, DOCUMENTS_COL);
     }
 };
 
 export const deleteDocumentFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, DOCUMENTS_COL, id));
-    } catch (e) {
-        console.error("Error deleting document:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${DOCUMENTS_COL}/${id}`);
     }
 };
 
@@ -347,31 +400,31 @@ export const subscribeToCheckpoints = (callback: (data: Checkpoint[]) => void) =
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Checkpoint));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to checkpoints:", error);
+        handleFirestoreError(error, OperationType.LIST, CHECKPOINTS_COL);
     });
 };
 
 export const addCheckpointToDb = async (checkpoint: Omit<Checkpoint, 'id'>) => {
     try {
         await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(checkpoint));
-    } catch (e) {
-        console.error("Error adding checkpoint:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, CHECKPOINTS_COL);
     }
 };
 
 export const updateCheckpointInDb = async (id: string, data: Partial<Checkpoint>) => {
     try {
         await updateDoc(doc(db, CHECKPOINTS_COL, id), deepSanitize(data));
-    } catch (e) {
-        console.error("Error updating checkpoint:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${CHECKPOINTS_COL}/${id}`);
     }
 };
 
 export const deleteCheckpointFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, CHECKPOINTS_COL, id));
-    } catch (e) {
-        console.error("Error deleting checkpoint:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${CHECKPOINTS_COL}/${id}`);
     }
 };
 
@@ -382,15 +435,15 @@ export const subscribeToMapPoints = (callback: (data: MapPoint[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MapPoint));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to map points:", error);
+        handleFirestoreError(error, OperationType.LIST, MAP_POINTS_COL);
     });
 };
 
 export const addMapPointToDb = async (point: Partial<MapPoint>) => {
     try {
         await addDoc(collection(db, MAP_POINTS_COL), deepSanitize(point));
-    } catch (e) {
-        console.error("Error adding map point:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, MAP_POINTS_COL);
     }
 };
 
@@ -398,16 +451,16 @@ export const updateMapPointInDb = async (id: string, point: Partial<MapPoint>) =
     try {
         const { id: _, ...data } = point;
         await setDoc(doc(db, MAP_POINTS_COL, id), deepSanitize(data), { merge: true });
-    } catch (e) {
-        console.error("Error updating map point:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${MAP_POINTS_COL}/${id}`);
     }
 };
 
 export const deleteMapPointFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, MAP_POINTS_COL, id));
-    } catch (e) {
-        console.error("Error deleting map point:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${MAP_POINTS_COL}/${id}`);
     }
 };
 
@@ -416,8 +469,8 @@ export const deleteMapPointFromDb = async (id: string) => {
 export const updateCheckpointPosition = async (id: string, x: number, y: number) => {
     try {
         await setDoc(doc(db, CHECKPOINTS_COL, id), { x, y }, { merge: true });
-    } catch (e) {
-        console.error("Error updating checkpoint position:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${CHECKPOINTS_COL}/${id}`);
     }
 };
 
@@ -427,15 +480,25 @@ export const addBillToDb = async (bill: any) => {
     try {
         const { id, ...data } = bill;
         await addDoc(collection(db, BILLS_COL), deepSanitize(data));
-    } catch (e) { console.error("Error adding bill:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, BILLS_COL);
+    }
 };
 
 export const updateBillInDb = async (id: string, updates: any) => {
-    try { await updateDoc(doc(db, BILLS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating bill:", e); }
+    try {
+        await updateDoc(doc(db, BILLS_COL, id), deepSanitize(updates));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${BILLS_COL}/${id}`);
+    }
 };
 
 export const deleteBillFromDb = async (id: string) => {
-    try { await deleteDoc(doc(db, BILLS_COL, id)); } catch (e) { console.error("Error deleting bill:", e); }
+    try {
+        await deleteDoc(doc(db, BILLS_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${BILLS_COL}/${id}`);
+    }
 };
 
 export const subscribeToBills = (callback: (data: any[]) => void) => {
@@ -444,7 +507,7 @@ export const subscribeToBills = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to bills:", error);
+        handleFirestoreError(error, OperationType.LIST, BILLS_COL);
     });
 };
 
@@ -472,8 +535,8 @@ export const generateMonthlyBills = async (month: string, dueDate: string, items
         
         await batch.commit();
         return true;
-    } catch (e) {
-        console.error("Error generating monthly bills:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, BILLS_COL);
         return false;
     }
 };
@@ -482,9 +545,10 @@ export const uploadImageToStorage = async (file: File, path: string) => {
     const storageRef = ref(storage, path);
     const snapshot = await uploadBytes(storageRef, file);
     return await getDownloadURL(snapshot.ref);
-  } catch (e) {
-    console.error("Error uploading image:", e);
-    throw e;
+  } catch (error) {
+    // Storage error handling (using OperationType.WRITE as a proxy for upload)
+    handleFirestoreError(error, OperationType.WRITE, `storage/${path}`);
+    throw error;
   }
 };
 export const loginAdmin = (email: string, pass: string) => {
@@ -610,7 +674,7 @@ export const subscribeToCollection = (colName: string, callback: (data: any[]) =
     }));
     callback(data);
   }, (error) => {
-    console.error(`Error subscribing to ${colName}:`, error);
+    handleFirestoreError(error, OperationType.LIST, colName);
   });
 };
 
@@ -625,7 +689,7 @@ export const subscribeToActiveReports = (callback: (data: any[]) => void) => {
     }));
     callback(data);
   }, (error) => {
-    console.error("Error subscribing to active reports:", error);
+    handleFirestoreError(error, OperationType.LIST, REPORTS_COL);
   });
 };
 
@@ -640,15 +704,7 @@ export const subscribeToNotifications = (callback: (data: any[]) => void) => {
     }));
     callback(data);
   }, (error) => {
-    // Fallback if index missing or error
-    console.log("Notification index missing or query error, falling back to simple query");
-    const qSimple = query(collection(db, NOTIFICATIONS_COL));
-    onSnapshot(qSimple, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        // Manual Sort
-        data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        callback(data.slice(0, 20));
-    });
+    handleFirestoreError(error, OperationType.LIST, NOTIFICATIONS_COL);
   });
 };
 
@@ -656,15 +712,25 @@ export const addNotificationToDb = async (notification: any) => {
     try {
         const { id, ...data } = notification;
         await addDoc(collection(db, NOTIFICATIONS_COL), deepSanitize(data));
-    } catch (e) { console.error("Error adding notification:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, NOTIFICATIONS_COL);
+    }
 };
 
 export const deleteNotificationFromDb = async (id: string) => {
-    try { await deleteDoc(doc(db, NOTIFICATIONS_COL, id)); } catch (e) { console.error("Error deleting notification:", e); }
+    try {
+        await deleteDoc(doc(db, NOTIFICATIONS_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${NOTIFICATIONS_COL}/${id}`);
+    }
 };
 
 export const markNotificationAsRead = async (id: string) => {
-    try { await updateDoc(doc(db, NOTIFICATIONS_COL, id), { isRead: true }); } catch (e) { console.error("Error marking notification as read:", e); }
+    try {
+        await updateDoc(doc(db, NOTIFICATIONS_COL, id), { isRead: true });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${NOTIFICATIONS_COL}/${id}`);
+    }
 };
 
 export const sendPanicAlert = async (houseId: string, residentName: string, location: string, locationCoords?: { x: number, y: number }) => {
@@ -706,7 +772,7 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
         // Trigger Push Notifications
         try {
             const tokens = await getFCMTokens();
-            if (tokens.length > 0) {
+            if (tokens && tokens.length > 0) {
                 fetch('/api/push/send', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -722,16 +788,20 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
                             location
                         }
                     })
-                }).catch(err => console.error("Push API fetch error:", err));
+                }).catch(err => {
+                    // Non-critical error, just log
+                    console.warn("Push API fetch error:", err);
+                });
             }
-        } catch (e) {
-            console.error("Error triggering push notifications:", e);
+        } catch (error) {
+            // Non-critical error, just log
+            console.warn("Error triggering push notifications:", error);
         }
         
         return true;
-    } catch (e: any) {
-        console.error("Error sending panic alert:", e);
-        return e.message || "Gagal mengirim sinyal darurat.";
+    } catch (error: any) {
+        handleFirestoreError(error, OperationType.WRITE, PANIC_ALERTS_COL);
+        return error.message || "Gagal mengirim sinyal darurat.";
     }
 };
 
@@ -740,6 +810,8 @@ export const subscribeToActivePanicAlerts = (callback: (data: any[]) => void) =>
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, PANIC_ALERTS_COL);
     });
 };
 
@@ -749,7 +821,9 @@ export const updatePanicAlertStatus = async (id: string, status: string, respond
         if (responderName) updateData.responderName = responderName;
         if (status === 'Resolved') updateData.resolvedAt = new Date().toISOString();
         await updateDoc(doc(db, PANIC_ALERTS_COL, id), updateData);
-    } catch (e) { console.error("Error updating panic alert:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${PANIC_ALERTS_COL}/${id}`);
+    }
 };
 
 // --- UPDATE REQUESTS SERVICES ---
@@ -759,14 +833,7 @@ export const subscribeToUpdateRequests = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to update requests:", error);
-        // Fallback
-        const qSimple = query(collection(db, UPDATE_REQUESTS_COL));
-        onSnapshot(qSimple, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            data.sort((a:any, b:any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            callback(data);
-        });
+        handleFirestoreError(error, OperationType.LIST, UPDATE_REQUESTS_COL);
     });
 };
 
@@ -780,25 +847,33 @@ export const subscribeToHouseUpdateRequests = (houseId: string, callback: (data:
         data.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to house update requests:", error);
+        handleFirestoreError(error, OperationType.LIST, UPDATE_REQUESTS_COL);
     });
 };
 
 export const addUpdateRequest = async (data: any) => {
-    return await addDoc(collection(db, UPDATE_REQUESTS_COL), {
-        ...deepSanitize(data),
-        status: 'Menunggu',
-        createdAt: new Date().toISOString()
-    });
+    try {
+        return await addDoc(collection(db, UPDATE_REQUESTS_COL), {
+            ...deepSanitize(data),
+            status: 'Menunggu',
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, UPDATE_REQUESTS_COL);
+    }
 };
 
 export const updateRequestStatus = async (id: string, status: 'Disetujui' | 'Ditolak', notes?: string) => {
-    const docRef = doc(db, UPDATE_REQUESTS_COL, id);
-    return await updateDoc(docRef, { 
-        status, 
-        notes,
-        updatedAt: new Date().toISOString()
-    });
+    try {
+        const docRef = doc(db, UPDATE_REQUESTS_COL, id);
+        return await updateDoc(docRef, { 
+            status, 
+            notes,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${UPDATE_REQUESTS_COL}/${id}`);
+    }
 };
 
 // --- GUEST REPORTS FOR RESIDENT ---
@@ -817,14 +892,7 @@ export const subscribeToHouseGuestReports = (houseId: string, callback: (data: a
         });
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to house guest reports:", error);
-        // Fallback
-        const qSimple = query(collection(db, GUEST_REPORTS_COL), where("residentHouseId", "==", houseId));
-        onSnapshot(qSimple, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            data.sort((a:any, b:any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            callback(data);
-        });
+        handleFirestoreError(error, OperationType.LIST, GUEST_REPORTS_COL);
     });
 };
 
@@ -840,18 +908,26 @@ export const addHouse = async (houseData: any) => {
     } else {
        await addDoc(collection(db, HOUSES_COL), cleanData);
     }
-  } catch (e) { console.error("Error adding house: ", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, HOUSES_COL);
+  }
 };
 
 export const updateHouseData = async (id: string, updates: any) => {
     try {
       const houseRef = doc(db, HOUSES_COL, id);
       await updateDoc(houseRef, deepSanitize(updates));
-    } catch (e) { console.error("Error updating house:", e); }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `${HOUSES_COL}/${id}`);
+    }
 };
 
 export const deleteHouseFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, HOUSES_COL, id)); } catch (e) { console.error("Error deleting house:", e); }
+  try {
+    await deleteDoc(doc(db, HOUSES_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${HOUSES_COL}/${id}`);
+  }
 };
 
 export const formatHouseId = (houseId: string): string => {
@@ -933,8 +1009,8 @@ export const checkHouseOccupied = async (houseId: string): Promise<boolean> => {
             return !!(data.headOfFamily || data.accessCode);
         }
         return false;
-    } catch (e) {
-        console.error("Error checking house occupancy:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.GET, `${HOUSES_COL}/${formatHouseId(houseId)}`);
         return false;
     }
 };
@@ -945,8 +1021,8 @@ export const checkHouseExists = async (houseId: string): Promise<boolean> => {
         const docRef = doc(db, HOUSES_COL, formattedHouseId);
         const snapshot = await getDoc(docRef);
         return snapshot.exists();
-    } catch (e) {
-        console.error("Error checking house existence:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.GET, `${HOUSES_COL}/${formatHouseId(houseId)}`);
         return false;
     }
 };
@@ -1008,8 +1084,8 @@ export const validateResidentAccess = async (houseId: string, code: string): Pro
             console.log(`House document not found for ${formattedHouseId}`);
         }
         return false;
-    } catch (e) {
-        console.error("Verification error:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.GET, HOUSES_COL);
         return false;
     }
 };
@@ -1046,9 +1122,9 @@ export const generateAllAccessCodes = async (houses: any[]) => {
     }
     console.log(`Generate PIN massal selesai. ${generatedCount} PIN dibuat.`);
     return generatedCount;
-  } catch (e) {
-    console.error("Gagal melakukan generate PIN massal:", e);
-    throw e;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, HOUSES_COL);
+    throw error;
   }
 };
 
@@ -1081,9 +1157,9 @@ export const batchUpdateHouses = async (housesData: any[]) => {
     }
     console.log("Import data warga selesai.");
     return true;
-  } catch (e) {
-    console.error("Gagal melakukan batch update:", e);
-    throw e;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, HOUSES_COL);
+    throw error;
   }
 };
 
@@ -1123,9 +1199,9 @@ export const resetHouseData = async (newHouses: any[]) => {
       await batch.commit();
     }
     console.log("Migrasi data warga selesai.");
-  } catch (e) {
-    console.error("Gagal melakukan reset data:", e);
-    throw e;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, HOUSES_COL);
+    throw error;
   }
 };
 
@@ -1134,22 +1210,32 @@ export const addAnnouncementToDb = async (announcement: any) => {
   try {
     const { id, ...data } = announcement; 
     await addDoc(collection(db, ANNOUNCEMENTS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding announcement:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, ANNOUNCEMENTS_COL);
+  }
 };
 
 export const deleteAnnouncementFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, ANNOUNCEMENTS_COL, id)); } catch (e) { console.error("Error deleting announcement:", e); }
+  try {
+    await deleteDoc(doc(db, ANNOUNCEMENTS_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${ANNOUNCEMENTS_COL}/${id}`);
+  }
 };
 
 export const updateAnnouncementInDb = async (id: string, updates: any) => {
-  try { await updateDoc(doc(db, ANNOUNCEMENTS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating announcement:", e); }
+  try {
+    await updateDoc(doc(db, ANNOUNCEMENTS_COL, id), deepSanitize(updates));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${ANNOUNCEMENTS_COL}/${id}`);
+  }
 };
 
 export const addIuranPaymentToDb = async (payment: any) => {
     try {
         await addDoc(collection(db, IURAN_PAYMENTS_COL), deepSanitize(payment));
-    } catch (e) {
-        console.error("Error adding iuran payment:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, IURAN_PAYMENTS_COL);
     }
 };
 
@@ -1158,14 +1244,16 @@ export const subscribeToIuranPayments = (callback: (data: any[]) => void) => {
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, IURAN_PAYMENTS_COL);
     });
 };
 
 export const deleteIuranPaymentFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, IURAN_PAYMENTS_COL, id));
-    } catch (e) {
-        console.error("Error deleting iuran payment:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${IURAN_PAYMENTS_COL}/${id}`);
     }
 };
 
@@ -1181,8 +1269,8 @@ export const checkWasteRetribution = async (houseId: string): Promise<{ paid: bo
         const payments = snapshot.docs.map(doc => doc.data());
         const isPaid = payments.some((p: any) => p.type === 'Sampah' || p.type === 'Both');
         return { paid: isPaid, month: currentMonth };
-    } catch (e) {
-        console.error("Error checking waste retribution:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.GET, IURAN_PAYMENTS_COL);
         return { paid: false, month: '' };
     }
 };
@@ -1190,8 +1278,8 @@ export const checkWasteRetribution = async (houseId: string): Promise<{ paid: bo
 export const updateIuranPaymentInDb = async (id: string, updates: any) => {
     try {
         await updateDoc(doc(db, IURAN_PAYMENTS_COL, id), deepSanitize(updates));
-    } catch (e) {
-        console.error("Error updating iuran payment:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${IURAN_PAYMENTS_COL}/${id}`);
     }
 };
 
@@ -1199,8 +1287,8 @@ export const updateIuranPaymentInDb = async (id: string, updates: any) => {
 export const addResidentRegistrationToDb = async (registration: any) => {
     try {
         await addDoc(collection(db, RESIDENT_REGISTRATIONS_COL), deepSanitize(registration));
-    } catch (e) {
-        console.error("Error adding resident registration:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, RESIDENT_REGISTRATIONS_COL);
     }
 };
 
@@ -1209,22 +1297,24 @@ export const subscribeToResidentRegistrations = (callback: (data: ResidentRegist
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as ResidentRegistration[];
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, RESIDENT_REGISTRATIONS_COL);
     });
 };
 
 export const updateResidentRegistrationInDb = async (id: string, updates: any) => {
     try {
         await updateDoc(doc(db, RESIDENT_REGISTRATIONS_COL, id), deepSanitize(updates));
-    } catch (e) {
-        console.error("Error updating resident registration:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${RESIDENT_REGISTRATIONS_COL}/${id}`);
     }
 };
 
 export const deleteResidentRegistrationFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, RESIDENT_REGISTRATIONS_COL, id));
-    } catch (e) {
-        console.error("Error deleting resident registration:", e);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${RESIDENT_REGISTRATIONS_COL}/${id}`);
     }
 };
 
@@ -1235,13 +1325,7 @@ export const subscribeToActivities = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to activities:", error);
-        const qSimple = query(collection(db, ACTIVITIES_COL));
-        onSnapshot(qSimple, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            callback(data);
-        });
+        handleFirestoreError(error, OperationType.LIST, ACTIVITIES_COL);
     });
 };
 
@@ -1249,15 +1333,25 @@ export const addActivityToDb = async (activity: any) => {
     try {
         const { id, ...data } = activity;
         await addDoc(collection(db, ACTIVITIES_COL), deepSanitize(data));
-    } catch (e) { console.error("Error adding activity:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, ACTIVITIES_COL);
+    }
 };
 
 export const updateActivityInDb = async (id: string, updates: any) => {
-    try { await updateDoc(doc(db, ACTIVITIES_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating activity:", e); }
+    try {
+        await updateDoc(doc(db, ACTIVITIES_COL, id), deepSanitize(updates));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${ACTIVITIES_COL}/${id}`);
+    }
 };
 
 export const deleteActivityFromDb = async (id: string) => {
-    try { await deleteDoc(doc(db, ACTIVITIES_COL, id)); } catch (e) { console.error("Error deleting activity:", e); }
+    try {
+        await deleteDoc(doc(db, ACTIVITIES_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${ACTIVITIES_COL}/${id}`);
+    }
 };
 
 // --- ATTENDANCE SERVICES ---
@@ -1267,13 +1361,7 @@ export const subscribeToAttendance = (activityId: string, callback: (data: any[]
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to attendance:", error);
-        const qSimple = query(collection(db, ATTENDANCE_COL), where("activityId", "==", activityId));
-        onSnapshot(qSimple, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            data.sort((a:any, b:any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-            callback(data);
-        });
+        handleFirestoreError(error, OperationType.LIST, ATTENDANCE_COL);
     });
 };
 
@@ -1281,11 +1369,17 @@ export const addAttendanceToDb = async (attendance: any) => {
     try {
         const { id, ...data } = attendance;
         await addDoc(collection(db, ATTENDANCE_COL), deepSanitize(data));
-    } catch (e) { console.error("Error adding attendance:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, ATTENDANCE_COL);
+    }
 };
 
 export const deleteAttendanceFromDb = async (id: string) => {
-    try { await deleteDoc(doc(db, ATTENDANCE_COL, id)); } catch (e) { console.error("Error deleting attendance:", e); }
+    try {
+        await deleteDoc(doc(db, ATTENDANCE_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${ATTENDANCE_COL}/${id}`);
+    }
 };
 
 // --- HEALTH RECORDS SERVICES ---
@@ -1295,13 +1389,7 @@ export const subscribeToHealthRecords = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to health records:", error);
-        const qSimple = query(collection(db, HEALTH_RECORDS_COL));
-        onSnapshot(qSimple, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            callback(data);
-        });
+        handleFirestoreError(error, OperationType.LIST, HEALTH_RECORDS_COL);
     });
 };
 
@@ -1309,15 +1397,25 @@ export const addHealthRecordToDb = async (record: any) => {
     try {
         const { id, ...data } = record;
         await addDoc(collection(db, HEALTH_RECORDS_COL), deepSanitize(data));
-    } catch (e) { console.error("Error adding health record:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, HEALTH_RECORDS_COL);
+    }
 };
 
 export const updateHealthRecordInDb = async (id: string, updates: any) => {
-    try { await updateDoc(doc(db, HEALTH_RECORDS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating health record:", e); }
+    try {
+        await updateDoc(doc(db, HEALTH_RECORDS_COL, id), deepSanitize(updates));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${HEALTH_RECORDS_COL}/${id}`);
+    }
 };
 
 export const deleteHealthRecordFromDb = async (id: string) => {
-    try { await deleteDoc(doc(db, HEALTH_RECORDS_COL, id)); } catch (e) { console.error("Error deleting health record:", e); }
+    try {
+        await deleteDoc(doc(db, HEALTH_RECORDS_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${HEALTH_RECORDS_COL}/${id}`);
+    }
 };
 
 // --- FAQ SERVICES ---
@@ -1327,7 +1425,7 @@ export const subscribeToFAQ = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to FAQ:", error);
+        handleFirestoreError(error, OperationType.LIST, FAQ_COL);
     });
 };
 
@@ -1335,15 +1433,25 @@ export const addFAQToDb = async (faq: any) => {
     try {
         const { id, ...data } = faq;
         await addDoc(collection(db, FAQ_COL), deepSanitize(data));
-    } catch (e) { console.error("Error adding FAQ:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, FAQ_COL);
+    }
 };
 
 export const updateFAQInDb = async (id: string, updates: any) => {
-    try { await updateDoc(doc(db, FAQ_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating FAQ:", e); }
+    try {
+        await updateDoc(doc(db, FAQ_COL, id), deepSanitize(updates));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${FAQ_COL}/${id}`);
+    }
 };
 
 export const deleteFAQFromDb = async (id: string) => {
-    try { await deleteDoc(doc(db, FAQ_COL, id)); } catch (e) { console.error("Error deleting FAQ:", e); }
+    try {
+        await deleteDoc(doc(db, FAQ_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${FAQ_COL}/${id}`);
+    }
 };
 
 // --- EVENTS SERVICES ---
@@ -1353,13 +1461,7 @@ export const subscribeToEvents = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to events:", error);
-        const qSimple = query(collection(db, EVENTS_COL));
-        onSnapshot(qSimple, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            data.sort((a:any, b:any) => new Date(a.date).getTime() - new Date(b.date).getTime());
-            callback(data);
-        });
+        handleFirestoreError(error, OperationType.LIST, EVENTS_COL);
     });
 };
 
@@ -1367,15 +1469,25 @@ export const addEventToDb = async (event: any) => {
     try {
         const { id, ...data } = event;
         await addDoc(collection(db, EVENTS_COL), deepSanitize(data));
-    } catch (e) { console.error("Error adding event:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, EVENTS_COL);
+    }
 };
 
 export const updateEventInDb = async (id: string, updates: any) => {
-    try { await updateDoc(doc(db, EVENTS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating event:", e); }
+    try {
+        await updateDoc(doc(db, EVENTS_COL, id), deepSanitize(updates));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${EVENTS_COL}/${id}`);
+    }
 };
 
 export const deleteEventFromDb = async (id: string) => {
-    try { await deleteDoc(doc(db, EVENTS_COL, id)); } catch (e) { console.error("Error deleting event:", e); }
+    try {
+        await deleteDoc(doc(db, EVENTS_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${EVENTS_COL}/${id}`);
+    }
 };
 
 // --- 3. CASHFLOW ---
@@ -1384,21 +1496,27 @@ export const addTransactionToDb = async (transaction: any) => {
     const { id, ...data } = transaction;
     await addDoc(collection(db, CASHFLOW_COL), deepSanitize(data));
     await logAction('Catat Keuangan', `${data.type}: ${data.description} - Rp ${data.amount.toLocaleString()}`);
-  } catch (e) { console.error("Error adding transaction:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, CASHFLOW_COL);
+  }
 };
 
 export const updateTransactionInDb = async (id: string, updates: any) => {
   try { 
     await updateDoc(doc(db, CASHFLOW_COL, id), deepSanitize(updates)); 
     await logAction('Update Keuangan', `Mengubah transaksi ID: ${id}`);
-  } catch (e) { console.error("Error updating transaction:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${CASHFLOW_COL}/${id}`);
+  }
 };
 
 export const deleteTransactionFromDb = async (id: string) => {
   try { 
     await deleteDoc(doc(db, CASHFLOW_COL, id)); 
     await logAction('Hapus Keuangan', `Menghapus transaksi ID: ${id}`);
-  } catch (e) { console.error("Error deleting transaction:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${CASHFLOW_COL}/${id}`);
+  }
 };
 
 // --- 4. OFFICIALS ---
@@ -1406,15 +1524,25 @@ export const addOfficialToDb = async (official: any) => {
   try {
     const { id, ...data } = official;
     await addDoc(collection(db, OFFICIALS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding official:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, OFFICIALS_COL);
+  }
 };
 
 export const updateOfficialInDb = async (id: string, updates: any) => {
-  try { await updateDoc(doc(db, OFFICIALS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating official:", e); }
+  try {
+    await updateDoc(doc(db, OFFICIALS_COL, id), deepSanitize(updates));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${OFFICIALS_COL}/${id}`);
+  }
 };
 
 export const deleteOfficialFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, OFFICIALS_COL, id)); } catch (e) { console.error("Error deleting official:", e); }
+  try {
+    await deleteDoc(doc(db, OFFICIALS_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${OFFICIALS_COL}/${id}`);
+  }
 };
 
 // --- 5. REPORTS ---
@@ -1428,7 +1556,7 @@ export const subscribeToHouseReports = (houseId: string, callback: (data: any[])
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to house reports:", error);
+        handleFirestoreError(error, OperationType.LIST, REPORTS_COL);
     });
 };
 
@@ -1436,14 +1564,18 @@ export const addReportToDb = async (report: any) => {
   try {
     const { id, ...data } = report;
     await addDoc(collection(db, REPORTS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding report:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, REPORTS_COL);
+  }
 };
 
 export const updateReportStatus = async (id: string, status: string) => {
   try {
     await updateDoc(doc(db, REPORTS_COL, id), { status });
     await logAction('Update Laporan', `Mengubah status laporan ID: ${id} menjadi ${status}`);
-  } catch (e) { console.error("Error updating report:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${REPORTS_COL}/${id}`);
+  }
 };
 
 export const archiveOldReports = async (days: number = 30) => {
@@ -1462,14 +1594,18 @@ export const archiveOldReports = async (days: number = 30) => {
     
     await batch.commit();
     return snapshot.size;
-  } catch (e) {
-    console.error("Error archiving old reports:", e);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, REPORTS_COL);
     return 0;
   }
 };
 
 export const deleteReportFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, REPORTS_COL, id)); } catch (e) { console.error("Error deleting report:", e); }
+  try {
+    await deleteDoc(doc(db, REPORTS_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${REPORTS_COL}/${id}`);
+  }
 };
 
 // --- 6. LETTERS ---
@@ -1477,7 +1613,9 @@ export const addLetterToDb = async (letter: any) => {
   try {
     const { id, ...data } = letter;
     await addDoc(collection(db, LETTERS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding letter:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, LETTERS_COL);
+  }
 };
 
 export const updateLetterStatus = async (id: string, status: string, letterNumber?: string) => {
@@ -1486,13 +1624,17 @@ export const updateLetterStatus = async (id: string, status: string, letterNumbe
     if (letterNumber) updates.letterNumber = letterNumber;
     await updateDoc(doc(db, LETTERS_COL, id), updates); 
     await logAction('Update Surat', `Mengubah status surat ID: ${id} menjadi ${status}${letterNumber ? ' (No: ' + letterNumber + ')' : ''}`);
-  } catch (e) { console.error("Error updating letter:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${LETTERS_COL}/${id}`);
+  }
 };
 
 export const updateLetterInDb = async (id: string, updates: Partial<LetterRequest>) => {
   try {
     await updateDoc(doc(db, LETTERS_COL, id), deepSanitize(updates));
-  } catch (e) { console.error("Error updating letter in DB:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${LETTERS_COL}/${id}`);
+  }
 };
 
 export const archiveOldLetters = async (days: number = 30) => {
@@ -1511,14 +1653,18 @@ export const archiveOldLetters = async (days: number = 30) => {
     
     await batch.commit();
     return snapshot.size;
-  } catch (e) {
-    console.error("Error archiving old letters:", e);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, LETTERS_COL);
     return 0;
   }
 };
 
 export const deleteLetterFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, LETTERS_COL, id)); } catch (e) { console.error("Error deleting letter:", e); }
+  try {
+    await deleteDoc(doc(db, LETTERS_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${LETTERS_COL}/${id}`);
+  }
 };
 
 // --- 6.5 MUTATIONS ---
@@ -1526,40 +1672,52 @@ export const addPopulationLogToDb = async (log: any) => {
   try {
     const { id, ...data } = log;
     await addDoc(collection(db, POPULATION_LOGS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding population log:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, POPULATION_LOGS_COL);
+  }
 };
 
 export const updatePopulationLogToDb = async (id: string, updates: any) => {
   try {
     const { id: _, ...data } = updates;
     await updateDoc(doc(db, POPULATION_LOGS_COL, id), deepSanitize(data));
-  } catch (e) { console.error("Error updating population log:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${POPULATION_LOGS_COL}/${id}`);
+  }
 };
 
 export const deletePopulationLogFromDb = async (id: string) => {
   try {
     await deleteDoc(doc(db, POPULATION_LOGS_COL, id));
-  } catch (e) { console.error("Error deleting population log:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${POPULATION_LOGS_COL}/${id}`);
+  }
 };
 
 export const addPopulationReportToDb = async (report: any) => {
   try {
     const { id, ...data } = report;
     await addDoc(collection(db, "populationReports"), deepSanitize(data));
-  } catch (e) { console.error("Error adding population report:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, "populationReports");
+  }
 };
 
 export const updatePopulationReportToDb = async (id: string, updates: any) => {
   try {
     const { id: _, ...data } = updates;
     await updateDoc(doc(db, "populationReports", id), deepSanitize(data));
-  } catch (e) { console.error("Error updating population report:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `populationReports/${id}`);
+  }
 };
 
 export const deletePopulationReportFromDb = async (id: string) => {
   try {
     await deleteDoc(doc(db, "populationReports", id));
-  } catch (e) { console.error("Error deleting population report:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `populationReports/${id}`);
+  }
 };
 
 export const subscribeToPopulationLogs = (callback: (data: any[]) => void) => {
@@ -1568,12 +1726,7 @@ export const subscribeToPopulationLogs = (callback: (data: any[]) => void) => {
     const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
     callback(data);
   }, (error) => {
-    console.error("Error subscribing to population logs:", error);
-    const qSimple = query(collection(db, POPULATION_LOGS_COL));
-    onSnapshot(qSimple, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-      callback(data);
-    });
+    handleFirestoreError(error, OperationType.LIST, POPULATION_LOGS_COL);
   });
 };
 
@@ -1583,43 +1736,53 @@ export const addInventoryToDb = async (item: any) => {
         const { id, ...data } = item;
         await addDoc(collection(db, INVENTORY_COL), deepSanitize(data));
         await logAction('Tambah Inventaris', `Menambahkan barang: ${data.name}`);
-    } catch (e) { console.error("Error adding inventory:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, INVENTORY_COL);
+    }
 };
 
 export const updateInventoryInDb = async (id: string, updates: any) => {
     try { 
       await updateDoc(doc(db, INVENTORY_COL, id), deepSanitize(updates)); 
       await logAction('Update Inventaris', `Mengubah data barang ID: ${id}`);
-    } catch (e) { console.error("Error updating inventory:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${INVENTORY_COL}/${id}`);
+    }
 };
 
 export const deleteInventoryFromDb = async (id: string) => {
     try { 
       await deleteDoc(doc(db, INVENTORY_COL, id)); 
       await logAction('Hapus Inventaris', `Menghapus barang ID: ${id}`);
-    } catch (e) { console.error("Error deleting inventory:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${INVENTORY_COL}/${id}`);
+    }
 };
 
 // --- 8. RONDA ---
 export const updateRondaSchedule = async (id: string, members: string[]) => {
     try {
         await updateDoc(doc(db, RONDA_COL, id), { members });
-    } catch (e) { console.error("Error updating ronda:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${RONDA_COL}/${id}`);
+    }
 };
 
 export const updateRondaScheduleFull = async (id: string, data: Partial<RondaSchedule>) => {
     try {
         const { id: _, ...cleanData } = data;
         await updateDoc(doc(db, RONDA_COL, id), deepSanitize(cleanData));
-    } catch (e) { console.error("Error updating ronda full:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${RONDA_COL}/${id}`);
+    }
 };
 
 export const addRondaAttendance = async (data: Omit<RondaAttendance, 'id'>) => {
     try {
         const docRef = await addDoc(collection(db, "rondaAttendance"), deepSanitize(data));
         return docRef.id;
-    } catch (e) { 
-        console.error("Error adding attendance:", e);
+    } catch (error) { 
+        handleFirestoreError(error, OperationType.CREATE, "rondaAttendance");
         return null;
     }
 };
@@ -1629,25 +1792,33 @@ export const getRondaAttendance = (callback: (data: RondaAttendance[]) => void) 
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RondaAttendance));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, "rondaAttendance");
     });
 };
 
 export const updateRondaShifts = async (id: string, shifts: any[]) => {
     try {
         await updateDoc(doc(db, RONDA_COL, id), { shifts });
-    } catch (e) { console.error("Error updating ronda shifts:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${RONDA_COL}/${id}`);
+    }
 };
 
 export const addRondaSwapRequest = async (request: any) => {
     try {
         await addDoc(collection(db, "rondaSwapRequests"), deepSanitize(request));
-    } catch (e) { console.error("Error adding swap request:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, "rondaSwapRequests");
+    }
 };
 
 export const updateRondaSwapRequestStatus = async (id: string, status: string) => {
     try {
         await updateDoc(doc(db, "rondaSwapRequests", id), { status });
-    } catch (e) { console.error("Error updating swap request status:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `rondaSwapRequests/${id}`);
+    }
 };
 
 export const subscribeToRondaSwapRequests = (callback: (data: any[]) => void) => {
@@ -1656,12 +1827,7 @@ export const subscribeToRondaSwapRequests = (callback: (data: any[]) => void) =>
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to swap requests:", error);
-        const qSimple = query(collection(db, "rondaSwapRequests"));
-        onSnapshot(qSimple, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            callback(data);
-        });
+        handleFirestoreError(error, OperationType.LIST, "rondaSwapRequests");
     });
 };
 
@@ -1670,26 +1836,42 @@ export const addUMKMToDb = async (umkm: any) => {
   try {
     const { id, ...data } = umkm;
     await addDoc(collection(db, UMKM_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding UMKM:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, UMKM_COL);
+  }
 };
 
 export const updateUMKMInDb = async (id: string, updates: any) => {
-  try { await updateDoc(doc(db, UMKM_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating UMKM:", e); }
+  try {
+    await updateDoc(doc(db, UMKM_COL, id), deepSanitize(updates));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${UMKM_COL}/${id}`);
+  }
 };
 
 export const deleteUMKMFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, UMKM_COL, id)); } catch (e) { console.error("Error deleting UMKM:", e); }
+  try {
+    await deleteDoc(doc(db, UMKM_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${UMKM_COL}/${id}`);
+  }
 };
 
 export const addUMKMOrderToDb = async (order: any) => {
   try {
     const { id, ...data } = order;
     await addDoc(collection(db, UMKM_ORDERS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding UMKM order:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, UMKM_ORDERS_COL);
+  }
 };
 
 export const updateUMKMOrderStatus = async (id: string, status: string) => {
-  try { await updateDoc(doc(db, UMKM_ORDERS_COL, id), { status }); } catch (e) { console.error("Error updating UMKM order status:", e); }
+  try {
+    await updateDoc(doc(db, UMKM_ORDERS_COL, id), { status });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${UMKM_ORDERS_COL}/${id}`);
+  }
 };
 
 export const subscribeToUMKMOrders = (callback: (data: any[]) => void) => {
@@ -1698,13 +1880,7 @@ export const subscribeToUMKMOrders = (callback: (data: any[]) => void) => {
     const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
     callback(data);
   }, (error) => {
-    console.error("Error subscribing to UMKM orders:", error);
-    const qSimple = query(collection(db, UMKM_ORDERS_COL));
-    onSnapshot(qSimple, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        data.sort((a:any, b:any) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
-        callback(data);
-    });
+    handleFirestoreError(error, OperationType.LIST, UMKM_ORDERS_COL);
   });
 };
 
@@ -1713,15 +1889,25 @@ export const addPollToDb = async (poll: any) => {
   try {
     const { id, ...data } = poll;
     await addDoc(collection(db, POLLS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding poll:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, POLLS_COL);
+  }
 };
 
 export const deletePollFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, POLLS_COL, id)); } catch (e) { console.error("Error deleting poll:", e); }
+  try {
+    await deleteDoc(doc(db, POLLS_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${POLLS_COL}/${id}`);
+  }
 };
 
 export const updatePollStatus = async (id: string, status: string) => {
-  try { await updateDoc(doc(db, POLLS_COL, id), { status }); } catch (e) { console.error("Error updating poll status:", e); }
+  try {
+    await updateDoc(doc(db, POLLS_COL, id), { status });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${POLLS_COL}/${id}`);
+  }
 };
 
 export const submitVote = async (pollId: string, optionId: string, currentOptions: any[]) => {
@@ -1744,7 +1930,9 @@ export const submitVote = async (pollId: string, optionId: string, currentOption
       totalVotes: increment(1)
     });
 
-  } catch (e) { console.error("Error submitting vote:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${POLLS_COL}/${pollId}`);
+  }
 };
 
 
@@ -1753,7 +1941,9 @@ export const addRondaLog = async (log: any) => {
   try {
     const { id, ...data } = log;
     await addDoc(collection(db, RONDA_LOGS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding ronda log:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, RONDA_LOGS_COL);
+  }
 };
 
 export const subscribeToRondaLogs = (callback: (data: any[]) => void) => {
@@ -1766,14 +1956,7 @@ export const subscribeToRondaLogs = (callback: (data: any[]) => void) => {
     }));
     callback(data);
   }, (error) => {
-    // Fallback if index missing or error
-    console.log("Ronda Logs index missing, fallback query");
-    const qSimple = query(collection(db, RONDA_LOGS_COL));
-    onSnapshot(qSimple, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        data.sort((a:any, b:any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        callback(data.slice(0, 50));
-    });
+    handleFirestoreError(error, OperationType.LIST, RONDA_LOGS_COL);
   });
 };
 
@@ -1788,7 +1971,9 @@ export const startPatrolSession = async (officerName: string) => {
         };
         const docRef = await addDoc(collection(db, PATROL_SESSIONS_COL), deepSanitize(session));
         return docRef.id;
-    } catch (e) { console.error("Error starting patrol:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, PATROL_SESSIONS_COL);
+    }
 };
 
 export const visitCheckpoint = async (sessionId: string, checkpointId: string) => {
@@ -1802,7 +1987,9 @@ export const visitCheckpoint = async (sessionId: string, checkpointId: string) =
                 await updateDoc(sessionRef, { visitedCheckpoints: [...visited, checkpointId] });
             }
         }
-    } catch (e) { console.error("Error visiting checkpoint:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${PATROL_SESSIONS_COL}/${sessionId}`);
+    }
 };
 
 export const finishPatrolSession = async (sessionId: string) => {
@@ -1811,7 +1998,9 @@ export const finishPatrolSession = async (sessionId: string) => {
             endTime: new Date().toISOString(),
             status: 'Completed' 
         });
-    } catch (e) { console.error("Error finishing patrol:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${PATROL_SESSIONS_COL}/${sessionId}`);
+    }
 };
 
 export const updatePatrolLocation = async (sessionId: string, x: number, y: number) => {
@@ -1819,7 +2008,9 @@ export const updatePatrolLocation = async (sessionId: string, x: number, y: numb
         await updateDoc(doc(db, PATROL_SESSIONS_COL, sessionId), { 
             currentLocation: { x, y }
         });
-    } catch (e) { console.error("Error updating patrol location:", e); }
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${PATROL_SESSIONS_COL}/${sessionId}`);
+    }
 };
 
 export const subscribeToActivePatrols = (callback: (data: any[]) => void) => {
@@ -1827,6 +2018,8 @@ export const subscribeToActivePatrols = (callback: (data: any[]) => void) => {
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, PATROL_SESSIONS_COL);
     });
 };
 
@@ -1835,15 +2028,25 @@ export const addMarketItem = async (item: any) => {
   try {
     const { id, ...data } = item;
     await addDoc(collection(db, MARKET_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding market item:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, MARKET_COL);
+  }
 };
 
 export const deleteMarketItem = async (id: string) => {
-  try { await deleteDoc(doc(db, MARKET_COL, id)); } catch (e) { console.error("Error deleting market item:", e); }
+  try {
+    await deleteDoc(doc(db, MARKET_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${MARKET_COL}/${id}`);
+  }
 };
 
 export const updateMarketItemStatus = async (id: string, status: string) => {
-  try { await updateDoc(doc(db, MARKET_COL, id), { status }); } catch (e) { console.error("Error updating market status:", e); }
+  try {
+    await updateDoc(doc(db, MARKET_COL, id), { status });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${MARKET_COL}/${id}`);
+  }
 };
 
 export const subscribeToMarketItems = (callback: (data: any[]) => void) => {
@@ -1855,7 +2058,7 @@ export const subscribeToMarketItems = (callback: (data: any[]) => void) => {
     }));
     callback(data);
   }, (error) => {
-    console.error("Error subscribing to market items:", error);
+    handleFirestoreError(error, OperationType.LIST, MARKET_COL);
   });
 };
 
@@ -1867,11 +2070,17 @@ export const addGalleryItemToDb = async (item: any) => {
   try {
     const { id, ...data } = item;
     await addDoc(collection(db, GALLERY_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding gallery item:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, GALLERY_COL);
+  }
 };
 
 export const deleteGalleryItemFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, GALLERY_COL, id)); } catch (e) { console.error("Error deleting gallery item:", e); }
+  try {
+    await deleteDoc(doc(db, GALLERY_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${GALLERY_COL}/${id}`);
+  }
 };
 
 export const subscribeToGallery = (callback: (data: any[]) => void) => {
@@ -1883,14 +2092,7 @@ export const subscribeToGallery = (callback: (data: any[]) => void) => {
     }));
     callback(data);
   }, (error) => {
-    console.error("Error subscribing to gallery:", error);
-    // Fallback if index missing
-    const qSimple = query(collection(db, GALLERY_COL));
-    onSnapshot(qSimple, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        callback(data);
-    });
+    handleFirestoreError(error, OperationType.LIST, GALLERY_COL);
   });
 };
 
@@ -1899,15 +2101,25 @@ export const addNewsToDb = async (news: any) => {
   try {
     const { id, ...data } = news;
     await addDoc(collection(db, NEWS_COL), deepSanitize(data));
-  } catch (e) { console.error("Error adding news:", e); }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, NEWS_COL);
+  }
 };
 
 export const updateNewsInDb = async (id: string, updates: any) => {
-  try { await updateDoc(doc(db, NEWS_COL, id), deepSanitize(updates)); } catch (e) { console.error("Error updating news:", e); }
+  try {
+    await updateDoc(doc(db, NEWS_COL, id), deepSanitize(updates));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${NEWS_COL}/${id}`);
+  }
 };
 
 export const deleteNewsFromDb = async (id: string) => {
-  try { await deleteDoc(doc(db, NEWS_COL, id)); } catch (e) { console.error("Error deleting news:", e); }
+  try {
+    await deleteDoc(doc(db, NEWS_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${NEWS_COL}/${id}`);
+  }
 };
 
 export const subscribeToNews = (callback: (data: any[]) => void) => {
@@ -1919,7 +2131,7 @@ export const subscribeToNews = (callback: (data: any[]) => void) => {
     }));
     callback(data);
   }, (error) => {
-    console.error("Error subscribing to news:", error);
+    handleFirestoreError(error, OperationType.LIST, NEWS_COL);
   });
 };
 
@@ -1930,6 +2142,8 @@ export const subscribeToPolls = (callback: (data: Poll[]) => void) => {
     return onSnapshot(collection(db, POLLS_COL), (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Poll));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, POLLS_COL);
     });
 };
 
@@ -1937,6 +2151,8 @@ export const subscribeToUMKM = (callback: (data: UMKM[]) => void) => {
     return onSnapshot(collection(db, UMKM_COL), (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UMKM));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, UMKM_COL);
     });
 };
 
@@ -1946,7 +2162,7 @@ export const subscribeToWasteDeposits = (callback: (data: any[]) => void) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
     }, (error) => {
-        console.error("Error subscribing to waste deposits:", error);
+        handleFirestoreError(error, OperationType.LIST, WASTE_DEPOSITS_COL);
     });
 };
 
@@ -1954,9 +2170,8 @@ export const addWasteDepositToDb = async (deposit: any) => {
     try {
         await addDoc(collection(db, WASTE_DEPOSITS_COL), deepSanitize(deposit));
         await logAction("Waste Deposit Created", `Resident: ${deposit.residentName}, Type: ${deposit.type}`);
-    } catch (e) {
-        console.error("Error adding waste deposit:", e);
-        throw e;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, WASTE_DEPOSITS_COL);
     }
 };
 
@@ -1987,9 +2202,8 @@ export const updateWasteDepositStatus = async (id: string, status: 'Confirmed', 
 
         await batch.commit();
         await logAction("Waste Deposit Confirmed", `ID: ${id}, Value: ${totalValue}`);
-    } catch (e) {
-        console.error("Error confirming waste deposit:", e);
-        throw e;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${WASTE_DEPOSITS_COL}/${id}`);
     }
 };
 
@@ -1997,9 +2211,8 @@ export const deleteWasteDepositFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, WASTE_DEPOSITS_COL, id));
         await logAction("Waste Deposit Deleted", `ID: ${id}`);
-    } catch (e) {
-        console.error("Error deleting waste deposit:", e);
-        throw e;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${WASTE_DEPOSITS_COL}/${id}`);
     }
 };
 
@@ -2007,15 +2220,16 @@ export const subscribeToWastePrices = (callback: (data: any[]) => void) => {
     return onSnapshot(collection(db, WASTE_PRICES_COL), (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, WASTE_PRICES_COL);
     });
 };
 
 export const updateWastePriceInDb = async (id: string, pricePerUnit: number) => {
     try {
         await updateDoc(doc(db, WASTE_PRICES_COL, id), { pricePerUnit });
-    } catch (e) {
-        console.error("Error updating waste price:", e);
-        throw e;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${WASTE_PRICES_COL}/${id}`);
     }
 };
 
@@ -2023,18 +2237,16 @@ export const addWastePriceToDb = async (price: any) => {
     try {
         const { id, ...data } = price;
         await addDoc(collection(db, WASTE_PRICES_COL), deepSanitize(data));
-    } catch (e) {
-        console.error("Error adding waste price:", e);
-        throw e;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, WASTE_PRICES_COL);
     }
 };
 
 export const deleteWastePriceFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, WASTE_PRICES_COL, id));
-    } catch (e) {
-        console.error("Error deleting waste price:", e);
-        throw e;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${WASTE_PRICES_COL}/${id}`);
     }
 };
 
@@ -2045,6 +2257,8 @@ export const subscribeToWasteBalance = (houseId: string, callback: (data: any) =
         } else {
             callback(null);
         }
+    }, (error) => {
+        handleFirestoreError(error, OperationType.GET, `${WASTE_BALANCES_COL}/${houseId}`);
     });
 };
 
@@ -2203,8 +2417,8 @@ export const seedDatabase = async (initialData?: any) => {
           }
       }
 
-    } catch (e) {
-      console.error("Seeding/Migration failed:", e);
-      throw e;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, "seeding");
+      throw error;
     }
 };

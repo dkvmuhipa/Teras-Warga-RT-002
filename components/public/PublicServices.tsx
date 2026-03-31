@@ -772,7 +772,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           />
                         </div>
                         <div className="group">
-                          <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 ml-1 text-center">PIN Akses</label>
+                          <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 ml-1 text-center">PIN Akses <span className="text-red-500">*</span></label>
                           <div className="relative">
                             <input 
                               type={showPin ? "text" : "password"} 
@@ -956,7 +956,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           />
                         </div>
                         <div className="group">
-                          <label className="block text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2 ml-1">PIN Akses</label>
+                          <label className="block text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2 ml-1">PIN Akses <span className="text-red-500">*</span></label>
                           <div className="relative">
                             <input 
                               type={showPin ? "text" : "password"} 
@@ -1462,7 +1462,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           </h4>
                           <p className="text-xs text-emerald-700/70 font-medium">
                             {mutationType === 'Newcomer' 
-                              ? 'Laporan akan diverifikasi manual oleh RT.' 
+                              ? 'Masukkan PIN rumah yang dituju untuk verifikasi.' 
                               : 'Gunakan PIN rumah Anda untuk melapor.'}
                           </p>
                         </div>
@@ -1470,7 +1470,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       
                       <div className="group">
                         <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 ml-1">
-                          PIN Akses
+                          PIN Akses <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                           <input 

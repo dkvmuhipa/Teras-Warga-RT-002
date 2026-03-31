@@ -27,7 +27,7 @@ import {
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
-import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId, addBillToDb, updateBillInDb, addPopulationLogToDb } from '../../services/databaseService';
+import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId, addBillToDb, updateBillInDb, addPopulationLogToDb, logAction } from '../../services/databaseService';
 import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
@@ -374,6 +374,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         try {
             const updates = Array.from(selectedIds).map(id => ({ id, isVerified: true }));
             await batchUpdateHouses(updates);
+            await logAction('Verifikasi Massal', `Verifikasi ${selectedIds.size} warga terpilih`);
             toast.success('Warga terpilih berhasil diverifikasi.');
             setSelectedIds(new Set());
         } catch (e) {
@@ -408,6 +409,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   });
                 }
             }
+            await logAction('Hapus Massal Warga', `Hapus ${selectedIds.size} data warga terpilih`);
             toast.success('Warga terpilih berhasil dihapus.');
             setSelectedIds(new Set());
         } catch (e) {
@@ -722,11 +724,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           await deleteHouseFromDb(editingHouseId);
         }
         await addHouse(data); // Using addHouse because it handles setDoc with ID
+        await logAction('Update Warga', `Update data warga di rumah ${houseId}`);
         if (selectedResident?.id === editingHouseId) {
             setSelectedResident({ ...selectedResident, ...data, id: houseId } as House);
         }
       } else {
         await addHouse(data);
+        await logAction('Tambah Warga', `Tambah data warga baru di rumah ${houseId}`);
       }
 
       // --- AUTO GENERATE LOG MUTASI ---

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports } from '../../services/databaseService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports, logAction } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -126,6 +126,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     if (window.confirm(`Ubah status surat menjadi ${status}?`)) {
       try {
         await updateLetterStatus(id, status, status === 'Disetujui' ? letterNumberInput : undefined);
+        await logAction('Update Status Surat', `Ubah status surat ${id} menjadi ${status}`);
         
         if (status === 'Disetujui' && letter) {
           // Generate official PDF with stamp and signature
@@ -188,6 +189,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     if (window.confirm(`Ubah status laporan menjadi ${status}?`)) {
       try {
         await updateReportStatus(id, status);
+        await logAction('Update Status Laporan', `Ubah status laporan ${id} menjadi ${status}`);
         setSelectedReport(null);
         toast.success(`Status laporan berhasil diubah menjadi ${status}`);
       } catch (error) {

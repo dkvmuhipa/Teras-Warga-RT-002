@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb } from '../../services/databaseService';
+import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb, logAction } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { generateCashFlowReportPDF } from '../../services/pdfService';
 
@@ -80,9 +80,11 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
     try {
       if (editingId) {
         await updateTransactionInDb(editingId, data);
+        await logAction('Update Transaksi', `Update transaksi ${type}: ${desc} sejumlah Rp ${amount}`);
         toast.success('Transaksi berhasil diperbarui!');
       } else {
         await addTransactionToDb(data);
+        await logAction('Tambah Transaksi', `Tambah transaksi ${type}: ${desc} sejumlah Rp ${amount}`);
         toast.success('Transaksi berhasil dicatat!');
       }
       
@@ -98,6 +100,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
     if (window.confirm('Hapus transaksi ini?')) {
       try {
         await deleteTransactionFromDb(id);
+        await logAction('Hapus Transaksi', `Hapus transaksi ID: ${id}`);
         toast.success('Transaksi berhasil dihapus.');
       } catch (error) {
         console.error(error);

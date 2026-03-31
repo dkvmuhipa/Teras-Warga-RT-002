@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FileText, AlertCircle, CheckCircle2, Plus, Trash2, Calendar, User, DollarSign, ArrowRight, Search, Filter, MoreVertical, Download, X, List, RefreshCw } from 'lucide-react';
 import { Bill, House, BillItem } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { addBillToDb, updateBillInDb, deleteBillFromDb, generateMonthlyBills } from '../../services/databaseService';
+import { addBillToDb, updateBillInDb, deleteBillFromDb, generateMonthlyBills, logAction } from '../../services/databaseService';
 import { toast } from 'sonner';
 
 interface BillManagerProps {
@@ -64,6 +64,7 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
 
     try {
       await addBillToDb(newBill);
+      await logAction('Tambah Tagihan', `Tambah tagihan untuk rumah ${selectedHouseId} periode ${billMonth}`);
       setIsModalOpen(false);
       toast.success("Tagihan berhasil dibuat");
       // Reset form
@@ -95,6 +96,7 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
     try {
       const success = await generateMonthlyBills(month, dueDateStr, defaultItems);
       if (success) {
+        await logAction('Generate Tagihan Massal', `Generate tagihan otomatis untuk periode ${month}`);
         toast.success(`Berhasil generate tagihan untuk periode ${month}`);
       } else {
         toast.error("Gagal generate tagihan otomatis");

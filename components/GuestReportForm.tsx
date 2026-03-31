@@ -126,7 +126,7 @@ export const GuestReportForm: React.FC<GuestReportFormProps> = ({ onClose, house
 
         <form onSubmit={handleVerify} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pilih Rumah</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pilih Rumah <span className="text-red-500">*</span></label>
             <select 
               required
               className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
@@ -141,7 +141,7 @@ export const GuestReportForm: React.FC<GuestReportFormProps> = ({ onClose, house
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PIN Akses</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PIN Akses <span className="text-red-500">*</span></label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 

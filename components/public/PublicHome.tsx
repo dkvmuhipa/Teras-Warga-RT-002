@@ -257,7 +257,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. Rumah Pelapor</label>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. Rumah Pelapor <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
@@ -271,7 +271,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PIN Akses Rumah</label>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PIN Akses Rumah <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 

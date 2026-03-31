@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
 import { generatePopulationReportPDF } from '../../services/pdfService';
-import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData } from '../../services/databaseService';
+import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { 
   Plus, FileText, Trash2, TrendingUp, TrendingDown, 
@@ -356,8 +356,10 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     
     if (editingLogId) {
       await updatePopulationLogToDb(editingLogId, logData);
+      await logAction('Update Mutasi', `Update data mutasi ${logData.type} untuk ${logData.name}`);
     } else {
       await addPopulationLogToDb(logData);
+      await logAction('Tambah Mutasi', `Tambah data mutasi ${logData.type} untuk ${logData.name}`);
     }
 
     // --- INTEGRATION: Auto Update House Data ---

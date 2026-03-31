@@ -2,8 +2,41 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: houses
+    // Fields:
+    //   - block: string (required, size < 10)
+    //   - number: string (required, size < 10)
+    //   - headOfFamily: string (required, size < 100)
+    //   - nik: string (optional, size == 16)
+    //   - phone: string (optional, size < 20)
+    //   - role: string (enum: ['Admin', 'Bendahara', 'Sekretaris', 'Warga'])
+    //   - isVerified: bool
+    //
+    // Collection: reports
+    // Fields:
+    //   - type: string (required, size < 50)
+    //   - description: string (required, size < 1000)
+    //   - reporterName: string (required, size < 100)
+    //   - reporterHouseId: string (optional)
+    //   - status: string (enum: ['Baru', 'Diproses', 'Selesai'])
+    //   - date: string (ISO 8601)
+    //
+    // Collection: auditLogs
+    // Fields:
+    //   - adminEmail: string (required)
+    //   - action: string (required, size < 100)
+    //   - details: string (required, size < 1000)
+    //   - timestamp: string (ISO 8601)
+    //
+    // ===============================================================
+
+    // ===============================================================
     // Helper Functions
     // ===============================================================
+    
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -18,57 +51,94 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string &&
+        dateStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidHouse(data) {
+      return hasRequiredFields(['block', 'number', 'headOfFamily']) &&
+        validStringLength('block', 1, 10) &&
+        validStringLength('number', 1, 10) &&
+        validStringLength('headOfFamily', 1, 100) &&
+        (!('nik' in data) || (data.nik is string && data.nik.size() == 16)) &&
+        (!('phone' in data) || (data.phone is string && data.phone.size() < 20)) &&
+        (!('role' in data) || data.role in ['Admin', 'Bendahara', 'Sekretaris', 'Warga']) &&
+        (!('isVerified' in data) || data.isVerified is bool);
+    }
+
+    function isValidReport(data) {
+      return hasRequiredFields(['type', 'description', 'reporterName', 'status', 'date']) &&
+        validStringLength('type', 1, 50) &&
+        validStringLength('description', 1, 1000) &&
+        validStringLength('reporterName', 1, 100) &&
+        data.status in ['Baru', 'Diproses', 'Selesai'] &&
+        isValidDateString(data.date);
+    }
+
+    function isValidAuditLog(data) {
+      return hasRequiredFields(['adminEmail', 'action', 'details', 'timestamp']) &&
+        isValidEmail(data.adminEmail) &&
+        validStringLength('action', 1, 100) &&
+        validStringLength('details', 1, 1000) &&
+        isValidDateString(data.timestamp);
+    }
+
     // ===============================================================
     // Rules for Collections
     // ===============================================================
 
-    // Houses: Only Admins can see all. Residents can only see their own if they have the ID.
-    // Since residents use accessCode, we can't easily check it here without a custom claim.
-    // For now, we allow read if they know the document ID, but list is only for admins.
+    // Houses: PII Protection - Only admins can read/write.
+    // Residents access via PIN is handled by client-side logic + admin-only read.
+    // NOTE: This will restrict the dropdown list to admins only.
     match /houses/{houseId} {
-      allow read: if isAdmin() || isAuthenticated(); // Allow read for authenticated users
-      allow write: if isAdmin(); // Only admins can modify house data
+      allow read, write: if isAdmin();
     }
 
-    // Reports: Anyone can create, only admins can see all and update.
+    // Reports: Authenticated users can create with validation.
     match /reports/{reportId} {
-      allow create: if true; // Allow public reporting
+      allow create: if isAuthenticated() && isValidReport(request.resource.data);
       allow read, update, delete: if isAdmin();
     }
 
-    // Letters: Anyone can create, only admins can see all and update.
+    // Letters: Authenticated users can create with validation.
     match /letters/{letterId} {
-      allow create: if true;
+      allow create: if isAuthenticated(); // Add validation if schema known
       allow read, update, delete: if isAdmin();
     }
 
-    // Audit Logs: Only admins can read, only system/admins can write.
+    // Audit Logs: Only admins can read. Authenticated users can create (for logging).
     match /auditLogs/{logId} {
       allow read: if isAdmin();
-      allow create: if isAuthenticated(); // Allow logging from authenticated users
+      allow create: if isAuthenticated() && isValidAuditLog(request.resource.data);
     }
 
-    // Resident Registrations
-    match /residentRegistrations/{regId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-
-    // Update Requests
-    match /updateRequests/{reqId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-
-    // Guest Reports
-    match /guestReports/{guestId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-
-    // Configs: Public can read pdf config, only admins can write.
-    match /configs/pdf {
-      allow read: if true;
+    // Configs: Restricted read.
+    match /configs/{configId} {
+      allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
 
