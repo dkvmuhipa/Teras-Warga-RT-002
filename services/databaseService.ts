@@ -34,7 +34,9 @@ import {
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo } from "../types";
 
-const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {
+export { OperationType };
+
+export const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {

@@ -9,7 +9,9 @@ import {
   deleteUMKMFromDb, 
   uploadImageToStorage,
   subscribeToUMKMOrders,
-  updateUMKMOrderStatus
+  updateUMKMOrderStatus,
+  handleFirestoreError,
+  OperationType
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -127,7 +129,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, editingUmkmId ? OperationType.UPDATE : OperationType.CREATE, "umkm");
       toast.error('Gagal menyimpan data UMKM.');
     } finally {
         setIsUploading(false);
@@ -143,7 +145,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
             await deleteUMKMFromDb(id);
             toast.success('Data UMKM berhasil dihapus.');
           } catch (error) {
-            console.error(error);
+            handleFirestoreError(error, OperationType.DELETE, `umkm/${id}`);
             toast.error('Gagal menghapus data UMKM.');
           }
         }

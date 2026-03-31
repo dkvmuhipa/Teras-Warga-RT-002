@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FileText, AlertCircle, CheckCircle2, Plus, Trash2, Calendar, User, DollarSign, ArrowRight, Search, Filter, MoreVertical, Download, X, List, RefreshCw } from 'lucide-react';
 import { Bill, House, BillItem } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { addBillToDb, updateBillInDb, deleteBillFromDb, generateMonthlyBills, logAction } from '../../services/databaseService';
+import { addBillToDb, updateBillInDb, deleteBillFromDb, generateMonthlyBills, logAction, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
 
 interface BillManagerProps {
@@ -102,7 +102,7 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
         toast.error("Gagal generate tagihan otomatis");
       }
     } catch (error) {
-      console.error("Error generating bills:", error);
+      handleFirestoreError(error, OperationType.CREATE, "bills");
       toast.error("Terjadi kesalahan saat generate tagihan");
     } finally {
       setIsGenerating(false);
@@ -111,16 +111,26 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
 
   const handleDeleteBill = async (id: string) => {
     if (confirm("Hapus tagihan ini?")) {
-      await deleteBillFromDb(id);
-      toast.success("Tagihan dihapus");
+      try {
+        await deleteBillFromDb(id);
+        toast.success("Tagihan dihapus");
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `bills/${id}`);
+        toast.error("Gagal menghapus tagihan");
+      }
     }
   };
 
   const toggleItemStatus = async (bill: Bill, itemId: string) => {
-    const updatedItems = bill.items.map(item => 
-      item.id === itemId ? { ...item, status: item.status === 'Paid' ? 'Unpaid' : 'Paid' as any } : item
-    );
-    await updateBillInDb(bill.id, { items: updatedItems });
+    try {
+      const updatedItems = bill.items.map(item => 
+        item.id === itemId ? { ...item, status: item.status === 'Paid' ? 'Unpaid' : 'Paid' as any } : item
+      );
+      await updateBillInDb(bill.id, { items: updatedItems });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `bills/${bill.id}`);
+      toast.error("Gagal memperbarui status item");
+    }
   };
 
   const filteredBills = bills.filter(bill => {

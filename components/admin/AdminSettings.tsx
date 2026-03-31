@@ -5,7 +5,7 @@ import { auth } from '../../services/firebaseConfig';
 import { PdfConfig, House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, MarketItem, AppNotification } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { seedDatabase, deepSanitize, updatePdfConfig } from '../../services/databaseService';
+import { seedDatabase, deepSanitize, updatePdfConfig, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { getWhatsAppGroups } from '../../services/whatsappService';
 import { SignaturePad } from './SignaturePad';
 import { toast } from 'sonner';
@@ -93,7 +93,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         toast.success('Database berhasil di-reset!');
         window.location.reload();
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.WRITE, "seedDatabase");
         toast.error('Gagal reset database.');
       }
     }
@@ -116,7 +116,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       setPdfConfig(localConfig);
       toast.success('Konfigurasi surat tersimpan di cloud!');
     } catch (error) {
-      console.error("Error saving PDF config:", error);
+      handleFirestoreError(error, OperationType.UPDATE, "pdfConfig");
       toast.error('Gagal menyimpan konfigurasi ke cloud.');
     }
   };

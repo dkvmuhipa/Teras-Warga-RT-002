@@ -3,7 +3,7 @@ import { Plus, Trash2, BookOpen, Calendar, Edit2, MessageCircle, Sparkles, Image
 import { News } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { addNewsToDb, deleteNewsFromDb, updateNewsInDb } from '../../services/databaseService';
+import { addNewsToDb, deleteNewsFromDb, updateNewsInDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -99,7 +99,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
-      console.error('Error saving news:', error);
+      handleFirestoreError(error, editingId ? OperationType.UPDATE : OperationType.CREATE, "news");
       toast.error('Gagal menyimpan berita.');
     }
   };
@@ -122,7 +122,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
             await deleteNewsFromDb(id);
             toast.success('Berita berhasil dihapus.');
           } catch (error) {
-            console.error(error);
+            handleFirestoreError(error, OperationType.DELETE, `news/${id}`);
             toast.error('Gagal menghapus berita.');
           }
         }

@@ -4,7 +4,7 @@ import { GalleryItem } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { addGalleryItemToDb, deleteGalleryItemFromDb, uploadImageToStorage } from '../../services/databaseService';
+import { addGalleryItemToDb, deleteGalleryItemFromDb, uploadImageToStorage, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
 
 interface GalleryManagementProps {
@@ -55,7 +55,7 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
         await deleteGalleryItemFromDb(id);
         toast.success('Foto berhasil dihapus dari galeri.');
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.DELETE, `gallery/${id}`);
         toast.error('Gagal menghapus foto.');
       }
     }

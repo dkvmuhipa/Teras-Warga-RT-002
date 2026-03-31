@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Phone, Calendar, Clock, Send, CheckCircle, ArrowLeft, Camera, ShieldAlert, Lock, MapPin, FileText, Car, Info } from 'lucide-react';
 import { Button } from './ui/Button';
-import { addGuestReportToDb, uploadImageToStorage, validateResidentAccess } from '../services/databaseService';
+import { addGuestReportToDb, uploadImageToStorage, validateResidentAccess, handleFirestoreError, OperationType } from '../services/databaseService';
 import { House } from '../types';
 import { toast } from 'sonner';
 
@@ -82,7 +82,7 @@ export const GuestReportForm: React.FC<GuestReportFormProps> = ({ onClose, house
       });
       setIsSubmitted(true);
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, "guestReports");
       toast.error('Gagal mengirim laporan tamu.', {
         description: 'Silakan coba lagi beberapa saat lagi.'
       });

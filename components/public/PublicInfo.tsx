@@ -8,7 +8,7 @@ import {
   isMonthMatch 
 } from '../../src/utils/dateUtils';
 import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, Idea, DonationCampaign, News } from '../../types';
-import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel } from '../../services/databaseService';
+import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
@@ -280,7 +280,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
             setSwapToDay('');
             setSwapReason('');
         } catch (error) {
-            console.error("Error submitting swap request:", error);
+            handleFirestoreError(error, OperationType.CREATE, "rondaSwapRequests");
             toast.error("Gagal mengirim permintaan. Silakan coba lagi.");
         } finally {
             setIsSubmittingSwap(false);

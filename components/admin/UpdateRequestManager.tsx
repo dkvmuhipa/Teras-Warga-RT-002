@@ -18,7 +18,7 @@ import { UpdateRequest, House } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { updateRequestStatus, updateHouseData } from '../../services/databaseService';
+import { updateRequestStatus, updateHouseData, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
 
 interface UpdateRequestManagerProps {
@@ -59,7 +59,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
       setSelectedRequest(null);
       setAdminNote('');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.UPDATE, `updateRequests/${req.id}`);
       toast.error('Gagal menyetujui permohonan.');
     } finally {
       setIsProcessing(false);
@@ -78,7 +78,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
       setSelectedRequest(null);
       setAdminNote('');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.UPDATE, `updateRequests/${req.id}`);
       toast.error('Gagal menolak permohonan.');
     } finally {
       setIsProcessing(false);

@@ -3,6 +3,7 @@ import { DollarSign, Activity, AlertCircle, CreditCard, Mail, Download, Printer,
 import { House, PdfConfig } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 import { toast } from 'sonner';
+import { handleFirestoreError, OperationType } from '../../../services/databaseService';
 
 interface ResidentIuranManagerProps {
   houses: House[];
@@ -319,7 +320,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                                 await deleteIuranPaymentFromDb(payment.id);
                                 toast.success('Catatan pembayaran dihapus.');
                               } catch (error) {
-                                console.error(error);
+                                handleFirestoreError(error, OperationType.DELETE, `iuranPayments/${payment.id}`);
                                 toast.error('Gagal menghapus catatan pembayaran.');
                               }
                             }

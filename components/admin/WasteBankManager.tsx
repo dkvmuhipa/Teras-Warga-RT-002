@@ -13,7 +13,9 @@ import {
   subscribeToWastePrices,
   updateWastePriceInDb,
   addWastePriceToDb,
-  deleteWastePriceFromDb
+  deleteWastePriceFromDb,
+  handleFirestoreError,
+  OperationType
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -111,7 +113,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       });
       toast.success('Setoran berhasil disimpan!');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, "wasteDeposits");
       toast.error('Gagal menyimpan setoran.');
     }
   };
@@ -122,7 +124,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
         await updateWasteDepositStatus(deposit.id, 'Confirmed', deposit.totalValue, deposit.houseId);
         toast.success('Setoran berhasil dikonfirmasi!');
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.UPDATE, `wasteDeposits/${deposit.id}`);
         toast.error('Gagal mengonfirmasi setoran.');
       }
     }
@@ -134,7 +136,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
         await deleteWasteDepositFromDb(id);
         toast.success('Data setoran berhasil dihapus.');
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.DELETE, `wasteDeposits/${id}`);
         toast.error('Gagal menghapus data setoran.');
       }
     }
@@ -145,7 +147,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       await updateWastePriceInDb(id, newPrice);
       // Optional: toast.success('Harga diperbarui');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.UPDATE, `wastePrices/${id}`);
       toast.error('Gagal memperbarui harga.');
     }
   };

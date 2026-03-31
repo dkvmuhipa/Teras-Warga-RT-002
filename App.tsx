@@ -152,7 +152,9 @@ import { subscribeToMapPoints, subscribeToCollection,
   updateEventInDb,
   deleteEventFromDb,
   markNotificationAsRead,
-  deleteNotificationFromDb
+  deleteNotificationFromDb,
+  handleFirestoreError,
+  OperationType
 } from './services/databaseService';
 
 // --- Shared Components ---
@@ -302,15 +304,20 @@ export const App = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsAdmin(!!user);
       if (user && user.email) {
-        // Fetch role from officials
-        const q = query(collection(db, "officials"), where("email", "==", user.email));
-        const snapshot = await getDocs(q);
-        if (!snapshot.empty) {
-          const officialData = snapshot.docs[0].data() as Official;
-          setAdminRole(officialData.role as Role);
-        } else {
-          // Default to ADMIN if not found in officials (for the main admin account)
-          setAdminRole(Role.ADMIN);
+        try {
+          // Fetch role from officials
+          const q = query(collection(db, "officials"), where("email", "==", user.email));
+          const snapshot = await getDocs(q);
+          if (!snapshot.empty) {
+            const officialData = snapshot.docs[0].data() as Official;
+            setAdminRole(officialData.role as Role);
+          } else {
+            // Default to ADMIN if not found in officials (for the main admin account)
+            setAdminRole(Role.ADMIN);
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.GET, "officials");
+          setAdminRole(Role.ADMIN); // Fallback to ADMIN if error
         }
       } else {
         setAdminRole(null);

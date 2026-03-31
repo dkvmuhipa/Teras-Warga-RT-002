@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { InventoryItem, MaintenanceLog } from '../../types';
-import { addInventoryToDb, updateInventoryInDb, deleteInventoryFromDb, addInventoryLogToDb, updateInventoryLogStatus, deleteInventoryLogFromDb } from '../../services/databaseService';
+import { addInventoryToDb, updateInventoryInDb, deleteInventoryFromDb, addInventoryLogToDb, updateInventoryLogStatus, deleteInventoryLogFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
 
 interface AssetManagerProps {
@@ -107,7 +107,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
       resetMaintenanceForm();
       toast.success('Riwayat perawatan berhasil ditambahkan!');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.UPDATE, `inventory/${selectedAsset.id}`);
       toast.error('Gagal menyimpan riwayat perawatan.');
     }
   };
@@ -118,7 +118,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         await deleteInventoryFromDb(id);
         toast.success('Aset berhasil dihapus.');
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.DELETE, `inventory/${id}`);
         toast.error('Gagal menghapus aset.');
       }
     }
@@ -144,7 +144,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
       resetBorrowForm();
       toast.success('Peminjaman berhasil dicatat!');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, "inventoryLogs");
       toast.error('Gagal mencatat peminjaman.');
     }
   };

@@ -12,7 +12,7 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ notificati
     if ("Notification" in window && Notification.permission === "granted") {
       try {
         new Notification(notification.title, { body: notification.message, icon: '/vite.svg' });
-      } catch (e) { console.error("Notification Error:", e); }
+      } catch (e) { /* Browser notification failed */ }
     }
     const timer = setTimeout(onClose, 5000);
     return () => clearTimeout(timer);

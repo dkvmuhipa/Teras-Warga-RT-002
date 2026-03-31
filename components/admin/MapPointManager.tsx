@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MapPoint, House } from '../../types';
-import { addMapPointToDb, updateMapPointInDb, deleteMapPointFromDb } from '../../services/databaseService';
+import { addMapPointToDb, updateMapPointInDb, deleteMapPointFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { Button } from '../ui/Button';
 import { Plus, Trash2, Edit2, MapPin, Shield, Move, Lightbulb, Video, Droplets, Trash, Flame, Users, ArrowRight } from 'lucide-react';
 import { Modal } from '../ui/Modal';
@@ -69,8 +69,8 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
             }
             setIsModalOpen(false);
         } catch (error) {
+            handleFirestoreError(error, editingPoint ? OperationType.UPDATE : OperationType.CREATE, "mapPoints");
             toast.error("Gagal menyimpan data.");
-            console.error(error);
         }
     };
 
@@ -80,7 +80,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                 await deleteMapPointFromDb(id);
                 toast.success("Titik informasi dihapus.");
             } catch (error) {
-                console.error(error);
+                handleFirestoreError(error, OperationType.DELETE, `mapPoints/${id}`);
                 toast.error("Gagal menghapus data.");
             }
         }

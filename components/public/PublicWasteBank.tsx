@@ -8,7 +8,9 @@ import {
   subscribeToWasteDeposits, 
   subscribeToWastePrices,
   subscribeToWasteBalance,
-  addWasteDepositToDb
+  addWasteDepositToDb,
+  handleFirestoreError,
+  OperationType
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -87,7 +89,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
         description: 'Silakan serahkan sampah ke petugas untuk dikonfirmasi.'
       });
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, "wasteDeposits");
       toast.error('Gagal mengajukan setoran.');
     }
   };

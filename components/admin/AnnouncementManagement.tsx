@@ -3,7 +3,7 @@ import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edi
 import { Announcement, House, PdfConfig } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { addAnnouncementToDb, deleteAnnouncementFromDb, updateAnnouncementInDb } from '../../services/databaseService';
+import { addAnnouncementToDb, deleteAnnouncementFromDb, updateAnnouncementInDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatAnnouncementForWhatsApp, broadcastWhatsApp } from '../../services/whatsappService';
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
@@ -125,7 +125,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, editingId ? OperationType.UPDATE : OperationType.CREATE, "announcements");
       toast.error('Gagal menyimpan pengumuman.');
     }
   };
@@ -147,7 +147,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
             await deleteAnnouncementFromDb(id);
             toast.success('Pengumuman berhasil dihapus.');
           } catch (error) {
-            console.error(error);
+            handleFirestoreError(error, OperationType.DELETE, `announcements/${id}`);
             toast.error('Gagal menghapus pengumuman.');
           }
         }

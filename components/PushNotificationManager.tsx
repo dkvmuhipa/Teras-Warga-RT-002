@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getToken, onMessage } from 'firebase/messaging';
 import { messaging } from '../services/firebaseConfig';
-import { saveFCMToken } from '../services/databaseService';
+import { saveFCMToken, handleFirestoreError, OperationType } from '../services/databaseService';
 import { Bell, BellOff, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -80,7 +80,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
         toast.error('Browser ini tidak mendukung notifikasi push.');
       }
     } catch (error: any) {
-      console.error('Error requesting notification permission:', error);
+      handleFirestoreError(error, OperationType.WRITE, "fcmTokens");
       toast.error(`Gagal mengaktifkan notifikasi: ${error.message || 'Error tidak diketahui'}`);
     }
   };
@@ -121,7 +121,7 @@ export const NotificationToggle: React.FC<{ userId: string; variant?: 'compact' 
             toast.success('Notifikasi aktif!');
           }
         } catch (e) {
-          console.error(e);
+          handleFirestoreError(e, OperationType.WRITE, "fcmTokens");
         }
       }
     } else {

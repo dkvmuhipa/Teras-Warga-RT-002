@@ -3,7 +3,7 @@ import { Plus, Edit2, Trash2, User, Phone, MapPin, Briefcase, Upload, AlertTrian
 import { Official, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel } from '../../services/databaseService';
+import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
@@ -91,7 +91,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, editingOfficialId ? OperationType.UPDATE : OperationType.CREATE, "officials");
       toast.error('Gagal menyimpan data pengurus.');
     } finally {
         setIsUploading(false);
@@ -104,7 +104,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         await deleteOfficialFromDb(id);
         toast.success('Data pengurus berhasil dihapus.');
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.DELETE, `officials/${id}`);
         toast.error('Gagal menghapus data pengurus.');
       }
     }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { User, Home, Phone, Users, Send, CheckCircle, ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, FileText, Camera, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/Button';
-import { addResidentRegistrationToDb, uploadImageToStorage, checkHouseOccupied, formatHouseId } from '../services/databaseService';
+import { addResidentRegistrationToDb, uploadImageToStorage, checkHouseOccupied, formatHouseId, handleFirestoreError, OperationType } from '../services/databaseService';
 import { toast } from 'sonner';
 
 interface ResidentRegistrationFormProps {
@@ -100,7 +100,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
       });
       setIsSubmitted(true);
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, "residentRegistrations");
       toast.error('Gagal mengirim pendaftaran.', {
         description: 'Silakan coba lagi beberapa saat lagi.'
       });

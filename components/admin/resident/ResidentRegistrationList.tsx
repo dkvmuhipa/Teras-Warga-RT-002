@@ -2,7 +2,7 @@ import React from 'react';
 import { User, Phone } from 'lucide-react';
 import { ResidentRegistration, PaymentStatus, House } from '../../../types';
 import { toast } from 'sonner';
-import { formatHouseId } from '../../../services/databaseService';
+import { formatHouseId, handleFirestoreError, OperationType } from '../../../services/databaseService';
 
 interface ResidentRegistrationListProps {
   residentRegistrations: ResidentRegistration[];
@@ -90,7 +90,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Rejected' });
                             toast.success('Pendaftaran ditolak.');
                           } catch (error) {
-                            console.error(error);
+                            handleFirestoreError(error, OperationType.UPDATE, `residentRegistrations/${reg.id}`);
                             toast.error('Gagal menolak pendaftaran.');
                           }
                         }
@@ -165,7 +165,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             
                             toast.success('Pendaftaran disetujui dan data warga telah ditambahkan!');
                           } catch (error) {
-                            console.error(error);
+                            handleFirestoreError(error, OperationType.WRITE, `residentRegistrations/${reg.id}`);
                             toast.error('Gagal menyetujui pendaftaran.');
                           }
                         }

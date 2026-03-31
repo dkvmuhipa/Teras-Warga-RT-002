@@ -7,7 +7,9 @@ import {
   subscribeToHealthRecords, 
   addHealthRecordToDb, 
   updateHealthRecordInDb, 
-  deleteHealthRecordFromDb 
+  deleteHealthRecordFromDb,
+  handleFirestoreError,
+  OperationType
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -64,7 +66,7 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
       setIsModalOpen(false);
       resetForm();
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, editingRecordId ? OperationType.UPDATE : OperationType.CREATE, "healthRecords");
       toast.error('Gagal menyimpan data kesehatan.');
     }
   };
@@ -128,7 +130,7 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
         await deleteHealthRecordFromDb(id);
         toast.success('Data kesehatan berhasil dihapus.');
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.DELETE, `healthRecords/${id}`);
         toast.error('Gagal menghapus data kesehatan.');
       }
     }

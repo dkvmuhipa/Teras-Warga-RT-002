@@ -42,7 +42,9 @@ import {
   addUpdateRequest,
   subscribeToHouseUpdateRequests,
   subscribeToHouseReports,
-  addReportToDb
+  addReportToDb,
+  handleFirestoreError,
+  OperationType
 } from '../../services/databaseService';
 import { NotificationToggle } from '../PushNotificationManager';
 import { motion, AnimatePresence } from 'motion/react';
@@ -253,7 +255,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         description: 'Admin akan meninjau permohonan Anda.'
       });
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, "updateRequests");
       toast.error('Gagal mengirim permohonan.');
     }
   };

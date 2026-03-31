@@ -3,6 +3,7 @@ import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSes
 import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
 import { useFinancial } from '../context/FinancialContext';
 
@@ -643,7 +644,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
       link.href = dataUrl;
       link.click();
     } catch (error) {
-      console.error('Download failed:', error);
+      toast.error('Gagal mengunduh denah.');
     }
   };
 

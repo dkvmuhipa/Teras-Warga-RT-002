@@ -11,7 +11,11 @@
         "nik": { "type": "string" },
         "phone": { "type": "string" },
         "role": { "type": "string", "enum": ["Admin", "Bendahara", "Sekretaris", "Warga"] },
-        "isVerified": { "type": "boolean" }
+        "isVerified": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["Occupied", "Empty", "Business"] },
+        "residenceType": { "type": "string", "enum": ["Tetap", "Kontrak", "Kost", "Rumah Keluarga"] },
+        "occupants": { "type": "number" },
+        "accessCode": { "type": "string" }
       },
       "required": ["block", "number", "headOfFamily"]
     },
@@ -20,11 +24,12 @@
       "description": "Laporan warga (Keamanan, Kebersihan, dll)",
       "type": "object",
       "properties": {
-        "type": { "type": "string" },
+        "type": { "type": "string", "enum": ["Keamanan", "Kebersihan", "Fasilitas", "Sosial", "Lainnya"] },
         "description": { "type": "string" },
         "reporterName": { "type": "string" },
         "status": { "type": "string", "enum": ["Baru", "Diproses", "Selesai"] },
-        "date": { "type": "string" }
+        "date": { "type": "string" },
+        "reporterHouseId": { "type": "string" }
       },
       "required": ["type", "description", "reporterName", "status", "date"]
     },
@@ -36,66 +41,121 @@
         "type": { "type": "string" },
         "applicantName": { "type": "string" },
         "nik": { "type": "string" },
-        "status": { "type": "string", "enum": ["Menunggu", "Disetujui", "Ditolak"] },
-        "date": { "type": "string" }
+        "status": { "type": "string", "enum": ["Menunggu", "Disetujui", "Ditolak", "Pending", "Approved", "Rejected"] },
+        "date": { "type": "string" },
+        "houseId": { "type": "string" }
       },
-      "required": ["type", "applicantName", "nik", "status", "date"]
+      "required": ["type", "applicantName", "nik", "status", "date", "houseId"]
     },
-    "AuditLog": {
-      "title": "AuditLog",
-      "description": "Log aktivitas sistem",
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Pengumuman warga",
       "type": "object",
       "properties": {
-        "action": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string" },
+        "type": { "type": "string", "enum": ["General", "Urgent", "Event"] }
+      },
+      "required": ["title", "content", "date", "type"]
+    },
+    "News": {
+      "title": "News",
+      "description": "Berita warga",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string" },
+        "category": { "type": "string", "enum": ["Kegiatan", "Pengumuman", "Warga", "Lainnya"] }
+      },
+      "required": ["title", "content", "date"]
+    },
+    "UMKM": {
+      "title": "UMKM",
+      "description": "Data UMKM warga",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "owner": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "contact": { "type": "string" },
+        "image": { "type": "string" }
+      },
+      "required": ["name", "owner", "category", "description", "contact", "image"]
+    },
+    "UMKMOrder": {
+      "title": "UMKMOrder",
+      "description": "Pesanan UMKM",
+      "type": "object",
+      "properties": {
+        "umkmId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Processing", "Completed", "Cancelled"] },
+        "orderDate": { "type": "string" }
+      },
+      "required": ["umkmId", "customerName", "customerPhone", "status", "orderDate"]
+    },
+    "PanicAlert": {
+      "title": "PanicAlert",
+      "description": "Sinyal darurat warga",
+      "type": "object",
+      "properties": {
+        "houseId": { "type": "string" },
+        "residentName": { "type": "string" },
+        "location": { "type": "string" },
         "timestamp": { "type": "string" },
-        "user": { "type": "string" },
-        "targetId": { "type": "string" }
+        "status": { "type": "string", "enum": ["Active", "Responding", "Resolved", "Cancelled"] }
       },
-      "required": ["action", "timestamp", "user"]
+      "required": ["houseId", "residentName", "location", "timestamp", "status"]
     },
-    "Config": {
-      "title": "Config",
-      "description": "Konfigurasi aplikasi (PDF, Biaya, dll)",
+    "Poll": {
+      "title": "Poll",
+      "description": "Pemungutan suara digital",
       "type": "object",
       "properties": {
-        "type": { "type": "string" },
-        "data": { "type": "object" }
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Open", "Closed"] },
+        "deadline": { "type": "string" }
       },
-      "required": ["type", "data"]
+      "required": ["title", "description", "status", "deadline"]
+    },
+    "WasteDeposit": {
+      "title": "WasteDeposit",
+      "description": "Setoran bank sampah",
+      "type": "object",
+      "properties": {
+        "houseId": { "type": "string" },
+        "residentName": { "type": "string" },
+        "type": { "type": "string" },
+        "weight": { "type": "number" },
+        "totalValue": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Menunggu", "Disetujui", "Ditolak"] }
+      },
+      "required": ["houseId", "residentName", "type", "weight", "totalValue", "status"]
     }
   },
   "firestore": {
-    "/houses/{houseId}": {
-      "schema": "House",
-      "description": "Koleksi data rumah"
-    },
-    "/reports/{reportId}": {
-      "schema": "Report",
-      "description": "Koleksi laporan warga"
-    },
-    "/letters/{letterId}": {
-      "schema": "LetterRequest",
-      "description": "Koleksi permohonan surat"
-    },
-    "/auditLogs/{logId}": {
-      "schema": "AuditLog",
-      "description": "Koleksi log audit"
-    },
-    "/residentRegistrations/{regId}": {
-      "schema": "ResidentRegistration",
-      "description": "Pendaftaran warga baru"
-    },
-    "/updateRequests/{reqId}": {
-      "schema": "UpdateRequest",
-      "description": "Permohonan update data warga"
-    },
-    "/guestReports/{guestId}": {
-      "schema": "GuestReport",
-      "description": "Laporan tamu menginap"
-    },
-    "/configs/{configId}": {
-      "schema": "Config",
-      "description": "Koleksi konfigurasi sistem"
-    }
+    "/houses/{houseId}": { "schema": "House", "description": "Data rumah" },
+    "/reports/{reportId}": { "schema": "Report", "description": "Laporan warga" },
+    "/letters/{letterId}": { "schema": "LetterRequest", "description": "Permohonan surat" },
+    "/announcements/{id}": { "schema": "Announcement", "description": "Pengumuman" },
+    "/news/{id}": { "schema": "News", "description": "Berita" },
+    "/umkm/{id}": { "schema": "UMKM", "description": "Produk UMKM" },
+    "/umkmOrders/{id}": { "schema": "UMKMOrder", "description": "Pesanan UMKM" },
+    "/panicAlerts/{id}": { "schema": "PanicAlert", "description": "Sinyal darurat" },
+    "/polls/{id}": { "schema": "Poll", "description": "E-Voting" },
+    "/wasteBankDeposits/{id}": { "schema": "WasteDeposit", "description": "Bank Sampah" },
+    "/notifications/{id}": { "schema": "object", "description": "Notifikasi sistem" },
+    "/auditLogs/{id}": { "schema": "object", "description": "Log audit" },
+    "/faq/{id}": { "schema": "object", "description": "FAQ" },
+    "/gallery/{id}": { "schema": "object", "description": "Galeri foto" },
+    "/marketItems/{id}": { "schema": "object", "description": "Bursa warga" },
+    "/residentRegistrations/{id}": { "schema": "object", "description": "Pendaftaran warga" },
+    "/guestReports/{id}": { "schema": "object", "description": "Laporan tamu" },
+    "/updateRequests/{id}": { "schema": "object", "description": "Update data warga" }
   }
 }

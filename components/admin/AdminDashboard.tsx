@@ -2,7 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
-import { addPopulationReportToDb, updatePopulationReportToDb, deletePopulationReportFromDb, subscribeToActivePanicAlerts, deleteNotificationFromDb, deleteReportFromDb } from '../../services/databaseService';
+import { 
+  addPopulationReportToDb, 
+  updatePopulationReportToDb, 
+  deletePopulationReportFromDb, 
+  subscribeToActivePanicAlerts, 
+  deleteNotificationFromDb, 
+  deleteReportFromDb,
+  handleFirestoreError,
+  OperationType
+} from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
   RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance, Role
@@ -117,7 +126,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             setPdfConfig={setPdfConfig} 
             onDeleteReport={async (id) => {
               if (window.confirm('Hapus laporan warga ini?')) {
-                await deleteReportFromDb(id);
+                try {
+                  await deleteReportFromDb(id);
+                } catch (error) {
+                  handleFirestoreError(error, OperationType.DELETE, `reports/${id}`);
+                }
               }
             }}
           />
@@ -141,7 +154,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             notifications={notifications} 
             onDeleteNotification={async (id) => {
               if (window.confirm('Hapus notifikasi ini?')) {
-                await deleteNotificationFromDb(id);
+                try {
+                  await deleteNotificationFromDb(id);
+                } catch (error) {
+                  handleFirestoreError(error, OperationType.DELETE, `notifications/${id}`);
+                }
               }
             }}
           />
@@ -159,14 +176,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <PopulationReportManager 
             reports={populationReports} 
             onAddReport={async (r) => {
-              await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
+              try {
+                await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
+              } catch (error) {
+                handleFirestoreError(error, OperationType.CREATE, "populationReports");
+              }
             }} 
             onUpdateReport={async (id, r) => {
-              await updatePopulationReportToDb(id, r);
+              try {
+                await updatePopulationReportToDb(id, r);
+              } catch (error) {
+                handleFirestoreError(error, OperationType.UPDATE, `populationReports/${id}`);
+              }
             }}
             onDeleteReport={async (id) => {
               if (window.confirm('Hapus laporan kependudukan ini?')) {
-                await deletePopulationReportFromDb(id);
+                try {
+                  await deletePopulationReportFromDb(id);
+                } catch (error) {
+                  handleFirestoreError(error, OperationType.DELETE, `populationReports/${id}`);
+                }
               }
             }} 
             populationLogs={populationLogs} 

@@ -27,7 +27,26 @@ import {
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
-import { batchUpdateHouses, deleteHouseFromDb, updateHouseData, addHouse, generateAllAccessCodes, addTransactionToDb, addIuranPaymentToDb, deleteIuranPaymentFromDb, updateResidentRegistrationInDb, deleteResidentRegistrationFromDb, updateIuranPaymentInDb, formatHouseId, addBillToDb, updateBillInDb, addPopulationLogToDb, logAction } from '../../services/databaseService';
+import { 
+  batchUpdateHouses, 
+  deleteHouseFromDb, 
+  updateHouseData, 
+  addHouse, 
+  generateAllAccessCodes, 
+  addTransactionToDb, 
+  addIuranPaymentToDb, 
+  deleteIuranPaymentFromDb, 
+  updateResidentRegistrationInDb, 
+  deleteResidentRegistrationFromDb, 
+  updateIuranPaymentInDb, 
+  formatHouseId, 
+  addBillToDb, 
+  updateBillInDb, 
+  addPopulationLogToDb, 
+  logAction,
+  handleFirestoreError,
+  OperationType
+} from '../../services/databaseService';
 import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
@@ -174,7 +193,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               toast.info('Semua data warga sudah memiliki PIN. Tidak ada PIN baru yang di-generate.');
             }
         } catch (e) {
-            console.error(e);
+            handleFirestoreError(e, OperationType.UPDATE, "houses");
             toast.error('Gagal meng-generate PIN.');
         } finally {
             setIsGenerating(false);
@@ -238,7 +257,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             await batchUpdateHouses(updates);
             toast.success(`Berhasil mereset ${updates.length} data rumah menjadi status Kosong.`);
         } catch (e) {
-            console.error(e);
+            handleFirestoreError(e, OperationType.UPDATE, "houses");
             toast.error('Gagal melakukan cleanup data.');
         } finally {
             setIsGenerating(false);
@@ -336,7 +355,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               });
             }
           } catch (err) {
-            console.error('Error processing house:', err);
+            handleFirestoreError(err, OperationType.WRITE, "houses");
             failCount++;
           }
         }
@@ -357,7 +376,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           description: `Data Baru Ditambahkan: ${addedCount}\nData Diperbarui: ${updatedCount}\nGagal/Format Salah: ${failCount}\nData Tidak Berubah: ${parsedData.length - addedCount - updatedCount - failCount}`
         });
       } catch (error) {
-        console.error('Excel Parse Error:', error);
+        handleFirestoreError(error, OperationType.WRITE, "houses");
         toast.error('Gagal memproses file Excel.');
       } finally {
         setIsUploading(false);
@@ -378,7 +397,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             toast.success('Warga terpilih berhasil diverifikasi.');
             setSelectedIds(new Set());
         } catch (e) {
-            console.error(e);
+            handleFirestoreError(e, OperationType.UPDATE, "houses");
             toast.error('Gagal memverifikasi warga.');
         }
     }
@@ -413,7 +432,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             toast.success('Warga terpilih berhasil dihapus.');
             setSelectedIds(new Set());
         } catch (e) {
-            console.error(e);
+            handleFirestoreError(e, OperationType.DELETE, "houses");
             toast.error('Gagal menghapus warga terpilih.');
         }
     }
@@ -595,7 +614,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       setPayHouse(null);
       setPayNotes('');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.WRITE, "iuranPayments");
       toast.error('Gagal memperbarui status iuran.');
     }
   };
@@ -619,7 +638,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       setEditingPayment(null);
       setPayNotes('');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.UPDATE, "iuranPayments");
       toast.error('Gagal memperbarui catatan pembayaran.');
     }
   };
@@ -814,7 +833,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       resetForm();
       toast.success('Data warga berhasil disimpan!');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.WRITE, "houses");
       toast.error('Gagal menyimpan data warga.');
     }
   };
@@ -898,7 +917,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           setSelectedResident(null);
         }
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.DELETE, "houses");
         toast.error('Gagal menghapus data warga.');
       }
     }
@@ -923,7 +942,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           toast.error(`Gagal mengirim pesan: ${result?.error || 'Terjadi kesalahan'}`);
         }
       } catch (error) {
-        console.error('WA error:', error);
+        handleFirestoreError(error, OperationType.WRITE, "whatsapp");
         toast.error('Gagal mengirim pesan WhatsApp via gateway.');
       }
     }

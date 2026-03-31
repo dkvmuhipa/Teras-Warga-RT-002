@@ -10,7 +10,9 @@ import {
   deleteActivityFromDb,
   subscribeToAttendance,
   deleteAttendanceFromDb,
-  addTransactionToDb
+  addTransactionToDb,
+  handleFirestoreError,
+  OperationType
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -69,7 +71,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       resetForm();
       toast.success(editingActivityId ? 'Kegiatan berhasil diperbarui!' : 'Kegiatan berhasil dibuat!');
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, editingActivityId ? OperationType.UPDATE : OperationType.CREATE, "activities");
       toast.error('Gagal menyimpan kegiatan.');
     }
   };

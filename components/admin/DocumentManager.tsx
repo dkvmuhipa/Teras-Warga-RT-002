@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Trash2, Search, Filter, Upload, X, Clock, User, Download, FileArchive, FileCode, FileSpreadsheet, File as FileIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Document } from '../../types';
-import { subscribeToDocuments, addDocumentToDb, deleteDocumentFromDb, uploadImageToStorage } from '../../services/databaseService';
+import { subscribeToDocuments, addDocumentToDb, deleteDocumentFromDb, uploadImageToStorage, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'react-hot-toast';
 
 interface DocumentManagerProps {
@@ -49,7 +49,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
       setNewDoc({ title: '', category: 'Aturan', url: '' });
       setSelectedFile(null);
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, "documents");
       toast.error('Gagal mengunggah dokumen');
     } finally {
       setIsUploading(false);
@@ -62,6 +62,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
         await deleteDocumentFromDb(id);
         toast.success('Dokumen dihapus');
       } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `documents/${id}`);
         toast.error('Gagal menghapus dokumen');
       }
     }

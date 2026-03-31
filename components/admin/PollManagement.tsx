@@ -3,7 +3,7 @@ import { Plus, Trash2, Vote, Calendar, Clock, Lock, CheckCircle2 } from 'lucide-
 import { Poll } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { addPollToDb, updatePollStatus, deletePollFromDb } from '../../services/databaseService';
+import { addPollToDb, updatePollStatus, deletePollFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
@@ -49,7 +49,7 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
       setIsModalOpen(false);
       resetForms();
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, OperationType.CREATE, "polls");
       toast.error('Gagal membuat voting.');
     }
   };
@@ -84,7 +84,7 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
             await updatePollStatus(id, 'Closed');
             toast.success('Voting berhasil ditutup.');
           } catch (error) {
-            console.error(error);
+            handleFirestoreError(error, OperationType.UPDATE, `polls/${id}`);
             toast.error('Gagal menutup voting.');
           }
         }

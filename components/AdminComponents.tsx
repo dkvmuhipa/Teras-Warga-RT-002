@@ -38,7 +38,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
       await loginAdmin(email, password);
       onLogin(); 
     } catch (err: any) {
-      console.error("Auth Error Debug:", err.code);
+      // Auth errors are handled by the UI state, no need for handleFirestoreError here
+      // but we remove console.error to be consistent with the goal of refactoring it.
       
       // Handle modern Firebase error codes
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {

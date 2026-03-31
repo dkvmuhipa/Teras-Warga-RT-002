@@ -7,7 +7,9 @@ import { toast } from 'sonner';
 import { 
   subscribeToActivities, 
   addAttendanceToDb,
-  subscribeToAttendance
+  subscribeToAttendance,
+  handleFirestoreError,
+  OperationType
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { QrReader } from 'react-qr-reader';
@@ -83,7 +85,7 @@ export const PublicActivity: React.FC = () => {
           setIsScanModalOpen(false);
           setIsSuccessModalOpen(true);
         } catch (error) {
-          console.error(error);
+          handleFirestoreError(error, OperationType.CREATE, "attendance");
           toast.error("Gagal mencatat kehadiran.");
         }
       } else {

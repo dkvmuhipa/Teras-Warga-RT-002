@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
-import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, checkWasteRetribution } from '../../services/databaseService';
+import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, checkWasteRetribution, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
 import { GuestReportForm } from '../GuestReportForm';
@@ -176,116 +176,126 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
   const handleSubmitSurat = async (e: React.FormEvent) => { 
     e.preventDefault(); 
-    const isValid = await validateResidentAccess(houseId, accessCode);
-    if (!isValid) {
-      toast.error("Verifikasi Gagal!", {
-        description: "Kode Akses Rumah tidak valid. Silakan hubungi Ketua RT jika lupa kode."
-      });
-      return;
-    }
+    try {
+      const isValid = await validateResidentAccess(houseId, accessCode);
+      if (!isValid) {
+        toast.error("Verifikasi Gagal!", {
+          description: "Kode Akses Rumah tidak valid. Silakan hubungi Ketua RT jika lupa kode."
+        });
+        return;
+      }
 
-    const formattedHouseId = formatHouseId(houseId);
-    
-    // Check Waste Retribution (Mandatory in Palu City)
-    const retribution = await checkWasteRetribution(formattedHouseId);
-    if (!retribution.paid) {
-      toast.warning("PENGURUSAN DITANGGUHKAN", {
-        description: `Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`,
+      const formattedHouseId = formatHouseId(houseId);
+      
+      // Check Waste Retribution (Mandatory in Palu City)
+      const retribution = await checkWasteRetribution(formattedHouseId);
+      if (!retribution.paid) {
+        toast.warning("PENGURUSAN DITANGGUHKAN", {
+          description: `Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`,
+          duration: 10000
+        });
+        return;
+      }
+
+      const finalRequestType = requestType === 'Lainnya' ? customRequestType : requestType;
+
+      const letterData: LetterRequest = { 
+        id: Date.now().toString(), 
+        type: finalRequestType, 
+        applicantName, 
+        nik, 
+        familyHeadName, 
+        birthPlace, 
+        birthDate, 
+        gender, 
+        religion, 
+        job, 
+        maritalStatus, 
+        nationality, 
+        addressKtp, 
+        currentAddress: isSameAddress ? addressKtp : currentAddress,
+        houseId: formattedHouseId, 
+        purposeDetail, 
+        phone,
+        email,
+        education,
+        familyStatus,
+        bloodType,
+        status: 'Menunggu', 
+        date: new Date().toISOString().split('T')[0],
+        estimatedTime: estimatedTimes[finalRequestType] || estimatedTimes['Lainnya']
+      }; 
+      
+      await generateSuratPengantar(letterData, pdfConfig, true); 
+      await addLetterToDb(letterData); 
+      const historyItem = {...letterData, category: 'Surat', title: `Surat ${finalRequestType}`};
+      saveToHistory(historyItem); 
+      
+      toast.success("Surat Berhasil Diajukan!", {
+        description: `ID: #${letterData.id.slice(-8)} | Estimasi: ${letterData.estimatedTime}`,
+        action: {
+          label: "WhatsApp RT",
+          onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20${finalRequestType}%20dengan%20ID%20${letterData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
+        },
         duration: 10000
       });
-      return;
+      
+      // Reset form
+      setApplicantName(''); setNik(''); setFamilyHeadName(''); setBirthPlace(''); setBirthDate(''); setJob(''); setAddressKtp(''); setHouseId(''); setPurposeDetail(''); setAccessCode('');
+      setNationality('Indonesia'); setMaritalStatus('Kawin'); setPhone(''); setEmail(''); setCustomRequestType('');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, "letters");
+      toast.error("Gagal mengajukan surat.");
     }
-
-    const finalRequestType = requestType === 'Lainnya' ? customRequestType : requestType;
-
-    const letterData: LetterRequest = { 
-      id: Date.now().toString(), 
-      type: finalRequestType, 
-      applicantName, 
-      nik, 
-      familyHeadName, 
-      birthPlace, 
-      birthDate, 
-      gender, 
-      religion, 
-      job, 
-      maritalStatus, 
-      nationality, 
-      addressKtp, 
-      currentAddress: isSameAddress ? addressKtp : currentAddress,
-      houseId: formattedHouseId, 
-      purposeDetail, 
-      phone,
-      email,
-      education,
-      familyStatus,
-      bloodType,
-      status: 'Menunggu', 
-      date: new Date().toISOString().split('T')[0],
-      estimatedTime: estimatedTimes[finalRequestType] || estimatedTimes['Lainnya']
-    }; 
-    
-    await generateSuratPengantar(letterData, pdfConfig, true); 
-    await addLetterToDb(letterData); 
-    const historyItem = {...letterData, category: 'Surat', title: `Surat ${finalRequestType}`};
-    saveToHistory(historyItem); 
-    
-    toast.success("Surat Berhasil Diajukan!", {
-      description: `ID: #${letterData.id.slice(-8)} | Estimasi: ${letterData.estimatedTime}`,
-      action: {
-        label: "WhatsApp RT",
-        onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20${finalRequestType}%20dengan%20ID%20${letterData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
-      },
-      duration: 10000
-    });
-    
-    // Reset form
-    setApplicantName(''); setNik(''); setFamilyHeadName(''); setBirthPlace(''); setBirthDate(''); setJob(''); setAddressKtp(''); setHouseId(''); setPurposeDetail(''); setAccessCode('');
-    setNationality('Indonesia'); setMaritalStatus('Kawin'); setPhone(''); setEmail(''); setCustomRequestType('');
   };
 
   const handleSubmitLapor = async (e: React.FormEvent) => { 
     e.preventDefault(); 
-    const isValid = await validateResidentAccess(reporterHouseId, accessCode);
-    if (!isValid) {
-      toast.error("Verifikasi Gagal!", {
-        description: "Kode Akses Rumah tidak valid."
+    try {
+      const isValid = await validateResidentAccess(reporterHouseId, accessCode);
+      if (!isValid) {
+        toast.error("Verifikasi Gagal!", {
+          description: "Kode Akses Rumah tidak valid."
+        });
+        return;
+      }
+
+      const formattedReporterHouseId = formatHouseId(reporterHouseId);
+      const formattedReportHouseId = reportHouseId ? formatHouseId(reportHouseId) : '';
+
+      const reportData: Report = { 
+        id: Date.now().toString(), 
+        type: reportType, 
+        description: reportDesc, 
+        reporterName, 
+        houseId: formattedReportHouseId, 
+        reporterHouseId: formattedReporterHouseId, 
+        status: 'Baru', 
+        date: new Date().toISOString(),
+        photoUrl: reportPhoto || undefined
+      };
+      
+      generateReportReceiptPDF(reportData, pdfConfig);
+      await addReportToDb(reportData);
+      const historyItem = {...reportData, category: 'Laporan', title: `Laporan ${reportType}`};
+      saveToHistory(historyItem);
+      
+      toast.success("Laporan Berhasil Terkirim!", {
+        description: `ID: #${reportData.id.slice(-8)} | Kategori: ${reportType}`,
+        action: {
+          label: "WhatsApp RT",
+          onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20Laporan%20${reportType}%20dengan%20ID%20${reportData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
+        },
+        duration: 10000
       });
-      return;
+      
+      // Reset form
+      setReportDesc(''); setReporterName(''); setReportHouseId(''); setReporterHouseId(''); setAccessCode('');
+      setReportPhoto(null);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, "reports");
+      toast.error("Gagal mengirim laporan.");
     }
-
-    const formattedReporterHouseId = formatHouseId(reporterHouseId);
-    const formattedReportHouseId = reportHouseId ? formatHouseId(reportHouseId) : '';
-
-    const reportData: Report = { 
-      id: Date.now().toString(), 
-      type: reportType, 
-      description: reportDesc, 
-      reporterName, 
-      houseId: formattedReportHouseId, 
-      reporterHouseId: formattedReporterHouseId, 
-      status: 'Baru', 
-      date: new Date().toISOString(),
-      photoUrl: reportPhoto || undefined
-    };
-    
-    generateReportReceiptPDF(reportData, pdfConfig);
-    await addReportToDb(reportData);
-    const historyItem = {...reportData, category: 'Laporan', title: `Laporan ${reportType}`};
-    saveToHistory(historyItem);
-    
-    toast.success("Laporan Berhasil Terkirim!", {
-      description: `ID: #${reportData.id.slice(-8)} | Kategori: ${reportType}`,
-      action: {
-        label: "WhatsApp RT",
-        onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20Laporan%20${reportType}%20dengan%20ID%20${reportData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
-      },
-      duration: 10000
-    });
-    
-    // Reset form
-    setReportDesc(''); setReporterName(''); setReportHouseId(''); setReporterHouseId(''); setAccessCode('');
-    setReportPhoto(null);
   };
 
   const handleSubmitMutasi = async (e: React.FormEvent) => {

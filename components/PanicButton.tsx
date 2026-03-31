@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, X, ShieldAlert, Volume2, VolumeX, MapPin, CheckCircle, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { sendPanicAlert, subscribeToActivePanicAlerts, updatePanicAlertStatus } from '../services/databaseService';
+import { sendPanicAlert, subscribeToActivePanicAlerts, updatePanicAlertStatus, handleFirestoreError, OperationType } from '../services/databaseService';
 import { toast } from 'sonner';
 import { PanicAlert, House } from '../types';
 
@@ -155,7 +155,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
         toast.error(errorMessage);
       }
     } catch (error: any) {
-      console.error("Panic alert error:", error);
+      handleFirestoreError(error, OperationType.CREATE, "panicAlerts");
       toast.error(`Terjadi kesalahan sistem: ${error.message || 'Error tidak diketahui'}`);
     }
   };

@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb, logAction } from '../../services/databaseService';
+import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb, logAction, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { generateCashFlowReportPDF } from '../../services/pdfService';
 
@@ -91,7 +91,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
       setIsModalOpen(false);
       resetForm();
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, editingId ? OperationType.UPDATE : OperationType.CREATE, "cashFlow");
       toast.error('Gagal menyimpan transaksi.');
     }
   };
@@ -103,7 +103,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
         await logAction('Hapus Transaksi', `Hapus transaksi ID: ${id}`);
         toast.success('Transaksi berhasil dihapus.');
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.DELETE, `cashFlow/${id}`);
         toast.error('Gagal menghapus transaksi.');
       }
     }

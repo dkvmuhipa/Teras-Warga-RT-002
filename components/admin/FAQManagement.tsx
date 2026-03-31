@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FAQItem } from '../../types';
 import { Plus, Edit2, Trash2, HelpCircle, Save, X } from 'lucide-react';
-import { addFAQToDb, updateFAQInDb, deleteFAQFromDb } from '../../services/databaseService';
+import { addFAQToDb, updateFAQInDb, deleteFAQFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
@@ -50,7 +50,7 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
       setIsModalOpen(false);
       resetForm();
     } catch (error) {
-      console.error(error);
+      handleFirestoreError(error, editingId ? OperationType.UPDATE : OperationType.CREATE, "faq");
       toast.error('Gagal menyimpan FAQ.');
     }
   };
@@ -61,7 +61,7 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
         await deleteFAQFromDb(id);
         toast.success('FAQ berhasil dihapus.');
       } catch (error) {
-        console.error(error);
+        handleFirestoreError(error, OperationType.DELETE, `faq/${id}`);
         toast.error('Gagal menghapus FAQ.');
       }
     }
