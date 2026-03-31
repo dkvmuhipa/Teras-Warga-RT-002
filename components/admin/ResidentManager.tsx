@@ -749,10 +749,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           phone: data.phone,
           houseId: data.id,
           date: logDate,
-          description: 'Warga baru ditambahkan melalui Data Warga',
+          description: 'Registrasi Awal (Admin)',
           details: {
             previousAddress: '-',
-            reasonForMoving: '-',
+            reasonForMoving: 'Registrasi Awal',
             familyCount: data.occupants || 1,
             familyMembers: data.familyMembers || [],
             residenceType: data.residenceType || 'Tetap',
@@ -1145,6 +1145,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             searchTerm={searchTerm}
             updateResidentRegistrationInDb={updateResidentRegistrationInDb}
             addHouse={addHouse}
+            addPopulationLogToDb={addPopulationLogToDb}
           />
         ) : viewMode === 'table' ? (
           <ResidentTableView 

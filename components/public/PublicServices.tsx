@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   FileText, AlertTriangle, History, Send, User, MapPin, 
   Calendar, Briefcase, Heart, Flag, Home, Lock, CheckCircle2, Clock, XCircle, Sparkles, Eye, EyeOff,
-  Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus, ShieldAlert
+  Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus, ShieldAlert, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -1022,6 +1022,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               </div>
             </div>
 
+            {/* Explanation of Registration vs Mutation */}
+            <div className="mb-8 p-6 bg-indigo-50 border border-indigo-100 rounded-[2rem] flex items-start gap-4 shadow-sm">
+              <div className="p-3 bg-white text-indigo-600 rounded-2xl shadow-sm">
+                <Info size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-black text-indigo-900 uppercase tracking-widest">Panduan Kependudukan</p>
+                <p className="text-sm font-medium text-indigo-700 mt-1 leading-relaxed">
+                  Gunakan menu <b>Mutasi</b> ini jika rumah Anda sudah aktif dan ingin melaporkan penambahan anggota keluarga. Jika Anda penghuni pertama di rumah yang belum aktif di aplikasi, silakan gunakan menu <b>Registrasi Penghuni</b> di halaman utama.
+                </p>
+              </div>
+            </div>
+
             {/* Palu City Regulation Notice */}
             <div className="mb-12 p-6 bg-amber-50 border border-amber-100 rounded-[2rem] flex items-start gap-4 shadow-sm">
               <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm">
@@ -1052,7 +1065,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {[
-                      { id: 'Newcomer', label: 'Warga Masuk', icon: UserPlus, desc: 'Pindah masuk ke RT 02' },
+                      { id: 'Newcomer', label: 'Tambah Anggota Keluarga', icon: UserPlus, desc: 'Pindah masuk ke rumah yang sudah aktif' },
                       { id: 'MovedOut', label: 'Warga Pindah', icon: Share2, desc: 'Pindah keluar dari RT 02' },
                       { id: 'Birth', label: 'Kelahiran', icon: Heart, desc: 'Anggota keluarga baru lahir' },
                       { id: 'Death', label: 'Kematian', icon: Flag, desc: 'Laporan warga meninggal dunia' }

@@ -121,7 +121,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     { label: 'Dashboard', icon: User, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/resident' },
     { label: 'Buat Surat', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', link: '/services' },
     { label: 'Lapor Tamu', icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=tamu' },
-    { label: 'Warga Baru', icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/register' },
+    { label: 'Registrasi Penghuni', icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/register' },
     { label: 'Pasar Warga', icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', link: '/market' },
     { label: 'Info Publik', icon: Megaphone, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', link: '/info' },
     { label: 'E-Voting', icon: Vote, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/voting' },

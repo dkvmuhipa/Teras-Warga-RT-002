@@ -2,12 +2,14 @@ import React from 'react';
 import { User, Phone } from 'lucide-react';
 import { ResidentRegistration, PaymentStatus, House } from '../../../types';
 import { toast } from 'sonner';
+import { formatHouseId } from '../../../services/databaseService';
 
 interface ResidentRegistrationListProps {
   residentRegistrations: ResidentRegistration[];
   searchTerm: string;
   updateResidentRegistrationInDb: (id: string, data: Partial<ResidentRegistration>) => Promise<void>;
   addHouse: (house: Omit<House, 'id'>) => Promise<void>;
+  addPopulationLogToDb?: (log: any) => Promise<void>;
 }
 
 export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> = ({
@@ -15,6 +17,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
   searchTerm,
   updateResidentRegistrationInDb,
   addHouse,
+  addPopulationLogToDb,
 }) => {
   const searchLower = searchTerm.toLowerCase();
   const filteredRegistrations = residentRegistrations.filter(reg => {
@@ -135,6 +138,30 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             
                             // 2. Update registration status
                             await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Approved' });
+                            
+                            // 3. Add to population logs (Log Mutasi)
+                            if (addPopulationLogToDb) {
+                              await addPopulationLogToDb({
+                                id: Date.now().toString(),
+                                type: 'Newcomer',
+                                name: reg.headOfFamily,
+                                phone: reg.phone,
+                                houseId: formatHouseId(`${reg.block}-${reg.number}`),
+                                date: new Date().toISOString().split('T')[0],
+                                description: 'Registrasi Awal (Aplikasi)',
+                                details: {
+                                  previousAddress: '-',
+                                  reasonForMoving: 'Registrasi Awal',
+                                  familyCount: reg.occupants || 1,
+                                  familyMembers: reg.familyMembers || [],
+                                  residenceType: reg.residenceType || 'Tetap',
+                                  religion: reg.religion || '-',
+                                  kkNumber: '-',
+                                  jobCategory: reg.jobCategory || '-',
+                                  education: reg.education || '-'
+                                }
+                              });
+                            }
                             
                             toast.success('Pendaftaran disetujui dan data warga telah ditambahkan!');
                           } catch (error) {

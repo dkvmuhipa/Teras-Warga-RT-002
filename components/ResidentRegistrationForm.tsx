@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { User, Home, Phone, Users, Send, CheckCircle, ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, FileText, Camera, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/Button';
-import { addResidentRegistrationToDb, uploadImageToStorage } from '../services/databaseService';
+import { addResidentRegistrationToDb, uploadImageToStorage, checkHouseOccupied, formatHouseId } from '../services/databaseService';
 import { toast } from 'sonner';
 
 interface ResidentRegistrationFormProps {
@@ -68,6 +68,19 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     e.preventDefault();
     setIsLoading(true);
     try {
+      // Check if house is already occupied in the system
+      const houseId = formatHouseId(`${formData.block}-${formData.number}`);
+      const isOccupied = await checkHouseOccupied(houseId);
+      
+      if (isOccupied) {
+        toast.error('Rumah Sudah Terdaftar!', {
+          description: `Blok ${formData.block} No. ${formData.number} sudah memiliki penghuni terdaftar. Jika Anda ingin menambah anggota keluarga, silakan gunakan menu Mutasi > Tambah Anggota di halaman Layanan.`,
+          duration: 6000
+        });
+        setIsLoading(false);
+        return;
+      }
+
       let ktpUrl = '';
       let kkUrl = '';
 
@@ -121,7 +134,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
           <ArrowLeft size={20} className="text-slate-400" />
         </button>
         <div>
-          <h2 className="text-2xl font-black text-slate-800">Formulir Warga Baru</h2>
+          <h2 className="text-2xl font-black text-slate-800">Formulir Registrasi Penghuni</h2>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lengkapi Data Kependudukan RT 02</p>
         </div>
       </div>

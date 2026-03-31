@@ -17,6 +17,16 @@ import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaCha
 // Destructure React Router DOM components
 const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } = ReactRouterDOM;
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
 import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
@@ -311,6 +321,7 @@ export const App = () => {
 
   return (
     <HashRouter>
+        <ScrollToTop />
         <Toaster position="top-right" richColors />
         {activeNotification && <NotificationToast notification={activeNotification} onClose={() => setActiveNotification(null)} />}
         <FinancialProvider 
@@ -377,7 +388,7 @@ export const App = () => {
                         />
                         <div className="pb-24 md:pb-0">
                             <Routes>
-                                <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} polls={polls} umkm={umkm} events={events} donationCampaigns={donationCampaigns} />} />
+                                <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
                                 <Route path="/voting" element={<PublicVoting polls={polls} />} />
                                 <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
                                 <Route path="/market" element={<PublicMarket items={marketItems} />} />

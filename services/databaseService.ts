@@ -922,6 +922,35 @@ export const getHouseDisplayLabel = (houseId: string, houses?: any[]): string =>
     return `Blok ${formattedId}`;
 };
 
+export const checkHouseOccupied = async (houseId: string): Promise<boolean> => {
+    try {
+        const formattedHouseId = formatHouseId(houseId);
+        const docRef = doc(db, HOUSES_COL, formattedHouseId);
+        const snapshot = await getDoc(docRef);
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            // A house is considered occupied if it has a headOfFamily or an accessCode
+            return !!(data.headOfFamily || data.accessCode);
+        }
+        return false;
+    } catch (e) {
+        console.error("Error checking house occupancy:", e);
+        return false;
+    }
+};
+
+export const checkHouseExists = async (houseId: string): Promise<boolean> => {
+    try {
+        const formattedHouseId = formatHouseId(houseId);
+        const docRef = doc(db, HOUSES_COL, formattedHouseId);
+        const snapshot = await getDoc(docRef);
+        return snapshot.exists();
+    } catch (e) {
+        console.error("Error checking house existence:", e);
+        return false;
+    }
+};
+
 export const validateResidentAccess = async (houseId: string, code: string): Promise<boolean> => {
     try {
         const formattedHouseId = formatHouseId(houseId);
