@@ -69,9 +69,10 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       }
 
       const formattedHouseId = formatHouseId(reportForm.reporterHouseId);
+      const { pin, ...reportData } = reportForm;
 
       await addReportToDb({
-        ...reportForm,
+        ...reportData,
         reporterHouseId: formattedHouseId,
         date: new Date().toISOString(),
         status: 'Baru'

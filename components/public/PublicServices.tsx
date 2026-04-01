@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   FileText, AlertTriangle, History, Send, User, MapPin, 
   Calendar, Briefcase, Heart, Flag, Home, Lock, CheckCircle2, Clock, XCircle, Sparkles, Eye, EyeOff,
-  Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus, ShieldAlert, Info
+  Camera, Star, MessageCircle, ExternalLink, Share2, Users, UserPlus, ShieldAlert, Info, ArrowRight, Phone
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -42,6 +42,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [reportType, setReportType] = useState<Report['type']>('Fasilitas');
   const [reportDesc, setReportDesc] = useState('');
   const [reporterName, setReporterName] = useState('');
+  const [reporterPhone, setReporterPhone] = useState(''); // NEW: Reporter's phone number
   const [reportHouseId, setReportHouseId] = useState(initialHouseId); 
   const [reporterHouseId, setReporterHouseId] = useState(''); 
 
@@ -86,6 +87,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [isSameAddress, setIsSameAddress] = useState(false);
   const [houseId, setHouseId] = useState(initialHouseId);
   const [purposeDetail, setPurposeDetail] = useState(''); 
+  const [letterStep, setLetterStep] = useState(1); // NEW: Step for letter request
   
   const dynamicTemplates = pdfConfig.letterTemplates?.reduce((acc, curr) => {
     acc[curr.type] = curr.suggestion;
@@ -190,11 +192,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       // Check Waste Retribution (Mandatory in Palu City)
       const retribution = await checkWasteRetribution(formattedHouseId);
       if (!retribution.paid) {
-        toast.warning("PENGURUSAN DITANGGUHKAN", {
-          description: `Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`,
-          duration: 10000
-        });
-        return;
+        if (retribution.isMandatory) {
+          toast.warning("PENGURUSAN DITANGGUHKAN", {
+            description: `Pembayaran Retribusi Sampah & Air untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan, iuran wajib dilunasi paling lambat tanggal 20 setiap bulannya. Silakan hubungi petugas atau Ketua RT.`,
+            duration: 10000
+          });
+          return;
+        } else {
+          // Information only, not blocking
+          toast.info("INFORMASI TAGIHAN", {
+            description: `Tagihan Sampah & Air bulan ${retribution.month} sudah tersedia. Batas pelunasan adalah tanggal 20. Mohon segera melakukan pembayaran agar tidak menghambat pengurusan administrasi di akhir bulan.`,
+            duration: 8000
+          });
+        }
       }
 
       const finalRequestType = requestType === 'Lainnya' ? customRequestType : requestType;
@@ -243,6 +253,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       // Reset form
       setApplicantName(''); setNik(''); setFamilyHeadName(''); setBirthPlace(''); setBirthDate(''); setJob(''); setAddressKtp(''); setHouseId(''); setPurposeDetail(''); setAccessCode('');
       setNationality('Indonesia'); setMaritalStatus('Kawin'); setPhone(''); setEmail(''); setCustomRequestType('');
+      setLetterStep(1); // Reset step
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, "letters");
       toast.error("Gagal mengajukan surat.");
@@ -268,6 +279,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
         type: reportType, 
         description: reportDesc, 
         reporterName, 
+        reporterPhone, // NEW: Include reporter phone
         houseId: formattedReportHouseId, 
         reporterHouseId: formattedReporterHouseId, 
         status: 'Baru', 
@@ -290,7 +302,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       });
       
       // Reset form
-      setReportDesc(''); setReporterName(''); setReportHouseId(''); setReporterHouseId(''); setAccessCode('');
+      setReportDesc(''); setReporterName(''); setReporterPhone(''); setReportHouseId(''); setReporterHouseId(''); setAccessCode('');
       setReportPhoto(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, "reports");
@@ -316,11 +328,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     // Check Waste Retribution (Mandatory in Palu City)
     const retribution = await checkWasteRetribution(formattedMutationHouseId);
     if (!retribution.paid) {
-      toast.warning("PELAPORAN DITANGGUHKAN", {
-        description: `Pembayaran Retribusi Sampah untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan Kota Palu, retribusi sampah wajib dilunasi sebelum pengurusan administrasi. Silakan hubungi petugas kebersihan atau Ketua RT.`,
-        duration: 10000
-      });
-      return;
+      if (retribution.isMandatory) {
+        toast.warning("PELAPORAN DITANGGUHKAN", {
+          description: `Pembayaran Retribusi Sampah & Air untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan, iuran wajib dilunasi paling lambat tanggal 20 setiap bulannya. Silakan hubungi petugas atau Ketua RT.`,
+          duration: 10000
+        });
+        return;
+      } else {
+        // Information only, not blocking
+        toast.info("INFORMASI TAGIHAN", {
+          description: `Tagihan Sampah & Air bulan ${retribution.month} sudah tersedia. Batas pelunasan adalah tanggal 20. Mohon segera melakukan pembayaran agar tidak menghambat pelaporan di akhir bulan.`,
+          duration: 8000
+        });
+      }
     }
 
     const mutationData = {
@@ -546,19 +566,52 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               </div>
             </div>
 
-            <form onSubmit={handleSubmitSurat} className="space-y-16">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                {/* Left Column: Personal Info (Wider) */}
-                <div className="lg:col-span-7 space-y-12">
-                  <div className="flex items-center gap-4 mb-2">
-                    <div className="w-10 h-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-sm font-black shadow-lg shadow-slate-200">01</div>
+            <div className="flex items-center justify-center mb-12">
+              <div className="flex items-center w-full max-w-2xl">
+                {[
+                  { step: 1, label: 'Identitas' },
+                  { step: 2, label: 'Keperluan' },
+                  { step: 3, label: 'Verifikasi' }
+                ].map((s, i) => (
+                  <React.Fragment key={s.step}>
+                    <div className="flex flex-col items-center relative">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black transition-all duration-500 ${letterStep >= s.step ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-100 text-slate-400'}`}>
+                        {letterStep > s.step ? <CheckCircle2 size={20} /> : s.step}
+                      </div>
+                      <span className={`absolute -bottom-7 text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${letterStep >= s.step ? 'text-indigo-600' : 'text-slate-400'}`}>
+                        {s.label}
+                      </span>
+                    </div>
+                    {i < 2 && (
+                      <div className="flex-1 h-1 mx-4 bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: letterStep > s.step ? '100%' : '0%' }}
+                          className="h-full bg-indigo-600"
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmitSurat} className="space-y-12">
+              {letterStep === 1 && (
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-12"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-lg font-black shadow-lg shadow-slate-200">01</div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-900 tracking-tight">Identitas Diri</h3>
-                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Informasi sesuai KTP & KK</p>
+                      <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Identitas Diri</h3>
+                      <p className="text-xs text-slate-400 font-bold">Informasi sesuai KTP & KK</p>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="md:col-span-2 group">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Lengkap Sesuai KTP</label>
                       <div className="relative">
@@ -674,20 +727,35 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       )}
                     </div>
                   </div>
-                </div>
 
-                {/* Right Column: Request & Contact (Narrower) */}
-                <div className="lg:col-span-5 space-y-12">
-                  <div className="flex items-center gap-4 mb-2">
-                    <div className="w-10 h-10 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-sm font-black shadow-lg shadow-slate-200">02</div>
+                  <div className="flex justify-end pt-8">
+                    <button 
+                      type="button"
+                      onClick={() => setLetterStep(2)}
+                      className="px-12 py-5 bg-indigo-600 text-white rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-3"
+                    >
+                      Lanjut ke Keperluan <ArrowRight size={20} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {letterStep === 2 && (
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-12"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-lg font-black shadow-lg shadow-slate-200">02</div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-900 tracking-tight">Kontak & Keperluan</h3>
-                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Detail pengajuan surat</p>
+                      <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Kontak & Keperluan</h3>
+                      <p className="text-xs text-slate-400 font-bold">Detail pengajuan surat</p>
                     </div>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       <div className="group">
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">No. HP / WhatsApp</label>
                         <input className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" value={phone} onChange={e=>setPhone(e.target.value)} required placeholder="08..."/>
@@ -717,21 +785,21 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <motion.div 
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        className="p-6 bg-amber-50 border border-amber-100 rounded-3xl"
+                        className="p-8 bg-amber-50 border border-amber-100 rounded-[2.5rem]"
                       >
-                        <div className="flex items-center gap-2 mb-3">
-                          <Flag size={14} className="text-amber-600" />
+                        <div className="flex items-center gap-2 mb-4">
+                          <Flag size={16} className="text-amber-600" />
                           <h4 className="text-[10px] font-black text-amber-900 uppercase tracking-widest">Persyaratan Berkas Fisik</h4>
                         </div>
-                        <ul className="space-y-2">
+                        <ul className="space-y-3">
                           {letterRequirements[requestType].map((req, i) => (
-                            <li key={i} className="flex items-center gap-2 text-xs font-bold text-amber-700/80">
-                              <div className="w-1 h-1 bg-amber-400 rounded-full" />
+                            <li key={i} className="flex items-center gap-3 text-sm font-bold text-amber-700/80">
+                              <div className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
                               {req}
                             </li>
                           ))}
                         </ul>
-                        <p className="mt-4 text-[9px] text-amber-600/60 font-medium italic">
+                        <p className="mt-6 text-[10px] text-amber-600/60 font-medium italic">
                           * Siapkan berkas di atas saat mengambil surat fisik di rumah Ketua RT.
                         </p>
                       </motion.div>
@@ -751,71 +819,122 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         )}
                       </div>
                       <textarea 
-                        className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all min-h-[120px] resize-none leading-relaxed" 
+                        className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all min-h-[150px] resize-none leading-relaxed" 
                         value={purposeDetail} 
                         onChange={e=>setPurposeDetail(e.target.value)} 
                         required 
                         placeholder="Jelaskan secara detail keperluan Anda..."
                       />
                     </div>
+                  </div>
 
-                    <div className="p-8 bg-indigo-50/50 border border-indigo-100 rounded-[3rem] space-y-8 mt-10">
-                      <div className="flex items-center gap-4">
-                        <div className="p-4 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-200">
-                          <Lock size={24} />
-                        </div>
-                        <div>
-                          <h4 className="text-lg font-black text-indigo-900 tracking-tight">Verifikasi Warga</h4>
-                          <p className="text-xs text-indigo-700/70 font-bold uppercase tracking-widest">Wajib Diisi</p>
-                        </div>
+                  <div className="flex items-center justify-between pt-8">
+                    <button 
+                      type="button"
+                      onClick={() => setLetterStep(1)}
+                      className="px-8 py-5 text-slate-400 font-black uppercase tracking-widest hover:text-slate-600 transition-colors"
+                    >
+                      Kembali
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setLetterStep(3)}
+                      className="px-12 py-5 bg-indigo-600 text-white rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-3"
+                    >
+                      Lanjut ke Verifikasi <ArrowRight size={20} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {letterStep === 3 && (
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-12"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-lg font-black shadow-lg shadow-slate-200">03</div>
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Verifikasi Warga</h3>
+                      <p className="text-xs text-slate-400 font-bold">Keamanan data & akses</p>
+                    </div>
+                  </div>
+
+                  <div className="p-10 bg-indigo-50/50 border border-indigo-100 rounded-[3rem] space-y-10">
+                    <div className="flex items-center gap-5">
+                      <div className="p-5 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-200">
+                        <Lock size={32} />
                       </div>
-                      
-                      <div className="grid grid-cols-2 gap-5">
-                        <div className="group">
-                          <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 ml-1 text-center">Blok Rumah</label>
+                      <div>
+                        <h4 className="text-xl font-black text-indigo-900 tracking-tight">Konfirmasi Akses</h4>
+                        <p className="text-xs text-indigo-700/70 font-bold uppercase tracking-widest">Wajib Diisi</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                      <div className="group">
+                        <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 ml-1 text-center">Blok Rumah</label>
+                        <input 
+                          className="w-full p-6 bg-white border border-indigo-100 rounded-3xl text-xl font-black focus:border-indigo-500 outline-none transition-all text-center uppercase shadow-sm" 
+                          placeholder="C7-02" 
+                          value={houseId} 
+                          onChange={e=>setHouseId(e.target.value)} 
+                          required
+                        />
+                      </div>
+                      <div className="group">
+                        <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 ml-1 text-center">PIN Akses <span className="text-red-500">*</span></label>
+                        <div className="relative">
                           <input 
-                            className="w-full p-5 bg-white border border-indigo-100 rounded-2xl text-base font-black focus:border-indigo-500 outline-none transition-all text-center uppercase shadow-sm" 
-                            placeholder="C7-02" 
-                            value={houseId} 
-                            onChange={e=>setHouseId(e.target.value)} 
+                            type={showPin ? "text" : "password"} 
+                            placeholder="PIN" 
+                            className="w-full p-6 bg-white border border-indigo-100 rounded-3xl text-xl font-black focus:border-indigo-500 outline-none transition-all text-center shadow-sm tracking-[0.5em]" 
+                            value={accessCode} 
+                            onChange={e=>setAccessCode(e.target.value)} 
                             required
                           />
-                        </div>
-                        <div className="group">
-                          <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 ml-1 text-center">PIN Akses <span className="text-red-500">*</span></label>
-                          <div className="relative">
-                            <input 
-                              type={showPin ? "text" : "password"} 
-                              placeholder="PIN" 
-                              className="w-full p-5 bg-white border border-indigo-100 rounded-2xl text-base font-black focus:border-indigo-500 outline-none transition-all text-center shadow-sm tracking-[0.5em]" 
-                              value={accessCode} 
-                              onChange={e=>setAccessCode(e.target.value)} 
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowPin(!showPin)}
-                              className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-600 transition-colors"
-                            >
-                              {showPin ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowPin(!showPin)}
+                            className="absolute right-6 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-600 transition-colors"
+                          >
+                            {showPin ? <EyeOff size={24} /> : <Eye size={24} />}
+                          </button>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-3 text-slate-400">
-                  <CheckCircle2 size={20} className="text-emerald-500" />
-                  <p className="text-xs font-bold">Data Anda aman dan hanya digunakan untuk keperluan administrasi RT.</p>
-                </div>
-                <Button type="submit" size="lg" className="w-full md:w-auto px-12 py-5 rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-2xl shadow-indigo-500/40 hover:shadow-indigo-500/60 hover:-translate-y-1.5 transition-all duration-300">
-                  <Send size={20} className="mr-2" /> Kirim Permohonan
-                </Button>
-              </div>
+                    <div className="p-6 bg-white/50 rounded-2xl border border-indigo-100/50 flex items-start gap-4">
+                      <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
+                        <Info size={18} />
+                      </div>
+                      <p className="text-xs text-indigo-800/70 font-medium leading-relaxed">
+                        PIN Akses adalah kode 6 digit yang diberikan oleh Pengurus RT untuk setiap rumah. Jika lupa, silakan hubungi Ketua RT.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-8 border-t border-slate-100">
+                    <button 
+                      type="button"
+                      onClick={() => setLetterStep(2)}
+                      className="px-8 py-5 text-slate-400 font-black uppercase tracking-widest hover:text-slate-600 transition-colors"
+                    >
+                      Kembali
+                    </button>
+                    <div className="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
+                      <div className="flex items-center gap-3 text-slate-400">
+                        <CheckCircle2 size={20} className="text-emerald-500" />
+                        <p className="text-[10px] font-bold uppercase tracking-widest">Data Siap Dikirim</p>
+                      </div>
+                      <Button type="submit" size="lg" className="w-full md:w-auto px-16 py-6 rounded-[2.5rem] text-sm font-black uppercase tracking-widest shadow-2xl shadow-indigo-500/40 hover:shadow-indigo-500/60 hover:-translate-y-2 transition-all duration-300">
+                        <Send size={20} className="mr-3" /> Kirim Permohonan
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </form>
           </motion.div>
         )}
@@ -941,6 +1060,20 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         required 
                         placeholder="Nama sesuai KTP"
                       />
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">No. WhatsApp</label>
+                      <div className="relative">
+                        <Phone size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" />
+                        <input 
+                          className="w-full pl-14 pr-5 py-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                          value={reporterPhone} 
+                          onChange={e=>setReporterPhone(e.target.value)} 
+                          required 
+                          placeholder="0812..."
+                        />
+                      </div>
                     </div>
 
                     <div className="p-8 bg-rose-50/50 border border-rose-100 rounded-[2.5rem] space-y-6 mt-10">

@@ -33,6 +33,8 @@ import {
   Send,
   Camera
 } from 'lucide-react';
+import { useFinancial } from '../../context/FinancialContext';
+import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
 import { House, GuestReport, UpdateRequest, PaymentStatus, Report } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
@@ -67,7 +69,15 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   
+  const { getPaymentStatus } = useFinancial();
   const currentHouse = houses.find(h => h.id === selectedHouseId);
+
+  const currentMonth = getIndonesianMonthYear(new Date());
+  const isPaidAir = currentHouse ? getPaymentStatus(currentHouse, 'Air', currentMonth) === PaymentStatus.PAID : true;
+  const isPaidSampah = currentHouse ? getPaymentStatus(currentHouse, 'Sampah', currentMonth) === PaymentStatus.PAID : true;
+  const isAllPaid = isPaidAir && isPaidSampah;
+  const dayOfMonth = new Date().getDate();
+  const isMandatory = dayOfMonth >= 20;
 
   useEffect(() => {
     if (!selectedHouseId) return;
@@ -415,13 +425,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                           <p className="text-lg md:text-xl font-black">{currentHouse?.block}-{currentHouse?.number}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Status Iuran</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Status Iuran ({currentMonth})</p>
                           <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                            currentHouse?.paymentStatus === PaymentStatus.PAID 
+                            isAllPaid 
                             ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
-                            : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                            : (isMandatory ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30')
                           }`}>
-                            {currentHouse?.paymentStatus || 'Belum Lunas'}
+                            {isAllPaid ? 'Lunas' : (isMandatory ? 'Wajib Bayar' : 'Tagihan Baru')}
                           </span>
                         </div>
                       </div>
@@ -442,6 +452,35 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
             {/* Quick Info */}
             <div className="space-y-6">
+              {/* Iuran Warning */}
+              {!isAllPaid && (
+                <div className={`p-6 rounded-3xl border ${isMandatory ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100'}`}>
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-2xl shadow-sm shrink-0 ${isMandatory ? 'bg-white text-rose-600' : 'bg-white text-amber-600'}`}>
+                      <AlertTriangle size={24} />
+                    </div>
+                    <div>
+                      <h4 className={`text-sm font-black uppercase tracking-widest mb-1 ${isMandatory ? 'text-rose-900' : 'text-amber-900'}`}>
+                        {isMandatory ? 'Layanan Ditangguhkan' : 'Tagihan Iuran Tersedia'}
+                      </h4>
+                      <p className={`text-xs font-medium leading-relaxed ${isMandatory ? 'text-rose-700' : 'text-amber-700'}`}>
+                        {isMandatory 
+                          ? `Mohon maaf, layanan pengajuan surat dan mutasi ditangguhkan karena iuran bulan ${currentMonth} belum diselesaikan (melewati tgl 20).` 
+                          : `Tagihan iuran bulan ${currentMonth} sudah tersedia. Mohon selesaikan sebelum tanggal 20 untuk tetap dapat mengakses layanan digital.`}
+                      </p>
+                      <div className="mt-4 flex gap-3">
+                        <Button className={`h-8 px-4 text-[10px] font-black uppercase tracking-widest ${isMandatory ? 'bg-rose-600 hover:bg-rose-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
+                          Lihat Rincian
+                        </Button>
+                        <Button variant="outline" className="h-8 px-4 text-[10px] font-black uppercase tracking-widest border-slate-200 bg-white text-slate-600">
+                          Hubungi Bendahara
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <Card className="p-6 bg-white border-slate-100 shadow-sm">
                 <h4 className="font-black text-slate-800 mb-4 flex items-center gap-2">
                   <Info size={18} className="text-indigo-600" /> Informasi Hunian

@@ -27,7 +27,10 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       label: 'Layanan',
       icon: LayoutGrid,
       items: [
-        { path: '/services', label: 'Persuratan' },
+        { path: '/services?tab=surat', label: 'Persuratan' },
+        { path: '/services?tab=lapor', label: 'Lapor Masalah' },
+        { path: '/services?tab=mutasi', label: 'Mutasi Warga' },
+        { path: '/services?tab=tamu', label: 'Lapor Tamu' },
         { path: '/dokumen', label: 'Arsip Dokumen' },
         { path: '/voting', label: 'E-Voting' },
       ]

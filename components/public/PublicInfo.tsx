@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote } from 'lucide-react';
+import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote, Info } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { 
@@ -8,7 +8,7 @@ import {
   isMonthMatch 
 } from '../../src/utils/dateUtils';
 import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, Idea, DonationCampaign, News } from '../../types';
-import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType, checkWasteRetribution } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
@@ -1735,6 +1735,50 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                             </div>
                         ))}
                     </div>
+
+                    {foundHouse && (
+                        <div className={`p-4 rounded-2xl border ${
+                            (getPaymentStatus(foundHouse, 'Air', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID && 
+                             getPaymentStatus(foundHouse, 'Sampah', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID)
+                            ? 'bg-emerald-50 border-emerald-100' 
+                            : (new Date().getDate() >= 20 ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100')
+                        }`}>
+                            <div className="flex items-start gap-3">
+                                <div className={`p-2 rounded-xl shadow-sm shrink-0 ${
+                                    (getPaymentStatus(foundHouse, 'Air', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID && 
+                                     getPaymentStatus(foundHouse, 'Sampah', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID)
+                                    ? 'bg-white text-emerald-600' 
+                                    : (new Date().getDate() >= 20 ? 'bg-white text-rose-600' : 'bg-white text-amber-600')
+                                }`}>
+                                    <Info size={16} />
+                                </div>
+                                <div>
+                                    <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${
+                                        (getPaymentStatus(foundHouse, 'Air', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID && 
+                                         getPaymentStatus(foundHouse, 'Sampah', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID)
+                                        ? 'text-emerald-900' 
+                                        : (new Date().getDate() >= 20 ? 'text-rose-900' : 'text-amber-900')
+                                    }`}>
+                                        Informasi Penagihan & Layanan
+                                    </p>
+                                    <p className={`text-[10px] font-medium leading-relaxed ${
+                                        (getPaymentStatus(foundHouse, 'Air', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID && 
+                                         getPaymentStatus(foundHouse, 'Sampah', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID)
+                                        ? 'text-emerald-700' 
+                                        : (new Date().getDate() >= 20 ? 'text-rose-700' : 'text-amber-700')
+                                    }`}>
+                                        {(getPaymentStatus(foundHouse, 'Air', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID && 
+                                          getPaymentStatus(foundHouse, 'Sampah', getIndonesianMonthYear(new Date())) === PaymentStatus.PAID)
+                                          ? "Terima kasih! Iuran bulan ini sudah lunas. Anda dapat mengakses semua layanan digital tanpa hambatan."
+                                          : (new Date().getDate() >= 20 
+                                            ? "PENTING: Iuran bulan ini belum terlunasi dan sudah melewati batas waktu (tgl 20). Layanan pengajuan surat akan ditangguhkan sementara."
+                                            : "PENGINGAT: Tagihan iuran bulan ini sudah tersedia. Mohon selesaikan sebelum tanggal 20 untuk menghindari penangguhan layanan digital.")
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="pt-4 border-t border-slate-100">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Riwayat 6 Bulan Terakhir</p>

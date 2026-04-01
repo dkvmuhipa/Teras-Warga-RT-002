@@ -281,6 +281,7 @@ export interface Report {
   status: 'Baru' | 'Diproses' | 'Selesai';
   houseId?: string; // Optional: Link report to specific house (e.g., "Rumah C1-05 kotor")
   reporterHouseId?: string;
+  reporterPhone?: string; // NEW: Reporter's phone number
   photoUrl?: string; // NEW: Photo evidence
   archived?: boolean; // NEW: Archive status
 }

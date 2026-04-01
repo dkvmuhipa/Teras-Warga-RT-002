@@ -139,9 +139,11 @@ export const subscribeToPdfConfig = (callback: (data: any) => void) => {
 export const updatePdfConfig = async (config: any) => {
     try {
         const docRef = doc(db, CONFIGS_COL, "pdf");
+        // Use a safer way to ensure a plain object for simple configs
+        const cleanData = JSON.parse(JSON.stringify(deepSanitize(config) || {}));
         await setDoc(docRef, {
             type: "pdf",
-            data: deepSanitize(config),
+            data: cleanData,
             updatedAt: new Date().toISOString()
         });
     } catch (error) {
@@ -1259,21 +1261,38 @@ export const deleteIuranPaymentFromDb = async (id: string) => {
     }
 };
 
-export const checkWasteRetribution = async (houseId: string): Promise<{ paid: boolean; month: string }> => {
+export const checkWasteRetribution = async (houseId: string): Promise<{ paid: boolean; month: string; isMandatory: boolean; dayOfMonth: number }> => {
     try {
-        const currentMonth = new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+        const now = new Date();
+        const dayOfMonth = now.getDate();
+        const currentMonth = now.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+        // Mandatory check starts from the 20th of the month
+        const isMandatory = dayOfMonth >= 20;
+
+        // Simplify query to avoid composite index requirement
         const q = query(
             collection(db, IURAN_PAYMENTS_COL), 
-            where("houseId", "==", houseId),
-            where("month", "==", currentMonth)
+            where("houseId", "==", houseId)
         );
         const snapshot = await getDocs(q);
         const payments = snapshot.docs.map(doc => doc.data());
-        const isPaid = payments.some((p: any) => p.type === 'Sampah' || p.type === 'Both');
-        return { paid: isPaid, month: currentMonth };
+        // Filter by month on client side
+        const currentMonthPayments = payments.filter((p: any) => p.month === currentMonth);
+        
+        const hasPaidSampah = currentMonthPayments.some((p: any) => p.type === 'Sampah' || p.type === 'Both');
+        const hasPaidAir = currentMonthPayments.some((p: any) => p.type === 'Air' || p.type === 'Both');
+        
+        const isPaid = hasPaidSampah && hasPaidAir;
+        
+        return { 
+            paid: isPaid, 
+            month: currentMonth, 
+            isMandatory, 
+            dayOfMonth 
+        };
     } catch (error) {
         handleFirestoreError(error, OperationType.GET, IURAN_PAYMENTS_COL);
-        return { paid: false, month: '' };
+        return { paid: false, month: '', isMandatory: false, dayOfMonth: 1 };
     }
 };
 
@@ -1358,9 +1377,16 @@ export const deleteActivityFromDb = async (id: string) => {
 
 // --- ATTENDANCE SERVICES ---
 export const subscribeToAttendance = (activityId: string, callback: (data: any[]) => void) => {
-    const q = query(collection(db, ATTENDANCE_COL), where("activityId", "==", activityId), orderBy("timestamp", "desc"));
+    // Simplify query to avoid composite index requirement (where + orderBy)
+    const q = query(collection(db, ATTENDANCE_COL), where("activityId", "==", activityId));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        // Sort on client side
+        data.sort((a: any, b: any) => {
+            const dateA = new Date(a.timestamp || 0).getTime();
+            const dateB = new Date(b.timestamp || 0).getTime();
+            return dateB - dateA;
+        });
         callback(data);
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, ATTENDANCE_COL);
@@ -1549,13 +1575,19 @@ export const deleteOfficialFromDb = async (id: string) => {
 
 // --- 5. REPORTS ---
 export const subscribeToHouseReports = (houseId: string, callback: (data: any[]) => void) => {
+    // Simplify query to avoid composite index requirement (where + orderBy)
     const q = query(
         collection(db, REPORTS_COL), 
-        where("reporterHouseId", "==", houseId),
-        orderBy("date", "desc")
+        where("reporterHouseId", "==", houseId)
     );
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        // Sort on client side
+        data.sort((a: any, b: any) => {
+            const dateA = new Date(a.date || 0).getTime();
+            const dateB = new Date(b.date || 0).getTime();
+            return dateB - dateA;
+        });
         callback(data);
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, REPORTS_COL);
@@ -1586,16 +1618,24 @@ export const archiveOldReports = async (days: number = 30) => {
     cutoffDate.setDate(cutoffDate.getDate() - days);
     const cutoffStr = cutoffDate.toISOString();
 
-    const q = query(collection(db, REPORTS_COL), where("date", "<", cutoffStr), where("status", "==", "Selesai"));
+    // Simplify query to avoid composite index requirement
+    const q = query(collection(db, REPORTS_COL), where("status", "==", "Selesai"));
     const snapshot = await getDocs(q);
     
     const batch = writeBatch(db);
+    let count = 0;
     snapshot.docs.forEach(doc => {
-      batch.update(doc.ref, { archived: true });
+      const data = doc.data();
+      if ((data.date || '') < cutoffStr && !data.archived) {
+        batch.update(doc.ref, { archived: true });
+        count++;
+      }
     });
     
-    await batch.commit();
-    return snapshot.size;
+    if (count > 0) {
+      await batch.commit();
+    }
+    return count;
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, REPORTS_COL);
     return 0;
@@ -1645,16 +1685,24 @@ export const archiveOldLetters = async (days: number = 30) => {
     cutoffDate.setDate(cutoffDate.getDate() - days);
     const cutoffStr = cutoffDate.toISOString();
 
-    const q = query(collection(db, LETTERS_COL), where("date", "<", cutoffStr), where("status", "in", ["Disetujui", "Ditolak"]));
+    // Simplify query to avoid composite index requirement
+    const q = query(collection(db, LETTERS_COL), where("status", "in", ["Disetujui", "Ditolak"]));
     const snapshot = await getDocs(q);
     
     const batch = writeBatch(db);
+    let count = 0;
     snapshot.docs.forEach(doc => {
-      batch.update(doc.ref, { archived: true });
+      const data = doc.data();
+      if ((data.date || '') < cutoffStr && !data.archived) {
+        batch.update(doc.ref, { archived: true });
+        count++;
+      }
     });
     
-    await batch.commit();
-    return snapshot.size;
+    if (count > 0) {
+      await batch.commit();
+    }
+    return count;
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, LETTERS_COL);
     return 0;
