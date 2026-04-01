@@ -458,27 +458,39 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
     
     return (
         <div className="flex flex-col gap-4 pt-4 md:pt-8">
-            {/* Main Road - North Side (Highway Style) */}
-            <div className="flex items-center justify-center px-8 md:px-12 py-6 bg-slate-800 rounded-2xl border-y-4 border-slate-700 relative overflow-hidden group shadow-2xl shadow-slate-900/20">
-                {/* Asphalt Texture */}
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-40 pointer-events-none"></div>
+            {/* Main Road - North Side (Highway Style) with Sidewalks */}
+            <div className="relative">
+                {/* North Sidewalk */}
+                <div className="h-5 bg-slate-300 border-t-2 border-slate-400 rounded-t-xl relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'linear-gradient(90deg, #64748b 1px, transparent 1px), linear-gradient(#64748b 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                </div>
                 
-                {/* Lane Markings - Top & Bottom Shoulder */}
-                <div className="absolute top-1 left-0 right-0 h-0.5 bg-white/30"></div>
-                <div className="absolute bottom-1 left-0 right-0 h-0.5 bg-white/30"></div>
-                
-                {/* Center Lane Divider (Dashed) */}
-                <div className="absolute top-1/2 left-0 right-0 h-1 border-t-2 border-dashed border-amber-400/60 -translate-y-1/2"></div>
-                
-                <div className="flex items-center gap-6 relative z-10">
-                    <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/90 drop-shadow-md mb-1">Jl. Pue Lombe</span>
-                        <div className="flex items-center gap-1">
-                            <ChevronRight size={10} className="text-amber-400 animate-pulse" />
-                            <ChevronRight size={10} className="text-amber-400 animate-pulse delay-75" />
-                            <ChevronRight size={10} className="text-amber-400 animate-pulse delay-150" />
+                <div className="flex items-center justify-center px-8 md:px-12 py-6 bg-slate-800 border-y-4 border-slate-700 relative overflow-hidden group shadow-2xl shadow-slate-900/20">
+                    {/* Asphalt Texture */}
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-40 pointer-events-none"></div>
+                    
+                    {/* Lane Markings - Top & Bottom Shoulder */}
+                    <div className="absolute top-1 left-0 right-0 h-0.5 bg-white/30"></div>
+                    <div className="absolute bottom-1 left-0 right-0 h-0.5 bg-white/30"></div>
+                    
+                    {/* Center Lane Divider (Dashed) */}
+                    <div className="absolute top-1/2 left-0 right-0 h-1 border-t-2 border-dashed border-amber-400/60 -translate-y-1/2"></div>
+                    
+                    <div className="flex items-center gap-6 relative z-10">
+                        <div className="flex flex-col items-center">
+                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/90 drop-shadow-md mb-1">Jl. Pue Lombe</span>
+                            <div className="flex items-center gap-1">
+                                <ChevronRight size={10} className="text-amber-400 animate-pulse" />
+                                <ChevronRight size={10} className="text-amber-400 animate-pulse delay-75" />
+                                <ChevronRight size={10} className="text-amber-400 animate-pulse delay-150" />
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                {/* South Sidewalk */}
+                <div className="h-5 bg-slate-300 border-b-2 border-slate-400 rounded-b-xl relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'linear-gradient(90deg, #64748b 1px, transparent 1px), linear-gradient(#64748b 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                 </div>
             </div>
 
@@ -537,12 +549,24 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
             </div>
         </div>
 
-        {/* Alternative Road - South Side (Secondary Road Style) */}
-        <div className="flex items-center justify-center px-12 py-4 bg-slate-700 rounded-xl border-y-2 border-slate-600 relative overflow-hidden shadow-lg">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-20 pointer-events-none"></div>
-            <div className="absolute top-1/2 left-0 right-0 h-0.5 border-t border-dashed border-slate-500/50 -translate-y-1/2"></div>
-            <div className="flex items-center gap-3 relative z-10">
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-300">Jalan Alternatif</span>
+        {/* Alternative Road - South Side (Secondary Road Style) with Sidewalks */}
+        <div className="relative">
+            {/* North Sidewalk (Alternative Road) */}
+            <div className="h-4 bg-slate-200 border-t-2 border-slate-300 rounded-t-lg relative overflow-hidden">
+                <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(90deg, #94a3b8 1px, transparent 1px), linear-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '15px 15px' }}></div>
+            </div>
+
+            <div className="flex items-center justify-center px-12 py-4 bg-slate-700 border-y-2 border-slate-600 relative overflow-hidden shadow-lg">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-20 pointer-events-none"></div>
+                <div className="absolute top-1/2 left-0 right-0 h-0.5 border-t border-dashed border-slate-500/50 -translate-y-1/2"></div>
+                <div className="flex items-center gap-3 relative z-10">
+                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-300">Jalan Alternatif</span>
+                </div>
+            </div>
+
+            {/* South Sidewalk (Alternative Road) */}
+            <div className="h-4 bg-slate-200 border-b-2 border-slate-300 rounded-b-lg relative overflow-hidden">
+                <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(90deg, #94a3b8 1px, transparent 1px), linear-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '15px 15px' }}></div>
             </div>
         </div>
     </div>
