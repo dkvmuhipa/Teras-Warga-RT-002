@@ -2312,6 +2312,41 @@ export const subscribeToWasteBalance = (houseId: string, callback: (data: any) =
     });
 };
 
+export const ensureMosqueExists = async () => {
+    try {
+        const q = query(collection(db, MAP_POINTS_COL), where("label", "==", "Masjid Al-Ikhlas"));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) {
+            const mosquePoint = {
+                label: 'Masjid Al-Ikhlas',
+                type: 'Facility',
+                x: 85,
+                y: 85,
+                icon: 'MapPin',
+                facilityInfo: 'Masjid utama warga RT 02, berlokasi di sisi timur jalur alternatif. Digunakan untuk shalat berjamaah dan kegiatan keagamaan warga.'
+            };
+            await addDoc(collection(db, MAP_POINTS_COL), deepSanitize(mosquePoint));
+            console.log("Mosque added to Firestore.");
+        }
+
+        // Also check checkpoint
+        const qcp = query(collection(db, CHECKPOINTS_COL), where("name", "==", "Masjid Al-Ikhlas"));
+        const snapshotcp = await getDocs(qcp);
+        if (snapshotcp.empty) {
+            const mosqueCheckpoint = {
+                name: 'Masjid Al-Ikhlas',
+                qrCode: 'MASJID_RT02',
+                x: 85,
+                y: 85
+            };
+            await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(mosqueCheckpoint));
+            console.log("Mosque checkpoint added to Firestore.");
+        }
+    } catch (error) {
+        console.error("Error ensuring mosque exists:", error);
+    }
+};
+
 export const seedDatabase = async (initialData?: any) => {
     try {
       // If no initialData provided, use dummy data or fetch from a source

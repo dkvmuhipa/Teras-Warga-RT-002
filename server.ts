@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { createServer as createViteServer } from "vite";
@@ -49,6 +50,7 @@ if (!admin.apps.length) {
 
 async function startServer() {
   const app = express();
+  app.use(cors()); // Add CORS middleware
   app.use(express.json()); // Add JSON body parser
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
@@ -93,17 +95,21 @@ async function startServer() {
 
   // Weather Proxy
   app.get("/api/weather", async (req, res) => {
+    console.log("Weather request received");
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
       
-      const response = await fetch('http://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', {
+      const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', {
         signal: controller.signal
       });
       
       clearTimeout(timeout);
       
-      if (!response.ok) throw new Error(`Weather API responded with ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Weather API responded with ${response.status}: ${errorText}`);
+      }
       const data = await response.json();
       res.json(data);
     } catch (error: any) {
@@ -114,17 +120,21 @@ async function startServer() {
 
   // AQI Proxy
   app.get("/api/aqi", async (req, res) => {
+    console.log("AQI request received");
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch('http://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', {
+      const response = await fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', {
         signal: controller.signal
       });
 
       clearTimeout(timeout);
 
-      if (!response.ok) throw new Error(`AQI API responded with ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`AQI API responded with ${response.status}: ${errorText}`);
+      }
       const data = await response.json();
       res.json(data);
     } catch (error: any) {
@@ -218,6 +228,12 @@ async function startServer() {
       console.error("WhatsApp Groups error:", error);
       res.status(500).json({ error: error.message });
     }
+  });
+
+  // Catch-all for /api routes to prevent falling through to Vite's SPA fallback
+  app.all("/api/*", (req, res) => {
+    console.warn(`API route not found: ${req.method} ${req.url}`);
+    res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
   });
 
   // Socket.io logic

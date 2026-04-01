@@ -26,6 +26,21 @@ export const useWeather = () => {
 
             if (!weatherRes.ok || !aqiRes.ok) throw new Error("Failed to fetch weather or AQI from proxy");
 
+            const weatherContentType = weatherRes.headers.get("content-type");
+            const aqiContentType = aqiRes.headers.get("content-type");
+
+            if (!weatherContentType?.includes("application/json")) {
+                const text = await weatherRes.text();
+                console.error("Weather API returned non-JSON:", text.substring(0, 200));
+                throw new Error("Weather API returned non-JSON response");
+            }
+
+            if (!aqiContentType?.includes("application/json")) {
+                const text = await aqiRes.text();
+                console.error("AQI API returned non-JSON:", text.substring(0, 200));
+                throw new Error("AQI API returned non-JSON response");
+            }
+
             const weatherData = await weatherRes.json();
             const aqiData = await aqiRes.json();
             

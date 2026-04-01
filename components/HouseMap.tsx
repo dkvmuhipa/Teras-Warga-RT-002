@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
-import { Home, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight } from 'lucide-react';
+import { Home, MapPin as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -595,7 +595,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const totalWidow = houses.reduce((acc, h) => acc + (h.widowCount || 0), 0);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeLayers, setActiveLayers] = useState<string[]>(['Security', 'Social', 'Financial']);
+  const [activeLayers, setActiveLayers] = useState<string[]>(['Security', 'Social', 'Financial', 'Facility']);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<MapPoint | null>(null);
   const [activeCctv, setActiveCctv] = useState<MapPoint | null>(null);
@@ -735,7 +735,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
               {[
                 { id: 'Security', label: 'Keamanan', desc: 'CCTV, APAR, Pos Satpam' },
                 { id: 'Social', label: 'Sosial', desc: 'Status Mudik, Tamu, Isoman' },
-                { id: 'Financial', label: 'Keuangan', desc: 'Status Iuran Sampah' }
+                { id: 'Financial', label: 'Keuangan', desc: 'Status Iuran Sampah' },
+                { id: 'Facility', label: 'Fasilitas', desc: 'Masjid, Lapangan, Balai' }
               ].map(layer => (
                 <label key={layer.id} className={`flex flex-col gap-1 p-3 rounded-xl cursor-pointer transition-all border ${activeLayers.includes(layer.id) ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
                   <div className="flex items-center gap-3">
@@ -974,6 +975,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center"><Users size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Titik Kumpul</span></div>
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-teal-500 flex items-center justify-center"><ArrowRight size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Jalur Evakuasi</span></div>
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500 flex items-center justify-center"><Droplets size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Hydrant / Air</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-purple-600 flex items-center justify-center"><MapIcon size={8} className="text-white"/></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Fasilitas Umum</span></div>
                                     </div>
                                 </div>
                                 <div>
@@ -1076,6 +1078,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                               if (point.type === 'APAR' && !activeLayers.includes('Security')) return null;
                               if (point.type === 'Security' && !activeLayers.includes('Security')) return null;
                               if (point.type === 'Trash' && !activeLayers.includes('Social')) return null;
+                              if (point.type === 'Facility' && !activeLayers.includes('Facility')) return null;
 
                               return (
                               <div 
@@ -1107,6 +1110,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                       point.type === 'AssemblyPoint' ? 'bg-green-600' :
                                       point.type === 'EvacuationRoute' ? 'bg-teal-500' :
                                       point.type === 'Trash' ? 'bg-orange-500' :
+                                      point.type === 'Facility' ? 'bg-purple-600' :
                                       'bg-slate-500'
                                   } text-white border-2 border-white`}>
                                       {point.type === 'Gate' ? <Move size={14} /> : 
@@ -1118,6 +1122,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                        point.type === 'AssemblyPoint' ? <Users size={14} /> :
                                        point.type === 'EvacuationRoute' ? <ArrowRight size={14} /> :
                                        point.type === 'Trash' ? <Trash size={14} /> :
+                                       point.type === 'Facility' ? <MapIcon size={14} /> :
                                        <MapPin size={14} />}
                                   </div>
                                   <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">

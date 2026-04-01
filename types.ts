@@ -401,7 +401,7 @@ export interface RondaAttendance {
 export interface MapPoint {
   id: string;
   label: string;
-  type: 'Gate' | 'Security' | 'Block' | 'PJU' | 'CCTV' | 'Hydrant' | 'Trash' | 'APAR' | 'AssemblyPoint' | 'EvacuationRoute' | 'Other';
+  type: 'Gate' | 'Security' | 'Block' | 'PJU' | 'CCTV' | 'Hydrant' | 'Trash' | 'APAR' | 'AssemblyPoint' | 'EvacuationRoute' | 'Facility' | 'Other';
   x: number;
   y: number;
   icon: string;

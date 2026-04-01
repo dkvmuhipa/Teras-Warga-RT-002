@@ -200,6 +200,7 @@ export const CHECKPOINTS: Checkpoint[] = [
     { id: 'cp2', name: 'Pos Satpam', qrCode: 'POS_SATPAM_RT02', x: 10, y: 50 },
     { id: 'cp3', name: 'Blok C5', qrCode: 'BLOK_C5_RT02', x: 25, y: 20 },
     { id: 'cp4', name: 'Blok C10', qrCode: 'BLOK_C10_RT02', x: 75, y: 20 },
+    { id: 'cp5', name: 'Masjid Al-Ikhlas', qrCode: 'MASJID_RT02', x: 85, y: 85 },
 ];
 
 export const MOCK_MAP_POINTS: MapPoint[] = [
@@ -208,6 +209,7 @@ export const MOCK_MAP_POINTS: MapPoint[] = [
     { id: 'mp3', label: 'APAR Blok C5', type: 'APAR', x: 25, y: 20, icon: 'Flame' },
     { id: 'mp4', label: 'Titik Kumpul Lapangan', type: 'AssemblyPoint', x: 50, y: 50, icon: 'Users' },
     { id: 'mp5', label: 'Jalur Evakuasi Utara', type: 'EvacuationRoute', x: 50, y: 10, icon: 'ArrowRight' },
+    { id: 'mp6', label: 'Masjid Al-Ikhlas', type: 'Facility', x: 85, y: 85, icon: 'MapPin', facilityInfo: 'Masjid utama warga RT 02, berlokasi di sisi timur jalur alternatif. Digunakan untuk shalat berjamaah dan kegiatan keagamaan warga.' },
 ];
 
 export const MOCK_CASHFLOW: CashFlow[] = [

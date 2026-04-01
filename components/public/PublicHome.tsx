@@ -7,7 +7,7 @@ import {
   Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest } from '../../types';
+import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint } from '../../types';
 import { HeroSection } from '../HeroSection';
 import { DigitalSummary } from './DigitalSummary';
 import { ServiceStats } from '../ServiceStats';
@@ -27,10 +27,11 @@ interface PublicHomeProps {
   officials: Official[];
   gallery: GalleryItem[];
   activePatrol: PatrolSession | null;
+  mapPoints: MapPoint[];
 }
 
 export const PublicHome: React.FC<PublicHomeProps> = ({ 
-  houses, announcements, ronda, reports, letters, officials, gallery, activePatrol
+  houses, announcements, ronda, reports, letters, officials, gallery, activePatrol, mapPoints
 }) => {
   const navigate = useNavigate();
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -354,6 +355,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           isAdmin={false} 
           reports={reports} 
           officials={officials} 
+          mapPoints={mapPoints}
           onReportHouse={(house: House) => navigate(`/services?tab=lapor&houseId=${house.id}`)} 
         />
       </motion.div>

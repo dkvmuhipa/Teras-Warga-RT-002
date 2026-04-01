@@ -115,6 +115,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   batchUpdateHouses,
   logoutAdmin,
   seedDatabase,
+  ensureMosqueExists,
   updateAdminPassword,
   addNotificationToDb,
   addPollToDb,
@@ -292,6 +293,9 @@ export const App = () => {
         }
     });
 
+    // Ensure Mosque exists in Firestore
+    ensureMosqueExists();
+
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
@@ -395,7 +399,7 @@ export const App = () => {
                         />
                         <div className="pb-24 md:pb-0">
                             <Routes>
-                                <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} />} />
+                                <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} mapPoints={mapPoints} />} />
                                 <Route path="/voting" element={<PublicVoting polls={polls} />} />
                                 <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
                                 <Route path="/market" element={<PublicMarket items={marketItems} />} />
