@@ -31,11 +31,11 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
   return (
     <motion.div 
       layout
-      className="bg-white p-3 md:p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:shadow-slate-200/50 transition-all group"
+      className="relative bg-white p-3 md:p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:shadow-slate-200/50 transition-all group overflow-hidden"
     >
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm md:text-base border border-indigo-100">
+      <div className="flex justify-between items-start mb-3 gap-2">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm md:text-base border border-indigo-100 shrink-0">
             {house.headOfFamily.charAt(0)}
           </div>
           <div className="min-w-0">
@@ -48,9 +48,14 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
             </p>
           </div>
         </div>
-        <span className={`shrink-0 font-mono font-black text-slate-600 bg-slate-100 px-2 md:px-3 py-1 rounded-lg text-[8px] md:text-[10px] border border-slate-200`}>
-          {house.block}-{house.number}
-        </span>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <div className="bg-rose-600 text-white px-2 py-0.5 rounded-lg text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-sm border border-rose-500">
+            Blok {house.block}
+          </div>
+          <div className="bg-slate-100 text-slate-900 px-2 py-0.5 rounded-lg text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-slate-200">
+            No. {house.number}
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-1 md:gap-1.5 mb-3 md:mb-4 flex-wrap">

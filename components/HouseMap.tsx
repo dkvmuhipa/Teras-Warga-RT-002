@@ -31,6 +31,7 @@ interface HouseDetailModalProps {
     onEditHouse?: (house: House) => void;
     onPayDues?: (house: House) => void;
     onReportHouse?: (house: House) => void;
+    onSendWhatsApp?: (house: House) => void;
 }
 
 // --- Helper Functions ---
@@ -86,7 +87,8 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     iuranPayments,
     onEditHouse, 
     onPayDues, 
-    onReportHouse 
+    onReportHouse,
+    onSendWhatsApp
 }) => {
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const activeReports = reports.filter(r => r.houseId === house.id && r.status !== 'Selesai');
@@ -106,24 +108,52 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            <div className="bg-white w-full max-w-sm md:max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden animate-slide-up ring-1 ring-slate-200 flex flex-col max-h-[85vh]">
-                {/* Header Section */}
-                <div className={`relative px-6 py-8 flex flex-col items-center justify-center text-center shrink-0 transition-colors duration-300 ${isSafe ? (officialData ? 'bg-slate-800' : 'bg-emerald-600') : 'bg-rose-600'}`}>
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none"></div>
+            <div className="bg-white w-full max-w-sm md:max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden animate-slide-up ring-1 ring-slate-200 flex flex-col max-h-[90vh]">
+                {/* Header Section with Photo Support */}
+                <div className={`relative h-40 md:h-48 shrink-0 transition-colors duration-300 ${isSafe ? (officialData ? 'bg-slate-800' : 'bg-emerald-600') : 'bg-rose-600'}`}>
+                    {house.housePhotoUrl ? (
+                        <div className="absolute inset-0">
+                            <img 
+                                src={house.housePhotoUrl} 
+                                alt="Foto Rumah" 
+                                className="w-full h-full object-cover opacity-60"
+                                referrerPolicy="no-referrer"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        </div>
+                    ) : (
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none"></div>
+                    )}
+                    
                     <button onClick={onClose} className="absolute top-3 right-3 z-20 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors backdrop-blur-sm"><X size={18}/></button>
-                    <div className="relative text-white space-y-1 mt-2 z-10">
+                    
+                    <div className="absolute bottom-4 left-6 text-white z-10">
                         <h2 className="text-4xl md:text-5xl font-black tracking-tighter shadow-sm drop-shadow-md">{house.block}-{house.number}</h2>
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-90">Kavling Rumah</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-90">Kavling Rumah • {house.status === 'Occupied' ? 'Dihuni' : 'Kosong'}</p>
                     </div>
                 </div>
 
                 {/* Content Section */}
                 <div className="overflow-y-auto custom-scrollbar flex-1 bg-white">
                     <div className="p-6 space-y-6">
+                        {/* Emergency Alert Banner */}
+                        {!isSafe && (
+                            <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4 flex items-start gap-4 animate-pulse">
+                                <div className="bg-rose-600 p-2 rounded-xl text-white shadow-lg shadow-rose-200">
+                                    <AlertTriangle size={20} />
+                                </div>
+                                <div>
+                                    <h4 className="font-black text-rose-700 text-xs uppercase tracking-widest">Laporan Aktif</h4>
+                                    <ul className="text-[11px] text-rose-600 mt-1 list-disc pl-4 font-bold">
+                                        {activeReports.map(r => (<li key={r.id}>{r.type}: {r.description}</li>))}
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
 
                          {/* OFFICIAL CARD SECTION */}
                          {officialData && (
-                            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 text-white p-5 shadow-lg shadow-slate-300 ring-4 ring-slate-50 transform transition-all hover:scale-[1.02] border border-slate-700">
+                            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-5 shadow-lg shadow-slate-300 ring-4 ring-slate-50 transform transition-all hover:scale-[1.02] border border-slate-700">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 transform rotate-12 pointer-events-none"><Star size={100} fill="currentColor" /></div>
                                 <div className="relative z-10 flex items-center gap-5">
                                      <div className="relative shrink-0">
@@ -136,7 +166,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                          <p className="text-sm text-slate-300 font-medium mt-0.5 truncate">{officialData.name}</p>
                                          <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center gap-3">
                                              <a href={`https://wa.me/${officialData.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-500 transition-colors shadow-sm ring-1 ring-emerald-400/50">
-                                                <MessageCircle size={12}/> Hubungi
+                                                <MessageCircle size={12}/> Hubungi Pengurus
                                              </a>
                                          </div>
                                      </div>
@@ -144,10 +174,65 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             </div>
                         )}
                         
-                        {/* Status Iuran (NEW: Air & Sampah) */}
+                        {/* Family Info Card */}
+                        <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 shadow-sm">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-indigo-600 font-black text-2xl shadow-sm border border-slate-100">
+                                    {house.headOfFamily.charAt(0)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] leading-none mb-1">Kepala Keluarga</p>
+                                    <h3 className="font-black text-slate-800 text-lg truncate leading-tight">{house.headOfFamily}</h3>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <p className="text-xs font-bold text-slate-500">{house.phone || '-'}</p>
+                                        {house.phone && (
+                                            <a 
+                                                href={`https://wa.me/${house.phone.replace(/[^0-9]/g, '')}`} 
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                className="text-emerald-600 hover:text-emerald-700 transition-colors"
+                                            >
+                                                <MessageCircle size={14} fill="currentColor" className="opacity-20" />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-white p-3 rounded-xl border border-slate-100">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Penghuni</p>
+                                    <p className="text-sm font-black text-slate-800">{house.occupants || 0} <span className="text-[10px] font-bold text-slate-400">Jiwa</span></p>
+                                </div>
+                                <div className="bg-white p-3 rounded-xl border border-slate-100">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Tipe Hunian</p>
+                                    <p className="text-sm font-black text-slate-800">{house.residenceType || 'Pemilik'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Family Members List (If Admin) */}
+                        {isAdmin && house.familyMembers && house.familyMembers.length > 0 && (
+                            <div className="space-y-3">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Anggota Keluarga</h4>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {house.familyMembers.map((member, idx) => (
+                                        <div key={idx} className="flex items-center justify-between p-3 bg-slate-50/50 rounded-xl border border-slate-100">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
+                                                <span className="text-xs font-bold text-slate-700">{member.name}</span>
+                                            </div>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{member.relation}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Status Iuran */}
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">Status Pembayaran Iuran</h4>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">Status Keuangan</h4>
                                 {!isFullyPaid && (
                                     <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 animate-pulse">
                                         {arrears.length} Tunggakan
@@ -158,96 +243,69 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                 <StatusBadge label="OP Air" status={statusAir} icon={Droplets} />
                                 <StatusBadge label="Sampah" status={statusSampah} icon={Trash2} />
                             </div>
-                            {!isFullyPaid && (
-                                <div className="p-3 bg-rose-50/50 rounded-xl border border-rose-100/50">
-                                    <p className="text-[8px] font-black text-rose-400 uppercase tracking-widest mb-1.5">Bulan Belum Lunas:</p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {arrears.map(m => (
-                                            <span key={m} className="px-2 py-0.5 bg-white text-rose-600 rounded-lg text-[9px] font-bold border border-rose-200">
-                                                {m}
-                                            </span>
-                                        ))}
+                        </div>
+
+                        {/* Special Notes & Social Assistance (If Admin) */}
+                        {isAdmin && (
+                            <div className="space-y-4">
+                                {(house.isPKH || house.isBLT || house.isBansosLain) && (
+                                    <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
+                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Bantuan Sosial</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {house.isPKH && <span className="px-2 py-1 bg-white text-indigo-600 rounded-lg text-[9px] font-black border border-indigo-200">PKH</span>}
+                                            {house.isBLT && <span className="px-2 py-1 bg-white text-indigo-600 rounded-lg text-[9px] font-black border border-indigo-200">BLT</span>}
+                                            {house.isBansosLain && <span className="px-2 py-1 bg-white text-indigo-600 rounded-lg text-[9px] font-black border border-indigo-200">{house.bansosLainName || 'Bansos'}</span>}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
 
-                        {/* Residence Info */}
-                        <div className="flex flex-wrap gap-2 justify-center pb-2 border-b border-slate-100">
-                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold border shadow-sm ${house.status === 'Occupied' ? 'bg-blue-50 text-blue-600 border-blue-100' : house.status === 'Business' ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                                {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Business' ? 'Tempat Usaha' : 'Rumah Kosong'}
-                            </span>
-                            {house.status === 'Occupied' && (
-                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold border shadow-sm flex items-center gap-1 ${house.residenceType === 'Kost' ? 'bg-cyan-50 text-cyan-600 border-cyan-200' : house.residenceType === 'Kontrak' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200'}`}>
-                                    {house.residenceType === 'Kost' ? <GraduationCap size={12}/> : house.residenceType === 'Kontrak' ? <Key size={12}/> : <Home size={12}/>}
-                                    {house.residenceType === 'Kost' ? 'Kost' : house.residenceType === 'Kontrak' ? 'Kontrak/Sewa' : 'Milik Sendiri'}
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Safety Status */}
-                        {isSafe ? (
-                             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3 animate-fade-in">
-                                <div className="bg-emerald-100 p-2.5 rounded-full shadow-sm text-emerald-600"><ShieldCheck size={24} strokeWidth={2.5}/></div>
-                                <div><h4 className="font-bold text-emerald-700 text-sm">Status: Aman & Terkendali</h4><p className="text-xs text-emerald-600 mt-0.5">Tidak ada laporan gangguan keamanan.</p></div>
-                            </div>
-                        ) : (
-                            <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-3 animate-fade-in ring-1 ring-rose-200 shadow-sm">
-                                <div className="bg-rose-100 p-2 rounded-full animate-pulse text-rose-600"><AlertTriangle size={24} strokeWidth={2.5}/></div>
-                                <div><h4 className="font-bold text-rose-700 text-sm">Laporan Aktif</h4><ul className="text-xs text-rose-600 mt-1 list-disc pl-4 space-y-0.5 font-medium">{activeReports.map(r => (<li key={r.id}>{r.type}: {r.description}</li>))}</ul></div>
+                                {house.specialNotes && (
+                                    <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+                                        <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Catatan Khusus</p>
+                                        <p className="text-xs font-bold text-slate-700 italic">"{house.specialNotes}"</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        {/* Family Info */}
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm">
-                                <div className="bg-white p-3 rounded-xl text-slate-400 shadow-sm border border-slate-100"><User size={24}/></div>
-                                <div><p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Kepala Keluarga</p><p className="font-bold text-slate-800 text-lg leading-tight">{displayName}</p></div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center shadow-sm"><p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Penghuni</p><p className="font-bold text-slate-800 text-xl mt-1">{house.occupants} <span className="text-xs font-normal text-slate-500">Jiwa</span></p></div>
-                               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center shadow-sm"><p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Telepon</p><p className="font-bold text-slate-800 text-sm mt-2 break-all">{house.phone || '-'}</p></div>
-                            </div>
-
-                            {/* Demografi Detail */}
-                            {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount || house.widowCount) ? (
-                                <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 shadow-sm">
-                                    <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-3">Kelompok Rentan</p>
-                                    <div className="flex flex-wrap gap-4">
-                                        {house.pregnantCount ? (
-                                            <div className="flex items-center gap-2">
-                                                <div className="p-1.5 bg-white rounded-lg text-rose-400 shadow-sm"><Heart size={14} fill="currentColor"/></div>
-                                                <span className="text-xs font-bold text-slate-700">{house.pregnantCount} Ibu Hamil</span>
-                                            </div>
-                                        ) : null}
-                                        {house.babyCount ? (
-                                            <div className="flex items-center gap-2">
-                                                <div className="p-1.5 bg-white rounded-lg text-rose-500 shadow-sm"><Baby size={14}/></div>
-                                                <span className="text-xs font-bold text-slate-700">{house.babyCount} Bayi</span>
-                                            </div>
-                                        ) : null}
-                                        {house.toddlerCount ? (
-                                            <div className="flex items-center gap-2">
-                                                <div className="p-1.5 bg-white rounded-lg text-orange-500 shadow-sm"><Baby size={14}/></div>
-                                                <span className="text-xs font-bold text-slate-700">{house.toddlerCount} Balita</span>
-                                            </div>
-                                        ) : null}
-                                        {house.elderlyCount ? (
-                                            <div className="flex items-center gap-2">
-                                                <div className="p-1.5 bg-white rounded-lg text-indigo-500 shadow-sm"><Accessibility size={14}/></div>
-                                                <span className="text-xs font-bold text-slate-700">{house.elderlyCount} Lansia</span>
-                                            </div>
-                                        ) : null}
-                                        {house.widowCount ? (
-                                            <div className="flex items-center gap-2">
-                                                <div className="p-1.5 bg-white rounded-lg text-slate-500 shadow-sm"><User size={14}/></div>
-                                                <span className="text-xs font-bold text-slate-700">{house.widowCount} Janda</span>
-                                            </div>
-                                        ) : null}
-                                    </div>
+                        {/* Kelompok Rentan Badges */}
+                        {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount || house.widowCount) ? (
+                            <div className="p-4 rounded-2xl bg-rose-50/30 border border-rose-100">
+                                <p className="text-[10px] text-rose-400 uppercase font-black tracking-widest mb-3">Kelompok Rentan</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {house.pregnantCount ? (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
+                                            <Heart size={12} className="text-rose-400" fill="currentColor"/>
+                                            <span className="text-[10px] font-black text-slate-700">{house.pregnantCount} Ibu Hamil</span>
+                                        </div>
+                                    ) : null}
+                                    {house.babyCount ? (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
+                                            <Baby size={12} className="text-rose-500"/>
+                                            <span className="text-[10px] font-black text-slate-700">{house.babyCount} Bayi</span>
+                                        </div>
+                                    ) : null}
+                                    {house.toddlerCount ? (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
+                                            <Baby size={12} className="text-orange-500"/>
+                                            <span className="text-[10px] font-black text-slate-700">{house.toddlerCount} Balita</span>
+                                        </div>
+                                    ) : null}
+                                    {house.elderlyCount ? (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
+                                            <Accessibility size={12} className="text-indigo-500"/>
+                                            <span className="text-[10px] font-black text-slate-700">{house.elderlyCount} Lansia</span>
+                                        </div>
+                                    ) : null}
+                                    {house.widowCount ? (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
+                                            <User size={12} className="text-slate-500"/>
+                                            <span className="text-[10px] font-black text-slate-700">{house.widowCount} Janda</span>
+                                        </div>
+                                    ) : null}
                                 </div>
-                            ) : null}
-                        </div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
 
@@ -255,11 +313,11 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 <div className="bg-slate-50 p-4 border-t border-slate-100 shrink-0">
                     {isAdmin ? (
                         <div className="grid grid-cols-2 gap-3">
-                            <button onClick={() => { onClose(); onEditHouse?.(house); }} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-800 text-white font-bold text-sm hover:bg-slate-700 active:scale-95 transition-all shadow-lg shadow-slate-300"><Edit size={16}/> Edit Data</button>
-                            <button onClick={() => { onClose(); onPayDues?.(house); }} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-500 active:scale-95 transition-all shadow-lg shadow-emerald-200"><DollarSign size={16}/> Catat Iuran</button>
+                            <button onClick={() => { onClose(); onEditHouse?.(house); }} className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-800 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-700 active:scale-95 transition-all shadow-lg shadow-slate-300"><Edit size={16}/> Edit Data</button>
+                            <button onClick={() => { onClose(); onPayDues?.(house); }} className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-500 active:scale-95 transition-all shadow-lg shadow-emerald-200"><DollarSign size={16}/> Catat Iuran</button>
                         </div>
                     ) : (
-                        <button onClick={() => { onClose(); onReportHouse?.(house); }} className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-rose-600 text-white font-bold shadow-lg shadow-rose-200 hover:bg-rose-500 active:scale-95 transition-all"><ShieldAlert size={20}/> Lapor Masalah</button>
+                        <button onClick={() => { onClose(); onReportHouse?.(house); }} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-rose-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-200 hover:bg-rose-500 active:scale-95 transition-all"><ShieldAlert size={20}/> Lapor Masalah</button>
                     )}
                 </div>
             </div>
@@ -277,9 +335,10 @@ interface HouseCardProps {
     onClick: () => void;
     showHeatmap?: boolean;
     activeLayers?: string[];
+    isHighlighted?: boolean;
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, activePanicAlert, onClick, showHeatmap = false, activeLayers = ['Security', 'Social', 'Financial'] }) => {
+const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, activePanicAlert, onClick, showHeatmap = false, activeLayers = ['Security', 'Social', 'Financial'], isHighlighted = false }) => {
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const formattedRole = officialRole ? formatRole(officialRole) : null;
     
@@ -310,7 +369,16 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
     const showFinancial = activeLayers.includes('Financial');
 
     return (
-        <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-200 min-h-[60px] w-full hover:shadow-md hover:-translate-y-0.5 ${getHouseColor()}`}>
+        <button 
+            id={`house-${house.id}`}
+            onClick={onClick} 
+            className={`relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-300 min-h-[60px] w-full hover:shadow-md hover:-translate-y-0.5 ${getHouseColor()} ${
+                isHighlighted ? 'ring-4 ring-indigo-500 ring-offset-2 z-30 scale-105 shadow-xl' : ''
+            }`}
+        >
+            {isHighlighted && (
+                <div className="absolute -inset-1 bg-indigo-500/20 rounded-xl animate-pulse -z-10"></div>
+            )}
             <span className={`font-black leading-none drop-shadow-sm ${officialRole ? 'text-lg' : 'text-sm'}`}>{house.number}</span>
             
             <div className="flex items-center justify-center mt-1 w-full gap-0.5">
@@ -405,9 +473,10 @@ interface BlockRendererProps {
     blockCode: string; houses: House[]; reports: Report[]; officials: Official[]; isAdmin: boolean; iuranPayments?: any[]; activePanicAlerts?: PanicAlert[]; onSelect: (h: House) => void; className?: string;
     showHeatmap?: boolean;
     activeLayers?: string[];
+    highlightedId?: string | null;
 }
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, activePanicAlerts = [], onSelect, className, showHeatmap, activeLayers }) => {
+const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, activePanicAlerts = [], onSelect, className, showHeatmap, activeLayers, highlightedId }) => {
     const sortByNumber = (a: House, b: House) => parseInt(a.number, 10) - parseInt(b.number, 10);
     const sortByNumberDesc = (a: House, b: House) => parseInt(b.number, 10) - parseInt(a.number, 10);
     const sortedHouses = [...houses].sort(sortByNumber);
@@ -418,18 +487,18 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     const getPanicAlert = (hid: string) => activePanicAlerts.find(a => a.houseId === hid);
 
     return (
-        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg overflow-hidden ${className || 'h-full'}`}>
-            <div className="bg-rose-600 text-white text-center py-1.5 border-b-2 border-slate-800 relative overflow-hidden shrink-0">
+        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg ${className || 'h-full'}`}>
+            <div className="bg-rose-600 text-white text-center py-1.5 border-b-2 border-slate-800 relative overflow-hidden shrink-0 rounded-t-md">
                  <h3 className="text-xl font-black tracking-tighter relative z-10 drop-shadow-md">{blockCode}</h3>
             </div>
             <div className="flex-1 bg-slate-100 p-2 relative">
                  <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-300 z-0"></div>
                  <div className="flex gap-4 relative z-10 h-full">
                     <div className="flex-1 flex flex-col gap-2">
-                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} />))}
+                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} isHighlighted={highlightedId === house.id} />))}
                     </div>
                      <div className="flex-1 flex flex-col gap-2">
-                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} />))}
+                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} isHighlighted={highlightedId === house.id} />))}
                     </div>
                 </div>
             </div>
@@ -445,14 +514,27 @@ interface MapLayoutProps {
     iuranPayments?: any[];
     activePanicAlerts?: PanicAlert[];
     onSelect?: (h: House) => void;
-    renderBlock: (blockCode: string, houses: House[], reports: Report[], officials: Official[], isAdmin: boolean, iuranPayments: any[], activePanicAlerts: PanicAlert[], onSelect: (h: House) => void, showHeatmap?: boolean, activeLayers?: string[]) => React.ReactNode;
+    renderBlock: (
+        blockCode: string, 
+        houses?: House[], 
+        reports?: Report[], 
+        officials?: Official[], 
+        isAdmin?: boolean, 
+        iuranPayments?: any[], 
+        activePanicAlerts?: PanicAlert[], 
+        onSelect?: (h: House) => void, 
+        showHeatmap?: boolean, 
+        activeLayers?: string[], 
+        highlightedId?: string | null
+    ) => React.ReactNode;
     className?: string;
     showHeatmap?: boolean;
     activeLayers?: string[];
     mapPoints?: MapPoint[];
+    highlightedId?: string | null;
 }
 
-export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], officials = [], isAdmin = false, iuranPayments = [], activePanicAlerts = [], onSelect = () => {}, renderBlock, className, showHeatmap, activeLayers, mapPoints = [] }) => {
+export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], officials = [], isAdmin = false, iuranPayments = [], activePanicAlerts = [], onSelect = () => {}, renderBlock, className, showHeatmap, activeLayers, mapPoints = [], highlightedId }) => {
     const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
     const securityPost = mapPoints.find(p => p.type === 'Security');
     
@@ -545,19 +627,19 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
             </svg>
 
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C5', getBlockHouses('C5'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
+                {renderBlock('C5', getBlockHouses('C5'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C7', getBlockHouses('C7'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
-                {renderBlock('C8', getBlockHouses('C8'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
+                {renderBlock('C7', getBlockHouses('C7'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
+                {renderBlock('C8', getBlockHouses('C8'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C9', getBlockHouses('C9'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
-                {renderBlock('C10', getBlockHouses('C10'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
+                {renderBlock('C9', getBlockHouses('C9'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
+                {renderBlock('C10', getBlockHouses('C10'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C11', getBlockHouses('C11'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
-                {renderBlock('C12', getBlockHouses('C12'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers)}
+                {renderBlock('C11', getBlockHouses('C11'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
+                {renderBlock('C12', getBlockHouses('C12'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
             </div>
         </div>
 
@@ -687,12 +769,40 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const filteredHouses = useMemo(() => {
     if (!searchQuery) return houses;
     const query = searchQuery.toLowerCase();
-    return houses.filter(h => 
-      h.number.toLowerCase().includes(query) || 
-      h.headOfFamily.toLowerCase().includes(query) ||
-      h.block.toLowerCase().includes(query)
-    );
+    return houses.filter(h => {
+      const fullHouseId = `${h.block}-${h.number}`.toLowerCase();
+      const fullHouseIdNoDash = `${h.block}${h.number}`.toLowerCase();
+      
+      return h.number.toLowerCase().includes(query) || 
+             h.headOfFamily.toLowerCase().includes(query) ||
+             h.block.toLowerCase().includes(query) ||
+             fullHouseId.includes(query) ||
+             fullHouseIdNoDash.includes(query);
+    });
   }, [houses, searchQuery]);
+
+  const highlightedHouseId = useMemo(() => {
+    if (!searchQuery || searchQuery.length < 2) return null;
+    const query = searchQuery.toLowerCase();
+    
+    // Exact match for block-number (e.g. C5-10)
+    const exactMatch = houses.find(h => `${h.block}-${h.number}`.toLowerCase() === query);
+    if (exactMatch) return exactMatch.id;
+
+    // If only one house is filtered, highlight it
+    if (filteredHouses.length === 1) return filteredHouses[0].id;
+    
+    return null;
+  }, [houses, filteredHouses, searchQuery]);
+
+  useEffect(() => {
+    if (highlightedHouseId) {
+      const el = document.getElementById(`house-${highlightedHouseId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }
+    }
+  }, [highlightedHouseId]);
 
   const getBlockHouses = (code: string) => filteredHouses.filter(h => h.block === code);
   
@@ -713,26 +823,28 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                      onChange={(e) => setSearchQuery(e.target.value)}
                    />
                  </div>
-                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
-                   <button 
-                     onClick={() => setShowHeatmap(!showHeatmap)}
-                     className={`px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[10px] md:text-xs font-bold border transition-all flex items-center gap-2 whitespace-nowrap ${showHeatmap ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
-                   >
-                     <Lightbulb size={12} /> Heatmap
-                   </button>
-                   <button 
-                     onClick={() => window.print()}
-                     className="px-3 py-1.5 md:px-4 md:py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] md:text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2 whitespace-nowrap"
-                   >
-                     <Printer size={12} /> Cetak
-                   </button>
-                   <button 
-                     onClick={handleDownload}
-                     className="px-3 py-1.5 md:px-4 md:py-2 bg-indigo-600 text-white border border-indigo-600 rounded-xl text-[10px] md:text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 whitespace-nowrap"
-                   >
-                     <Download size={12} /> Unduh
-                   </button>
-                 </div>
+                 {isAdmin && (
+                   <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                     <button 
+                       onClick={() => setShowHeatmap(!showHeatmap)}
+                       className={`px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[10px] md:text-xs font-bold border transition-all flex items-center gap-2 whitespace-nowrap ${showHeatmap ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                     >
+                       <Lightbulb size={12} /> Heatmap
+                     </button>
+                     <button 
+                       onClick={() => window.print()}
+                       className="px-3 py-1.5 md:px-4 md:py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] md:text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2 whitespace-nowrap"
+                     >
+                       <Printer size={12} /> Cetak
+                     </button>
+                     <button 
+                       onClick={handleDownload}
+                       className="px-3 py-1.5 md:px-4 md:py-2 bg-indigo-600 text-white border border-indigo-600 rounded-xl text-[10px] md:text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 whitespace-nowrap"
+                     >
+                       <Download size={12} /> Unduh
+                     </button>
+                   </div>
+                 )}
                </div>
             </div>
             
@@ -762,39 +874,41 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Orientasi Utara</span>
           </div>
 
-          {/* Filter Layer Section */}
-          <div>
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
-              <Settings2 size={12} /> Filter Layer
-            </h4>
-            <div className="space-y-2">
-              {[
-                { id: 'Security', label: 'Keamanan', desc: 'CCTV, APAR, Pos Satpam' },
-                { id: 'Social', label: 'Sosial', desc: 'Status Mudik, Tamu, Isoman' },
-                { id: 'Financial', label: 'Keuangan', desc: 'Status Iuran Sampah' },
-                { id: 'Facility', label: 'Fasilitas', desc: 'Masjid, Lapangan, Balai' }
-              ].map(layer => (
-                <label key={layer.id} className={`flex flex-col gap-1 p-3 rounded-xl cursor-pointer transition-all border ${activeLayers.includes(layer.id) ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
-                  <div className="flex items-center gap-3">
-                    <input 
-                      type="checkbox" 
-                      checked={activeLayers.includes(layer.id)}
-                      onChange={() => {
-                        setActiveLayers(prev => prev.includes(layer.id) ? prev.filter(l => l !== layer.id) : [...prev, layer.id]);
-                      }}
-                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span className={`text-xs font-bold ${activeLayers.includes(layer.id) ? 'text-indigo-700' : 'text-slate-600'}`}>
-                      {layer.label}
+          {/* Filter Layer Section (Admin Only) */}
+          {isAdmin && (
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+                <Settings2 size={12} /> Filter Layer
+              </h4>
+              <div className="space-y-2">
+                {[
+                  { id: 'Security', label: 'Keamanan', desc: 'CCTV, APAR, Pos Satpam' },
+                  { id: 'Social', label: 'Sosial', desc: 'Status Mudik, Tamu, Isoman' },
+                  { id: 'Financial', label: 'Keuangan', desc: 'Status Iuran Sampah' },
+                  { id: 'Facility', label: 'Fasilitas', desc: 'Masjid, Lapangan, Balai' }
+                ].map(layer => (
+                  <label key={layer.id} className={`flex flex-col gap-1 p-3 rounded-xl cursor-pointer transition-all border ${activeLayers.includes(layer.id) ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        checked={activeLayers.includes(layer.id)}
+                        onChange={() => {
+                          setActiveLayers(prev => prev.includes(layer.id) ? prev.filter(l => l !== layer.id) : [...prev, layer.id]);
+                        }}
+                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className={`text-xs font-bold ${activeLayers.includes(layer.id) ? 'text-indigo-700' : 'text-slate-600'}`}>
+                        {layer.label}
+                      </span>
+                    </div>
+                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter ml-7">
+                      {layer.desc}
                     </span>
-                  </div>
-                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter ml-7">
-                    {layer.desc}
-                  </span>
-                </label>
-              ))}
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Map Legend Section */}
           <div className="space-y-6">
@@ -944,7 +1058,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                             showHeatmap={showHeatmap}
                             activeLayers={activeLayers}
                             mapPoints={mapPoints}
-                            renderBlock={(code, bHouses, bReports, bOfficials, bIsAdmin, bIuran, bAlerts, bOnSelect, bHeatmap, bLayers) => (
+                            highlightedId={highlightedHouseId}
+                            renderBlock={(code, bHouses = [], bReports = [], bOfficials = [], bIsAdmin = false, bIuran = [], bAlerts = [], bOnSelect = () => {}, bHeatmap = false, bLayers = [], bHighlight = null) => (
                               <BlockRenderer 
                                 blockCode={code} 
                                 houses={bHouses} 
@@ -956,6 +1071,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                 onSelect={bOnSelect}
                                 showHeatmap={bHeatmap}
                                 activeLayers={bLayers}
+                                highlightedId={bHighlight}
                               />
                             )} 
                           />
@@ -1223,7 +1339,24 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                   </div>
               </div>
       </div>
-      {selectedHouse && (<HouseDetailModal house={selectedHouse} onClose={() => setSelectedHouse(null)} reports={reports} isAdmin={isAdmin} officials={officials} iuranPayments={iuranPayments} onEditHouse={onEditHouse} onPayDues={onPayDues} onReportHouse={onReportHouse} />)}
+      {selectedHouse && (
+        <HouseDetailModal 
+          house={selectedHouse} 
+          onClose={() => setSelectedHouse(null)} 
+          reports={reports} 
+          isAdmin={isAdmin} 
+          officials={officials} 
+          iuranPayments={iuranPayments} 
+          onEditHouse={onEditHouse} 
+          onPayDues={onPayDues} 
+          onReportHouse={onReportHouse}
+          onSendWhatsApp={(house) => {
+            if (house.phone) {
+              window.open(`https://wa.me/${house.phone.replace(/[^0-9]/g, '')}`, '_blank');
+            }
+          }}
+        />
+      )}
       
       {/* CCTV Modal */}
       {activeCctv && (

@@ -42,6 +42,10 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
     <div className="space-y-8">
       {sortedBlocks.map(([block, houses]) => (
         <div key={block} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-slate-800 text-white px-6 py-3 flex items-center justify-between">
+            <h3 className="font-black uppercase tracking-widest text-xs">Blok {block}</h3>
+            <span className="text-[10px] font-bold bg-white/10 px-2 py-1 rounded-lg border border-white/10">{houses.length} Rumah</span>
+          </div>
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full text-sm min-w-[1000px]">
               <thead className="bg-slate-50/50">
