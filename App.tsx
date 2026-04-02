@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Send, Bot, Trash2, Clock, CheckCircle, XCircle, Search, Edit2, Plus,
   Shield, Phone, Wallet, Moon, Sun, CloudRain, 
   LogOut, Download, Package, ShoppingBag,
-  ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, MapPin as MapIcon,
+  ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, Map as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
   RefreshCw, Calendar, DollarSign, Settings, Filter, Heart, Baby, Smile, GraduationCap, Accessibility, Key, MessageCircle, ImageIcon, AlertCircle, Wrench, ChevronRight,
   Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, PieChart, LocateFixed, ShoppingCart, Wand2

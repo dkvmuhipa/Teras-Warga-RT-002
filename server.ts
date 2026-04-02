@@ -231,7 +231,7 @@ async function startServer() {
   });
 
   // Catch-all for /api routes to prevent falling through to Vite's SPA fallback
-  app.all("/api/*", (req, res) => {
+  app.all("/api/*all", (req, res) => {
     console.warn(`API route not found: ${req.method} ${req.url}`);
     res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
   });
@@ -257,6 +257,12 @@ async function startServer() {
       appType: "spa",
     });
     app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*all', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
   }
 
   httpServer.listen(PORT, "0.0.0.0", () => {

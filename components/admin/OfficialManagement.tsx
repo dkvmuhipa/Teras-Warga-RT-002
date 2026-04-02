@@ -3,7 +3,7 @@ import { Plus, Edit2, Trash2, User, Phone, MapPin, Briefcase, Upload, AlertTrian
 import { Official, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel, handleFirestoreError, OperationType, isFirebaseConfigured } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
@@ -271,10 +271,18 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
             <p className="text-[10px] text-slate-400 mt-1 ml-1">Pisahkan setiap tugas dengan baris baru.</p>
           </div>
           
-          <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+          <div className="flex items-center justify-between p-1 bg-slate-100 rounded-xl">
             <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
             <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
           </div>
+
+          {!isFirebaseConfigured && imageType === 'upload' && (
+            <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+              <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-tight">
+                ⚠️ Firebase Storage Offline. Upload akan digantikan dengan gambar placeholder otomatis. Gunakan "Link URL" untuk foto asli.
+              </p>
+            </div>
+          )}
 
           {imageType === 'upload' ? (
             <div>

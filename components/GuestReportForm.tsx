@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Phone, Calendar, Clock, Send, CheckCircle, ArrowLeft, Camera, ShieldAlert, Lock, MapPin, FileText, Car, Info } from 'lucide-react';
 import { Button } from './ui/Button';
-import { addGuestReportToDb, uploadImageToStorage, validateResidentAccess, handleFirestoreError, OperationType } from '../services/databaseService';
+import { addGuestReportToDb, uploadImageToStorage, validateResidentAccess, handleFirestoreError, OperationType, isFirebaseConfigured } from '../services/databaseService';
 import { House } from '../types';
 import { toast } from 'sonner';
 
@@ -16,6 +16,8 @@ export const GuestReportForm: React.FC<GuestReportFormProps> = ({ onClose, house
   const [isVerified, setIsVerified] = useState(false);
   const [pin, setPin] = useState('');
   const [ktpFile, setKtpFile] = useState<File | null>(null);
+  const [ktpUrlInput, setKtpUrlInput] = useState('');
+  const [uploadType, setUploadType] = useState<'file' | 'url'>('file');
   const [formData, setFormData] = useState({
     residentHouseId: '',
     guestName: '',
@@ -67,9 +69,9 @@ export const GuestReportForm: React.FC<GuestReportFormProps> = ({ onClose, house
     setIsLoading(true);
     try {
       const selectedHouse = houses.find(h => h.id === formData.residentHouseId);
-      let ktpUrl = '';
+      let ktpUrl = ktpUrlInput;
 
-      if (ktpFile) {
+      if (uploadType === 'file' && ktpFile) {
         ktpUrl = await uploadImageToStorage(ktpFile, `guests/ktp_${Date.now()}_${ktpFile.name}`);
       }
 
@@ -367,29 +369,65 @@ export const GuestReportForm: React.FC<GuestReportFormProps> = ({ onClose, house
         </div>
 
         <div className="space-y-4">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Foto KTP Tamu</label>
-          <div className={`
-            relative h-40 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 cursor-pointer overflow-hidden
-            ${ktpFile ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-slate-50 hover:border-indigo-300'}
-          `}>
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="absolute inset-0 opacity-0 cursor-pointer z-10"
-              onChange={e => setKtpFile(e.target.files?.[0] || null)}
-            />
-            {ktpFile ? (
-              <div className="text-center p-4">
-                <CheckCircle className="mx-auto mb-2 text-indigo-600" size={32} />
-                <p className="text-xs font-black text-indigo-600 truncate max-w-[200px]">{ktpFile.name}</p>
-              </div>
-            ) : (
-              <>
-                <Camera className="text-slate-300" size={40} />
-                <p className="text-xs font-black text-slate-400">Ambil Foto KTP Tamu</p>
-              </>
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Foto KTP Tamu</label>
+            {!isFirebaseConfigured && uploadType === 'file' && (
+              <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded uppercase tracking-widest">Storage Offline (Opsional)</span>
             )}
           </div>
+
+          <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl mb-4">
+            <button 
+              type="button" 
+              onClick={() => setUploadType('file')} 
+              className={`flex-1 py-2 text-xs font-black rounded-xl transition-all uppercase tracking-widest ${uploadType === 'file' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+            >
+              Upload File
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setUploadType('url')} 
+              className={`flex-1 py-2 text-xs font-black rounded-xl transition-all uppercase tracking-widest ${uploadType === 'url' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+            >
+              Link URL
+            </button>
+          </div>
+
+          {uploadType === 'file' ? (
+            <div className={`
+              relative h-40 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 cursor-pointer overflow-hidden
+              ${ktpFile ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-slate-50 hover:border-indigo-300'}
+            `}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                onChange={e => setKtpFile(e.target.files?.[0] || null)}
+              />
+              {ktpFile ? (
+                <div className="text-center p-4">
+                  <CheckCircle className="mx-auto mb-2 text-indigo-600" size={32} />
+                  <p className="text-xs font-black text-indigo-600 truncate max-w-[200px]">{ktpFile.name}</p>
+                </div>
+              ) : (
+                <>
+                  <Camera className="text-slate-300" size={40} />
+                  <p className="text-xs font-black text-slate-400">Ambil Foto KTP Tamu</p>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="relative">
+              <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input 
+                type="url" 
+                placeholder="https://link-foto-ktp.com/foto.jpg" 
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" 
+                value={ktpUrlInput} 
+                onChange={e => setKtpUrlInput(e.target.value)} 
+              />
+            </div>
+          )}
         </div>
 
         <div className="pt-6">

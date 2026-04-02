@@ -11,7 +11,8 @@ import {
   subscribeToUMKMOrders,
   updateUMKMOrderStatus,
   handleFirestoreError,
-  OperationType
+  OperationType,
+  isFirebaseConfigured
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -484,10 +485,18 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
             <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[60px]" rows={2} value={galleryInput} onChange={e=>setGalleryInput(e.target.value)} placeholder="https://link1.com, https://link2.com..."/>
           </div>
           
-          <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+          <div className="flex items-center justify-between p-1 bg-slate-100 rounded-xl">
             <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
             <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
           </div>
+
+          {!isFirebaseConfigured && imageType === 'upload' && (
+            <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+              <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-tight">
+                ⚠️ Firebase Storage Offline. Upload akan digantikan dengan gambar placeholder otomatis. Gunakan "Link URL" untuk foto asli.
+              </p>
+            </div>
+          )}
 
           {imageType === 'upload' ? (
             <div>

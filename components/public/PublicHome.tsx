@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
-  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff
+  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint } from '../../types';
@@ -179,6 +179,91 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       <DigitalSummary />
+
+      {/* Resident Dues Widget - NEW Bento Card */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1 bg-gradient-to-br from-slate-900 to-slate-800 p-8 rounded-[3rem] text-white shadow-2xl shadow-slate-200 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
+            <Droplets size={120} />
+          </div>
+          <div className="relative z-10">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Keuangan Warga</p>
+            <h3 className="text-2xl font-black mb-4 tracking-tight">Iuran Bulanan</h3>
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                    <Droplets size={16} />
+                  </div>
+                  <span className="text-xs font-bold">Iuran Air</span>
+                </div>
+                <span className="text-xs font-black">Rp {summaries.totalCollected > 0 ? (summaries.totalCollected / houses.length).toLocaleString('id-ID') : '10.000'}</span>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
+                    <ShoppingCart size={16} />
+                  </div>
+                  <span className="text-xs font-bold">Iuran Sampah</span>
+                </div>
+                <span className="text-xs font-black">Rp 5.000</span>
+              </div>
+            </div>
+            <Button 
+              onClick={() => navigate('/services?tab=iuran')}
+              variant="secondary" 
+              className="w-full py-4 rounded-2xl text-[10px] tracking-widest"
+            >
+              Bayar Sekarang
+            </Button>
+          </div>
+        </div>
+
+        <div className="md:col-span-2 bg-white/80 backdrop-blur-md p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-indigo-500/5 flex flex-col justify-between group">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-1">Status Pembayaran</p>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight">Cek Tagihan Rumah</h3>
+            </div>
+            <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-600">
+              <CheckCircle2 size={24} />
+            </div>
+          </div>
+          
+          <div className="flex flex-col md:flex-row gap-6 items-center">
+            <div className="flex-1 w-full">
+              <p className="text-sm text-slate-500 font-medium mb-6 leading-relaxed">
+                Masukkan nomor rumah Anda untuk melihat rincian tagihan iuran air dan sampah yang belum terbayar.
+              </p>
+              <form onSubmit={handleCheckStatus} className="flex gap-3">
+                <input 
+                  type="text" 
+                  placeholder="No. Rumah (A1-01)" 
+                  className="flex-1 px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                  value={statusSearchId}
+                  onChange={e => setStatusSearchId(e.target.value)}
+                />
+                <Button type="submit" className="px-8 rounded-2xl">
+                  Cek
+                </Button>
+              </form>
+            </div>
+            <div className="hidden md:block w-px h-32 bg-slate-100 mx-4" />
+            <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
+              <div className="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100 group-hover:bg-indigo-50 transition-colors">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Warga</p>
+                <p className="text-2xl font-black text-slate-800">{houses.length}</p>
+              </div>
+              <div className="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100 group-hover:bg-emerald-50 transition-colors">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Lunas Iuran</p>
+                <p className="text-2xl font-black text-emerald-600">
+                  {houses.filter(h => h.paymentStatusAir === 'Lunas' && h.paymentStatusSampah === 'Lunas').length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       <ServiceStats houses={houses} reports={reports} letters={letters} />
 

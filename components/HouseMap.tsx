@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
-import { Home, MapPin as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight } from 'lucide-react';
+import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -461,36 +461,48 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
             {/* Main Road - North Side (Highway Style) with Sidewalks */}
             <div className="relative">
                 {/* North Sidewalk */}
-                <div className="h-5 bg-slate-300 border-t-2 border-slate-400 rounded-t-xl relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'linear-gradient(90deg, #64748b 1px, transparent 1px), linear-gradient(#64748b 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                <div className="h-6 bg-slate-400 border-t-2 border-slate-500 rounded-t-xl relative overflow-hidden shadow-inner">
+                    <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(90deg, #1e293b 1px, transparent 1px), linear-gradient(#1e293b 1px, transparent 1px)', backgroundSize: '12px 12px' }}></div>
+                    {/* Curb (Kerb) - Yellow/Black stripes common in Indonesia */}
+                    <div className="absolute bottom-0 left-0 right-0 h-2 bg-slate-800 flex border-t border-slate-600">
+                        {Array.from({ length: 60 }).map((_, i) => (
+                            <div key={i} className={`flex-1 h-full ${i % 2 === 0 ? 'bg-amber-400' : 'bg-slate-900'}`}></div>
+                        ))}
+                    </div>
                 </div>
                 
-                <div className="flex items-center justify-center px-8 md:px-12 py-6 bg-slate-800 border-y-4 border-slate-700 relative overflow-hidden group shadow-2xl shadow-slate-900/20">
+                <div className="flex items-center justify-center px-8 md:px-12 py-8 bg-slate-800 border-y-4 border-slate-700 relative overflow-hidden group shadow-2xl shadow-slate-900/40">
                     {/* Asphalt Texture */}
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-40 pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-50 pointer-events-none"></div>
                     
                     {/* Lane Markings - Top & Bottom Shoulder */}
-                    <div className="absolute top-1 left-0 right-0 h-0.5 bg-white/30"></div>
-                    <div className="absolute bottom-1 left-0 right-0 h-0.5 bg-white/30"></div>
+                    <div className="absolute top-1.5 left-0 right-0 h-0.5 bg-white/40"></div>
+                    <div className="absolute bottom-1.5 left-0 right-0 h-0.5 bg-white/40"></div>
                     
                     {/* Center Lane Divider (Dashed) */}
-                    <div className="absolute top-1/2 left-0 right-0 h-1 border-t-2 border-dashed border-amber-400/60 -translate-y-1/2"></div>
+                    <div className="absolute top-1/2 left-0 right-0 h-1.5 border-t-4 border-dashed border-amber-400/80 -translate-y-1/2 shadow-[0_0_8px_rgba(251,191,36,0.4)]"></div>
                     
                     <div className="flex items-center gap-6 relative z-10">
                         <div className="flex flex-col items-center">
-                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/90 drop-shadow-md mb-1">Jl. Pue Lombe</span>
+                            <span className="text-xs font-black uppercase tracking-[0.6em] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-1">Jl. Pue Lombe</span>
                             <div className="flex items-center gap-1">
-                                <ChevronRight size={10} className="text-amber-400 animate-pulse" />
-                                <ChevronRight size={10} className="text-amber-400 animate-pulse delay-75" />
-                                <ChevronRight size={10} className="text-amber-400 animate-pulse delay-150" />
+                                <ChevronRight size={12} className="text-amber-400 animate-pulse" />
+                                <ChevronRight size={12} className="text-amber-400 animate-pulse delay-75" />
+                                <ChevronRight size={12} className="text-amber-400 animate-pulse delay-150" />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* South Sidewalk */}
-                <div className="h-5 bg-slate-300 border-b-2 border-slate-400 rounded-b-xl relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'linear-gradient(90deg, #64748b 1px, transparent 1px), linear-gradient(#64748b 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                <div className="h-6 bg-slate-400 border-b-2 border-slate-500 rounded-b-xl relative overflow-hidden shadow-inner">
+                    <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(90deg, #1e293b 1px, transparent 1px), linear-gradient(#1e293b 1px, transparent 1px)', backgroundSize: '12px 12px' }}></div>
+                    {/* Curb (Kerb) */}
+                    <div className="absolute top-0 left-0 right-0 h-2 bg-slate-800 flex border-b border-slate-600">
+                        {Array.from({ length: 60 }).map((_, i) => (
+                            <div key={i} className={`flex-1 h-full ${i % 2 === 0 ? 'bg-amber-400' : 'bg-slate-900'}`}></div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -1146,7 +1158,14 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                        point.type === 'AssemblyPoint' ? <Users size={14} /> :
                                        point.type === 'EvacuationRoute' ? <ArrowRight size={14} /> :
                                        point.type === 'Trash' ? <Trash size={14} /> :
-                                       point.type === 'Facility' ? <MapIcon size={14} /> :
+                                       point.type === 'Facility' ? (
+                                           point.label.toLowerCase().includes('masjid') ? (
+                                               <div className="relative">
+                                                   <MapIcon size={14} className="text-emerald-200" />
+                                                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+                                               </div>
+                                           ) : <MapIcon size={14} />
+                                       ) :
                                        <MapPin size={14} />}
                                   </div>
                                   <span className="mt-1 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[9px] font-black text-slate-800 shadow-sm border border-slate-200 uppercase tracking-tighter">

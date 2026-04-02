@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { User, Home, Phone, Users, Send, CheckCircle, ArrowLeft, Plus, Trash2, GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, FileText, Camera, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/Button';
-import { addResidentRegistrationToDb, uploadImageToStorage, checkHouseOccupied, formatHouseId, handleFirestoreError, OperationType } from '../services/databaseService';
+import { addResidentRegistrationToDb, uploadImageToStorage, checkHouseOccupied, formatHouseId, handleFirestoreError, OperationType, isFirebaseConfigured } from '../services/databaseService';
 import { toast } from 'sonner';
 
 interface ResidentRegistrationFormProps {
@@ -14,6 +14,9 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
   const [isLoading, setIsLoading] = useState(false);
   const [ktpFile, setKtpFile] = useState<File | null>(null);
   const [kkFile, setKkFile] = useState<File | null>(null);
+  const [ktpUrlInput, setKtpUrlInput] = useState('');
+  const [kkUrlInput, setKkUrlInput] = useState('');
+  const [uploadType, setUploadType] = useState<'file' | 'url'>('file');
   const [formData, setFormData] = useState({
     headOfFamily: '',
     gender: 'Laki-laki' as 'Laki-laki' | 'Perempuan',
@@ -81,14 +84,16 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         return;
       }
 
-      let ktpUrl = '';
-      let kkUrl = '';
+      let ktpUrl = ktpUrlInput;
+      let kkUrl = kkUrlInput;
 
-      if (ktpFile) {
-        ktpUrl = await uploadImageToStorage(ktpFile, `registrations/ktp_${Date.now()}_${ktpFile.name}`);
-      }
-      if (kkFile) {
-        kkUrl = await uploadImageToStorage(kkFile, `registrations/kk_${Date.now()}_${kkFile.name}`);
+      if (uploadType === 'file') {
+        if (ktpFile) {
+          ktpUrl = await uploadImageToStorage(ktpFile, `registrations/ktp_${Date.now()}_${ktpFile.name}`);
+        }
+        if (kkFile) {
+          kkUrl = await uploadImageToStorage(kkFile, `registrations/kk_${Date.now()}_${kkFile.name}`);
+        }
       }
 
       await addResidentRegistrationToDb({
@@ -350,68 +355,115 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
         {/* Section 5: Upload Dokumen */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
-              <FileText size={16} />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                <FileText size={16} />
+              </div>
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Upload Dokumen</h3>
             </div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Upload Dokumen</h3>
+            {!isFirebaseConfigured && uploadType === 'file' && (
+              <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded uppercase tracking-widest">Storage Offline (Opsional)</span>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Foto KTP Kepala Keluarga</label>
-              <div className={`
-                relative h-48 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 cursor-pointer overflow-hidden
-                ${ktpFile ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-slate-50 hover:border-indigo-300'}
-              `}>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                  onChange={e => setKtpFile(e.target.files?.[0] || null)}
-                />
-                {ktpFile ? (
-                  <div className="text-center p-4">
-                    <CheckCircle className="mx-auto mb-2 text-indigo-600" size={32} />
-                    <p className="text-xs font-black text-indigo-600 truncate max-w-[200px]">{ktpFile.name}</p>
-                    <p className="text-[10px] text-indigo-400 font-bold mt-1">Klik untuk mengganti</p>
-                  </div>
-                ) : (
-                  <>
-                    <Camera className="text-slate-300" size={40} />
-                    <p className="text-xs font-black text-slate-400">Ambil Foto / Upload KTP</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Foto Kartu Keluarga (KK)</label>
-              <div className={`
-                relative h-48 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 cursor-pointer overflow-hidden
-                ${kkFile ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-slate-50 hover:border-emerald-300'}
-              `}>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                  onChange={e => setKkFile(e.target.files?.[0] || null)}
-                />
-                {kkFile ? (
-                  <div className="text-center p-4">
-                    <CheckCircle className="mx-auto mb-2 text-emerald-600" size={32} />
-                    <p className="text-xs font-black text-emerald-600 truncate max-w-[200px]">{kkFile.name}</p>
-                    <p className="text-[10px] text-emerald-400 font-bold mt-1">Klik untuk mengganti</p>
-                  </div>
-                ) : (
-                  <>
-                    <Camera className="text-slate-300" size={40} />
-                    <p className="text-xs font-black text-slate-400">Ambil Foto / Upload KK</p>
-                  </>
-                )}
-              </div>
-            </div>
+          <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl mb-6">
+            <button 
+              type="button" 
+              onClick={() => setUploadType('file')} 
+              className={`flex-1 py-2 text-xs font-black rounded-xl transition-all uppercase tracking-widest ${uploadType === 'file' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+            >
+              Upload File
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setUploadType('url')} 
+              className={`flex-1 py-2 text-xs font-black rounded-xl transition-all uppercase tracking-widest ${uploadType === 'url' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+            >
+              Link URL
+            </button>
           </div>
+
+          {uploadType === 'file' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Foto KTP Kepala Keluarga</label>
+                <div className={`
+                  relative h-48 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 cursor-pointer overflow-hidden
+                  ${ktpFile ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-slate-50 hover:border-indigo-300'}
+                `}>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                    onChange={e => setKtpFile(e.target.files?.[0] || null)}
+                  />
+                  {ktpFile ? (
+                    <div className="text-center p-4">
+                      <CheckCircle className="mx-auto mb-2 text-indigo-600" size={32} />
+                      <p className="text-xs font-black text-indigo-600 truncate max-w-[200px]">{ktpFile.name}</p>
+                      <p className="text-[10px] text-indigo-400 font-bold mt-1">Klik untuk mengganti</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Camera className="text-slate-300" size={40} />
+                      <p className="text-xs font-black text-slate-400">Ambil Foto / Upload KTP</p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Foto Kartu Keluarga (KK)</label>
+                <div className={`
+                  relative h-48 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 cursor-pointer overflow-hidden
+                  ${kkFile ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-slate-50 hover:border-emerald-300'}
+                `}>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                    onChange={e => setKkFile(e.target.files?.[0] || null)}
+                  />
+                  {kkFile ? (
+                    <div className="text-center p-4">
+                      <CheckCircle className="mx-auto mb-2 text-emerald-600" size={32} />
+                      <p className="text-xs font-black text-emerald-600 truncate max-w-[200px]">{kkFile.name}</p>
+                      <p className="text-[10px] text-emerald-400 font-bold mt-1">Klik untuk mengganti</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Camera className="text-slate-300" size={40} />
+                      <p className="text-xs font-black text-slate-400">Ambil Foto / Upload KK</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link URL KTP</label>
+                <input 
+                  type="url" 
+                  placeholder="https://..." 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" 
+                  value={ktpUrlInput} 
+                  onChange={e => setKtpUrlInput(e.target.value)} 
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link URL KK</label>
+                <input 
+                  type="url" 
+                  placeholder="https://..." 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" 
+                  value={kkUrlInput} 
+                  onChange={e => setKkUrlInput(e.target.value)} 
+                />
+              </div>
+            </div>
+          )}
         </section>
 
         <div className="pt-10 border-t border-slate-100">

@@ -14,6 +14,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
   const [filterCategory, setFilterCategory] = useState<'All' | Document['category']>('All');
   const [isAdding, setIsAdding] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadType, setUploadType] = useState<'file' | 'url'>('file');
 
   // Form State
   const [newDoc, setNewDoc] = useState<Partial<Document>>({
@@ -27,15 +28,19 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newDoc.title || !selectedFile) {
-      toast.error('Judul dan file wajib diisi');
+    if (!newDoc.title || (uploadType === 'file' && !selectedFile) || (uploadType === 'url' && !newDoc.url)) {
+      toast.error('Judul dan file/URL wajib diisi');
       return;
     }
 
     setIsUploading(true);
     try {
-      const fileName = `${Date.now()}_${selectedFile.name}`;
-      const url = await uploadImageToStorage(selectedFile, `documents/${fileName}`);
+      let url = newDoc.url || '';
+      
+      if (uploadType === 'file' && selectedFile) {
+        const fileName = `${Date.now()}_${selectedFile.name}`;
+        url = await uploadImageToStorage(selectedFile, `documents/${fileName}`);
+      }
       
       await addDocumentToDb({
         ...newDoc,
@@ -236,27 +241,58 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pilih File</label>
-                    <div className="relative group">
-                      <input
-                        type="file"
-                        required
-                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      />
-                      <div className={`
-                        flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl transition-all
-                        ${selectedFile ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-200 bg-slate-50 group-hover:border-indigo-300 group-hover:bg-indigo-50/10'}
-                      `}>
-                        <Upload className={selectedFile ? 'text-indigo-600' : 'text-slate-300'} size={32} />
-                        <p className="mt-3 text-xs font-black text-slate-600 uppercase tracking-widest">
-                          {selectedFile ? selectedFile.name : 'Klik atau seret file ke sini'}
-                        </p>
-                        <p className="mt-1 text-[10px] text-slate-400 font-medium">PDF, Word, Excel, ZIP (Maks 10MB)</p>
+                  <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl mb-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setUploadType('file')} 
+                      className={`flex-1 py-2 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest ${uploadType === 'file' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+                    >
+                      Upload File
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setUploadType('url')} 
+                      className={`flex-1 py-2 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest ${uploadType === 'url' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+                    >
+                      Link URL
+                    </button>
+                  </div>
+
+                  {uploadType === 'file' ? (
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pilih File</label>
+                      <div className="relative group">
+                        <input
+                          type="file"
+                          required={uploadType === 'file'}
+                          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div className={`
+                          flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl transition-all
+                          ${selectedFile ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-200 bg-slate-50 group-hover:border-indigo-300 group-hover:bg-indigo-50/10'}
+                        `}>
+                          <Upload className={selectedFile ? 'text-indigo-600' : 'text-slate-300'} size={32} />
+                          <p className="mt-3 text-xs font-black text-slate-600 uppercase tracking-widest">
+                            {selectedFile ? selectedFile.name : 'Klik atau seret file ke sini'}
+                          </p>
+                          <p className="mt-1 text-[10px] text-slate-400 font-medium">PDF, Word, Excel, ZIP (Maks 10MB)</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Link URL Dokumen</label>
+                      <input
+                        type="url"
+                        required={uploadType === 'url'}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                        placeholder="https://..."
+                        value={newDoc.url}
+                        onChange={(e) => setNewDoc({...newDoc, url: e.target.value})}
+                      />
+                    </div>
+                  )}
 
                   <button
                     type="submit"

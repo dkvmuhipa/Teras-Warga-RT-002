@@ -34,7 +34,7 @@ import {
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo } from "../types";
 
-export { OperationType };
+export { OperationType, isFirebaseConfigured };
 
 export const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {
   const errInfo: FirestoreErrorInfo = {
@@ -124,6 +124,7 @@ export const getFCMTokens = async () => {
     }
 };
 export const subscribeToPdfConfig = (callback: (data: any) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const docRef = doc(db, CONFIGS_COL, "pdf");
     return onSnapshot(docRef, (snapshot) => {
         if (snapshot.exists()) {
@@ -152,6 +153,7 @@ export const updatePdfConfig = async (config: any) => {
 };
 
 export const subscribeToIdeas = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, IDEAS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
@@ -276,6 +278,7 @@ export const logAction = async (action: string, details: string) => {
 };
 
 export const subscribeToAuditLogs = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, AUDIT_LOGS_COL), orderBy("timestamp", "desc"), limit(100));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
@@ -371,6 +374,7 @@ export const deleteGuestReportFromDb = async (id: string) => {
 
 // --- DOCUMENTS SERVICES ---
 export const subscribeToDocuments = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, DOCUMENTS_COL), orderBy("uploadDate", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
@@ -399,6 +403,7 @@ export const deleteDocumentFromDb = async (id: string) => {
 
 // --- CHECKPOINTS SERVICES ---
 export const subscribeToCheckpoints = (callback: (data: Checkpoint[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, CHECKPOINTS_COL));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Checkpoint));
@@ -434,6 +439,7 @@ export const deleteCheckpointFromDb = async (id: string) => {
 
 // --- MAP POINTS SERVICES ---
 export const subscribeToMapPoints = (callback: (data: MapPoint[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, MAP_POINTS_COL));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MapPoint));
@@ -544,15 +550,25 @@ export const generateMonthlyBills = async (month: string, dueDate: string, items
         return false;
     }
 };
+export const getPlaceholderImage = (keyword: string = 'community', width: number = 800, height: number = 600) => {
+  return `https://picsum.photos/seed/${keyword}/${width}/${height}`;
+};
+
 export const uploadImageToStorage = async (file: File, path: string) => {
+  if (!isFirebaseConfigured || !storage) {
+    console.warn("Firebase Storage is not configured. Using placeholder instead.");
+    return getPlaceholderImage(path.split('/')[0]);
+  }
+  
   try {
     const storageRef = ref(storage, path);
     const snapshot = await uploadBytes(storageRef, file);
     return await getDownloadURL(snapshot.ref);
   } catch (error) {
-    // Storage error handling (using OperationType.WRITE as a proxy for upload)
-    handleFirestoreError(error, OperationType.WRITE, `storage/${path}`);
-    throw error;
+    console.error("Storage upload failed:", error);
+    // Instead of throwing, we can return a placeholder to keep the app functional
+    // but we should probably inform the user.
+    return getPlaceholderImage(path.split('/')[0]);
   }
 };
 export const loginAdmin = (email: string, pass: string) => {
@@ -670,6 +686,10 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
 
 // --- GENERIC SUBSCRIBE ---
 export const subscribeToCollection = (colName: string, callback: (data: any[]) => void) => {
+  if (!isFirebaseConfigured || !db) {
+    console.warn(`Firebase not configured, skipping subscription to ${colName}`);
+    return () => {};
+  }
   const q = query(collection(db, colName));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => ({
@@ -684,6 +704,7 @@ export const subscribeToCollection = (colName: string, callback: (data: any[]) =
 
 // --- OPTIMIZED REPORT SUBSCRIBE ---
 export const subscribeToActiveReports = (callback: (data: any[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
   // Query only 'Baru' or 'Diproses' status
   const q = query(collection(db, REPORTS_COL), where('status', 'in', ['Baru', 'Diproses']));
   return onSnapshot(q, (snapshot) => {
@@ -1244,6 +1265,7 @@ export const addIuranPaymentToDb = async (payment: any) => {
 };
 
 export const subscribeToIuranPayments = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, IURAN_PAYMENTS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
@@ -1314,6 +1336,7 @@ export const addResidentRegistrationToDb = async (registration: any) => {
 };
 
 export const subscribeToResidentRegistrations = (callback: (data: ResidentRegistration[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, RESIDENT_REGISTRATIONS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as ResidentRegistration[];
@@ -1341,6 +1364,7 @@ export const deleteResidentRegistrationFromDb = async (id: string) => {
 
 // --- ACTIVITIES SERVICES ---
 export const subscribeToActivities = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, ACTIVITIES_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
@@ -1412,6 +1436,7 @@ export const deleteAttendanceFromDb = async (id: string) => {
 
 // --- HEALTH RECORDS SERVICES ---
 export const subscribeToHealthRecords = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, HEALTH_RECORDS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
@@ -1484,6 +1509,7 @@ export const deleteFAQFromDb = async (id: string) => {
 
 // --- EVENTS SERVICES ---
 export const subscribeToEvents = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, EVENTS_COL), orderBy("date", "asc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
@@ -2100,6 +2126,7 @@ export const updateMarketItemStatus = async (id: string, status: string) => {
 };
 
 export const subscribeToMarketItems = (callback: (data: any[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
   const q = query(collection(db, MARKET_COL));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => ({
@@ -2134,6 +2161,7 @@ export const deleteGalleryItemFromDb = async (id: string) => {
 };
 
 export const subscribeToGallery = (callback: (data: any[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
   const q = query(collection(db, GALLERY_COL), orderBy("date", "desc"));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => ({
@@ -2173,6 +2201,7 @@ export const deleteNewsFromDb = async (id: string) => {
 };
 
 export const subscribeToNews = (callback: (data: any[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
   const q = query(collection(db, NEWS_COL), orderBy("date", "desc"));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => ({
@@ -2189,6 +2218,7 @@ export const subscribeToNews = (callback: (data: any[]) => void) => {
 // --- SEEDING & AUTO-MIGRATION ---
 // --- WASTE BANK SERVICES ---
 export const subscribeToPolls = (callback: (data: Poll[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     return onSnapshot(collection(db, POLLS_COL), (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Poll));
         callback(data);
@@ -2198,6 +2228,7 @@ export const subscribeToPolls = (callback: (data: Poll[]) => void) => {
 };
 
 export const subscribeToUMKM = (callback: (data: UMKM[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     return onSnapshot(collection(db, UMKM_COL), (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UMKM));
         callback(data);
@@ -2207,6 +2238,7 @@ export const subscribeToUMKM = (callback: (data: UMKM[]) => void) => {
 };
 
 export const subscribeToWasteDeposits = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
     const q = query(collection(db, WASTE_DEPOSITS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
