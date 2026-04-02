@@ -19,6 +19,7 @@ interface FinancialContextType {
     totalArrearsAmount: number;
     totalArrearsMonths: number;
     totalArrearsHouseCount: number;
+    fullyPaidHousesCount: number;
     air: {
       totalCollected: number;
       unpaidCount: number;
@@ -36,6 +37,7 @@ interface FinancialContextType {
       arrearsHouseCount: number;
     };
   };
+  settings: { airFee: number; sampahFee: number };
   isMonthMatch: (monthA: string, monthB: string) => boolean;
 }
 
@@ -141,16 +143,22 @@ export const FinancialProvider: React.FC<{
     // Air specific
     const airPayments = currentMonthPayments.filter(p => p.type === 'Air' || p.type === 'Both');
     const airCollected = airPayments.reduce((acc, p) => acc + (p.type === 'Both' ? (p.amount * (airFee / combinedFee)) : p.amount), 0);
-    const airPaidHouses = new Set(airPayments.map(p => p.houseId)).size;
-    const airUnpaidCount = occupiedHousesList.length - airPaidHouses;
+    const airPaidHouses = new Set(airPayments.map(p => p.houseId));
+    const airUnpaidCount = occupiedHousesList.length - airPaidHouses.size;
     const airEstimatedReceivables = airUnpaidCount * airFee;
 
     // Sampah specific
     const sampahPayments = currentMonthPayments.filter(p => p.type === 'Sampah' || p.type === 'Both');
     const sampahCollected = sampahPayments.reduce((acc, p) => acc + (p.type === 'Both' ? (p.amount * (sampahFee / combinedFee)) : p.amount), 0);
-    const sampahPaidHouses = new Set(sampahPayments.map(p => p.houseId)).size;
-    const sampahUnpaidCount = occupiedHousesList.length - sampahPaidHouses;
+    const sampahPaidHouses = new Set(sampahPayments.map(p => p.houseId));
+    const sampahUnpaidCount = occupiedHousesList.length - sampahPaidHouses.size;
     const sampahEstimatedReceivables = sampahUnpaidCount * sampahFee;
+
+    const fullyPaidHousesCount = occupiedHousesList.filter(h => {
+      const airStatus = getPaymentStatus(h, 'Air', selectedMonth);
+      const sampahStatus = getPaymentStatus(h, 'Sampah', selectedMonth);
+      return airStatus === PaymentStatus.PAID && sampahStatus === PaymentStatus.PAID;
+    }).length;
 
     return {
       totalCollected,
@@ -161,6 +169,7 @@ export const FinancialProvider: React.FC<{
       totalArrearsAmount: combinedTotalArrearsAmount,
       totalArrearsMonths: airArrearsMonths + sampahArrearsMonths,
       totalArrearsHouseCount,
+      fullyPaidHousesCount,
       air: {
         totalCollected: airCollected,
         unpaidCount: airUnpaidCount,
@@ -190,6 +199,7 @@ export const FinancialProvider: React.FC<{
       getPaymentStatus,
       getArrearsForHouse,
       summaries,
+      settings: { airFee, sampahFee },
       isMonthMatch
     }}>
       {children}

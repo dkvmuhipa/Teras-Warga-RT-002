@@ -79,12 +79,13 @@ interface AdminDashboardProps {
   faqItems: FAQItem[];
   updateRequests: UpdateRequest[];
   settings: any;
+  onUpdateSettings: (settings: any) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   role,
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, settings
+  ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, settings, onUpdateSettings
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -221,6 +222,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             rondaLogs={rondaLogs}
             marketItems={marketItems}
             notifications={notifications}
+            settings={settings}
+            onUpdateSettings={onUpdateSettings}
           />
         );
       case 'analytics':

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
-import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight } from 'lucide-react';
+import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight, AlertCircle } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -90,6 +90,8 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     onReportHouse,
     onSendWhatsApp
 }) => {
+    const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'history'>('profile');
+
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const activeReports = reports.filter(r => r.houseId === house.id && r.status !== 'Selesai');
     const isSafe = activeReports.length === 0;
@@ -98,7 +100,6 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
         const currentHouseId = formatHouseId(`${house.block}-${house.number}`);
         return officialHouseId === currentHouseId;
     });
-    const displayName = shortenName(house.headOfFamily);
 
     const statusAir = getPaymentStatus(house, 'Air');
     const statusSampah = getPaymentStatus(house, 'Sampah');
@@ -108,222 +109,258 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            <div className="bg-white w-full max-w-sm md:max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden animate-slide-up ring-1 ring-slate-200 flex flex-col max-h-[90vh]">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="bg-white w-full max-w-sm md:max-w-md rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-slate-200 flex flex-col max-h-[90vh]"
+            >
                 {/* Header Section with Photo Support */}
-                <div className={`relative h-40 md:h-48 shrink-0 transition-colors duration-300 ${isSafe ? (officialData ? 'bg-slate-800' : 'bg-emerald-600') : 'bg-rose-600'}`}>
+                <div className={`relative h-44 md:h-52 shrink-0 transition-colors duration-500 ${isSafe ? (officialData ? 'bg-slate-900' : 'bg-indigo-600') : 'bg-rose-600'}`}>
                     {house.housePhotoUrl ? (
                         <div className="absolute inset-0">
                             <img 
                                 src={house.housePhotoUrl} 
                                 alt="Foto Rumah" 
-                                className="w-full h-full object-cover opacity-60"
+                                className="w-full h-full object-cover opacity-70"
                                 referrerPolicy="no-referrer"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
                         </div>
                     ) : (
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30 pointer-events-none"></div>
                     )}
                     
-                    <button onClick={onClose} className="absolute top-3 right-3 z-20 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors backdrop-blur-sm"><X size={18}/></button>
+                    <button onClick={onClose} className="absolute top-4 right-4 z-20 bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-full transition-all backdrop-blur-md border border-white/20 shadow-lg"><X size={20}/></button>
                     
-                    <div className="absolute bottom-4 left-6 text-white z-10">
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tighter shadow-sm drop-shadow-md">{house.block}-{house.number}</h2>
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-90">Kavling Rumah • {house.status === 'Occupied' ? 'Dihuni' : 'Kosong'}</p>
+                    <div className="absolute bottom-6 left-8 text-white z-10">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${house.status === 'Occupied' ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+                                {house.status === 'Occupied' ? 'Dihuni' : 'Kosong'}
+                            </span>
+                            {officialData && <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest bg-indigo-500">Pengurus</span>}
+                        </div>
+                        <h2 className="text-5xl md:text-6xl font-black tracking-tighter leading-none drop-shadow-2xl">{house.block}-{house.number}</h2>
+                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.4em] mt-1">Digital Twin Property ID: {house.id.slice(0,8)}</p>
                     </div>
+                </div>
+
+                {/* Modern Tab Navigation */}
+                <div className="flex p-2 bg-slate-50 border-b border-slate-100 shrink-0">
+                    {[
+                        { id: 'profile', label: 'Profil', icon: User },
+                        { id: 'finance', label: 'Keuangan', icon: DollarSign },
+                        { id: 'history', label: 'Riwayat', icon: Clock }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white text-indigo-600 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            <tab.icon size={14} /> {tab.label}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Content Section */}
                 <div className="overflow-y-auto custom-scrollbar flex-1 bg-white">
-                    <div className="p-6 space-y-6">
-                        {/* Emergency Alert Banner */}
-                        {!isSafe && (
-                            <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4 flex items-start gap-4 animate-pulse">
-                                <div className="bg-rose-600 p-2 rounded-xl text-white shadow-lg shadow-rose-200">
-                                    <AlertTriangle size={20} />
-                                </div>
-                                <div>
-                                    <h4 className="font-black text-rose-700 text-xs uppercase tracking-widest">Laporan Aktif</h4>
-                                    <ul className="text-[11px] text-rose-600 mt-1 list-disc pl-4 font-bold">
-                                        {activeReports.map(r => (<li key={r.id}>{r.type}: {r.description}</li>))}
-                                    </ul>
-                                </div>
-                            </div>
-                        )}
-
-                         {/* OFFICIAL CARD SECTION */}
-                         {officialData && (
-                            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-5 shadow-lg shadow-slate-300 ring-4 ring-slate-50 transform transition-all hover:scale-[1.02] border border-slate-700">
-                                <div className="absolute top-0 right-0 p-4 opacity-10 transform rotate-12 pointer-events-none"><Star size={100} fill="currentColor" /></div>
-                                <div className="relative z-10 flex items-center gap-5">
-                                     <div className="relative shrink-0">
-                                         <div className="w-16 h-16 rounded-full p-1 bg-gradient-to-br from-amber-300 to-yellow-600 shadow-lg">
-                                             <img src={officialData.photo || `https://ui-avatars.com/api/?name=${officialData.name}&background=random`} alt={officialData.name} className="w-full h-full rounded-full border-2 border-white object-cover bg-white"/>
-                                         </div>
-                                     </div>
-                                     <div className="flex-1 min-w-0">
-                                         <h3 className="font-black text-xl leading-tight text-white truncate">{officialData.role}</h3>
-                                         <p className="text-sm text-slate-300 font-medium mt-0.5 truncate">{officialData.name}</p>
-                                         <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center gap-3">
-                                             <a href={`https://wa.me/${officialData.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-500 transition-colors shadow-sm ring-1 ring-emerald-400/50">
-                                                <MessageCircle size={12}/> Hubungi Pengurus
-                                             </a>
-                                         </div>
-                                     </div>
-                                </div>
-                            </div>
-                        )}
-                        
-                        {/* Family Info Card */}
-                        <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 shadow-sm">
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-indigo-600 font-black text-2xl shadow-sm border border-slate-100">
-                                    {house.headOfFamily.charAt(0)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] leading-none mb-1">Kepala Keluarga</p>
-                                    <h3 className="font-black text-slate-800 text-lg truncate leading-tight">{house.headOfFamily}</h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <p className="text-xs font-bold text-slate-500">{house.phone || '-'}</p>
-                                        {house.phone && (
-                                            <a 
-                                                href={`https://wa.me/${house.phone.replace(/[^0-9]/g, '')}`} 
-                                                target="_blank" 
-                                                rel="noreferrer"
-                                                className="text-emerald-600 hover:text-emerald-700 transition-colors"
-                                            >
-                                                <MessageCircle size={14} fill="currentColor" className="opacity-20" />
-                                            </a>
-                                        )}
+                    <div className="p-6">
+                        {activeTab === 'profile' && (
+                            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                                {/* Emergency Alert Banner */}
+                                {!isSafe && (
+                                    <div className="bg-rose-50 border-2 border-rose-100 rounded-[2rem] p-5 flex items-start gap-4 animate-pulse">
+                                        <div className="bg-rose-600 p-3 rounded-2xl text-white shadow-xl shadow-rose-200">
+                                            <AlertTriangle size={24} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-rose-700 text-xs uppercase tracking-widest">Laporan Aktif</h4>
+                                            <ul className="text-[11px] text-rose-600 mt-1 list-disc pl-4 font-bold space-y-0.5">
+                                                {activeReports.map(r => (<li key={r.id}>{r.type}: {r.description}</li>))}
+                                            </ul>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+                                )}
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-white p-3 rounded-xl border border-slate-100">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Penghuni</p>
-                                    <p className="text-sm font-black text-slate-800">{house.occupants || 0} <span className="text-[10px] font-bold text-slate-400">Jiwa</span></p>
-                                </div>
-                                <div className="bg-white p-3 rounded-xl border border-slate-100">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Tipe Hunian</p>
-                                    <p className="text-sm font-black text-slate-800">{house.residenceType || 'Pemilik'}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Family Members List (If Admin) */}
-                        {isAdmin && house.familyMembers && house.familyMembers.length > 0 && (
-                            <div className="space-y-3">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Anggota Keluarga</h4>
-                                <div className="grid grid-cols-1 gap-2">
-                                    {house.familyMembers.map((member, idx) => (
-                                        <div key={idx} className="flex items-center justify-between p-3 bg-slate-50/50 rounded-xl border border-slate-100">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
-                                                <span className="text-xs font-bold text-slate-700">{member.name}</span>
+                                {/* Family Info Card */}
+                                <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 shadow-sm relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform"><User size={120} /></div>
+                                    <div className="flex items-center gap-5 mb-6 relative z-10">
+                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-indigo-600 font-black text-3xl shadow-md border border-slate-100">
+                                            {house.headOfFamily.charAt(0)}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] leading-none mb-1.5">Kepala Keluarga</p>
+                                            <h3 className="font-black text-slate-900 text-xl truncate leading-tight">{house.headOfFamily}</h3>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <div className="flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
+                                                    <Phone size={10} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-600">{house.phone || '-'}</span>
+                                                </div>
+                                                {house.phone && (
+                                                    <a href={`https://wa.me/${house.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="p-1.5 bg-emerald-50 text-emerald-600 rounded-full hover:bg-emerald-100 transition-colors border border-emerald-100">
+                                                        <MessageCircle size={14} fill="currentColor" className="opacity-80" />
+                                                    </a>
+                                                )}
                                             </div>
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{member.relation}</span>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        
-                        {/* Status Iuran */}
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">Status Keuangan</h4>
-                                {!isFullyPaid && (
-                                    <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 animate-pulse">
-                                        {arrears.length} Tunggakan
-                                    </span>
-                                )}
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <StatusBadge label="OP Air" status={statusAir} icon={Droplets} />
-                                <StatusBadge label="Sampah" status={statusSampah} icon={Trash2} />
-                            </div>
-                        </div>
+                                    </div>
 
-                        {/* Special Notes & Social Assistance (If Admin) */}
-                        {isAdmin && (
-                            <div className="space-y-4">
-                                {(house.isPKH || house.isBLT || house.isBansosLain) && (
-                                    <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
-                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Bantuan Sosial</p>
+                                    <div className="grid grid-cols-2 gap-4 relative z-10">
+                                        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Penghuni</p>
+                                            <p className="text-lg font-black text-slate-900">{house.occupants || 0} <span className="text-xs font-bold text-slate-400">Jiwa</span></p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Hunian</p>
+                                            <p className="text-lg font-black text-slate-900">{house.residenceType || 'Milik'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Kelompok Rentan Badges */}
+                                {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount || house.widowCount) ? (
+                                    <div className="space-y-3">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Kelompok Rentan</h4>
                                         <div className="flex flex-wrap gap-2">
-                                            {house.isPKH && <span className="px-2 py-1 bg-white text-indigo-600 rounded-lg text-[9px] font-black border border-indigo-200">PKH</span>}
-                                            {house.isBLT && <span className="px-2 py-1 bg-white text-indigo-600 rounded-lg text-[9px] font-black border border-indigo-200">BLT</span>}
-                                            {house.isBansosLain && <span className="px-2 py-1 bg-white text-indigo-600 rounded-lg text-[9px] font-black border border-indigo-200">{house.bansosLainName || 'Bansos'}</span>}
+                                            {house.pregnantCount ? <VulnerabilityBadge icon={Heart} label="Ibu Hamil" count={house.pregnantCount} color="rose" /> : null}
+                                            {house.babyCount ? <VulnerabilityBadge icon={Baby} label="Bayi" count={house.babyCount} color="blue" /> : null}
+                                            {house.toddlerCount ? <VulnerabilityBadge icon={Baby} label="Balita" count={house.toddlerCount} color="amber" /> : null}
+                                            {house.elderlyCount ? <VulnerabilityBadge icon={Accessibility} label="Lansia" count={house.elderlyCount} color="indigo" /> : null}
+                                            {house.widowCount ? <VulnerabilityBadge icon={User} label="Janda" count={house.widowCount} color="slate" /> : null}
+                                        </div>
+                                    </div>
+                                ) : null}
+
+                                {/* Official Data */}
+                                {officialData && (
+                                    <div className="bg-slate-900 rounded-[2rem] p-6 text-white relative overflow-hidden shadow-xl shadow-slate-200">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12"><Star size={80} fill="currentColor" /></div>
+                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4">Profil Pengurus</p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-14 h-14 rounded-2xl border-2 border-indigo-500/30 p-1">
+                                                <img src={officialData.photo || `https://ui-avatars.com/api/?name=${officialData.name}&background=random`} className="w-full h-full rounded-xl object-cover" alt="" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-black text-lg leading-none">{officialData.role}</h4>
+                                                <p className="text-xs text-slate-400 mt-1 font-bold">{officialData.name}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
-
-                                {house.specialNotes && (
-                                    <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
-                                        <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Catatan Khusus</p>
-                                        <p className="text-xs font-bold text-slate-700 italic">"{house.specialNotes}"</p>
-                                    </div>
-                                )}
-                            </div>
+                            </motion.div>
                         )}
 
-                        {/* Kelompok Rentan Badges */}
-                        {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount || house.widowCount) ? (
-                            <div className="p-4 rounded-2xl bg-rose-50/30 border border-rose-100">
-                                <p className="text-[10px] text-rose-400 uppercase font-black tracking-widest mb-3">Kelompok Rentan</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {house.pregnantCount ? (
-                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
-                                            <Heart size={12} className="text-rose-400" fill="currentColor"/>
-                                            <span className="text-[10px] font-black text-slate-700">{house.pregnantCount} Ibu Hamil</span>
+                        {activeTab === 'finance' && (
+                            <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                                <div className="bg-indigo-600 rounded-[2rem] p-8 text-white text-center relative overflow-hidden shadow-xl shadow-indigo-200">
+                                    <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Total Tunggakan</p>
+                                    <h3 className="text-4xl font-black">{arrears.length} <span className="text-sm font-bold opacity-60 uppercase tracking-widest">Bulan</span></h3>
+                                    <div className="mt-6 flex justify-center gap-4">
+                                        <div className="text-center">
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 border-2 ${statusAir === PaymentStatus.PAID ? 'bg-emerald-500/20 border-emerald-400' : 'bg-rose-500/20 border-rose-400'}`}>
+                                                <Droplets size={20} className={statusAir === PaymentStatus.PAID ? 'text-emerald-300' : 'text-rose-300'} />
+                                            </div>
+                                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60">Iuran Air</p>
                                         </div>
-                                    ) : null}
-                                    {house.babyCount ? (
-                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
-                                            <Baby size={12} className="text-rose-500"/>
-                                            <span className="text-[10px] font-black text-slate-700">{house.babyCount} Bayi</span>
+                                        <div className="text-center">
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 border-2 ${statusSampah === PaymentStatus.PAID ? 'bg-emerald-500/20 border-emerald-400' : 'bg-rose-500/20 border-rose-400'}`}>
+                                                <Trash2 size={20} className={statusSampah === PaymentStatus.PAID ? 'text-emerald-300' : 'text-rose-300'} />
+                                            </div>
+                                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60">Iuran Sampah</p>
                                         </div>
-                                    ) : null}
-                                    {house.toddlerCount ? (
-                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
-                                            <Baby size={12} className="text-orange-500"/>
-                                            <span className="text-[10px] font-black text-slate-700">{house.toddlerCount} Balita</span>
-                                        </div>
-                                    ) : null}
-                                    {house.elderlyCount ? (
-                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
-                                            <Accessibility size={12} className="text-indigo-500"/>
-                                            <span className="text-[10px] font-black text-slate-700">{house.elderlyCount} Lansia</span>
-                                        </div>
-                                    ) : null}
-                                    {house.widowCount ? (
-                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-sm border border-rose-100">
-                                            <User size={12} className="text-slate-500"/>
-                                            <span className="text-[10px] font-black text-slate-700">{house.widowCount} Janda</span>
-                                        </div>
-                                    ) : null}
+                                    </div>
                                 </div>
-                            </div>
-                        ) : null}
+
+                                {arrears.length > 0 && (
+                                    <div className="space-y-3">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Detail Tunggakan</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {arrears.map(month => (
+                                                <div key={month} className="p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-center justify-between">
+                                                    <span className="text-xs font-bold text-rose-700">{month}</span>
+                                                    <AlertCircle size={12} className="text-rose-400" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {isAdmin && (
+                                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Bantuan Sosial</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {house.isPKH && <span className="px-3 py-1.5 bg-white text-indigo-600 rounded-xl text-[10px] font-black border border-indigo-100 shadow-sm">PKH</span>}
+                                            {house.isBLT && <span className="px-3 py-1.5 bg-white text-indigo-600 rounded-xl text-[10px] font-black border border-indigo-100 shadow-sm">BLT</span>}
+                                            {house.isBansosLain && <span className="px-3 py-1.5 bg-white text-indigo-600 rounded-xl text-[10px] font-black border border-indigo-100 shadow-sm">{house.bansosLainName || 'Bansos'}</span>}
+                                            {(!house.isPKH && !house.isBLT && !house.isBansosLain) && <span className="text-xs font-bold text-slate-400 italic">Tidak ada data bantuan</span>}
+                                        </div>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'history' && (
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+                                <div className="relative pl-8 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                                    {/* Mock History Items - In real app, fetch from database */}
+                                    <HistoryItem icon={DollarSign} title="Pembayaran Iuran" desc="Iuran bulan Maret berhasil dicatat" date="2 jam yang lalu" color="emerald" />
+                                    <HistoryItem icon={ShieldAlert} title="Laporan Keamanan" desc="Laporan lampu jalan mati di depan rumah" date="Kemarin, 14:20" color="rose" />
+                                    <HistoryItem icon={Edit} title="Pembaruan Data" desc="Perubahan jumlah penghuni rumah" date="3 hari yang lalu" color="indigo" />
+                                </div>
+                                {house.specialNotes && (
+                                    <div className="p-5 bg-amber-50 border border-amber-100 rounded-[2rem] relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10"><Info size={40} className="text-amber-600" /></div>
+                                        <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-2">Catatan Khusus</p>
+                                        <p className="text-xs font-bold text-slate-700 italic leading-relaxed">"{house.specialNotes}"</p>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
                     </div>
                 </div>
 
                 {/* Footer Actions */}
-                <div className="bg-slate-50 p-4 border-t border-slate-100 shrink-0">
+                <div className="bg-slate-50 p-6 border-t border-slate-100 shrink-0">
                     {isAdmin ? (
-                        <div className="grid grid-cols-2 gap-3">
-                            <button onClick={() => { onClose(); onEditHouse?.(house); }} className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-800 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-700 active:scale-95 transition-all shadow-lg shadow-slate-300"><Edit size={16}/> Edit Data</button>
-                            <button onClick={() => { onClose(); onPayDues?.(house); }} className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-500 active:scale-95 transition-all shadow-lg shadow-emerald-200"><DollarSign size={16}/> Catat Iuran</button>
+                        <div className="grid grid-cols-2 gap-4">
+                            <button onClick={() => { onClose(); onEditHouse?.(house); }} className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all shadow-xl shadow-slate-200"><Edit size={18}/> Edit</button>
+                            <button onClick={() => { onClose(); onPayDues?.(house); }} className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:bg-indigo-500 active:scale-95 transition-all shadow-xl shadow-indigo-200"><DollarSign size={18}/> Iuran</button>
                         </div>
                     ) : (
-                        <button onClick={() => { onClose(); onReportHouse?.(house); }} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-rose-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-200 hover:bg-rose-500 active:scale-95 transition-all"><ShieldAlert size={20}/> Lapor Masalah</button>
+                        <button onClick={() => { onClose(); onReportHouse?.(house); }} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-rose-600 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-200 hover:bg-rose-500 active:scale-95 transition-all"><ShieldAlert size={20}/> Lapor Masalah</button>
                     )}
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };
+
+// --- Sub-components for Detail Modal ---
+
+const VulnerabilityBadge = ({ icon: Icon, label, count, color }: { icon: any, label: string, count: number, color: string }) => (
+    <div className={`flex items-center gap-2 px-3 py-2 bg-white rounded-2xl shadow-sm border border-${color}-100`}>
+        <div className={`p-1.5 bg-${color}-50 text-${color}-500 rounded-lg`}>
+            <Icon size={14} fill={color === 'rose' ? 'currentColor' : 'none'} />
+        </div>
+        <span className="text-[10px] font-black text-slate-700">{count} {label}</span>
+    </div>
+);
+
+const HistoryItem = ({ icon: Icon, title, desc, date, color }: { icon: any, title: string, desc: string, date: string, color: string }) => (
+    <div className="relative">
+        <div className={`absolute -left-[29px] top-0 w-6 h-6 rounded-full bg-white border-2 border-${color}-500 flex items-center justify-center z-10 shadow-sm`}>
+            <Icon size={12} className={`text-${color}-600`} />
+        </div>
+        <div>
+            <div className="flex justify-between items-start mb-1">
+                <h5 className="text-xs font-black text-slate-800 leading-none">{title}</h5>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{date}</span>
+            </div>
+            <p className="text-[10px] font-bold text-slate-500 leading-tight">{desc}</p>
+        </div>
+    </div>
+);
 
 interface HouseCardProps {
     house: House;
@@ -487,12 +524,13 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     const getPanicAlert = (hid: string) => activePanicAlerts.find(a => a.houseId === hid);
 
     return (
-        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)] rounded-lg ${className || 'h-full'}`}>
-            <div className="bg-rose-600 text-white text-center py-1.5 border-b-2 border-slate-800 relative overflow-hidden shrink-0 rounded-t-md">
-                 <h3 className="text-xl font-black tracking-tighter relative z-10 drop-shadow-md">{blockCode}</h3>
+        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(15,23,42,0.1)] rounded-[2rem] ${className || 'h-full'} transition-all hover:shadow-[12px_12px_0px_0px_rgba(15,23,42,0.15)] hover:-translate-y-1`}>
+            <div className="bg-slate-900 text-white text-center py-3 border-b-2 border-slate-800 relative overflow-hidden shrink-0 rounded-t-[1.8rem]">
+                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+                 <h3 className="text-2xl font-black tracking-tighter relative z-10 drop-shadow-md">{blockCode}</h3>
             </div>
-            <div className="flex-1 bg-slate-100 p-2 relative">
-                 <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-300 z-0"></div>
+            <div className="flex-1 bg-slate-50/50 p-3 relative">
+                 <div className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-200 z-0"></div>
                  <div className="flex gap-4 relative z-10 h-full">
                     <div className="flex-1 flex flex-col gap-2">
                         {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} isHighlighted={highlightedId === house.id} />))}
@@ -1040,12 +1078,12 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
         </div>
 
         {/* Map Container */}
-        <div className="flex-1 relative overflow-auto p-4 md:p-8 print:p-0 print:overflow-visible print:h-auto">
-          <div className="min-w-[1000px] mx-auto relative print:min-w-0 print:w-full print:transform print:scale-[0.85] print:origin-top">
+        <div className="flex-1 relative overflow-auto p-4 md:p-12 print:p-0 print:overflow-visible print:h-auto bg-[url('https://www.transparenttextures.com/patterns/grid-me.png')] bg-fixed">
+          <div className="min-w-[1100px] mx-auto relative print:min-w-0 print:w-full print:transform print:scale-[0.85] print:origin-top">
               <div 
                   ref={mapRef}
                   onClick={handleMapClick}
-                  className={`border-[4px] border-amber-400/20 bg-amber-50/10 p-12 md:p-16 rounded-[48px] relative transition-all duration-500 print:border-none print:bg-white print:p-0 print:rounded-none ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
+                  className={`border-[8px] border-slate-200 bg-white/80 backdrop-blur-sm p-16 md:p-24 rounded-[5rem] relative transition-all duration-500 shadow-2xl print:border-none print:bg-white print:p-0 print:rounded-none ${isManageMode ? 'cursor-crosshair ring-8 ring-rose-500/20 border-rose-400/50' : ''}`}
               >
                           <MapLayout 
                             houses={filteredHouses} 

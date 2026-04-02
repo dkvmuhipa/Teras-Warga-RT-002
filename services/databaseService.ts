@@ -123,6 +123,34 @@ export const getFCMTokens = async () => {
         handleFirestoreError(error, OperationType.GET, FCM_TOKENS_COL);
     }
 };
+export const subscribeToSettings = (callback: (data: any) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
+    const docRef = doc(db, CONFIGS_COL, "system");
+    return onSnapshot(docRef, (snapshot) => {
+        if (snapshot.exists()) {
+            callback(snapshot.data().data);
+        } else {
+            // Default settings if not exists
+            callback({ airFee: 10000, sampahFee: 5000 });
+        }
+    }, (error) => {
+        handleFirestoreError(error, OperationType.GET, `${CONFIGS_COL}/system`);
+    });
+};
+
+export const updateSettings = async (settings: any) => {
+    try {
+        const docRef = doc(db, CONFIGS_COL, "system");
+        await setDoc(docRef, {
+            type: "system",
+            data: settings,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `${CONFIGS_COL}/system`);
+    }
+};
+
 export const subscribeToPdfConfig = (callback: (data: any) => void) => {
     if (!isFirebaseConfigured || !db) return () => {};
     const docRef = doc(db, CONFIGS_COL, "pdf");

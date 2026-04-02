@@ -35,7 +35,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 }) => {
   const navigate = useNavigate();
   const contentRef = React.useRef<HTMLDivElement>(null);
-  const { summaries } = useFinancial();
+  const { summaries, settings: financialSettings } = useFinancial();
   const [statusSearchId, setStatusSearchId] = React.useState('');
   
   const [isReportModalOpen, setIsReportModalOpen] = React.useState(false);
@@ -195,18 +195,27 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                   <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
                     <Droplets size={16} />
                   </div>
-                  <span className="text-xs font-bold">Iuran Air</span>
+                  <span className="text-xs font-bold">Tarif Air</span>
                 </div>
-                <span className="text-xs font-black">Rp {summaries.totalCollected > 0 ? (summaries.totalCollected / houses.length).toLocaleString('id-ID') : '10.000'}</span>
+                <span className="text-xs font-black">Rp {financialSettings.airFee.toLocaleString('id-ID')}</span>
               </div>
               <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
                     <ShoppingCart size={16} />
                   </div>
-                  <span className="text-xs font-bold">Iuran Sampah</span>
+                  <span className="text-xs font-bold">Tarif Sampah</span>
                 </div>
-                <span className="text-xs font-black">Rp 5.000</span>
+                <span className="text-xs font-black">Rp {financialSettings.sampahFee.toLocaleString('id-ID')}</span>
+              </div>
+              
+              {/* Info Transparansi Tambahan */}
+              <div className="pt-4 mt-4 border-t border-white/10">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Terkumpul</span>
+                  <span className="text-sm font-black text-emerald-400">Rp {summaries.totalCollected.toLocaleString('id-ID')}</span>
+                </div>
+                <p className="text-[8px] text-slate-500 font-bold uppercase tracking-tighter mt-1">Bulan {summaries.totalCollected > 0 ? 'Berjalan' : 'Ini'}</p>
               </div>
             </div>
             <Button 
@@ -257,7 +266,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               <div className="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100 group-hover:bg-emerald-50 transition-colors">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Lunas Iuran</p>
                 <p className="text-2xl font-black text-emerald-600">
-                  {houses.filter(h => h.paymentStatusAir === 'Lunas' && h.paymentStatusSampah === 'Lunas').length}
+                  {summaries.fullyPaidHousesCount}
                 </p>
               </div>
             </div>

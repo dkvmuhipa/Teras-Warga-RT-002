@@ -86,6 +86,8 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToMarketItems,
   subscribeToPdfConfig,
   updatePdfConfig,
+  subscribeToSettings,
+  updateSettings,
   deepSanitize,
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
@@ -228,6 +230,22 @@ export const App = () => {
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
+
+  useEffect(() => {
+    const unsub = subscribeToSettings((data) => {
+      if (data) setSettings(data);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleUpdateSettings = async (newSettings: any) => {
+    try {
+      await updateSettings(newSettings);
+    } catch (error) {
+      console.error("Failed to update settings:", error);
+    }
+  };
+
   const [pdfConfig, setPdfConfigState] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
 
   const setPdfConfig = (newConfig: PdfConfig | ((prev: PdfConfig) => PdfConfig)) => {
@@ -383,6 +401,7 @@ export const App = () => {
                             marketItems={marketItems}
                             faqItems={faqItems} 
                             settings={settings}
+                            onUpdateSettings={handleUpdateSettings}
                         />
                     </AdminRouteWrapper>
                 }/>
