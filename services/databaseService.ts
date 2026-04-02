@@ -1771,6 +1771,20 @@ export const deleteLetterFromDb = async (id: string) => {
   }
 };
 
+export const getLetterById = async (id: string) => {
+  try {
+    const docRef = doc(db, LETTERS_COL, id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id };
+    }
+    return null;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, `${LETTERS_COL}/${id}`);
+    return null;
+  }
+};
+
 // --- 6.5 MUTATIONS ---
 export const addPopulationLogToDb = async (log: any) => {
   try {

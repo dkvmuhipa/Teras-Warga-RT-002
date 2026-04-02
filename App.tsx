@@ -48,6 +48,7 @@ import { PublicHome } from './components/public/PublicHome';
 import { PublicVoting } from './components/public/PublicVoting';
 import { PublicMarket } from './components/public/PublicMarket';
 import { PublicServices } from './components/public/PublicServices';
+import { PublicVerification } from './components/public/PublicVerification';
 import { PublicUMKM } from './components/public/PublicUMKM';
 import { PublicInfo } from './components/public/PublicInfo';
 import { PublicMap } from './components/public/PublicMap';
@@ -424,6 +425,7 @@ export const App = () => {
                                 <Route path="/market" element={<PublicMarket items={marketItems} />} />
                                 <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
                                 <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
+                                <Route path="/verify/:id" element={<PublicVerification />} />
                                 <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
                                 <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
                                 <Route path="/info" element={<PublicInfo 

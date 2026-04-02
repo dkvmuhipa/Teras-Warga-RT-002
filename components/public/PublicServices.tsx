@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
-import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, checkWasteRetribution, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, checkWasteRetribution, handleFirestoreError, OperationType, getLetterById } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
 import { GuestReportForm } from '../GuestReportForm';
@@ -26,17 +26,47 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const initialHouseId = searchParams.get('houseId') || '';
   
   const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'tamu' | 'mutasi' | 'history'>(initialTab as any);
-  
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'lapor' || tab === 'tamu' || tab === 'surat' || tab === 'mutasi' || tab === 'history') {
-      setActiveTab(tab as any);
-    }
-  }, [searchParams]);
-
   const [localHistory, setLocalHistory] = useState<any[]>([]);
+  const [statusSearchId, setStatusSearchId] = useState('');
+  const [searchResult, setSearchResult] = useState<any>(null);
   const [accessCode, setAccessCode] = useState('');
   const [showPin, setShowPin] = useState(false);
+  
+  const handleSearchById = async (id: string) => {
+    // First check local history
+    const foundLocal = localHistory.find(h => h.id === id);
+    if (foundLocal) {
+      setSearchResult(foundLocal);
+      return;
+    }
+
+    // If not in local history, check database
+    try {
+      const letter = await getLetterById(id);
+      if (letter) {
+        setSearchResult(letter);
+      } else {
+        setSearchResult('not_found');
+      }
+    } catch (error) {
+      console.error("Error searching letter:", error);
+      setSearchResult('not_found');
+    }
+  };
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const id = searchParams.get('id');
+    
+    if (tab === 'lapor' || tab === 'tamu' || tab === 'surat' || tab === 'mutasi' || tab === 'history') {
+      setActiveTab(tab as any);
+      
+      if (tab === 'history' && id) {
+        setStatusSearchId(id);
+        handleSearchById(id);
+      }
+    }
+  }, [searchParams]);
   
   // Form States
   const [reportType, setReportType] = useState<Report['type']>('Fasilitas');
@@ -111,9 +141,6 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     'Surat Keterangan Tidak Mampu': ['Fotokopi KK & KTP', 'Foto Rumah (tampak depan)', 'Surat Pernyataan Bermaterai'],
     'Surat Keterangan Usaha': ['Fotokopi KTP', 'Foto Lokasi Usaha', 'Surat Pernyataan Usaha'],
   };
-
-  const [statusSearchId, setStatusSearchId] = useState('');
-  const [searchResult, setSearchResult] = useState<any>(null);
 
   const [reportPhoto, setReportPhoto] = useState<string | null>(null);
 
@@ -1688,10 +1715,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                 </div>
                 <Button 
-                  onClick={() => {
-                    const found = localHistory.find(h => h.id === statusSearchId);
-                    setSearchResult(found || 'not_found');
-                  }}
+                  onClick={() => handleSearchById(statusSearchId)}
                   className="px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest"
                 >
                   Lacak Sekarang
@@ -1710,19 +1734,48 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <p className="text-sm font-bold">ID Surat tidak ditemukan. Pastikan ID yang Anda masukkan benar.</p>
                     </div>
                   ) : (
-                    <div className="bg-indigo-50/50 p-6 rounded-3xl border border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-white rounded-2xl shadow-sm text-indigo-600">
-                          <CheckCircle2 size={24} />
+                    <div className="bg-white p-8 rounded-[2.5rem] border-2 border-indigo-100 shadow-xl shadow-indigo-500/5 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 opacity-50" />
+                      
+                      <div className="relative z-10">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-8 border-b border-slate-100">
+                          <div className="flex items-center gap-4">
+                            <div className="p-4 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-200">
+                              <CheckCircle2 size={28} />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-1">Dokumen Terverifikasi</p>
+                              <h4 className="text-2xl font-black text-slate-900">{searchResult.title}</h4>
+                            </div>
+                          </div>
+                          <div className="px-6 py-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
+                            <span className="text-xs font-black uppercase tracking-widest">{searchResult.status || 'Aktif'}</span>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-lg font-black text-indigo-900">{searchResult.title}</h4>
-                          <p className="text-xs text-indigo-700 font-bold uppercase tracking-widest">Status: {searchResult.status || 'Menunggu Verifikasi'}</p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ID Otentikasi</p>
+                            <p className="text-sm font-bold text-slate-700 font-mono">{searchResult.id.toUpperCase()}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pemohon</p>
+                            <p className="text-sm font-bold text-slate-700">{searchResult.applicantName || searchResult.reporterName || 'Warga RT 02'}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal Terbit</p>
+                            <p className="text-sm font-bold text-slate-700">{new Date(searchResult.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Terakhir Diperbarui</p>
-                        <p className="text-sm font-bold text-indigo-900">{new Date(searchResult.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+
+                        <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                          <div className="flex items-start gap-3">
+                            <Info size={18} className="text-indigo-500 mt-0.5" />
+                            <p className="text-xs font-medium text-slate-500 leading-relaxed">
+                              Sistem Otentikasi Dokumen Digital (SODD) menjamin bahwa dokumen ini adalah sah dan diterbitkan secara resmi oleh Pengurus RT 02. Data yang ditampilkan di atas sesuai dengan database kependudukan Teras Warga.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1730,13 +1783,29 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               )}
             </div>
 
-            <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100 flex items-start gap-4">
-              <div className="p-2 bg-amber-100 text-amber-600 rounded-xl">
-                <History size={20} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-amber-50 p-8 rounded-[3rem] border border-amber-100 flex items-start gap-6 shadow-sm">
+                <div className="p-4 bg-white text-amber-600 rounded-2xl shadow-sm">
+                  <ShieldAlert size={28} />
+                </div>
+                <div>
+                  <h4 className="text-lg font-black text-amber-900">Keamanan & Otentikasi</h4>
+                  <p className="text-sm text-amber-700/80 mt-2 font-medium leading-relaxed">
+                    Setiap dokumen yang diterbitkan melalui sistem ini dilengkapi dengan <b>ID Otentikasi Unik</b> dan <b>QR Code</b>. Pihak ketiga (Bank, Instansi, dll) dapat memverifikasi keaslian dokumen dengan memasukkan ID tersebut di portal ini.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-sm font-black text-amber-900">Riwayat Aktivitas Lokal</h4>
-                <p className="text-xs text-amber-700/80 mt-1 font-medium">Data ini disimpan di perangkat Anda untuk memudahkan pengecekan status permohonan terakhir.</p>
+
+              <div className="bg-indigo-50 p-8 rounded-[3rem] border border-indigo-100 flex items-start gap-6 shadow-sm">
+                <div className="p-4 bg-white text-indigo-600 rounded-2xl shadow-sm">
+                  <History size={28} />
+                </div>
+                <div>
+                  <h4 className="text-lg font-black text-indigo-900">Riwayat Aktivitas</h4>
+                  <p className="text-sm text-indigo-700/80 mt-2 font-medium leading-relaxed">
+                    Data riwayat di bawah ini disimpan secara lokal di perangkat Anda. Untuk keamanan, sistem tidak menyimpan data pribadi Anda secara terbuka di publik kecuali melalui proses otentikasi ID yang sah.
+                  </p>
+                </div>
               </div>
             </div>
 

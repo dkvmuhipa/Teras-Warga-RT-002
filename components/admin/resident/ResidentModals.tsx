@@ -14,6 +14,8 @@ import {
   isMonthMatch 
 } from '../../../src/utils/dateUtils';
 
+import { toast } from 'sonner';
+
 interface AddEditResidentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,9 +37,81 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
   activeFormTab,
   setActiveFormTab
 }) => {
+  const validateTab = (tab: 'basic' | 'demographics' | 'family') => {
+    if (tab === 'basic') {
+      const requiredFields = [
+        { key: 'headOfFamily', label: 'Kepala Keluarga' },
+        { key: 'nik', label: 'NIK' },
+        { key: 'kkNumber', label: 'Nomor KK' },
+        { key: 'gender', label: 'Jenis Kelamin' },
+        { key: 'birthPlace', label: 'Tempat Lahir' },
+        { key: 'birthDate', label: 'Tanggal Lahir' },
+        { key: 'addressKtp', label: 'Alamat KTP' },
+        { key: 'block', label: 'Blok' },
+        { key: 'number', label: 'Nomor' }
+      ];
+
+      for (const field of requiredFields) {
+        if (!formData[field.key]) {
+          toast.error(`Field "${field.label}" wajib diisi.`);
+          return false;
+        }
+      }
+
+      if (formData.nik.length !== 16) {
+        toast.error('NIK harus 16 digit.');
+        return false;
+      }
+      if (formData.kkNumber.length !== 16) {
+        toast.error('Nomor KK harus 16 digit.');
+        return false;
+      }
+    } else if (tab === 'demographics') {
+      const requiredFields = [
+        { key: 'education', label: 'Pendidikan' },
+        { key: 'jobCategory', label: 'Kategori Pekerjaan' },
+        { key: 'religion', label: 'Agama' }
+      ];
+
+      for (const field of requiredFields) {
+        if (!formData[field.key]) {
+          toast.error(`Field "${field.label}" wajib diisi.`);
+          return false;
+        }
+      }
+    } else if (tab === 'family') {
+      for (let i = 0; i < formData.familyMembers.length; i++) {
+        const member = formData.familyMembers[i];
+        if (!member.name || !member.nik || !member.birthDate || !member.job) {
+          toast.error(`Lengkapi data anggota keluarga ke-${i + 1}.`);
+          return false;
+        }
+        if (member.nik.length !== 16) {
+          toast.error(`NIK anggota keluarga ke-${i + 1} harus 16 digit.`);
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateTab(activeFormTab)) {
+      if (activeFormTab === 'basic') setActiveFormTab('demographics');
+      else if (activeFormTab === 'demographics') setActiveFormTab('family');
+    }
+  };
+
+  const onFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateTab('basic') && validateTab('demographics') && validateTab('family')) {
+      handleSaveHouse(e);
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={editingHouseId ? "Edit Data Warga" : "Tambah Warga Baru"} maxWidth="max-w-7xl">
-      <form onSubmit={handleSaveHouse} className="space-y-8">
+      <form onSubmit={onFormSubmit} className="space-y-8">
         {/* Tab Navigation */}
         <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] border border-slate-200">
           <button 
@@ -52,7 +126,13 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
           </button>
           <button 
             type="button"
-            onClick={() => setActiveFormTab('demographics')}
+            onClick={() => {
+              if (activeFormTab === 'basic') {
+                if (validateTab('basic')) setActiveFormTab('demographics');
+              } else {
+                setActiveFormTab('demographics');
+              }
+            }}
             className={`flex-1 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${activeFormTab === 'demographics' ? 'bg-white text-indigo-600 shadow-md shadow-indigo-500/10' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <div className={`p-1.5 rounded-lg ${activeFormTab === 'demographics' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
@@ -62,7 +142,19 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
           </button>
           <button 
             type="button"
-            onClick={() => setActiveFormTab('family')}
+            onClick={() => {
+              if (activeFormTab === 'basic') {
+                if (validateTab('basic')) {
+                  setActiveFormTab('demographics'); // Go to next first? Or just allow?
+                  // Actually if they click 3 from 1, we should validate 1 AND 2.
+                  if (validateTab('demographics')) setActiveFormTab('family');
+                }
+              } else if (activeFormTab === 'demographics') {
+                if (validateTab('demographics')) setActiveFormTab('family');
+              } else {
+                setActiveFormTab('family');
+              }
+            }}
             className={`flex-1 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${activeFormTab === 'family' ? 'bg-white text-indigo-600 shadow-md shadow-indigo-500/10' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <div className={`p-1.5 rounded-lg ${activeFormTab === 'family' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
@@ -321,7 +413,12 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       </div>
                       <div>
                         <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Agama <span className="text-rose-500">*</span></label>
-                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.religion} onChange={e => setFormData({...formData, religion: e.target.value})}>
+                        <select 
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
+                          value={formData.religion} 
+                          onChange={e => setFormData({...formData, religion: e.target.value})}
+                          required
+                        >
                           <option value="">Pilih...</option>
                           <option value="Islam">Islam</option>
                           <option value="Kristen">Kristen</option>
@@ -749,10 +846,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
             {activeFormTab !== 'family' ? (
               <button 
                 type="button"
-                onClick={() => {
-                  if (activeFormTab === 'basic') setActiveFormTab('demographics');
-                  if (activeFormTab === 'demographics') setActiveFormTab('family');
-                }}
+                onClick={handleNext}
                 className="px-10 py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-100 transition-all flex items-center gap-3"
               >
                 Lanjut <ChevronRight size={16} />

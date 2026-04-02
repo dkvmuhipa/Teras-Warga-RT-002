@@ -1,5 +1,6 @@
 
 import { jsPDF } from "jspdf";
+import QRCode from "qrcode";
 import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 
@@ -347,31 +348,54 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   // Digital Verification Footer for Official Letters
   if (!isDraft) {
-    const footerY = pageHeight - 35;
-    doc.setDrawColor(220);
-    doc.setLineWidth(0.1);
+    const footerY = pageHeight - 40;
+    doc.setDrawColor(200);
+    doc.setLineWidth(0.2);
     doc.line(marginX, footerY, pageWidth - marginX, footerY);
     
-    // QR Code Placeholder
-    doc.setFillColor(245, 245, 245);
-    doc.rect(marginX, footerY + 5, 20, 20, 'F');
-    doc.setDrawColor(200, 200, 200);
-    doc.rect(marginX, footerY + 5, 20, 20, 'S');
-    
-    // Simple QR Pattern
-    doc.setDrawColor(50);
-    doc.setLineWidth(0.5);
-    doc.rect(marginX + 2, footerY + 7, 4, 4);
-    doc.rect(marginX + 14, footerY + 7, 4, 4);
-    doc.rect(marginX + 2, footerY + 19, 4, 4);
-    doc.rect(marginX + 7, footerY + 11, 6, 6);
+    // Real QR Code generation
+    const qrSize = 22;
+    const qrX = marginX;
+    const qrY = footerY + 6;
 
+    try {
+      const verificationUrl = `${window.location.origin}/#/verify/${letter.id}`;
+      const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { 
+        margin: 1,
+        width: 200,
+        color: {
+          dark: '#1e293b', // Slate-800
+          light: '#f8fafc' // Slate-50
+        }
+      });
+      doc.addImage(qrCodeDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+    } catch (qrError) {
+      console.error("Failed to generate QR Code:", qrError);
+      // Fallback to a simple box if QR fails
+      doc.setDrawColor(220, 220, 220);
+      doc.rect(qrX, qrY, qrSize, qrSize, 'S');
+    }
+
+    const infoX = qrX + qrSize + 6;
+    doc.setFont("times", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(30, 41, 59);
+    doc.text("SISTEM OTENTIKASI DOKUMEN DIGITAL (SODD)", infoX, footerY + 10);
+    
+    doc.setFont("times", "normal");
     doc.setFontSize(7);
-    doc.setTextColor(120);
-    doc.text("VERIFIKASI DIGITAL RT 02", marginX + 25, footerY + 10);
-    doc.text(`ID Dokumen: ${letter.id.substring(0, 8).toUpperCase()}-${letter.houseId}`, marginX + 25, footerY + 14);
-    doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, marginX + 25, footerY + 18);
-    doc.text("Dokumen ini sah dan diverifikasi secara elektronik.", marginX + 25, footerY + 22);
+    doc.setTextColor(100, 116, 139); // Slate-500
+    doc.text(`ID Otentikasi : ${letter.id.toUpperCase()}`, infoX, footerY + 14);
+    doc.text(`Kode Rumah    : ${letter.houseId}`, infoX, footerY + 17.5);
+    doc.text(`Waktu Terbit  : ${new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })} WITA`, infoX, footerY + 21);
+    
+    doc.setFont("times", "italic");
+    doc.setFontSize(6.5);
+    doc.setTextColor(148, 163, 184); // Slate-400
+    const disclaimer = "Dokumen ini diterbitkan secara elektronik melalui Sistem Teras Warga dan merupakan dokumen sah yang tidak memerlukan tanda tangan basah. Keaslian dokumen dapat diverifikasi melalui pemindaian QR Code di atas atau melalui portal resmi layanan warga.";
+    const splitDisclaimer = doc.splitTextToSize(disclaimer, contentWidth - qrSize - 10);
+    doc.text(splitDisclaimer, infoX, footerY + 26);
+    
     doc.setTextColor(0);
   }
 
