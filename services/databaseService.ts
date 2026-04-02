@@ -168,8 +168,21 @@ export const subscribeToPdfConfig = (callback: (data: any) => void) => {
 export const updatePdfConfig = async (config: any) => {
     try {
         const docRef = doc(db, CONFIGS_COL, "pdf");
-        // Use a safer way to ensure a plain object for simple configs
-        const cleanData = JSON.parse(JSON.stringify(deepSanitize(config) || {}));
+        
+        // Ensure we have a clean, plain object without circular references or complex types
+        let cleanData: any = {};
+        try {
+            // First pass with deepSanitize
+            const sanitized = deepSanitize(config);
+            // Second pass with JSON stringify/parse to ensure it's a plain object
+            // This also removes any remaining undefined values
+            cleanData = JSON.parse(JSON.stringify(sanitized || {}));
+        } catch (e) {
+            console.error("Error sanitizing PDF config:", e);
+            // Fallback to a very basic object if sanitization fails
+            cleanData = { error: "Sanitization failed", timestamp: new Date().toISOString() };
+        }
+
         await setDoc(docRef, {
             type: "pdf",
             data: cleanData,
@@ -670,9 +683,9 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
       data instanceof ArrayBuffer ||
       ArrayBuffer.isView(data);
 
-    if (isComplex) return undefined;
+    if (isComplex) return "[Complex Object]";
   } catch (e) {
-    return undefined;
+    return "[Error Accessing]";
   }
 
   seen.add(data);
@@ -695,7 +708,7 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
         if (value === undefined || typeof value === 'function') continue;
         
         // Extra check for 'src' property which often causes circularity in DOM/Image objects
-        if (key === 'src' && typeof value === 'object') continue;
+        if (key === 'src' && (typeof value === 'object' || typeof value === 'function')) continue;
 
         const sanitized = deepSanitize(value, seen, depth + 1);
         if (sanitized !== undefined) {

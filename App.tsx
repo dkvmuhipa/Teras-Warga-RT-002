@@ -252,7 +252,11 @@ export const App = () => {
   const setPdfConfig = (newConfig: PdfConfig | ((prev: PdfConfig) => PdfConfig)) => {
     setPdfConfigState(prev => {
       const next = typeof newConfig === 'function' ? newConfig(prev) : newConfig;
-      localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(next)));
+      try {
+        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(next)));
+      } catch (e) {
+        console.warn("Failed to save PDF config to localStorage:", e);
+      }
       updatePdfConfig(next);
       return next;
     });

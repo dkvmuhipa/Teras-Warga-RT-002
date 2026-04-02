@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports, logAction } from '../../services/databaseService';
@@ -136,18 +136,26 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
           const configToUse = tempSignature ? { ...pdfConfig, signature: tempSignature } : pdfConfig;
           
           await generateSuratPengantar(updatedLetter, configToUse, false);
-
-          // Update lastLetterNumber in config based on the number used
-          const parts = letterNumberInput.split('/');
-          let nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
-          if (parts.length >= 2) {
-            const extractedNum = parseInt(parts[1]);
-            if (!isNaN(extractedNum)) nextNum = extractedNum;
-          }
-
-          const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
-          setPdfConfig(newConfig);
         }
+
+        // Update lastLetterNumber in config based on the number used
+        let nextNum = (pdfConfig.lastLetterNumber || 0);
+        const parts = letterNumberInput.split('/');
+        
+        if (parts.length >= 2) {
+          const extractedNum = parseInt(parts[1]);
+          if (!isNaN(extractedNum) && extractedNum > nextNum) nextNum = extractedNum;
+        } else {
+          // Fallback: try to find any number in the input if format doesn't match
+          const match = letterNumberInput.match(/(\d+)/);
+          if (match) {
+            const extractedNum = parseInt(match[1]);
+            if (!isNaN(extractedNum) && extractedNum > nextNum) nextNum = extractedNum;
+          }
+        }
+
+        const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
+        setPdfConfig(newConfig);
         
         setSelectedLetter(null);
         setLetterNumberInput('');
@@ -169,13 +177,24 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       });
       
       // Update lastLetterNumber in config if it's a valid number
+      let nextNum = (pdfConfig.lastLetterNumber || 0);
       const parts = letterNumberInput.split('/');
+      
       if (parts.length >= 2) {
         const extractedNum = parseInt(parts[1]);
-        if (!isNaN(extractedNum) && extractedNum > (pdfConfig.lastLetterNumber || 0)) {
-          const newConfig = { ...pdfConfig, lastLetterNumber: extractedNum };
-          setPdfConfig(newConfig);
+        if (!isNaN(extractedNum) && extractedNum > nextNum) nextNum = extractedNum;
+      } else {
+        // Fallback for manual entry without slashes
+        const match = letterNumberInput.match(/(\d+)/);
+        if (match) {
+          const extractedNum = parseInt(match[1]);
+          if (!isNaN(extractedNum) && extractedNum > nextNum) nextNum = extractedNum;
         }
+      }
+      
+      if (nextNum > (pdfConfig.lastLetterNumber || 0)) {
+        const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
+        setPdfConfig(newConfig);
       }
       
       toast.success("Detail surat berhasil disimpan!");
@@ -271,11 +290,18 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     await generateSuratPengantar(newLetter, configToUse, false);
 
     // Update lastLetterNumber in config based on the number used
+    let nextNum = (pdfConfig.lastLetterNumber || 0);
     const parts = adminLetterNumber.split('/');
-    let nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+    
     if (parts.length >= 2) {
       const extractedNum = parseInt(parts[1]);
-      if (!isNaN(extractedNum)) nextNum = extractedNum;
+      if (!isNaN(extractedNum) && extractedNum > nextNum) nextNum = extractedNum;
+    } else {
+      const match = adminLetterNumber.match(/(\d+)/);
+      if (match) {
+        const extractedNum = parseInt(match[1]);
+        if (!isNaN(extractedNum) && extractedNum > nextNum) nextNum = extractedNum;
+      }
     }
 
     const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
@@ -513,17 +539,44 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">No. Surat Terakhir</label>
-                      <input 
-                        type="number"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={pdfConfig.lastLetterNumber || 0} 
-                        onChange={e => {
-                          const newConfig = {...pdfConfig, lastLetterNumber: parseInt(e.target.value) || 0};
-                          setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
-                        }} 
-                        placeholder="0"
-                      />
+                      <div className="flex gap-2">
+                        <input 
+                          type="number"
+                          className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                          value={pdfConfig.lastLetterNumber || 0} 
+                          onChange={e => {
+                            const newConfig = {...pdfConfig, lastLetterNumber: parseInt(e.target.value) || 0};
+                            setPdfConfig(newConfig);
+                            localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                          }} 
+                          placeholder="0"
+                        />
+                        <button 
+                          onClick={() => {
+                            let maxNum = 0;
+                            letters.forEach(l => {
+                              if (l.letterNumber) {
+                                const match = l.letterNumber.match(/\/(\d+)\//) || l.letterNumber.match(/(\d+)/);
+                                if (match) {
+                                  const num = parseInt(match[1]);
+                                  if (!isNaN(num) && num > maxNum) maxNum = num;
+                                }
+                              }
+                            });
+                            if (maxNum > 0) {
+                              const newConfig = { ...pdfConfig, lastLetterNumber: maxNum };
+                              setPdfConfig(newConfig);
+                              toast.success(`Counter disinkronkan ke nomor: ${maxNum}`);
+                            } else {
+                              toast.error("Tidak ditemukan nomor surat valid untuk sinkronisasi.");
+                            }
+                          }}
+                          className="px-4 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-2xl hover:bg-indigo-100 transition-all"
+                          title="Sinkronkan dengan nomor tertinggi dari surat yang ada"
+                        >
+                          <RefreshCw size={18} />
+                        </button>
+                      </div>
                       <p className="text-[9px] text-slate-400 mt-1 ml-1 leading-tight">
                         Digunakan untuk penomoran otomatis. Format: KODE/NOMOR/RT/BULAN/TAHUN
                       </p>

@@ -359,7 +359,8 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
     const qrY = footerY + 6;
 
     try {
-      const verificationUrl = `${window.location.origin}/#/verify/${letter.id}`;
+      const baseUrl = 'https://terasrt02.vercel.app';
+      const verificationUrl = `${baseUrl}/#/verify/${letter.id}`;
       const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { 
         margin: 1,
         width: 200,

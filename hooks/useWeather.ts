@@ -19,30 +19,40 @@ export const useWeather = () => {
 
     const fetchWeather = async (signal?: AbortSignal) => {
         try {
-            const [weatherRes, aqiRes] = await Promise.all([
-                fetch('/api/weather', { signal }),
-                fetch('/api/aqi', { signal })
-            ]);
+            let weatherData: any;
+            let aqiData: any;
 
-            if (!weatherRes.ok || !aqiRes.ok) throw new Error("Failed to fetch weather or AQI from proxy");
+            try {
+                const [weatherRes, aqiRes] = await Promise.all([
+                    fetch('/api/weather', { signal }),
+                    fetch('/api/aqi', { signal })
+                ]);
 
-            const weatherContentType = weatherRes.headers.get("content-type");
-            const aqiContentType = aqiRes.headers.get("content-type");
+                if (weatherRes.ok && aqiRes.ok) {
+                    const weatherContentType = weatherRes.headers.get("content-type");
+                    const aqiContentType = aqiRes.headers.get("content-type");
 
-            if (!weatherContentType?.includes("application/json")) {
-                const text = await weatherRes.text();
-                console.error("Weather API returned non-JSON:", text.substring(0, 200));
-                throw new Error("Weather API returned non-JSON response");
+                    if (weatherContentType?.includes("application/json") && aqiContentType?.includes("application/json")) {
+                        weatherData = await weatherRes.json();
+                        aqiData = await aqiRes.json();
+                    }
+                }
+            } catch (proxyErr) {
+                console.warn("Proxy fetch failed, trying direct fetch:", proxyErr);
             }
 
-            if (!aqiContentType?.includes("application/json")) {
-                const text = await aqiRes.text();
-                console.error("AQI API returned non-JSON:", text.substring(0, 200));
-                throw new Error("AQI API returned non-JSON response");
-            }
+            // Fallback to direct fetch if proxy failed or returned non-JSON
+            if (!weatherData || !aqiData) {
+                const [directWeatherRes, directAqiRes] = await Promise.all([
+                    fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', { signal }),
+                    fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', { signal })
+                ]);
 
-            const weatherData = await weatherRes.json();
-            const aqiData = await aqiRes.json();
+                if (!directWeatherRes.ok || !directAqiRes.ok) throw new Error("Failed to fetch weather or AQI from both proxy and direct API");
+                
+                weatherData = await directWeatherRes.json();
+                aqiData = await directAqiRes.json();
+            }
             
             const aqi = aqiData.current.us_aqi;
             let aqiLabel = 'Bagus';

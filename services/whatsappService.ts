@@ -87,7 +87,8 @@ Berikut adalah informasi terbaru:
 *Judul:* ${title}
 *Isi:* ${content}
 
-Untuk informasi lebih lengkap, silakan akses aplikasi *TERAS RT 02*.
+Untuk informasi lebih lengkap, silakan akses aplikasi *TERAS RT 02*:
+https://terasrt02.vercel.app
 
 Terima kasih atas perhatiannya.
 _Pesan otomatis dari Pengurus RT 02_`;
@@ -111,6 +112,8 @@ Kami menginformasikan bahwa permohonan surat Anda:
 ${footer}
 
 Terima kasih telah menggunakan layanan digital RT 02.
+Akses portal mandiri: https://terasrt02.vercel.app
+
 _Pesan otomatis dari Pengurus RT 02_`;
 };
 
@@ -137,6 +140,8 @@ Berikut adalah jadwal ronda mingguan terbaru:
   });
 
   message += `------------------------------------------
+Akses jadwal lengkap & lapor ronda: https://terasrt02.vercel.app
+
 Mohon kehadiran dan kerjasamanya demi keamanan lingkungan kita bersama.
 
 Terima kasih.
