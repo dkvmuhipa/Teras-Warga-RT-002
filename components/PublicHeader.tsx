@@ -51,6 +51,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       icon: Info,
       items: [
         { path: '/info', label: 'Info RT & Kas' },
+        { path: '/info#faq', label: 'Pertanyaan Umum (FAQ)' },
         { path: '/kegiatan', label: 'Jadwal Kegiatan' },
       ]
     }

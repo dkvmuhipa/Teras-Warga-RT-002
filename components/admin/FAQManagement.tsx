@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { FAQItem } from '../../types';
-import { Plus, Edit2, Trash2, HelpCircle, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, HelpCircle, Save, X, Download } from 'lucide-react';
 import { addFAQToDb, updateFAQInDb, deleteFAQFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
+import { MOCK_FAQ } from '../../constants';
 
 interface FAQManagementProps {
   faqItems: FAQItem[];
@@ -15,6 +16,7 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
 
   const resetForm = () => {
     setQuestion('');
@@ -32,6 +34,27 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
     setAnswer(item.answer);
     setEditingId(item.id);
     setIsModalOpen(true);
+  };
+
+  const handleImportDefaults = async () => {
+    if (window.confirm('Impor FAQ default? Ini akan menambahkan FAQ standar ke sistem.')) {
+      setIsImporting(true);
+      try {
+        for (const faq of MOCK_FAQ) {
+          // Check if already exists by question
+          if (!faqItems.some(f => f.question === faq.question)) {
+            const { id, ...data } = faq;
+            await addFAQToDb(data);
+          }
+        }
+        toast.success('FAQ default berhasil diimpor!');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal mengimpor FAQ default.');
+      } finally {
+        setIsImporting(false);
+      }
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -69,14 +92,25 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h3 className="text-xl font-black text-slate-800">Daftar FAQ</h3>
           <p className="text-sm text-slate-500">Kelola tanya jawab umum untuk warga.</p>
         </div>
-        <Button onClick={handleOpenAdd} className="bg-indigo-600 hover:bg-indigo-700">
-          <Plus size={18} className="mr-2" /> Tambah FAQ
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleImportDefaults} 
+            disabled={isImporting}
+            className="border-slate-200 text-slate-600 hover:bg-slate-50"
+          >
+            <Download size={18} className="mr-2" /> 
+            {isImporting ? 'Mengimpor...' : 'Impor Default'}
+          </Button>
+          <Button onClick={handleOpenAdd} className="bg-indigo-600 hover:bg-indigo-700">
+            <Plus size={18} className="mr-2" /> Tambah FAQ
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4">

@@ -232,8 +232,46 @@ export const MOCK_GALLERY: GalleryItem[] = [
 ];
 
 export const MOCK_FAQ: FAQItem[] = [
-  { id: '1', question: 'Bagaimana cara mengurus KTP?', answer: 'Silakan hubungi Sekretaris RT untuk mendapatkan surat pengantar.' },
-  { id: '2', question: 'Kapan jadwal pengambilan sampah?', answer: 'Jadwal pengambilan sampah adalah setiap hari Senin dan Kamis pagi.' },
+  { 
+    id: '1', 
+    question: 'Bagaimana cara mengurus surat pengantar RT?', 
+    answer: 'Warga dapat mengajukan secara online melalui menu "Layanan Digital". Pilih jenis surat, isi formulir, dan tunggu verifikasi Admin. Surat yang sudah jadi dapat diunduh atau diambil di rumah Ketua RT.' 
+  },
+  { 
+    id: '2', 
+    question: 'Kapan jadwal pengambilan sampah rutin?', 
+    answer: 'Pengambilan sampah rumah tangga dilakukan setiap hari Senin dan Kamis pagi oleh petugas kebersihan lingkungan.' 
+  },
+  { 
+    id: '3', 
+    question: 'Apa itu Bank Sampah dan bagaimana cara menabung?', 
+    answer: 'Bank Sampah adalah program menabung sampah anorganik (plastik, kertas, logam) yang bernilai ekonomi. Warga bisa menyetorkan sampah yang sudah dipilah ke Pos Ronda setiap Sabtu pagi jam 08.00 - 10.00.' 
+  },
+  { 
+    id: '4', 
+    question: 'Bagaimana cara membayar iuran bulanan (Air & Sampah)?', 
+    answer: 'Iuran dapat dibayarkan melalui Bendahara RT atau transfer bank. Status pembayaran dan transparansi penggunaan dana dapat dipantau secara real-time di menu "Transparansi Keuangan".' 
+  },
+  { 
+    id: '5', 
+    question: 'Bagaimana jika ada tamu yang menginap?', 
+    answer: 'Sesuai aturan lingkungan, tamu yang menginap lebih dari 1x24 jam wajib dilaporkan ke Ketua RT atau petugas keamanan melalui menu "Lapor Tamu" di aplikasi ini.' 
+  },
+  { 
+    id: '6', 
+    question: 'Di mana saya bisa melihat jadwal Ronda malam?', 
+    answer: 'Jadwal ronda malam dapat dilihat pada menu "Keamanan & Ronda". Warga juga bisa memantau aktivitas patroli petugas melalui log patroli digital.' 
+  },
+  { 
+    id: '7', 
+    question: 'Bagaimana cara mendaftarkan usaha UMKM saya?', 
+    answer: 'Warga yang memiliki usaha dapat mendaftarkannya ke Admin RT untuk ditampilkan di menu "Bursa UMKM". Ini bertujuan untuk mempromosikan produk lokal antar warga.' 
+  },
+  { 
+    id: '8', 
+    question: 'Apa fungsi Tombol Darurat di aplikasi?', 
+    answer: 'Tombol Darurat digunakan untuk mengirimkan sinyal bantuan cepat kepada seluruh pengurus RT dan warga jika terjadi situasi mendesak seperti kebakaran, pencurian, atau masalah medis.' 
+  }
 ];
 
 export const MOCK_DOCUMENTS: Document[] = [

@@ -857,7 +857,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
             </motion.div>
 
             {/* FAQ */}
-            <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+            <motion.div id="faq" variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm scroll-mt-20">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><HelpCircle size={24}/></div>
                     <h2 className="text-2xl font-black text-slate-800">Pertanyaan Umum (FAQ)</h2>
