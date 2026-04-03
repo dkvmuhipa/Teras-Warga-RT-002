@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports, logAction } from '../../services/databaseService';
-import { sendWhatsAppMessage, formatLetterStatusForWhatsApp } from '../../services/whatsappService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar } from '../../services/pdfService';
 import { Modal } from '../ui/Modal';
@@ -40,6 +40,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [tempSignature, setTempSignature] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isVerifyingGroup, setIsVerifyingGroup] = useState(false);
+  const [availableGroups, setAvailableGroups] = useState<{id: string, name: string}[]>([]);
+  const [showGroupList, setShowGroupList] = useState(false);
   
   // Admin Form State
   const [adminForm, setAdminForm] = useState<Partial<LetterRequest>>({
@@ -310,6 +314,64 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
     setIsCreatingLetter(false);
     toast.success("Surat berhasil dibuat dan diunduh!");
+  };
+
+  const handleSaveConfig = async () => {
+    setIsSaving(true);
+    try {
+      await updatePdfConfig(pdfConfig);
+      toast.success('Konfigurasi berhasil disimpan ke cloud!');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, "pdfConfig");
+      toast.error('Gagal menyimpan konfigurasi ke cloud.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleVerifyGroup = async () => {
+    setIsVerifyingGroup(true);
+    try {
+      const result = await getWhatsAppGroups();
+      if (result?.success && Array.isArray(result?.data)) {
+        setAvailableGroups(result.data.map((g: any) => ({
+          id: g.id || g.jid,
+          name: g.name || g.subject
+        })));
+        setShowGroupList(true);
+        toast.success(`Ditemukan ${result.data.length} grup.`);
+      } else if (result?.error) {
+        toast.error(`Gagal: ${result?.error}`);
+      } else {
+        const data = result?.data || result;
+        if (Array.isArray(data)) {
+          setAvailableGroups(data.map((g: any) => ({
+            id: g.id || g.jid,
+            name: g.name || g.subject
+          })));
+          setShowGroupList(true);
+          toast.success(`Ditemukan ${data.length} grup.`);
+        } else {
+          toast.error('Gagal mengambil daftar grup. Pastikan API Key benar.');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Terjadi kesalahan saat verifikasi.');
+    } finally {
+      setIsVerifyingGroup(false);
+    }
+  };
+
+  const selectGroup = (id: string, name: string) => {
+    const newConfig = {
+      ...pdfConfig,
+      whatsappGroupId: id,
+      whatsappGroupName: name
+    };
+    setPdfConfig(newConfig);
+    localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+    setShowGroupList(false);
   };
 
   const filteredLetters = letters.filter(l => {
@@ -933,6 +995,100 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* WhatsApp Integration */}
+              <div className="mt-12 pt-12 border-t border-slate-100">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <MessageCircle size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Integrasi WhatsApp</h4>
+                    <p className="text-[10px] font-bold text-slate-400 mt-1">Hubungkan aplikasi dengan grup WhatsApp warga untuk notifikasi otomatis.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp Group ID (JID)</label>
+                    <div className="flex gap-2">
+                      <input 
+                        className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all font-mono" 
+                        placeholder="Cth: 1234567890@g.us"
+                        value={pdfConfig.whatsappGroupId || ''} 
+                        onChange={e => {
+                          const newConfig = {...pdfConfig, whatsappGroupId: e.target.value};
+                          setPdfConfig(newConfig);
+                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                        }} 
+                      />
+                      <button 
+                        type="button" 
+                        onClick={handleVerifyGroup}
+                        disabled={isVerifyingGroup}
+                        className="px-4 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-2xl hover:bg-indigo-100 transition-all"
+                      >
+                        {isVerifyingGroup ? '...' : <Search size={18} />}
+                      </button>
+                    </div>
+
+                    {showGroupList && availableGroups.length > 0 && (
+                      <div className="p-3 bg-white border border-indigo-100 rounded-xl shadow-inner max-h-40 overflow-y-auto space-y-2">
+                        <p className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Pilih dari Grup Anda:</p>
+                        {availableGroups.map(group => (
+                          <button
+                            key={group.id}
+                            type="button"
+                            onClick={() => selectGroup(group.id, group.name)}
+                            className="w-full text-left p-2 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-between group"
+                          >
+                            <div className="overflow-hidden">
+                              <p className="text-xs font-bold text-slate-700 truncate">{group.name}</p>
+                              <p className="text-[9px] text-slate-400 truncate">{group.id}</p>
+                            </div>
+                            <CheckCircle2 size={14} className="text-indigo-400 opacity-0 group-hover:opacity-100" />
+                          </button>
+                        ))}
+                        <button 
+                          type="button" 
+                          onClick={() => setShowGroupList(false)}
+                          className="w-full text-center py-1 text-[10px] text-slate-400 hover:text-slate-600"
+                        >
+                          Tutup Daftar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Grup WhatsApp (Display)</label>
+                    <input 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      placeholder="Cth: Warga RT 02 Official"
+                      value={pdfConfig.whatsappGroupName || ''} 
+                      onChange={e => {
+                        const newConfig = {...pdfConfig, whatsappGroupName: e.target.value};
+                        setPdfConfig(newConfig);
+                        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                      }} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-12 pt-8 border-t border-slate-100">
+                <Button 
+                  onClick={handleSaveConfig} 
+                  className="w-full py-5 bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-100 rounded-[2rem]"
+                  disabled={isSaving}
+                >
+                  <Save size={20} className="mr-2" /> 
+                  {isSaving ? 'Menyimpan...' : 'Simpan Seluruh Konfigurasi ke Cloud'}
+                </Button>
+                <p className="text-[10px] text-center text-slate-400 mt-4 font-bold uppercase tracking-widest">
+                  Klik simpan agar perubahan logo, stempel, TTD, dan WhatsApp tersimpan permanen.
+                </p>
               </div>
             </div>
           </motion.div>

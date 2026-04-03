@@ -257,7 +257,6 @@ export const App = () => {
       } catch (e) {
         console.warn("Failed to save PDF config to localStorage:", e);
       }
-      updatePdfConfig(next);
       return next;
     });
   };

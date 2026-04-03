@@ -207,8 +207,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'settings':
         return (
           <AdminSettings 
-            pdfConfig={pdfConfig} 
-            setPdfConfig={setPdfConfig} 
             houses={houses}
             announcements={announcements}
             cashFlow={cashFlow}

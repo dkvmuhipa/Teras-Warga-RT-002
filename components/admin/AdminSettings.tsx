@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
-import { User, Lock, Eye, EyeOff, Database, Download, AlertTriangle, Trash, FileText, Save, Image as ImageIcon, ShieldCheck, Edit2, MessageCircle, Search, CheckCircle2, XCircle, Wallet } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, Database, Download, AlertTriangle, Trash, Wallet } from 'lucide-react';
 import { updatePassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
-import { PdfConfig, House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, MarketItem, AppNotification } from '../../types';
+import { House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, MarketItem, AppNotification } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { seedDatabase, deepSanitize, updatePdfConfig, handleFirestoreError, OperationType } from '../../services/databaseService';
-import { getWhatsAppGroups } from '../../services/whatsappService';
-import { SignaturePad } from './SignaturePad';
+import { seedDatabase, deepSanitize, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
 
 interface AdminSettingsProps {
-  pdfConfig: PdfConfig;
-  setPdfConfig: (config: PdfConfig) => void;
   houses: House[];
   announcements: Announcement[];
   cashFlow: CashFlow[];
@@ -31,19 +27,16 @@ interface AdminSettingsProps {
 }
 
 export const AdminSettings: React.FC<AdminSettingsProps> = ({ 
-  pdfConfig, setPdfConfig, houses, announcements, cashFlow, officials, 
+  houses, announcements, cashFlow, officials, 
   reports, letters, ronda, inventory, umkm, polls, rondaLogs, marketItems, notifications,
   settings, onUpdateSettings
 }) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'system' | 'pdf' | 'whatsapp' | 'fees'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'system' | 'fees'>('profile');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [localConfig, setLocalConfig] = useState<PdfConfig>(pdfConfig);
-  const [isVerifyingGroup, setIsVerifyingGroup] = useState(false);
-  const [availableGroups, setAvailableGroups] = useState<{id: string, name: string}[]>([]);
-  const [showGroupList, setShowGroupList] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Fee Settings State
   const [airFee, setAirFee] = React.useState(settings?.airFee || 10000);
@@ -128,72 +121,6 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof PdfConfig) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLocalConfig(prev => ({ ...prev, [key]: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSaveConfig = async () => {
-    try {
-      await updatePdfConfig(localConfig);
-      setPdfConfig(localConfig);
-      toast.success('Konfigurasi surat tersimpan di cloud!');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, "pdfConfig");
-      toast.error('Gagal menyimpan konfigurasi ke cloud.');
-    }
-  };
-
-  const handleVerifyGroup = async () => {
-    setIsVerifyingGroup(true);
-    try {
-      const result = await getWhatsAppGroups();
-      if (result?.success && Array.isArray(result?.data)) {
-        setAvailableGroups(result.data.map((g: any) => ({
-          id: g.id || g.jid,
-          name: g.name || g.subject
-        })));
-        setShowGroupList(true);
-        toast.success(`Ditemukan ${result.data.length} grup.`);
-      } else if (result?.error) {
-        toast.error(`Gagal: ${result?.error}`);
-      } else {
-        const data = result?.data || result;
-        if (Array.isArray(data)) {
-          setAvailableGroups(data.map((g: any) => ({
-            id: g.id || g.jid,
-            name: g.name || g.subject
-          })));
-          setShowGroupList(true);
-          toast.success(`Ditemukan ${data.length} grup.`);
-        } else {
-          toast.error('Gagal mengambil daftar grup. Pastikan API Key benar.');
-        }
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('Terjadi kesalahan saat verifikasi.');
-    } finally {
-      setIsVerifyingGroup(false);
-    }
-  };
-
-  const selectGroup = (id: string, name: string) => {
-    setLocalConfig(prev => ({
-      ...prev,
-      whatsappGroupId: id,
-      whatsappGroupName: name
-    }));
-    setShowGroupList(false);
-    toast.success(`Grup "${name}" terpilih.`);
-  };
-
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Tabs Header */}
@@ -201,8 +128,6 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         {[
           { id: 'profile', label: 'Profil Admin', icon: User },
           { id: 'fees', label: 'Tarif Iuran', icon: Wallet },
-          { id: 'pdf', label: 'Konfigurasi PDF', icon: FileText },
-          { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
           { id: 'system', label: 'Sistem', icon: Database },
         ].map((tab) => (
           <button
@@ -302,150 +227,6 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 </div>
                 <Button onClick={handleResetSystem} className="w-full bg-white text-rose-600 border border-rose-200 hover:bg-rose-600 hover:text-white shadow-sm transition-all"><Trash size={16}/> Reset ke Pengaturan Awal</Button>
               </div>
-            </div>
-          </Card>
-        )}
-
-        {activeTab === 'pdf' && (
-          <Card title="Konfigurasi Surat (PDF)" icon={FileText} action={<Button onClick={handleSaveConfig} size="sm" className="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"><Save size={16}/> Simpan</Button>}>
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold mb-2 text-slate-700">Nama RT (Contoh: RT 02 / RW 03)</label>
-                  <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.rtName} onChange={e => setLocalConfig({...localConfig, rtName: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold mb-2 text-slate-700">Nama Ketua RT</label>
-                  <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.rtChairman} onChange={e => setLocalConfig({...localConfig, rtChairman: e.target.value})} />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-bold mb-2 text-slate-700">Alamat RT di Kop Surat</label>
-                <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.rtAddress} onChange={e => setLocalConfig({...localConfig, rtAddress: e.target.value})} />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold mb-2 text-slate-700">Kelurahan</label>
-                  <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.kelurahan} onChange={e => setLocalConfig({...localConfig, kelurahan: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold mb-2 text-slate-700">Kecamatan</label>
-                  <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.kecamatan} onChange={e => setLocalConfig({...localConfig, kecamatan: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold mb-2 text-slate-700">Kota</label>
-                  <input className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" value={localConfig.kota} onChange={e => setLocalConfig({...localConfig, kota: e.target.value})} />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold mb-2 text-slate-700">Nomor Surat Terakhir (Counter)</label>
-                <input 
-                  type="number"
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" 
-                  value={localConfig.lastLetterNumber} 
-                  onChange={e => setLocalConfig({...localConfig, lastLetterNumber: parseInt(e.target.value) || 0})} 
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold text-slate-700">Logo</label>
-                  <div className="relative h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden cursor-pointer">
-                    {localConfig.logo ? <img src={localConfig.logo} className="h-full w-full object-contain p-2" /> : <ImageIcon size={24} className="text-slate-300"/>}
-                    <input type="file" onChange={e => handleFileChange(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer"/>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold text-slate-700">Stempel</label>
-                  <div className="relative h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden cursor-pointer">
-                    {localConfig.stamp ? <img src={localConfig.stamp} className="h-full w-full object-contain p-2" /> : <ShieldCheck size={24} className="text-slate-300"/>}
-                    <input type="file" onChange={e => handleFileChange(e, 'stamp')} className="absolute inset-0 opacity-0 cursor-pointer"/>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700">Tanda Tangan Ketua RT</label>
-                <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
-                  <SignaturePad 
-                    initialValue={localConfig.signature}
-                    onSave={(sig) => setLocalConfig({...localConfig, signature: sig})}
-                    onClear={() => setLocalConfig({...localConfig, signature: ''})}
-                  />
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {activeTab === 'whatsapp' && (
-          <Card title="Integrasi WhatsApp" icon={MessageCircle} action={<Button onClick={handleSaveConfig} size="sm" className="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"><Save size={16}/> Simpan</Button>}>
-            <div className="p-4 bg-brand-blue/5 rounded-2xl border border-brand-blue/10">
-              <div className="flex items-center gap-2 mb-3">
-                <MessageCircle size={16} className="text-brand-blue" />
-                <h4 className="font-bold text-sm text-slate-700">Integrasi WhatsApp</h4>
-              </div>
-              <label className="block text-xs font-bold mb-2 text-slate-700">WhatsApp Group ID (JID)</label>
-              <div className="flex gap-2 mb-4">
-                <input 
-                  className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none font-mono" 
-                  placeholder="Contoh: 1234567890@g.us"
-                  value={localConfig.whatsappGroupId || ''} 
-                  onChange={e => setLocalConfig({...localConfig, whatsappGroupId: e.target.value})} 
-                />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleVerifyGroup}
-                  disabled={isVerifyingGroup}
-                  className="shrink-0"
-                >
-                  {isVerifyingGroup ? '...' : <Search size={16} />}
-                </Button>
-              </div>
-
-              {showGroupList && availableGroups.length > 0 && (
-                <div className="mb-4 p-3 bg-white border border-indigo-100 rounded-xl shadow-inner max-h-40 overflow-y-auto space-y-2">
-                  <p className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Pilih dari Grup Anda:</p>
-                  {availableGroups.map(group => (
-                    <button
-                      key={group.id}
-                      type="button"
-                      onClick={() => selectGroup(group.id, group.name)}
-                      className="w-full text-left p-2 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-between group"
-                    >
-                      <div className="overflow-hidden">
-                        <p className="text-xs font-bold text-slate-700 truncate">{group.name}</p>
-                        <p className="text-[9px] text-slate-400 truncate">{group.id}</p>
-                      </div>
-                      <CheckCircle2 size={14} className="text-indigo-400 opacity-0 group-hover:opacity-100" />
-                    </button>
-                  ))}
-                  <button 
-                    type="button" 
-                    onClick={() => setShowGroupList(false)}
-                    className="w-full text-center py-1 text-[10px] text-slate-400 hover:text-slate-600"
-                  >
-                    Tutup Daftar
-                  </button>
-                </div>
-              )}
-
-              <label className="block text-xs font-bold mb-2 text-slate-700">Nama Grup WhatsApp (Display)</label>
-              <input 
-                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm outline-none" 
-                placeholder="Contoh: Warga RT 02 Official"
-                value={localConfig.whatsappGroupName || ''} 
-                onChange={e => setLocalConfig({...localConfig, whatsappGroupName: e.target.value})} 
-              />
-              <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
-                ID Grup diperlukan untuk mengirim pengumuman ke grup WhatsApp warga secara otomatis. 
-                Anda bisa mendapatkan ID ini dari dashboard Sidobe atau melalui bot helper.
-              </p>
             </div>
           </Card>
         )}
