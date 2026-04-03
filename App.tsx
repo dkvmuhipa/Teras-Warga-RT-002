@@ -312,7 +312,7 @@ export const App = () => {
     const unsubPdfConfig = subscribeToPdfConfig((data) => {
         if (data) {
             setPdfConfigState(data);
-            localStorage.setItem('pdf_config', JSON.stringify(data));
+            localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(data)));
         }
     });
 

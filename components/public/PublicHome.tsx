@@ -210,10 +210,18 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               </div>
               
               {/* Info Transparansi Tambahan */}
-              <div className="pt-4 mt-4 border-t border-white/10">
+              <div className="pt-4 mt-4 border-t border-white/10 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Terkumpul</span>
-                  <span className="text-sm font-black text-emerald-400">Rp {summaries.totalCollected.toLocaleString('id-ID')}</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dana Air Terkumpul</span>
+                  <span className="text-sm font-black text-blue-400">Rp {summaries.air.totalCollected.toLocaleString('id-ID')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dana Sampah Terkumpul</span>
+                  <span className="text-sm font-black text-emerald-400">Rp {summaries.sampah.totalCollected.toLocaleString('id-ID')}</span>
+                </div>
+                <div className="pt-2 border-t border-white/5 flex justify-between items-center">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Keseluruhan</span>
+                  <span className="text-sm font-black text-white">Rp {summaries.totalCollected.toLocaleString('id-ID')}</span>
                 </div>
                 <p className="text-[8px] text-slate-500 font-bold uppercase tracking-tighter mt-1">Bulan {summaries.totalCollected > 0 ? 'Berjalan' : 'Ini'}</p>
               </div>

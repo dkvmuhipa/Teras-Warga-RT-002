@@ -184,8 +184,10 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
 
   const filteredDeposits = deposits.filter(d => {
     const houseLabel = getHouseLabel(d.houseId);
-    const matchesSearch = d.residentName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         houseLabel.toLowerCase().includes(searchQuery.toLowerCase());
+    const residentName = d.residentName || '';
+    const search = searchQuery || '';
+    const matchesSearch = residentName.toLowerCase().includes(search.toLowerCase()) || 
+                         (houseLabel || '').toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filterStatus === 'All' || d.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -295,10 +297,10 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black shadow-sm text-sm">
-                        {deposit.residentName.charAt(0)}
+                        {(deposit.residentName || '?').charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-800 leading-none mb-1">{deposit.residentName}</p>
+                        <p className="text-sm font-black text-slate-800 leading-none mb-1">{deposit.residentName || '-'}</p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Blok {getHouseLabel(deposit.houseId)}</p>
                       </div>
                     </div>
