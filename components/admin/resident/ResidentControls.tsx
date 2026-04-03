@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Calendar, Users, LayoutList, MapPin, DollarSign, UserPlus, Activity } from 'lucide-react';
+import { Search, Calendar, Users, LayoutList, MapPin, DollarSign, UserPlus, Activity, FileText } from 'lucide-react';
 import { generateMonthOptions } from '../../../src/utils/dateUtils';
 import { ResidentRegistration } from '../../../types';
 
@@ -78,6 +78,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             <button onClick={() => setViewMode('map')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'map' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Peta"><MapPin size={16} className="md:w-[18px] md:h-[18px]"/></button>
             <button onClick={() => setViewMode('analytics')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'analytics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Analitik"><Activity size={16} className="md:w-[18px] md:h-[18px]"/></button>
             <button onClick={() => setViewMode('iuran')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'iuran' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Laporan Iuran"><DollarSign size={16} className="md:w-[18px] md:h-[18px]"/></button>
+            <button onClick={() => setViewMode('pbb')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'pbb' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Pembayaran PBB"><FileText size={16} className="md:w-[18px] md:h-[18px]"/></button>
             <div className="relative flex-1 sm:flex-none">
               <button onClick={() => setViewMode('registrations')} className={`w-full p-2 rounded-lg transition-all ${viewMode === 'registrations' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Pendaftaran Baru">
                 <UserPlus size={16} className="mx-auto md:w-[18px] md:h-[18px]"/>

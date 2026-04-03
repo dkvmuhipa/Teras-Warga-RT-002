@@ -13,6 +13,7 @@ import { ResidentGridView } from './resident/ResidentGridView';
 import { ResidentIuranManager } from './resident/ResidentIuranManager';
 import { ResidentRegistrationList } from './resident/ResidentRegistrationList';
 import { ResidentDetailDrawer } from './resident/ResidentDetailDrawer';
+import { PbbManager } from './PbbManager';
 import { AddEditResidentModal, PaymentModal, EditPaymentModal } from './resident/ResidentModals';
 import { ResidentStats } from './resident/ResidentStats';
 import { ResidentControls } from './resident/ResidentControls';
@@ -24,7 +25,7 @@ import {
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon
 } from 'lucide-react';
-import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill } from '../../types';
+import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, PbbRecord } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
 import { 
@@ -61,15 +62,16 @@ interface ResidentManagerProps {
   iuranPayments: any[];
   bills: Bill[];
   residentRegistrations: ResidentRegistration[];
+  pbbRecords: PbbRecord[];
   settings: any;
 }
 
 type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business';
 
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
-  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, settings
+  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, pbbRecords, settings
 }) => {
-  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'pbb'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
   const [filterStatus, setFilterStatus] = useState<any>('all');
@@ -1182,6 +1184,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             handleDelete={handleDelete}
             onSendWhatsApp={handleSendWhatsApp}
           />
+        ) : viewMode === 'pbb' ? (
+          <PbbManager houses={houses} pbbRecords={pbbRecords} />
         ) : viewMode === 'map' ? (
       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
         <HouseMap 

@@ -778,6 +778,32 @@ export interface DonationRecord {
   isAnonymous?: boolean;
 }
 
+export interface PbbRecord {
+  id: string;
+  houseId: string;
+  year: number;
+  amount: number;
+  status: 'Paid' | 'Unpaid';
+  paymentDate?: string;
+  notes?: string;
+  nop?: string; // Nomor Objek Pajak
+}
+
+export interface OfficialLetter {
+  id: string;
+  letterNumber: string;
+  subject: string;
+  date: string;
+  content: string;
+  recipient: string;
+  type: 'Himbauan' | 'Undangan' | 'Pemberitahuan' | 'Lainnya';
+  status: 'Draft' | 'Published';
+  createdAt: string;
+  updatedAt?: string;
+  attachmentUrl?: string; // URL to uploaded file (PDF/Image)
+  source?: 'Internal' | 'External';
+}
+
 export interface UpdateRequest {
   id: string;
   houseId: string;

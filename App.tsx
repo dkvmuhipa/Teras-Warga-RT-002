@@ -29,7 +29,7 @@ const ScrollToTop = () => {
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest, RondaAttendance, Role, PbbRecord } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -230,6 +230,7 @@ export const App = () => {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
+  const [pbbRecords, setPbbRecords] = useState<PbbRecord[]>([]);
   const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
 
   useEffect(() => {
@@ -308,6 +309,7 @@ export const App = () => {
     const unsubIdeas = subscribeToIdeas((data) => setIdeas(data));
     const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
     const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
+    const unsubPbbRecords = subscribeToCollection('pbbRecords', (data) => setPbbRecords(data));
     const unsubPdfConfig = subscribeToPdfConfig((data) => {
         if (data) {
             setPdfConfigState(data);
@@ -323,6 +325,7 @@ export const App = () => {
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations(); unsubUpdateRequests(); unsubPdfConfig(); unsubWasteDeposits();
+      unsubPbbRecords();
     };
   }, []);
 
@@ -395,6 +398,7 @@ export const App = () => {
                             setPopulationLogs={setPopulationLogs} 
                             events={events} 
                             updateRequests={updateRequests}
+                            pbbRecords={pbbRecords}
                             mapPoints={mapPoints} 
                             activePatrol={activePatrol} 
                             iuranPayments={iuranPayments} 

@@ -1,7 +1,7 @@
 
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 
 // ... (existing helper functions) ...
@@ -441,6 +441,258 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.save(`${filenamePrefix}Surat_${safeTitle}_${safeApplicantName}.pdf`);
   } catch (error) {
     console.error("PDF Generation Error:", error);
+    alert("Gagal membuat PDF: " + (error instanceof Error ? error.message : "Unknown error"));
+  }
+};
+
+export const generateOfficialLetterPDF = async (letter: OfficialLetter, customConfig?: PdfConfig) => {
+  try {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 25;
+    const contentWidth = pageWidth - (marginX * 2);
+    const centerX = pageWidth / 2;
+
+    // --- Watermark for Draft ---
+    if (letter.status === 'Draft') {
+      doc.saveGraphicsState();
+      doc.setTextColor(235, 235, 235);
+      doc.setFontSize(50);
+      doc.setFont("helvetica", "bold");
+      doc.text("DRAFT / KONSEP", centerX, pageHeight / 2, { align: "center", angle: 45 });
+      doc.restoreGraphicsState();
+      doc.setTextColor(0, 0, 0);
+    }
+
+    // --- Professional Header (Kop Surat) ---
+    let logoDrawn = false;
+    try {
+      const logoData = await getImageData(config.logo);
+      if (logoData) {
+        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+        logoDrawn = true;
+      }
+    } catch (e) { console.error(e); }
+
+    doc.setFont("times", "bold"); 
+    doc.setFontSize(14);
+    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+    doc.setLineWidth(1.0);
+    doc.line(20, 42, 190, 42);
+    doc.setLineWidth(0.3);
+    doc.line(20, 43, 190, 43);
+
+    // --- Date (Top Right) ---
+    let cursorY = 55;
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    const dateStr = new Date(letter.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    doc.text(`Palu, ${dateStr}`, pageWidth - marginX, cursorY, { align: "right" });
+    cursorY += 10;
+
+    // --- Metadata (Nomor, Lampiran, Perihal) ---
+    const labelX = marginX;
+    const colonX = marginX + 25;
+    const valueX = marginX + 28;
+
+    const drawMetaRow = (label: string, value: string, isBoldValue = false) => {
+      doc.setFont("times", "normal");
+      doc.text(label, labelX, cursorY);
+      doc.text(":", colonX, cursorY);
+      if (isBoldValue) doc.setFont("times", "bold");
+      doc.text(value, valueX, cursorY);
+      doc.setFont("times", "normal");
+      cursorY += 6;
+    };
+
+    drawMetaRow("Nomor", letter.letterNumber);
+    drawMetaRow("Lampiran", "-");
+    drawMetaRow("Perihal", letter.subject.toUpperCase(), true);
+    cursorY += 6;
+
+    // --- Recipient ---
+    doc.text("Kepada Yth,", marginX, cursorY);
+    cursorY += 6;
+    doc.setFont("times", "bold");
+    doc.text(letter.recipient, marginX, cursorY);
+    doc.setFont("times", "normal");
+    cursorY += 6;
+    doc.text("di -", marginX, cursorY);
+    cursorY += 6;
+    doc.text("   Tempat", marginX, cursorY);
+    cursorY += 15;
+
+    // --- Content ---
+    doc.text("Dengan hormat,", marginX, cursorY);
+    cursorY += 10;
+
+    const renderJustifiedText = (text: string, x: number, y: number, width: number) => {
+      // Simple HTML to text conversion for PDF
+      // Replace <p> and <br> with newlines, then strip all other tags
+      const cleanText = text
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<li>/gi, '• ')
+        .replace(/<\/li>/gi, '\n')
+        .replace(/<[^>]+>/g, '');
+
+      // Decode HTML entities
+      const decodedText = cleanText
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+
+      const paragraphs = decodedText.split('\n');
+      let currentY = y;
+      const bottomMargin = 45; // Leave space for footer/SODD
+      
+      paragraphs.forEach(para => {
+        const trimmedPara = para.trim();
+        if (!trimmedPara) {
+          currentY += 5;
+          return;
+        }
+        
+        const lines = doc.splitTextToSize(trimmedPara, width);
+        lines.forEach((line: string, index: number) => {
+          // Check for page break
+          if (currentY > pageHeight - bottomMargin) {
+            doc.addPage();
+            currentY = 25; // Top margin for subsequent pages
+            
+            // Re-apply watermark if it's a draft
+            if (letter.status === 'Draft') {
+              doc.saveGraphicsState();
+              doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
+              doc.setTextColor(200, 200, 200);
+              doc.setFontSize(50);
+              doc.setFont("helvetica", "bold");
+              doc.text("DRAFT / KONSEP", centerX, pageHeight / 2, { align: "center", angle: 45 });
+              doc.restoreGraphicsState();
+              doc.setTextColor(0, 0, 0);
+            }
+          }
+
+          const isLastLine = index === lines.length - 1;
+          doc.text(line, x, currentY, { 
+            align: isLastLine ? "left" : "justify",
+            maxWidth: width
+          });
+          currentY += 6.5;
+        });
+        currentY += 2;
+      });
+      
+      return currentY;
+    };
+
+    cursorY = renderJustifiedText(letter.content, marginX, cursorY, contentWidth);
+    cursorY += 5;
+
+    // Closing
+    const closingText = "Demikian surat ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.";
+    cursorY = renderJustifiedText(closingText, marginX, cursorY, contentWidth);
+    cursorY += 15;
+
+    // --- Signature Section ---
+    // If signature doesn't fit on the current page, move to next
+    if (cursorY > pageHeight - 65) {
+      doc.addPage();
+      cursorY = 25;
+    }
+
+    const signX = pageWidth - 65;
+    doc.setFont("times", "normal");
+    doc.text(`Ketua ${config.rtName}`, signX, cursorY, { align: "center" });
+    
+    const signSpaceY = cursorY + 5;
+    cursorY += 30;
+    
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, cursorY, { align: "center" });
+    const chairmanWidth = doc.getTextWidth(config.rtChairman);
+    doc.line(signX - (chairmanWidth / 2), cursorY + 1, signX + (chairmanWidth / 2), cursorY + 1);
+
+    // Add Stamp and Signature
+    if (letter.status === 'Published') {
+      try {
+        if (config.stamp) {
+          const stampImg = await getImageData(config.stamp);
+          if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 5, 25, 25);
+        }
+        if (config.signature) {
+          const signImg = await getImageData(config.signature);
+          if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY, 30, 20);
+        }
+      } catch (e) {}
+
+      // Digital Verification Footer (SODD) - Same as Surat Pengantar
+      const footerY = pageHeight - 40;
+      doc.setDrawColor(200);
+      doc.setLineWidth(0.2);
+      doc.line(marginX, footerY, pageWidth - marginX, footerY);
+      
+      const qrSize = 22;
+      const qrX = marginX;
+      const qrY = footerY + 6;
+
+      try {
+        const baseUrl = window.location.origin;
+        const verificationUrl = `${baseUrl}/#/verify-official/${letter.id}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { 
+          margin: 1,
+          width: 200,
+          color: { dark: '#1e293b', light: '#f8fafc' }
+        });
+        doc.addImage(qrCodeDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+      } catch (e) {}
+
+      const infoX = qrX + qrSize + 6;
+      doc.setFont("times", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(30, 41, 59);
+      doc.text("SISTEM OTENTIKASI DOKUMEN DIGITAL (SODD)", infoX, footerY + 10);
+      
+      doc.setFont("times", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`ID Otentikasi : ${letter.id.toUpperCase()}`, infoX, footerY + 14);
+      doc.text(`Jenis Surat    : ${letter.type.toUpperCase()}`, infoX, footerY + 17.5);
+      doc.text(`Waktu Terbit  : ${new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })} WITA`, infoX, footerY + 21);
+      
+      doc.setFont("times", "italic");
+      doc.setFontSize(6.5);
+      doc.setTextColor(148, 163, 184);
+      const disclaimer = "Dokumen ini diterbitkan secara elektronik melalui Sistem Teras Warga dan merupakan dokumen sah yang tidak memerlukan tanda tangan basah. Keaslian dokumen dapat diverifikasi melalui pemindaian QR Code di atas.";
+      const splitDisclaimer = doc.splitTextToSize(disclaimer, contentWidth - qrSize - 10);
+      doc.text(splitDisclaimer, infoX, footerY + 26);
+      
+      doc.setTextColor(0);
+    }
+
+    doc.save(`Surat_${letter.type}_${letter.letterNumber.replace(/\//g, '-')}.pdf`);
+  } catch (error) {
+    console.error("Official PDF Generation Error:", error);
     alert("Gagal membuat PDF: " + (error instanceof Error ? error.message : "Unknown error"));
   }
 };

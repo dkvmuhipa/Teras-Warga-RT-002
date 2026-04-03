@@ -32,7 +32,7 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo, PbbRecord, OfficialLetter } from "../types";
 
 export { OperationType, isFirebaseConfigured };
 
@@ -99,6 +99,8 @@ const DONATION_CAMPAIGNS_COL = "donationCampaigns";
 const DONATION_RECORDS_COL = "donationRecords";
 const PANIC_ALERTS_COL = "panicAlerts";
 const UPDATE_REQUESTS_COL = "updateRequests";
+const PBB_COL = "pbbRecords";
+const OFFICIAL_LETTERS_COL = "officialLetters";
 const FCM_TOKENS_COL = "fcmTokens";
 const CONFIGS_COL = "configs";
 
@@ -796,6 +798,89 @@ export const markNotificationAsRead = async (id: string) => {
         await updateDoc(doc(db, NOTIFICATIONS_COL, id), { isRead: true });
     } catch (error) {
         handleFirestoreError(error, OperationType.UPDATE, `${NOTIFICATIONS_COL}/${id}`);
+    }
+};
+
+// --- PBB SERVICES ---
+export const subscribeToPbbRecords = (callback: (data: PbbRecord[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
+    const q = query(collection(db, PBB_COL), orderBy("year", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as PbbRecord));
+        callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, PBB_COL);
+    });
+};
+
+export const addPbbRecordToDb = async (data: Omit<PbbRecord, 'id'>) => {
+    try {
+        return await addDoc(collection(db, PBB_COL), deepSanitize(data));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, PBB_COL);
+    }
+};
+
+export const updatePbbRecordInDb = async (id: string, data: Partial<PbbRecord>) => {
+    try {
+        return await updateDoc(doc(db, PBB_COL, id), deepSanitize(data));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${PBB_COL}/${id}`);
+    }
+};
+
+export const deletePbbRecordFromDb = async (id: string) => {
+    try {
+        return await deleteDoc(doc(db, PBB_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${PBB_COL}/${id}`);
+    }
+};
+
+// --- FILE STORAGE ---
+export const uploadFile = async (file: File, path: string): Promise<string> => {
+  if (!isFirebaseConfigured || !storage) {
+    throw new Error("Firebase Storage is not configured");
+  }
+  
+  const fileRef = ref(storage, path);
+  const snapshot = await uploadBytes(fileRef, file);
+  return await getDownloadURL(snapshot.ref);
+};
+
+// --- OFFICIAL LETTERS SERVICES ---
+export const subscribeToOfficialLetters = (callback: (data: OfficialLetter[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
+    const q = query(collection(db, OFFICIAL_LETTERS_COL), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as OfficialLetter));
+        callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, OFFICIAL_LETTERS_COL);
+    });
+};
+
+export const addOfficialLetterToDb = async (data: Omit<OfficialLetter, 'id'>) => {
+    try {
+        return await addDoc(collection(db, OFFICIAL_LETTERS_COL), deepSanitize(data));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, OFFICIAL_LETTERS_COL);
+    }
+};
+
+export const updateOfficialLetterInDb = async (id: string, data: Partial<OfficialLetter>) => {
+    try {
+        return await updateDoc(doc(db, OFFICIAL_LETTERS_COL, id), deepSanitize({ ...data, updatedAt: new Date().toISOString() }));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${OFFICIAL_LETTERS_COL}/${id}`);
+    }
+};
+
+export const deleteOfficialLetterFromDb = async (id: string) => {
+    try {
+        return await deleteDoc(doc(db, OFFICIAL_LETTERS_COL, id));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${OFFICIAL_LETTERS_COL}/${id}`);
     }
 };
 

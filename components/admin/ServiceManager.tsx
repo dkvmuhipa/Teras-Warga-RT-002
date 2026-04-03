@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw } from 'lucide-react';
-import { LetterRequest, Report, PdfConfig } from '../../types';
+import { LetterRequest, Report, PdfConfig, OfficialLetter } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups } from '../../services/whatsappService';
@@ -9,6 +9,7 @@ import { generateSuratPengantar } from '../../services/pdfService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { SignaturePad } from './SignaturePad';
+import { OfficialLetterManager } from './OfficialLetterManager';
 import { toast } from 'sonner';
 
 interface ServiceManagerProps {
@@ -26,7 +27,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   setPdfConfig,
   onDeleteReport
 }) => {
-  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'settings'>('letters');
+  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'official-letters' | 'settings'>('letters');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showArchived, setShowArchived] = useState(false);
@@ -452,6 +453,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <span>Laporan ({reports.filter(r => r.status === 'Baru').length})</span>
             </button>
             <button 
+              onClick={() => setActiveTab('official-letters')} 
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === 'official-letters' 
+                  ? 'bg-white text-amber-600 shadow-md ring-1 ring-black/5' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+              }`}
+            >
+              <FileText size={14} className="sm:w-4 sm:h-4" />
+              <span>Surat Resmi</span>
+            </button>
+            <button 
               onClick={() => setActiveTab('settings')} 
               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
                 activeTab === 'settings' 
@@ -547,7 +559,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
       {/* Content */}
       <AnimatePresence mode="wait">
-        {activeTab === 'settings' ? (
+        {activeTab === 'official-letters' ? (
+          <motion.div
+            key="official-letters"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <OfficialLetterManager pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />
+          </motion.div>
+        ) : activeTab === 'settings' ? (
           <motion.div
             key="settings"
             initial={{ opacity: 0, y: 20 }}
