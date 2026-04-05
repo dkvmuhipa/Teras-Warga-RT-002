@@ -208,14 +208,35 @@ export const subscribeToIdeas = (callback: (data: any[]) => void) => {
 
 export const addIdea = async (data: any) => {
     try {
-        return await addDoc(collection(db, IDEAS_COL), {
+        const docRef = await addDoc(collection(db, IDEAS_COL), {
             ...data,
             date: new Date().toISOString(),
             upvotes: [],
             status: 'Usulan'
         });
+
+        // Add notification for admins
+        await addNotificationToDb({
+            title: 'Aspirasi Baru',
+            message: `Warga ${data.authorName} menyampaikan ide: ${data.title}`,
+            type: 'Info',
+            category: 'Forum',
+            isRead: false,
+            date: new Date().toISOString()
+        });
+
+        return docRef;
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, IDEAS_COL);
+    }
+};
+
+export const deleteIdeaFromDb = async (id: string) => {
+    try {
+        const docRef = doc(db, IDEAS_COL, id);
+        return await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${IDEAS_COL}/${id}`);
     }
 };
 
@@ -1750,6 +1771,15 @@ export const addReportToDb = async (report: any) => {
   try {
     const { id, ...data } = report;
     await addDoc(collection(db, REPORTS_COL), deepSanitize(data));
+    
+    // Add notification for admin
+    await addNotificationToDb({
+      title: 'Laporan Warga Baru',
+      message: `Ada laporan baru dari ${data.reporterName} (Rumah ${data.reporterHouseId}): ${data.type}`,
+      type: 'Report',
+      date: new Date().toISOString(),
+      isRead: false
+    });
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, REPORTS_COL);
   }
@@ -1807,6 +1837,15 @@ export const addLetterToDb = async (letter: any) => {
   try {
     const { id, ...data } = letter;
     await addDoc(collection(db, LETTERS_COL), deepSanitize(data));
+
+    // Add notification for admin
+    await addNotificationToDb({
+      title: 'Permohonan Surat Baru',
+      message: `Ada permohonan surat ${data.type} baru dari ${data.name} (Rumah ${data.houseId})`,
+      type: 'Letter',
+      date: new Date().toISOString(),
+      isRead: false
+    });
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, LETTERS_COL);
   }

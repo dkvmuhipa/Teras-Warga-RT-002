@@ -267,15 +267,36 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             </div>
             <div className="hidden md:block w-px h-32 bg-slate-100 mx-4" />
             <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-              <div className="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100 group-hover:bg-indigo-50 transition-colors">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Warga</p>
+              <div className="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100 group-hover:bg-indigo-50 transition-colors flex flex-col justify-center">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Rumah</p>
                 <p className="text-2xl font-black text-slate-800">{houses.length}</p>
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter mt-1">
+                  {houses.filter(h => h.status === 'Occupied').length} Rumah Terisi
+                </p>
               </div>
               <div className="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100 group-hover:bg-emerald-50 transition-colors">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Lunas Iuran</p>
-                <p className="text-2xl font-black text-emerald-600">
-                  {summaries.fullyPaidHousesCount}
-                </p>
+                <div className="flex flex-col items-center">
+                  <p className="text-2xl font-black text-emerald-600">
+                    {summaries.fullyPaidHousesCount}
+                  </p>
+                  <p className="text-[7px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">Lunas Keduanya</p>
+                </div>
+                
+                <div className="mt-3 pt-3 border-t border-slate-200/50 grid grid-cols-2 gap-1">
+                  <div className="text-center">
+                    <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Air</p>
+                    <p className="text-[10px] font-black text-blue-600">
+                      {houses.filter(h => h.status === 'Occupied').length - summaries.air.unpaidCount}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Sampah</p>
+                    <p className="text-[10px] font-black text-emerald-600">
+                      {houses.filter(h => h.status === 'Occupied').length - summaries.sampah.unpaidCount}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

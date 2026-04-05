@@ -747,7 +747,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                         <h4 className="font-black text-slate-800 mb-1">Butuh Bantuan atau Ingin Melapor?</h4>
                         <p className="text-slate-600 text-sm">Jika Anda atau tetangga Anda membutuhkan bantuan sosial darurat atau belum terdata, silakan hubungi pengurus RT melalui fitur Lapor.</p>
                     </div>
-                    <Link to="/lapor" className="ml-auto px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                    <Link to="/services?tab=lapor" className="ml-auto px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-colors whitespace-nowrap">
                         Lapor Sekarang
                     </Link>
                 </div>

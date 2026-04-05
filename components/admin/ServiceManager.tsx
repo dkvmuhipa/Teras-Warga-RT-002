@@ -10,6 +10,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { SignaturePad } from './SignaturePad';
 import { OfficialLetterManager } from './OfficialLetterManager';
+import { LetterArchiveManager } from './LetterArchiveManager';
 import { toast } from 'sonner';
 
 interface ServiceManagerProps {
@@ -27,7 +28,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   setPdfConfig,
   onDeleteReport
 }) => {
-  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'official-letters' | 'settings'>('letters');
+  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'official-letters' | 'letter-archive' | 'settings'>('letters');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showArchived, setShowArchived] = useState(false);
@@ -464,6 +465,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <span>Surat Resmi</span>
             </button>
             <button 
+              onClick={() => setActiveTab('letter-archive')} 
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === 'letter-archive' 
+                  ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+              }`}
+            >
+              <Archive size={14} className="sm:w-4 sm:h-4" />
+              <span>Arsip Surat</span>
+            </button>
+            <button 
               onClick={() => setActiveTab('settings')} 
               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
                 activeTab === 'settings' 
@@ -567,6 +579,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             exit={{ opacity: 0, y: -20 }}
           >
             <OfficialLetterManager pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />
+          </motion.div>
+        ) : activeTab === 'letter-archive' ? (
+          <motion.div
+            key="letter-archive"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <LetterArchiveManager pdfConfig={pdfConfig} />
           </motion.div>
         ) : activeTab === 'settings' ? (
           <motion.div

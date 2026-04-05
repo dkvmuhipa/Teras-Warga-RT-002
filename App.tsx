@@ -408,6 +408,7 @@ export const App = () => {
                             auditLogs={auditLogs} 
                             marketItems={marketItems}
                             faqItems={faqItems} 
+                            ideas={ideas}
                             settings={settings}
                             onUpdateSettings={handleUpdateSettings}
                         />
