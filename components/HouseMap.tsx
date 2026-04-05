@@ -197,7 +197,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                                     <span className="text-[10px] font-bold text-slate-600">{house.phone || '-'}</span>
                                                 </div>
                                                 {house.phone && (
-                                                    <a href={`https://wa.me/${house.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="p-1.5 bg-emerald-50 text-emerald-600 rounded-full hover:bg-emerald-100 transition-colors border border-emerald-100">
+                                                    <a href={`https://wa.me/${house.phone.replace(/^0/, '62').replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="p-1.5 bg-emerald-50 text-emerald-600 rounded-full hover:bg-emerald-100 transition-colors border border-emerald-100">
                                                         <MessageCircle size={14} fill="currentColor" className="opacity-80" />
                                                     </a>
                                                 )}
@@ -1390,7 +1390,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
           onReportHouse={onReportHouse}
           onSendWhatsApp={(house) => {
             if (house.phone) {
-              window.open(`https://wa.me/${house.phone.replace(/[^0-9]/g, '')}`, '_blank');
+              window.open(`https://wa.me/${house.phone.replace(/^0/, '62').replace(/\D/g, '')}`, '_blank');
             }
           }}
         />

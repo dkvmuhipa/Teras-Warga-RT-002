@@ -1417,7 +1417,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                             <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Kontak Personil</p>
                                 <div className="space-y-3">
-                                    <a href={`https://wa.me/${selectedOfficial.phone}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+                                    <a href={`https://wa.me/${selectedOfficial.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
                                         <div className="p-2 bg-emerald-50 rounded-lg shrink-0"><Phone size={14}/></div>
                                         <span className="truncate">{selectedOfficial.phone}</span>
                                     </a>
@@ -1462,7 +1462,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 Tutup
                             </Button>
                             <a 
-                                href={`https://wa.me/${selectedOfficial.phone}`} 
+                                href={`https://wa.me/${selectedOfficial.phone.replace(/[^0-9]/g, '')}`} 
                                 target="_blank" 
                                 rel="noreferrer"
                                 className="sm:flex-[2] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"

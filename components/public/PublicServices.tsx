@@ -272,7 +272,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
         description: `ID: #${letterData.id.slice(-8)} | Estimasi: ${letterData.estimatedTime}`,
         action: {
           label: "WhatsApp RT",
-          onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20${finalRequestType}%20dengan%20ID%20${letterData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
+          onClick: () => window.open(`https://wa.me/${(pdfConfig.rtPhone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20${finalRequestType}%20dengan%20ID%20${letterData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
         },
         duration: 10000
       });
@@ -323,7 +323,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
         description: `ID: #${reportData.id.slice(-8)} | Kategori: ${reportType}`,
         action: {
           label: "WhatsApp RT",
-          onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20Laporan%20${reportType}%20dengan%20ID%20${reportData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
+          onClick: () => window.open(`https://wa.me/${(pdfConfig.rtPhone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20Laporan%20${reportType}%20dengan%20ID%20${reportData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
         },
         duration: 10000
       });
@@ -409,7 +409,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       description: `ID: #${mutationData.id.slice(-8)} | Jenis: ${mutationType}`,
       action: {
         label: "WhatsApp RT",
-        onClick: () => window.open(`https://wa.me/${pdfConfig.rtChairman.replace(/[^0-9]/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20Laporan%20Mutasi%20${mutationType}%20dengan%20ID%20${mutationData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
+        onClick: () => window.open(`https://wa.me/${(pdfConfig.rtPhone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}?text=Halo%20Pak%20RT,%20saya%20telah%20mengajukan%20Laporan%20Mutasi%20${mutationType}%20dengan%20ID%20${mutationData.id.slice(-8)}.%20Mohon%20bantuannya%20untuk%20verifikasi.`, '_blank')
       },
       duration: 10000
     });

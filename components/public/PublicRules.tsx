@@ -192,7 +192,7 @@ export const PublicRules: React.FC = () => {
           <div className="inline-block text-left bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
             <p className="text-white font-black text-lg mb-1">Ketua RT 02: Irfan</p>
             <p className="text-indigo-200 text-sm mb-1">Alamat: Blok C10 No. 08</p>
-            <p className="text-indigo-200 text-sm">WhatsApp: 085961194621</p>
+            <p className="text-indigo-200 text-sm">WhatsApp: +62 859-6119-4621</p>
           </div>
         </div>
       </div>

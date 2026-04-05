@@ -54,7 +54,13 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
         note,
         isAnonymous
       });
-      toast.success("Terima kasih atas donasi Anda! Semoga berkah.");
+      toast.success("Terima kasih atas donasi Anda! Semoga berkah.", {
+        description: "Silakan konfirmasi ke Pengurus RT via WhatsApp.",
+        action: {
+          label: "WhatsApp",
+          onClick: () => window.open(`https://wa.me/6285961194621?text=Halo%20Pengurus%20RT%2002%2C%20saya%20ingin%20konfirmasi%20donasi%20untuk%20${selectedCampaign.title}%20sebesar%20Rp%20${amount.toLocaleString()}`, '_blank')
+        }
+      });
       setIsDonationModalOpen(false);
       setAmount(0);
       setNote('');
@@ -246,7 +252,7 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
           <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex gap-3">
             <Info className="text-indigo-600 shrink-0" size={18} />
             <p className="text-[10px] text-indigo-700 font-bold leading-relaxed">
-              Silakan hubungi Pengurus RT (085961194621) untuk menyalurkan donasi Anda secara tunai atau koordinasi lebih lanjut. Klik tombol di bawah untuk mencatat niat donasi Anda.
+              Silakan hubungi Pengurus RT (+62 859-6119-4621) untuk menyalurkan donasi Anda secara tunai atau koordinasi lebih lanjut. Klik tombol di bawah untuk mencatat niat donasi Anda.
             </p>
           </div>
           <div className="flex gap-3 pt-4">

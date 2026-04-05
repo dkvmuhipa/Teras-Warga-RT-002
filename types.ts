@@ -464,6 +464,7 @@ export interface PdfConfig {
   rtName: string;
   rtAddress: string;
   rtChairman: string;
+  rtPhone?: string;
   kelurahan?: string;
   kecamatan?: string;
   kota?: string;

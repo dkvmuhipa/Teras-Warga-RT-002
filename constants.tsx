@@ -127,11 +127,11 @@ export const generateHouses = (): House[] => {
 };
 
 export const INITIAL_OFFICIALS: Official[] = [
-    { id: '1', role: 'Ketua RT', name: 'Bpk. IRFAN ARIANTO', houseId: 'C10-08', phone: '0859-6119-4621' }, 
-    { id: '2', role: 'Sekretaris', name: 'Ibu Siti Aminah', houseId: 'C5-02', phone: '0812-9876-5432' },
-    { id: '3', role: 'Bendahara', name: 'Bpk. Rudi Hartono', houseId: 'C11-12', phone: '0813-4567-8901' },
-    { id: '4', role: 'Koord. Keamanan', name: 'Bpk. Joko Susilo', houseId: 'C8-05', phone: '0813-1122-3344' },
-    { id: '5', role: 'Bendahara RW', name: 'Ibu Haryati', houseId: 'C9-10', phone: '0813-9988-7766' },
+    { id: '1', role: 'Ketua RT', name: 'Bpk. IRFAN ARIANTO', houseId: 'C10-08', phone: '+62 859-6119-4621' }, 
+    { id: '2', role: 'Sekretaris', name: 'Ibu Siti Aminah', houseId: 'C5-02', phone: '+62 812-9876-5432' },
+    { id: '3', role: 'Bendahara', name: 'Bpk. Rudi Hartono', houseId: 'C11-12', phone: '+62 813-4567-8901' },
+    { id: '4', role: 'Koord. Keamanan', name: 'Bpk. Joko Susilo', houseId: 'C8-05', phone: '+62 813-1122-3344' },
+    { id: '5', role: 'Bendahara RW', name: 'Ibu Haryati', houseId: 'C9-10', phone: '+62 813-9988-7766' },
 ];
 
 export const MOCK_ANNOUNCEMENTS: Announcement[] = [
@@ -306,8 +306,9 @@ export const DEFAULT_PDF_CONFIG: PdfConfig = {
   stamp: "",
   signature: "",
   rtName: "RT.02 / RW.020",
-  rtAddress: "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Telp. 085961194621",
+  rtAddress: "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Telp. +62 859-6119-4621",
   rtChairman: "IRFAN ARIANTO",
+  rtPhone: "6285961194621",
   kelurahan: "TONDO",
   kecamatan: "MANTIKULORE",
   kota: "PALU",

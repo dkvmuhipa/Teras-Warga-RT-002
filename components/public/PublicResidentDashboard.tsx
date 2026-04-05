@@ -480,7 +480,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         </Button>
                         <Button 
                           variant="outline" 
-                          onClick={() => window.open(`https://wa.me/${currentHouse?.phone || '6285961194621'}`, '_blank')}
+                          onClick={() => window.open(`https://wa.me/${(currentHouse?.phone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}`, '_blank')}
                           className="h-8 px-4 text-[10px] font-black uppercase tracking-widest border-slate-200 bg-white text-slate-600"
                         >
                           Hubungi Pengurus RT
