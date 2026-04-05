@@ -18,6 +18,8 @@ import {
   Info,
   X,
   CreditCard,
+  Trash2,
+  Droplets,
   Globe,
   MapPin,
   Heart,
@@ -156,6 +158,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   });
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isIuranModalOpen, setIsIuranModalOpen] = useState(false);
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [selectedReportDetail, setSelectedReportDetail] = useState<Report | null>(null);
   const [reportForm, setReportForm] = useState({
@@ -469,11 +472,18 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                           : `Tagihan iuran bulan ${currentMonth} sudah tersedia. Mohon selesaikan sebelum tanggal 20 untuk tetap dapat mengakses layanan digital.`}
                       </p>
                       <div className="mt-4 flex gap-3">
-                        <Button className={`h-8 px-4 text-[10px] font-black uppercase tracking-widest ${isMandatory ? 'bg-rose-600 hover:bg-rose-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
+                        <Button 
+                          onClick={() => setIsIuranModalOpen(true)}
+                          className={`h-8 px-4 text-[10px] font-black uppercase tracking-widest ${isMandatory ? 'bg-rose-600 hover:bg-rose-700' : 'bg-amber-600 hover:bg-amber-700'}`}
+                        >
                           Lihat Rincian
                         </Button>
-                        <Button variant="outline" className="h-8 px-4 text-[10px] font-black uppercase tracking-widest border-slate-200 bg-white text-slate-600">
-                          Hubungi Bendahara
+                        <Button 
+                          variant="outline" 
+                          onClick={() => window.open(`https://wa.me/${currentHouse?.phone || '6285961194621'}`, '_blank')}
+                          className="h-8 px-4 text-[10px] font-black uppercase tracking-widest border-slate-200 bg-white text-slate-600"
+                        >
+                          Hubungi Pengurus RT
                         </Button>
                       </div>
                     </div>
@@ -1273,6 +1283,62 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Iuran Detail Modal */}
+      <Modal isOpen={isIuranModalOpen} onClose={() => setIsIuranModalOpen(false)} title="Rincian Tagihan Iuran">
+        <div className="p-6 space-y-6">
+          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-center">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Tagihan {currentMonth}</p>
+            <h3 className="text-3xl font-black text-slate-900">Rp 15.000</h3>
+            <p className="text-[10px] font-bold text-rose-500 mt-2 uppercase tracking-widest">Jatuh Tempo: Tgl 20 {currentMonth}</p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-3 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Trash2 size={16} /></div>
+                <span className="text-sm font-bold text-slate-700">Retribusi Sampah</span>
+              </div>
+              <span className="text-sm font-black text-slate-900">Rp 5.000</span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Droplets size={16} /></div>
+                <span className="text-sm font-bold text-slate-700">Iuran Air Bersih</span>
+              </div>
+              <span className="text-sm font-black text-slate-900">Rp 10.000</span>
+            </div>
+          </div>
+
+          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+            <h4 className="text-[10px] font-black text-amber-900 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <Info size={12} /> Cara Pembayaran
+            </h4>
+            <ul className="text-xs text-amber-800 space-y-2 font-medium">
+              <li className="flex gap-2">
+                <span className="font-black">1.</span>
+                <span>Pembayaran dapat dilakukan secara tunai kepada Pengurus RT.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-black">2.</span>
+                <span>Hubungi Pengurus RT melalui WhatsApp untuk koordinasi atau konfirmasi pembayaran.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button onClick={() => setIsIuranModalOpen(false)} variant="outline" className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest">
+              Tutup
+            </Button>
+            <Button 
+              onClick={() => window.open(`https://wa.me/6285961194621?text=Halo%20Pengurus%20RT%2002%2C%20saya%20ingin%20konfirmasi%20pembayaran%20iuran%20rumah%20${currentHouse?.block}-${currentHouse?.number}`, '_blank')}
+              className="flex-[2] py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-100"
+            >
+              Konfirmasi Bayar (WA)
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Report Issue Modal */}
       <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Buat Laporan Masalah" maxWidth="max-w-xl">

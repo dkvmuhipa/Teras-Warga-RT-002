@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Vote, ShoppingCart, FileText, Shield, Package, Calendar, Menu, X, LayoutGrid, Wallet, Info } from 'lucide-react';
+import { Home, Vote, ShoppingCart, FileText, Shield, Package, Calendar, Menu, X, LayoutGrid, Wallet, Info, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const MobileBottomNav: React.FC = () => {
@@ -36,6 +36,7 @@ export const MobileBottomNav: React.FC = () => {
       label: 'Informasi RT',
       items: [
         { path: '/info', icon: Shield, label: 'Info RT & Kas' },
+        { path: '/info#faq', icon: HelpCircle, label: 'FAQ' },
         { path: '/kegiatan', icon: Calendar, label: 'Jadwal Kegiatan' },
       ]
     }

@@ -190,11 +190,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
               <div className="p-2.5 md:p-4 bg-blue-50 text-blue-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform">
                 <Users size={18} className="md:w-6 md:h-6" />
               </div>
-              <span className="hidden xs:block text-[8px] md:text-[10px] font-black text-blue-600 bg-blue-50 px-2 md:px-2.5 py-1 rounded-full uppercase tracking-wider">Populasi</span>
+              <span className="hidden xs:block text-[8px] md:text-[10px] font-black text-blue-600 bg-blue-50 px-2 md:px-2.5 py-1 rounded-full uppercase tracking-wider">Kependudukan</span>
             </div>
-            <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-4xl font-black text-slate-900">{totalResidents}</h3>
-              <span className="text-[10px] md:text-sm font-bold text-slate-400">Jiwa</span>
+            <div className="space-y-1">
+              <div className="flex items-baseline gap-1 md:gap-2">
+                <h3 className="text-2xl md:text-4xl font-black text-slate-900">{totalResidents}</h3>
+                <span className="text-[10px] md:text-sm font-bold text-slate-400">Jiwa</span>
+              </div>
+              <div className="flex items-baseline gap-1 md:gap-2">
+                <h3 className="text-xl md:text-2xl font-black text-indigo-600">{occupiedHouses}</h3>
+                <span className="text-[10px] md:text-xs font-bold text-slate-400">KK (Kepala Keluarga)</span>
+              </div>
             </div>
             <div className="mt-2 md:mt-4 flex items-center gap-1.5 md:gap-2 text-[9px] md:text-xs font-bold text-slate-500">
               <div className="hidden sm:flex -space-x-1.5 md:-space-x-2">
@@ -204,7 +210,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
                   </div>
                 ))}
               </div>
-              <span className="truncate">{occupiedHouses} Rumah</span>
+              <span className="truncate">Data Terverifikasi</span>
             </div>
           </div>
         </motion.div>

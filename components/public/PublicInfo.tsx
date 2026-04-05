@@ -1806,7 +1806,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
 
                     <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
                         <p className="text-[10px] text-indigo-600 font-bold leading-relaxed">
-                            * Jika terdapat ketidaksesuaian data, silakan hubungi Bendahara RT melalui menu Layanan atau WhatsApp.
+                            * Jika terdapat ketidaksesuaian data, silakan hubungi Pengurus RT melalui menu Layanan atau WhatsApp.
                         </p>
                     </div>
 

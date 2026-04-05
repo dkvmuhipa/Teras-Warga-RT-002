@@ -177,7 +177,7 @@ export const MOCK_UMKM: UMKM[] = [
     owner: 'Ibu Ani',
     category: 'Kuliner',
     description: 'Nasi kuning khas Palu, tersedia mulai jam 6 pagi. Menerima pesanan katering.',
-    contact: '628123456789',
+    contact: '6285961194621',
     image: 'https://images.unsplash.com/photo-1604152135912-04a022e23696?auto=format&fit=crop&q=80&w=300&h=200'
   }
 ];
@@ -250,7 +250,7 @@ export const MOCK_FAQ: FAQItem[] = [
   { 
     id: '4', 
     question: 'Bagaimana cara membayar iuran bulanan (Air & Sampah)?', 
-    answer: 'Iuran dapat dibayarkan melalui Bendahara RT atau transfer bank. Status pembayaran dan transparansi penggunaan dana dapat dipantau secara real-time di menu "Transparansi Keuangan".' 
+    answer: 'Iuran dapat dibayarkan secara tunai melalui Pengurus RT. Status pembayaran dan transparansi penggunaan dana dapat dipantau secara real-time di menu "Transparansi Keuangan".' 
   },
   { 
     id: '5', 

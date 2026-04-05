@@ -95,7 +95,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
         </p>
         <div className="flex justify-center">
           <Button 
-            onClick={() => window.open(`https://wa.me/628123456789?text=Halo Pengurus RT, saya ingin mendaftarkan UMKM saya di website.`, '_blank')}
+            onClick={() => window.open(`https://wa.me/6285961194621?text=Halo Pengurus RT, saya ingin mendaftarkan UMKM saya di website.`, '_blank')}
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-200 px-8 py-4 rounded-2xl flex items-center gap-2 group transition-all hover:scale-105"
           >
             <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />

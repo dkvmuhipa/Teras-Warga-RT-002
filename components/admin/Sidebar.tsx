@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert,
-  PieChart, Activity, FileEdit, MessageCircle
+  PieChart, Activity, FileEdit, MessageSquare
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role, Idea } from '../../types';
@@ -71,7 +71,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'activities', icon: Calendar, label: 'Presensi Kegiatan' },
         { id: 'waste-bank', icon: Box, label: 'Bank Sampah' },
         { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
-        { id: 'ideas', icon: MessageCircle, label: 'Aspirasi Warga' },
+        { id: 'ideas', icon: MessageSquare, label: 'Aspirasi Warga' },
         { id: 'content', icon: Megaphone, label: 'Konten & Informasi' },
       ] 
     },

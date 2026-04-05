@@ -246,7 +246,7 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
           <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex gap-3">
             <Info className="text-indigo-600 shrink-0" size={18} />
             <p className="text-[10px] text-indigo-700 font-bold leading-relaxed">
-              Silakan lakukan transfer ke rekening RT 02 (Bank Mandiri: 123-456-7890 a.n RT 02) dan konfirmasi melalui tombol di bawah.
+              Silakan hubungi Pengurus RT (085961194621) untuk menyalurkan donasi Anda secara tunai atau koordinasi lebih lanjut. Klik tombol di bawah untuk mencatat niat donasi Anda.
             </p>
           </div>
           <div className="flex gap-3 pt-4">
