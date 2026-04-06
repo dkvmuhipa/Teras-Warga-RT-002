@@ -438,6 +438,10 @@ export interface CashFlow {
   amount: number;
   type: 'Income' | 'Expense';
   category: string;
+  evidenceUrl?: string;
+  payerReceiver?: string;
+  method?: 'Tunai' | 'Transfer' | 'Lainnya';
+  referenceNumber?: string;
 }
 
 export interface Official {

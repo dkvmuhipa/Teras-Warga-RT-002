@@ -93,7 +93,11 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'history'>('profile');
 
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
-    const activeReports = reports.filter(r => r.houseId === house.id && r.status !== 'Selesai');
+    const activeReports = reports.filter(r => 
+        (formatHouseId(r.houseId || '') === formatHouseId(house.id) || 
+         formatHouseId(r.reporterHouseId || '') === formatHouseId(house.id)) && 
+        r.status !== 'Selesai'
+    );
     const isSafe = activeReports.length === 0;
     const officialData = officials?.find(o => {
         const officialHouseId = formatHouseId(o.houseId);
@@ -521,10 +525,10 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     const leftSide = sortedHouses.slice(0, splitIndex); 
     const rightSide = sortedHouses.slice(splitIndex).sort(sortByNumberDesc); 
     const getOfficialRole = (hid: string) => officials.find(o => formatHouseId(o.houseId) === formatHouseId(hid))?.role;
-    const getPanicAlert = (hid: string) => activePanicAlerts.find(a => a.houseId === hid);
+    const getPanicAlert = (hid: string) => activePanicAlerts.find(a => formatHouseId(a.houseId) === formatHouseId(hid));
 
     return (
-        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(15,23,42,0.1)] rounded-[2rem] ${className || 'h-full'} transition-all hover:shadow-[12px_12px_0px_0px_rgba(15,23,42,0.15)] hover:-translate-y-1`}>
+        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(15,23,42,0.15)] rounded-[2rem] ${className || 'h-full'} transition-all hover:shadow-[12px_12px_0px_0px_rgba(15,23,42,0.2)] hover:-translate-y-1`}>
             <div className="bg-slate-900 text-white text-center py-3 border-b-2 border-slate-800 relative overflow-hidden shrink-0 rounded-t-[1.8rem]">
                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
                  <h3 className="text-2xl font-black tracking-tighter relative z-10 drop-shadow-md">{blockCode}</h3>
@@ -533,10 +537,56 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                  <div className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-200 z-0"></div>
                  <div className="flex gap-4 relative z-10 h-full">
                     <div className="flex-1 flex flex-col gap-2">
-                        {leftSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} isHighlighted={highlightedId === house.id} />))}
+                        {leftSide.map(house => {
+                            const houseReports = reports.filter(r => 
+                                (formatHouseId(r.houseId || '') === formatHouseId(house.id) || 
+                                 formatHouseId(r.reporterHouseId || '') === formatHouseId(house.id)) && 
+                                r.status !== 'Selesai'
+                            );
+                            const hasIssue = houseReports.length > 0;
+                            
+                            return (
+                                <HouseCard 
+                                    key={house.id} 
+                                    house={house} 
+                                    isAdmin={isAdmin} 
+                                    iuranPayments={iuranPayments} 
+                                    hasIssue={hasIssue} 
+                                    officialRole={getOfficialRole(house.id)} 
+                                    activePanicAlert={getPanicAlert(house.id)} 
+                                    onClick={() => onSelect(house)} 
+                                    showHeatmap={showHeatmap} 
+                                    activeLayers={activeLayers} 
+                                    isHighlighted={highlightedId === house.id} 
+                                />
+                            );
+                        })}
                     </div>
                      <div className="flex-1 flex flex-col gap-2">
-                        {rightSide.map(house => (<HouseCard key={house.id} house={house} isAdmin={isAdmin} iuranPayments={iuranPayments} hasIssue={reports.some(r => r.houseId === house.id && r.status !== 'Selesai')} officialRole={getOfficialRole(house.id)} activePanicAlert={getPanicAlert(house.id)} onClick={() => onSelect(house)} showHeatmap={showHeatmap} activeLayers={activeLayers} isHighlighted={highlightedId === house.id} />))}
+                        {rightSide.map(house => {
+                            const houseReports = reports.filter(r => 
+                                (formatHouseId(r.houseId || '') === formatHouseId(house.id) || 
+                                 formatHouseId(r.reporterHouseId || '') === formatHouseId(house.id)) && 
+                                r.status !== 'Selesai'
+                            );
+                            const hasIssue = houseReports.length > 0;
+                            
+                            return (
+                                <HouseCard 
+                                    key={house.id} 
+                                    house={house} 
+                                    isAdmin={isAdmin} 
+                                    iuranPayments={iuranPayments} 
+                                    hasIssue={hasIssue} 
+                                    officialRole={getOfficialRole(house.id)} 
+                                    activePanicAlert={getPanicAlert(house.id)} 
+                                    onClick={() => onSelect(house)} 
+                                    showHeatmap={showHeatmap} 
+                                    activeLayers={activeLayers} 
+                                    isHighlighted={highlightedId === house.id} 
+                                />
+                            );
+                        })}
                     </div>
                 </div>
             </div>

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { DollarSign, Plus, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Filter, Search, Download, PieChart, Wallet } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { DollarSign, Plus, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Filter, Search, Download, PieChart, Wallet, User, CreditCard, Upload, X, Eye, FileText, CheckCircle2, AlertCircle, Trash2, RefreshCw } from 'lucide-react';
 import { CashFlow } from '../../types';
 import { getIndonesianMonthYear, generateMonthOptions } from '../../src/utils/dateUtils';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, AreaChart, Area
 } from 'recharts';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb, logAction, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb, logAction, handleFirestoreError, OperationType, uploadImageToStorage } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { generateCashFlowReportPDF } from '../../services/pdfService';
 
@@ -23,12 +23,20 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
   const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Form State
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<'Income' | 'Expense'>('Income');
   const [category, setCategory] = useState('Iuran');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [payerReceiver, setPayerReceiver] = useState('');
+  const [method, setMethod] = useState<'Tunai' | 'Transfer' | 'Lainnya'>('Tunai');
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [evidenceUrl, setEvidenceUrl] = useState('');
+  const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
 
   // Stats Calculation
   const totalIncome = cashFlow.filter(cf => cf.type === 'Income').reduce((acc, cf) => acc + cf.amount, 0);
@@ -64,17 +72,46 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const resetForm = () => {
-    setDesc(''); setAmount(''); setType('Income'); setCategory('Iuran'); setEditingId(null);
+    setDesc(''); 
+    setAmount(''); 
+    setType('Income'); 
+    setCategory('Iuran'); 
+    setDate(new Date().toISOString().split('T')[0]);
+    setPayerReceiver('');
+    setMethod('Tunai');
+    setReferenceNumber('');
+    setEvidenceUrl('');
+    setEditingId(null);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const url = await uploadImageToStorage(file, `finance/evidence_${Date.now()}`);
+      setEvidenceUrl(url);
+      toast.success('Bukti transaksi berhasil diunggah');
+    } catch (error) {
+      toast.error('Gagal mengunggah bukti transaksi');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = {
+    const data: Omit<CashFlow, 'id'> = {
       description: desc,
       amount: parseInt(amount),
       type,
       category,
-      date: new Date().toISOString().split('T')[0]
+      date,
+      payerReceiver,
+      method,
+      referenceNumber,
+      evidenceUrl
     };
 
     try {
@@ -110,7 +147,16 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
   };
 
   const openEdit = (cf: CashFlow) => {
-    setEditingId(cf.id); setDesc(cf.description); setAmount(cf.amount.toString()); setType(cf.type); setCategory(cf.category);
+    setEditingId(cf.id); 
+    setDesc(cf.description); 
+    setAmount(cf.amount.toString()); 
+    setType(cf.type); 
+    setCategory(cf.category);
+    setDate(cf.date || new Date().toISOString().split('T')[0]);
+    setPayerReceiver(cf.payerReceiver || '');
+    setMethod(cf.method || 'Tunai');
+    setReferenceNumber(cf.referenceNumber || '');
+    setEvidenceUrl(cf.evidenceUrl || '');
     setIsModalOpen(true);
   };
 
@@ -252,14 +298,14 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
 
         <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-sm text-left min-w-[800px]">
+            <table className="w-full text-sm text-left min-w-[1000px]">
               <thead>
                 <tr className="bg-slate-50/50 text-slate-400 font-black uppercase text-[10px] tracking-[0.15em] border-b border-slate-100">
                   <th className="px-6 sm:px-8 py-4 sm:py-5">Tanggal</th>
-                  <th className="px-6 sm:px-8 py-4 sm:py-5">Keterangan</th>
-                  <th className="px-6 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">Kategori</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5">Keterangan & Pihak</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">Kategori & Metode</th>
                   <th className="px-6 sm:px-8 py-4 sm:py-5 text-right">Nominal</th>
-                  <th className="px-6 sm:px-8 py-4 sm:py-5 text-center">Tipe</th>
+                  <th className="px-6 sm:px-8 py-4 sm:py-5 text-center">Bukti</th>
                   <th className="px-6 sm:px-8 py-4 sm:py-5 text-center">Aksi</th>
                 </tr>
               </thead>
@@ -276,38 +322,63 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
                           <Calendar size={12} className="sm:w-3.5 sm:h-3.5" />
                         </div>
                         <span className="font-bold text-slate-500 text-xs sm:text-sm whitespace-nowrap">
-                          {new Date(cf.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                          {new Date(cf.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5">
-                      <p className="font-black text-slate-800 text-sm sm:text-base line-clamp-1">{cf.description}</p>
+                      <div>
+                        <p className="font-black text-slate-800 text-sm sm:text-base line-clamp-1">{cf.description}</p>
+                        {cf.payerReceiver && (
+                          <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-slate-400">
+                            <User size={10} /> {cf.payerReceiver}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">
-                      <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200">
-                        {cf.category}
-                      </span>
+                      <div className="space-y-1.5">
+                        <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200 block w-fit">
+                          {cf.category}
+                        </span>
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                          <CreditCard size={10} /> {cf.method || 'Tunai'}
+                        </div>
+                      </div>
                     </td>
                     <td className={`px-6 sm:px-8 py-4 sm:py-5 text-right font-mono font-black text-sm sm:text-lg ${
                       cf.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'
                     }`}>
-                      {cf.type === 'Income' ? '+' : '-'} Rp {cf.amount.toLocaleString()}
+                      <div className="flex flex-col items-end">
+                        <span>{cf.type === 'Income' ? '+' : '-'} Rp {cf.amount.toLocaleString()}</span>
+                        <div className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest mt-1 ${
+                          cf.type === 'Income' ? 'text-emerald-400' : 'text-rose-400'
+                        }`}>
+                          {cf.type === 'Income' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                          {cf.type === 'Income' ? 'Pemasukan' : 'Pengeluaran'}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5 text-center">
-                      {cf.type === 'Income' ? (
-                        <div className="flex items-center justify-center gap-1 text-emerald-600 bg-emerald-50 px-2 sm:px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-100 w-fit mx-auto">
-                          <TrendingUp size={12} /> <span className="hidden sm:inline">Pemasukan</span>
-                        </div>
+                      {cf.evidenceUrl ? (
+                        <button 
+                          onClick={() => setSelectedEvidence(cf.evidenceUrl!)}
+                          className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors mx-auto flex items-center justify-center"
+                        >
+                          <Eye size={16} />
+                        </button>
                       ) : (
-                        <div className="flex items-center justify-center gap-1 text-rose-600 bg-rose-50 px-2 sm:px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-rose-100 w-fit mx-auto">
-                          <TrendingDown size={12} /> <span className="hidden sm:inline">Pengeluaran</span>
-                        </div>
+                        <span className="text-[10px] font-bold text-slate-300 italic">No Evidence</span>
                       )}
                     </td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5 text-center">
                        <div className="flex justify-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => openEdit(cf)} className="text-slate-400 hover:text-indigo-600 font-bold text-[10px] sm:text-xs">Edit</button>
-                          <button onClick={() => handleDelete(cf.id)} className="text-slate-400 hover:text-rose-600 font-bold text-[10px] sm:text-xs">Hapus</button>
+                          <button onClick={() => openEdit(cf)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all">
+                            <Plus size={14} className="rotate-45" />
+                          </button>
+                          <button onClick={() => handleDelete(cf.id)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-rose-600 hover:text-white transition-all">
+                            <Trash2 size={14} />
+                          </button>
                        </div>
                     </td>
                   </motion.tr>
@@ -326,38 +397,122 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
         </div>
       </motion.div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Transaksi" : "Catat Transaksi Baru"}>
-         <form onSubmit={handleSave} className="space-y-4">
-            <div>
-               <label className="block text-xs font-bold mb-1.5 text-slate-700">Keterangan <span className="text-rose-500">*</span></label>
-               <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={desc} onChange={e => setDesc(e.target.value)} required placeholder="Contoh: Iuran Sampah..." />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Transaksi" : "Catat Transaksi Baru"} maxWidth="max-w-3xl">
+         <form onSubmit={handleSave} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Keterangan Transaksi <span className="text-rose-500">*</span></label>
+                   <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={desc} onChange={e => setDesc(e.target.value)} required placeholder="Contoh: Pembelian Lampu Jalan..." />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                   <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Nominal (Rp) <span className="text-rose-500">*</span></label>
+                      <input type="number" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0" />
+                   </div>
+                   <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Tipe</label>
+                      <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={type} onChange={e => setType(e.target.value as any)}>
+                         <option value="Income">Pemasukan (+)</option>
+                         <option value="Expense">Pengeluaran (-)</option>
+                      </select>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Tanggal <span className="text-rose-500">*</span></label>
+                    <input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={date} onChange={e => setDate(e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Metode</label>
+                    <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={method} onChange={e => setMethod(e.target.value as any)}>
+                      <option value="Tunai">Tunai</option>
+                      <option value="Transfer">Transfer</option>
+                      <option value="Lainnya">Lainnya</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Pihak (Penerima/Penyetor)</label>
+                   <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={payerReceiver} onChange={e => setPayerReceiver(e.target.value)} placeholder="Nama warga / Toko..." />
+                   </div>
+                </div>
+
+                <div>
+                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Kategori <span className="text-rose-500">*</span></label>
+                   <input required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={category} onChange={e => setCategory(e.target.value)} list="cat-suggestions" placeholder="Pilih atau ketik..." />
+                   <datalist id="cat-suggestions">
+                      <option value="Iuran Warga"/>
+                      <option value="Sumbangan"/>
+                      <option value="Pembangunan"/>
+                      <option value="Operasional"/>
+                      <option value="Sosial"/>
+                      <option value="Listrik & Air"/>
+                      <option value="Keamanan"/>
+                      <option value="Kebersihan"/>
+                   </datalist>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Bukti Transaksi (Foto/Nota)</label>
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`w-full p-4 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
+                      evidenceUrl ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50'
+                    }`}
+                  >
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                    {isUploading ? (
+                      <RefreshCw className="animate-spin text-indigo-600" size={24} />
+                    ) : evidenceUrl ? (
+                      <>
+                        <CheckCircle2 className="text-emerald-600" size={24} />
+                        <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Bukti Terunggah</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="text-slate-400" size={24} />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Klik untuk Unggah</span>
+                      </>
+                    )}
+                  </div>
+                  {evidenceUrl && (
+                    <button 
+                      type="button" 
+                      onClick={(e) => { e.stopPropagation(); setEvidenceUrl(''); }}
+                      className="mt-2 text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline"
+                    >
+                      Hapus Bukti
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-               <div>
-                  <label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp) <span className="text-rose-500">*</span></label>
-                  <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={amount} onChange={e => setAmount(e.target.value)} required />
-               </div>
-               <div>
-                  <label className="block text-xs font-bold mb-1.5 text-slate-700">Tipe</label>
-                  <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={type} onChange={e => setType(e.target.value as any)}>
-                     <option value="Income">Pemasukan</option>
-                     <option value="Expense">Pengeluaran</option>
-                  </select>
-               </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1 py-4 rounded-2xl" onClick={() => setIsModalOpen(false)}>Batal</Button>
+              <Button type="submit" className="flex-[2] py-4 rounded-2xl shadow-lg shadow-indigo-200" disabled={isUploading}>
+                {editingId ? 'Simpan Perubahan' : 'Catat Transaksi'}
+              </Button>
             </div>
-            <div>
-               <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori <span className="text-rose-500">*</span></label>
-               <input required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={category} onChange={e => setCategory(e.target.value)} list="cat-suggestions" />
-               <datalist id="cat-suggestions">
-                  <option value="Iuran Warga"/>
-                  <option value="Sumbangan"/>
-                  <option value="Pembangunan"/>
-                  <option value="Operasional"/>
-                  <option value="Sosial"/>
-               </datalist>
-            </div>
-            <Button type="submit" className="w-full py-3 mt-2">{editingId ? 'Simpan Perubahan' : 'Simpan Transaksi'}</Button>
          </form>
+      </Modal>
+
+      {/* Evidence Preview Modal */}
+      <Modal isOpen={!!selectedEvidence} onClose={() => setSelectedEvidence(null)} title="Bukti Transaksi">
+        <div className="p-2">
+          <img src={selectedEvidence!} alt="Bukti Transaksi" className="w-full rounded-2xl shadow-lg" referrerPolicy="no-referrer" />
+          <div className="mt-6 flex justify-end">
+            <Button onClick={() => setSelectedEvidence(null)}>Tutup</Button>
+          </div>
+        </div>
       </Modal>
     </motion.div>
   );

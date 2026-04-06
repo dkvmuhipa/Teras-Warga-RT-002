@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig, OfficialLetter } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -35,6 +35,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   
   const [selectedLetter, setSelectedLetter] = useState<LetterRequest | null>(null);
   const [isCreatingLetter, setIsCreatingLetter] = useState(false);
+  const [isCreatingReport, setIsCreatingReport] = useState(false);
   const [letterNumberInput, setLetterNumberInput] = useState('');
   const [adminLetterNumber, setAdminLetterNumber] = useState('');
   const [editLetterData, setEditLetterData] = useState<Partial<LetterRequest>>({});
@@ -69,6 +70,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     education: 'SMA/Sederajat',
     familyStatus: 'Kepala Keluarga',
     bloodType: '-',
+  });
+
+  const [adminReportForm, setAdminReportForm] = useState<Partial<Report>>({
+    type: 'Keamanan',
+    status: 'Baru',
+    reporterName: '',
+    houseId: '',
+    description: '',
+    date: new Date().toISOString(),
+    archived: false
   });
 
   React.useEffect(() => {
@@ -250,6 +261,41 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         console.error(error);
         toast.error('Gagal mengarsipkan surat.');
       }
+    }
+  };
+
+  const handleCreateReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminReportForm.description || !adminReportForm.reporterName) {
+      toast.error("Mohon lengkapi data laporan!");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const reportData = {
+        ...adminReportForm,
+        date: new Date().toISOString(),
+        archived: false,
+        status: adminReportForm.status || 'Baru'
+      };
+      
+      await addReportToDb(reportData);
+      await logAction('Buat Laporan Baru', `Admin membuat laporan baru: ${adminReportForm.description}`);
+      
+      toast.success("Laporan berhasil dibuat!");
+      setIsCreatingReport(false);
+      setAdminReportForm({
+        type: 'Keamanan',
+        status: 'Baru',
+        date: new Date().toISOString(),
+        archived: false
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'reports');
+      toast.error("Gagal membuat laporan.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -524,6 +570,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
           {activeTab === 'letters' && (
             <Button onClick={() => setIsCreatingLetter(true)} className="bg-indigo-600 hover:bg-indigo-700">
               <Plus size={18} className="mr-2" /> Buat Surat Baru
+            </Button>
+          )}
+          {activeTab === 'reports' && (
+            <Button onClick={() => setIsCreatingReport(true)} className="bg-rose-600 hover:bg-rose-700">
+              <Plus size={18} className="mr-2" /> Buat Laporan Baru
             </Button>
           )}
           <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
@@ -1823,6 +1874,114 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <Button type="button" variant="secondary" onClick={() => setIsCreatingLetter(false)} className="px-6">Batal</Button>
             <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 px-8">
               <Printer size={18} className="mr-2" /> Terbitkan & Cetak
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Admin Create Report Modal */}
+      <Modal isOpen={isCreatingReport} onClose={() => setIsCreatingReport(false)} title="Buat Laporan Baru (Admin)" maxWidth="max-w-2xl">
+        <form onSubmit={handleCreateReport} className="space-y-6">
+          <div className="bg-rose-50/50 p-4 rounded-2xl border border-rose-100 flex items-start gap-3">
+            <div className="p-2 bg-rose-100 text-rose-600 rounded-xl">
+              <AlertTriangle size={18} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-rose-900">Pencatatan Laporan Langsung</h4>
+              <p className="text-xs text-rose-700/80 mt-1">Gunakan ini untuk mencatat temuan atau laporan yang diterima langsung saat kunjungan ke rumah warga.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="group">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Pelapor / Warga <span className="text-rose-500">*</span></label>
+              <div className="relative">
+                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                  value={adminReportForm.reporterName || ''} 
+                  onChange={e=>setAdminReportForm({...adminReportForm, reporterName: e.target.value})} 
+                  required 
+                  placeholder="Nama warga"
+                />
+              </div>
+            </div>
+
+            <div className="group">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Blok / Nomor Rumah <span className="text-rose-500">*</span></label>
+              <div className="relative">
+                <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold uppercase focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                  value={adminReportForm.houseId || ''} 
+                  onChange={e=>setAdminReportForm({...adminReportForm, houseId: e.target.value})} 
+                  required 
+                  placeholder="Cth: C7-02" 
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="group">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Laporan <span className="text-rose-500">*</span></label>
+              <select 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                value={adminReportForm.type} 
+                onChange={e=>setAdminReportForm({...adminReportForm, type: e.target.value as any})}
+              >
+                <option value="Keamanan">Keamanan</option>
+                <option value="Kebersihan">Kebersihan</option>
+                <option value="Infrastruktur">Infrastruktur</option>
+                <option value="Sosial">Sosial</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+
+            <div className="group">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Status Awal <span className="text-rose-500">*</span></label>
+              <select 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                value={adminReportForm.status} 
+                onChange={e=>setAdminReportForm({...adminReportForm, status: e.target.value as any})}
+              >
+                <option value="Baru">Baru (Belum Ditangani)</option>
+                <option value="Diproses">Diproses (Sedang Ditangani)</option>
+                <option value="Selesai">Selesai (Sudah Tuntas)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="group">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Isi Laporan / Catatan <span className="text-rose-500">*</span></label>
+            <textarea 
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all h-32 resize-none leading-relaxed" 
+              value={adminReportForm.description || ''} 
+              onChange={e=>setAdminReportForm({...adminReportForm, description: e.target.value})} 
+              required 
+              placeholder="Jelaskan detail laporan atau temuan di lokasi..."
+            />
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <Button 
+              type="button" 
+              onClick={() => setIsCreatingReport(false)} 
+              className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-none"
+            >
+              Batal
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSaving}
+              className="flex-1 bg-rose-600 hover:bg-rose-700 shadow-rose-200"
+            >
+              {isSaving ? (
+                <RefreshCw size={18} className="mr-2 animate-spin" />
+              ) : (
+                <Save size={18} className="mr-2" />
+              )}
+              Simpan Laporan
             </Button>
           </div>
         </form>

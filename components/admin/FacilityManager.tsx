@@ -13,7 +13,8 @@ import {
   updateRondaSwapRequestStatus, 
   updatePanicAlertStatus,
   addRondaAttendance,
-  updateHouseData
+  updateHouseData,
+  addReportToDb
 } from '../../services/databaseService';
 import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
@@ -39,11 +40,20 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [isRondaModalOpen, setIsRondaModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedReportHouse, setSelectedReportHouse] = useState<House | null>(null);
+  const [reportForm, setReportForm] = useState({
+    type: 'Keamanan' as Report['type'],
+    description: '',
+    block: '',
+    houseNumber: ''
+  });
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
   const [presentMembers, setPresentMembers] = useState<string[]>([]);
   const [attendanceNotes, setAttendanceNotes] = useState('');
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const availableBlocks = Array.from(new Set(houses.map(h => h.block))).sort();
   const [editingRonda, setEditingRonda] = useState<RondaSchedule | null>(null);
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
@@ -267,8 +277,50 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   };
 
   const handleResolvePanic = async (id: string) => {
-    const adminName = localStorage.getItem('admin_name') || 'Admin';
-    await updatePanicAlertStatus(id, 'Resolved', adminName);
+    await updatePanicAlertStatus(id, 'Resolved');
+  };
+
+  const handleReportHouse = (house: House) => {
+    setSelectedReportHouse(house);
+    setReportForm({
+      type: 'Keamanan',
+      description: `Laporan di Rumah ${house.block}-${house.number}: `,
+      block: house.block,
+      houseNumber: house.number
+    });
+    setIsReportModalOpen(true);
+  };
+
+  const handleSubmitReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportForm.description) {
+      toast.error("Mohon isi deskripsi laporan");
+      return;
+    }
+
+    setIsSubmittingReport(true);
+    try {
+      const adminName = localStorage.getItem('admin_name') || 'Admin';
+      const targetHouse = selectedReportHouse || houses.find(h => h.block === reportForm.block && h.number === reportForm.houseNumber);
+      
+      await addReportToDb({
+        type: reportForm.type,
+        description: reportForm.description,
+        reporterName: adminName,
+        reporterHouseId: 'ADMIN',
+        houseId: targetHouse?.id || '',
+        date: new Date().toISOString(),
+        status: 'Baru'
+      });
+      toast.success("Laporan berhasil dikirim!");
+      setIsReportModalOpen(false);
+      setSelectedReportHouse(null);
+      setReportForm({ type: 'Keamanan', description: '', block: '', houseNumber: '' });
+    } catch (error) {
+      toast.error("Gagal mengirim laporan");
+    } finally {
+      setIsSubmittingReport(false);
+    }
   };
 
   const handleSaveAttendance = async () => {
@@ -491,6 +543,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       mapPoints={mapPoints}
                       activePatrol={activePatrol}
                       activePanicAlerts={activePanicAlerts}
+                      onReportHouse={handleReportHouse}
                     />
                   </div>
                 </motion.div>
@@ -582,6 +635,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   reports={reports} 
                   officials={officials} 
                   mapPoints={mapPoints}
+                  onReportHouse={handleReportHouse}
                 />
               </div>
             </motion.div>
@@ -1194,24 +1248,89 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         </form>
       </Modal>
 
-      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Laporan Insiden Keamanan">
-        <div className="space-y-6">
-          <div className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100 text-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-b from-rose-100/0 to-rose-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative z-10">
-              <button className="w-20 h-20 bg-rose-600 text-white rounded-full flex items-center justify-center mx-auto hover:bg-rose-700 transition-all shadow-xl shadow-rose-200 hover:scale-110 active:scale-95">
-                <Megaphone size={32} />
-              </button>
-              <h4 className="text-lg font-black text-rose-900 mt-6">Tekan & Bicara</h4>
-              <p className="text-xs text-rose-600 font-medium mt-1">AI akan otomatis mentranskripsi laporan Anda.</p>
+      <Modal 
+        isOpen={isReportModalOpen} 
+        onClose={() => {
+          setIsReportModalOpen(false);
+          setSelectedReportHouse(null);
+        }} 
+        title={selectedReportHouse ? `Lapor Masalah: Rumah ${selectedReportHouse.block}-${selectedReportHouse.number}` : "Laporan Insiden Keamanan"}
+      >
+        <form onSubmit={handleSubmitReport} className="space-y-6">
+          {selectedReportHouse ? (
+            <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center gap-3">
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 font-black shadow-sm">
+                {selectedReportHouse.number}
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest leading-none mb-1">Target Laporan</p>
+                <p className="text-sm font-bold text-slate-700">Rumah {selectedReportHouse.block}-{selectedReportHouse.number} ({selectedReportHouse.headOfFamily})</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">Blok Rumah</label>
+                <select 
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                  value={reportForm.block}
+                  onChange={(e) => setReportForm(prev => ({ ...prev, block: e.target.value, houseNumber: '' }))}
+                >
+                  <option value="">Pilih Blok</option>
+                  {availableBlocks.map(block => (
+                    <option key={block} value={block}>{block}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">Nomor Rumah</label>
+                <select 
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none disabled:opacity-50"
+                  value={reportForm.houseNumber}
+                  disabled={!reportForm.block}
+                  onChange={(e) => setReportForm(prev => ({ ...prev, houseNumber: e.target.value }))}
+                >
+                  <option value="">Pilih Nomor</option>
+                  {houses
+                    .filter(h => h.block === reportForm.block)
+                    .sort((a, b) => parseInt(a.number) - parseInt(b.number))
+                    .map(h => (
+                      <option key={h.id} value={h.number}>{h.number}</option>
+                    ))
+                  }
+                </select>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest">Kategori Laporan</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {(['Keamanan', 'Kebersihan', 'Fasilitas', 'Sosial', 'Lainnya'] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setReportForm(prev => ({ ...prev, type }))}
+                  className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                    reportForm.type === type 
+                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
           </div>
           
           <div className="relative">
             <div className="absolute inset-y-0 left-0 w-1 bg-indigo-500 rounded-full"></div>
             <div className="pl-4">
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Detail Laporan Manual</label>
+              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Detail Laporan</label>
               <textarea 
+                required
+                value={reportForm.description}
+                onChange={(e) => setReportForm(prev => ({ ...prev, description: e.target.value }))}
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all h-32"
                 placeholder="Jelaskan situasi atau kejadian yang Anda temukan..."
               />
@@ -1219,10 +1338,26 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           </div>
 
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setIsReportModalOpen(false)} className="flex-1 py-3">Batal</Button>
-            <Button className="flex-1 py-3 bg-rose-600 hover:bg-rose-700">Kirim Laporan Darurat</Button>
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => {
+                setIsReportModalOpen(false);
+                setSelectedReportHouse(null);
+              }} 
+              className="flex-1 py-3"
+            >
+              Batal
+            </Button>
+            <Button 
+              type="submit"
+              disabled={isSubmittingReport}
+              className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-200"
+            >
+              {isSubmittingReport ? 'Mengirim...' : 'Kirim Laporan'}
+            </Button>
           </div>
-        </div>
+        </form>
       </Modal>
 
       {isQRModalOpen && <CheckpointQRGenerator onClose={() => setIsQRModalOpen(false)} />}
