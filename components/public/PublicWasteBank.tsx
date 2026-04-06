@@ -277,14 +277,14 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
               </Card>
 
               <div className="grid grid-cols-2 gap-4">
-                <Card className="p-6 bg-white border-slate-100 shadow-sm">
+                <Card className="bg-white border-slate-100 shadow-sm">
                   <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl w-fit mb-4">
                     <Package size={20} />
                   </div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Sampah</p>
                   <p className="text-xl font-black text-slate-800">{totalWeight.toFixed(1)} kg</p>
                 </Card>
-                <Card className="p-6 bg-white border-slate-100 shadow-sm">
+                <Card className="bg-white border-slate-100 shadow-sm">
                   <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl w-fit mb-4">
                     <TrendingUp size={20} />
                   </div>

@@ -1023,6 +1023,18 @@ export const subscribeToHouseUpdateRequests = (houseId: string, callback: (data:
     });
 };
 
+export const subscribeToHouseLetters = (houseId: string, callback: (data: LetterRequest[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
+    const q = query(collection(db, LETTERS_COL), where("houseId", "==", houseId));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as LetterRequest));
+        data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, LETTERS_COL);
+    });
+};
+
 export const addUpdateRequest = async (data: any) => {
     try {
         return await addDoc(collection(db, UPDATE_REQUESTS_COL), {

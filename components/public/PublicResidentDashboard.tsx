@@ -33,11 +33,12 @@ import {
   Stethoscope,
   AlertTriangle,
   Send,
-  Camera
+  Camera,
+  FileText
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
-import { House, GuestReport, UpdateRequest, PaymentStatus, Report } from '../../types';
+import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -46,6 +47,7 @@ import {
   addUpdateRequest,
   subscribeToHouseUpdateRequests,
   subscribeToHouseReports,
+  subscribeToHouseLetters,
   addReportToDb,
   handleFirestoreError,
   OperationType
@@ -66,12 +68,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [tempHouseId, setTempHouseId] = useState('');
   const [pinError, setPinError] = useState(false);
   
-  const [activeTab, setActiveTab] = useState<'eid' | 'update' | 'guests' | 'reports'>('eid');
+  const [activeTab, setActiveTab] = useState<'eid' | 'update' | 'guests' | 'reports' | 'letters'>('eid');
   const [guestReports, setGuestReports] = useState<GuestReport[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
+  const [letters, setLetters] = useState<LetterRequest[]>([]);
   
-  const { getPaymentStatus } = useFinancial();
+  const { getPaymentStatus, settings } = useFinancial();
   const currentHouse = houses.find(h => h.id === selectedHouseId);
 
   const currentMonth = getIndonesianMonthYear(new Date());
@@ -81,17 +84,23 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const dayOfMonth = new Date().getDate();
   const isMandatory = dayOfMonth >= 20;
 
+  const airFee = settings?.airFee || 10000;
+  const sampahFee = settings?.sampahFee || 5000;
+  const totalFee = airFee + sampahFee;
+
   useEffect(() => {
     if (!selectedHouseId) return;
     
     const unsubGuests = subscribeToHouseGuestReports(selectedHouseId, setGuestReports);
     const unsubUpdates = subscribeToHouseUpdateRequests(selectedHouseId, setUpdateRequests);
     const unsubReports = subscribeToHouseReports(selectedHouseId, setReports);
+    const unsubLetters = subscribeToHouseLetters(selectedHouseId, setLetters);
     
     return () => {
       unsubGuests();
       unsubUpdates();
       unsubReports();
+      unsubLetters();
     };
   }, [selectedHouseId]);
 
@@ -369,6 +378,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       <div className="flex items-center gap-2 bg-white p-1.5 border border-slate-200 rounded-3xl shadow-sm mb-8 overflow-x-auto no-scrollbar">
         {[
           { id: 'eid', label: 'E-ID Warga', icon: QrCode },
+          { id: 'letters', label: 'Status Surat', icon: FileText },
           { id: 'update', label: 'Update Data', icon: FileEdit },
           { id: 'guests', label: 'Log Tamu', icon: History },
           { id: 'reports', label: 'Laporan', icon: AlertTriangle }
@@ -395,11 +405,11 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start"
           >
             {/* E-ID Card */}
             <div className="lg:col-span-2">
-              <Card className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 text-white border-none shadow-2xl p-0 aspect-[1.6/1] md:aspect-auto md:h-[400px]">
+              <Card className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 text-white border-none shadow-2xl p-0 min-h-[350px]">
                 {/* Decorative elements */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
@@ -422,7 +432,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Nama Kepala Keluarga</p>
                         <p className="text-2xl md:text-4xl font-black tracking-tight">{currentHouse?.headOfFamily}</p>
                       </div>
-                      <div className="flex gap-8 md:gap-12">
+                      <div className="flex flex-wrap gap-4 md:gap-12">
                         <div>
                           <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">ID Rumah</p>
                           <p className="text-lg md:text-xl font-black">{currentHouse?.block}-{currentHouse?.number}</p>
@@ -457,31 +467,31 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             <div className="space-y-6">
               {/* Iuran Warning */}
               {!isAllPaid && (
-                <div className={`p-6 rounded-3xl border ${isMandatory ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100'}`}>
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-2xl shadow-sm shrink-0 ${isMandatory ? 'bg-white text-rose-600' : 'bg-white text-amber-600'}`}>
-                      <AlertTriangle size={24} />
+                <div className={`p-6 rounded-[2rem] border-2 ${isMandatory ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100'}`}>
+                  <div className="flex flex-col sm:flex-row items-start gap-5">
+                    <div className={`p-4 rounded-2xl shadow-sm shrink-0 ${isMandatory ? 'bg-white text-rose-600' : 'bg-white text-amber-600'}`}>
+                      <AlertTriangle size={28} />
                     </div>
-                    <div>
-                      <h4 className={`text-sm font-black uppercase tracking-widest mb-1 ${isMandatory ? 'text-rose-900' : 'text-amber-900'}`}>
+                    <div className="flex-1">
+                      <h4 className={`text-base font-black uppercase tracking-widest mb-2 ${isMandatory ? 'text-rose-900' : 'text-amber-900'}`}>
                         {isMandatory ? 'Layanan Ditangguhkan' : 'Tagihan Iuran Tersedia'}
                       </h4>
-                      <p className={`text-xs font-medium leading-relaxed ${isMandatory ? 'text-rose-700' : 'text-amber-700'}`}>
+                      <p className={`text-sm font-medium leading-relaxed mb-6 ${isMandatory ? 'text-rose-700' : 'text-amber-700'}`}>
                         {isMandatory 
                           ? `Mohon maaf, layanan pengajuan surat dan mutasi ditangguhkan karena iuran bulan ${currentMonth} belum diselesaikan (melewati tgl 20).` 
                           : `Tagihan iuran bulan ${currentMonth} sudah tersedia. Mohon selesaikan sebelum tanggal 20 untuk tetap dapat mengakses layanan digital.`}
                       </p>
-                      <div className="mt-4 flex gap-3">
+                      <div className="flex flex-col xl:flex-row gap-3 flex-wrap">
                         <Button 
                           onClick={() => setIsIuranModalOpen(true)}
-                          className={`h-8 px-4 text-[10px] font-black uppercase tracking-widest ${isMandatory ? 'bg-rose-600 hover:bg-rose-700' : 'bg-amber-600 hover:bg-amber-700'}`}
+                          className={`h-12 sm:h-10 px-8 sm:px-6 text-[10px] font-black uppercase tracking-widest w-full xl:w-auto shadow-lg ${isMandatory ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100'}`}
                         >
                           Lihat Rincian
                         </Button>
                         <Button 
-                          variant="outline" 
+                          variant="secondary" 
                           onClick={() => window.open(`https://wa.me/${(currentHouse?.phone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}`, '_blank')}
-                          className="h-8 px-4 text-[10px] font-black uppercase tracking-widest border-slate-200 bg-white text-slate-600"
+                          className="h-12 sm:h-10 px-8 sm:px-6 text-[10px] font-black uppercase tracking-widest w-full xl:w-auto bg-white border-slate-200"
                         >
                           Hubungi Pengurus RT
                         </Button>
@@ -491,7 +501,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 </div>
               )}
 
-              <Card className="p-6 bg-white border-slate-100 shadow-sm">
+              <Card className="bg-white border-slate-100 shadow-sm">
                 <h4 className="font-black text-slate-800 mb-4 flex items-center gap-2">
                   <Info size={18} className="text-indigo-600" /> Informasi Hunian
                 </h4>
@@ -511,7 +521,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 </div>
               </Card>
 
-              <Card className="p-6 bg-indigo-50 border-indigo-100 shadow-sm">
+              <Card className="bg-indigo-50 border-indigo-100 shadow-sm">
                 <h4 className="font-black text-indigo-900 mb-2">Manfaat E-ID</h4>
                 <p className="text-xs text-indigo-700 font-medium leading-relaxed mb-4">
                   Gunakan QR Code di atas untuk verifikasi identitas saat kegiatan RT, pengambilan bantuan, atau akses fasilitas lingkungan.
@@ -526,6 +536,66 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   </div>
                 </div>
               </Card>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'letters' && (
+          <motion.div 
+            key="letters"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6"
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-black text-slate-800">Status Pengajuan Surat</h3>
+                <p className="text-sm text-slate-500 font-medium">Pantau status surat pengantar yang Anda ajukan melalui menu Layanan.</p>
+              </div>
+              <Button onClick={() => window.location.hash = '#/services'} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
+                <Plus size={18} className="mr-2" /> Buat Pengajuan
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {letters.length === 0 ? (
+                <div className="col-span-full py-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                  <FileText className="mx-auto text-slate-300 mb-4" size={48} />
+                  <p className="text-slate-500 font-bold">Belum ada pengajuan surat.</p>
+                </div>
+              ) : (
+                letters.map(letter => (
+                  <Card key={letter.id} className="bg-white border-slate-100 hover:border-indigo-200 transition-all">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                          <FileText size={20} />
+                        </div>
+                        <div>
+                          <h4 className="font-black text-slate-800">{letter.type}</h4>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            {new Date(letter.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                        letter.status === 'Disetujui' || letter.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                        letter.status === 'Ditolak' || letter.status === 'Rejected' ? 'bg-rose-50 text-rose-600 border-rose-200' :
+                        'bg-amber-50 text-amber-600 border-amber-200'
+                      }`}>
+                        {letter.status}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-slate-50 rounded-xl">
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
+                        <p className="text-xs font-bold text-slate-700 line-clamp-2">{letter.purposeDetail}</p>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              )}
             </div>
           </motion.div>
         )}
@@ -1289,7 +1359,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         <div className="p-6 space-y-6">
           <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-center">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Tagihan {currentMonth}</p>
-            <h3 className="text-3xl font-black text-slate-900">Rp 15.000</h3>
+            <h3 className="text-3xl font-black text-slate-900">Rp {totalFee.toLocaleString('id-ID')}</h3>
             <p className="text-[10px] font-bold text-rose-500 mt-2 uppercase tracking-widest">Jatuh Tempo: Tgl 20 {currentMonth}</p>
           </div>
 
@@ -1299,14 +1369,14 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Trash2 size={16} /></div>
                 <span className="text-sm font-bold text-slate-700">Retribusi Sampah</span>
               </div>
-              <span className="text-sm font-black text-slate-900">Rp 5.000</span>
+              <span className="text-sm font-black text-slate-900">Rp {sampahFee.toLocaleString('id-ID')}</span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Droplets size={16} /></div>
                 <span className="text-sm font-bold text-slate-700">Iuran Air Bersih</span>
               </div>
-              <span className="text-sm font-black text-slate-900">Rp 10.000</span>
+              <span className="text-sm font-black text-slate-900">Rp {airFee.toLocaleString('id-ID')}</span>
             </div>
           </div>
 
