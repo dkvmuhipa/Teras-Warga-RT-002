@@ -22,7 +22,7 @@ export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, let
   const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const resolvedReports = reports.filter(r => r.status === 'Selesai').length;
-  const processedLetters = letters.filter(l => l.status === 'Disetujui').length;
+  const processedLetters = letters.filter(l => l.status !== 'Ditolak' && l.status !== 'Rejected').length;
   
   const stats = [
     { 
