@@ -402,14 +402,14 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Keterangan Transaksi <span className="text-rose-500">*</span></label>
-                   <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={desc} onChange={e => setDesc(e.target.value)} required placeholder="Contoh: Pembelian Lampu Jalan..." />
+                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Keterangan Transaksi</label>
+                   <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={desc} onChange={e => setDesc(e.target.value)} placeholder="Contoh: Pembelian Lampu Jalan..." />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                    <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Nominal (Rp) <span className="text-rose-500">*</span></label>
-                      <input type="number" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0" />
+                      <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Nominal (Rp)</label>
+                      <input type="number" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0" />
                    </div>
                    <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Tipe</label>
@@ -422,8 +422,8 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Tanggal <span className="text-rose-500">*</span></label>
-                    <input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={date} onChange={e => setDate(e.target.value)} required />
+                    <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Tanggal</label>
+                    <input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={date} onChange={e => setDate(e.target.value)} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Metode</label>
@@ -446,8 +446,8 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
                 </div>
 
                 <div>
-                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Kategori <span className="text-rose-500">*</span></label>
-                   <input required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={category} onChange={e => setCategory(e.target.value)} list="cat-suggestions" placeholder="Pilih atau ketik..." />
+                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Kategori</label>
+                   <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={category} onChange={e => setCategory(e.target.value)} list="cat-suggestions" placeholder="Pilih atau ketik..." />
                    <datalist id="cat-suggestions">
                       <option value="Iuran Warga"/>
                       <option value="Sumbangan"/>

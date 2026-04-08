@@ -116,7 +116,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'overview':
         return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
       case 'residents':
-        return <ResidentManager houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} bills={bills} residentRegistrations={residentRegistrations} pbbRecords={pbbRecords} settings={settings} />;
+        return <ResidentManager role={role} houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} bills={bills} residentRegistrations={residentRegistrations} pbbRecords={pbbRecords} settings={settings} />;
       case 'update-requests':
         return <UpdateRequestManager requests={updateRequests} houses={houses} />;
       case 'finance':

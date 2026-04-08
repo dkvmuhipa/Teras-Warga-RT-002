@@ -365,9 +365,8 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
               <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pilih Rumah <span className="text-rose-500">*</span></label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pilih Rumah</label>
                     <select 
-                      required
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
                       value={selectedHouseId}
                       onChange={(e) => setSelectedHouseId(e.target.value)}
@@ -379,20 +378,18 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bulan Tagihan <span className="text-rose-500">*</span></label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bulan Tagihan</label>
                     <input 
                       type="month" 
-                      required
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
                       value={billMonth}
                       onChange={(e) => setBillMonth(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jatuh Tempo <span className="text-rose-500">*</span></label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jatuh Tempo</label>
                     <input 
                       type="date" 
-                      required
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
@@ -416,33 +413,30 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
                     {billItems.map((item, idx) => (
                       <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 items-end animate-slide-up">
                         <div className="md:col-span-4 space-y-1.5">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Item <span className="text-rose-500">*</span></label>
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Item</label>
                           <input 
                             type="text" 
                             placeholder="Contoh: Iuran Sampah"
-                            required
                             className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
                             value={item.name}
                             onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
                           />
                         </div>
                         <div className="md:col-span-3 space-y-1.5">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Jumlah (Rp) <span className="text-rose-500">*</span></label>
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Jumlah (Rp)</label>
                           <input 
                             type="number" 
                             placeholder="0"
-                            required
                             className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
                             value={item.amount}
                             onChange={(e) => handleItemChange(idx, 'amount', e.target.value)}
                           />
                         </div>
                         <div className="md:col-span-4 space-y-1.5">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Pengelola <span className="text-rose-500">*</span></label>
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Pengelola</label>
                           <input 
                             type="text" 
                             placeholder="Contoh: Bpk. RT"
-                            required
                             className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
                             value={item.manager}
                             onChange={(e) => handleItemChange(idx, 'manager', e.target.value)}

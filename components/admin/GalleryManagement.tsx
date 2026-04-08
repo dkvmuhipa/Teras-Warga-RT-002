@@ -119,13 +119,12 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tambah Foto Galeri">
         <form onSubmit={handleAddGallery} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Judul Kegiatan <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Judul Kegiatan</label>
             <input 
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="Contoh: Kerja Bakti..."
-              required
             />
           </div>
           
@@ -144,7 +143,7 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
 
           {imageType === 'upload' ? (
             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Pilih Foto <span className="text-rose-500">*</span></label>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Pilih Foto</label>
                 <div className="relative">
                     <input 
                         type="file"
@@ -152,7 +151,6 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
                         className="hidden"
                         id="gallery-file-upload"
                         onChange={e => setImageFile(e.target.files?.[0] || null)}
-                        required={imageType === 'upload'}
                     />
                     <label htmlFor="gallery-file-upload" className="flex items-center gap-3 w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold cursor-pointer hover:bg-slate-100 transition-colors">
                         <Upload size={18} className="text-slate-400" />
@@ -162,13 +160,12 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
             </div>
           ) : (
             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">URL Foto <span className="text-rose-500">*</span></label>
+                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">URL Foto</label>
                 <input 
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
                   value={imageUrl}
                   onChange={e => setImageUrl(e.target.value)}
                   placeholder="https://..."
-                  required={imageType === 'link'}
                 />
             </div>
           )}

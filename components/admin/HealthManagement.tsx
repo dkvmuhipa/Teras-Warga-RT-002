@@ -376,7 +376,6 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
                   <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={18} />
                   <input 
                     type="text" 
-                    required
                     className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-300"
                     value={form.residentName}
                     onChange={e => setForm({...form, residentName: e.target.value})}
@@ -390,7 +389,6 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
                   <Activity className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={18} />
                   <input 
                     type="text" 
-                    required
                     className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-300"
                     value={form.houseId}
                     onChange={e => setForm({...form, houseId: e.target.value})}
@@ -433,7 +431,6 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
                   <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={18} />
                   <input 
                     type="date" 
-                    required
                     className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 outline-none transition-all"
                     value={form.date}
                     onChange={e => setForm({...form, date: e.target.value})}
@@ -606,7 +603,6 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
                 </label>
                 <input 
                   type="text" 
-                  required
                   className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 outline-none transition-all shadow-sm"
                   value={form.officerName}
                   onChange={e => setForm({...form, officerName: e.target.value})}

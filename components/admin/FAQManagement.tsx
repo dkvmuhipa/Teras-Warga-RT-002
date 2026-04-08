@@ -157,23 +157,21 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
       >
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wider">Pertanyaan <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wider">Pertanyaan</label>
             <input 
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
               value={question} 
               onChange={e => setQuestion(e.target.value)} 
               placeholder="Contoh: Bagaimana cara lapor tamu?"
-              required
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wider">Jawaban <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wider">Jawaban</label>
             <textarea 
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-h-[120px]" 
               value={answer} 
               onChange={e => setAnswer(e.target.value)} 
               placeholder="Tuliskan jawaban lengkap di sini..."
-              required
             />
           </div>
           <div className="flex gap-3 pt-2">

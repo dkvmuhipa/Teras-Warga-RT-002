@@ -977,25 +977,23 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Bulan (YYYY-MM) <span className="text-rose-500">*</span></label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Bulan (YYYY-MM)</label>
                 <div className="relative">
                   <input 
                     type="month" 
                     value={formData.month} 
                     onChange={e => setFormData({...formData, month: e.target.value})} 
                     className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" 
-                    required 
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tahun <span className="text-rose-500">*</span></label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tahun</label>
                 <input 
                   type="number" 
                   value={formData.year} 
                   onChange={e => setFormData({...formData, year: parseInt(e.target.value)})} 
                   className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" 
-                  required 
                 />
               </div>
             </div>
@@ -1009,7 +1007,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="col-span-full bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Penduduk Awal Bulan <span className="text-rose-500">*</span></label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Penduduk Awal Bulan</label>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400"><Users size={18} /></div>
                   <input 
@@ -1017,30 +1015,29 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     value={formData.initialPopulation} 
                     onChange={e => setFormData({...formData, initialPopulation: parseInt(e.target.value)})} 
                     className="flex-1 p-2 bg-transparent text-lg font-black text-slate-800 outline-none" 
-                    required 
                   />
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
-                  <label className="block text-[10px] font-bold text-emerald-600 mb-1.5 uppercase">Kelahiran (+) <span className="text-rose-500">*</span></label>
-                  <input type="number" value={formData.birthCount} onChange={e => setFormData({...formData, birthCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-emerald-700 outline-none" required />
+                  <label className="block text-[10px] font-bold text-emerald-600 mb-1.5 uppercase">Kelahiran (+)</label>
+                  <input type="number" value={formData.birthCount} onChange={e => setFormData({...formData, birthCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-emerald-700 outline-none" />
                 </div>
                 <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
-                  <label className="block text-[10px] font-bold text-blue-600 mb-1.5 uppercase">Pendatang (+) <span className="text-rose-500">*</span></label>
-                  <input type="number" value={formData.newcomerCount} onChange={e => setFormData({...formData, newcomerCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-blue-700 outline-none" required />
+                  <label className="block text-[10px] font-bold text-blue-600 mb-1.5 uppercase">Pendatang (+)</label>
+                  <input type="number" value={formData.newcomerCount} onChange={e => setFormData({...formData, newcomerCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-blue-700 outline-none" />
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-100">
-                  <label className="block text-[10px] font-bold text-rose-600 mb-1.5 uppercase">Kematian (-) <span className="text-rose-500">*</span></label>
-                  <input type="number" value={formData.deathCount} onChange={e => setFormData({...formData, deathCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-rose-700 outline-none" required />
+                  <label className="block text-[10px] font-bold text-rose-600 mb-1.5 uppercase">Kematian (-)</label>
+                  <input type="number" value={formData.deathCount} onChange={e => setFormData({...formData, deathCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-rose-700 outline-none" />
                 </div>
                 <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100">
-                  <label className="block text-[10px] font-bold text-amber-600 mb-1.5 uppercase">Pindah Keluar (-) <span className="text-rose-500">*</span></label>
-                  <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-amber-700 outline-none" required />
+                  <label className="block text-[10px] font-bold text-amber-600 mb-1.5 uppercase">Pindah Keluar (-)</label>
+                  <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-amber-700 outline-none" />
                 </div>
               </div>
             </div>
@@ -1053,12 +1050,12 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             </h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white p-4 rounded-2xl border border-slate-200">
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Laki-laki <span className="text-rose-500">*</span></label>
-                <input type="number" value={formData.maleCount} onChange={e => setFormData({...formData, maleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-black text-slate-800 outline-none" required />
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Laki-laki</label>
+                <input type="number" value={formData.maleCount} onChange={e => setFormData({...formData, maleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-black text-slate-800 outline-none" />
               </div>
               <div className="bg-white p-4 rounded-2xl border border-slate-200">
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Perempuan <span className="text-rose-500">*</span></label>
-                <input type="number" value={formData.femaleCount} onChange={e => setFormData({...formData, femaleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-black text-slate-800 outline-none" required />
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Perempuan</label>
+                <input type="number" value={formData.femaleCount} onChange={e => setFormData({...formData, femaleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-black text-slate-800 outline-none" />
               </div>
             </div>
           </div>
@@ -1202,7 +1199,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="col-span-full">
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Lengkap Warga <span className="text-rose-500">*</span></label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Lengkap Warga</label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><User size={16} /></div>
                   <input 
@@ -1211,12 +1208,11 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     onChange={e => setLogFormData({ ...logFormData, name: e.target.value })} 
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
                     placeholder="Contoh: Budi Santoso"
-                    required 
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Blok & Nomor Rumah <span className="text-rose-500">*</span></label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Blok & Nomor Rumah</label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><LayoutGrid size={16} /></div>
                   <input 
@@ -1225,7 +1221,6 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     onChange={e => setLogFormData({ ...logFormData, houseId: e.target.value.toUpperCase() })} 
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
                     placeholder="C7-02"
-                    required 
                   />
                 </div>
               </div>
@@ -1243,7 +1238,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 </div>
               </div>
               <div className="col-span-full">
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tanggal Kejadian <span className="text-rose-500">*</span></label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tanggal Kejadian</label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><Calendar size={16} /></div>
                   <input 
@@ -1251,7 +1246,6 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     value={logFormData.date} 
                     onChange={e => setLogFormData({ ...logFormData, date: e.target.value })} 
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
-                    required 
                   />
                 </div>
               </div>
@@ -1268,27 +1262,25 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               {logFormData.type === 'Newcomer' && (
                 <>
                   <div className="col-span-full">
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alamat Asal <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alamat Asal</label>
                     <input 
                       type="text" 
                       value={logFormData.details.previousAddress} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, previousAddress: e.target.value } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alasan Pindah <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alasan Pindah</label>
                     <input 
                       type="text" 
                       value={logFormData.details.reasonForMoving} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Jumlah Anggota Keluarga <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Jumlah Anggota Keluarga</label>
                     <input 
                       type="number" 
                       value={logFormData.details.familyCount} 
@@ -1305,7 +1297,6 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                         });
                       }} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                       min="1"
                     />
                   </div>
@@ -1315,7 +1306,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     {logFormData.details.familyMembers.map((member, idx) => (
                       <div key={idx} className="grid grid-cols-2 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                         <input 
-                          placeholder="Nama Lengkap *"
+                          placeholder="Nama Lengkap"
                           className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500"
                           value={member.name}
                           onChange={e => {
@@ -1323,7 +1314,6 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                             updated[idx].name = e.target.value;
                             setLogFormData({ ...logFormData, details: { ...logFormData.details, familyMembers: updated } });
                           }}
-                          required
                         />
                         <select 
                           className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500"
@@ -1333,9 +1323,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                             updated[idx].relationship = e.target.value;
                             setLogFormData({ ...logFormData, details: { ...logFormData.details, familyMembers: updated } });
                           }}
-                          required
                         >
-                          <option value="">Hubungan *</option>
+                          <option value="">Hubungan</option>
                           <option value="Istri">Istri</option>
                           <option value="Anak">Anak</option>
                           <option value="Orang Tua">Orang Tua</option>
@@ -1348,9 +1337,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5">Status Hunian <span className="text-rose-500">*</span></label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">Status Hunian</label>
                     <select 
-                      required
                       value={logFormData.details.residenceType} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, residenceType: e.target.value as any } })} 
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
@@ -1362,9 +1350,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5">Agama <span className="text-rose-500">*</span></label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">Agama</label>
                     <select 
-                      required
                       value={logFormData.details.religion} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, religion: e.target.value } })} 
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
@@ -1460,23 +1447,21 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               {logFormData.type === 'MovedOut' && (
                 <>
                   <div className="col-span-full">
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alamat Tujuan <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alamat Tujuan</label>
                     <input 
                       type="text" 
                       value={logFormData.details.newAddress} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, newAddress: e.target.value } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     />
                   </div>
                   <div className="col-span-full">
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alasan Pindah <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alasan Pindah</label>
                     <input 
                       type="text" 
                       value={logFormData.details.reasonForMoving} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     />
                   </div>
                 <div className="col-span-2">
@@ -1486,7 +1471,6 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     value={logFormData.details.familyCount} 
                     onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, familyCount: parseInt(e.target.value) || 1 } })} 
                     className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                    required 
                     min="1"
                   />
                 </div>
@@ -1496,32 +1480,29 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               {logFormData.type === 'Birth' && (
                 <>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Ayah <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Ayah</label>
                     <input 
                       type="text" 
                       value={logFormData.details.fatherName} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, fatherName: e.target.value } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Ibu <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Ibu</label>
                     <input 
                       type="text" 
                       value={logFormData.details.motherName} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, motherName: e.target.value } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Jenis Kelamin <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Jenis Kelamin</label>
                     <select 
                       value={logFormData.details.gender} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, gender: e.target.value as any } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     >
                       <option value="Laki-laki">Laki-laki</option>
                       <option value="Perempuan">Perempuan</option>
@@ -1533,23 +1514,21 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               {logFormData.type === 'Death' && (
                 <>
                   <div className="col-span-full">
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Penyebab Wafat <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Penyebab Wafat</label>
                     <input 
                       type="text" 
                       value={logFormData.details.causeOfDeath} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, causeOfDeath: e.target.value } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     />
                   </div>
                   <div className="col-span-full">
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tempat Wafat <span className="text-rose-500">*</span></label>
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Tempat Wafat</label>
                     <input 
                       type="text" 
                       value={logFormData.details.placeOfDeath} 
                       onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, placeOfDeath: e.target.value } })} 
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
-                      required 
                     />
                   </div>
                 </>

@@ -293,10 +293,6 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
   const handleSubmitReport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reportForm.description) {
-      toast.error("Mohon isi deskripsi laporan");
-      return;
-    }
 
     setIsSubmittingReport(true);
     try {
@@ -1328,7 +1324,6 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             <div className="pl-4">
               <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Detail Laporan</label>
               <textarea 
-                required
                 value={reportForm.description}
                 onChange={(e) => setReportForm(prev => ({ ...prev, description: e.target.value }))}
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all h-32"

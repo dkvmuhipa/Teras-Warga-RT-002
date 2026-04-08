@@ -369,9 +369,8 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       }} title="Input Setoran Sampah">
         <form onSubmit={handleSaveDeposit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pilih Rumah / Warga <span className="text-rose-500">*</span></label>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pilih Rumah / Warga</label>
             <select 
-              required
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
               value={form.houseId}
               onChange={e => handleHouseChange(e.target.value)}
@@ -441,7 +440,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Jenis Sampah <span className="text-rose-500">*</span></label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Jenis Sampah</label>
               <select 
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
                 value={form.type}
@@ -453,12 +452,11 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Berat / Volume <span className="text-rose-500">*</span></label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Berat / Volume</label>
               <div className="relative">
                 <input 
                   type="number" 
                   step="0.1"
-                  required
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
                   value={form.weight}
                   onChange={e => setForm({...form, weight: parseFloat(e.target.value)})}
@@ -468,10 +466,9 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal Setoran <span className="text-rose-500">*</span></label>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal Setoran</label>
             <input 
               type="date" 
-              required
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
               value={form.date}
               onChange={e => setForm({...form, date: e.target.value})}

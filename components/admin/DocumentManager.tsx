@@ -219,7 +219,6 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Judul Dokumen</label>
                     <input
                       type="text"
-                      required
                       className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
                       placeholder="Contoh: Tata Tertib Lingkungan 2026"
                       value={newDoc.title}
@@ -264,7 +263,6 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                       <div className="relative group">
                         <input
                           type="file"
-                          required={uploadType === 'file'}
                           onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
@@ -285,7 +283,6 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Link URL Dokumen</label>
                       <input
                         type="url"
-                        required={uploadType === 'url'}
                         className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
                         placeholder="https://..."
                         value={newDoc.url}

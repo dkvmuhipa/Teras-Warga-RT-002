@@ -230,9 +230,8 @@ export const PbbManager: React.FC<PbbManagerProps> = ({ houses, pbbRecords }) =>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Data PBB" : "Catat Pembayaran PBB"}>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Pilih Rumah <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-bold mb-1.5 text-slate-700">Pilih Rumah</label>
             <select 
-              required
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-500"
               value={selectedHouseId}
               onChange={e => setSelectedHouseId(e.target.value)}
@@ -246,9 +245,8 @@ export const PbbManager: React.FC<PbbManagerProps> = ({ houses, pbbRecords }) =>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold mb-1.5 text-slate-700">Tahun Pajak <span className="text-rose-500">*</span></label>
+              <label className="block text-xs font-bold mb-1.5 text-slate-700">Tahun Pajak</label>
               <select 
-                required
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-500"
                 value={year}
                 onChange={e => setYear(parseInt(e.target.value))}
@@ -257,10 +255,9 @@ export const PbbManager: React.FC<PbbManagerProps> = ({ houses, pbbRecords }) =>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp) <span className="text-rose-500">*</span></label>
+              <label className="block text-xs font-bold mb-1.5 text-slate-700">Nominal (Rp)</label>
               <input 
                 type="number" 
-                required
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-500"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}

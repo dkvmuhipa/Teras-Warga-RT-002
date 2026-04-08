@@ -188,7 +188,6 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                       className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all"
                       value={airFee}
                       onChange={(e) => setAirFee(e.target.value)}
-                      required
                     />
                   </div>
                 </div>
@@ -201,7 +200,6 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                       className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all"
                       value={sampahFee}
                       onChange={(e) => setSampahFee(e.target.value)}
-                      required
                     />
                   </div>
                 </div>

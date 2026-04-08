@@ -234,20 +234,20 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Buat Voting Baru">
         <form onSubmit={handleCreatePoll} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Judul Voting <span className="text-rose-500">*</span></label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={pollTitle} onChange={e=>setPollTitle(e.target.value)} placeholder="Contoh: Pemilihan Ketua Panitia 17an" required/>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Judul Voting</label>
+            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={pollTitle} onChange={e=>setPollTitle(e.target.value)} placeholder="Contoh: Pemilihan Ketua Panitia 17an" />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Deskripsi & Tujuan <span className="text-rose-500">*</span></label>
-            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[100px]" rows={3} value={pollDesc} onChange={e=>setPollDesc(e.target.value)} placeholder="Jelaskan tujuan voting ini..." required/>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Deskripsi & Tujuan</label>
+            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[100px]" rows={3} value={pollDesc} onChange={e=>setPollDesc(e.target.value)} placeholder="Jelaskan tujuan voting ini..." />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Batas Waktu (Deadline) <span className="text-rose-500">*</span></label>
-            <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={pollDeadline} onChange={e=>setPollDeadline(e.target.value)} required/>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Batas Waktu (Deadline)</label>
+            <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={pollDeadline} onChange={e=>setPollDeadline(e.target.value)} />
           </div>
           
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Opsi Jawaban <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Opsi Jawaban</label>
             <div className="space-y-3">
               {pollOptions.map((opt, idx) => (
                 <div key={opt.id} className="flex gap-2">
@@ -256,7 +256,6 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
                     value={opt.text} 
                     onChange={e => updateOption(idx, e.target.value)} 
                     placeholder={`Opsi ${idx + 1}`} 
-                    required
                   />
                   {pollOptions.length > 2 && (
                     <button 

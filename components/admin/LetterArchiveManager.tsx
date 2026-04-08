@@ -77,11 +77,6 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedFile && !formData.attachmentUrl) {
-      toast.error('Silakan pilih file surat yang ingin diunggah');
-      return;
-    }
-
     setIsLoading(true);
     try {
       let attachmentUrl = formData.attachmentUrl;
@@ -280,7 +275,6 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
                 value={formData.type}
                 onChange={e => setFormData({...formData, type: e.target.value as any})}
-                required
               >
                 <option value="Himbauan">Himbauan</option>
                 <option value="Undangan">Undangan</option>
@@ -295,7 +289,6 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
                 value={formData.date}
                 onChange={e => setFormData({...formData, date: e.target.value})}
-                required
               />
             </div>
           </div>
@@ -308,7 +301,6 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
               value={formData.letterNumber}
               onChange={e => setFormData({...formData, letterNumber: e.target.value})}
               placeholder="Masukkan nomor surat asli..."
-              required
             />
           </div>
 
@@ -320,7 +312,6 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
               value={formData.subject}
               onChange={e => setFormData({...formData, subject: e.target.value})}
               placeholder="Contoh: Undangan Rapat Warga"
-              required
             />
           </div>
 
@@ -332,12 +323,11 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
               value={formData.recipient}
               onChange={e => setFormData({...formData, recipient: e.target.value})}
               placeholder="Contoh: Seluruh Warga RT 02"
-              required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">File Surat (Wajib)</label>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">File Surat</label>
             <div className={`relative border-2 border-dashed rounded-2xl p-8 transition-all ${
               selectedFile ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-200 bg-slate-50 hover:border-indigo-300'
             }`}>
@@ -346,7 +336,6 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 onChange={e => setSelectedFile(e.target.files?.[0] || null)}
                 accept=".pdf,image/*"
-                required={!formData.attachmentUrl}
               />
               <div className="flex flex-col items-center justify-center gap-3">
                 {selectedFile ? (

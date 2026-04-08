@@ -283,10 +283,9 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingActivityId ? "Edit Kegiatan" : "Buat Kegiatan Baru"}>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Judul Kegiatan <span className="text-rose-500">*</span></label>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Judul Kegiatan</label>
             <input 
               type="text" 
-              required
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
               value={form.title}
               onChange={e => setForm({...form, title: e.target.value})}
@@ -304,20 +303,18 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal & Waktu <span className="text-rose-500">*</span></label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal & Waktu</label>
               <input 
                 type="datetime-local" 
-                required
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                 value={form.date}
                 onChange={e => setForm({...form, date: e.target.value})}
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Lokasi <span className="text-rose-500">*</span></label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Lokasi</label>
               <input 
                 type="text" 
-                required
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                 value={form.location}
                 onChange={e => setForm({...form, location: e.target.value})}

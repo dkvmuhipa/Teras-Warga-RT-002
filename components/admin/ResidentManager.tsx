@@ -25,7 +25,7 @@ import {
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon
 } from 'lucide-react';
-import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, PbbRecord } from '../../types';
+import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, PbbRecord, Role } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
 import { 
@@ -54,6 +54,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
 interface ResidentManagerProps {
+  role: Role;
   houses: House[];
   reports: Report[];
   cashFlow: CashFlow[];
@@ -69,6 +70,7 @@ interface ResidentManagerProps {
 type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business';
 
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
+  role,
   houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, pbbRecords, settings
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'pbb'>('grid');
@@ -1221,6 +1223,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       </AnimatePresence>
 
       <AddEditResidentModal 
+        role={role}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         editingHouseId={editingHouseId}

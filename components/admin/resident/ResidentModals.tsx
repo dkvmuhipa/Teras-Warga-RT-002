@@ -6,7 +6,7 @@ import {
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
   CreditCard, AlertCircle, Calendar, FileText
 } from 'lucide-react';
-import { House, PaymentStatus } from '../../../types';
+import { House, PaymentStatus, Role } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 import { 
   getIndonesianMonthYear, 
@@ -17,6 +17,7 @@ import {
 import { toast } from 'sonner';
 
 interface AddEditResidentModalProps {
+  role: Role;
   isOpen: boolean;
   onClose: () => void;
   editingHouseId: string | null;
@@ -28,6 +29,7 @@ interface AddEditResidentModalProps {
 }
 
 export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
+  role,
   isOpen,
   onClose,
   editingHouseId,
@@ -38,6 +40,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
   setActiveFormTab
 }) => {
   const validateTab = (tab: 'basic' | 'demographics' | 'family') => {
+    const isAdmin = role === Role.ADMIN;
+
     if (tab === 'basic') {
       const requiredFields = [
         { key: 'headOfFamily', label: 'Kepala Keluarga' },
@@ -51,20 +55,22 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
         { key: 'number', label: 'Nomor' }
       ];
 
-      for (const field of requiredFields) {
-        if (!formData[field.key]) {
-          toast.error(`Field "${field.label}" wajib diisi.`);
+      if (!isAdmin) {
+        for (const field of requiredFields) {
+          if (!formData[field.key]) {
+            toast.error(`Field "${field.label}" wajib diisi.`);
+            return false;
+          }
+        }
+
+        if (formData.nik && formData.nik.length !== 16) {
+          toast.error('NIK harus 16 digit.');
           return false;
         }
-      }
-
-      if (formData.nik.length !== 16) {
-        toast.error('NIK harus 16 digit.');
-        return false;
-      }
-      if (formData.kkNumber.length !== 16) {
-        toast.error('Nomor KK harus 16 digit.');
-        return false;
+        if (formData.kkNumber && formData.kkNumber.length !== 16) {
+          toast.error('Nomor KK harus 16 digit.');
+          return false;
+        }
       }
     } else if (tab === 'demographics') {
       const requiredFields = [
@@ -73,22 +79,26 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
         { key: 'religion', label: 'Agama' }
       ];
 
-      for (const field of requiredFields) {
-        if (!formData[field.key]) {
-          toast.error(`Field "${field.label}" wajib diisi.`);
-          return false;
+      if (!isAdmin) {
+        for (const field of requiredFields) {
+          if (!formData[field.key]) {
+            toast.error(`Field "${field.label}" wajib diisi.`);
+            return false;
+          }
         }
       }
     } else if (tab === 'family') {
-      for (let i = 0; i < formData.familyMembers.length; i++) {
-        const member = formData.familyMembers[i];
-        if (!member.name || !member.nik || !member.birthDate || !member.job) {
-          toast.error(`Lengkapi data anggota keluarga ke-${i + 1}.`);
-          return false;
-        }
-        if (member.nik.length !== 16) {
-          toast.error(`NIK anggota keluarga ke-${i + 1} harus 16 digit.`);
-          return false;
+      if (!isAdmin) {
+        for (let i = 0; i < formData.familyMembers.length; i++) {
+          const member = formData.familyMembers[i];
+          if (!member.name || !member.nik || !member.birthDate || !member.job) {
+            toast.error(`Lengkapi data anggota keluarga ke-${i + 1}.`);
+            return false;
+          }
+          if (member.nik && member.nik.length !== 16) {
+            toast.error(`NIK anggota keluarga ke-${i + 1} harus 16 digit.`);
+            return false;
+          }
         }
       }
     }

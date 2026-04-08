@@ -318,18 +318,18 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Pengumuman" : "Buat Pengumuman Baru"}>
         <form onSubmit={handleSaveAnnouncement} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Judul Pengumuman <span className="text-rose-500">*</span></label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={annTitle} onChange={e=>setAnnTitle(e.target.value)} placeholder="Contoh: Kerja Bakti Minggu Ini" required/>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Judul Pengumuman</label>
+            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={annTitle} onChange={e=>setAnnTitle(e.target.value)} placeholder="Contoh: Kerja Bakti Minggu Ini" />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Isi Pengumuman <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Isi Pengumuman</label>
             <Button type="button" onClick={handleGenerateWithAi} className="mb-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 shadow-none text-xs py-2 px-3">
               <Sparkles size={14} className="mr-2" /> {isAiLoading ? 'Memproses...' : 'Buat dengan AI'}
             </Button>
-            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[120px]" rows={4} value={annContent} onChange={e=>setAnnContent(e.target.value)} placeholder="Tulis detail pengumuman di sini..." required/>
+            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[120px]" rows={4} value={annContent} onChange={e=>setAnnContent(e.target.value)} placeholder="Tulis detail pengumuman di sini..." />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Tipe / Kategori <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Tipe / Kategori</label>
             <div className="grid grid-cols-3 gap-3">
               {['Info', 'Urgent', 'Event'].map((type) => (
                 <button

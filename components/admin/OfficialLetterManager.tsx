@@ -371,7 +371,6 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
                 value={formData.type}
                 onChange={e => setFormData({...formData, type: e.target.value as any})}
-                required
               >
                 <option value="Himbauan">Himbauan</option>
                 <option value="Undangan">Undangan</option>
@@ -386,7 +385,6 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
                 value={formData.date}
                 onChange={e => setFormData({...formData, date: e.target.value})}
-                required
               />
             </div>
           </div>
@@ -408,7 +406,6 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
               value={formData.letterNumber}
               onChange={e => setFormData({...formData, letterNumber: e.target.value})}
               placeholder="Contoh: HIM/001/RT02/IV/2024"
-              required
             />
           </div>
 
@@ -420,7 +417,6 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
               value={formData.subject}
               onChange={e => setFormData({...formData, subject: e.target.value})}
               placeholder="Contoh: Himbauan Kerja Bakti"
-              required
             />
           </div>
 
@@ -432,7 +428,6 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
               value={formData.recipient}
               onChange={e => setFormData({...formData, recipient: e.target.value})}
               placeholder="Contoh: Seluruh Warga RT 02"
-              required
             />
           </div>
 
