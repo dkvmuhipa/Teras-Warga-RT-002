@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Settings as SettingsIcon, Save, Download, Trash2, Shield, User, Key, Mail, Database, RefreshCw, AlertCircle } from 'lucide-react';
 import { PdfConfig } from '../../types';
 import { motion } from 'motion/react';
-import { updateAdminPassword, seedDatabase, deepSanitize } from '../../services/databaseService';
+import { updateAdminPassword, seedDatabase, deepSanitize, safeJsonStringify } from '../../services/databaseService';
 import { generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, INITIAL_OFFICIALS, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_WASTE_PRICES, MOCK_FAQ, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS, MOCK_BILLS } from '../../constants';
 import { toast } from 'sonner';
 
@@ -84,7 +84,7 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig, set
           note: "Full database export requires fetching all collections."
       };
       
-      const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(deepSanitize(data), null, 2));
+      const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(safeJsonStringify(data, 2));
       const downloadAnchorNode = document.createElement('a');
       downloadAnchorNode.setAttribute("href", jsonString);
       downloadAnchorNode.setAttribute("download", `backup_config_rt02_${new Date().toISOString().split('T')[0]}.json`);

@@ -23,7 +23,7 @@ import {
   Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle, Droplets,
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon, ChevronDown, Settings, MoreVertical
 } from 'lucide-react';
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, PbbRecord, Role } from '../../types';
 import { HouseMap } from '../HouseMap';
@@ -43,6 +43,7 @@ import {
   formatHouseId, 
   addBillToDb, 
   updateBillInDb, 
+  updateGuestReportInDb,
   addPopulationLogToDb, 
   logAction,
   handleFirestoreError,
@@ -63,6 +64,7 @@ interface ResidentManagerProps {
   iuranPayments: any[];
   bills: Bill[];
   residentRegistrations: ResidentRegistration[];
+  guestReports: any[];
   pbbRecords: PbbRecord[];
   settings: any;
 }
@@ -71,7 +73,7 @@ type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business
 
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
   role,
-  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, pbbRecords, settings
+  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, guestReports, pbbRecords, settings
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'pbb'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,6 +83,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedResident, setSelectedResident] = useState<House | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -731,19 +734,41 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const handleSaveHouse = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const oldHouse = editingHouseId ? houses.find(h => h.id === editingHouseId) : null;
       const houseId = formatHouseId(`${formData.block}-${formData.number}`);
       const data = {
         ...formData,
         id: houseId,
-        location: { x: 0, y: 0 }, // Default location, map editor handles this separately
-        joiningDate: editingHouseId ? (houses.find(h => h.id === editingHouseId)?.joiningDate || new Date().toISOString()) : new Date().toISOString()
+        location: oldHouse?.location || { x: 0, y: 0 },
+        joiningDate: editingHouseId ? (oldHouse?.joiningDate || new Date().toISOString()) : new Date().toISOString()
       };
 
-      const oldHouse = editingHouseId ? houses.find(h => h.id === editingHouseId) : null;
-
       if (editingHouseId) {
-        // If ID changed (block or number changed), delete old and create new
+        // If ID changed (block or number changed), migrate related data
         if (editingHouseId !== houseId) {
+          // 1. Migrate iuranPayments
+          const housePayments = iuranPayments.filter(p => p.houseId === editingHouseId);
+          for (const p of housePayments) {
+            await updateIuranPaymentInDb(p.id, { 
+              houseId: houseId,
+              block: formData.block,
+              number: formData.number
+            });
+          }
+
+          // 2. Migrate bills
+          const houseBills = bills.filter(b => b.houseId === editingHouseId);
+          for (const b of houseBills) {
+            await updateBillInDb(b.id, { houseId: houseId });
+          }
+
+          // 3. Migrate guestReports
+          const houseGuests = guestReports.filter(g => g.residentHouseId === editingHouseId);
+          for (const g of houseGuests) {
+            await updateGuestReportInDb(g.id, { residentHouseId: houseId });
+          }
+
+          // 4. Delete old house
           await deleteHouseFromDb(editingHouseId);
         }
         await addHouse(data); // Using addHouse because it handles setDoc with ID
@@ -868,7 +893,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
     if (sortBy === 'name') return a.headOfFamily.localeCompare(b.headOfFamily);
-    return (a.block + a.number).localeCompare(b.block + b.number);
+    const blockCompare = a.block.localeCompare(b.block);
+    if (blockCompare !== 0) return blockCompare;
+    return a.number.localeCompare(b.number, undefined, { numeric: true });
   });
 
   // Stats
@@ -998,41 +1025,64 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             </div>
           )}
           
-          <div className="grid grid-cols-2 sm:flex flex-wrap gap-2 w-full lg:w-auto">
+          <div className="relative w-full sm:w-auto">
             <button 
-              onClick={handleGenerateAllPins}
-              className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl hover:bg-amber-100 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
-              disabled={isGenerating}
+              onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-xs transition-all shadow-sm"
             >
-              <Shield size={14} className="md:w-4 md:h-4" /> <span className="text-center">{isGenerating ? 'Wait...' : 'PIN Massal'}</span>
+              <Settings size={16} className="text-slate-400" />
+              <span>Kelola Data</span>
+              <ChevronDown size={14} className={`text-slate-400 transition-transform ${isActionMenuOpen ? 'rotate-180' : ''}`} />
             </button>
-            <button 
-              onClick={handleCleanupPlaceholders}
-              className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl hover:bg-rose-100 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
-              disabled={isGenerating}
-            >
-              <Trash2 size={14} className="md:w-4 md:h-4" /> <span className="text-center">Reset Default</span>
-            </button>
-            <button 
-              onClick={() => generateProfessionalExcel(houses)}
-              className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-lg shadow-emerald-600/20"
-            >
-              <Download size={14} className="md:w-4 md:h-4" /> Export
-            </button>
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
-              disabled={isUploading}
-            >
-              <Upload size={14} className="md:w-4 md:h-4" /> {isUploading ? '...' : 'Import'}
-            </button>
+
+            {isActionMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsActionMenuOpen(false)}></div>
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-xl z-20 overflow-hidden animate-in fade-in zoom-in duration-200">
+                  <div className="p-2 space-y-1">
+                    <button 
+                      onClick={() => { handleGenerateAllPins(); setIsActionMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                      disabled={isGenerating}
+                    >
+                      <Shield size={16} className="text-amber-500" />
+                      <span>{isGenerating ? 'Memproses...' : 'Generate PIN Massal'}</span>
+                    </button>
+                    <button 
+                      onClick={() => { handleCleanupPlaceholders(); setIsActionMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                    >
+                      <Trash2 size={16} className="text-rose-500" />
+                      <span>Reset Data Default</span>
+                    </button>
+                    <div className="h-px bg-slate-100 my-1"></div>
+                    <button 
+                      onClick={() => { generateProfessionalExcel(houses); setIsActionMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                    >
+                      <Download size={16} className="text-emerald-500" />
+                      <span>Ekspor Excel</span>
+                    </button>
+                    <button 
+                      onClick={() => { fileInputRef.current?.click(); setIsActionMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                      disabled={isUploading}
+                    >
+                      <Upload size={16} className="text-indigo-500" />
+                      <span>{isUploading ? 'Mengunggah...' : 'Impor Excel'}</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <button 
             onClick={handleOpenAdd}
-            className="w-full lg:w-auto flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold text-xs md:text-sm shadow-lg shadow-indigo-600/20 transition-all"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all"
           >
-            <UserPlus size={16} className="md:w-[18px] md:h-[18px]" /> Tambah Warga
+            <UserPlus size={16} />
+            <span>Tambah Warga</span>
           </button>
           
           <input 

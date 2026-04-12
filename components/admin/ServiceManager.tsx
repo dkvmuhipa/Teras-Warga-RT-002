@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig, OfficialLetter } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb } from '../../services/databaseService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -358,7 +358,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
     const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
     setPdfConfig(newConfig);
-    localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
 
     setIsCreatingLetter(false);
     toast.success("Surat berhasil dibuat dan diunduh!");
@@ -418,7 +417,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       whatsappGroupName: name
     };
     setPdfConfig(newConfig);
-    localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
     setShowGroupList(false);
   };
 
@@ -455,7 +453,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       reader.onloadend = () => {
         const newConfig = { ...pdfConfig, [field]: reader.result as string };
         setPdfConfig(newConfig);
-        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
       };
       reader.readAsDataURL(file);
     }
@@ -673,7 +670,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         onChange={e => {
                           const newConfig = {...pdfConfig, rtName: e.target.value};
                           setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
                         }} 
                         placeholder="RT 02 / RW 005"
                       />
@@ -687,7 +683,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         onChange={e => {
                           const newConfig = {...pdfConfig, rtChairman: e.target.value};
                           setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
                         }} 
                         placeholder="NAMA KETUA RT"
                       />
@@ -702,7 +697,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           onChange={e => {
                             const newConfig = {...pdfConfig, lastLetterNumber: parseInt(e.target.value) || 0};
                             setPdfConfig(newConfig);
-                            localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
                           }} 
                           placeholder="0"
                         />
@@ -869,7 +863,6 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         onSave={(dataUrl) => {
                           const newConfig = { ...pdfConfig, signature: dataUrl };
                           setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
                           toast.success("Tanda tangan berhasil disimpan!");
                         }}
                       />

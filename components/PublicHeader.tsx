@@ -12,9 +12,10 @@ interface PublicHeaderProps {
   notifications: AppNotification[];
   onMarkRead: (id: string) => void;
   onDeleteNotification?: (id: string) => void;
+  onDeleteAllNotifications?: () => void;
 }
 
-export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMarkRead, onDeleteNotification }) => {
+export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMarkRead, onDeleteNotification, onDeleteAllNotifications }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -128,6 +129,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                   notifications={notifications} 
                   onMarkRead={onMarkRead} 
                   onDelete={onDeleteNotification}
+                  onDeleteAll={onDeleteAllNotifications}
                 />
 
                 <div className="hidden md:block h-6 w-px bg-slate-200 mx-2"></div>

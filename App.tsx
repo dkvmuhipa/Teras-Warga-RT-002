@@ -98,6 +98,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToSettings,
   updateSettings,
   deepSanitize,
+  safeJsonStringify,
   addAnnouncementToDb, 
   deleteAnnouncementFromDb, 
   addTransactionToDb, 
@@ -165,6 +166,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   deleteEventFromDb,
   markNotificationAsRead,
   deleteNotificationFromDb,
+  deleteAllNotificationsFromDb,
   handleFirestoreError,
   OperationType
 } from './services/databaseService';
@@ -262,7 +264,7 @@ export const App = () => {
     setPdfConfigState(prev => {
       const next = typeof newConfig === 'function' ? newConfig(prev) : newConfig;
       try {
-        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(next)));
+        localStorage.setItem('pdf_config', safeJsonStringify(next));
       } catch (e) {
         console.warn("Failed to save PDF config to localStorage:", e);
       }
@@ -430,6 +432,11 @@ export const App = () => {
                             onDeleteNotification={async (id) => {
                                 if (window.confirm('Hapus notifikasi ini?')) {
                                     await deleteNotificationFromDb(id);
+                                }
+                            }}
+                            onDeleteAllNotifications={async () => {
+                                if (window.confirm('Hapus semua notifikasi?')) {
+                                    await deleteAllNotificationsFromDb();
                                 }
                             }}
                         />

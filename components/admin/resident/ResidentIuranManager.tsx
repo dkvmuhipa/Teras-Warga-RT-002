@@ -4,6 +4,7 @@ import { House, PdfConfig } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 import { toast } from 'sonner';
 import { handleFirestoreError, OperationType } from '../../../services/databaseService';
+import { generateIuranReportExcel } from '../../../services/excelService';
 
 interface ResidentIuranManagerProps {
   houses: House[];
@@ -66,6 +67,10 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
       p.number.toLowerCase().includes(searchLower);
     const matchesType = filterType === 'All' || p.type === filterType || p.type === 'Both';
     return matchesMonth && matchesSearch && matchesType;
+  }).sort((a, b) => {
+    const blockCompare = a.block.localeCompare(b.block);
+    if (blockCompare !== 0) return blockCompare;
+    return a.number.localeCompare(b.number, undefined, { numeric: true });
   });
 
   const occupiedHousesList = houses.filter(h => {
@@ -77,6 +82,10 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
       (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) ||
       (h.familyMembers && h.familyMembers.some(m => m.name.toLowerCase().includes(searchLower)));
     return isOccupied && matchesSearch;
+  }).sort((a, b) => {
+    const blockCompare = a.block.localeCompare(b.block);
+    if (blockCompare !== 0) return blockCompare;
+    return a.number.localeCompare(b.number, undefined, { numeric: true });
   });
 
   const displayStats = filterType === 'All' ? {
@@ -222,24 +231,15 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             </button>
             <button 
               onClick={() => {
-                const typeLabel = filterType === 'All' ? 'Semua' : filterType;
-                const csv = [
-                  ['Tanggal Bayar', 'Bulan Iuran', 'Nama', 'Rumah', 'Jenis', 'Nominal'].join(','),
-                  ...currentMonthPayments.map(p => [
-                    new Date(p.date).toLocaleDateString('id-ID'),
-                    p.month,
-                    p.headOfFamily,
-                    `${p.block}-${p.number}`,
-                    p.type,
-                    p.amount
-                  ].join(','))
-                ].join('\n');
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Laporan_Iuran_${typeLabel}_${selectedMonth.replace(/\s+/g, '_')}.csv`;
-                a.click();
+                const typeLabel = filterType === 'All' ? 'Semua Iuran' : filterType === 'Air' ? 'Iuran Air' : 'Iuran Sampah';
+                const arrearsData = occupiedHousesList
+                  .map(h => ({ 
+                    house: h, 
+                    arrears: getArrearsForHouse(h, filterType === 'All' ? undefined : filterType as 'Air' | 'Sampah') 
+                  }))
+                  .filter(item => item.arrears.length > 0);
+                
+                generateIuranReportExcel(currentMonthPayments, selectedMonth, typeLabel, displayStats, arrearsData);
               }}
               className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
             >
@@ -367,7 +367,11 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
           {occupiedHousesList
             .map(h => ({ house: h, arrears: getArrearsForHouse(h, filterType === 'All' ? undefined : filterType as 'Air' | 'Sampah') }))
             .filter(item => item.arrears.length > 0)
-            .sort((a, b) => b.arrears.length - a.arrears.length)
+            .sort((a, b) => {
+              const blockCompare = a.house.block.localeCompare(b.house.block);
+              if (blockCompare !== 0) return blockCompare;
+              return a.house.number.localeCompare(b.house.number, undefined, { numeric: true });
+            })
             .map(({ house, arrears }) => (
               <div key={house.id} className="p-5 bg-slate-50 border border-slate-100 rounded-3xl group hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all">
                 <div className="flex justify-between items-start mb-4">

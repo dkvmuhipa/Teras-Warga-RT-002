@@ -830,9 +830,10 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     doc.setFont("times", "normal");
     doc.setFontSize(10);
     
-    const sortedHouses = [...houses].sort((a,b) => {
-        if(a.block === b.block) return parseInt(a.number, 10) - parseInt(b.number, 10);
-        return a.block.localeCompare(b.block);
+    const sortedHouses = [...houses].sort((a, b) => {
+        const blockCompare = a.block.localeCompare(b.block);
+        if (blockCompare !== 0) return blockCompare;
+        return a.number.localeCompare(b.number, undefined, { numeric: true });
     });
 
     sortedHouses.forEach((house, index) => {

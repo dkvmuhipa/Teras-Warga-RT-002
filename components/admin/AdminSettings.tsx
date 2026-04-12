@@ -5,7 +5,7 @@ import { auth } from '../../services/firebaseConfig';
 import { House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, MarketItem, AppNotification } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { seedDatabase, deepSanitize, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { seedDatabase, deepSanitize, safeJsonStringify, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
 
 interface AdminSettingsProps {
@@ -91,7 +91,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         houses, announcements, cashFlow, officials, reports, letters, 
         ronda, inventory, umkm, polls, rondaLogs, marketItems, notifications
       };
-      const blob = new Blob([JSON.stringify(deepSanitize(data), null, 2)], { type: 'application/json' });
+      const blob = new Blob([safeJsonStringify(data, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

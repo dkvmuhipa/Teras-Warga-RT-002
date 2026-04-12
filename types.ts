@@ -71,6 +71,7 @@ export interface House {
   ktpUrl?: string;
   kkUrl?: string;
   role?: Role; // RBAC
+  location?: { x: number; y: number };
   
   education?: string;
   jobCategory?: string;

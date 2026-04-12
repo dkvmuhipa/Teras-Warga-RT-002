@@ -8,16 +8,9 @@ export const generateProfessionalExcel = async (houses: House[]) => {
 
   // Sort houses by block and number
   const sortedHouses = [...houses].sort((a, b) => {
-    if (a.block !== b.block) {
-      return a.block.localeCompare(b.block);
-    }
-    // Try to sort numerically if possible
-    const numA = parseInt(a.number, 10);
-    const numB = parseInt(b.number, 10);
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return numA - numB;
-    }
-    return a.number.localeCompare(b.number);
+    const blockCompare = a.block.localeCompare(b.block);
+    if (blockCompare !== 0) return blockCompare;
+    return a.number.localeCompare(b.number, undefined, { numeric: true });
   });
 
   // Define columns
@@ -487,5 +480,219 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
   });
 
   return data;
+};
+
+export const generateIuranReportExcel = async (
+  payments: any[], 
+  month: string, 
+  typeLabel: string, 
+  summaries: any,
+  arrearsData?: { house: any, arrears: string[] }[]
+) => {
+  const workbook = new ExcelJS.Workbook();
+  
+  // Sort payments by block and number
+  const sortedPayments = [...payments].sort((a, b) => {
+    const blockCompare = a.block.localeCompare(b.block);
+    if (blockCompare !== 0) return blockCompare;
+    return a.number.localeCompare(b.number, undefined, { numeric: true });
+  });
+
+  // Sort arrearsData if provided
+  const sortedArrearsData = arrearsData ? [...arrearsData].sort((a, b) => {
+    const blockCompare = a.house.block.localeCompare(b.house.block);
+    if (blockCompare !== 0) return blockCompare;
+    return a.house.number.localeCompare(b.house.number, undefined, { numeric: true });
+  }) : [];
+
+  // SHEET 1: LAPORAN PEMBAYARAN
+  const worksheet = workbook.addWorksheet('Laporan Pembayaran');
+
+  // Title
+  worksheet.mergeCells('A1:F1');
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = `LAPORAN PEMBAYARAN IURAN - PERIODE ${month.toUpperCase()}`;
+  titleCell.font = { bold: true, size: 16, color: { argb: 'FF1E293B' } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  worksheet.getRow(1).height = 40;
+
+  worksheet.mergeCells('A2:F2');
+  const subtitleCell = worksheet.getCell('A2');
+  subtitleCell.value = `Kategori: ${typeLabel.toUpperCase()}`;
+  subtitleCell.font = { bold: true, size: 12, color: { argb: 'FF64748B' } };
+  subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  worksheet.getRow(2).height = 25;
+
+  // Summary Section
+  worksheet.addRow([]);
+  worksheet.addRow(['RINGKASAN KEUANGAN']);
+  worksheet.getRow(4).font = { bold: true, size: 12 };
+  
+  const summaryRows = [
+    ['Total Terkumpul', summaries.totalCollected, 'Rupiah'],
+    ['Partisipasi Warga', summaries.participationRate, '%'],
+    ['Rumah Sudah Bayar', summaries.paidHousesCount, 'Unit'],
+    ['Rumah Belum Bayar', summaries.unpaidHousesCount, 'Unit'],
+    ['Estimasi Piutang', summaries.estimatedReceivables, 'Rupiah'],
+    ['Total Tunggakan', summaries.totalArrearsAmount, 'Rupiah'],
+    ['Total Bulan Tunggakan', summaries.totalArrearsMonths, 'Bulan'],
+  ];
+
+  summaryRows.forEach(row => {
+    worksheet.addRow(row);
+  });
+
+  // Style Summary
+  const summaryStartRow = 5;
+  const summaryEndRow = 5 + summaryRows.length - 1;
+  for (let i = summaryStartRow; i <= summaryEndRow; i++) {
+    const row = worksheet.getRow(i);
+    row.getCell(2).numFmt = '#,##0';
+    row.eachCell(cell => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+      };
+    });
+  }
+
+  worksheet.addRow([]);
+  
+  // Table Header
+  const headerRowIndex = summaryEndRow + 3;
+  worksheet.getRow(headerRowIndex).values = ['TANGGAL BAYAR', 'BULAN IURAN', 'NAMA WARGA', 'RUMAH', 'JENIS IURAN', 'NOMINAL'];
+  worksheet.columns = [
+    { key: 'date', width: 20 },
+    { key: 'month', width: 20 },
+    { key: 'name', width: 40 },
+    { key: 'house', width: 15 },
+    { key: 'type', width: 20 },
+    { key: 'amount', width: 20 },
+  ];
+
+  const headerRow = worksheet.getRow(headerRowIndex);
+  headerRow.height = 30;
+  headerRow.eachCell((cell) => {
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF4F46E5' },
+    };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' },
+    };
+  });
+
+  // Add Data
+  sortedPayments.forEach((p, index) => {
+    const row = worksheet.addRow({
+      date: new Date(p.date).toLocaleDateString('id-ID'),
+      month: p.month,
+      name: p.headOfFamily + (p.payerName && p.payerName !== p.headOfFamily ? ` (Oleh: ${p.payerName})` : ''),
+      house: `${p.block}-${p.number}`,
+      type: p.type === 'Both' ? 'Air & Sampah' : p.type === 'Air' ? 'Air Saja' : 'Sampah Saja',
+      amount: p.amount,
+    });
+
+    row.height = 25;
+    row.eachCell((cell, colNumber) => {
+      cell.alignment = { vertical: 'middle', horizontal: colNumber === 6 ? 'right' : 'center' };
+      if (colNumber === 6) cell.numFmt = '#,##0';
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+      };
+    });
+
+    if (index % 2 !== 0) {
+      row.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFF8FAFC' },
+      };
+    }
+  });
+
+  // Footer
+  const footerRowIndex = worksheet.rowCount + 2;
+  worksheet.mergeCells(`A${footerRowIndex}:E${footerRowIndex}`);
+  worksheet.getCell(`A${footerRowIndex}`).value = 'TOTAL PEMASUKAN PERIODE INI';
+  worksheet.getCell(`A${footerRowIndex}`).font = { bold: true };
+  worksheet.getCell(`A${footerRowIndex}`).alignment = { horizontal: 'right' };
+  
+  const totalAmount = payments.reduce((acc, p) => acc + p.amount, 0);
+  worksheet.getCell(`F${footerRowIndex}`).value = totalAmount;
+  worksheet.getCell(`F${footerRowIndex}`).font = { bold: true };
+  worksheet.getCell(`F${footerRowIndex}`).numFmt = '#,##0';
+  worksheet.getCell(`F${footerRowIndex}`).border = {
+    top: { style: 'double' },
+    bottom: { style: 'double' }
+  };
+
+  // SHEET 2: DAFTAR TUNGGAKAN
+  if (sortedArrearsData && sortedArrearsData.length > 0) {
+    const arrearsSheet = workbook.addWorksheet('Daftar Tunggakan');
+    
+    arrearsSheet.mergeCells('A1:D1');
+    const arrearsTitle = arrearsSheet.getCell('A1');
+    arrearsTitle.value = `DAFTAR TUNGGAKAN WARGA - PERIODE ${month.toUpperCase()}`;
+    arrearsTitle.font = { bold: true, size: 14 };
+    arrearsTitle.alignment = { horizontal: 'center' };
+    arrearsSheet.getRow(1).height = 30;
+
+    arrearsSheet.addRow([]);
+    
+    const arrearsHeaderRow = arrearsSheet.addRow(['NAMA WARGA', 'RUMAH', 'JUMLAH BULAN', 'DETAIL BULAN']);
+    arrearsHeaderRow.height = 25;
+    arrearsHeaderRow.eachCell(cell => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+    });
+
+    arrearsSheet.columns = [
+      { width: 35 },
+      { width: 15 },
+      { width: 15 },
+      { width: 50 },
+    ];
+
+    sortedArrearsData.forEach((item, index) => {
+      const row = arrearsSheet.addRow([
+        item.house.headOfFamily,
+        `${item.house.block}-${item.house.number}`,
+        item.arrears.length,
+        item.arrears.join(', ')
+      ]);
+      row.height = 20;
+      row.eachCell((cell, colNumber) => {
+        cell.alignment = { vertical: 'middle', horizontal: colNumber === 3 ? 'center' : 'left' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          right: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        };
+      });
+      if (index % 2 !== 0) {
+        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+      }
+    });
+  }
+
+  // Generate and Save
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Laporan_Iuran_${typeLabel.replace(/\s+/g, '_')}_${month.replace(/\s+/g, '_')}.xlsx`);
 };
 

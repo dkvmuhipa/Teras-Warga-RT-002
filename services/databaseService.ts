@@ -55,8 +55,8 @@ export const handleFirestoreError = (error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.error('Firestore Error: ', JSON.stringify(deepSanitize(errInfo)));
-  throw new Error(JSON.stringify(deepSanitize(errInfo)));
+  console.error('Firestore Error: ', safeJsonStringify(errInfo));
+  throw new Error(safeJsonStringify(errInfo));
 };
 
 // Collection References
@@ -174,11 +174,8 @@ export const updatePdfConfig = async (config: any) => {
         // Ensure we have a clean, plain object without circular references or complex types
         let cleanData: any = {};
         try {
-            // First pass with deepSanitize
-            const sanitized = deepSanitize(config);
-            // Second pass with JSON stringify/parse to ensure it's a plain object
-            // This also removes any remaining undefined values
-            cleanData = JSON.parse(JSON.stringify(sanitized || {}));
+            // Use safeJsonStringify to ensure it's a plain object
+            cleanData = JSON.parse(safeJsonStringify(config));
         } catch (e) {
             console.error("Error sanitizing PDF config:", e);
             // Fallback to a very basic object if sanitization fails
@@ -428,6 +425,14 @@ export const updateGuestReportStatus = async (id: string, status: 'Active' | 'De
     }
 };
 
+export const updateGuestReportInDb = async (id: string, updates: any) => {
+    try {
+        await updateDoc(doc(db, GUEST_REPORTS_COL, id), deepSanitize(updates));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${GUEST_REPORTS_COL}/${id}`);
+    }
+};
+
 export const deleteGuestReportFromDb = async (id: string) => {
     try {
         await deleteDoc(doc(db, GUEST_REPORTS_COL, id));
@@ -653,6 +658,15 @@ export const updateAdminPassword = async (newPass: string) => {
 
 // --- UTILS ---
 
+export const safeJsonStringify = (data: any, space?: number): string => {
+  try {
+    return JSON.stringify(deepSanitize(data), null, space);
+  } catch (e) {
+    console.error("Safe JSON stringify failed:", e);
+    return '{"error": "Circular structure or complex object detected", "message": "' + (e instanceof Error ? e.message : String(e)) + '"}';
+  }
+};
+
 export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any => {
   // Prevent infinite recursion with a safety depth limit
   if (depth > 20) return "[Depth Limit]";
@@ -711,6 +725,7 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
     return "[Error Accessing]";
   }
 
+  // Mark as seen BEFORE recursing
   seen.add(data);
 
   if (Array.isArray(data)) {
@@ -721,6 +736,7 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
 
   const clean: any = {};
   try {
+    // For objects, we only want plain objects
     const keys = Object.keys(data);
     for (const key of keys) {
       // Skip internal properties
@@ -811,6 +827,17 @@ export const deleteNotificationFromDb = async (id: string) => {
         await deleteDoc(doc(db, NOTIFICATIONS_COL, id));
     } catch (error) {
         handleFirestoreError(error, OperationType.DELETE, `${NOTIFICATIONS_COL}/${id}`);
+    }
+};
+
+export const deleteAllNotificationsFromDb = async () => {
+    try {
+        const q = query(collection(db, NOTIFICATIONS_COL));
+        const snapshot = await getDocs(q);
+        const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, NOTIFICATIONS_COL);
     }
 };
 

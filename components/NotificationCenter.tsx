@@ -7,9 +7,10 @@ interface NotificationCenterProps {
   notifications: AppNotification[];
   onMarkRead: (id: string) => void;
   onDelete?: (id: string) => void;
+  onDeleteAll?: () => void;
 }
 
-export const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications, onMarkRead, onDelete }) => {
+export const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications, onMarkRead, onDelete, onDeleteAll }) => {
   const [isOpen, setIsOpen] = useState(false);
   const unreadCount = notifications.filter(n => !n.isRead).length;
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -44,6 +45,17 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifica
           <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
             <h4 className="font-bold text-sm text-slate-800">Notifikasi</h4>
             <div className="flex items-center gap-2">
+              {onDeleteAll && notifications.length > 0 && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteAll();
+                  }}
+                  className="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 hover:bg-rose-100 hover:text-rose-600 rounded-full transition-colors"
+                >
+                  Hapus Semua
+                </button>
+              )}
               <NotificationToggle userId={localStorage.getItem('resident_house_id') || 'guest_user'} variant="compact" />
               {unreadCount > 0 && <span className="text-[10px] font-bold px-2 py-0.5 bg-rose-100 text-rose-600 rounded-full">{unreadCount} Baru</span>}
             </div>

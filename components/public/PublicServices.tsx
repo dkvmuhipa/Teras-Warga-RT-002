@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
-import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, checkWasteRetribution, handleFirestoreError, OperationType, getLetterById } from '../../services/databaseService';
+import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, safeJsonStringify, checkWasteRetribution, handleFirestoreError, OperationType, getLetterById } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
 import { GuestReportForm } from '../GuestReportForm';
@@ -199,7 +199,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       setLocalHistory(updated); 
       // Use deepSanitize to prevent circular structure errors
       const sanitized = deepSanitize(updated);
-      localStorage.setItem('userRequestHistory', JSON.stringify(sanitized)); 
+      localStorage.setItem('userRequestHistory', safeJsonStringify(sanitized)); 
     } catch (e) { console.error("Error saving history", e); } 
   };
 

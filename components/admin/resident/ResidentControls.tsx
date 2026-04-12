@@ -73,15 +73,55 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
         </select>
 
         <div className="flex gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 col-span-2 sm:col-span-1 justify-center overflow-x-auto no-scrollbar">
-            <button onClick={() => setViewMode('grid')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}><Users size={16} className="md:w-[18px] md:h-[18px]"/></button>
-            <button onClick={() => setViewMode('table')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Tabel"><LayoutList size={16} className="md:w-[18px] md:h-[18px]"/></button>
-            <button onClick={() => setViewMode('map')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'map' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Peta"><MapPin size={16} className="md:w-[18px] md:h-[18px]"/></button>
-            <button onClick={() => setViewMode('analytics')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'analytics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Analitik"><Activity size={16} className="md:w-[18px] md:h-[18px]"/></button>
-            <button onClick={() => setViewMode('iuran')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'iuran' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Laporan Iuran"><DollarSign size={16} className="md:w-[18px] md:h-[18px]"/></button>
-            <button onClick={() => setViewMode('pbb')} className={`flex-1 sm:flex-none p-2 rounded-lg transition-all ${viewMode === 'pbb' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Pembayaran PBB"><FileText size={16} className="md:w-[18px] md:h-[18px]"/></button>
-            <div className="relative flex-1 sm:flex-none">
-              <button onClick={() => setViewMode('registrations')} className={`w-full p-2 rounded-lg transition-all ${viewMode === 'registrations' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="Pendaftaran Baru">
-                <UserPlus size={16} className="mx-auto md:w-[18px] md:h-[18px]"/>
+            <button 
+              onClick={() => setViewMode('grid')} 
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <Users size={16} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden xl:inline">Grid</span>
+            </button>
+            <button 
+              onClick={() => setViewMode('table')} 
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <LayoutList size={16} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden xl:inline">Tabel</span>
+            </button>
+            <button 
+              onClick={() => setViewMode('map')} 
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${viewMode === 'map' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <MapPin size={16} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden xl:inline">Peta</span>
+            </button>
+            <button 
+              onClick={() => setViewMode('analytics')} 
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${viewMode === 'analytics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <Activity size={16} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden xl:inline">Analitik</span>
+            </button>
+            <button 
+              onClick={() => setViewMode('iuran')} 
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${viewMode === 'iuran' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <DollarSign size={16} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden xl:inline">Iuran</span>
+            </button>
+            <button 
+              onClick={() => setViewMode('pbb')} 
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${viewMode === 'pbb' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <FileText size={16} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden xl:inline">PBB</span>
+            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setViewMode('registrations')} 
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${viewMode === 'registrations' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                <UserPlus size={16} />
+                <span className="text-[10px] font-black uppercase tracking-widest hidden xl:inline">Pendaftaran</span>
                 {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 && (
                   <span className="absolute -top-1 -right-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-rose-500 text-white text-[7px] md:text-[8px] font-black rounded-full flex items-center justify-center border border-white">
                     {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length}
