@@ -494,7 +494,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               }`}
             >
               <AlertTriangle size={14} className="sm:w-4 sm:h-4" />
-              <span>Laporan ({reports.filter(r => r.status === 'Baru').length})</span>
+              <span>Aspirasi & Pengaduan ({reports.filter(r => r.status === 'Baru').length})</span>
             </button>
             <button 
               onClick={() => setActiveTab('official-letters')} 
@@ -571,7 +571,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
           )}
           {activeTab === 'reports' && (
             <Button onClick={() => setIsCreatingReport(true)} className="bg-rose-600 hover:bg-rose-700">
-              <Plus size={18} className="mr-2" /> Buat Laporan Baru
+              <Plus size={18} className="mr-2" /> Buat Aspirasi/Pengaduan
             </Button>
           )}
           <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
@@ -1852,15 +1852,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       </Modal>
 
       {/* Admin Create Report Modal */}
-      <Modal isOpen={isCreatingReport} onClose={() => setIsCreatingReport(false)} title="Buat Laporan Baru (Admin)" maxWidth="max-w-2xl">
+      <Modal isOpen={isCreatingReport} onClose={() => setIsCreatingReport(false)} title="Buat Aspirasi/Pengaduan Baru (Admin)" maxWidth="max-w-2xl">
         <form onSubmit={handleCreateReport} className="space-y-6">
           <div className="bg-rose-50/50 p-4 rounded-2xl border border-rose-100 flex items-start gap-3">
             <div className="p-2 bg-rose-100 text-rose-600 rounded-xl">
               <AlertTriangle size={18} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-rose-900">Pencatatan Laporan Langsung</h4>
-              <p className="text-xs text-rose-700/80 mt-1">Gunakan ini untuk mencatat temuan atau laporan yang diterima langsung saat kunjungan ke rumah warga.</p>
+              <h4 className="text-sm font-bold text-rose-900">Pencatatan Aspirasi/Pengaduan Langsung</h4>
+              <p className="text-xs text-rose-700/80 mt-1">Gunakan ini untuk mencatat temuan atau aspirasi yang diterima langsung saat kunjungan ke rumah warga.</p>
             </div>
           </div>
 
@@ -1894,7 +1894,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="group">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Laporan</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Laporan/Aspirasi</label>
               <select 
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all" 
                 value={adminReportForm.type} 
@@ -1902,8 +1902,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               >
                 <option value="Keamanan">Keamanan</option>
                 <option value="Kebersihan">Kebersihan</option>
-                <option value="Infrastruktur">Infrastruktur</option>
+                <option value="Fasilitas">Fasilitas</option>
                 <option value="Sosial">Sosial</option>
+                <option value="Aspirasi/Saran">Aspirasi/Saran</option>
                 <option value="Lainnya">Lainnya</option>
               </select>
             </div>
@@ -1923,12 +1924,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
           </div>
 
           <div className="group">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Isi Laporan / Catatan</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Isi Laporan / Aspirasi</label>
             <textarea 
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all h-32 resize-none leading-relaxed" 
               value={adminReportForm.description || ''} 
               onChange={e=>setAdminReportForm({...adminReportForm, description: e.target.value})} 
-              placeholder="Jelaskan detail laporan atau temuan di lokasi..."
+              placeholder="Jelaskan detail laporan, aspirasi, atau temuan di lokasi..."
             />
           </div>
 
@@ -1957,7 +1958,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       </Modal>
 
       {/* Report Detail Modal */}
-      <Modal isOpen={!!selectedReport} onClose={() => setSelectedReport(null)} title="Detail Laporan Warga" maxWidth="max-w-lg">
+      <Modal isOpen={!!selectedReport} onClose={() => setSelectedReport(null)} title="Detail Aspirasi & Pengaduan" maxWidth="max-w-lg">
         {selectedReport && (
           <div className="space-y-6">
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
@@ -1976,7 +1977,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               </div>
               
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Isi Laporan</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Isi Laporan/Aspirasi</p>
                 <p className="font-medium text-slate-800 bg-white p-4 rounded-xl border border-slate-200 leading-relaxed">
                   "{selectedReport.description}"
                 </p>

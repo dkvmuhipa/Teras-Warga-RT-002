@@ -37,7 +37,7 @@ const ScrollToTop = () => {
 
 // Components & Services
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, Idea, DonationCampaign, UpdateRequest, RondaAttendance, Role, PbbRecord } from './types';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -65,7 +65,6 @@ import { PublicDocuments } from './components/public/PublicDocuments';
 import { PublicActivity } from './components/public/PublicActivity';
 import { PublicWasteBank } from './components/public/PublicWasteBank';
 import { PublicHealth } from './components/public/PublicHealth';
-import PublicForum from './components/public/PublicForum';
 import PublicDonations from './components/public/PublicDonations';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
@@ -84,7 +83,6 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToNotifications,
   subscribeToGallery,
   subscribeToDocuments,
-  subscribeToIdeas,
   subscribeToDonationCampaigns,
   subscribeToUpdateRequests,
   subscribeToWasteDeposits,
@@ -237,10 +235,8 @@ export const App = () => {
   const [activePatrol, setActivePatrol] = useState<PatrolSession | null>(null);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
   const [wasteDeposits, setWasteDeposits] = useState<any[]>([]);
-  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
-  const [pbbRecords, setPbbRecords] = useState<PbbRecord[]>([]);
   const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
 
   useEffect(() => {
@@ -316,10 +312,8 @@ export const App = () => {
     const unsubFAQ = subscribeToFAQ((data) => setFaqItems(data));
     const unsubEvents = subscribeToEvents((data) => setEvents(data));
     const unsubWasteDeposits = subscribeToWasteDeposits((data) => setWasteDeposits(data));
-    const unsubIdeas = subscribeToIdeas((data) => setIdeas(data));
     const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
     const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
-    const unsubPbbRecords = subscribeToCollection('pbbRecords', (data) => setPbbRecords(data));
     const unsubPdfConfig = subscribeToPdfConfig((data) => {
         if (data) {
             setPdfConfigState(data);
@@ -334,8 +328,7 @@ export const App = () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
       unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
       unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubAuditLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubIdeas(); unsubDonations(); unsubUpdateRequests(); unsubPdfConfig(); unsubWasteDeposits();
-      unsubPbbRecords();
+      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubUpdateRequests(); unsubPdfConfig(); unsubWasteDeposits();
     };
   }, []);
 
@@ -408,7 +401,6 @@ export const App = () => {
                             setPopulationLogs={setPopulationLogs} 
                             events={events} 
                             updateRequests={updateRequests}
-                            pbbRecords={pbbRecords}
                             mapPoints={mapPoints} 
                             activePatrol={activePatrol} 
                             iuranPayments={iuranPayments} 
@@ -418,7 +410,6 @@ export const App = () => {
                             auditLogs={auditLogs} 
                             marketItems={marketItems}
                             faqItems={faqItems} 
-                            ideas={ideas}
                             settings={settings}
                             onUpdateSettings={handleUpdateSettings}
                         />
@@ -467,14 +458,12 @@ export const App = () => {
                                     umkmData={umkm}
                                     documents={documents}
                                     polls={polls}
-                                    ideas={ideas}
                                     donationCampaigns={donationCampaigns}
                                     wasteDeposits={wasteDeposits}
                                 />} />
                                 <Route path="/kegiatan" element={<PublicActivity />} />
                                 <Route path="/sampah" element={<PublicWasteBank houseId={localStorage.getItem('resident_house_id') || ''} houses={houses} />} />
                                 <Route path="/kesehatan" element={<PublicHealth />} />
-                                <Route path="/forum" element={<PublicForum ideas={ideas} houses={houses} />} />
                                 <Route path="/donasi" element={<PublicDonations campaigns={donationCampaigns} houses={houses} />} />
                                 <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
                             </Routes>

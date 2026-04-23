@@ -7,7 +7,7 @@ import {
   generateMonthOptions, 
   isMonthMatch 
 } from '../../src/utils/dateUtils';
-import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, Idea, DonationCampaign, News } from '../../types';
+import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, DonationCampaign, News } from '../../types';
 import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType, checkWasteRetribution } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -34,7 +34,6 @@ interface PublicInfoProps {
   umkmData: UMKM[];
   documents: Document[];
   polls: Poll[];
-  ideas: Idea[];
   donationCampaigns: DonationCampaign[];
   wasteDeposits: any[];
 }
@@ -42,7 +41,7 @@ interface PublicInfoProps {
 export const PublicInfo: React.FC<PublicInfoProps> = ({ 
   officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, 
   houses, announcements, galleryItems, faqItems, activePatrol,
-  events, news, umkmData, documents, polls, ideas, donationCampaigns, wasteDeposits
+  events, news, umkmData, documents, polls, donationCampaigns, wasteDeposits
 }) => {
     const { summaries, getPaymentStatus, selectedMonth, setSelectedMonth } = useFinancial();
     const [searchParams] = useSearchParams();
@@ -124,7 +123,6 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
         .slice(0, 3);
 
     const activePolls = polls.filter(p => p.status === 'Open');
-    const trendingIdeas = ideas.sort((a, b) => (b.upvotes?.length || 0) - (a.upvotes?.length || 0)).slice(0, 3);
     const activeDonations = donationCampaigns.filter(c => c.status === 'Aktif');
     const featuredUMKM = umkmData.slice(0, 4);
 
@@ -537,31 +535,6 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                             </div>
                         ))}
                         {activePolls.length === 0 && <p className="text-xs text-slate-400 italic">Tidak ada voting aktif.</p>}
-                    </div>
-                </motion.div>
-
-                {/* Trending Ideas */}
-                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-black text-slate-800 flex items-center gap-3">
-                            <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><Lightbulb size={20}/></div>
-                            Aspirasi Warga
-                        </h2>
-                        <Link to="/forum" className="text-[10px] font-bold text-indigo-600 hover:underline uppercase tracking-wider">Beri Ide</Link>
-                    </div>
-                    <div className="space-y-4">
-                        {trendingIdeas.map(idea => (
-                            <div key={idea.id} className="flex items-start gap-3 p-3 hover:bg-slate-50 rounded-2xl transition-colors cursor-pointer group">
-                                <div className="p-2 bg-amber-100 text-amber-600 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                                    <ArrowUpRight size={16} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-slate-800 text-sm line-clamp-1">{idea.title}</h4>
-                                    <p className="text-[10px] text-slate-400 font-medium">{idea.upvotes?.length || 0} Dukungan • {idea.category}</p>
-                                </div>
-                            </div>
-                        ))}
-                        {trendingIdeas.length === 0 && <p className="text-xs text-slate-400 italic">Belum ada aspirasi.</p>}
                     </div>
                 </motion.div>
 

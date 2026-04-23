@@ -14,7 +14,7 @@ import {
 } from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance, Role, PbbRecord, Idea
+  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance, Role
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
@@ -37,7 +37,6 @@ import { UpdateRequestManager } from './UpdateRequestManager';
 import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
 import { AdminAnalytics } from './AdminAnalytics';
-import { IdeaManagement } from './IdeaManagement';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
@@ -79,8 +78,6 @@ interface AdminDashboardProps {
   marketItems: MarketItem[];
   faqItems: FAQItem[];
   updateRequests: UpdateRequest[];
-  pbbRecords: PbbRecord[];
-  ideas: Idea[];
   settings: any;
   onUpdateSettings: (settings: any) => void;
 }
@@ -88,7 +85,7 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   role,
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, pbbRecords, ideas, settings, onUpdateSettings
+  ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, settings, onUpdateSettings
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -116,7 +113,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'overview':
         return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
       case 'residents':
-        return <ResidentManager role={role} houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} bills={bills} residentRegistrations={residentRegistrations} guestReports={guestReports} pbbRecords={pbbRecords} settings={settings} />;
+        return <ResidentManager role={role} houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} bills={bills} residentRegistrations={residentRegistrations} guestReports={guestReports} settings={settings} />;
       case 'update-requests':
         return <UpdateRequestManager requests={updateRequests} houses={houses} />;
       case 'finance':
@@ -149,8 +146,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <AuditLogManager logs={auditLogs} />;
       case 'content':
         return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} events={events} faqItems={faqItems} houses={houses} pdfConfig={pdfConfig} />;
-      case 'ideas':
-        return <IdeaManagement ideas={ideas} houses={houses} />;
       case 'officials':
         return <OfficialManagement officials={officials} houses={houses} />;
       case 'notifications':
@@ -255,7 +250,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         residentRegistrations={residentRegistrations}
         guestReports={guestReports}
         updateRequests={updateRequests}
-        ideas={ideas}
       />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

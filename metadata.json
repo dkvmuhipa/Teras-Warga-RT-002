@@ -1,5 +1,5 @@
 {
   "name": "TERAS RT 02",
-  "description": "Sistem Informasi Digital TERAS RT 02 (Teknologi | Ekraf | Rukun | Aman | Sinergi). Platform terpadu untuk transparansi dan manajemen lingkungan.",
+  "description": "Sistem Informasi Digital TERAS RT 02 (Teknologi, Ekraf, Rukun, Aman, Sinergi). Platform manajemen lingkungan modern yang mengintegrasikan data kependudukan, transparansi keuangan, layanan administrasi surat menyurat, dan monitoring keamanan lingkungan dalam satu ekosistem digital yang terpadu.",
   "requestFramePermissions": ["camera", "geolocation"]
 }

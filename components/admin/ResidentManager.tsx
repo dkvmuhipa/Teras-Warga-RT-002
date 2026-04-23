@@ -13,7 +13,6 @@ import { ResidentGridView } from './resident/ResidentGridView';
 import { ResidentIuranManager } from './resident/ResidentIuranManager';
 import { ResidentRegistrationList } from './resident/ResidentRegistrationList';
 import { ResidentDetailDrawer } from './resident/ResidentDetailDrawer';
-import { PbbManager } from './PbbManager';
 import { AddEditResidentModal, PaymentModal, EditPaymentModal } from './resident/ResidentModals';
 import { ResidentStats } from './resident/ResidentStats';
 import { ResidentControls } from './resident/ResidentControls';
@@ -25,7 +24,7 @@ import {
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon, ChevronDown, Settings, MoreVertical
 } from 'lucide-react';
-import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, PbbRecord, Role } from '../../types';
+import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role } from '../../types';
 import { HouseMap } from '../HouseMap';
 import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
 import { 
@@ -65,7 +64,6 @@ interface ResidentManagerProps {
   bills: Bill[];
   residentRegistrations: ResidentRegistration[];
   guestReports: any[];
-  pbbRecords: PbbRecord[];
   settings: any;
 }
 
@@ -73,9 +71,9 @@ type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business
 
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
   role,
-  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, guestReports, pbbRecords, settings
+  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, guestReports, settings
 }) => {
-  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'pbb'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
   const [filterStatus, setFilterStatus] = useState<any>('all');
@@ -1002,87 +1000,116 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       className="space-y-6 relative"
     >
       {/* Header & Actions */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-6">
-        <div className="w-full lg:w-auto">
-          <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">Data Warga</h2>
-          <p className="text-[10px] sm:text-xs md:text-sm text-slate-500 font-medium mt-1">Kelola data kependudukan dan status hunian RT 02.</p>
-        </div>
-        <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 md:gap-8 mb-4">
+        <motion.div variants={itemVariants} className="w-full lg:w-auto">
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            Data Warga
+            <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse hidden md:block"></div>
+          </h2>
+          <p className="text-xs md:text-sm text-slate-500 font-semibold mt-1 tracking-wide">
+            Administrasi kependudukan & sistem pemantauan hunian RT 02
+          </p>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
           {selectedIds.size > 0 && (
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 pr-4 border-r border-slate-200">
               <button 
                 onClick={handleBulkVerify}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl hover:bg-emerald-100 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
+                className="group flex items-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
               >
-                <CheckCircle size={14} className="md:w-4 md:h-4" /> <span>Verifikasi ({selectedIds.size})</span>
+                <CheckCircle size={14} className="group-hover:scale-110 transition-transform" /> 
+                <span>Sahkan ({selectedIds.size})</span>
               </button>
               <button 
                 onClick={handleBulkDelete}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl hover:bg-rose-100 font-bold text-[9px] sm:text-[10px] md:text-xs transition-all shadow-sm"
+                className="group flex items-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl hover:bg-rose-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
               >
-                <Trash2 size={14} className="md:w-4 md:h-4" /> <span>Hapus</span>
+                <Trash2 size={14} className="group-hover:scale-110 transition-transform" /> 
+                <span>Hapus</span>
               </button>
             </div>
           )}
           
-          <div className="relative w-full sm:w-auto">
+          <div className="relative">
             <button 
               onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-xs transition-all shadow-sm"
+              className={`flex items-center gap-2 px-5 py-2.5 bg-white border rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm active:scale-95 ${
+                isActionMenuOpen 
+                  ? 'border-indigo-500 text-indigo-600 ring-4 ring-indigo-500/5' 
+                  : 'border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+              }`}
             >
-              <Settings size={16} className="text-slate-400" />
-              <span>Kelola Data</span>
-              <ChevronDown size={14} className={`text-slate-400 transition-transform ${isActionMenuOpen ? 'rotate-180' : ''}`} />
+              <Settings size={14} className={isActionMenuOpen ? 'animate-spin-slow' : 'text-slate-400'} />
+              <span>Manajemen Data</span>
+              <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isActionMenuOpen ? 'rotate-180 text-indigo-500' : ''}`} />
             </button>
 
             {isActionMenuOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setIsActionMenuOpen(false)}></div>
-                <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-xl z-20 overflow-hidden animate-in fade-in zoom-in duration-200">
-                  <div className="p-2 space-y-1">
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  className="absolute right-0 mt-3 w-64 bg-white/90 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl z-20 overflow-hidden ring-1 ring-black/5"
+                >
+                  <div className="p-3 space-y-1.5">
+                    <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Aksi Massal</div>
                     <button 
                       onClick={() => { handleGenerateAllPins(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
                       disabled={isGenerating}
                     >
-                      <Shield size={16} className="text-amber-500" />
-                      <span>{isGenerating ? 'Memproses...' : 'Generate PIN Massal'}</span>
+                      <div className="p-2 bg-amber-50 text-amber-500 rounded-xl group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                        <Shield size={14} />
+                      </div>
+                      <span>{isGenerating ? 'Memproses...' : 'Otokit PIN'}</span>
                     </button>
                     <button 
                       onClick={() => { handleCleanupPlaceholders(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-rose-600 hover:shadow-sm rounded-2xl transition-all"
                     >
-                      <Trash2 size={16} className="text-rose-500" />
-                      <span>Reset Data Default</span>
+                      <div className="p-2 bg-rose-50 text-rose-500 rounded-xl group-hover:bg-rose-500 group-hover:text-white transition-colors">
+                        <Trash2 size={14} />
+                      </div>
+                      <span>Reset Awal</span>
                     </button>
-                    <div className="h-px bg-slate-100 my-1"></div>
+                    
+                    <div className="h-px bg-slate-100 mx-3 my-2"></div>
+                    <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Impor & Ekspor</div>
+                    
                     <button 
                       onClick={() => { generateProfessionalExcel(houses); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-all"
                     >
-                      <Download size={16} className="text-emerald-500" />
-                      <span>Ekspor Excel</span>
+                      <div className="p-2 bg-emerald-50 text-emerald-500 rounded-xl">
+                        <Download size={14} />
+                      </div>
+                      <span>Unduh Excel</span>
                     </button>
                     <button 
                       onClick={() => { fileInputRef.current?.click(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
                       disabled={isUploading}
                     >
-                      <Upload size={16} className="text-indigo-500" />
-                      <span>{isUploading ? 'Mengunggah...' : 'Impor Excel'}</span>
+                      <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
+                        <Upload size={14} />
+                      </div>
+                      <span>Unggah Data</span>
                     </button>
                   </div>
-                </div>
+                </motion.div>
               </>
             )}
           </div>
 
           <button 
             onClick={handleOpenAdd}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all"
+            className="group relative flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl hover:bg-indigo-600 transition-all font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-slate-900/10 active:scale-95"
           >
-            <UserPlus size={16} />
-            <span>Tambah Warga</span>
+            <UserPlus size={16} className="group-hover:scale-110 transition-transform" />
+            <span>Tambah Warga Baru</span>
+            <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </button>
           
           <input 
@@ -1092,7 +1119,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             accept=".xlsx,.xls" 
             className="hidden" 
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* Stats Cards */}
@@ -1236,8 +1263,6 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             handleDelete={handleDelete}
             onSendWhatsApp={handleSendWhatsApp}
           />
-        ) : viewMode === 'pbb' ? (
-          <PbbManager houses={houses} pbbRecords={pbbRecords} />
         ) : viewMode === 'map' ? (
       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
         <HouseMap 

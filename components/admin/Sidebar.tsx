@@ -7,7 +7,7 @@ import {
   PieChart, Activity, FileEdit, MessageSquare
 } from 'lucide-react';
 import { Logo } from '../../constants';
-import { Role, Idea } from '../../types';
+import { Role } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface SidebarProps {
@@ -20,12 +20,11 @@ interface SidebarProps {
   residentRegistrations?: any[];
   guestReports?: any[];
   updateRequests?: any[];
-  ideas?: Idea[];
 }
 
 export const AdminSidebar: React.FC<SidebarProps> = ({ 
   role,
-  activeTab, setActiveTab, isOpen, setIsOpen, onLogout, residentRegistrations = [], guestReports = [], updateRequests = [], ideas = []
+  activeTab, setActiveTab, isOpen, setIsOpen, onLogout, residentRegistrations = [], guestReports = [], updateRequests = []
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -59,7 +58,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     { 
       title: "Layanan & Keuangan", 
       items: [
-        { id: 'services', icon: FileText, label: 'Layanan & Surat' },
+        { id: 'services', icon: FileText, label: 'Surat & Pengaduan' },
         { id: 'finance', icon: DollarSign, label: 'Keuangan' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
       ] 
@@ -71,7 +70,6 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'activities', icon: Calendar, label: 'Presensi Kegiatan' },
         { id: 'waste-bank', icon: Box, label: 'Bank Sampah' },
         { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
-        { id: 'ideas', icon: MessageSquare, label: 'Aspirasi Warga' },
         { id: 'content', icon: Megaphone, label: 'Konten & Informasi' },
       ] 
     },
@@ -100,7 +98,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         const allowed = [
           'overview', 'analytics', 'residents', 'update-requests', 'population-reports', 
           'health', 'guests', 'officials', 'services', 'documents', 'activities', 
-          'assets', 'ideas', 'content', 'audit', 'notifications', 'settings'
+          'assets', 'content', 'audit', 'notifications', 'settings'
         ];
         return allowed.includes(item.id);
       }
@@ -232,12 +230,6 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                               layoutId="activeTab"
                               className="absolute right-2 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
                             />
-                          )}
-
-                          {!isCollapsed && item.id === 'ideas' && ideas.filter(i => i.status === 'Usulan').length > 0 && (
-                            <span className="ml-auto bg-blue-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
-                              {ideas.filter(i => i.status === 'Usulan').length}
-                            </span>
                           )}
                         </button>
                       ))}

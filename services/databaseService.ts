@@ -32,7 +32,7 @@ import {
   updatePassword
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo, PbbRecord, OfficialLetter } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter } from "../types";
 
 export { OperationType, isFirebaseConfigured };
 
@@ -94,12 +94,10 @@ const EVENTS_COL = "events";
 const WASTE_DEPOSITS_COL = "wasteDeposits";
 const WASTE_PRICES_COL = "wastePrices";
 const WASTE_BALANCES_COL = "wasteBalances";
-const IDEAS_COL = "ideas";
 const DONATION_CAMPAIGNS_COL = "donationCampaigns";
 const DONATION_RECORDS_COL = "donationRecords";
 const PANIC_ALERTS_COL = "panicAlerts";
 const UPDATE_REQUESTS_COL = "updateRequests";
-const PBB_COL = "pbbRecords";
 const OFFICIAL_LETTERS_COL = "officialLetters";
 const FCM_TOKENS_COL = "fcmTokens";
 const CONFIGS_COL = "configs";
@@ -189,76 +187,6 @@ export const updatePdfConfig = async (config: any) => {
         });
     } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `${CONFIGS_COL}/pdf`);
-    }
-};
-
-export const subscribeToIdeas = (callback: (data: any[]) => void) => {
-    if (!isFirebaseConfigured || !db) return () => {};
-    const q = query(collection(db, IDEAS_COL), orderBy("date", "desc"));
-    return onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
-    }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, IDEAS_COL);
-    });
-};
-
-export const addIdea = async (data: any) => {
-    try {
-        const docRef = await addDoc(collection(db, IDEAS_COL), {
-            ...data,
-            date: new Date().toISOString(),
-            upvotes: [],
-            status: 'Usulan'
-        });
-
-        // Add notification for admins
-        await addNotificationToDb({
-            title: 'Aspirasi Baru',
-            message: `Warga ${data.authorName} menyampaikan ide: ${data.title}`,
-            type: 'Info',
-            category: 'Forum',
-            isRead: false,
-            date: new Date().toISOString()
-        });
-
-        return docRef;
-    } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, IDEAS_COL);
-    }
-};
-
-export const deleteIdeaFromDb = async (id: string) => {
-    try {
-        const docRef = doc(db, IDEAS_COL, id);
-        return await deleteDoc(docRef);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `${IDEAS_COL}/${id}`);
-    }
-};
-
-export const updateIdeaStatus = async (id: string, status: string) => {
-    try {
-        const docRef = doc(db, IDEAS_COL, id);
-        return await updateDoc(docRef, { status });
-    } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `${IDEAS_COL}/${id}`);
-    }
-};
-
-export const toggleUpvoteIdea = async (id: string, houseId: string) => {
-    try {
-        const docRef = doc(db, IDEAS_COL, id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const upvotes = docSnap.data().upvotes || [];
-            const newUpvotes = upvotes.includes(houseId) 
-                ? upvotes.filter((hid: string) => hid !== houseId)
-                : [...upvotes, houseId];
-            return await updateDoc(docRef, { upvotes: newUpvotes });
-        }
-    } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `${IDEAS_COL}/${id}`);
     }
 };
 
@@ -846,42 +774,6 @@ export const markNotificationAsRead = async (id: string) => {
         await updateDoc(doc(db, NOTIFICATIONS_COL, id), { isRead: true });
     } catch (error) {
         handleFirestoreError(error, OperationType.UPDATE, `${NOTIFICATIONS_COL}/${id}`);
-    }
-};
-
-// --- PBB SERVICES ---
-export const subscribeToPbbRecords = (callback: (data: PbbRecord[]) => void) => {
-    if (!isFirebaseConfigured || !db) return () => {};
-    const q = query(collection(db, PBB_COL), orderBy("year", "desc"));
-    return onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as PbbRecord));
-        callback(data);
-    }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, PBB_COL);
-    });
-};
-
-export const addPbbRecordToDb = async (data: Omit<PbbRecord, 'id'>) => {
-    try {
-        return await addDoc(collection(db, PBB_COL), deepSanitize(data));
-    } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, PBB_COL);
-    }
-};
-
-export const updatePbbRecordInDb = async (id: string, data: Partial<PbbRecord>) => {
-    try {
-        return await updateDoc(doc(db, PBB_COL, id), deepSanitize(data));
-    } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `${PBB_COL}/${id}`);
-    }
-};
-
-export const deletePbbRecordFromDb = async (id: string) => {
-    try {
-        return await deleteDoc(doc(db, PBB_COL, id));
-    } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `${PBB_COL}/${id}`);
     }
 };
 

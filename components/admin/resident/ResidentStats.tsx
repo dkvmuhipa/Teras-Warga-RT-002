@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Users, Home, Shield } from 'lucide-react';
+import { Users, Home, Shield, UserCheck, UserMinus } from 'lucide-react';
 
 interface ResidentStatsProps {
   totalResidents: number;
@@ -16,39 +16,104 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
   itemVariants 
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <motion.div 
         variants={itemVariants}
-        className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-lg shadow-blue-600/20 flex items-center gap-3 md:gap-5 group hover:scale-[1.02] transition-transform relative overflow-hidden"
+        whileHover={{ scale: 1.01 }}
+        className="md:col-span-2 bg-slate-950 p-8 rounded-[2.5rem] shadow-2xl flex flex-col justify-between group transition-all relative overflow-hidden text-white"
       >
-        <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="p-3 md:p-4 bg-white/20 text-white rounded-xl md:rounded-2xl backdrop-blur-sm border border-white/20">
-          <Users size={20} className="md:w-6 md:h-6" />
+        {/* Layered Decorative Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/30 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/40 transition-colors duration-1000"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-violet-600/20 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.05)_0%,transparent_50%)]"></div>
+        
+        <div className="relative z-10 flex justify-between items-start mb-12">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+              <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.3em]">Status Real-time</span>
+            </div>
+            <p className="text-xs font-bold text-slate-400">Database Warga RT 02/RW 06</p>
+          </div>
+          <div className="p-4 bg-white/5 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-inner group-hover:scale-110 transition-transform duration-500">
+            <Users size={24} className="text-white" />
+          </div>
         </div>
-        <div className="relative z-10 text-white">
-          <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-80">Total Warga</p>
-          <h3 className="text-xl md:text-2xl font-black">{totalResidents} <span className="text-[10px] md:text-xs font-bold opacity-60">Jiwa</span></h3>
+
+        <div className="relative z-10">
+          <div className="flex items-end gap-4">
+            <h3 className="text-7xl font-black tracking-tighter leading-none bg-gradient-to-t from-slate-200 to-white bg-clip-text text-transparent">{totalResidents}</h3>
+            <div className="mb-2">
+              <span className="block text-indigo-400 font-black text-[10px] uppercase tracking-[0.2em] mb-1">Populasi Aktif</span>
+              <span className="block text-white font-black text-base uppercase tracking-tighter leading-none">Jiwa Terdaftar</span>
+            </div>
+          </div>
+          
+          <div className="mt-8 pt-8 border-t border-white/5 flex flex-wrap gap-6">
+             <div className="flex items-center gap-3">
+               <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
+                 <Shield size={14} />
+               </div>
+               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Enkripsi Data</span>
+             </div>
+             <div className="flex items-center gap-3">
+               <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+                 <UserCheck size={14} />
+               </div>
+               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Admin Terverifikasi</span>
+             </div>
+          </div>
         </div>
       </motion.div>
 
-      {[
-        { icon: Home, label: 'Rumah Dihuni', value: occupiedHouses, unit: 'Unit', color: 'emerald' },
-        { icon: Shield, label: 'Rumah Kosong', value: emptyHouses, unit: 'Unit', color: 'slate' }
-      ].map((stat, i) => (
-        <motion.div 
-          key={i}
-          variants={itemVariants}
-          className="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-3 md:gap-5 group hover:shadow-xl hover:shadow-slate-200/50 transition-all"
-        >
-          <div className={`p-3 md:p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform`}>
-            <stat.icon size={20} className="md:w-6 md:h-6" />
+      <motion.div 
+        variants={itemVariants}
+        whileHover={{ y: -5 }}
+        className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between group hover:shadow-2xl hover:shadow-emerald-500/10 transition-all relative overflow-hidden"
+      >
+        <div className="absolute -top-12 -right-12 w-40 h-40 bg-emerald-50/50 rounded-full blur-3xl group-hover:bg-emerald-100/50 transition-colors"></div>
+        
+        <div className="relative z-10 flex justify-between items-start mb-10">
+          <div className="p-4 bg-emerald-50 text-emerald-600 rounded-3xl border border-emerald-100 group-hover:bg-emerald-600 group-hover:text-white transition-all transform group-hover:rotate-6 shadow-sm">
+            <Home size={22} />
           </div>
-          <div>
-            <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-            <h3 className="text-xl md:text-2xl font-black text-slate-900">{stat.value} <span className="text-[10px] md:text-xs font-bold text-slate-400">{stat.unit}</span></h3>
+          <div className="flex flex-col items-end">
+            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest px-2 py-1 bg-emerald-50 rounded-md mb-1">Terisi</span>
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
           </div>
-        </motion.div>
-      ))}
+        </div>
+        
+        <div className="relative z-10">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 leading-none">Hunian Aktif</p>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-5xl font-black text-slate-950 leading-none">{occupiedHouses}</h3>
+            <span className="text-xs font-black text-slate-400 uppercase tracking-tighter">Unit</span>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div 
+        variants={itemVariants}
+        whileHover={{ y: -5 }}
+        className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between group hover:shadow-2xl hover:shadow-rose-500/10 transition-all relative overflow-hidden"
+      >
+        <div className="absolute -top-12 -right-12 w-40 h-40 bg-rose-50/50 rounded-full blur-3xl group-hover:bg-rose-100/50 transition-colors"></div>
+
+        <div className="relative z-10 flex justify-between items-start mb-10">
+          <div className="p-4 bg-slate-50 text-slate-400 rounded-3xl border border-slate-200 group-hover:bg-slate-900 group-hover:text-white transition-all transform group-hover:-rotate-6 shadow-sm">
+            <UserMinus size={22} />
+          </div>
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2 py-1 bg-slate-50 rounded-md">Kosong</span>
+        </div>
+        
+        <div className="relative z-10">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 leading-none">Rumah Kosong</p>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-5xl font-black text-slate-950 leading-none">{emptyHouses}</h3>
+            <span className="text-xs font-black text-slate-400 uppercase tracking-tighter">Unit</span>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };

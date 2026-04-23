@@ -143,7 +143,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     { label: 'Pasar Warga', icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', link: '/market' },
     { label: 'Info Publik', icon: Megaphone, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', link: '/info' },
     { label: 'E-Voting', icon: Vote, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/voting' },
-    { label: 'Lapor Masalah', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', action: () => setIsReportModalOpen(true) }
+    { label: 'Aspirasi & Pengaduan', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', action: () => setIsReportModalOpen(true) }
   ];
 
   const [filterType, setFilterType] = React.useState<'All' | 'General' | 'Urgent' | 'Event'>('All');
@@ -335,16 +335,16 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       {/* Quick Report Modal */}
-      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Lapor Masalah Warga" maxWidth="max-w-xl">
+      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Aspirasi & Pengaduan Warga" maxWidth="max-w-xl">
         <div className="p-6">
           <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-6 flex gap-3">
             <div className="p-2 bg-rose-100 text-rose-600 rounded-xl h-fit">
               <AlertTriangle size={20} />
             </div>
             <div>
-              <h4 className="text-sm font-black text-rose-900 uppercase tracking-tight">Layanan Pengaduan Cepat</h4>
+              <h4 className="text-sm font-black text-rose-900 uppercase tracking-tight">Layanan Aspirasi & Pengaduan</h4>
               <p className="text-xs text-rose-700 font-medium leading-relaxed">
-                Gunakan formulir ini untuk melaporkan masalah keamanan, kebersihan, atau fasilitas di lingkungan RT 02. Laporan Anda akan diteruskan ke pengurus RT.
+                Gunakan formulir ini untuk melaporkan masalah keamanan, kebersihan, fasilitas, atau memberikan saran/aspirasi untuk lingkungan RT 02.
               </p>
             </div>
           </div>
@@ -352,7 +352,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           <form onSubmit={handleSubmitReport} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Laporan</label>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Laporan/Aspirasi</label>
                 <select 
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                   value={reportForm.type}
@@ -362,6 +362,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                   <option value="Kebersihan">Kebersihan</option>
                   <option value="Fasilitas">Fasilitas</option>
                   <option value="Sosial">Sosial</option>
+                  <option value="Aspirasi/Saran">Aspirasi/Saran</option>
                   <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
@@ -433,10 +434,10 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Deskripsi Masalah</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Deskripsi Laporan / Aspirasi</label>
               <textarea 
                 rows={4}
-                placeholder="Jelaskan secara detail masalah yang Anda temukan..."
+                placeholder="Jelaskan secara detail masalah atau saran Anda..."
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none"
                 value={reportForm.description}
                 onChange={e => setReportForm({...reportForm, description: e.target.value})}
@@ -459,7 +460,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               >
                 {isSubmitting ? 'Mengirim...' : (
                   <span className="flex items-center gap-2">
-                    <Send size={16} /> Kirim Laporan
+                    <Send size={16} /> Kirim Laporan/Aspirasi
                   </span>
                 )}
               </Button>

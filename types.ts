@@ -275,7 +275,7 @@ export interface AppNotification {
 
 export interface Report {
   id: string;
-  type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Sosial' | 'Lainnya';
+  type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Sosial' | 'Aspirasi/Saran' | 'Lainnya';
   description: string;
   reporterName: string;
   date: string;
@@ -747,18 +747,6 @@ export interface UMKMOrder {
 }
 
 // Musyawarah Digital (Forum Ide)
-export interface Idea {
-  id: string;
-  title: string;
-  description: string;
-  authorName: string;
-  houseId: string;
-  date: string;
-  upvotes: string[]; // Array of House IDs
-  status: 'Usulan' | 'Dibahas' | 'Disetujui' | 'Selesai';
-  category: 'Fasilitas' | 'Kegiatan' | 'Keamanan' | 'Lainnya';
-}
-
 // Donasi Sosial & Kas Kematian
 export interface DonationCampaign {
   id: string;
@@ -782,17 +770,6 @@ export interface DonationRecord {
   date: string;
   note?: string;
   isAnonymous?: boolean;
-}
-
-export interface PbbRecord {
-  id: string;
-  houseId: string;
-  year: number;
-  amount: number;
-  status: 'Paid' | 'Unpaid';
-  paymentDate?: string;
-  notes?: string;
-  nop?: string; // Nomor Objek Pajak
 }
 
 export interface OfficialLetter {

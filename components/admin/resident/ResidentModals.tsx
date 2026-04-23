@@ -4,7 +4,7 @@ import { Button } from '../../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
-  CreditCard, AlertCircle, Calendar, FileText
+  CreditCard, AlertCircle, Calendar, FileText, Shield, Send, History, Edit2, Heart
 } from 'lucide-react';
 import { House, PaymentStatus, Role } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -120,244 +120,259 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={editingHouseId ? "Edit Data Warga" : "Tambah Warga Baru"} maxWidth="max-w-7xl">
-      <form onSubmit={onFormSubmit} className="space-y-8">
-        {/* Tab Navigation */}
-        <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] border border-slate-200">
-          <button 
-            type="button"
-            onClick={() => setActiveFormTab('basic')}
-            className={`flex-1 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${activeFormTab === 'basic' ? 'bg-white text-indigo-600 shadow-md shadow-indigo-500/10' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <div className={`p-1.5 rounded-lg ${activeFormTab === 'basic' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
-              <Home size={14} />
-            </div>
-            1. Informasi Dasar
-          </button>
-          <button 
-            type="button"
-            onClick={() => {
-              if (activeFormTab === 'basic') {
-                if (validateTab('basic')) setActiveFormTab('demographics');
-              } else {
-                setActiveFormTab('demographics');
-              }
-            }}
-            className={`flex-1 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${activeFormTab === 'demographics' ? 'bg-white text-indigo-600 shadow-md shadow-indigo-500/10' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <div className={`p-1.5 rounded-lg ${activeFormTab === 'demographics' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
-              <Activity size={14} />
-            </div>
-            2. Demografi & Bantuan
-          </button>
-          <button 
-            type="button"
-            onClick={() => {
-              if (activeFormTab === 'basic') {
-                if (validateTab('basic')) {
-                  setActiveFormTab('demographics'); // Go to next first? Or just allow?
-                  // Actually if they click 3 from 1, we should validate 1 AND 2.
-                  if (validateTab('demographics')) setActiveFormTab('family');
+    <Modal isOpen={isOpen} onClose={onClose} title={editingHouseId ? "Edit Profil" : "Warga Baru"} maxWidth="max-w-4xl">
+      <form onSubmit={onFormSubmit} className="space-y-6 py-2 px-2">
+        {/* Modern Tab Navigation - Compact */}
+        <div className="flex bg-slate-100/50 p-1 rounded-2xl border border-slate-200/60 backdrop-blur-xl sticky top-0 z-20 mx-auto max-w-sm shadow-xl shadow-slate-200/10">
+          {[
+            { id: 'basic', label: 'Dasar', icon: Home },
+            { id: 'demographics', label: 'Demograf', icon: Activity },
+            { id: 'family', label: 'Keluarga', icon: Users }
+          ].map((tab) => (
+            <button 
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                if (tab.id === 'basic') setActiveFormTab('basic');
+                else if (tab.id === 'demographics') {
+                   if (validateTab('basic')) setActiveFormTab('demographics');
+                } else if (tab.id === 'family') {
+                   if (validateTab('basic') && validateTab('demographics')) setActiveFormTab('family');
                 }
-              } else if (activeFormTab === 'demographics') {
-                if (validateTab('demographics')) setActiveFormTab('family');
-              } else {
-                setActiveFormTab('family');
-              }
-            }}
-            className={`flex-1 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${activeFormTab === 'family' ? 'bg-white text-indigo-600 shadow-md shadow-indigo-500/10' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <div className={`p-1.5 rounded-lg ${activeFormTab === 'family' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
-              <Users size={14} />
-            </div>
-            3. Anggota Keluarga
-          </button>
+              }}
+              className={`flex-1 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 relative overflow-hidden ${
+                activeFormTab === tab.id ? 'bg-white text-indigo-600 shadow-lg shadow-indigo-600/5' : 'text-slate-400 hover:text-indigo-400'
+              }`}
+            >
+              <div className={`p-1.5 rounded-lg transition-all duration-700 ${
+                activeFormTab === tab.id ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400'
+              }`}>
+                <tab.icon size={12} />
+              </div>
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          ))}
         </div>
-        <div className="min-h-[500px]">
+
+        <div className="min-h-[400px]">
           <AnimatePresence mode="wait">
             {activeFormTab === 'basic' && (
               <motion.div 
                 key="basic"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-8"
               >
-                {/* Section 1: Informasi Utama */}
-                <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
-                  <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
-                    <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
-                      <User size={18} />
+                {/* Main Identity Section */}
+                <div className="lg:col-span-12 space-y-8">
+                  <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/[0.03] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+                    
+                    <div className="flex items-center gap-4 mb-8 relative z-10">
+                       <div className="p-4 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-600/20">
+                         <User size={20} strokeWidth={2.5} />
+                       </div>
+                       <div>
+                         <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Identitas Dasar</h3>
+                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Data sesuai KTP/KK untuk RT</p>
+                       </div>
                     </div>
-                    Informasi Utama
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="sm:col-span-2">
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kepala Keluarga (Penghuni) <span className="text-rose-500">*</span></label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.headOfFamily} onChange={e => setFormData({...formData, headOfFamily: e.target.value})} required placeholder="Nama Lengkap..." />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">NIK (Kepala Keluarga) <span className="text-rose-500">*</span></label>
-                      <input required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.nik} onChange={e => setFormData({...formData, nik: e.target.value})} placeholder="16 Digit NIK..." />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">No. Kartu Keluarga (KK) <span className="text-rose-500">*</span></label>
-                      <input required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.kkNumber} onChange={e => setFormData({...formData, kkNumber: e.target.value})} placeholder="16 Digit No. KK..." />
-                    </div>
-                    <div className="sm:col-span-2 flex items-center gap-4 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
-                      <input 
-                        type="checkbox" 
-                        id="rondaExempt"
-                        className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer"
-                        checked={formData.rondaExempt}
-                        onChange={e => setFormData({...formData, rondaExempt: e.target.checked})}
-                      />
-                      <label htmlFor="rondaExempt" className="text-xs font-bold text-slate-700 cursor-pointer">
-                        Pengecualian Ronda (Lansia, Sakit, atau Alasan Khusus Lainnya)
-                      </label>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Kelamin <span className="text-rose-500">*</span></label>
-                      <select required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
-                        <option value="Laki-laki">Laki-laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tempat Lahir <span className="text-rose-500">*</span></label>
-                      <input required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthPlace} onChange={e => setFormData({...formData, birthPlace: e.target.value})} placeholder="Kota/Kabupaten..." />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Lahir <span className="text-rose-500">*</span></label>
-                      <input required type="date" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Perkawinan</label>
-                      <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.maritalStatus} onChange={e => setFormData({...formData, maritalStatus: e.target.value as any})}>
-                        <option value="Belum Kawin">Belum Kawin</option>
-                        <option value="Kawin">Kawin</option>
-                        <option value="Cerai Hidup">Cerai Hidup</option>
-                        <option value="Cerai Mati">Cerai Mati</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Golongan Darah</label>
-                      <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.bloodType} onChange={e => setFormData({...formData, bloodType: e.target.value as any})}>
-                        <option value="-">-</option>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="AB">AB</option>
-                        <option value="O">O</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kewarganegaraan</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.nationality} onChange={e => setFormData({...formData, nationality: e.target.value})} placeholder="WNI / WNA..." />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Alamat Sesuai KTP <span className="text-rose-500">*</span></label>
-                      <textarea required className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.addressKtp} onChange={e => setFormData({...formData, addressKtp: e.target.value})} placeholder="Alamat lengkap sesuai KTP..." rows={2} />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nama Pemilik Rumah</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} placeholder="Nama Pemilik (Kosongkan jika sama dengan KK)" />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kontak Pemilik Rumah</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.ownerPhone} onChange={e => setFormData({...formData, ownerPhone: e.target.value})} placeholder="No. HP/WA Pemilik Rumah..." />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Blok <span className="text-rose-500">*</span></label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.block} onChange={e => setFormData({...formData, block: e.target.value})} required placeholder="A" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nomor <span className="text-rose-500">*</span></label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} required placeholder="12" />
-                    </div>
-                  </div>
-                </div>
 
-                <div className="space-y-10">
-                  {/* Section 2: Status & Kepemilikan */}
-                  <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
-                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
-                      <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
-                        <Home size={18} />
-                      </div>
-                      Status & Kepemilikan
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Hunian</label>
-                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
-                          <option value="Occupied">Dihuni</option>
-                          <option value="Empty">Kosong</option>
-                          <option value="Business">Usaha</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Kepemilikan</label>
-                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.residenceType} onChange={e => setFormData({...formData, residenceType: e.target.value as any})}>
-                          <option value="Tetap">Pemilik (Tetap)</option>
-                          <option value="Rumah Keluarga">Rumah Keluarga</option>
-                          <option value="Kontrak">Kontrak</option>
-                          <option value="Kost">Kost</option>
-                        </select>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Penghuni (Total Jiwa) <span className="text-rose-500">*</span></label>
-                        <input 
-                          type="number" 
-                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
-                          value={formData.occupants} 
-                          onChange={e => setFormData({...formData, occupants: parseInt(e.target.value) || 0})} 
-                          min={1} 
-                          required
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
+                      <div className="md:col-span-8">
+                        <FormField 
+                          label="Kepala Keluarga" 
+                          required 
+                          placeholder="Nama Lengkap"
+                          value={formData.headOfFamily} 
+                          onChange={(v: any) => setFormData({...formData, headOfFamily: v})} 
                         />
                       </div>
-                      <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all">
-                          <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked={formData.isOutOfTown} onChange={e => setFormData({...formData, isOutOfTown: e.target.checked})} />
-                          <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Luar Kota</span>
-                        </label>
-                        <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all">
-                          <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked={formData.hasGuest} onChange={e => setFormData({...formData, hasGuest: e.target.checked})} />
-                          <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Ada Tamu</span>
-                        </label>
-                        <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all">
-                          <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked={formData.isIsoman} onChange={e => setFormData({...formData, isIsoman: e.target.checked})} />
-                          <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Isoman</span>
-                        </label>
+                      <div className="md:col-span-4">
+                        <label className="block text-[10px] font-black mb-3 text-slate-400 uppercase tracking-widest">Gender <span className="text-rose-500">*</span></label>
+                        <div className="grid grid-cols-2 gap-3">
+                           {['Laki-laki', 'Perempuan'].map((g) => (
+                             <button
+                               key={g}
+                               type="button"
+                               onClick={() => setFormData({...formData, gender: g as any})}
+                               className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all ${
+                                 formData.gender === g 
+                                   ? 'bg-slate-950 text-white border-slate-950 shadow-lg shadow-black/10' 
+                                   : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-white hover:border-slate-300'
+                               }`}
+                             >
+                               {g}
+                             </button>
+                           ))}
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-6">
+                        <FormField 
+                          label="No. NIK (KTP)" 
+                          required 
+                          placeholder="16 Digit Nomor Induk"
+                          value={formData.nik} 
+                          onChange={(v: any) => setFormData({...formData, nik: v})} 
+                          maxLength={16}
+                        />
+                      </div>
+                      <div className="md:col-span-6">
+                        <FormField 
+                          label="No. Kartu Keluarga" 
+                          required 
+                          placeholder="16 Digit Nomor KK"
+                          value={formData.kkNumber} 
+                          onChange={(v: any) => setFormData({...formData, kkNumber: v})} 
+                          maxLength={16}
+                        />
+                      </div>
+
+                       <div className="md:col-span-6">
+                        <FormField 
+                          label="Tempat Lahir" 
+                          required 
+                          placeholder="Kota Kelahiran"
+                          value={formData.birthPlace} 
+                          onChange={(v: any) => setFormData({...formData, birthPlace: v})} 
+                        />
+                      </div>
+                      <div className="md:col-span-6">
+                        <FormField 
+                          label="Tanggal Lahir" 
+                          required 
+                          type="date"
+                          value={formData.birthDate} 
+                          onChange={(v: any) => setFormData({...formData, birthDate: v})} 
+                        />
                       </div>
                     </div>
                   </div>
 
-                  {/* Section: Kontak & Keamanan */}
-                  <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
-                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
-                      <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
-                        <Phone size={18} />
-                      </div>
-                      Kontak & Keamanan
-                    </h3>
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Telepon / WA</label>
-                        <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="08..." />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">PIN Akses (Access Code)</label>
-                        <div className="flex gap-3">
-                          <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.accessCode} onChange={e => setFormData({...formData, accessCode: e.target.value})} placeholder="Masukkan PIN..." />
-                          <button 
-                            type="button"
-                            onClick={() => setFormData({...formData, accessCode: Math.floor(100000 + Math.random() * 900000).toString()})}
-                            className="px-6 py-4 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 whitespace-nowrap"
-                          >
-                            Generate
-                          </button>
+                  {/* Residence Info Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-emerald-500/[0.03] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+                       
+                       <div className="flex items-center gap-6 mb-12 relative z-10">
+                          <div className="p-5 bg-emerald-600 text-white rounded-[2rem] shadow-2xl shadow-emerald-600/20 -rotate-3 transition-transform group-hover:rotate-0 duration-700">
+                            <Home size={28} strokeWidth={2.5} />
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Alamat Domisili</h3>
+                            <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Lokasi hunian dalam koordinat RT 02</p>
+                          </div>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-10 relative z-10">
+                        <FormField 
+                          label="Blok" 
+                          required 
+                          placeholder="A/B/C..."
+                          value={formData.block} 
+                          onChange={(v: any) => setFormData({...formData, block: v})} 
+                        />
+                        <FormField 
+                          label="Nomor" 
+                          required 
+                          placeholder="00"
+                          value={formData.number} 
+                          onChange={(v: any) => setFormData({...formData, number: v})} 
+                        />
+                        <div className="col-span-2">
+                          <label className="block text-[11px] font-black mb-4 text-slate-400 uppercase tracking-[0.2em]">Status Hunian</label>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                             {['Tetap', 'Rumah Keluarga', 'Kontrak', 'Kost'].map((st) => (
+                               <button
+                                 key={st}
+                                 type="button"
+                                 onClick={() => setFormData({...formData, residenceType: st as any})}
+                                 className={`py-4 px-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest border transition-all ${
+                                   formData.residenceType === st 
+                                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xl shadow-emerald-600/30 ring-4 ring-emerald-500/10' 
+                                     : 'bg-slate-50 text-slate-400 border-slate-100 hover:border-slate-300'
+                                 }`}
+                               >
+                                 {st === 'Rumah Keluarga' ? 'Keluarga' : st}
+                               </button>
+                             ))}
+                          </div>
                         </div>
-                      </div>
+                        <div className="col-span-2 mt-2">
+                          <FormField 
+                            label="Alamat KTP Lengkap" 
+                            required 
+                            placeholder="Tuliskan sesuai dokumen..."
+                            multiline
+                            value={formData.addressKtp} 
+                            onChange={(v: any) => setFormData({...formData, addressKtp: v})} 
+                          />
+                        </div>
+                       </div>
+                    </div>
+
+                    <div className="space-y-12 flex flex-col">
+                       <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group flex-1">
+                         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-rose-500/[0.03] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+                         
+                         <div className="flex items-center gap-6 mb-12 relative z-10">
+                           <div className="p-5 bg-rose-500 text-white rounded-[2rem] shadow-2xl shadow-rose-600/20 rotate-6 group-hover:rotate-0 transition-transform duration-700">
+                             <Phone size={28} strokeWidth={2.5} />
+                           </div>
+                           <div>
+                             <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Komunikasi</h3>
+                             <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Saluran koordinasi antar warga</p>
+                           </div>
+                         </div>
+                         <div className="relative z-10">
+                            <FormField 
+                              label="No. WhatsApp Aktif" 
+                              placeholder="08xxxxxxxxxx"
+                              value={formData.phone} 
+                              onChange={(v: any) => setFormData({...formData, phone: v})} 
+                            />
+                         </div>
+                       </div>
+
+                       <div className="bg-slate-950 p-12 rounded-[4rem] text-white shadow-2xl relative overflow-hidden group">
+                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/[0.15] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-600/20 transition-colors duration-1000"></div>
+                         <div className="relative z-10 space-y-10">
+                           <div className="flex items-center gap-6">
+                              <div className="p-5 bg-white/10 backdrop-blur-3xl rounded-[2rem] border border-white/20 shadow-2xl">
+                                <Shield size={28} className="text-indigo-400" strokeWidth={2.5} />
+                              </div>
+                              <div>
+                                <h3 className="text-2xl font-black uppercase tracking-widest tracking-tight">E-Warga Access</h3>
+                                <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Akses portal mandiri untuk warga</p>
+                              </div>
+                           </div>
+                           
+                           <div className="flex flex-col sm:flex-row gap-6">
+                             <div className="relative flex-1 group/pin">
+                               <input 
+                                 className="w-full py-6 px-8 bg-white/5 border border-white/10 rounded-[2rem] text-3xl font-black text-white focus:bg-white/10 focus:border-indigo-400 focus:ring-8 focus:ring-indigo-500/10 transition-all outline-none text-center tracking-[1em] placeholder:text-white/5" 
+                                 value={formData.accessCode} 
+                                 onChange={e => setFormData({...formData, accessCode: e.target.value})} 
+                                 placeholder="000000" 
+                               />
+                               <div className="absolute inset-0 rounded-[2rem] border-2 border-transparent group-focus-within/pin:border-indigo-400/30 pointer-events-none"></div>
+                             </div>
+                             <button 
+                               type="button"
+                               onClick={() => setFormData({...formData, accessCode: Math.floor(100000 + Math.random() * 900000).toString()})}
+                               className="py-6 px-10 bg-indigo-600 text-white rounded-[2rem] hover:bg-white hover:text-indigo-600 font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-2xl shadow-indigo-600/40 active:scale-95"
+                             >
+                               Generate
+                             </button>
+                           </div>
+                           <div className="flex items-start gap-4">
+                              <AlertCircle size={16} className="text-indigo-400 mt-1" />
+                              <p className="text-[11px] text-slate-500 font-bold leading-relaxed">Berikan PIN ini kepada warga untuk proses aktivasi aplikasi. Jaga kerahasiaan PIN demi keamanan data warga.</p>
+                           </div>
+                         </div>
+                       </div>
                     </div>
                   </div>
                 </div>
@@ -367,298 +382,101 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
             {activeFormTab === 'demographics' && (
               <motion.div 
                 key="demographics"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
               >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                  {/* Section 3: Data Demografi */}
-                  <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
-                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
-                      <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
-                        <Activity size={18} />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Demographics Card */}
+                  <div className="lg:col-span-12 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/[0.03] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="flex items-center gap-4 mb-8 relative z-10">
+                      <div className="p-4 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-600/20">
+                        <Activity size={20} strokeWidth={2.5} />
                       </div>
-                      Demografi & Pekerjaan
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Pendidikan Terakhir <span className="text-rose-500">*</span></label>
+                        <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Socio-Ekonomi</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Dinamika kesejahteraan keluarga</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                      <div className="space-y-3">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Pendidikan <span className="text-rose-500">*</span></label>
                         <select 
-                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
+                          className="w-full p-4.5 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all outline-none"
                           value={formData.education} 
                           onChange={e => setFormData({...formData, education: e.target.value})}
                           required
                         >
-                          <option value="">Pilih...</option>
-                          <option value="SD">SD</option>
-                          <option value="SMP">SMP</option>
-                          <option value="SMA/SMK">SMA/SMK</option>
-                          <option value="D3">D3</option>
-                          <option value="S1">S1</option>
-                          <option value="S2">S2</option>
-                          <option value="S3">S3</option>
+                          <option value="">Jenjang...</option>
+                          {['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S2', 'S3'].map(edu => (
+                            <option key={edu} value={edu}>{edu}</option>
+                          ))}
                         </select>
                       </div>
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Kategori Pekerjaan <span className="text-rose-500">*</span></label>
+                      <div className="space-y-3">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Pekerjaan <span className="text-rose-500">*</span></label>
                         <select 
-                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
+                          className="w-full p-4.5 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all outline-none"
                           value={formData.jobCategory} 
                           onChange={e => setFormData({...formData, jobCategory: e.target.value})}
                           required
                         >
-                          <option value="">Pilih...</option>
+                          <option value="">Sektor...</option>
                           <option value="PNS">PNS / TNI / Polri</option>
                           <option value="Pegawai Swasta">Pegawai Swasta</option>
-                          <option value="Wiraswasta">Wiraswasta / Pengusaha</option>
-                          <option value="Freelance">Pekerja Lepas / Freelance</option>
+                          <option value="Wiraswasta">Wiraswasta</option>
+                          <option value="Freelance">Freelance</option>
                           <option value="Pensiunan">Pensiunan</option>
-                          <option value="Tidak Bekerja">Tidak / Belum Bekerja</option>
+                          <option value="Tidak Bekerja">Tidak Bekerja</option>
                         </select>
                       </div>
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Pekerjaan Spesifik</label>
-                        <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.job} onChange={e => setFormData({...formData, job: e.target.value})} placeholder="Contoh: Guru, Arsitek..." />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Agama <span className="text-rose-500">*</span></label>
-                        <select 
-                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
-                          value={formData.religion} 
-                          onChange={e => setFormData({...formData, religion: e.target.value})}
-                          required
-                        >
-                          <option value="">Pilih...</option>
-                          <option value="Islam">Islam</option>
-                          <option value="Kristen">Kristen</option>
-                          <option value="Katolik">Katolik</option>
-                          <option value="Hindu">Hindu</option>
-                          <option value="Budha">Budha</option>
-                          <option value="Konghucu">Konghucu</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Ekonomi</label>
-                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.economicStatus} onChange={e => setFormData({...formData, economicStatus: e.target.value as any})}>
-                          <option value="Pra-Sejahtera">Pra-Sejahtera</option>
-                          <option value="Sejahtera">Sejahtera</option>
-                          <option value="Mampu">Mampu</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status BPJS</label>
-                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.bpjsStatus} onChange={e => setFormData({...formData, bpjsStatus: e.target.value as any})}>
-                          <option value="Tidak Ada">Tidak Ada</option>
-                          <option value="PPU">PPU (Pekerja Penerima Upah)</option>
-                          <option value="PBPU">PBPU (Mandiri)</option>
-                          <option value="PBI">PBI (Pemerintah)</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Kendaraan</label>
-                        <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.vehicleCount} onChange={e => setFormData({...formData, vehicleCount: parseInt(e.target.value) || 0})} min={0} />
-                      </div>
+                      <FormField 
+                        label="Agama" 
+                        required 
+                        value={formData.religion} 
+                        onChange={(v: any) => setFormData({...formData, religion: v})} 
+                      />
                     </div>
                   </div>
 
-                  {/* Section: Bantuan Sosial */}
-                  <div className="space-y-6 bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
-                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4">
-                      <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
-                        <DollarSign size={18} />
+                  <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                      <div className="flex items-center gap-4 mb-8">
+                         <div className="p-4 bg-rose-500 text-white rounded-2xl shadow-xl shadow-rose-600/20">
+                           <DollarSign size={20} strokeWidth={2.5} />
+                         </div>
+                         <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Bantuan Sosial</h3>
                       </div>
-                      Bantuan Sosial
-                    </h3>
-                    <div className="space-y-4">
-                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
-                        <input 
-                          type="checkbox" 
-                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                          checked={formData.isPKH}
-                          onChange={e => setFormData({...formData, isPKH: e.target.checked})}
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Program Keluarga Harapan (PKH)</span>
-                          <span className="text-[10px] text-slate-400 font-bold">Bantuan sosial bersyarat untuk keluarga miskin</span>
-                        </div>
-                      </label>
-                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
-                        <input 
-                          type="checkbox" 
-                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                          checked={formData.isBLT}
-                          onChange={e => setFormData({...formData, isBLT: e.target.checked})}
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Bantuan Langsung Tunai (BLT)</span>
-                          <span className="text-[10px] text-slate-400 font-bold">Bantuan tunai langsung dari pemerintah</span>
-                        </div>
-                      </label>
-                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
-                        <input 
-                          type="checkbox" 
-                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                          checked={formData.isBPNT}
-                          onChange={e => setFormData({...formData, isBPNT: e.target.checked})}
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Bantuan Pangan Non-Tunai (BPNT)</span>
-                          <span className="text-[10px] text-slate-400 font-bold">Bantuan pangan non-tunai (Sembako)</span>
-                        </div>
-                      </label>
-                      <div className="space-y-4">
-                        <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
-                          <input 
-                            type="checkbox" 
-                            className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                            checked={formData.isBansosLain}
-                            onChange={e => setFormData({...formData, isBansosLain: e.target.checked})}
-                          />
-                          <div className="flex flex-col">
-                            <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Bantuan Lainnya</span>
-                            <span className="text-[10px] text-slate-400 font-bold">Sebutkan jenis bantuan sosial lainnya</span>
-                          </div>
-                        </label>
-                        {formData.isBansosLain && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                          >
-                            <input 
-                              placeholder="Sebutkan jenis bantuan..."
-                              className="w-full p-4 bg-white border border-indigo-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-                              value={formData.bansosLainName}
-                              onChange={e => setFormData({...formData, bansosLainName: e.target.value})}
-                            />
-                          </motion.div>
-                        )}
+
+                      <div className="grid grid-cols-1 gap-3 relative z-10">
+                        <BansosCard label="PKH" checked={formData.isPKH} onChange={c => setFormData({...formData, isPKH: c})} />
+                        <BansosCard label="BLT" checked={formData.isBLT} onChange={c => setFormData({...formData, isBLT: c})} />
+                        <BansosCard label="BPNT" checked={formData.isBPNT} onChange={c => setFormData({...formData, isBPNT: c})} />
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Section: Kelompok Rentan */}
-                <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
-                  <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4 mb-8">
-                    <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
-                      <Users size={18} />
-                    </div>
-                    Rincian Kelompok Rentan
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6 mb-8">
-                    {[
-                      { label: 'Hamil', key: 'pregnantCount' },
-                      { label: 'Bayi', key: 'babyCount' },
-                      { label: 'Balita', key: 'toddlerCount' },
-                      { label: 'Anak', key: 'childCount' },
-                      { label: 'Remaja', key: 'teenagerCount' },
-                      { label: 'Dewasa', key: 'adultCount' },
-                      { label: 'Lansia', key: 'elderlyCount' },
-                      { label: 'Janda', key: 'widowCount' },
-                    ].map((item) => (
-                      <div key={item.key} className="space-y-3">
-                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider text-center">{item.label}</label>
-                        <input 
-                          type="number" 
-                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-black text-center focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" 
-                          value={formData[item.key as keyof typeof formData] as number} 
-                          onChange={e => setFormData({...formData, [item.key]: parseInt(e.target.value) || 0})} 
-                          min={0} 
-                        />
+                    <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                       <div className="flex items-center gap-4 mb-8">
+                         <div className="p-4 bg-amber-500 text-white rounded-2xl shadow-xl shadow-amber-600/20">
+                           <Heart size={20} strokeWidth={2.5} />
+                         </div>
+                         <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Kesehatan</h3>
                       </div>
-                    ))}
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-100">
-                    <div className="space-y-4">
-                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
-                        <input 
-                          type="checkbox" 
-                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                          checked={formData.isDisability}
-                          onChange={e => setFormData({...formData, isDisability: e.target.checked})}
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Penyandang Disabilitas</span>
-                          <span className="text-[10px] text-slate-400 font-bold">Centang jika ada anggota keluarga disabilitas</span>
+                      <div className="space-y-6 relative z-10">
+                        <div className="space-y-3">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">BPJS</label>
+                          <select className="w-full p-4.5 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-black text-slate-700 outline-none" value={formData.bpjsStatus} onChange={e => setFormData({...formData, bpjsStatus: e.target.value as any})}>
+                            <option value="Tidak Ada">Tidak Ada</option>
+                            <option value="PPU">PPU</option>
+                            <option value="PBPU">PBPU</option>
+                            <option value="PBI">PBI</option>
+                          </select>
                         </div>
-                      </label>
-                      {formData.isDisability && (
-                        <div className="pl-14">
-                          <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Jiwa Disabilitas</label>
-                          <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.disabilityCount} onChange={e => setFormData({...formData, disabilityCount: parseInt(e.target.value) || 0})} min={1} />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-4">
-                      <label className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all group">
-                        <input 
-                          type="checkbox" 
-                          className="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                          checked={formData.isOrphan}
-                          onChange={e => setFormData({...formData, isOrphan: e.target.checked})}
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600">Anak Yatim / Piatu</span>
-                          <span className="text-[10px] text-slate-400 font-bold">Centang jika ada anggota keluarga yatim/piatu</span>
-                        </div>
-                      </label>
-                      {formData.isOrphan && (
-                        <div className="pl-14">
-                          <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jumlah Jiwa Yatim/Piatu</label>
-                          <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.orphanCount} onChange={e => setFormData({...formData, orphanCount: parseInt(e.target.value) || 0})} min={1} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section: Dokumen & Catatan */}
-                <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
-                  <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3 border-b border-indigo-100 pb-4 mb-8">
-                    <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
-                      <FileText size={18} />
-                    </div>
-                    Dokumen & Catatan
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Status Vaksinasi</label>
-                      <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.vaccinationStatus} onChange={e => setFormData({...formData, vaccinationStatus: e.target.value as any})}>
-                        <option value="Belum">Belum</option>
-                        <option value="Dosis 1">Dosis 1</option>
-                        <option value="Dosis 2">Dosis 2</option>
-                        <option value="Booster 1">Booster 1</option>
-                        <option value="Booster 2">Booster 2</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Bergabung</label>
-                      <input type="date" className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.joiningDate} onChange={e => setFormData({...formData, joiningDate: e.target.value})} />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Foto KTP (URL)</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.ktpUrl} onChange={e => setFormData({...formData, ktpUrl: e.target.value})} placeholder="https://..." />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Foto KK (URL)</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.kkUrl} onChange={e => setFormData({...formData, kkUrl: e.target.value})} placeholder="https://..." />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Foto Rumah (URL)</label>
-                      <input className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.housePhotoUrl} onChange={e => setFormData({...formData, housePhotoUrl: e.target.value})} placeholder="https://..." />
-                    </div>
-                    <div className="flex items-end pb-2">
-                      <label className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-indigo-50 transition-all w-full">
-                        <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" checked={formData.isVerified} onChange={e => setFormData({...formData, isVerified: e.target.checked})} />
-                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Warga Terverifikasi</span>
-                      </label>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Catatan Khusus</label>
-                      <textarea className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" value={formData.specialNotes} onChange={e => setFormData({...formData, specialNotes: e.target.value})} placeholder="Catatan tambahan mengenai warga..." rows={3} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -668,19 +486,21 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
             {activeFormTab === 'family' && (
               <motion.div 
                 key="family"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
                 className="space-y-8"
               >
-                <div className="flex justify-between items-center bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-600/20">
-                      <Users size={24} />
+                <div className="flex justify-between items-center bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="p-4 bg-slate-950 text-white rounded-2xl shadow-xl">
+                      <Users size={24} strokeWidth={2.5} />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Daftar Anggota Keluarga</h3>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{formData.familyMembers.length} Orang Terdaftar</p>
+                      <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Anggota Keluarga</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                        {formData.familyMembers.length} Orang Terdaftar
+                      </p>
                     </div>
                   </div>
                   <button 
@@ -689,20 +509,20 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       ...formData, 
                       familyMembers: [...formData.familyMembers, { id: Math.random().toString(36).substr(2, 9), name: '', relation: 'Anak', nik: '', birthDate: '', gender: 'Laki-laki' }]
                     })}
-                    className="text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 flex items-center gap-3 px-8 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-600/20 uppercase tracking-widest active:scale-95"
+                    className="px-8 py-4 bg-indigo-600 text-white rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-950 transition-all flex items-center gap-3"
                   >
-                    <UserPlus size={18} /> Tambah Anggota
+                    <UserPlus size={16} strokeWidth={3} /> Tambah
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
                   {formData.familyMembers.map((member: any, idx: number) => (
                     <motion.div 
                       layout
-                      initial={{ opacity: 0, scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
                       key={member.id || idx} 
-                      className="p-8 bg-white rounded-[2.5rem] border border-slate-200 space-y-6 relative group transition-all hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-500/10"
+                      className="p-8 bg-white rounded-3xl border border-slate-100 space-y-6 relative group overflow-hidden"
                     >
                       <button 
                         type="button"
@@ -711,54 +531,39 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           newMembers.splice(idx, 1);
                           setFormData({...formData, familyMembers: newMembers});
                         }}
-                        className="absolute top-6 right-6 text-slate-300 hover:text-rose-500 transition-colors p-2 hover:bg-rose-50 rounded-xl"
+                        className="absolute top-6 right-6 p-2 text-slate-300 hover:text-rose-500 transition-all rounded-lg bg-slate-50"
                       >
-                        <X size={20} />
+                        <X size={18} strokeWidth={3} />
                       </button>
                       
-                      <div className="space-y-5">
-                        <div>
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Lengkap <span className="text-rose-500">*</span></label>
-                          <input 
-                            placeholder="Nama Lengkap" 
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                            value={member.name}
-                            onChange={e => {
-                              const newMembers = [...formData.familyMembers];
-                              newMembers[idx].name = e.target.value;
-                              setFormData({...formData, familyMembers: newMembers});
-                            }}
-                            required
-                          />
+                      <div className="space-y-6 relative z-10">
+                        <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-base">
+                             {idx + 1}
+                           </div>
+                           <h4 className="font-black text-slate-800 uppercase tracking-widest text-[11px]">Anggota {idx + 1}</h4>
                         </div>
+
+                        <FormField 
+                          label="Nama" 
+                          value={member.name}
+                          onChange={(v: any) => {
+                            const newMembers = [...formData.familyMembers];
+                            newMembers[idx].name = v;
+                            setFormData({...formData, familyMembers: newMembers});
+                          }}
+                        />
                         <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Jenis Kelamin <span className="text-rose-500">*</span></label>
+                          <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Hubungan</label>
                             <select 
-                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                              value={member.gender || 'Laki-laki'}
-                              onChange={e => {
-                                const newMembers = [...formData.familyMembers];
-                                newMembers[idx].gender = e.target.value as any;
-                                setFormData({...formData, familyMembers: newMembers});
-                              }}
-                              required
-                            >
-                              <option value="Laki-laki">Laki-laki</option>
-                              <option value="Perempuan">Perempuan</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Hubungan <span className="text-rose-500">*</span></label>
-                            <select 
-                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                              className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-black text-slate-700 outline-none"
                               value={member.relation}
                               onChange={e => {
                                 const newMembers = [...formData.familyMembers];
                                 newMembers[idx].relation = e.target.value as any;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
-                              required
                             >
                               <option value="Istri">Istri</option>
                               <option value="Anak">Anak</option>
@@ -766,62 +571,31 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               <option value="Famili Lain">Famili Lain</option>
                             </select>
                           </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">NIK <span className="text-rose-500">*</span></label>
+                          <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">NIK</label>
                             <input 
-                              placeholder="NIK" 
-                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                              value={member.nik || ''}
+                              className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-black text-slate-700 outline-none"
+                              value={member.nik}
+                              maxLength={16}
                               onChange={e => {
                                 const newMembers = [...formData.familyMembers];
                                 newMembers[idx].nik = e.target.value;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Tgl Lahir <span className="text-rose-500">*</span></label>
-                            <input 
-                              type="date"
-                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                              value={member.birthDate || ''}
-                              onChange={e => {
-                                const newMembers = [...formData.familyMembers];
-                                newMembers[idx].birthDate = e.target.value;
-                                setFormData({...formData, familyMembers: newMembers});
-                              }}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pekerjaan <span className="text-rose-500">*</span></label>
-                            <input 
-                              placeholder="Pekerjaan" 
-                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                              value={member.job || ''}
-                              onChange={e => {
-                                const newMembers = [...formData.familyMembers];
-                                newMembers[idx].job = e.target.value;
-                                setFormData({...formData, familyMembers: newMembers});
-                              }}
-                              required
                             />
                           </div>
                         </div>
                       </div>
                     </motion.div>
                   ))}
+                  
                   {formData.familyMembers.length === 0 && (
-                    <div className="md:col-span-2 xl:col-span-3 text-center p-20 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[3rem]">
-                      <div className="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center text-slate-200 mx-auto mb-8 shadow-sm">
-                        <Users size={48} />
-                      </div>
-                      <h4 className="text-lg font-black text-slate-400 uppercase tracking-widest">Belum Ada Anggota</h4>
-                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-2">Klik tombol di atas untuk menambahkan anggota keluarga</p>
-                    </div>
+                    <motion.div 
+                      layout
+                      className="md:col-span-2 text-center p-16 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-3xl"
+                    >
+                      <h4 className="text-xl font-black text-slate-300 uppercase tracking-widest">Belum ada anggota</h4>
+                    </motion.div>
                   )}
                 </div>
               </motion.div>
@@ -829,7 +603,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
           </AnimatePresence>
         </div>
 
-        <div className="pt-10 border-t border-slate-100 flex justify-between items-center">
+        <div className="pt-6 border-t border-slate-100 flex justify-between items-center px-4 pb-2">
           <div className="flex gap-4">
             {activeFormTab !== 'basic' && (
               <button 
@@ -838,35 +612,35 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                   if (activeFormTab === 'demographics') setActiveFormTab('basic');
                   if (activeFormTab === 'family') setActiveFormTab('demographics');
                 }}
-                className="px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+                className="px-8 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-200"
               >
                 Kembali
               </button>
             )}
+          </div>
+
+          <div className="flex gap-4 items-center">
             <button 
               type="button" 
               onClick={onClose}
-              className="px-8 py-4 text-xs font-black text-slate-400 hover:text-rose-500 transition-colors uppercase tracking-widest"
+              className="px-6 py-3.5 text-[11px] font-black text-slate-400 hover:text-rose-500 uppercase tracking-widest"
             >
               Batal
             </button>
-          </div>
-
-          <div className="flex gap-4">
             {activeFormTab !== 'family' ? (
               <button 
                 type="button"
                 onClick={handleNext}
-                className="px-10 py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-100 transition-all flex items-center gap-3"
+                className="px-10 py-3.5 bg-indigo-600 text-white rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20 active:scale-95"
               >
-                Lanjut <ChevronRight size={16} />
+                Lanjut <ChevronRight size={14} />
               </button>
             ) : (
               <button 
                 type="submit" 
-                className="px-16 py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3"
+                className="px-12 py-4 bg-indigo-600 text-white rounded-xl font-black text-[12px] uppercase tracking-widest hover:bg-slate-950 transition-all shadow-xl shadow-indigo-600/30 flex items-center gap-2"
               >
-                <CheckCircle size={20} /> {editingHouseId ? 'Simpan Perubahan' : 'Simpan Data'}
+                <CheckCircle size={20} /> {editingHouseId ? 'Simpan' : 'Daftar'}
               </button>
             )}
           </div>
@@ -875,6 +649,51 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
     </Modal>
   );
 };
+
+// UI Helpers
+const FormField = ({ label, value, onChange, placeholder, type = 'text', required = false, multiline = false, maxLength }: any) => (
+  <div className="w-full group/field">
+    <label className="block text-[9px] font-black mb-2 text-slate-400 uppercase tracking-widest group-focus-within/field:text-indigo-600 transition-colors">
+      {label} {required && <span className="text-rose-500">*</span>}
+    </label>
+    {multiline ? (
+      <textarea 
+        required={required}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-[12px] font-black text-slate-700 outline-none focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all shadow-sm focus:bg-white resize-none placeholder:text-slate-300"
+      />
+    ) : (
+      <input 
+        type={type}
+        required={required}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-black text-slate-700 outline-none focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all shadow-sm focus:bg-white placeholder:text-slate-300"
+      />
+    )}
+  </div>
+);
+
+const BansosCard = ({ label, checked, onChange }: { label: string, checked: boolean, onChange: (c: boolean) => void }) => (
+  <label className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer group relative overflow-hidden ${checked ? 'bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-600/10' : 'bg-slate-50 border-slate-100 hover:border-indigo-300 hover:bg-white'}`}>
+    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${checked ? 'bg-white border-white scale-110 shadow-sm' : 'bg-white border-slate-200 group-hover:border-indigo-400'}`}>
+      {checked ? <CheckCircle size={12} className="text-indigo-600" strokeWidth={3} /> : <div className="w-1 h-1 bg-slate-100 rounded-full"></div>}
+      <input 
+        type="checkbox" 
+        className="hidden"
+        checked={checked}
+        onChange={e => onChange(e.target.checked)}
+      />
+    </div>
+    <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${checked ? 'text-white' : 'text-slate-500'}`}>{label}</span>
+  </label>
+);
+
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -921,174 +740,116 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const arrears = getArrearsForHouse(payHouse);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Bayar Iuran: ${payHouse.headOfFamily}`} maxWidth="max-w-xl">
-      <form onSubmit={handleSavePayment} className="space-y-6">
-        {arrears.length > 0 && (
-          <div className="p-5 bg-rose-50 border border-rose-100 rounded-[2rem]">
-            <div className="flex items-center gap-3 text-rose-600 mb-4">
-              <div className="p-2 bg-rose-100 rounded-xl">
-                <AlertCircle size={18} />
+    <Modal isOpen={isOpen} onClose={onClose} title="Rekam Iuran" maxWidth="max-w-4xl">
+      <div className="space-y-6 py-2 px-2">
+        {/* House Info Summary */}
+        <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/[0.03] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 bg-white/10 backdrop-blur-2xl rounded-2xl flex items-center justify-center text-2xl font-black border border-white/20 font-mono shadow-xl">
+                {payHouse.block}-{payHouse.number}
               </div>
-              <div>
-                <p className="text-xs font-black uppercase tracking-widest">Daftar Tunggakan</p>
-                <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">Klik bulan untuk membayar tunggakan tersebut</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {arrears.map(m => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setTargetMonth(m)}
-                  className={`px-4 py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center gap-2 ${
-                    targetMonth === m 
-                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-200 scale-105' 
-                    : 'bg-white text-rose-600 border border-rose-200 hover:bg-rose-100'
-                  }`}
-                >
-                  <Calendar size={12} />
-                  {m}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Informasi Rumah</p>
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white rounded-2xl border border-slate-200 text-indigo-600 shadow-sm">
-                <Home size={20} />
-              </div>
-              <div>
-                <p className="text-sm font-black text-slate-800">Blok {payHouse.block} No. {payHouse.number}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{payHouse.headOfFamily}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-5 bg-indigo-50/50 rounded-[2rem] border border-indigo-100">
-            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Bulan Iuran (Target)</p>
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-white rounded-2xl border border-indigo-100 text-indigo-600 shadow-sm">
-                <Calendar size={20} />
-              </div>
-              <div className="flex-1">
-                <select 
-                  className="w-full bg-transparent py-1 text-sm font-black text-indigo-600 outline-none cursor-pointer"
-                  value={targetMonth}
-                  onChange={e => setTargetMonth(e.target.value)}
-                >
-                  {generateMonthOptions(12, 36).map((m: string) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-                <div className="flex items-center gap-3 mt-1">
-                  <div className="flex items-center gap-1">
-                    <div className={`w-1.5 h-1.5 rounded-full ${
-                      getPaymentStatus(payHouse, 'Air', targetMonth) === PaymentStatus.PAID ? 'bg-blue-500' : 'bg-rose-500'
-                    }`}></div>
-                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Air</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className={`w-1.5 h-1.5 rounded-full ${
-                      getPaymentStatus(payHouse, 'Sampah', targetMonth) === PaymentStatus.PAID ? 'bg-emerald-500' : 'bg-rose-500'
-                    }`}></div>
-                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Sampah</p>
-                  </div>
+              <div className="space-y-1">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400">Kepala Keluarga</p>
+                <h3 className="text-xl font-black tracking-tight">{payHouse.headOfFamily}</h3>
+                <div className="flex gap-2 mt-2">
+                  <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border border-white/10">
+                    {payHouse.status === 'Occupied' ? 'Dihuni' : payHouse.status === 'Empty' ? 'Kosong' : 'Ekonomi'}
+                  </span>
                 </div>
               </div>
             </div>
+            
+            <div className="text-center md:text-right bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 min-w-[200px]">
+              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40 mb-1">Tunggakan</p>
+              <div className={`text-2xl font-black tracking-tighter ${arrears.length === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {arrears.length === 0 ? 'LUNAS' : `${arrears.length} Periode`}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-6 bg-slate-50/30 p-6 rounded-[2.5rem] border border-slate-100">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran <span className="text-rose-500">*</span></label>
-              <select 
-                required
-                className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-                value={payType}
-                onChange={e => setPayType(e.target.value as any)}
-              >
-                <option value="Both">Iuran Sampah & Air</option>
-                <option value="Sampah">Iuran Sampah Saja</option>
-                <option value="Air">Iuran Air Saja</option>
-              </select>
+        <form onSubmit={handleSavePayment} className="space-y-6">
+          {/* Arrears Selection */}
+          {arrears.length > 0 && (
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3.5 bg-rose-50 text-rose-600 rounded-xl shadow-sm border border-rose-100">
+                  <History size={18} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-800 uppercase tracking-widest">Pilih Periode</h3>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Selesaikan tunggakan iuran</p>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {arrears.map((month) => (
+                  <button
+                    key={month}
+                    type="button"
+                    onClick={() => setTargetMonth(month)}
+                    className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                      targetMonth === month
+                        ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20'
+                        : 'bg-slate-50 text-slate-400 border border-slate-100 hover:border-rose-300'
+                    }`}
+                  >
+                    {month}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Payment Details */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+            <div className="flex items-center gap-4 mb-8">
+               <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl shadow-sm border border-emerald-100">
+                 <DollarSign size={18} strokeWidth={2.5} />
+               </div>
+               <h3 className="text-base font-black text-slate-800 uppercase tracking-widest">Detail Transaksi</h3>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nominal (Rp) <span className="text-rose-500">*</span></label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</div>
-                <input 
-                  type="number"
-                  className="w-full p-4 pl-12 bg-white border border-slate-200 rounded-2xl text-sm font-black focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-                  value={payAmount}
-                  onChange={e => setPayAmount(e.target.value)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Kategori Iuran <span className="text-rose-500">*</span></label>
+                <select 
                   required
-                />
+                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-black text-slate-700 outline-none" 
+                  value={payType} 
+                  onChange={e => setPayType(e.target.value as any)}
+                >
+                  <option value="Both">Sampah & Air</option>
+                  <option value="Sampah">Hanya Sampah</option>
+                  <option value="Air">Hanya Air</option>
+                </select>
+              </div>
+              <FormField label="Nominal (Rp)" type="number" required value={payAmount} onChange={setPayAmount} />
+              <div className="space-y-3">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal <span className="text-rose-500">*</span></label>
+                <div className="flex gap-2">
+                  <input type="date" required className="flex-1 p-4 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-black text-slate-700 outline-none" value={payDate} onChange={e => setPayDate(e.target.value)} />
+                </div>
+              </div>
+              <FormField label="Penyetor" value={payerName} onChange={setPayerName} />
+              <div className="md:col-span-2">
+                <FormField label="Catatan" placeholder="Catatan transaksi..." multiline value={payNotes} onChange={setPayNotes} />
               </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Transaksi (Kapan Dibayar) <span className="text-rose-500">*</span></label>
-            <div className="flex gap-3">
-              <div className="relative flex-1">
-                <input 
-                  type="date"
-                  className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-                  value={payDate}
-                  onChange={e => setPayDate(e.target.value)}
-                  required
-                />
-              </div>
-              <button 
-                type="button"
-                onClick={() => setPayDate(new Date().toISOString().split('T')[0])}
-                className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 font-black text-[10px] uppercase tracking-widest transition-all"
-              >
-                Hari Ini
-              </button>
-            </div>
-            <p className="text-[10px] text-slate-400 font-bold mt-2 italic px-1">
-              * Tanggal saat uang diterima oleh petugas
-            </p>
+          <div className="pt-4 flex gap-4">
+            <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-xl font-black text-[12px] uppercase tracking-widest hover:bg-slate-200 transition-all">
+              Batal
+            </button>
+            <button type="submit" className="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-[12px] uppercase tracking-widest hover:bg-slate-950 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3">
+               <CheckCircle size={18} /> Konfirmasi
+            </button>
           </div>
-
-          <div>
-            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nama Pembayar (Jika Berbeda)</label>
-            <input 
-              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-              value={payerName}
-              onChange={e => setPayerName(e.target.value)}
-              placeholder={`Default: ${payHouse.headOfFamily}`}
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Catatan Tambahan (Opsional)</label>
-            <textarea 
-              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm min-h-[80px]"
-              value={payNotes}
-              onChange={e => setPayNotes(e.target.value)}
-              placeholder="Contoh: Titipan tetangga, Bayar lunas 3 bulan, dll..."
-            />
-          </div>
-        </div>
-
-        <div className="pt-4">
-          <button 
-            type="submit" 
-            className="w-full py-5 bg-emerald-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-emerald-700 transition-all shadow-2xl shadow-emerald-600/30 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3"
-          >
-            <CheckCircle size={20} /> Simpan Pembayaran
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </Modal>
   );
 };
@@ -1130,102 +891,79 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
   if (!editingPayment) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Catatan Iuran: ${editingPayment.headOfFamily}`} maxWidth="max-w-xl">
-      <form onSubmit={handleUpdatePayment} className="space-y-6">
-        <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Informasi Rumah</p>
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white rounded-2xl border border-slate-200 text-indigo-600 shadow-sm">
-              <Home size={20} />
-            </div>
-            <div>
-              <p className="text-sm font-black text-slate-800">Blok {editingPayment.block} No. {editingPayment.number}</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Bulan: {editingPayment.month}</p>
-            </div>
-          </div>
+    <Modal isOpen={isOpen} onClose={onClose} title="Edit Transaksi" maxWidth="max-w-4xl">
+      <div className="space-y-6 py-2 px-2">
+        {/* Payment Headline */}
+        <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 p-8 rounded-3xl text-white relative overflow-hidden shadow-xl group">
+           <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2"></div>
+           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="flex items-center gap-6">
+                 <div className="w-16 h-16 bg-white/10 backdrop-blur-2xl rounded-2xl flex items-center justify-center text-2xl border border-white/20 font-black font-mono shadow-xl">
+                    {editingPayment.block}-{editingPayment.number}
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em]">Koreksi Data</p>
+                    <h3 className="text-xl font-black tracking-tight">{editingPayment.headOfFamily}</h3>
+                    <div className="flex items-center gap-2 mt-2">
+                       <span className="px-3 py-1 bg-indigo-600/50 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">{editingPayment.month}</span>
+                    </div>
+                 </div>
+              </div>
+              <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 min-w-[200px] text-right">
+                 <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-1">Nominal</p>
+                 <div className="text-2xl font-black tracking-tighter text-indigo-100">
+                    Rp {parseInt(editingPayment.amount).toLocaleString('id-ID')}
+                 </div>
+              </div>
+           </div>
         </div>
 
-        <div className="space-y-6 bg-slate-50/30 p-6 rounded-[2.5rem] border border-slate-100">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran <span className="text-rose-500">*</span></label>
-              <select 
-                required
-                className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-                value={payType}
-                onChange={e => setPayType(e.target.value as any)}
-              >
-                <option value="Both">Iuran Sampah & Air</option>
-                <option value="Sampah">Iuran Sampah Saja</option>
-                <option value="Air">Iuran Air Saja</option>
-              </select>
+        <form onSubmit={handleUpdatePayment} className="space-y-6">
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100">
+                <Edit2 size={18} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-base font-black text-slate-800 uppercase tracking-widest">Parameter Revisi</h3>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nominal (Rp) <span className="text-rose-500">*</span></label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</div>
-                <input 
-                  type="number"
-                  className="w-full p-4 pl-12 bg-white border border-slate-200 rounded-2xl text-sm font-black focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-                  value={payAmount}
-                  onChange={e => setPayAmount(e.target.value)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Kategori <span className="text-rose-500">*</span></label>
+                <select 
                   required
-                />
+                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-black text-slate-700 outline-none"
+                  value={payType}
+                  onChange={e => setPayType(e.target.value as any)}
+                >
+                  <option value="Both">Iuran Paket</option>
+                  <option value="Sampah">Sampah Saja</option>
+                  <option value="Air">Air Saja</option>
+                </select>
+              </div>
+              <FormField label="Nominal" type="number" required value={payAmount} onChange={setPayAmount} />
+              <div className="space-y-3">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal <span className="text-rose-500">*</span></label>
+                <input type="date" required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-black text-slate-700 outline-none" value={payDate} onChange={e => setPayDate(e.target.value)} />
+              </div>
+              <FormField label="Penyetor" value={payerName} onChange={setPayerName} />
+              <div className="md:col-span-2">
+                <FormField label="Alasan Revisi" multiline value={payNotes} onChange={setPayNotes} />
               </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Tanggal Transaksi <span className="text-rose-500">*</span></label>
-            <div className="flex gap-3">
-              <input 
-                type="date"
-                className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-                value={payDate}
-                onChange={e => setPayDate(e.target.value)}
-                required
-              />
-              <button 
-                type="button"
-                onClick={() => setPayDate(new Date().toISOString().split('T')[0])}
-                className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 font-black text-[10px] uppercase tracking-widest transition-all"
-              >
-                Hari Ini
-              </button>
-            </div>
+          <div className="flex gap-4">
+            <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-xl font-black text-[12px] uppercase tracking-widest hover:bg-slate-200 transaction-all">
+              Batal
+            </button>
+            <button type="submit" className="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-[12px] uppercase tracking-widest hover:bg-slate-950 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3">
+               <CheckCircle size={18} /> Simpan Perubahan
+            </button>
           </div>
-
-          <div>
-            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Nama Pembayar</label>
-            <input 
-              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
-              value={payerName}
-              onChange={e => setPayerName(e.target.value)}
-              placeholder={`Default: ${editingPayment.headOfFamily}`}
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest">Catatan Tambahan</label>
-            <textarea 
-              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm min-h-[80px]"
-              value={payNotes}
-              onChange={e => setPayNotes(e.target.value)}
-              placeholder="Tambahkan catatan jika diperlukan..."
-            />
-          </div>
-        </div>
-
-        <div className="pt-4">
-          <button 
-            type="submit" 
-            className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-600/30 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3"
-          >
-            <CheckCircle size={20} /> Simpan Perubahan
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </Modal>
   );
 };
+
