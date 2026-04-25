@@ -33,57 +33,57 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
   return (
     <div className="space-y-8">
       <div className="flex flex-col xl:flex-row gap-6 items-stretch xl:items-center">
-        {/* Search Bar - Ultra Premium */}
+        {/* Search Bar - Professional & Clean */}
         <div className="relative flex-1 group">
-          <div className="absolute inset-x-4 inset-y-0 bg-indigo-500/10 rounded-3xl blur-2xl group-focus-within:bg-indigo-500/20 transition-all duration-500"></div>
-          <div className="relative flex items-center bg-white border border-slate-200 rounded-3xl shadow-sm hover:border-slate-300 focus-within:border-slate-900 focus-within:ring-0 transition-all overflow-hidden p-2">
-            <div className="w-12 h-12 flex items-center justify-center text-slate-300 group-focus-within:text-slate-900 transition-colors">
-              <Search size={20} strokeWidth={2.5} />
+          <div className="absolute inset-x-4 inset-y-0 bg-indigo-500/5 rounded-[2rem] blur-xl group-focus-within:bg-indigo-500/10 transition-all duration-500"></div>
+          <div className="relative flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-4 focus-within:ring-indigo-600/5 transition-all overflow-hidden px-2 py-1">
+            <div className="w-12 h-12 flex items-center justify-center text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+              <Search size={22} strokeWidth={2} />
             </div>
             <input 
               type="text" 
-              placeholder="Cari warga, blok, nomor, atau anggota keluarga..." 
-              className="flex-1 bg-transparent px-2 py-4 text-sm font-black text-slate-900 placeholder:text-slate-300 placeholder:font-bold outline-none"
+              placeholder="Cari warga, nomor blok, atau kategori..." 
+              className="flex-1 bg-transparent px-3 py-4 text-sm font-bold text-slate-800 placeholder:text-slate-300 placeholder:font-medium outline-none"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
             {searchTerm && (
               <button 
                 onClick={() => setSearchTerm('')}
-                className="w-10 h-10 flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-2xl"
+                className="w-10 h-10 flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-xl"
               >
-                <X size={18} strokeWidth={2.5} />
+                <X size={18} />
               </button>
             )}
           </div>
         </div>
 
-        {/* View Selection - Premium Glassmorphism like buttons */}
-        <div className="flex bg-white p-1.5 rounded-[2rem] border border-slate-200 self-center xl:self-auto overflow-x-auto no-scrollbar shadow-sm">
+        {/* View Selection - Elegant Integrated Design */}
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl self-center xl:self-auto overflow-x-auto no-scrollbar shadow-inner border border-slate-200/50">
             {[
               { id: 'grid', icon: Users, label: 'Grid' },
               { id: 'table', icon: LayoutList, label: 'Tabel' },
               { id: 'map', icon: MapPin, label: 'Peta' },
-              { id: 'analytics', icon: Activity, label: 'Analisa' },
+              { id: 'analytics', icon: Activity, label: 'Intel' },
               { id: 'registrations', 
                 icon: UserPlus, 
-                label: 'Regis', 
+                label: 'Antrean', 
                 badge: residentRegistrations.filter(r => r.approvalStatus === 'Pending').length 
               }
             ].map((mode) => (
               <button 
                 key={mode.id}
                 onClick={() => setViewMode(mode.id)} 
-                className={`relative flex items-center gap-2 px-5 py-3 rounded-2xl transition-all whitespace-nowrap active:scale-95 ${
+                className={`relative flex items-center gap-2.5 px-6 py-3 rounded-xl transition-all whitespace-nowrap active:scale-95 ${
                   viewMode === mode.id 
-                    ? 'bg-slate-900 text-white shadow-xl font-black ring-1 ring-slate-900' 
-                    : 'text-slate-400 hover:text-slate-600 font-bold'
+                    ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60 font-black' 
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 font-bold'
                 }`}
               >
-                <mode.icon size={18} />
-                <span className="text-[10px] uppercase tracking-[0.15em] hidden sm:inline">{mode.label}</span>
+                <mode.icon size={16} className={viewMode === mode.id ? 'text-indigo-600' : 'text-slate-400'} />
+                <span className="text-[10px] uppercase tracking-[0.1em] hidden sm:inline">{mode.label}</span>
                 {mode.badge ? (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-[9px] font-black text-white border-2 border-white shadow-lg animate-bounce">
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-white shadow-lg">
                     {mode.badge}
                   </span>
                 ) : null}
@@ -92,51 +92,57 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
         </div>
       </div>
 
-      {/* Tertiary Filters Row */}
-      <div className="flex flex-wrap items-end gap-6">
-        <FilterGroup icon={<Calendar size={14} />} label="Periode Data">
+      {/* Advanced Filters Row */}
+      <div className="flex flex-wrap items-end gap-5">
+        <FilterGroup icon={<Calendar size={14} className="text-indigo-500" />} label="Periode Data">
           <select 
-            className="bg-transparent w-full text-xs font-black outline-none text-slate-900 appearance-none pr-8 cursor-pointer" 
+            className="bg-transparent w-full text-xs font-black outline-none text-slate-800 appearance-none pr-8 cursor-pointer focus:ring-0" 
             value={selectedMonth} 
             onChange={e => setSelectedMonth(e.target.value)}
           >
-            {generateMonthOptions(12, 36).map((m: string) => (
+            {generateMonthOptions(12, 60).map((m: string) => (
               <option key={m} value={m}>{m}</option>
             ))}
           </select>
         </FilterGroup>
 
-        <FilterGroup icon={<Filter size={14} />} label="Status Filter">
+        <FilterGroup icon={<Filter size={14} className="text-emerald-500" />} label="Status Filter">
           <select 
-            className="bg-transparent w-full text-xs font-black outline-none text-slate-900 appearance-none pr-8 cursor-pointer" 
+            className="bg-transparent w-full text-xs font-black outline-none text-slate-800 appearance-none pr-8 cursor-pointer focus:ring-0" 
             value={filterStatus} 
             onChange={e => setFilterStatus(e.target.value as any)}
           >
             <option value="all">Semua Warga</option>
-            <option value="paid">Sudah Lunas</option>
-            <option value="unpaid">Belum Lunas</option>
-            <option value="occupied">Dihuni</option>
-            <option value="empty">Kosong</option>
-            <option value="business">Tempat Usaha</option>
-            <option value="arrears">Ada Tunggakan</option>
+            <option value="paid">✅ Lunas Iuran</option>
+            <option value="unpaid">❌ Belum Lunas</option>
+            <option value="occupied">🏠 Rumah Terisi</option>
+            <option value="empty">📭 Rumah Kosong</option>
+            <option value="business">🏢 Tempat Usaha</option>
+            <option value="verified">🛡️ Terverifikasi</option>
+            <option value="unverified">❓ Belum Verifikasi</option>
+            <option value="arrears">⚠️ Ada Tunggakan</option>
           </select>
         </FilterGroup>
 
-        <FilterGroup icon={<ArrowUpDown size={14} />} label="Urutan">
+        <FilterGroup icon={<ArrowUpDown size={14} className="text-amber-500" />} label="Urutan Daftar">
           <select 
-            className="bg-transparent w-full text-xs font-black outline-none text-slate-900 appearance-none pr-8 cursor-pointer" 
+            className="bg-transparent w-full text-xs font-black outline-none text-slate-800 appearance-none pr-8 cursor-pointer focus:ring-0" 
             value={sortBy} 
             onChange={e => setSortBy(e.target.value as any)}
           >
             <option value="block">Blok & Nomor</option>
-            <option value="name">Nama Warga</option>
+            <option value="name">Alfabetis (A-Z)</option>
           </select>
         </FilterGroup>
 
-        <div className="ml-auto hidden xl:block self-center">
-           <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl">
-             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></div>
-             <span className="text-[10px] font-black uppercase tracking-widest">Smart Filter Aktif</span>
+        <div className="ml-auto flex items-center gap-3 self-center">
+           <div className="hidden lg:flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
+             <div className="flex -space-x-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className={`w-6 h-6 rounded-full border-2 border-white bg-slate-${i*100 + 100} flex items-center justify-center text-[8px] font-black`}>W</div>
+                ))}
+             </div>
+             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest"><span className="text-slate-900">142</span> Warga Terdaftar</p>
            </div>
         </div>
       </div>

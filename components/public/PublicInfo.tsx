@@ -1685,7 +1685,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                     value={selectedMonth}
                                     onChange={e => setSelectedMonth(e.target.value)}
                                 >
-                                    {generateMonthOptions(12, 36).map((m: string) => (
+                                    {generateMonthOptions(12, 60).map((m: string) => (
                                         <option key={m} value={m}>{m}</option>
                                     ))}
                                 </select>

@@ -4,7 +4,7 @@ import { Button } from '../../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
-  CreditCard, AlertCircle, Calendar, FileText, Shield, Send, History, Edit2, Heart
+  CreditCard, AlertCircle, Calendar, FileText, Shield, Send, History, Edit2, Heart, ShieldCheck
 } from 'lucide-react';
 import { House, PaymentStatus, Role } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -52,7 +52,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
         { key: 'birthDate', label: 'Tanggal Lahir' },
         { key: 'addressKtp', label: 'Alamat KTP' },
         { key: 'block', label: 'Blok' },
-        { key: 'number', label: 'Nomor' }
+        { key: 'number', label: 'Nomor' },
+        { key: 'joiningDate', label: 'Tanggal Mulai Menempati' }
       ];
 
       if (!isAdmin) {
@@ -120,15 +121,15 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={editingHouseId ? "Edit Profil Warga" : "Pendaftaran Warga Baru"} maxWidth="max-w-7xl">
-      <form onSubmit={onFormSubmit} className="space-y-16 py-6 px-4">
-        {/* Modern Tab Navigation - More Refined and Integrated */}
-        <div className="flex bg-slate-100/50 p-2 rounded-[3rem] border border-slate-200/60 backdrop-blur-xl sticky top-0 z-20 mx-auto max-w-2xl shadow-xl shadow-slate-200/20">
+    <Modal isOpen={isOpen} onClose={onClose} title={editingHouseId ? "Edit Profil Warga" : "Pendaftaran Warga Baru"} maxWidth="max-w-6xl">
+      <form onSubmit={onFormSubmit} className="space-y-12 py-4 px-4">
+        {/* Modern Tab Navigation - More Refined */}
+        <div className="flex bg-slate-100 p-1.5 rounded-[2rem] border border-slate-200 sticky top-0 z-30 mx-auto max-w-xl shadow-xl shadow-slate-200/20 backdrop-blur-md bg-opacity-80">
           {[
-            { id: 'basic', label: 'Informasi Dasar', icon: Home },
-            { id: 'demographics', label: 'Demografi', icon: Activity },
+            { id: 'basic', label: 'Identitas', icon: User },
+            { id: 'demographics', label: 'Profil', icon: ShieldCheck },
             { id: 'family', label: 'Keluarga', icon: Users }
-          ].map((tab) => (
+          ].map((tab, idx) => (
             <button 
               key={tab.id}
               type="button"
@@ -140,27 +141,22 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                    if (validateTab('basic') && validateTab('demographics')) setActiveFormTab('family');
                 }
               }}
-              className={`flex-1 px-5 py-4 rounded-[2.5rem] text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 relative overflow-hidden group ${
-                activeFormTab === tab.id ? 'bg-white text-indigo-600 shadow-2xl shadow-indigo-600/10' : 'text-slate-400 hover:text-indigo-400'
+              className={`flex-1 px-4 py-3.5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 relative z-10 ${
+                activeFormTab === tab.id ? 'bg-white text-indigo-600 shadow-lg shadow-indigo-500/10' : 'text-slate-500 hover:text-indigo-400'
               }`}
             >
-              <div className={`p-2.5 rounded-2xl transition-all duration-700 ${
-                activeFormTab === tab.id ? 'bg-indigo-600 text-white rotate-0' : 'bg-slate-200 text-slate-400 -rotate-6 group-hover:rotate-0'
-              }`}>
-                <tab.icon size={16} />
-              </div>
+              <tab.icon size={14} className={activeFormTab === tab.id ? 'text-indigo-600' : 'text-slate-400'} />
               <span className="hidden md:inline">{tab.label}</span>
-              {activeFormTab === tab.id && (
-                <motion.div 
-                  layoutId="activeFormTab"
-                  className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"
-                />
+              {idx < 2 && (
+                <div className="hidden md:block absolute -right-1.5 top-1/2 -translate-y-1/2 text-slate-300">
+                  <ChevronRight size={12} />
+                </div>
               )}
             </button>
           ))}
         </div>
 
-        <div className="min-h-[700px]">
+        <div className="min-h-[600px]">
           <AnimatePresence mode="wait">
             {activeFormTab === 'basic' && (
               <motion.div 
@@ -171,42 +167,60 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                 className="grid grid-cols-1 lg:grid-cols-12 gap-12"
               >
                 {/* Main Identity Section */}
-                <div className="lg:col-span-12 space-y-12">
-                  <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/[0.03] rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
-                    
-                    <div className="flex items-center gap-6 mb-12 relative z-10">
-                       <div className="p-5 bg-indigo-600 text-white rounded-[2rem] shadow-2xl shadow-indigo-600/20 rotate-3">
-                         <User size={28} strokeWidth={2.5} />
-                       </div>
-                       <div>
-                         <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Identitas Terpusat</h3>
-                         <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Sinkronisasi data sesuai KTP/KK untuk keakuratan basis data RT</p>
-                       </div>
+                <div className="lg:col-span-12 space-y-8">
+                  <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 relative z-10">
+                      <div className="flex items-center gap-4">
+                         <div className="p-4 bg-slate-950 text-white rounded-[1.5rem] shadow-xl shadow-slate-900/10">
+                           <User size={24} />
+                         </div>
+                         <div>
+                           <h3 className="text-2xl font-black text-slate-900 tracking-tight">Data Personal</h3>
+                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Sesuai Dokumen Kependudukan (KTP/KK)</p>
+                         </div>
+                      </div>
+
+                      {role === Role.ADMIN && (
+                        <div className="flex items-center gap-3 p-1.5 bg-slate-50 rounded-2xl border border-slate-200">
+                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-3 pr-2">Status Akun:</span>
+                          <button
+                            type="button"
+                            onClick={() => setFormData({...formData, isVerified: !formData.isVerified})}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                              formData.isVerified 
+                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' 
+                                : 'bg-slate-200 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600'
+                            }`}
+                          >
+                            <ShieldCheck size={14} />
+                            {formData.isVerified ? 'Tersahkankan' : 'Belum Sah'}
+                          </button>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-10 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
                       <div className="md:col-span-8">
                         <FormField 
                           label="Nama Lengkap Kepala Keluarga" 
                           required 
-                          placeholder="Contoh: Budi Santoso"
+                          placeholder="Nama lengkap..."
                           value={formData.headOfFamily} 
                           onChange={(v: any) => setFormData({...formData, headOfFamily: v})} 
                         />
                       </div>
                       <div className="md:col-span-4">
-                        <label className="block text-[11px] font-black mb-4 text-slate-400 uppercase tracking-[0.2em]">Gender <span className="text-rose-500">*</span></label>
-                        <div className="grid grid-cols-2 gap-4">
+                        <label className="block text-[10px] font-bold mb-2 text-slate-400 uppercase tracking-widest">Gender <span className="text-rose-500">*</span></label>
+                        <div className="grid grid-cols-2 gap-3">
                            {['Laki-laki', 'Perempuan'].map((g) => (
                              <button
                                key={g}
                                type="button"
                                onClick={() => setFormData({...formData, gender: g as any})}
-                               className={`py-5 rounded-3xl text-sm font-black uppercase tracking-widest border transition-all ${
+                               className={`py-3 rounded-xl text-[11px] font-bold uppercase tracking-wider border transition-all ${
                                  formData.gender === g 
-                                   ? 'bg-slate-950 text-white border-slate-950 shadow-2xl shadow-black/20' 
-                                   : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-white hover:border-slate-300'
+                                   ? 'bg-slate-900 text-white border-slate-900 shadow-sm' 
+                                   : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-white'
                                }`}
                              >
                                {g}
@@ -217,9 +231,9 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
                       <div className="md:col-span-6">
                         <FormField 
-                          label="No. NIK (KTP)" 
+                          label="NIK" 
                           required 
-                          placeholder="16 Digit Nomor Induk"
+                          placeholder="16 Digit NIK"
                           value={formData.nik} 
                           onChange={(v: any) => setFormData({...formData, nik: v})} 
                           maxLength={16}
@@ -227,9 +241,9 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       </div>
                       <div className="md:col-span-6">
                         <FormField 
-                          label="No. Kartu Keluarga" 
+                          label="Nomor KK" 
                           required 
-                          placeholder="16 Digit Nomor KK"
+                          placeholder="16 Digit No. KK"
                           value={formData.kkNumber} 
                           onChange={(v: any) => setFormData({...formData, kkNumber: v})} 
                           maxLength={16}
@@ -240,7 +254,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         <FormField 
                           label="Tempat Lahir" 
                           required 
-                          placeholder="Kota Kelahiran"
+                          placeholder="Kota kelahiran"
                           value={formData.birthPlace} 
                           onChange={(v: any) => setFormData({...formData, birthPlace: v})} 
                         />
@@ -258,25 +272,23 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                   </div>
 
                   {/* Residence Info Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-                       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-emerald-500/[0.03] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
-                       
-                       <div className="flex items-center gap-6 mb-12 relative z-10">
-                          <div className="p-5 bg-emerald-600 text-white rounded-[2rem] shadow-2xl shadow-emerald-600/20 -rotate-3 transition-transform group-hover:rotate-0 duration-700">
-                            <Home size={28} strokeWidth={2.5} />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
+                       <div className="flex items-center gap-4 mb-10 relative z-10">
+                          <div className="p-3 bg-slate-950 text-white rounded-xl">
+                            <Home size={20} />
                           </div>
                           <div>
-                            <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Alamat Domisili</h3>
-                            <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Lokasi hunian dalam koordinat RT 02</p>
+                            <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wider">Domisili</h3>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Lokasi hunian di RT 02</p>
                           </div>
                        </div>
 
-                       <div className="grid grid-cols-2 gap-10 relative z-10">
+                       <div className="grid grid-cols-2 gap-6 relative z-10">
                         <FormField 
                           label="Blok" 
                           required 
-                          placeholder="A/B/C..."
+                          placeholder="A/B..."
                           value={formData.block} 
                           onChange={(v: any) => setFormData({...formData, block: v})} 
                         />
@@ -288,94 +300,94 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           onChange={(v: any) => setFormData({...formData, number: v})} 
                         />
                         <div className="col-span-2">
-                          <label className="block text-[11px] font-black mb-4 text-slate-400 uppercase tracking-[0.2em]">Status Hunian</label>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                             {['Tetap', 'Rumah Keluarga', 'Kontrak', 'Kost'].map((st) => (
+                          <label className="block text-[10px] font-bold mb-2 text-slate-400 uppercase tracking-widest">Status Hunian</label>
+                          <div className="grid grid-cols-4 gap-2">
+                             {['Tetap', 'Keluarga', 'Kontrak', 'Kost'].map((st) => (
                                <button
                                  key={st}
                                  type="button"
                                  onClick={() => setFormData({...formData, residenceType: st as any})}
-                                 className={`py-4 px-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest border transition-all ${
-                                   formData.residenceType === st 
-                                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xl shadow-emerald-600/30 ring-4 ring-emerald-500/10' 
-                                     : 'bg-slate-50 text-slate-400 border-slate-100 hover:border-slate-300'
+                                 className={`py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all ${
+                                   formData.residenceType === (st === 'Keluarga' ? 'Rumah Keluarga' : st) 
+                                     ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+                                     : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-white'
                                  }`}
                                >
-                                 {st === 'Rumah Keluarga' ? 'Keluarga' : st}
+                                 {st}
                                </button>
                              ))}
                           </div>
                         </div>
-                        <div className="col-span-2 mt-2">
+                        <div className="col-span-2">
                           <FormField 
-                            label="Alamat KTP Lengkap" 
+                            label="Alamat Sesuai KTP" 
                             required 
-                            placeholder="Tuliskan sesuai dokumen..."
+                            placeholder="Alamat asal..."
                             multiline
                             value={formData.addressKtp} 
                             onChange={(v: any) => setFormData({...formData, addressKtp: v})} 
                           />
                         </div>
+                        <div className="col-span-2">
+                           <FormField 
+                             label="Tanggal Mulai Menempati" 
+                             required 
+                             type="date"
+                             value={formData.joiningDate} 
+                             onChange={(v: any) => setFormData({...formData, joiningDate: v})} 
+                           />
+                           <p className="text-[9px] text-slate-400 mt-2 italic">* Digunakan untuk acuan perhitungan tunggakan iuran.</p>
+                        </div>
                        </div>
                     </div>
 
-                    <div className="space-y-12 flex flex-col">
-                       <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group flex-1">
-                         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-rose-500/[0.03] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
-                         
-                         <div className="flex items-center gap-6 mb-12 relative z-10">
-                           <div className="p-5 bg-rose-500 text-white rounded-[2rem] shadow-2xl shadow-rose-600/20 rotate-6 group-hover:rotate-0 transition-transform duration-700">
-                             <Phone size={28} strokeWidth={2.5} />
+                    <div className="space-y-8 flex flex-col">
+                       <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group flex-1">
+                         <div className="flex items-center gap-4 mb-8 relative z-10">
+                           <div className="p-3 bg-emerald-600 text-white rounded-xl">
+                             <Phone size={20} />
                            </div>
                            <div>
-                             <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Komunikasi</h3>
-                             <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Saluran koordinasi antar warga</p>
+                             <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wider">Kontak</h3>
+                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Media komunikasi warga</p>
                            </div>
                          </div>
                          <div className="relative z-10">
                             <FormField 
-                              label="No. WhatsApp Aktif" 
-                              placeholder="08xxxxxxxxxx"
+                              label="Nomor WhatsApp" 
+                              placeholder="08..."
                               value={formData.phone} 
                               onChange={(v: any) => setFormData({...formData, phone: v})} 
                             />
                          </div>
                        </div>
 
-                       <div className="bg-slate-950 p-12 rounded-[4rem] text-white shadow-2xl relative overflow-hidden group">
-                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/[0.15] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-600/20 transition-colors duration-1000"></div>
-                         <div className="relative z-10 space-y-10">
-                           <div className="flex items-center gap-6">
-                              <div className="p-5 bg-white/10 backdrop-blur-3xl rounded-[2rem] border border-white/20 shadow-2xl">
-                                <Shield size={28} className="text-indigo-400" strokeWidth={2.5} />
+                       <div className="bg-slate-900 p-8 rounded-3xl text-white shadow-lg relative overflow-hidden group">
+                         <div className="relative z-10 space-y-6">
+                           <div className="flex items-center gap-4">
+                              <div className="p-3 bg-white/10 rounded-xl border border-white/10">
+                                <Shield size={20} className="text-indigo-400" />
                               </div>
                               <div>
-                                <h3 className="text-2xl font-black uppercase tracking-widest tracking-tight">E-Warga Access</h3>
-                                <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Akses portal mandiri untuk warga</p>
+                                <h3 className="text-lg font-bold uppercase tracking-wider">Akses Portal</h3>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">PIN Aktivasi Aplikasi</p>
                               </div>
                            </div>
                            
-                           <div className="flex flex-col sm:flex-row gap-6">
-                             <div className="relative flex-1 group/pin">
-                               <input 
-                                 className="w-full py-6 px-8 bg-white/5 border border-white/10 rounded-[2rem] text-3xl font-black text-white focus:bg-white/10 focus:border-indigo-400 focus:ring-8 focus:ring-indigo-500/10 transition-all outline-none text-center tracking-[1em] placeholder:text-white/5" 
-                                 value={formData.accessCode} 
-                                 onChange={e => setFormData({...formData, accessCode: e.target.value})} 
-                                 placeholder="000000" 
-                               />
-                               <div className="absolute inset-0 rounded-[2rem] border-2 border-transparent group-focus-within/pin:border-indigo-400/30 pointer-events-none"></div>
-                             </div>
+                           <div className="flex gap-4">
+                             <input 
+                               className="flex-1 py-4 px-6 bg-white/5 border border-white/10 rounded-xl text-2xl font-bold text-white focus:bg-white/10 focus:border-indigo-400 transition-all outline-none text-center tracking-widest" 
+                               value={formData.accessCode} 
+                               onChange={e => setFormData({...formData, accessCode: e.target.value})} 
+                               placeholder="XXXXXX" 
+                             />
                              <button 
                                type="button"
                                onClick={() => setFormData({...formData, accessCode: Math.floor(100000 + Math.random() * 900000).toString()})}
-                               className="py-6 px-10 bg-indigo-600 text-white rounded-[2rem] hover:bg-white hover:text-indigo-600 font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-2xl shadow-indigo-600/40 active:scale-95"
+                               className="px-6 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 font-bold text-[10px] uppercase tracking-widest transition-all"
                              >
                                Generate
                              </button>
-                           </div>
-                           <div className="flex items-start gap-4">
-                              <AlertCircle size={16} className="text-indigo-400 mt-1" />
-                              <p className="text-[11px] text-slate-500 font-bold leading-relaxed">Berikan PIN ini kepada warga untuk proses aktivasi aplikasi. Jaga kerahasiaan PIN demi keamanan data warga.</p>
                            </div>
                          </div>
                        </div>
@@ -388,80 +400,81 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
             {activeFormTab === 'demographics' && (
               <motion.div 
                 key="demographics"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -30 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 className="space-y-12"
               >
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                  {/* Demographics Card */}
-                  <div className="lg:col-span-12 bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/[0.03] rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
-                    <div className="flex items-center gap-6 mb-12 relative z-10">
-                      <div className="p-5 bg-indigo-600 text-white rounded-[2rem] shadow-2xl shadow-indigo-600/20 rotate-12 group-hover:rotate-0 transition-transform duration-700">
-                        <Activity size={28} strokeWidth={2.5} />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Dimensi Sosio-Ekonomi</h3>
-                        <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Dinamika kesejahteraan dan latar belakang warga</p>
-                      </div>
+                <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                  <div className="flex items-center gap-4 mb-12 relative z-10">
+                    <div className="p-4 bg-indigo-600 text-white rounded-[1.5rem] shadow-xl shadow-indigo-500/10">
+                      <ShieldCheck size={24} />
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
-                      <div className="space-y-4">
-                        <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Pendidikan Terakhir <span className="text-rose-500">*</span></label>
-                        <select 
-                          className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all outline-none"
-                          value={formData.education} 
-                          onChange={e => setFormData({...formData, education: e.target.value})}
-                          required
-                        >
-                          <option value="">Pilih Jenjang...</option>
-                          {['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S2', 'S3'].map(edu => (
-                            <option key={edu} value={edu}>{edu}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-4">
-                        <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Sektor Pekerjaan <span className="text-rose-500">*</span></label>
-                        <select 
-                          className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all outline-none"
-                          value={formData.jobCategory} 
-                          onChange={e => setFormData({...formData, jobCategory: e.target.value})}
-                          required
-                        >
-                          <option value="">Pilih Sektor...</option>
-                          <option value="PNS">PNS / TNI / Polri</option>
-                          <option value="Pegawai Swasta">Pegawai Swasta</option>
-                          <option value="Wiraswasta">Wiraswasta / Pengusaha</option>
-                          <option value="Freelance">Pekerja Lepas / Freelance</option>
-                          <option value="Pensiunan">Pensiunan</option>
-                          <option value="Tidak Bekerja">Tidak / Belum Bekerja</option>
-                        </select>
-                      </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight">Karakteristik Sosio-Ekonomi</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Latar belakang pendidikan, pekerjaan, dan kepercayaan</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 relative z-10">
+                    <div className="md:col-span-4">
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Pendidikan Terakhir <span className="text-rose-500">*</span></label>
+                      <select 
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
+                        value={formData.education} 
+                        onChange={e => setFormData({...formData, education: e.target.value})}
+                      >
+                        <option value="">Pilih Jenjang...</option>
+                        {['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S2', 'S3'].map(edu => (
+                          <option key={edu} value={edu}>{edu}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="md:col-span-4">
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Sektor Pekerjaan <span className="text-rose-500">*</span></label>
+                      <select 
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
+                        value={formData.jobCategory} 
+                        onChange={e => setFormData({...formData, jobCategory: e.target.value})}
+                      >
+                        <option value="">Pilih Sektor...</option>
+                        <option value="PNS">PNS / TNI / Polri</option>
+                        <option value="Pegawai Swasta">Pegawai Swasta</option>
+                        <option value="Wiraswasta">Wiraswasta / Pengusaha</option>
+                        <option value="Freelance">Pekerja Lepas / Freelance</option>
+                        <option value="Pensiunan">Pensiunan</option>
+                        <option value="Tidak Bekerja">Tidak / Belum Bekerja</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-4">
                       <FormField 
                         label="Agama" 
                         required 
-                        placeholder="Contoh: Islam"
+                        type="select"
+                        options={['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Khonghucu', 'Lainnya']}
                         value={formData.religion} 
                         onChange={(v: any) => setFormData({...formData, religion: v})} 
                       />
+                    </div>
+                    <div className="md:col-span-6">
                       <FormField 
-                        label="Jabatan / Profesi Spesifik" 
+                        label="Profesi Spesifik" 
                         placeholder="Contoh: Arsitek"
                         value={formData.job} 
                         onChange={(v: any) => setFormData({...formData, job: v})} 
                       />
-                      <div className="space-y-4">
-                        <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Kemandirian Ekonomi</label>
-                        <select className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none" value={formData.economicStatus} onChange={e => setFormData({...formData, economicStatus: e.target.value as any})}>
-                          <option value="Pra-Sejahtera">Pra-Sejahtera (Subsidi)</option>
-                          <option value="Sejahtera">Sejahtera</option>
-                          <option value="Mampu">Mampu / Mandiri</option>
-                        </select>
-                      </div>
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Status Ekonomi</label>
+                      <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white" value={formData.economicStatus} onChange={e => setFormData({...formData, economicStatus: e.target.value as any})}>
+                        <option value="Pra-Sejahtera">Pra-Sejahtera (Subsidi)</option>
+                        <option value="Sejahtera">Sejahtera</option>
+                        <option value="Mampu">Mampu / Mandiri</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-3">
                       <FormField 
-                        label="Kepemilikan Kendaraan" 
+                        label="Jumlah Kendaraan" 
                         type="number"
                         placeholder="0"
                         value={formData.vehicleCount} 
@@ -469,91 +482,95 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       />
                     </div>
                   </div>
+                </div>
 
-                  <div className="lg:col-span-8 bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-3 bg-rose-600/10"></div>
-                    <div className="flex items-center gap-6 mb-12">
-                       <div className="p-5 bg-rose-500 text-white rounded-[2rem] shadow-2xl shadow-rose-600/20 -rotate-6 group-hover:rotate-0 transition-transform duration-700">
-                         <DollarSign size={28} strokeWidth={2.5} />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-8 bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                    <div className="flex items-center gap-4 mb-10">
+                       <div className="p-4 bg-indigo-50 text-indigo-600 rounded-[1.5rem]">
+                         <DollarSign size={24} />
                        </div>
                        <div>
-                         <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Jaringan Pengaman Sosial</h3>
-                         <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Status keikutsertaan program bantuan pemerintah</p>
+                         <h3 className="text-xl font-black text-slate-900 tracking-tight">Perlindungan Sosial</h3>
+                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Keikutsertaan program bantuan pemerintah</p>
                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
-                      <BansosCard 
-                        label="Keikutsertaan PKH" 
-                        checked={formData.isPKH} 
-                        onChange={c => setFormData({...formData, isPKH: c})} 
-                      />
-                      <BansosCard 
-                        label="Penerima BLT" 
-                        checked={formData.isBLT} 
-                        onChange={c => setFormData({...formData, isBLT: c})} 
-                      />
-                      <BansosCard 
-                        label="Program BPNT" 
-                        checked={formData.isBPNT} 
-                        onChange={c => setFormData({...formData, isBPNT: c})} 
-                      />
-                      <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                       {[
+                         { id: 'isPKH', label: 'Penerima PKH' },
+                         { id: 'isBLT', label: 'Bantuan Langsung Tunai (BLT)' },
+                         { id: 'isBPNT', label: 'Bantuan Pangan Non Tunai' },
+                         { id: 'isBansosLain', label: 'Bansos Lainnya' }
+                       ].map((item) => (
                         <BansosCard 
-                          label="Program Bantuan Lain" 
-                          checked={formData.isBansosLain} 
-                          onChange={c => setFormData({...formData, isBansosLain: c})} 
+                          key={item.id}
+                          label={item.label} 
+                          checked={formData[item.id]} 
+                          onChange={c => setFormData({...formData, [item.id]: c})} 
                         />
-                        <AnimatePresence>
-                          {formData.isBansosLain && (
-                            <motion.div 
-                              initial={{ opacity: 0, height: 0, marginTop: 0 }} 
-                              animate={{ opacity: 1, height: 'auto', marginTop: 12 }} 
-                              exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                              className="overflow-hidden"
-                            >
-                              <input 
-                                placeholder="Tuliskan nama program bantuan..." 
-                                className="w-full p-6 bg-rose-50 border border-rose-100 rounded-[1.5rem] text-[12px] font-black text-rose-950 focus:ring-8 focus:ring-rose-500/5 focus:border-rose-400 transition-all outline-none"
-                                value={formData.bansosLainName}
-                                onChange={e => setFormData({...formData, bansosLainName: e.target.value})}
-                              />
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
+                       ))}
+                       
+                       <AnimatePresence>
+                         {formData.isBansosLain && (
+                           <motion.div 
+                             initial={{ opacity: 0, height: 0 }} 
+                             animate={{ opacity: 1, height: 'auto' }} 
+                             exit={{ opacity: 0, height: 0 }}
+                             className="col-span-full overflow-hidden"
+                           >
+                             <div className="pt-2">
+                               <input 
+                                 placeholder="Sebutkan nama program bantuan..." 
+                                 className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-900 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all outline-none"
+                                 value={formData.bansosLainName}
+                                 onChange={e => setFormData({...formData, bansosLainName: e.target.value})}
+                               />
+                             </div>
+                           </motion.div>
+                         )}
+                       </AnimatePresence>
                     </div>
                   </div>
 
-                  <div className="lg:col-span-4 bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-3 bg-amber-600/10"></div>
-                     <div className="flex items-center gap-6 mb-12">
-                       <div className="p-5 bg-amber-500 text-white rounded-[2rem] shadow-2xl shadow-amber-600/20 rotate-6 group-hover:rotate-0 transition-transform duration-700">
-                         <Heart size={28} strokeWidth={2.5} />
+                  <div className="lg:col-span-4 bg-slate-900 p-10 rounded-[3rem] text-white shadow-xl relative overflow-hidden group">
+                     <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+                     
+                     <div className="flex items-center gap-4 mb-10 relative z-10">
+                       <div className="p-4 bg-white/10 text-amber-400 rounded-[1.5rem] border border-white/10">
+                         <Heart size={24} />
                        </div>
                        <div>
-                         <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Kesehatan</h3>
-                         <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Cakupan akses kesehatan keluarga</p>
+                         <h3 className="text-xl font-black tracking-tight">Kesehatan</h3>
+                         <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-1">Status proteksi medis</p>
                        </div>
                     </div>
 
-                    <div className="space-y-10 relative z-10">
-                      <div className="space-y-4">
-                        <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Kategori BPJS</label>
-                        <select className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none" value={formData.bpjsStatus} onChange={e => setFormData({...formData, bpjsStatus: e.target.value as any})}>
-                          <option value="Tidak Ada">Belum Terdaftar</option>
-                          <option value="PPU">PPU (Pekerja)</option>
-                          <option value="PBPU">PBPU (Mandiri)</option>
-                          <option value="PBI">PBI (Pemerintah)</option>
+                    <div className="space-y-8 relative z-10">
+                      <div>
+                        <label className="block text-[10px] font-black mb-3 text-white/50 uppercase tracking-widest pl-1">Kategori BPJS</label>
+                        <select 
+                          className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 transition-all" 
+                          value={formData.bpjsStatus} 
+                          onChange={e => setFormData({...formData, bpjsStatus: e.target.value as any})}
+                        >
+                          <option value="Tidak Ada" className="bg-slate-900">Belum Terdaftar</option>
+                          <option value="PPU" className="bg-slate-900">PPU (Pekerja)</option>
+                          <option value="PBPU" className="bg-slate-900">PBPU (Mandiri)</option>
+                          <option value="PBI" className="bg-slate-900">PBI (Pemerintah)</option>
                         </select>
                       </div>
-                      <div className="space-y-4">
-                        <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Vaksinasi Terakhir</label>
-                        <select className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none" value={formData.vaccinationStatus} onChange={e => setFormData({...formData, vaccinationStatus: e.target.value as any})}>
-                          <option value="Belum">Belum Terdata</option>
-                          <option value="Dosis 1">Dosis 1</option>
-                          <option value="Dosis 2">Dosis 2 (Primer)</option>
-                          <option value="Booster">Booster Terpenuhi</option>
+                      <div>
+                        <label className="block text-[10px] font-black mb-3 text-white/50 uppercase tracking-widest pl-1">Vaksinasi</label>
+                        <select 
+                          className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 transition-all" 
+                          value={formData.vaccinationStatus} 
+                          onChange={e => setFormData({...formData, vaccinationStatus: e.target.value as any})}
+                        >
+                          <option value="Belum" className="bg-slate-900">Belum Terdata</option>
+                          <option value="Dosis 1" className="bg-slate-900">Dosis 1</option>
+                          <option value="Dosis 2" className="bg-slate-900">Dosis 2</option>
+                          <option value="Booster" className="bg-slate-900">Booster</option>
                         </select>
                       </div>
                     </div>
@@ -565,21 +582,20 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
             {activeFormTab === 'family' && (
               <motion.div 
                 key="family"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -30 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 className="space-y-12"
               >
-                <div className="flex flex-col lg:flex-row justify-between items-center bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm gap-10 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/[0.03] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
-                  <div className="flex items-center gap-8 relative z-10">
-                    <div className="p-6 bg-slate-950 text-white rounded-[2.5rem] shadow-2xl shadow-black/30 group-hover:rotate-12 transition-transform duration-700">
-                      <Users size={36} strokeWidth={2.5} />
+                <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm gap-8 relative overflow-hidden group">
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="p-4 bg-slate-950 text-white rounded-[1.5rem] shadow-xl shadow-slate-900/10">
+                      <Users size={24} />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Sinergi Keluarga</h3>
-                      <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2.5 flex items-center gap-3">
-                        <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight">Anggota Keluarga</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         {formData.familyMembers.length} Personel Terdaftar
                       </p>
                     </div>
@@ -588,118 +604,143 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     type="button"
                     onClick={() => setFormData({
                       ...formData, 
-                      familyMembers: [...formData.familyMembers, { id: Math.random().toString(36).substr(2, 9), name: '', relation: 'Anak', nik: '', birthDate: '', gender: 'Laki-laki' }]
+                      familyMembers: [...formData.familyMembers, { id: Math.random().toString(36).substr(2, 9), name: '', relation: 'Anak', nik: '', birthDate: '', gender: 'Laki-laki', job: '' }]
                     })}
-                    className="w-full lg:w-auto px-16 py-6 bg-indigo-600 text-white rounded-[2rem] font-black text-[13px] uppercase tracking-widest hover:bg-slate-950 transition-all shadow-2xl shadow-indigo-600/30 flex items-center justify-center gap-5 active:scale-95 group/add"
+                    className="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-3 active:scale-95"
                   >
-                    <UserPlus size={22} strokeWidth={3} className="group-hover/add:scale-110 transition-transform" /> 
-                    Registrasi Anggota
+                    <UserPlus size={18} />
+                    <span>Tambah Anggota</span>
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pb-12">
-                  {formData.familyMembers.map((member: any, idx: number) => (
-                    <motion.div 
-                      layout
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      key={member.id || idx} 
-                      className="p-12 bg-white rounded-[4rem] border border-slate-100 space-y-10 relative group hover:border-indigo-300 transition-all hover:shadow-2xl hover:shadow-indigo-500/10 overflow-hidden"
-                    >
-                      <div className="absolute top-0 right-0 w-48 h-48 bg-slate-50 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
-                      
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          const newMembers = [...formData.familyMembers];
-                          newMembers.splice(idx, 1);
-                          setFormData({...formData, familyMembers: newMembers});
-                        }}
-                        className="absolute top-10 right-10 p-4 text-slate-300 hover:text-white hover:bg-rose-500 transition-all rounded-[1.5rem] bg-slate-50 group-hover:bg-rose-100 group-hover:text-rose-500 hover:rotate-12"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
+                  <AnimatePresence>
+                    {formData.familyMembers.map((member: any, idx: number) => (
+                      <motion.div 
+                        layout
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        key={member.id || idx} 
+                        className="p-10 bg-white rounded-[2.5rem] border border-slate-200 space-y-8 relative group hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-500/5 transition-all overflow-hidden"
                       >
-                        <X size={22} strokeWidth={3} />
-                      </button>
-                      
-                      <div className="space-y-8 relative z-10">
-                        <div className="flex items-center gap-5 mb-4">
-                           <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-2xl shadow-indigo-600/20">
-                             {idx + 1}
-                           </div>
-                           <h4 className="font-black text-slate-800 uppercase tracking-widest text-sm">Profil Anggota</h4>
-                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newMembers = [...formData.familyMembers];
+                            newMembers.splice(idx, 1);
+                            setFormData({...formData, familyMembers: newMembers});
+                          }}
+                          className="absolute top-6 right-6 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-xl opacity-0 group-hover:opacity-100"
+                        >
+                          <X size={18} />
+                        </button>
+                        
+                        <div className="space-y-8 relative z-10">
+                          <div className="flex items-center gap-4">
+                             <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-lg shadow-slate-950/10">
+                               {idx + 1}
+                             </div>
+                             <h4 className="font-black text-slate-400 uppercase tracking-[0.3em] text-[10px]">Profil Anggota #{idx + 1}</h4>
+                          </div>
 
-                        <FormField 
-                          label="Nama Lengkap" 
-                          placeholder="Masukkan nama lengkap" 
-                          value={member.name}
-                          onChange={(v: any) => {
-                            const newMembers = [...formData.familyMembers];
-                            newMembers[idx].name = v;
-                            setFormData({...formData, familyMembers: newMembers});
-                          }}
-                        />
-                        <div className="grid grid-cols-2 gap-8">
-                          <div className="space-y-4">
-                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest">Hubungan</label>
-                            <select 
-                              className="w-full p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none"
-                              value={member.relation}
-                              onChange={e => {
-                                const newMembers = [...formData.familyMembers];
-                                newMembers[idx].relation = e.target.value as any;
-                                setFormData({...formData, familyMembers: newMembers});
-                              }}
-                            >
-                              <option value="Istri">Istri</option>
-                              <option value="Anak">Anak</option>
-                              <option value="Orang Tua">Orang Tua</option>
-                              <option value="Mertua">Ibu/Ayah Mertua</option>
-                              <option value="Famili Lain">Famili Lain</option>
-                            </select>
+                          <FormField 
+                            label="Nama Lengkap" 
+                            required
+                            placeholder="Nama sesuai KTP..." 
+                            value={member.name}
+                            onChange={(v: any) => {
+                              const newMembers = [...formData.familyMembers];
+                              newMembers[idx].name = v;
+                              setFormData({...formData, familyMembers: newMembers});
+                            }}
+                          />
+                          <div className="grid grid-cols-2 gap-6">
+                            <div>
+                              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Hubungan</label>
+                              <select 
+                                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all"
+                                value={member.relation}
+                                onChange={e => {
+                                  const newMembers = [...formData.familyMembers];
+                                  newMembers[idx].relation = e.target.value as any;
+                                  setFormData({...formData, familyMembers: newMembers});
+                                }}
+                              >
+                                <option value="Istri">Istri</option>
+                                <option value="Anak">Anak</option>
+                                <option value="Orang Tua">Orang Tua</option>
+                                <option value="Mertua">Ibu/Ayah Mertua</option>
+                                <option value="Famili Lain">Famili Lain</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Gender</label>
+                              <div className="grid grid-cols-2 gap-2">
+                                 {['Laki-laki', 'Perempuan'].map(g => (
+                                   <button
+                                     key={g}
+                                     type="button"
+                                     onClick={() => {
+                                       const newMembers = [...formData.familyMembers];
+                                       newMembers[idx].gender = g as any;
+                                       setFormData({...formData, familyMembers: newMembers});
+                                     }}
+                                     className={`py-3 rounded-[1rem] text-[9px] font-black uppercase tracking-widest border transition-all ${
+                                       (member.gender || 'Laki-laki') === g 
+                                         ? 'bg-slate-900 text-white border-slate-900 shadow-sm' 
+                                         : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-white'
+                                     }`}
+                                   >
+                                     {g === 'Laki-laki' ? 'Pria' : 'Wanita'}
+                                   </button>
+                                 ))}
+                              </div>
+                            </div>
                           </div>
-                          <div className="space-y-4">
-                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest">Gender</label>
-                            <select 
-                              className="w-full p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[13px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none"
-                              value={member.gender || 'Laki-laki'}
-                              onChange={e => {
+                          
+                          <div className="grid grid-cols-2 gap-6">
+                            <FormField 
+                              label="NIK" 
+                              required
+                              placeholder="16 Digit NIK" 
+                              value={member.nik}
+                              onChange={(v: any) => {
                                 const newMembers = [...formData.familyMembers];
-                                newMembers[idx].gender = e.target.value as any;
+                                newMembers[idx].nik = v;
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
-                            >
-                              <option value="Laki-laki">Laki-laki</option>
-                              <option value="Perempuan">Perempuan</option>
-                            </select>
+                              maxLength={16}
+                            />
+                            <FormField 
+                              label="Pekerjaan" 
+                              required
+                              placeholder="Status/Profesi" 
+                              value={member.job}
+                              onChange={(v: any) => {
+                                const newMembers = [...formData.familyMembers];
+                                newMembers[idx].job = v;
+                                setFormData({...formData, familyMembers: newMembers});
+                              }}
+                            />
                           </div>
                         </div>
-                        <FormField 
-                          label="Nomor Induk Kependudukan" 
-                          placeholder="NIK 16 Digit" 
-                          value={member.nik}
-                          onChange={(v: any) => {
-                            const newMembers = [...formData.familyMembers];
-                            newMembers[idx].nik = v;
-                            setFormData({...formData, familyMembers: newMembers});
-                          }}
-                          maxLength={16}
-                        />
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                   
                   {formData.familyMembers.length === 0 && (
                     <motion.div 
                       layout
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="md:col-span-2 text-center p-32 bg-slate-50/50 border-4 border-dashed border-slate-200 rounded-[5rem] group hover:border-indigo-300 transition-all"
+                      className="md:col-span-2 text-center py-24 bg-slate-50 border border-dashed border-slate-300 rounded-[3rem]"
                     >
-                      <div className="w-32 h-32 bg-white rounded-[3.5rem] flex items-center justify-center text-slate-200 mx-auto mb-10 shadow-2xl shadow-slate-200/40 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700">
-                        <Users size={64} strokeWidth={2} />
+                      <div className="w-20 h-20 bg-white rounded-[2rem] border border-slate-100 flex items-center justify-center text-slate-200 mx-auto mb-6 shadow-sm">
+                        <Users size={40} />
                       </div>
-                      <h4 className="text-2xl font-black text-slate-300 uppercase tracking-[0.3em]">Keluarga Belum Diinput</h4>
-                      <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-4">Sistem mendeteksi hunian ini sebagai kepala keluarga tunggal</p>
+                      <h4 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Belum Ada Anggota Keluarga</h4>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-2">Daftarkan pasangan, anak, atau kerabat yang tinggal serumah</p>
                     </motion.div>
                   )}
                 </div>
@@ -708,8 +749,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
           </AnimatePresence>
         </div>
 
-        <div className="pt-12 border-t border-slate-100 flex justify-between items-center px-6">
-          <div className="flex gap-6">
+        <div className="pt-10 border-t border-slate-100 flex justify-between items-center px-4">
+          <div className="flex gap-4">
             {activeFormTab !== 'basic' && (
               <button 
                 type="button"
@@ -717,35 +758,38 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                   if (activeFormTab === 'demographics') setActiveFormTab('basic');
                   if (activeFormTab === 'family') setActiveFormTab('demographics');
                 }}
-                className="px-12 py-5 bg-slate-100 text-slate-600 rounded-[1.5rem] font-black text-[12px] uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95 shadow-sm"
+                className="group px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all active:scale-95 flex items-center gap-2"
               >
+                <div className="group-hover:-translate-x-1 transition-transform">←</div>
                 Kembali
               </button>
             )}
           </div>
 
-          <div className="flex gap-6">
+          <div className="flex gap-6 items-center">
             <button 
               type="button" 
               onClick={onClose}
-              className="px-12 py-5 text-[12px] font-black text-slate-400 hover:text-rose-500 transition-colors uppercase tracking-widest"
+              className="px-6 py-4 text-[10px] font-black text-slate-400 hover:text-rose-500 transition-colors uppercase tracking-[0.2em]"
             >
-              Batal
+              Batalkan
             </button>
             {activeFormTab !== 'family' ? (
               <button 
                 type="button"
                 onClick={handleNext}
-                className="px-14 py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-[12px] uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-4 shadow-2xl shadow-indigo-500/20 active:scale-95"
+                className="group px-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-600 transition-all flex items-center gap-3 shadow-xl shadow-slate-900/10 active:scale-95"
               >
-                Halaman Berikutnya <ChevronRight size={18} />
+                Lanjutkan
+                <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </button>
             ) : (
               <button 
                 type="submit" 
-                className="px-20 py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black text-[14px] uppercase tracking-[0.2em] hover:bg-slate-950 transition-all shadow-2xl shadow-indigo-600/40 active:scale-95 flex items-center gap-4"
+                className="px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.25em] hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-600/30 active:scale-95 flex items-center gap-3"
               >
-                <CheckCircle size={24} /> {editingHouseId ? 'Simpan Perubahan' : 'Selesaikan Pendaftaran'}
+                <ShieldCheck size={20} />
+                {editingHouseId ? 'Simpan Perubahan' : 'Finalisasi Data'}
               </button>
             )}
           </div>
@@ -758,7 +802,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 // UI Helpers
 const FormField = ({ label, value, onChange, placeholder, type = 'text', required = false, multiline = false, maxLength }: any) => (
   <div className="w-full group/field">
-    <label className="block text-[10px] font-black mb-3 text-slate-400 uppercase tracking-widest group-focus-within/field:text-indigo-600 transition-colors">
+    <label className="block text-[10px] font-bold mb-2 text-slate-400 uppercase tracking-widest group-focus-within/field:text-indigo-600 transition-colors">
       {label} {required && <span className="text-rose-500">*</span>}
     </label>
     {multiline ? (
@@ -768,7 +812,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         rows={4}
-        className="w-full p-5 bg-slate-50 border border-slate-100 rounded-[2rem] text-[13px] font-black text-slate-700 outline-none focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all shadow-sm focus:bg-white resize-none placeholder:text-slate-300"
+        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white resize-none placeholder:text-slate-300"
       />
     ) : (
       <input 
@@ -778,19 +822,16 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={maxLength}
-        className="w-full p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[13px] font-black text-slate-700 outline-none focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all shadow-sm focus:bg-white placeholder:text-slate-300"
+        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white placeholder:text-slate-300"
       />
     )}
   </div>
 );
 
 const BansosCard = ({ label, checked, onChange }: { label: string, checked: boolean, onChange: (c: boolean) => void }) => (
-  <label className={`flex items-center gap-5 p-6 rounded-[2rem] border transition-all cursor-pointer group relative overflow-hidden ${checked ? 'bg-indigo-600 border-indigo-600 shadow-xl shadow-indigo-600/20' : 'bg-slate-50 border-slate-100 hover:border-indigo-300 hover:bg-white'}`}>
-    {checked && (
-      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-    )}
-    <div className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all ${checked ? 'bg-white border-white scale-110 shadow-lg' : 'bg-white border-slate-200 group-hover:border-indigo-400 group-hover:rotate-6'}`}>
-      {checked ? <CheckCircle size={16} className="text-indigo-600" strokeWidth={3} /> : <div className="w-1.5 h-1.5 bg-slate-100 rounded-full"></div>}
+  <label className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer group relative overflow-hidden ${checked ? 'bg-indigo-600 border-indigo-600 shadow-md shadow-indigo-600/10' : 'bg-slate-50 border-slate-200 hover:border-indigo-300 hover:bg-white'}`}>
+    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${checked ? 'bg-white border-white' : 'bg-white border-slate-200'}`}>
+      {checked ? <CheckCircle size={14} className="text-indigo-600" /> : <div className="w-1 h-1 bg-slate-100 rounded-full"></div>}
       <input 
         type="checkbox" 
         className="hidden"
@@ -798,7 +839,7 @@ const BansosCard = ({ label, checked, onChange }: { label: string, checked: bool
         onChange={e => onChange(e.target.checked)}
       />
     </div>
-    <span className={`text-[11px] font-black uppercase tracking-widest transition-colors ${checked ? 'text-white' : 'text-slate-500'}`}>{label}</span>
+    <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors ${checked ? 'text-white' : 'text-slate-600'}`}>{label}</span>
   </label>
 );
 
@@ -813,8 +854,8 @@ interface PaymentModalProps {
   setPayAmount: (amount: string) => void;
   payDate: string;
   setPayDate: (date: string) => void;
-  targetMonth: string;
-  setTargetMonth: (month: string) => void;
+  targetMonths: string[];
+  setTargetMonths: (months: string[]) => void;
   payNotes: string;
   setPayNotes: (notes: string) => void;
   payerName: string;
@@ -833,8 +874,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   setPayAmount,
   payDate,
   setPayDate,
-  targetMonth,
-  setTargetMonth,
+  targetMonths,
+  setTargetMonths,
   payNotes,
   setPayNotes,
   payerName,
@@ -842,177 +883,252 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   handleSavePayment,
   getIndonesianMonthYear
 }) => {
-  const { getArrearsForHouse, getPaymentStatus } = useFinancial();
+  const { getArrearsForHouse, settings } = useFinancial();
   if (!payHouse) return null;
 
   const arrears = getArrearsForHouse(payHouse);
+  const airFee = settings?.airFee || 10000;
+  const sampahFee = settings?.sampahFee || 10000;
+  const unitFee = payType === 'Air' ? airFee : payType === 'Sampah' ? sampahFee : (airFee + sampahFee);
+  
+  const totalSuggested = targetMonths.length * unitFee;
+
+  const toggleMonth = (month: string) => {
+    if (targetMonths.includes(month)) {
+      setTargetMonths(targetMonths.filter(m => m !== month));
+    } else {
+      setTargetMonths([...targetMonths, month].sort((a, b) => {
+        // Simple sort by approximate date logic or just leave it
+        return 0; 
+      }));
+    }
+  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Rekam Pembayaran Iuran" maxWidth="max-w-5xl">
-      <div className="space-y-10 py-6">
-        {/* House Info Summary */}
-        <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 rounded-[4rem] text-white shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/[0.03] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
-            <div className="flex items-center gap-8">
-              <div className="w-24 h-24 bg-white/10 backdrop-blur-2xl rounded-[1.5rem] flex items-center justify-center text-4xl font-black border border-white/20 font-mono shadow-2xl rotate-3 group-hover:rotate-0 transition-transform duration-700">
+    <Modal isOpen={isOpen} onClose={onClose} title="Sistem Pembayaran Terpadu" maxWidth="max-w-5xl">
+      <div className="space-y-8 py-6">
+        {/* House Info Summary - Modern & Clean */}
+        <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm">
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-3xl font-bold font-mono shadow-lg">
                 {payHouse.block}-{payHouse.number}
               </div>
-              <div className="space-y-2">
-                <p className="text-[11px] font-black uppercase tracking-[0.3em] text-indigo-400">Kepala Keluarga</p>
-                <h3 className="text-3xl font-black tracking-tight">{payHouse.headOfFamily}</h3>
-                <div className="flex gap-3 mt-4">
-                  <span className="px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/10">
-                    {payHouse.status === 'Occupied' ? 'Dihuni' : payHouse.status === 'Empty' ? 'Kosong' : 'Tempat Usaha'}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Profil Warga</p>
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                  {payHouse.headOfFamily}
+                  {payHouse.isVerified && <ShieldCheck size={20} className="text-emerald-500" />}
+                </h3>
+                <div className="flex gap-2 mt-2">
+                  <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Home size={12} /> {payHouse.residenceType || 'Warga'}
                   </span>
-                  <span className="px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/10">
-                    {payHouse.residenceType}
+                  <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Activity size={12} /> {payHouse.status === 'Occupied' ? 'AKTIF' : 'KOSONG'}
                   </span>
                 </div>
               </div>
             </div>
             
-            <div className="text-center md:text-right bg-white/5 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10">
-              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-white/40 mb-2">Akumulasi Tunggakan</p>
-              <div className={`text-4xl font-black tracking-tighter ${arrears.length === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {arrears.length === 0 ? 'TERVALIDASI LUNAS' : `${arrears.length} Periode Bulan`}
+            <div className="text-center md:text-right bg-white p-6 rounded-2xl border border-slate-200 shadow-sm min-w-[240px]">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Status Tunggakan</p>
+              <div className={`text-2xl font-bold tracking-tight ${arrears.length === 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {arrears.length === 0 ? 'TERVALIDASI LUNAS' : `${arrears.length} Bulan Terhutang`}
               </div>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleSavePayment} className="space-y-12">
-          {/* Arrears Selection */}
-          {arrears.length > 0 && (
-            <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-full h-3 bg-rose-600/10"></div>
-              <div className="flex items-center gap-6 mb-10">
-                <div className="p-5 bg-rose-50 text-rose-600 rounded-[2rem] shadow-xl shadow-rose-600/5 border border-rose-100 rotate-6 group-hover:rotate-0 transition-transform duration-500">
-                  <History size={24} strokeWidth={2.5} />
+        <form onSubmit={handleSavePayment} className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+          {/* Left Column: Month Selection */}
+          <div className="xl:col-span-7 space-y-8">
+            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-slate-900 text-white rounded-xl">
+                    <Calendar size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wider">Pilih Periode</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Pilih bulan yang akan dibayar</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-800 uppercase tracking-widest">Penentuan Periode</h3>
-                  <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Pilih bulan yang ingin diselesaikan pembayarannya</p>
-                </div>
+                {targetMonths.length > 0 && (
+                  <button 
+                    type="button"
+                    onClick={() => setTargetMonths([])}
+                    className="text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100 transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
               </div>
               
-              <div className="flex flex-wrap gap-4">
-                {arrears.map((month) => (
-                  <button
-                    key={month}
-                    type="button"
-                    onClick={() => setTargetMonth(month)}
-                    className={`px-8 py-5 rounded-[1.5rem] text-[12px] font-black uppercase tracking-[0.1em] transition-all ${
-                      targetMonth === month
-                        ? 'bg-rose-600 text-white shadow-2xl shadow-rose-600/30 scale-105'
-                        : 'bg-slate-50 text-slate-400 border border-slate-100 hover:border-rose-300 hover:bg-white'
-                    }`}
-                  >
-                    {month}
-                  </button>
-                ))}
-                <div className="w-full mt-6 pt-8 border-t border-slate-50 flex flex-col sm:flex-row items-center gap-6">
-                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-6 py-2 rounded-full">Opsi Periode Lain:</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {arrears.map((month) => {
+                  const isSelected = targetMonths.includes(month);
+                  return (
+                    <button
+                      key={month}
+                      type="button"
+                      onClick={() => toggleMonth(month)}
+                      className={`relative px-4 py-4 rounded-xl text-[12px] font-bold uppercase tracking-wider transition-all duration-200 flex flex-col items-center justify-center gap-1 border ${
+                        isSelected
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-black/10 scale-[1.02] z-10'
+                          : 'bg-slate-50 text-slate-400 border-slate-200 hover:border-slate-400 hover:bg-white hover:text-slate-600'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white rounded-full p-1 shadow-md">
+                          <CheckCircle size={12} />
+                        </div>
+                      )}
+                      <span>{month}</span>
+                      <span className={`text-[9px] opacity-60 font-medium ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
+                        Rp {unitFee.toLocaleString()}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {arrears.length === 0 && (
+                <div className="py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                   <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                      <ShieldCheck size={24} />
+                   </div>
+                   <h4 className="text-sm font-bold text-slate-800 uppercase tracking-widest mb-1">TIDAK ADA TUNGGAKAN</h4>
+                   <p className="text-[11px] text-slate-400 max-w-xs mx-auto">Semua iuran telah terbayar hingga periode saat ini.</p>
+                </div>
+              )}
+
+              <div className="mt-8 pt-8 border-t border-slate-100">
+                <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Input Manual Periode:</p>
                   <select 
-                    className="flex-1 sm:flex-none w-full sm:w-64 bg-slate-100 p-5 rounded-[1.25rem] text-[13px] font-black text-slate-600 outline-none hover:bg-slate-200 transition-all cursor-pointer border border-transparent focus:border-indigo-400"
-                    value={targetMonth}
-                    onChange={e => setTargetMonth(e.target.value)}
+                    className="flex-1 bg-white p-3 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                    value={targetMonths[0] || ""}
+                    onChange={e => {
+                      if (e.target.value) setTargetMonths([e.target.value]);
+                    }}
                   >
-                    {generateMonthOptions(12, 36).map((m: string) => (
+                    <option value="" disabled>Pilih Bulan Spesifik...</option>
+                    {generateMonthOptions(12, 60).map((m: string) => (
                       <option key={m} value={m}>{m}</option>
                     ))}
                   </select>
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Payment Details */}
-          <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-full h-3 bg-emerald-600/10"></div>
-            <div className="flex items-center gap-6 mb-12">
-               <div className="p-5 bg-emerald-50 text-emerald-600 rounded-[2rem] shadow-xl shadow-emerald-600/5 border border-emerald-100 -rotate-6 group-hover:rotate-0 transition-transform duration-500">
-                 <DollarSign size={24} strokeWidth={2.5} />
-               </div>
-               <div>
-                 <h3 className="text-xl font-black text-slate-800 uppercase tracking-widest">Detail Transaksi</h3>
-                 <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Lengkapi rincian nominal dan data pendukung</p>
-               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-4">
-                <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Instrumen Iuran <span className="text-rose-500">*</span></label>
-                <select 
-                  required
-                  className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[14px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all outline-none" 
-                  value={payType} 
-                  onChange={e => setPayType(e.target.value as any)}
-                >
-                  <option value="Both">Iuran Sampah & Air (Sepaket)</option>
-                  <option value="Sampah">Iuran Sampah Saja</option>
-                  <option value="Air">Iuran Air Saja</option>
-                </select>
-              </div>
-              <FormField 
-                label="Nominal Pembayaran (Rp)" 
-                type="number" 
-                required
-                placeholder="Masukkan jumlah Rupiah"
-                value={payAmount} 
-                onChange={setPayAmount} 
-              />
-              <div className="space-y-4">
-                <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Waktu Transaksi <span className="text-rose-500">*</span></label>
-                <div className="flex gap-4">
-                  <input 
-                    type="date"
-                    required
-                    className="flex-1 p-6 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[14px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all outline-none" 
-                    value={payDate}
-                    onChange={e => setPayDate(e.target.value)}
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setPayDate(new Date().toISOString().split('T')[0])}
-                    className="px-8 py-5 bg-slate-100 text-slate-500 rounded-[1.25rem] hover:bg-slate-950 hover:text-white font-black text-[11px] uppercase tracking-widest transition-all shadow-sm"
-                  >
-                    Hari Ini
-                  </button>
-                </div>
-              </div>
-              <FormField 
-                label="Nama Penyetor" 
-                placeholder={`Otomatis: ${payHouse.headOfFamily}`}
-                value={payerName} 
-                onChange={setPayerName} 
-              />
-              <div className="md:col-span-2">
-                <FormField 
-                  label="Memorandum / Catatan" 
-                  placeholder="Contoh: Pembayaran dimajukan, titipan melalui kurir, dll..."
-                  multiline
-                  value={payNotes} 
-                  onChange={setPayNotes} 
-                />
-              </div>
-            </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row gap-6">
-            <button 
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-6 bg-slate-100 text-slate-500 rounded-[2.5rem] font-black text-[13px] uppercase tracking-widest hover:bg-slate-200 transition-all"
-            >
-              Batalkan
-            </button>
-            <button 
-              type="submit"
-              className="flex-[2] py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black text-[14px] uppercase tracking-[0.2em] hover:bg-slate-950 transition-all shadow-2xl shadow-indigo-600/40 active:scale-95 flex items-center justify-center gap-4"
-            >
-               <CheckCircle size={24} /> Konfirmasi Pembayaran
-            </button>
+          {/* Right Column: Bill Summary & Details */}
+          <div className="xl:col-span-5 space-y-8">
+            <div className="bg-slate-900 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden border border-white/5">
+              <div className="flex items-center gap-4 mb-8 pb-8 border-b border-white/10">
+                <div className="p-3 bg-indigo-600 rounded-xl">
+                  <FileText size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold uppercase tracking-wider">Ringkasan Tagihan</h3>
+                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Iuran Bulanan RT 02</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-white/40 font-bold uppercase tracking-widest text-[9px]">Jenis Iuran</span>
+                  <select 
+                    required
+                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[11px] font-bold text-white outline-none focus:border-indigo-400 transition-all"
+                    value={payType} 
+                    onChange={e => {
+                      const newType = e.target.value as any;
+                      setPayType(newType);
+                      const nFee = newType === 'Air' ? airFee : newType === 'Sampah' ? sampahFee : (airFee + sampahFee);
+                      setPayAmount((targetMonths.length * nFee).toString());
+                    }}
+                  >
+                    <option value="Both" className="bg-slate-900">Paket (Air & Sampah)</option>
+                    <option value="Air" className="bg-slate-900">Hanya Air</option>
+                    <option value="Sampah" className="bg-slate-900">Hanya Sampah</option>
+                  </select>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-white/40 font-bold uppercase tracking-widest text-[9px]">Jumlah Bulan</span>
+                  <span className="font-mono font-bold text-indigo-400">{targetMonths.length} Bulan</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-white/40 font-bold uppercase tracking-widest text-[9px]">Tarif Satuan</span>
+                  <span className="font-bold text-white">Rp {unitFee.toLocaleString()}</span>
+                </div>
+                <div className="pt-6 border-t border-white/10">
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Total Sesuai Pilihan</p>
+                    <div className="flex items-center gap-2">
+                       <span className="text-xl font-bold text-white/50">Rp</span>
+                       <input 
+                         type="number"
+                         className="bg-transparent text-4xl font-bold text-white w-full border-b border-indigo-500/30 focus:border-indigo-500 outline-none transition-all tracking-tight"
+                         value={payAmount}
+                         onChange={e => setPayAmount(e.target.value)}
+                       />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-6 border-t border-white/10">
+                 <div className="space-y-2">
+                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest">Nama Penyetor</label>
+                    <input 
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm font-bold outline-none focus:border-indigo-400 transition-all placeholder:text-white/10"
+                      placeholder={`Default: ${payHouse.headOfFamily}`}
+                      value={payerName}
+                      onChange={e => setPayerName(e.target.value)}
+                    />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest">Waktu Pembayaran</label>
+                    <input 
+                      type="date"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm font-bold outline-none focus:border-indigo-400 transition-all font-mono"
+                      value={payDate}
+                      onChange={e => setPayDate(e.target.value)}
+                    />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest">Catatan Tambahan</label>
+                    <textarea 
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm font-medium outline-none focus:border-indigo-400 transition-all placeholder:text-white/10 h-20 resize-none"
+                      placeholder="Tulis catatan jika ada..."
+                      value={payNotes}
+                      onChange={e => setPayNotes(e.target.value)}
+                    />
+                 </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button 
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold text-[12px] uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95"
+              >
+                Batal
+              </button>
+              <button 
+                type="submit"
+                disabled={targetMonths.length === 0}
+                className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                 <CheckCircle size={20} /> Konfirmasi Bayar
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -1058,58 +1174,56 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`Edit Catatan Iuran`} maxWidth="max-w-5xl">
-      <div className="space-y-10 py-6">
-        {/* Payment Headline */}
-        <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 p-12 rounded-[4rem] text-white relative overflow-hidden shadow-2xl group">
-           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2"></div>
-           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
-              <div className="flex items-center gap-10">
-                 <div className="w-28 h-28 bg-white/10 backdrop-blur-2xl rounded-[2rem] flex items-center justify-center text-4xl border border-white/20 font-black font-mono shadow-2xl group-hover:scale-110 transition-transform duration-700">
+      <div className="space-y-8 py-6">
+        {/* Payment Headline - Modern & Clean */}
+        <div className="bg-slate-900 p-8 rounded-3xl text-white relative overflow-hidden group shadow-xl">
+           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="flex items-center gap-6">
+                 <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl border border-white/20 font-bold font-mono">
                     {editingPayment.block}-{editingPayment.number}
                  </div>
-                 <div className="space-y-3">
-                    <p className="text-[12px] font-black text-indigo-400 uppercase tracking-[0.4em]">Koreksi Transaksi</p>
-                    <h3 className="text-4xl font-black tracking-tighter italic">{editingPayment.headOfFamily}</h3>
-                    <div className="flex items-center gap-4 mt-2">
-                       <span className="px-6 py-2 bg-indigo-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-600/20">{editingPayment.month}</span>
-                       <span className="text-[11px] text-white/30 font-black uppercase tracking-widest border border-white/5 px-4 py-2 rounded-xl backdrop-blur-md">LOG ID: #{editingPayment.id?.slice(-8).toUpperCase()}</span>
+                 <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Koreksi Transaksi</p>
+                    <h3 className="text-2xl font-bold tracking-tight">{editingPayment.headOfFamily}</h3>
+                    <div className="flex items-center gap-3 mt-2">
+                       <span className="px-3 py-1 bg-indigo-600 text-white rounded-lg text-[9px] font-bold uppercase tracking-widest">{editingPayment.month}</span>
+                       <span className="text-[9px] text-white/30 font-bold uppercase tracking-widest border border-white/5 px-3 py-1 rounded-lg">ID: {editingPayment.id?.slice(-8).toUpperCase()}</span>
                     </div>
                  </div>
               </div>
-              <div className="flex flex-col items-center md:items-end bg-white/5 backdrop-blur-md p-8 rounded-[3rem] border border-white/10">
-                 <p className="text-[12px] font-black text-white/20 uppercase tracking-[0.4em] mb-3">Nominal Tercatat</p>
-                 <div className="text-5xl font-black tracking-tighter text-indigo-100">
+              <div className="flex flex-col items-center md:items-end bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                 <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Nominal Terdaftar</p>
+                 <div className="text-3xl font-bold tracking-tight text-white">
                     Rp {parseInt(editingPayment.amount).toLocaleString('id-ID')}
                  </div>
               </div>
            </div>
         </div>
 
-        <form onSubmit={handleUpdatePayment} className="space-y-12">
-          <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-full h-3 bg-indigo-600/10"></div>
-            <div className="flex items-center gap-6 mb-12">
-              <div className="p-5 bg-indigo-50 text-indigo-600 rounded-[2rem] border border-indigo-100 shadow-xl shadow-indigo-600/5 rotate-6 group-hover:rotate-0 transition-transform duration-500">
-                <Edit2 size={28} strokeWidth={2.5} />
+        <form onSubmit={handleUpdatePayment} className="space-y-8">
+          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
+            <div className="flex items-center gap-4 mb-10">
+              <div className="p-3 bg-slate-100 text-slate-900 rounded-xl">
+                <Edit2 size={20} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-slate-800 uppercase tracking-widest">Parameter Pembaruan</h3>
-                <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">Modifikasi detail iuran yang telah diverifikasi</p>
+                <h3 className="text-lg font-bold text-slate-800 uppercase tracking-wider">Detail Perubahan</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Sesuaikan parameter transaksi yang lama</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-4">
-                <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Kategori Iuran <span className="text-rose-500">*</span></label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-[10px] font-bold mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran <span className="text-rose-500">*</span></label>
                 <select 
                   required
-                  className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[2rem] text-[14px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none"
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
                   value={payType}
                   onChange={e => setPayType(e.target.value as any)}
                 >
-                  <option value="Both">Iuran Sampah & Air (Paket)</option>
-                  <option value="Sampah">Iuran Sampah Saja</option>
-                  <option value="Air">Iuran Air Saja</option>
+                  <option value="Both">Sepaket (Air & Sampah)</option>
+                  <option value="Sampah">Hanya Sampah</option>
+                  <option value="Air">Hanya Air</option>
                 </select>
               </div>
               
@@ -1121,20 +1235,20 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
                 onChange={setPayAmount} 
               />
 
-              <div className="space-y-4">
-                <label className="block text-[11px] font-black mb-1 text-slate-400 uppercase tracking-widest">Tanggal Perubahan <span className="text-rose-500">*</span></label>
-                <div className="flex gap-4">
+              <div>
+                <label className="block text-[10px] font-bold mb-2 text-slate-400 uppercase tracking-widest">Tanggal Perkoreksian <span className="text-rose-500">*</span></label>
+                <div className="flex gap-2">
                   <input 
                     type="date"
                     required
-                    className="flex-1 p-6 bg-slate-50 border border-slate-100 rounded-[2rem] text-[14px] font-black text-slate-700 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none"
+                    className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
                     value={payDate}
                     onChange={e => setPayDate(e.target.value)}
                   />
                   <button 
                     type="button"
                     onClick={() => setPayDate(new Date().toISOString().split('T')[0])}
-                    className="px-10 py-5 bg-slate-950 text-white rounded-[1.5rem] hover:bg-indigo-600 font-black text-[12px] uppercase tracking-widest transition-all shadow-xl shadow-black/10"
+                    className="px-4 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-bold text-[9px] uppercase tracking-widest transition-all shadow-sm"
                   >
                     Hari Ini
                   </button>
@@ -1142,7 +1256,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
               </div>
 
               <FormField 
-                label="Entitas Penyetor" 
+                label="Penyetor" 
                 placeholder={`Default: ${editingPayment.headOfFamily}`}
                 value={payerName} 
                 onChange={setPayerName} 
@@ -1150,7 +1264,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 
               <div className="md:col-span-2">
                 <FormField 
-                  label="Log Perubahan / Catatan" 
+                  label="Log Perubahan" 
                   placeholder="Alasan perubahan atau catatan tambahan..."
                   multiline
                   value={payNotes} 
@@ -1160,19 +1274,19 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-6">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button 
               type="button"
               onClick={onClose}
-              className="flex-1 py-6 bg-slate-100 text-slate-500 rounded-[2.5rem] font-black text-[13px] uppercase tracking-widest hover:bg-slate-200 transition-all"
+              className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold text-[12px] uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95"
             >
-              Batalkan
+              Batal
             </button>
             <button 
               type="submit" 
-              className="flex-[2] py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black text-[13px] uppercase tracking-[0.3em] hover:bg-slate-950 transition-all shadow-2xl shadow-indigo-600/40 active:scale-95 flex items-center justify-center gap-5"
+              className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
             >
-              <CheckCircle size={24} /> Simpan Perubahan Data
+              <CheckCircle size={20} /> Simpan Perubahan
             </button>
           </div>
         </form>

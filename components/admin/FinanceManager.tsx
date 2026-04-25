@@ -191,7 +191,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
               value={selectedMonth} 
               onChange={e => setSelectedMonth(e.target.value)}
             >
-              {generateMonthOptions(0, 12).map((m: string) => (
+              {generateMonthOptions(0, 60).map((m: string) => (
                 <option key={m} value={m}>{m}</option>
               ))}
             </select>

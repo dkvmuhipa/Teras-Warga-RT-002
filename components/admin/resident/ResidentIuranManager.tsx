@@ -19,6 +19,7 @@ interface ResidentIuranManagerProps {
   setPayNotes: (notes: string) => void;
   setPayerName: (name: string) => void;
   setIsEditPaymentModalOpen: (open: boolean) => void;
+  openPayModal: (house: House) => void;
   onSendWhatsApp?: (house: House, message?: string) => void;
 }
 
@@ -35,6 +36,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
   setPayNotes,
   setPayerName,
   setIsEditPaymentModalOpen,
+  openPayModal,
   onSendWhatsApp,
 }) => {
   const [filterType, setFilterType] = React.useState<'All' | 'Air' | 'Sampah'>('All');
@@ -373,36 +375,52 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
               return a.house.number.localeCompare(b.house.number, undefined, { numeric: true });
             })
             .map(({ house, arrears }) => (
-              <div key={house.id} className="p-5 bg-slate-50 border border-slate-100 rounded-3xl group hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-sm font-black text-slate-800">{house.headOfFamily}</p>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blok {house.block}-{house.number}</p>
+              <div key={house.id} className="p-5 bg-slate-50 border border-slate-100 rounded-3xl group hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-sm font-black text-slate-800">{house.headOfFamily}</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blok {house.block}-{house.number}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="px-2 py-1 bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg uppercase tracking-widest">
+                        {arrears.length} Bulan
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <span className="px-2 py-1 bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg uppercase tracking-widest">
-                      {arrears.length} Bulan
-                    </span>
-                    {onSendWhatsApp && (
-                      <button 
-                        onClick={() => {
-                          const msg = `Halo Bapak/Ibu ${house.headOfFamily} (Blok ${house.block}-${house.number}),\n\nMohon maaf mengganggu, kami ingin menginfokan bahwa terdapat tunggakan iuran ${filterType === 'All' ? 'Air & Sampah' : 'Iuran ' + filterType} sebanyak ${arrears.length} bulan (${arrears.join(', ')}).\n\nMohon segera melakukan pembayaran. Terima kasih.`;
-                          onSendWhatsApp(house, msg);
-                        }}
-                        className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all"
-                        title="Kirim Pengingat WA"
-                      >
-                        <Mail size={14} />
-                      </button>
+                  <div className="flex flex-wrap gap-1.5 mb-6">
+                    {arrears.slice(0, 3).map(m => (
+                      <span key={m} className="px-2 py-1 bg-white text-rose-500 rounded-lg text-[9px] font-bold border border-rose-100">
+                        {m}
+                      </span>
+                    ))}
+                    {arrears.length > 3 && (
+                       <span className="px-2 py-1 bg-rose-50 text-rose-400 rounded-lg text-[9px] font-bold border border-rose-50 italic">
+                        + {arrears.length - 3} lainnya
+                      </span>
                     )}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {arrears.map(m => (
-                    <span key={m} className="px-2 py-1 bg-white text-rose-500 rounded-lg text-[9px] font-bold border border-rose-100">
-                      {m}
-                    </span>
-                  ))}
+
+                <div className="flex gap-2">
+                   <button 
+                    onClick={() => openPayModal(house)}
+                    className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
+                  >
+                    <CreditCard size={12} /> Bayar Sekarang
+                  </button>
+                  {onSendWhatsApp && (
+                    <button 
+                      onClick={() => {
+                        const msg = `Halo Bapak/Ibu ${house.headOfFamily} (Blok ${house.block}-${house.number}),\n\nMohon maaf mengganggu, kami ingin menginfokan bahwa terdapat tunggakan iuran ${filterType === 'All' ? 'Air & Sampah' : 'Iuran ' + filterType} sebanyak ${arrears.length} bulan (${arrears.join(', ')}).\n\nMohon segera melakukan pembayaran. Terima kasih.`;
+                        onSendWhatsApp(house, msg);
+                      }}
+                      className="px-4 py-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all"
+                      title="Kirim Pengingat WA"
+                    >
+                      <Mail size={12} />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { 
   X, Phone, MapPin, FileText, CreditCard, DollarSign, 
-  LayoutList, Droplets, Trash2, Users, Activity, Shield, User 
+  LayoutList, Droplets, Trash2, Users, Activity, Shield, User,
+  ShieldCheck, Calendar, AlertCircle
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -105,7 +106,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="mb-2">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white">
-                        Kepala Keluarga
+                        Warga Terverifikasi
                       </span>
                       <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm ${isFullyPaid ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/20 border-rose-500/30 text-rose-300'}`}>
                         {isFullyPaid ? 'LUNAS IURAN' : 'MENUNGGAK'}
@@ -114,7 +115,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <h2 className="text-4xl font-black text-white tracking-tight leading-tight">{selectedResident.headOfFamily}</h2>
                     <div className="flex items-center gap-2 mt-4">
                        <MapPin size={14} className="text-white/40" />
-                       <span className="text-[11px] font-black text-white/60 uppercase tracking-widest">Blok {selectedResident.block} - #{selectedResident.number}</span>
+                       <span className="text-[11px] font-black text-white/60 uppercase tracking-widest">Domisili: Blok {selectedResident.block} - #{selectedResident.number}</span>
                     </div>
                   </div>
                </div>
@@ -122,114 +123,158 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
           </div>
 
           {/* Main Body Content */}
-          <div className="p-8 space-y-10 flex-1">
+          <div className="p-8 space-y-12 flex-1">
+            {/* Professional Resident ID Card Display */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+              <div className="relative bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
+                <div className="bg-slate-900 px-8 py-4 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Shield size={14} className="text-indigo-400" />
+                    <span className="text-[9px] font-black text-white uppercase tracking-[0.3em]">Smart Resident Card</span>
+                  </div>
+                  <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">ID: {selectedResident.id.substring(0, 8).toUpperCase()}</span>
+                </div>
+                <div className="p-8 flex items-center gap-8">
+                  <div className="w-20 h-20 bg-slate-50 rounded-2xl border-2 border-slate-100 flex items-center justify-center text-4xl shadow-inner">
+                    🇮🇩
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status Kependudukan</p>
+                    <p className="text-lg font-black text-slate-900 tracking-tight">{selectedResident.residenceType || 'Pemilik Tetap'}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                       {selectedResident.isVerified ? (
+                        <>
+                          <ShieldCheck size={14} className="text-emerald-500" />
+                          <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Data Terverifikasi RT-02</span>
+                        </>
+                       ) : (
+                        <>
+                          <AlertCircle size={14} className="text-amber-500" />
+                          <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Belum Terverifikasi</span>
+                        </>
+                       )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Quick Actions Tray */}
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => openPayModal(selectedResident)}
                 className="p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all text-center group"
               >
-                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-sm">
                   <DollarSign size={24} />
                 </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Rekam</p>
-                <p className="text-xs font-black text-slate-800 uppercase tracking-widest">Pembayaran</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Entri</p>
+                <p className="text-xs font-black text-slate-800 uppercase tracking-widest">Iuran Bulanan</p>
               </button>
               <button 
                 onClick={() => { onClose(); setSelectedHouseForBills(selectedResident); }}
                 className="p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all text-center group"
               >
-                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-sm">
                   <LayoutList size={24} />
                 </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cek</p>
-                <p className="text-xs font-black text-slate-800 uppercase tracking-widest">Riwayat Tagihan</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pantau</p>
+                <p className="text-xs font-black text-slate-800 uppercase tracking-widest">Riwayat Bayar</p>
               </button>
             </div>
 
             {/* Detailed Info Groups */}
-            <div className="space-y-12">
+            <div className="space-y-12 pb-10">
               {/* Group: Dasar & Kontak */}
-              <section className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-                <div className="flex items-center gap-3 mb-8">
+              <section className="bg-white p-10 rounded-[3.5rem] border border-slate-200/60 shadow-sm relative overflow-hidden group/sec">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-full -mr-12 -mt-12 group-hover/sec:scale-110 transition-transform"></div>
+                <div className="flex items-center gap-3 mb-10 relative z-10">
                   <div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div>
-                  <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Data Dasar & Kontak</h4>
+                  <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Data Primer & Kontak</h4>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
                   <DetailItem icon={<Phone size={16} />} label="Nomor WhatsApp" value={selectedResident.phone || 'N/A'} isUrgent={!!selectedResident.phone} />
-                  <DetailItem icon={<MapPin size={16} />} label="Domisili" value={`Blok ${selectedResident.block} Nomor ${selectedResident.number}`} />
-                  <DetailItem icon={<FileText size={16} />} label="NIK (KTP)" value={selectedResident.nik || '-'} isMain />
-                  <DetailItem icon={<Users size={16} />} label="Nomor Kartu Keluarga" value={selectedResident.kkNumber || '-'} isMain />
-                  <DetailItem icon={<User size={16} />} label="Tipe Hunian" value={selectedResident.residenceType || 'Pemilik'} />
-                  <DetailItem icon={<Activity size={16} />} label="Status BPJS" value={selectedResident.bpjsStatus || 'N/A'} />
+                  <DetailItem icon={<MapPin size={16} />} label="Unit Hunian" value={`Blok ${selectedResident.block} - Nomor ${selectedResident.number}`} />
+                  <DetailItem icon={<FileText size={16} />} label="Nomor NIK" value={selectedResident.nik || '-'} isMain />
+                  <DetailItem icon={<Users size={16} />} label="Nomor Keluarga" value={selectedResident.kkNumber || '-'} isMain />
+                  <DetailItem icon={<Calendar size={16} />} label="Mulai Menempati" value={selectedResident.joiningDate || '-'} />
+                  <DetailItem icon={<Activity size={16} />} label="Kepemilikan" value={selectedResident.residenceType || 'Pemilik'} />
                 </div>
               </section>
 
-              {/* Group: Demografi & Keluarga */}
-              <section className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-                <div className="flex items-center gap-3 mb-8">
+              {/* Group: Demografi */}
+              <section className="bg-white p-10 rounded-[3.5rem] border border-slate-200/60 shadow-sm">
+                <div className="flex items-center gap-3 mb-10">
                   <div className="w-1.5 h-6 bg-emerald-600 rounded-full"></div>
-                  <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Demografi & Keluarga</h4>
+                  <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Profil Demografis</h4>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
                   <DetailItem label="Tempat, Tgl Lahir" value={`${selectedResident.birthPlace || '-'}, ${selectedResident.birthDate ? new Date(selectedResident.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}`} />
-                  <DetailItem label="Agama" value={selectedResident.religion || '-'} />
                   <DetailItem label="Pekerjaan" value={selectedResident.jobCategory || '-'} />
-                  <DetailItem label="Pendidikan" value={selectedResident.education || '-'} />
+                  <DetailItem label="Pendidikan Terakhir" value={selectedResident.education || '-'} />
                   <DetailItem label="Status Ekonomi" value={selectedResident.economicStatus || 'Sejahtera'} />
-                  <DetailItem label="Jumlah Anggota" value={`${selectedResident.occupants || 0} Orang`} />
+                  <DetailItem label="Asuransi Kesehatan" value={selectedResident.bpjsStatus || 'N/A'} />
+                  <DetailItem label="Agama" value={selectedResident.religion || '-'} />
                 </div>
 
-                {/* Family Members Table-like List */}
-                <div className="space-y-4">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 mb-4">Daftar Anggota Keluarga ({selectedResident.familyMembers?.length || 0})</p>
+                {/* Family Members Section - Enhanced */}
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center px-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anggota Keluarga Terdata</p>
+                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black">{selectedResident.familyMembers?.length || 0} Jiwa</span>
+                  </div>
+                  
                   {selectedResident.familyMembers && selectedResident.familyMembers.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3">
                       {selectedResident.familyMembers.map((member, idx) => (
-                        <div key={member.id || idx} className="flex items-center justify-between p-5 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all group">
+                        <div key={member.id || idx} className="flex items-center justify-between p-5 bg-slate-50/50 rounded-2xl border border-slate-200/40 hover:bg-white hover:shadow-xl hover:shadow-slate-200/40 transition-all group/member">
                           <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 font-black shadow-sm group-hover:scale-110 transition-transform">
+                             <div className="w-11 h-11 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-indigo-600 text-sm font-black shadow-sm group-hover/member:border-indigo-200 transition-colors">
                                {member.name.charAt(0)}
                              </div>
                              <div>
                                 <p className="text-sm font-black text-slate-800">{member.name}</p>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{member.relation} • {member.nik || 'NIK N/A'}</p>
+                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{member.relation} • {member.job || 'Tidak Bekerja'} • {member.nik || 'NIK N/A'}</p>
                              </div>
                           </div>
-                          <div className="text-right">
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{member.gender}</p>
+                          <div className="flex flex-col items-end gap-1">
+                             <span className="px-2.5 py-1 bg-white rounded-lg border border-slate-100 text-[9px] font-black text-slate-500 uppercase">{member.gender === 'Laki-laki' ? 'PRIA' : 'WANITA'}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="bg-slate-50/50 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
-                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest italic">Tidak ada data anggota keluarga</p>
+                    <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center">
+                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">Belum ada data anggota keluarga</p>
                     </div>
                   )}
                 </div>
               </section>
 
-              {/* Group: Bansos & Kerentanan (Only if exists) */}
+              {/* Vulnerability Section */}
               {(selectedResident.isPKH || selectedResident.isBLT || selectedResident.isBPNT || selectedResident.isBansosLain || selectedResident.isDisability || selectedResident.isOrphan) && (
-                <section className="bg-rose-50/50 p-8 rounded-[3rem] border border-rose-100 shadow-sm">
-                  <div className="flex items-center gap-3 mb-8">
+                <section className="bg-rose-50/40 p-10 rounded-[3.5rem] border border-rose-100 shadow-sm overflow-hidden relative">
+                  <div className="absolute top-0 right-0 p-8 opacity-10">
+                    <Shield size={64} className="text-rose-900" />
+                  </div>
+                  <div className="flex items-center gap-3 mb-8 relative z-10">
                     <div className="w-1.5 h-6 bg-rose-600 rounded-full"></div>
-                    <h4 className="text-[11px] font-black text-rose-950 uppercase tracking-[0.2em]">Status Khusus & Kerentanan</h4>
+                    <h4 className="text-[11px] font-black text-rose-950 uppercase tracking-[0.2em]">Prioritas & Afiliasi</h4>
                   </div>
                   
-                  <div className="flex flex-wrap gap-3">
-                    {selectedResident.isPKH && <BansosBadge label="PKH" />}
-                    {selectedResident.isBLT && <BansosBadge label="BLT" />}
-                    {selectedResident.isBPNT && <BansosBadge label="BPNT" />}
+                  <div className="flex flex-wrap gap-2.5 relative z-10">
+                    {selectedResident.isPKH && <BansosBadge label="Penerima PKH" />}
+                    {selectedResident.isBLT && <BansosBadge label="Subsidi BLT" />}
+                    {selectedResident.isBPNT && <BansosBadge label="Bantuan BPNT" />}
                     {selectedResident.isBansosLain && <BansosBadge label={selectedResident.bansosLainName || 'BANSOS'} />}
-                    {selectedResident.isDisability && <BansosBadge label="DISABILITAS" color="rose" />}
-                    {selectedResident.isOrphan && <BansosBadge label="YATIM/PIATU" color="rose" />}
+                    {selectedResident.isDisability && <BansosBadge label="PENYANDANG DISABILITAS" color="rose" />}
+                    {selectedResident.isOrphan && <BansosBadge label="YATIM / PIATU" color="rose" />}
                   </div>
 
-                  <div className="mt-8 grid grid-cols-2 gap-4">
+                  <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
                      {(selectedResident.pregnantCount || 0) > 0 && <VulnerabilityStat count={selectedResident.pregnantCount || 0} label="Ibu Hamil" />}
                      {(selectedResident.elderlyCount || 0) > 0 && <VulnerabilityStat count={selectedResident.elderlyCount || 0} label="Lansia" />}
                      {(selectedResident.babyCount || 0) > 0 && <VulnerabilityStat count={selectedResident.babyCount || 0} label="Bayi" />}
@@ -243,9 +288,9 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
             <div className="pt-10 border-t border-slate-100 flex flex-col gap-4">
               <button 
                 onClick={() => handleDelete(selectedResident.id)}
-                className="w-full py-5 bg-rose-50 text-rose-600 border border-rose-100 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-3"
+                className="w-full py-5 bg-rose-50 text-rose-600 border border-rose-100 rounded-[2.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-3"
               >
-                <Trash2 size={18} /> Hapus Seluruh Data Warga
+                <Trash2 size={16} /> Arsipkan / Hapus Data Warga
               </button>
             </div>
           </div>

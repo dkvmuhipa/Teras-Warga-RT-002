@@ -68,6 +68,8 @@ export interface House {
   // New Fields for Professional Data Management
   isVerified?: boolean;
   joiningDate?: string; // ISO String or YYYY-MM
+  createdAt?: string; // NEW: Track when record was created for arrears fallback
+  updatedAt?: string; // NEW: Track last update
   ktpUrl?: string;
   kkUrl?: string;
   role?: Role; // RBAC

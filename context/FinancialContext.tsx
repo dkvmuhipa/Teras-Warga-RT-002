@@ -80,20 +80,26 @@ export const FinancialProvider: React.FC<{
 
   const getArrearsForHouse = (house: House, type?: 'Air' | 'Sampah') => {
     const now = new Date();
-    
     const arrears: string[] = [];
     
-    // Check months in current year (tahun berjalan)
-    const currentMonthIndex = now.getMonth();
-    for (let i = currentMonthIndex; i >= 0; i--) {
+    // Check months for the last 36 months (3 years) or based on joining date
+    const maxLookback = 36;
+    
+    for (let i = 0; i < maxLookback; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthStrId = getIndonesianMonthYear(d);
       
-      // Skip if before joining date (waktu menempati hunian)
-      if (house.joiningDate) {
-        const joinDate = new Date(house.joiningDate);
-        if (d.getFullYear() < joinDate.getFullYear() || (d.getFullYear() === joinDate.getFullYear() && d.getMonth() < joinDate.getMonth())) {
-          continue;
+      // Stop if before joining date or creation date
+      const referenceDate = house.joiningDate || house.createdAt;
+      if (referenceDate) {
+        const joinDate = new Date(referenceDate);
+        const joinYear = joinDate.getFullYear();
+        const joinMonth = joinDate.getMonth();
+        const currentYear = d.getFullYear();
+        const currentMonth = d.getMonth();
+
+        if (currentYear < joinYear || (currentYear === joinYear && currentMonth < joinMonth)) {
+          break;
         }
       }
 
@@ -113,7 +119,8 @@ export const FinancialProvider: React.FC<{
         arrears.push(monthStrId);
       }
     }
-    return arrears;
+    // Return sorted by date (oldest first is better for UX)
+    return arrears.reverse();
   };
 
   const summaries = useMemo(() => {

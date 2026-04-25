@@ -91,7 +91,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
-  const [targetMonth, setTargetMonth] = useState(getIndonesianMonthYear(new Date()));
+  const [targetMonths, setTargetMonths] = useState<string[]>([]);
   const { 
     selectedMonth, 
     setSelectedMonth, 
@@ -510,117 +510,93 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     e.preventDefault();
     if (!payHouse) return;
 
-    const paymentDateObj = new Date(payDate);
-    const currentMonth = targetMonth;
-    
-    // Check for duplicate payment in history for the same month
-    const duplicatePayment = iuranPayments.find(p => 
-      p.houseId === payHouse.id && 
-      isMonthMatch(p.month, currentMonth) &&
-      (
-        p.type === payType || 
-        p.type === 'Both' || 
-        payType === 'Both'
-      )
-    );
-
-    if (duplicatePayment) {
-      toast.error(`Pembayaran iuran ${duplicatePayment.type === 'Both' ? 'Air & Sampah' : duplicatePayment.type} untuk bulan ${currentMonth} sudah tercatat pada tanggal ${new Date(duplicatePayment.date).toLocaleDateString('id-ID')}.`);
-      return;
-    }
-
-    const updates: any = {};
-    const isCurrentMonth = isMonthMatch(getIndonesianMonthYear(new Date()), currentMonth);
-    
-    if (isCurrentMonth) {
-      if (payType === 'Air' || payType === 'Both') updates.paymentStatusAir = PaymentStatus.PAID;
-      if (payType === 'Sampah' || payType === 'Both') updates.paymentStatusSampah = PaymentStatus.PAID;
-      updates.paymentDate = payDate;
-    }
+    const currentMonths = targetMonths;
+    if (currentMonths.length === 0) return;
 
     try {
-      if (Object.keys(updates).length > 0) {
+      const totalAmount = parseInt(payAmount) || 0;
+      const amountPerMonth = Math.floor(totalAmount / currentMonths.length);
+      const isCurrentMonthInSelection = currentMonths.some(m => isMonthMatch(getIndonesianMonthYear(new Date()), m));
+
+      // 1. Update House document if current month is included
+      if (isCurrentMonthInSelection) {
+        const updates: any = {};
+        if (payType === 'Air' || payType === 'Both') updates.paymentStatusAir = PaymentStatus.PAID;
+        if (payType === 'Sampah' || payType === 'Both') updates.paymentStatusSampah = PaymentStatus.PAID;
+        updates.paymentDate = payDate;
         await updateHouseData(payHouse.id, updates);
       }
-      
-      const paymentMonth = currentMonth;
-      const paymentDateIso = paymentDateObj.toISOString();
-      const amount = parseInt(payAmount) || 0;
 
-      // Record iuran payment separately
-      await addIuranPaymentToDb({
-        houseId: payHouse.id,
-        headOfFamily: payHouse.headOfFamily,
-        block: payHouse.block,
-        number: payHouse.number,
-        amount: amount,
-        type: payType,
-        date: paymentDateIso,
-        month: paymentMonth,
-        notes: payNotes,
-        payerName: payerName || payHouse.headOfFamily
-      });
-
-      // SYNC WITH BILLS COLLECTION
-      // Check if a bill already exists for this house and month
-      const existingBill = bills.find(b => b.houseId === payHouse.id && b.month === paymentMonth);
-      
-      const newItems = [];
-      if (payType === 'Air' || payType === 'Both') {
-        newItems.push({
-          id: Math.random().toString(36).substr(2, 9),
-          name: 'Iuran Air',
-          amount: payType === 'Both' ? amount / 2 : amount,
-          manager: 'RT 02',
-          status: 'Paid' as const,
-          paymentDate: paymentDateIso
-        });
-      }
-      if (payType === 'Sampah' || payType === 'Both') {
-        newItems.push({
-          id: Math.random().toString(36).substr(2, 9),
-          name: 'Iuran Sampah',
-          amount: payType === 'Both' ? amount / 2 : amount,
-          manager: 'RT 02',
-          status: 'Paid' as const,
-          paymentDate: paymentDateIso
-        });
-      }
-
-      if (existingBill) {
-        // Update existing bill items
-        const updatedItems = [...existingBill.items];
-        newItems.forEach(newItem => {
-          const existingItemIndex = updatedItems.findIndex(item => item.name === newItem.name);
-          if (existingItemIndex > -1) {
-            updatedItems[existingItemIndex] = { ...updatedItems[existingItemIndex], status: 'Paid', paymentDate: paymentDateIso };
-          } else {
-            updatedItems.push(newItem);
-          }
-        });
-
-        await updateBillInDb(existingBill.id, {
-          items: updatedItems,
-          total: updatedItems.reduce((acc, curr) => acc + (curr.status === 'Paid' ? 0 : curr.amount), 0)
-        });
-      } else {
-        // Create new bill
-        await addBillToDb({
+      // 2. Loop through months and record payments
+      for (const monthStr of currentMonths) {
+        // Record iuran payment
+        await addIuranPaymentToDb({
           houseId: payHouse.id,
-          month: paymentMonth,
-          dueDate: new Date(new Date(payDate).getFullYear(), new Date(payDate).getMonth(), 20).toISOString().split('T')[0],
-          items: newItems,
-          total: 0
+          headOfFamily: payHouse.headOfFamily,
+          block: payHouse.block,
+          number: payHouse.number,
+          amount: amountPerMonth,
+          type: payType,
+          date: new Date(payDate).toISOString(),
+          month: monthStr,
+          notes: payNotes + (currentMonths.length > 1 ? ` (Pembayaran Paket ${currentMonths.length} Bulan)` : ""),
+          payerName: payerName || payHouse.headOfFamily
         });
+
+        // Sync with Bills
+        const existingBill = bills.find(b => b.houseId === payHouse.id && b.month === monthStr);
+        const newItems = [];
+        if (payType === 'Air' || payType === 'Both') {
+          newItems.push({
+            id: Math.random().toString(36).substr(2, 9),
+            name: 'Iuran Air',
+            amount: payType === 'Both' ? amountPerMonth / 2 : amountPerMonth,
+            manager: 'RT 02',
+            status: 'Paid' as const,
+            paymentDate: new Date(payDate).toISOString()
+          });
+        }
+        if (payType === 'Sampah' || payType === 'Both') {
+          newItems.push({
+            id: Math.random().toString(36).substr(2, 9),
+            name: 'Iuran Sampah',
+            amount: payType === 'Both' ? amountPerMonth / 2 : amountPerMonth,
+            manager: 'RT 02',
+            status: 'Paid' as const,
+            paymentDate: new Date(payDate).toISOString()
+          });
+        }
+
+        if (existingBill) {
+          const updatedItems = [...existingBill.items];
+          newItems.forEach(newItem => {
+            const idx = updatedItems.findIndex(item => item.name === newItem.name);
+            if (idx > -1) updatedItems[idx] = { ...updatedItems[idx], status: 'Paid', paymentDate: new Date(payDate).toISOString() };
+            else updatedItems.push(newItem);
+          });
+          await updateBillInDb(existingBill.id, {
+            items: updatedItems,
+            total: updatedItems.reduce((acc, curr) => acc + (curr.status === 'Paid' ? 0 : curr.amount), 0)
+          });
+        } else {
+          await addBillToDb({
+            houseId: payHouse.id,
+            month: monthStr,
+            dueDate: new Date(new Date(payDate).getFullYear(), new Date(payDate).getMonth(), 20).toISOString().split('T')[0],
+            items: newItems,
+            total: 0
+          });
+        }
       }
 
-      toast.success('Status iuran berhasil diperbarui dan dicatat di riwayat tagihan!');
+      toast.success(`Berhasil merekam pembayaran untuk ${currentMonths.length} bulan!`);
       setIsPayModalOpen(false);
       setPayHouse(null);
+      setTargetMonths([]);
       setPayNotes('');
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, "iuranPayments");
-      toast.error('Gagal memperbarui status iuran.');
+      toast.error('Gagal memproses pembayaran massal.');
     }
   };
 
@@ -652,9 +628,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setPayHouse(house);
     const arrears = getArrearsForHouse(house);
     if (arrears.length > 0) {
-      setTargetMonth(arrears[0]);
+      setTargetMonths([arrears[0]]);
     } else {
-      setTargetMonth(getIndonesianMonthYear(new Date()));
+      setTargetMonths([getIndonesianMonthYear(new Date())]);
     }
     setIsPayModalOpen(true);
   };
@@ -738,7 +714,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         ...formData,
         id: houseId,
         location: oldHouse?.location || { x: 0, y: 0 },
-        joiningDate: editingHouseId ? (oldHouse?.joiningDate || new Date().toISOString()) : new Date().toISOString()
+        // Use the joiningDate from formData which can be modified by the user
+        joiningDate: formData.joiningDate || (oldHouse?.joiningDate || new Date().toISOString())
       };
 
       if (editingHouseId) {
@@ -886,6 +863,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     else if (filterStatus === 'occupied') matchesStatus = h.status?.toLowerCase() === 'occupied';
     else if (filterStatus === 'empty') matchesStatus = h.status?.toLowerCase() === 'empty';
     else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business';
+    else if (filterStatus === 'verified') matchesStatus = h.isVerified === true;
+    else if (filterStatus === 'unverified') matchesStatus = !h.isVerified;
     else if (filterStatus === 'arrears') matchesStatus = h.status === 'Occupied' && getArrearsForHouse(h).length > 0;
 
     return matchesSearch && matchesStatus;
@@ -900,6 +879,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const emptyHouses = houses.filter(h => h.status === 'Empty').length;
+  const verifiedCount = houses.filter(h => h.isVerified).length;
 
   // Bulk Actions
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1127,6 +1107,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         totalResidents={totalResidents}
         occupiedHouses={occupiedHouses}
         emptyHouses={emptyHouses}
+        verifiedCount={verifiedCount}
         itemVariants={itemVariants}
       />
       
@@ -1151,6 +1132,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             isOpen={isPayModalOpen}
             onClose={() => {
               setIsPayModalOpen(false);
+              setTargetMonths([]);
               setPayNotes('');
               setPayerName('');
             }}
@@ -1165,8 +1147,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayNotes={setPayNotes}
             payerName={payerName}
             setPayerName={setPayerName}
-            targetMonth={targetMonth}
-            setTargetMonth={setTargetMonth}
+            targetMonths={targetMonths}
+            setTargetMonths={setTargetMonths}
             handleSavePayment={handleSavePayment}
             getIndonesianMonthYear={getIndonesianMonthYear}
           />
@@ -1241,6 +1223,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setPayNotes={setPayNotes}
             setPayerName={setPayerName}
             setIsEditPaymentModalOpen={setIsEditPaymentModalOpen}
+            openPayModal={openPayModal}
             onSendWhatsApp={handleSendWhatsApp}
           />
         ) : viewMode === 'registrations' ? (

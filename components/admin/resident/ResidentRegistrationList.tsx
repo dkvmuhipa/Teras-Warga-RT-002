@@ -129,11 +129,16 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               kkUrl: reg.kkUrl,
                               familyMembers: reg.familyMembers || [],
                               paymentStatusAir: PaymentStatus.PENDING,
-                              paymentStatusSampam: PaymentStatus.PENDING, // Fixed typo from original code if any, but wait, original code had paymentStatusSampah
                               paymentStatusSampah: PaymentStatus.PENDING,
                               isVerified: true,
                               joiningDate: reg.date || new Date().toISOString(),
-                              religion: reg.religion, // Added religion
+                              religion: reg.religion,
+                              kkNumber: reg.kkNumber,
+                              isPKH: reg.isPKH,
+                              isBLT: reg.isBLT,
+                              isBansosLain: reg.isBansosLain,
+                              bansosLainName: reg.bansosLainName,
+                              childCount: reg.childCount,
                             } as any); // Use any to bypass strict type check if needed, but better to match House type
                             
                             // 2. Update registration status

@@ -1006,6 +1006,10 @@ export const addHouse = async (houseData: any) => {
     const cleanData = deepSanitize(houseData);
     if (!cleanData) return;
 
+    const now = new Date().toISOString();
+    if (!cleanData.createdAt) cleanData.createdAt = now;
+    cleanData.updatedAt = now;
+
     if (cleanData.id) {
        await setDoc(doc(db, HOUSES_COL, cleanData.id), cleanData);
     } else {
@@ -1018,8 +1022,10 @@ export const addHouse = async (houseData: any) => {
 
 export const updateHouseData = async (id: string, updates: any) => {
     try {
+      const cleanUpdates = deepSanitize(updates);
+      cleanUpdates.updatedAt = new Date().toISOString();
       const houseRef = doc(db, HOUSES_COL, id);
-      await updateDoc(houseRef, deepSanitize(updates));
+      await updateDoc(houseRef, cleanUpdates);
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `${HOUSES_COL}/${id}`);
     }
