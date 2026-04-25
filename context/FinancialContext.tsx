@@ -87,6 +87,12 @@ export const FinancialProvider: React.FC<{
     
     for (let i = 0; i < maxLookback; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      
+      // Tunggakan dimulai dari awal tahun 2026 saja sesuai permintaan user
+      if (d.getFullYear() < 2026) {
+        break;
+      }
+
       const monthStrId = getIndonesianMonthYear(d);
       
       // Stop if before joining date or creation date

@@ -11,6 +11,7 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   isDanger?: boolean;
+  icon?: React.ReactNode;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ 
@@ -21,13 +22,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   message, 
   confirmLabel = 'Ya', 
   cancelLabel = 'Batal',
-  isDanger = false
+  isDanger = false,
+  icon
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="flex flex-col items-center text-center">
         <div className={`p-4 rounded-full mb-6 ${isDanger ? 'bg-rose-50 text-rose-500' : 'bg-indigo-50 text-indigo-500'}`}>
-          <AlertCircle size={40} />
+          {icon || <AlertCircle size={40} />}
         </div>
         
         <p className="text-slate-600 font-medium mb-8 leading-relaxed">

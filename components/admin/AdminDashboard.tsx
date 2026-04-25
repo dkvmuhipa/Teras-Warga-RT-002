@@ -41,6 +41,7 @@ import { AdminAnalytics } from './AdminAnalytics';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
+import { toast } from 'sonner';
 
 interface AdminDashboardProps {
   role: Role;

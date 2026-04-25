@@ -236,9 +236,17 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     let currentTotal = 0;
     let currentMale = 0;
     let currentFemale = 0;
+    let currentSeasonal = 0;
+    let currentSeasonalMale = 0;
+    let currentSeasonalFemale = 0;
 
     houses.forEach(house => {
       if (house.status === 'Occupied') {
+        const isSeasonal = house.residenceType === 'Kontrak' || house.residenceType === 'Kost';
+        if (isSeasonal) {
+          currentSeasonal += house.occupants || 0;
+        }
+
         currentTotal += house.occupants || 0;
         currentPregnant += house.pregnantCount || 0;
         currentBaby += house.babyCount || 0;
@@ -252,13 +260,25 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         // Count gender from family members if available, otherwise estimate
         if (house.familyMembers && house.familyMembers.length > 0) {
           house.familyMembers.forEach(m => {
-            if (m.gender === 'Laki-laki') currentMale++;
-            else if (m.gender === 'Perempuan') currentFemale++;
+            if (m.gender === 'Laki-laki') {
+              currentMale++;
+              if (isSeasonal) currentSeasonalMale++;
+            }
+            else if (m.gender === 'Perempuan') {
+              currentFemale++;
+              if (isSeasonal) currentSeasonalFemale++;
+            }
           });
         } else {
           // Fallback: assume head of family gender or split
-          currentMale += Math.ceil((house.occupants || 0) / 2);
-          currentFemale += Math.floor((house.occupants || 0) / 2);
+          const m = Math.ceil((house.occupants || 0) / 2);
+          const f = Math.floor((house.occupants || 0) / 2);
+          currentMale += m;
+          currentFemale += f;
+          if (isSeasonal) {
+            currentSeasonalMale += m;
+            currentSeasonalFemale += f;
+          }
         }
       }
     });
@@ -292,6 +312,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       adultCount: currentAdult,
       elderlyCount: currentElderly,
       widowCount: currentWidow,
+      seasonalCount: currentSeasonal,
+      seasonalMaleCount: currentSeasonalMale,
+      seasonalFemaleCount: currentSeasonalFemale,
       initialPopulation: initialPopulation
     }));
     setEditingReportId(null);

@@ -8,7 +8,7 @@
 
 
 
-import { db, auth, storage, isFirebaseConfigured } from "./firebaseConfig";
+import { db, auth, isFirebaseConfigured } from "./firebaseConfig";
 import { 
   collection, 
   addDoc, 
@@ -31,7 +31,6 @@ import {
   signOut, 
   updatePassword
 } from "firebase/auth";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter } from "../types";
 
 export { OperationType, isFirebaseConfigured };
@@ -552,19 +551,24 @@ export const getPlaceholderImage = (keyword: string = 'community', width: number
 };
 
 export const uploadImageToStorage = async (file: File, path: string) => {
-  if (!isFirebaseConfigured || !storage) {
-    console.warn("Firebase Storage is not configured. Using placeholder instead.");
-    return getPlaceholderImage(path.split('/')[0]);
-  }
-  
   try {
-    const storageRef = ref(storage, path);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Upload failed");
+    }
+    
+    const data = await response.json();
+    return data.url;
   } catch (error) {
-    console.error("Storage upload failed:", error);
-    // Instead of throwing, we can return a placeholder to keep the app functional
-    // but we should probably inform the user.
+    console.error("Cloudinary upload failed, using placeholder:", error);
     return getPlaceholderImage(path.split('/')[0]);
   }
 };
@@ -779,13 +783,26 @@ export const markNotificationAsRead = async (id: string) => {
 
 // --- FILE STORAGE ---
 export const uploadFile = async (file: File, path: string): Promise<string> => {
-  if (!isFirebaseConfigured || !storage) {
-    throw new Error("Firebase Storage is not configured");
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Upload failed");
+    }
+    
+    const data = await response.json();
+    return data.url;
+  } catch (error) {
+    console.error("Upload failed:", error);
+    throw error;
   }
-  
-  const fileRef = ref(storage, path);
-  const snapshot = await uploadBytes(fileRef, file);
-  return await getDownloadURL(snapshot.ref);
 };
 
 // --- OFFICIAL LETTERS SERVICES ---

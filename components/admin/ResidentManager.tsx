@@ -74,6 +74,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   role,
   houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, guestReports, settings
 }) => {
+  const confirm = useConfirm();
+  const prompt = usePrompt();
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
@@ -420,37 +422,36 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     }
   };
 
-  const handleBulkVerify = () => {
+  const handleBulkVerify = async () => {
     if (selectedIds.size === 0) return;
-    setConfirmState({
-      isOpen: true,
+    const isConfirmed = await confirm({
       title: 'Verifikasi Massal',
       message: `Apakah Anda yakin ingin memverifikasi ${selectedIds.size} warga terpilih secara sekaligus?`,
       confirmLabel: 'Verifikasi',
-      onConfirm: async () => {
-        try {
-            const updates = Array.from(selectedIds).map(id => ({ id, isVerified: true }));
-            await batchUpdateHouses(updates);
-            await logAction('Verifikasi Massal', `Verifikasi ${selectedIds.size} warga terpilih`);
-            toast.success('Warga terpilih berhasil diverifikasi.');
-            setSelectedIds(new Set());
-        } catch (e) {
-            handleFirestoreError(e, OperationType.UPDATE, "houses");
-            toast.error('Gagal memverifikasi warga.');
-        }
-      }
     });
+    if (isConfirmed) {
+      try {
+          const updates = Array.from(selectedIds).map(id => ({ id, isVerified: true }));
+          await batchUpdateHouses(updates);
+          await logAction('Verifikasi Massal', `Verifikasi ${selectedIds.size} warga terpilih`);
+          toast.success('Warga terpilih berhasil diverifikasi.');
+          setSelectedIds(new Set());
+      } catch (e) {
+          handleFirestoreError(e, OperationType.UPDATE, "houses");
+          toast.error('Gagal memverifikasi warga.');
+      }
+    }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    setConfirmState({
-      isOpen: true,
+    const isConfirmed = await confirm({
       title: 'Hapus Massal Warga',
       message: `PERINGATAN: Apakah Anda yakin ingin MENGHAPUS PERMANEN ${selectedIds.size} warga terpilih? Tindakan ini tidak dapat dibatalkan.`,
       confirmLabel: 'Hapus Semua',
       isDanger: true,
-      onConfirm: async () => {
+    });
+    if (isConfirmed) {
         try {
             for (const id of Array.from(selectedIds)) {
                 const houseToDelete = houses.find(h => h.id === id);
@@ -480,8 +481,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             handleFirestoreError(e, OperationType.DELETE, "houses");
             toast.error('Gagal menghapus warga terpilih.');
         }
-      }
-    });
+    }
   };
 
   const resetForm = () => {
@@ -981,19 +981,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setSelectedIds(newSet);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const houseToDelete = houses.find(h => h.id === id);
-    setConfirmState({
-      isOpen: true,
+    const isConfirmed = await confirm({
       title: 'Hapus Data Warga',
       message: `Apakah Anda yakin ingin menghapus data warga di ${houseToDelete?.block}-${houseToDelete?.number} (${houseToDelete?.headOfFamily || 'Kosong'})? Tindakan ini tidak dapat dibatalkan.`,
       confirmLabel: 'Hapus Permanen',
       isDanger: true,
-      onConfirm: async () => {
-        try {
-          await deleteHouseFromDb(id);
-          
-          if (houseToDelete && houseToDelete.status === 'Occupied') {
+    });
+    if (isConfirmed) {
+      try {
+        await deleteHouseFromDb(id);
+        
+        if (houseToDelete && houseToDelete.status === 'Occupied') {
             await addPopulationLogToDb({
               id: Date.now().toString(),
               type: 'MovedOut',
@@ -1020,7 +1020,6 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           toast.error('Gagal menghapus data warga.');
         }
       }
-    });
   };
 
   const openDetail = (house: House) => {

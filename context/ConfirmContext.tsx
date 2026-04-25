@@ -8,10 +8,12 @@ interface ConfirmOptions {
   confirmLabel?: string;
   cancelLabel?: string;
   isDanger?: boolean;
+  confirmIcon?: React.ReactNode;
 }
 
 interface PromptOptions extends ConfirmOptions {
   placeholder?: string;
+  initialValue?: string;
 }
 
 interface ConfirmContextType {
@@ -90,6 +92,7 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
         confirmLabel={confirmOptions.confirmLabel}
         cancelLabel={confirmOptions.cancelLabel}
         isDanger={confirmOptions.isDanger}
+        icon={confirmOptions.confirmIcon}
       />
       <PromptDialog
         isOpen={promptOpen}
@@ -101,6 +104,7 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
         confirmLabel={promptOptions.confirmLabel}
         cancelLabel={promptOptions.cancelLabel}
         isDanger={promptOptions.isDanger}
+        initialValue={promptOptions.initialValue}
       />
     </ConfirmContext.Provider>
   );

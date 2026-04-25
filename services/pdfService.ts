@@ -110,6 +110,22 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
     addStatRow("7. Lansia", report.elderlyCount || 0);
     addStatRow("8. Janda", report.widowCount || 0);
 
+    // --- Section 3: Data Musiman ---
+    y += 5;
+    if (y > pageHeight - 80) {
+        doc.addPage();
+        y = 30;
+    }
+    doc.setFont("times", "bold");
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.text("III. DATA WARGA MUSIMAN (KONTRAK/KOST)", margin + 2, y);
+    y += 12;
+
+    addStatRow("1. Total Warga Musiman", report.seasonalCount || 0, true);
+    addStatRow("- Laki-laki (Musiman)", report.seasonalMaleCount || 0);
+    addStatRow("- Perempuan (Musiman)", report.seasonalFemaleCount || 0);
+
     // --- Signature Section ---
     y += 15;
     if (y > pageHeight - 60) {

@@ -12,6 +12,7 @@ interface PromptDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   isDanger?: boolean;
+  initialValue?: string;
 }
 
 export const PromptDialog: React.FC<PromptDialogProps> = ({ 
@@ -23,9 +24,16 @@ export const PromptDialog: React.FC<PromptDialogProps> = ({
   placeholder = '',
   confirmLabel = 'Ya', 
   cancelLabel = 'Batal',
-  isDanger = false
+  isDanger = false,
+  initialValue = ''
 }) => {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = React.useState(initialValue);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setInputValue(initialValue);
+    }
+  }, [isOpen, initialValue]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>

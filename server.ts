@@ -6,6 +6,20 @@ import { createServer as createViteServer } from "vite";
 import admin from "firebase-admin";
 import fs from "fs";
 import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import multer from "multer";
+import "dotenv/config";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configure Multer for temporary storage
+const storage_multer = multer.diskStorage({});
+const upload = multer({ storage: storage_multer });
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -139,6 +153,28 @@ async function startServer() {
       res.json(data);
     } catch (error: any) {
       console.error("AQI proxy error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Cloudinary Upload Endpoint
+  app.post("/api/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "teras-warga",
+        upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET || undefined,
+      });
+
+      res.json({
+        url: result.secure_url,
+        public_id: result.public_id,
+      });
+    } catch (error: any) {
+      console.error("Cloudinary upload error:", error);
       res.status(500).json({ error: error.message });
     }
   });

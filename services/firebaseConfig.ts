@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
 import { getMessaging, isSupported } from "firebase/messaging";
 import firebaseAppletConfig from "../firebase-applet-config.json";
 
@@ -20,7 +19,6 @@ const firebaseConfig = {
 let app: any;
 let db: any;
 let auth: any;
-let storage: any;
 let messaging: any = null;
 let isFirebaseConfigured = false;
 
@@ -29,7 +27,6 @@ try {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);
-  storage = getStorage(app);
   
   // Messaging only works in browser and if supported
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -47,4 +44,4 @@ try {
   console.error("Firebase initialization failed:", error);
 }
 
-export { app, db, auth, storage, messaging, isFirebaseConfigured };
+export { app, db, auth, messaging, isFirebaseConfigured };

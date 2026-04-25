@@ -715,6 +715,9 @@ export const generatePopulationReportExcel = async (reports: any[], logs: any[])
     { header: 'Hamil', key: 'pregnantCount', width: 10 },
     { header: 'Bayi/Balita', key: 'youngChildren', width: 15 },
     { header: 'Lansia', key: 'elderlyCount', width: 10 },
+    { header: 'Musiman Total', key: 'seasonalCount', width: 15 },
+    { header: 'Musiman (L)', key: 'seasonalMaleCount', width: 12 },
+    { header: 'Musiman (P)', key: 'seasonalFemaleCount', width: 12 },
   ];
 
   const headerRow = reportSheet.getRow(1);
@@ -739,7 +742,10 @@ export const generatePopulationReportExcel = async (reports: any[], logs: any[])
       femaleCount: r.femaleCount,
       pregnantCount: r.pregnantCount,
       youngChildren: (r.babyCount || 0) + (r.toddlerCount || 0),
-      elderlyCount: r.elderlyCount
+      elderlyCount: r.elderlyCount,
+      seasonalCount: r.seasonalCount || 0,
+      seasonalMaleCount: r.seasonalMaleCount || 0,
+      seasonalFemaleCount: r.seasonalFemaleCount || 0
     });
   });
 
