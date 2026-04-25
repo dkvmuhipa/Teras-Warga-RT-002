@@ -52,14 +52,19 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
   ];
 
+  // Styles
+  const primaryHeaderColor = 'FF1E293B'; // Slate-800
+  const alternateRowColor = 'FFF8FAFC'; // Slate-50
+  const borderColor = 'FFE2E8F0'; // Slate-200
+
   // Style Header
   const headerRow = worksheet.getRow(1);
-  headerRow.height = 30;
+  headerRow.height = 32;
   headerRow.eachCell((cell) => {
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF4F46E5' }, // Indigo-600
+      fgColor: { argb: primaryHeaderColor },
     };
     cell.font = {
       bold: true,
@@ -68,12 +73,21 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     };
     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
     cell.border = {
-      top: { style: 'thin' },
-      left: { style: 'thin' },
-      bottom: { style: 'thin' },
-      right: { style: 'thin' },
+      top: { style: 'thin', color: { argb: '000000' } },
+      left: { style: 'thin', color: { argb: '000000' } },
+      bottom: { style: 'thin', color: { argb: '000000' } },
+      right: { style: 'thin', color: { argb: '000000' } },
     };
   });
+
+  // Freeze top row and enable filter
+  worksheet.views = [
+    { state: 'frozen', xSplit: 0, ySplit: 1, topLeftCell: 'A2' }
+  ];
+  worksheet.autoFilter = {
+    from: { row: 1, column: 1 },
+    to: { row: 1, column: worksheet.columns.length }
+  };
 
   // Add Data
   sortedHouses.forEach((house, index) => {
@@ -116,32 +130,47 @@ export const generateProfessionalExcel = async (houses: House[]) => {
     });
 
     // Style Data Rows
-    row.height = 25;
+    row.height = 24;
     row.eachCell((cell) => {
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
       cell.border = {
-        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-        right: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        top: { style: 'thin', color: { argb: borderColor } },
+        left: { style: 'thin', color: { argb: borderColor } },
+        bottom: { style: 'thin', color: { argb: borderColor } },
+        right: { style: 'thin', color: { argb: borderColor } },
       };
       
       // Conditional styling for Payment Status
       if (cell.value === PaymentStatus.PAID || cell.value === 'Terverifikasi') {
         cell.font = { color: { argb: 'FF059669' }, bold: true }; // Emerald-600
-      } else if (cell.value === PaymentStatus.PENDING || cell.value === PaymentStatus.UNPAID || cell.value === 'Belum Verifikasi') {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFECFDF5' } };
+      } else if (cell.value === PaymentStatus.UNPAID || cell.value === 'Belum Verifikasi') {
         cell.font = { color: { argb: 'FFDC2626' }, bold: true }; // Rose-600
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF1F2' } };
       }
     });
 
     // Alternate row background
-    if (index % 2 !== 0) {
+    if (index % 2 !== 0 && !row.getCell(34).fill) {
       row.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FFF8FAFC' }, // Slate-50
+        fgColor: { argb: alternateRowColor },
       };
     }
+  });
+
+  // Adjust Column Widths based on content
+  worksheet.columns.forEach(column => {
+    let maxColumnLength = 0;
+    column.eachCell?.({ includeEmpty: true }, (cell) => {
+      const columnLength = cell.value ? cell.value.toString().length : 10;
+      if (columnLength > maxColumnLength) {
+        maxColumnLength = columnLength;
+      }
+    });
+    const finalWidth = Math.min(Math.max(12, maxColumnLength + 5), 50);
+    column.width = finalWidth;
   });
 
   // Add Family Members Sheet
@@ -548,6 +577,7 @@ export const generateIuranReportExcel = async (
   for (let i = summaryStartRow; i <= summaryEndRow; i++) {
     const row = worksheet.getRow(i);
     row.getCell(2).numFmt = '#,##0';
+    row.getCell(1).font = { bold: true };
     row.eachCell(cell => {
       cell.border = {
         top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
@@ -563,23 +593,11 @@ export const generateIuranReportExcel = async (
   // Table Header
   const headerRowIndex = summaryEndRow + 3;
   worksheet.getRow(headerRowIndex).values = ['TANGGAL BAYAR', 'BULAN IURAN', 'NAMA WARGA', 'RUMAH', 'JENIS IURAN', 'NOMINAL'];
-  worksheet.columns = [
-    { key: 'date', width: 20 },
-    { key: 'month', width: 20 },
-    { key: 'name', width: 40 },
-    { key: 'house', width: 15 },
-    { key: 'type', width: 20 },
-    { key: 'amount', width: 20 },
-  ];
-
-  const headerRow = worksheet.getRow(headerRowIndex);
-  headerRow.height = 30;
-  headerRow.eachCell((cell) => {
-    cell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FF4F46E5' },
-    };
+  
+  const hRow = worksheet.getRow(headerRowIndex);
+  hRow.height = 30;
+  hRow.eachCell((cell) => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
     cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
     cell.border = {
@@ -592,19 +610,22 @@ export const generateIuranReportExcel = async (
 
   // Add Data
   sortedPayments.forEach((p, index) => {
-    const row = worksheet.addRow({
-      date: new Date(p.date).toLocaleDateString('id-ID'),
-      month: p.month,
-      name: p.headOfFamily + (p.payerName && p.payerName !== p.headOfFamily ? ` (Oleh: ${p.payerName})` : ''),
-      house: `${p.block}-${p.number}`,
-      type: p.type === 'Both' ? 'Air & Sampah' : p.type === 'Air' ? 'Air Saja' : 'Sampah Saja',
-      amount: p.amount,
-    });
+    const row = worksheet.addRow([
+      new Date(p.date).toLocaleDateString('id-ID'),
+      p.month,
+      p.headOfFamily + (p.payerName && p.payerName !== p.headOfFamily ? ` (Oleh: ${p.payerName})` : ''),
+      `${p.block}-${p.number}`,
+      p.type === 'Both' ? 'Air & Sampah' : p.type === 'Air' ? 'Air Saja' : 'Sampah Saja',
+      p.amount,
+    ]);
 
     row.height = 25;
     row.eachCell((cell, colNumber) => {
       cell.alignment = { vertical: 'middle', horizontal: colNumber === 6 ? 'right' : 'center' };
-      if (colNumber === 6) cell.numFmt = '#,##0';
+      if (colNumber === 6) {
+        cell.numFmt = '#,##0';
+        cell.font = { bold: true };
+      }
       cell.border = {
         top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
         left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
@@ -614,13 +635,22 @@ export const generateIuranReportExcel = async (
     });
 
     if (index % 2 !== 0) {
-      row.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFF8FAFC' },
-      };
+      row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
     }
   });
+
+  // Auto column widths for Iuran sheet
+  worksheet.columns.forEach(column => {
+    let max = 15;
+    column.eachCell?.({ includeEmpty: true }, (cell) => {
+      const len = cell.value ? cell.value.toString().length : 10;
+      if (len > max) max = len;
+    });
+    column.width = Math.min(max + 5, 40);
+  });
+
+  // Header freeze
+  worksheet.views = [{ state: 'frozen', ySplit: headerRowIndex }];
 
   // Footer
   const footerRowIndex = worksheet.rowCount + 2;
@@ -701,35 +731,40 @@ export const generatePopulationReportExcel = async (reports: any[], logs: any[])
   
   // SHEET 1: REKAPITULASI LAPORAN
   const reportSheet = workbook.addWorksheet('Rekapitulasi Laporan');
-  reportSheet.columns = [
-    { header: 'Periode', key: 'month', width: 15 },
-    { header: 'Tahun', key: 'year', width: 10 },
-    { header: 'Awal (Jiwa)', key: 'initialPopulation', width: 15 },
-    { header: 'Lahir', key: 'birthCount', width: 10 },
-    { header: 'Meninggal', key: 'deathCount', width: 10 },
-    { header: 'Masuk', key: 'newcomerCount', width: 10 },
-    { header: 'Keluar', key: 'movedOutCount', width: 10 },
-    { header: 'Akhir (Jiwa)', key: 'finalPopulation', width: 15 },
-    { header: 'Laki-laki', key: 'maleCount', width: 12 },
-    { header: 'Perempuan', key: 'femaleCount', width: 12 },
-    { header: 'Hamil', key: 'pregnantCount', width: 10 },
-    { header: 'Bayi/Balita', key: 'youngChildren', width: 15 },
-    { header: 'Lansia', key: 'elderlyCount', width: 10 },
-    { header: 'Musiman Total', key: 'seasonalCount', width: 15 },
-    { header: 'Musiman (L)', key: 'seasonalMaleCount', width: 12 },
-    { header: 'Musiman (P)', key: 'seasonalFemaleCount', width: 12 },
+  
+  // Style Header
+  const headers = [
+    { header: 'Periode', key: 'month' },
+    { header: 'Tahun', key: 'year' },
+    { header: 'Awal (Jiwa)', key: 'initialPopulation' },
+    { header: 'Lahir', key: 'birthCount' },
+    { header: 'Meninggal', key: 'deathCount' },
+    { header: 'Masuk', key: 'newcomerCount' },
+    { header: 'Keluar', key: 'movedOutCount' },
+    { header: 'Akhir (Jiwa)', key: 'finalPopulation' },
+    { header: 'Laki-laki', key: 'maleCount' },
+    { header: 'Perempuan', key: 'femaleCount' },
+    { header: 'Hamil', key: 'pregnantCount' },
+    { header: 'Bayilih/Balita', key: 'youngChildren' },
+    { header: 'Lansia', key: 'elderlyCount' },
+    { header: 'Musiman Total', key: 'seasonalCount' },
+    { header: 'Musiman (L)', key: 'seasonalMaleCount' },
+    { header: 'Musiman (P)', key: 'seasonalFemaleCount' },
   ];
+
+  reportSheet.columns = headers.map(h => ({ ...h, width: 15 }));
 
   const headerRow = reportSheet.getRow(1);
   headerRow.height = 30;
   headerRow.eachCell(cell => {
-    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
     cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
   });
 
-  reports.sort((a, b) => b.month.localeCompare(a.month)).forEach(r => {
-    reportSheet.addRow({
+  reports.sort((a, b) => b.month.localeCompare(a.month)).forEach((r, i) => {
+    const row = reportSheet.addRow({
       month: r.month,
       year: r.year,
       initialPopulation: r.initialPopulation,
@@ -747,29 +782,42 @@ export const generatePopulationReportExcel = async (reports: any[], logs: any[])
       seasonalMaleCount: r.seasonalMaleCount || 0,
       seasonalFemaleCount: r.seasonalFemaleCount || 0
     });
+
+    row.height = 25;
+    row.eachCell(cell => {
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = { top: { style: 'thin', color: { argb: 'FFE2E8F0' } }, left: { style: 'thin', color: { argb: 'FFE2E8F0' } }, bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } }, right: { style: 'thin', color: { argb: 'FFE2E8F0' } } };
+    });
+
+    if (i % 2 !== 0) {
+      row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+    }
   });
+
+  reportSheet.views = [{ state: 'frozen', ySplit: 1 }];
 
   // SHEET 2: LOG MUTASI
   const logSheet = workbook.addWorksheet('Log Mutasi Penduduk');
   logSheet.columns = [
-    { header: 'Tanggal', key: 'date', width: 15 },
-    { header: 'Tipe Mutasi', key: 'type', width: 15 },
-    { header: 'Nama', key: 'name', width: 30 },
-    { header: 'Blok-No', key: 'houseId', width: 12 },
-    { header: 'Keterangan', key: 'description', width: 40 },
-    { header: 'Jumlah Keluarga', key: 'familyCount', width: 15 },
-    { header: 'Detail', key: 'details', width: 50 },
+    { header: 'TANGGAL', key: 'date', width: 15 },
+    { header: 'TIPE MUTASI', key: 'type', width: 20 },
+    { header: 'NAMA WARGA', key: 'name', width: 35 },
+    { header: 'LOKASI (BLOK-NO)', key: 'houseId', width: 18 },
+    { header: 'KETERANGAN', key: 'description', width: 45 },
+    { header: 'JML KELUARGA', key: 'familyCount', width: 18 },
+    { header: 'DETAIL INFORMASI', key: 'details', width: 50 },
   ];
 
   const logHeaderRow = logSheet.getRow(1);
-  logHeaderRow.height = 30;
+  logHeaderRow.height = 32;
   logHeaderRow.eachCell(cell => {
-    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE11D48' } }; // Rose-600
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFBE123C' } }; // Rose-700
     cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
   });
 
-  logs.sort((a, b) => b.date.localeCompare(a.date)).forEach(l => {
+  logs.sort((a, b) => b.date.localeCompare(a.date)).forEach((l, i) => {
     let detailsStr = '';
     if (l.type === 'Newcomer' && l.details) {
       detailsStr = `Asal: ${l.details.previousAddress || '-'}. Alasan: ${l.details.reasonForMoving || '-'}`;

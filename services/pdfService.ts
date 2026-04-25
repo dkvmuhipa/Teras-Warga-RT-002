@@ -56,115 +56,123 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
     doc.setFont("times", "normal");
     doc.text(`Periode: ${report.month} ${report.year}`, centerX, 58, { align: "center" });
 
+    // Add Page Numbers
+    const addPageNumbers = (pdf: jsPDF) => {
+        const totalPages = pdf.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(8);
+            pdf.setFont("times", "italic");
+            pdf.setTextColor(150);
+            pdf.text(`Halaman ${i} dari ${totalPages}`, pageWidth - margin, pageHeight - 10, { align: "right" });
+            pdf.text(`Dicetak otomatis melalui Sistem Teras Warga pada ${new Date().toLocaleString('id-ID')}`, margin, pageHeight - 10);
+        }
+    };
+
     let y = 70;
-    const rowHeight = 10;
+    const rowHeight = 8;
+
+    // --- Summary Blocks (Highlights) ---
+    const drawSummaryCard = (label: string, value: string | number, x: number, width: number, bgColor: [number, number, number], textColor: [number, number, number] = [255, 255, 255]) => {
+        doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+        doc.roundedRect(x, y, width, 25, 2, 2, 'F');
+        doc.setFont("times", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+        doc.text(label, x + (width / 2), y + 8, { align: "center" });
+        doc.setFont("times", "bold");
+        doc.setFontSize(16);
+        doc.text(value.toString(), x + (width / 2), y + 18, { align: "center" });
+        doc.setTextColor(0);
+    };
+
+    const cardWidth = (contentWidth - 10) / 3;
+    const finalPop = report.initialPopulation + report.birthCount + report.newcomerCount - report.movedOutCount - (report.deathCount || 0);
+    
+    drawSummaryCard("PENDUDUK AWAL", report.initialPopulation, margin, cardWidth, [71, 85, 105]);
+    drawSummaryCard("MUTASI (NET)", (report.birthCount + report.newcomerCount - report.movedOutCount - (report.deathCount || 0)), margin + cardWidth + 5, cardWidth, [100, 116, 139]);
+    drawSummaryCard("TOTAL AKHIR", finalPop, margin + (cardWidth * 2) + 10, cardWidth, [79, 70, 229]);
+    
+    y += 35;
 
     // --- Section 1: Mutasi Penduduk ---
     doc.setFont("times", "bold");
-    doc.setFillColor(245, 245, 245);
+    doc.setFontSize(11);
+    doc.setFillColor(30, 41, 59);
     doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
     doc.text("I. DATA MUTASI PENDUDUK", margin + 2, y);
-    y += 12;
+    doc.setTextColor(0);
+    y += 10;
 
-    const addStatRow = (label: string, value: string | number, isBold = false, color?: [number, number, number]) => {
+    const addStatRow = (label: string, value: string | number, isBold = false, color?: [number, number, number], bg?: boolean) => {
+        if (bg) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(margin, y - 5, contentWidth, rowHeight, 'F');
+        }
         doc.setFont("times", isBold ? "bold" : "normal");
-        doc.setFontSize(11);
+        doc.setFontSize(10);
         if (color) doc.setTextColor(color[0], color[1], color[2]);
         doc.text(label, margin + 5, y);
         doc.text(value.toString(), pageWidth - margin - 5, y, { align: "right" });
         doc.setTextColor(0);
         
-        doc.setDrawColor(230);
+        doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.1);
-        doc.line(margin + 5, y + 2, pageWidth - margin - 5, y + 2);
+        doc.line(margin, y + 2, pageWidth - margin, y + 2);
         y += rowHeight;
     };
 
-    addStatRow("1. Penduduk Awal Bulan", report.initialPopulation);
+    addStatRow("1. Penduduk Awal Bulan", report.initialPopulation, false, undefined, true);
     addStatRow("2. Kelahiran (+)", `+ ${report.birthCount}`, false, [16, 185, 129]);
-    addStatRow("3. Kematian (-)", `- ${report.deathCount || 0}`, false, [239, 68, 68]);
+    addStatRow("3. Kematian (-)", `- ${report.deathCount || 0}`, false, [239, 68, 68], true);
     addStatRow("4. Pendatang (+)", `+ ${report.newcomerCount}`, false, [37, 99, 235]);
-    addStatRow("5. Pindah Keluar (-)", `- ${report.movedOutCount}`, false, [245, 158, 11]);
+    addStatRow("5. Pindah Keluar (-)", `- ${report.movedOutCount}`, false, [245, 158, 11], true);
     
-    const totalAkhir = report.initialPopulation + report.birthCount + report.newcomerCount - report.movedOutCount - (report.deathCount || 0);
-    y += 2;
-    doc.setFillColor(240, 244, 255);
-    doc.rect(margin, y - 7, contentWidth, 10, 'F');
-    addStatRow("TOTAL PENDUDUK AKHIR", totalAkhir, true, [79, 70, 229]);
+    addStatRow("TOTAL PENDUDUK AKHIR", finalPop, true, [79, 70, 229]);
 
-    y += 10;
+    y += 8;
 
     // --- Section 2: Kelompok Rentan ---
+    if (y > pageHeight - 60) { doc.addPage(); y = 30; }
     doc.setFont("times", "bold");
-    doc.setFillColor(245, 245, 245);
+    doc.setFillColor(30, 41, 59);
     doc.rect(margin, y - 6, contentWidth, 8, 'F');
-    doc.text("II. DATA KELOMPOK RENTAN", margin + 2, y);
-    y += 12;
+    doc.setTextColor(255);
+    doc.text("II. DATA KELOMPOK RENTAN & UMUR", margin + 2, y);
+    doc.setTextColor(0);
+    y += 10;
 
-    addStatRow("1. Ibu Hamil", report.pregnantCount || 0);
-    addStatRow("2. Bayi", report.babyCount || 0);
-    addStatRow("3. Balita", report.toddlerCount || 0);
-    addStatRow("4. Anak", report.childCount || 0);
-    addStatRow("5. Remaja", report.teenagerCount || 0);
-    addStatRow("6. Dewasa", report.adultCount || 0);
-    addStatRow("7. Lansia", report.elderlyCount || 0);
-    addStatRow("8. Janda", report.widowCount || 0);
+    const stats = [
+        { l: "1. Ibu Hamil", v: report.pregnantCount || 0 },
+        { l: "2. Bayi (0-12 bln)", v: report.babyCount || 0 },
+        { l: "3. Balita (1-5 thn)", v: report.toddlerCount || 0 },
+        { l: "4. Anak-anak", v: report.childCount || 0 },
+        { l: "5. Remaja", v: report.teenagerCount || 0 },
+        { l: "6. Dewasa", v: report.adultCount || 0 },
+        { l: "7. Lansia", v: report.elderlyCount || 0 },
+        { l: "8. Janda/Duda", v: report.widowCount || 0 }
+    ];
+
+    stats.forEach((s, i) => addStatRow(s.l, s.v, false, undefined, i % 2 === 0));
+
+    y += 8;
 
     // --- Section 3: Data Musiman ---
-    y += 5;
-    if (y > pageHeight - 80) {
-        doc.addPage();
-        y = 30;
-    }
+    if (y > pageHeight - 60) { doc.addPage(); y = 30; }
     doc.setFont("times", "bold");
-    doc.setFillColor(245, 245, 245);
+    doc.setFillColor(30, 41, 59);
     doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
     doc.text("III. DATA WARGA MUSIMAN (KONTRAK/KOST)", margin + 2, y);
-    y += 12;
+    doc.setTextColor(0);
+    y += 10;
 
-    addStatRow("1. Total Warga Musiman", report.seasonalCount || 0, true);
+    addStatRow("1. Total Warga Musiman", report.seasonalCount || 0, true, undefined, true);
     addStatRow("- Laki-laki (Musiman)", report.seasonalMaleCount || 0);
-    addStatRow("- Perempuan (Musiman)", report.seasonalFemaleCount || 0);
+    addStatRow("- Perempuan (Musiman)", report.seasonalFemaleCount || 0, false, undefined, true);
 
-    // --- Signature Section ---
-    y += 15;
-    if (y > pageHeight - 60) {
-        doc.addPage();
-        y = 30;
-    }
-
-    const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    const signX = pageWidth - 60;
-    doc.setFont("times", "normal");
-    doc.setFontSize(11);
-    doc.text(`Palu, ${dateString}`, signX, y, { align: "center" });
-    doc.text(`Ketua ${config.rtName}`, signX, y + 6, { align: "center" });
-    
-    const signSpaceY = y + 8;
-    
-    doc.setFont("times", "bold");
-    doc.text(config.rtChairman, signX, y + 35, { align: "center" });
-    const chairmanWidth = doc.getTextWidth(config.rtChairman);
-    doc.line(signX - (chairmanWidth / 2), y + 36, signX + (chairmanWidth / 2), y + 36);
-
-    // Add Stamp and Signature if available
-    try {
-        if (config.stamp) {
-            const stampImg = await getImageData(config.stamp);
-            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY, 25, 25);
-        }
-        if (config.signature) {
-            const signImg = await getImageData(config.signature);
-            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
-        }
-    } catch (e) {}
-
-    // Footer
-    doc.setFontSize(8);
-    doc.setFont("times", "italic");
-    doc.setTextColor(150);
-    doc.text(`Dicetak otomatis melalui Sistem Teras Warga pada ${new Date().toLocaleString('id-ID')}`, margin, pageHeight - 10);
-
+    addPageNumbers(doc);
     doc.save(`Laporan_Penduduk_${report.month}_${report.year}.pdf`);
 };
 
@@ -769,203 +777,146 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 10;
+    const margin = 15;
     const contentWidth = pageWidth - (margin * 2);
     const centerX = pageWidth / 2;
 
-    let logoDrawn = false;
-    try {
-        const logoData = await getImageData(config.logo);
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', margin, 10, 20, 25);
-            logoDrawn = true;
-        }
-    } catch (e) {}
-
-    doc.setFont("times", "normal");
-    doc.setFontSize(14);
-    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-    doc.setFontSize(10);
-    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-
-    doc.setLineWidth(1.0);
-    doc.line(margin, 42, pageWidth - margin, 42);
-    doc.setLineWidth(0.3);
-    doc.line(margin, 43, pageWidth - margin, 43);
-
-    const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    doc.setFont("times", "bold");
-    doc.setFontSize(12);
-    doc.text(`LAPORAN DATA WARGA ${config.rtName}`, centerX, 52, { align: "center" });
-    doc.setFontSize(10);
-    doc.setFont("times", "normal");
-    doc.text(`Per Tanggal: ${dateString}`, centerX, 57, { align: "center" });
-
-    let startY = 65;
-    const rowHeight = 8;
-    const cols = [
-        { header: "No", width: 10, x: margin },
-        { header: "Blok/Rumah", width: 30, x: margin + 10 },
-        { header: "Kepala Keluarga", width: 80, x: margin + 40 },
-        { header: "Jml", width: 15, x: margin + 120 },
-        { header: "Status Hunian", width: 35, x: margin + 135 },
-        { header: "Air", width: 18, x: margin + 170 },
-        { header: "Sampah", width: 17, x: margin + 188 },
-        { header: "No. HP", width: 40, x: margin + 205 },
-        { header: "Ket", width: 32, x: margin + 245 },
-    ];
-
-    const drawTableHeader = (y: number) => {
-        doc.setFillColor(230, 230, 230);
-        doc.rect(margin, y, contentWidth, rowHeight, 'F');
+    const drawHeader = () => {
         doc.setFont("times", "bold");
+        doc.setFontSize(14);
+        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+        doc.setFont("times", "normal");
         doc.setFontSize(10);
-        doc.setTextColor(0);
-        
-        cols.forEach(col => {
-            doc.text(col.header, col.x + 1, y + 5);
-        });
-        
-        doc.setDrawColor(0);
-        doc.rect(margin, y, contentWidth, rowHeight);
-        
-        let currentX = margin;
-        cols.forEach(col => {
-             doc.line(currentX, y, currentX, y + rowHeight);
-             currentX += col.width;
-        });
-        doc.line(currentX, y, currentX, y + rowHeight);
+        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+        doc.setLineWidth(0.8);
+        doc.line(margin, 42, pageWidth - margin, 42);
+        doc.setLineWidth(0.2);
+        doc.line(margin, 43, pageWidth - margin, 43);
     };
 
-    drawTableHeader(startY);
-    let currentY = startY + rowHeight;
-
-    doc.setFont("times", "normal");
-    doc.setFontSize(10);
+    drawHeader();
     
-    const sortedHouses = [...houses].sort((a, b) => {
-        const blockCompare = a.block.localeCompare(b.block);
-        if (blockCompare !== 0) return blockCompare;
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text("DAFTAR INDUK DATA WARGA", centerX, 52, { align: "center" });
+    doc.setFontSize(9);
+    doc.setFont("times", "normal");
+    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, margin, 52);
+
+    let y = 60;
+    const colWidths = {
+        no: 10,
+        blok: 15,
+        no_rumah: 15,
+        nama: 60,
+        status: 25,
+        tipe: 25,
+        jml: 15,
+        kontak: 35,
+        ekonomi: 30,
+        keterangan: 37
+    };
+
+    const headers = [
+        { label: "NO", w: colWidths.no },
+        { label: "BLOK", w: colWidths.blok },
+        { label: "NO RMH", w: colWidths.no_rumah },
+        { label: "NAMA KEPALA KELUARGA", w: colWidths.nama },
+        { label: "STATUS", w: colWidths.status },
+        { label: "KEPEMILIKAN", w: colWidths.tipe },
+        { label: "JIWA", w: colWidths.jml },
+        { label: "TELEPON", w: colWidths.kontak },
+        { label: "EKONOMI", w: colWidths.ekonomi },
+        { label: "KET", w: colWidths.keterangan }
+    ];
+
+    const drawTableHeader = (startY: number) => {
+        doc.setFillColor(30, 41, 59);
+        doc.rect(margin, startY - 5, contentWidth, 8, 'F');
+        doc.setTextColor(255);
+        doc.setFont("times", "bold");
+        doc.setFontSize(9);
+        
+        let currX = margin;
+        headers.forEach(h => {
+            doc.text(h.label, currX + (h.w / 2), startY, { align: "center" });
+            currX += h.w;
+        });
+        doc.setTextColor(0);
+    };
+
+    drawTableHeader(y);
+    y += 8;
+
+    const sortedHouses = [...houses].sort((a,b) => {
+        const blockComp = a.block.localeCompare(b.block);
+        if (blockComp !== 0) return blockComp;
         return a.number.localeCompare(b.number, undefined, { numeric: true });
     });
 
-    sortedHouses.forEach((house, index) => {
-        if (currentY > pageHeight - 20) {
+    sortedHouses.forEach((h, i) => {
+        if (y > pageHeight - 20) {
             doc.addPage();
-            currentY = 20;
-            drawTableHeader(currentY);
-            currentY += rowHeight;
+            drawHeader();
+            y = 60;
+            drawTableHeader(y);
+            y += 8;
         }
 
-        const no = (index + 1).toString();
-        const address = `${house.block}-${house.number}`;
-        const name = house.headOfFamily;
-        const count = house.occupants.toString();
-        
-        let status = house.status === 'Occupied' ? 'Dihuni' : (house.status === 'Business' ? 'Usaha' : 'Kosong');
-        if (house.status === 'Occupied') {
-             if (house.residenceType === 'Kontrak') status += " (Kontrak)";
-             else if (house.residenceType === 'Kost') status += " (Kost)";
-             else status += " (Pemilik)";
+        // Zebra striping
+        if (i % 2 !== 0) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(margin, y - 5, contentWidth, 7, 'F');
         }
 
-        const paymentAir = house.paymentStatusAir || PaymentStatus.UNPAID;
-        const paymentSampah = house.paymentStatusSampah || PaymentStatus.UNPAID;
-        const phone = house.phone || '-';
+        doc.setFont("times", "normal");
+        doc.setFontSize(8.5);
         
-        const notes = [];
-        if(house.pregnantCount && house.pregnantCount > 0) notes.push("Hamil");
-        if(house.babyCount && house.babyCount > 0) notes.push("Bayi");
-        if(house.toddlerCount && house.toddlerCount > 0) notes.push("Balita");
-        if(house.childCount && house.childCount > 0) notes.push("Anak");
-        if(house.teenagerCount && house.teenagerCount > 0) notes.push("Remaja");
-        if(house.adultCount && house.adultCount > 0) notes.push("Dewasa");
-        if(house.elderlyCount && house.elderlyCount > 0) notes.push("Lansia");
-        if(house.widowCount && house.widowCount > 0) notes.push("Janda");
-        const ket = notes.join(', ');
+        let currX = margin;
+        const rowData = [
+            (i + 1).toString(),
+            h.block,
+            h.number,
+            h.headOfFamily.toUpperCase(),
+            h.status === 'Occupied' ? 'DIHUNI' : h.status === 'Empty' ? 'KOSONG' : 'USAHA',
+            h.residenceType || '-',
+            (h.occupants || 0).toString(),
+            h.phone || '-',
+            h.economicStatus || '-',
+            h.isVerified ? 'VERIF' : 'PENDING'
+        ];
 
-        doc.text(no, cols[0].x + 1, currentY + 5);
-        doc.text(address, cols[1].x + 1, currentY + 5);
-        doc.text(name, cols[2].x + 1, currentY + 5);
-        doc.text(count, cols[3].x + 1, currentY + 5);
-        
-        const splitStatus = doc.splitTextToSize(status, cols[4].width - 2);
-        doc.text(splitStatus, cols[4].x + 1, currentY + 5);
-        
-        // Air
-        if (paymentAir === PaymentStatus.UNPAID) doc.setTextColor(220, 38, 38);
-        else if (paymentAir === PaymentStatus.PENDING) doc.setTextColor(217, 119, 6);
-        doc.text(paymentAir === PaymentStatus.PAID ? 'L' : 'B', cols[5].x + 1, currentY + 5);
-        doc.setTextColor(0);
-
-        // Sampah
-        if (paymentSampah === PaymentStatus.UNPAID) doc.setTextColor(220, 38, 38);
-        else if (paymentSampah === PaymentStatus.PENDING) doc.setTextColor(217, 119, 6);
-        doc.text(paymentSampah === PaymentStatus.PAID ? 'L' : 'B', cols[6].x + 1, currentY + 5);
-        doc.setTextColor(0);
-
-        doc.text(phone, cols[7].x + 1, currentY + 5);
-        doc.text(ket, cols[8].x + 1, currentY + 5);
-
-        doc.rect(margin, currentY, contentWidth, rowHeight);
-        
-        let currentX = margin;
-        cols.forEach(col => {
-            doc.line(currentX, currentY, currentX, currentY + rowHeight);
-            currentX += col.width;
+        rowData.forEach((text, idx) => {
+            const w = headers[idx].w;
+            const align = (idx === 0 || idx === 1 || idx === 2 || idx === 6) ? "center" : "left";
+            const xPos = align === "center" ? currX + (w / 2) : currX + 2;
+            
+            const truncatedText = doc.getTextWidth(text) > w - 2 ? doc.splitTextToSize(text, w - 5)[0] + "..." : text;
+            doc.text(truncatedText, xPos, y, { align: align as any });
+            currX += w;
         });
-        doc.line(currentX, currentY, currentX, currentY + rowHeight);
 
-        currentY += rowHeight;
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.1);
+        doc.line(margin, y + 2, pageWidth - margin, y + 2);
+        
+        y += 7;
     });
 
-    currentY += 5;
-    if (currentY > pageHeight - 40) { doc.addPage(); currentY = 20; }
-
-    const totalPermanent = houses.filter(h => h.status === 'Occupied' && (h.residenceType === 'Tetap' || !h.residenceType)).length;
-    const totalRenter = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kontrak').length;
-    const totalBoarding = houses.filter(h => h.status === 'Occupied' && h.residenceType === 'Kost').length;
-    const totalEmpty = houses.filter(h => h.status === 'Empty').length;
-    const totalPeople = houses.reduce((acc, h) => acc + h.occupants, 0);
-
-    doc.setFont("times", "bold");
-    doc.text("REKAPITULASI:", margin, currentY);
-    currentY += 5;
-    doc.setFont("times", "normal");
-    doc.text(`Total Unit Rumah: ${houses.length} Unit`, margin, currentY);
-    doc.text(`Total Kepala Keluarga: ${houses.length}`, margin + 70, currentY);
-    currentY += 5;
-    doc.text(`Dihuni Tetap (Pemilik): ${totalPermanent}`, margin, currentY);
-    doc.text(`Dihuni Kontrak/Sewa: ${totalRenter}`, margin + 70, currentY);
-    doc.text(`Dihuni Kost: ${totalBoarding}`, margin + 140, currentY);
-    currentY += 5;
-    doc.text(`Rumah Kosong: ${totalEmpty}`, margin, currentY);
-    doc.text(`Estimasi Total Penduduk: ${totalPeople} Jiwa`, margin + 70, currentY);
-
-    const signY = currentY + 10;
-    if (signY + 30 > pageHeight) { doc.addPage(); }
-
-    const signX = pageWidth - 60;
-    doc.setFontSize(11);
-    doc.text(`Palu, ${dateString}`, signX, signY, { align: "center" });
-    doc.text(`Ketua ${config.rtName}`, signX, signY + 6, { align: "center" });
-
-    if (config.signature) {
-        try {
-            const signImg = await getImageData(config.signature);
-            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signY + 10, 30, 20);
-        } catch(e) {}
+    // Page Numbers
+    const totalPages = doc.getNumberOfPages();
+    for(let j = 1; j <= totalPages; j++) {
+        doc.setPage(j);
+        doc.setFontSize(8);
+        doc.setFont("times", "italic");
+        doc.setTextColor(150);
+        doc.text(`Halaman ${j} dari ${totalPages}`, pageWidth - margin, pageHeight - 10, { align: "right" });
     }
-
-    doc.setFont("times", "bold");
-    doc.text(config.rtChairman, signX, signY + 35, { align: "center" });
-    const chairmanWidth = doc.getTextWidth(config.rtChairman);
-    doc.line(signX - (chairmanWidth / 2), signY + 36, signX + (chairmanWidth / 2), signY + 36);
-
-    doc.save(`Laporan_Warga_RT02_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`Data_Warga_RT02_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
 export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfConfig) => {
