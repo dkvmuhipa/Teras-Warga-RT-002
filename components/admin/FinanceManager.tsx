@@ -11,6 +11,7 @@ import { Button } from '../ui/Button';
 import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb, logAction, handleFirestoreError, OperationType, uploadImageToStorage } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { generateCashFlowReportPDF } from '../../services/pdfService';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface FinanceManagerProps {
   cashFlow: CashFlow[];
@@ -18,6 +19,7 @@ interface FinanceManagerProps {
 }
 
 export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfConfig }) => {
+  const confirm = useConfirm();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'All' | 'Income' | 'Expense'>('All');
   const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
@@ -134,7 +136,14 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus transaksi ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Transaksi',
+      message: 'Apakah Anda yakin ingin menghapus data transaksi ini? Catatan keuangan akan memperbarui saldo secara otomatis.',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteTransactionFromDb(id);
         await logAction('Hapus Transaksi', `Hapus transaksi ID: ${id}`);

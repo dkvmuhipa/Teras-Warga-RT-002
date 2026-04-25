@@ -8,6 +8,7 @@ import {
   LayoutDashboard
 } from 'lucide-react';
 import { RondaCheckLog, Report, House, Official, CashFlow, LetterRequest } from '../../types';
+import { DemographicAnalytics } from './DemographicAnalytics';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFinancial } from '../../context/FinancialContext';
 
@@ -22,20 +23,6 @@ interface AdminAnalyticsProps {
 export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, reports, houses, officials, letters }) => {
   const { cashFlow, getArrearsForHouse } = useFinancial();
   const [activeTab, setActiveTab] = useState<'overview' | 'demographics' | 'operational'>('overview');
-
-  // Helper to calculate age
-  const calculateAge = (birthDate?: string) => {
-    if (!birthDate) return 30;
-    const birth = new Date(birthDate);
-    if (isNaN(birth.getTime())) return 30;
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  };
 
   // --- Security Analytics ---
   const securityStats = useMemo(() => {
@@ -149,125 +136,6 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, repor
     return { totalLetters, pendingLetters, approvedLetters, typeData, trend };
   }, [letters]);
 
-  // --- Resident Demographics (Unified) ---
-  const demographicStats = useMemo(() => {
-    const allResidents: any[] = [];
-    const religions: Record<string, number> = {};
-    const educations: Record<string, number> = {};
-    const jobs: Record<string, number> = {};
-    let totalVehicles = 0;
-    let totalPregnant = 0;
-    let totalBabies = 0;
-    let totalToddlers = 0;
-    let totalChildren = 0;
-    let totalTeenagers = 0;
-    let totalAdults = 0;
-    let totalElderly = 0;
-    let totalWidows = 0;
-    let totalPKH = 0;
-    let totalBLT = 0;
-    let totalBansosLain = 0;
-
-    houses.forEach(h => {
-      if (h && h.status === 'Occupied') {
-        totalVehicles += (h.vehicleCount || 0);
-        totalPregnant += (h.pregnantCount || 0);
-        totalBabies += (h.babyCount || 0);
-        totalToddlers += (h.toddlerCount || 0);
-        totalChildren += (h.childCount || 0);
-        totalTeenagers += (h.teenagerCount || 0);
-        totalAdults += (h.adultCount || 0);
-        totalElderly += (h.elderlyCount || 0);
-        totalWidows += (h.widowCount || 0);
-        if (h.isPKH) totalPKH++;
-        if (h.isBLT) totalBLT++;
-        if (h.isBansosLain) totalBansosLain++;
-
-        // Add Head of Family
-        const hoF = {
-          gender: h.gender || 'Laki-laki',
-          age: calculateAge(h.birthDate),
-          job: h.jobCategory || 'Lainnya',
-          religion: h.religion || 'Lainnya',
-          education: h.education || 'Lainnya'
-        };
-        allResidents.push(hoF);
-        
-        religions[hoF.religion] = (religions[hoF.religion] || 0) + 1;
-        educations[hoF.education] = (educations[hoF.education] || 0) + 1;
-        jobs[hoF.job] = (jobs[hoF.job] || 0) + 1;
-        
-        // Add Family Members
-        if (h.familyMembers && Array.isArray(h.familyMembers)) {
-          h.familyMembers.forEach((m: any) => {
-            if (!m) return;
-            const member = {
-              gender: m.gender || 'Laki-laki',
-              age: calculateAge(m.birthDate),
-              job: m.job || 'Lainnya',
-              religion: h.religion || 'Lainnya',
-              education: m.education || 'Lainnya'
-            };
-            allResidents.push(member);
-            religions[member.religion] = (religions[member.religion] || 0) + 1;
-            educations[member.education] = (educations[member.education] || 0) + 1;
-            jobs[member.job] = (jobs[member.job] || 0) + 1;
-          });
-        }
-      }
-    });
-
-    const ageGroups = {
-      bayi: allResidents.filter(r => r.age < 1).length,
-      balita: allResidents.filter(r => r.age >= 1 && r.age <= 5).length,
-      anak: allResidents.filter(r => r.age > 5 && r.age <= 12).length,
-      remaja: allResidents.filter(r => r.age > 12 && r.age <= 18).length,
-      dewasa: allResidents.filter(r => r.age > 18 && r.age <= 55).length,
-      lansia: allResidents.filter(r => r.age > 55).length,
-    };
-
-    const ageDistribution = [
-      { name: 'Bayi', value: ageGroups.bayi, color: '#fb7185' },
-      { name: 'Balita', value: ageGroups.balita, color: '#fb923c' },
-      { name: 'Anak', value: ageGroups.anak, color: '#3b82f6' },
-      { name: 'Remaja', value: ageGroups.remaja, color: '#6366f1' },
-      { name: 'Dewasa', value: ageGroups.dewasa, color: '#10b981' },
-      { name: 'Lansia', value: ageGroups.lansia, color: '#f59e0b' },
-    ].filter(d => d.value > 0);
-
-    const genderDistribution = [
-      { name: 'Laki-laki', value: allResidents.filter(r => r.gender === 'Laki-laki').length, color: '#3b82f6' },
-      { name: 'Perempuan', value: allResidents.filter(r => r.gender === 'Perempuan').length, color: '#ec4899' },
-    ];
-
-    const religionData = Object.entries(religions).map(([name, value]) => ({ name, value }));
-    const educationData = Object.entries(educations).map(([name, value]) => ({ name, value }));
-    const occupationData = Object.entries(jobs).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 6);
-
-    return {
-      totalOccupants: allResidents.length,
-      ageGroups,
-      ageDistribution,
-      genderDistribution,
-      religionData,
-      educationData,
-      occupationData,
-      vulnerable: {
-        pregnant: totalPregnant,
-        babies: totalBabies,
-        toddlers: totalToddlers,
-        children: totalChildren,
-        teenagers: totalTeenagers,
-        adults: totalAdults,
-        elderly: totalElderly,
-        widows: totalWidows,
-        pkh: totalPKH,
-        blt: totalBLT,
-        bansos: totalBansosLain
-      }
-    };
-  }, [houses]);
-
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
@@ -365,7 +233,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, repor
                   </div>
                 </div>
                 <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Total Warga</h3>
-                <p className="text-2xl font-black text-slate-900">{demographicStats.totalOccupants} <span className="text-sm font-bold text-slate-400">Jiwa</span></p>
+                <p className="text-2xl font-black text-slate-900">{houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0)} <span className="text-sm font-bold text-slate-400">Jiwa</span></p>
               </motion.div>
             </div>
 
@@ -451,120 +319,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, repor
             exit={{ opacity: 0, y: -10 }}
             className="space-y-10"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Age Distribution */}
-              <motion.div variants={cardVariants} className="lg:col-span-2 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight mb-6">Distribusi Usia</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                  <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={demographicStats.ageDistribution}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={90}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {demographicStats.ageDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="space-y-3">
-                    {demographicStats.ageDistribution.map((item) => (
-                      <div key={item.name} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                          <span className="text-xs font-bold text-slate-600">{item.name}</span>
-                        </div>
-                        <span className="text-xs font-black text-slate-900">{item.value} Jiwa</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Gender Distribution */}
-              <motion.div variants={cardVariants} className="bg-indigo-600 p-8 rounded-[3rem] text-white shadow-xl shadow-indigo-600/20">
-                <h3 className="text-xl font-black tracking-tight mb-8">Keseimbangan Gender</h3>
-                <div className="space-y-8">
-                  {demographicStats.genderDistribution.map((item, i) => (
-                    <div key={item.name} className="space-y-2">
-                      <div className="flex justify-between items-end">
-                        <span className="text-sm font-bold">{item.name}</span>
-                        <span className="text-2xl font-black">{item.value}</span>
-                      </div>
-                      <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(item.value / demographicStats.totalOccupants) * 100}%` }}
-                          className={`h-full rounded-full ${i === 0 ? 'bg-blue-400' : 'bg-pink-400'}`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Occupation Bar Chart */}
-              <motion.div variants={cardVariants} className="lg:col-span-2 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight mb-6">Sebaran Pekerjaan (Top 6)</h3>
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={demographicStats.occupationData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                      <XAxis type="number" hide />
-                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#64748b' }} width={100} />
-                      <Tooltip cursor={{ fill: '#f8fafc' }} />
-                      <Bar dataKey="value" fill="#6366f1" radius={[0, 10, 10, 0]} barSize={20}>
-                        {demographicStats.occupationData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </motion.div>
-
-              {/* Education */}
-              <motion.div variants={cardVariants} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight mb-6">Pendidikan</h3>
-                <div className="space-y-4">
-                  {demographicStats.educationData.slice(0, 5).map((item) => (
-                    <div key={item.name} className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-600">{item.name}</span>
-                      <span className="text-xs font-black text-slate-900">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Vulnerable Groups Bento */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {[
-                { label: 'Ibu Hamil', value: demographicStats.vulnerable.pregnant, icon: Heart, color: 'rose' },
-                { label: 'Bayi', value: demographicStats.vulnerable.babies, icon: Baby, color: 'sky' },
-                { label: 'Balita', value: demographicStats.vulnerable.toddlers, icon: Sparkles, color: 'emerald' },
-                { label: 'Lansia', value: demographicStats.vulnerable.elderly, icon: User, color: 'amber' },
-                { label: 'Penerima PKH', value: demographicStats.vulnerable.pkh, icon: FileText, color: 'indigo' },
-                { label: 'Penerima BLT', value: demographicStats.vulnerable.blt, icon: DollarSign, color: 'emerald' }
-              ].map((item) => (
-                <div key={item.label} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
-                  <div className={`p-3 bg-${item.color}-50 text-${item.color}-600 rounded-2xl mb-2`}>
-                    <item.icon size={18} />
-                  </div>
-                  <h4 className="text-xl font-black text-slate-900">{item.value}</h4>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
-                </div>
-              ))}
-            </div>
+            <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />
           </motion.div>
         )}
 

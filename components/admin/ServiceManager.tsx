@@ -12,6 +12,7 @@ import { SignaturePad } from './SignaturePad';
 import { OfficialLetterManager } from './OfficialLetterManager';
 import { LetterArchiveManager } from './LetterArchiveManager';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface ServiceManagerProps {
   reports: Report[];
@@ -40,6 +41,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const [adminLetterNumber, setAdminLetterNumber] = useState('');
   const [editLetterData, setEditLetterData] = useState<Partial<LetterRequest>>({});
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const confirm = useConfirm();
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [tempSignature, setTempSignature] = useState<string | null>(null);
@@ -140,7 +142,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   };
 
   const handleUpdateLetterStatus = async (id: string, status: 'Disetujui' | 'Ditolak', letter?: LetterRequest, tempSignature?: string | null) => {
-    if (window.confirm(`Ubah status surat menjadi ${status}?`)) {
+    const isConfirmed = await confirm({
+      title: 'Update Status Surat',
+      message: `Apakah Anda yakin ingin mengubah status pengajuan surat ini menjadi ${status}?`,
+      confirmLabel: 'Ubah Status',
+      isDanger: status === 'Ditolak'
+    });
+
+    if (isConfirmed) {
       try {
         await updateLetterStatus(id, status, status === 'Disetujui' ? letterNumberInput : undefined);
         await logAction('Update Status Surat', `Ubah status surat ${id} menjadi ${status}`);
@@ -222,7 +231,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   };
 
   const handleUpdateReportStatus = async (id: string, status: 'Diproses' | 'Selesai') => {
-    if (window.confirm(`Ubah status laporan menjadi ${status}?`)) {
+    const isConfirmed = await confirm({
+      title: 'Update Status Laporan',
+      message: `Apakah Anda yakin ingin mengubah status laporan warga ini menjadi ${status}?`,
+      confirmLabel: 'Update Status'
+    });
+
+    if (isConfirmed) {
       try {
         await updateReportStatus(id, status);
         await logAction('Update Status Laporan', `Ubah status laporan ${id} menjadi ${status}`);
@@ -236,11 +251,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   };
 
   const handleArchiveReport = async (id: string) => {
-    if (window.confirm('Arsipkan laporan ini? Laporan tidak akan muncul di daftar utama.')) {
+    const isConfirmed = await confirm({
+      title: 'Arsipkan Laporan',
+      message: 'Arsipkan laporan ini? Laporan tidak akan muncul di daftar utama.',
+      confirmLabel: 'Arsipkan'
+    });
+
+    if (isConfirmed) {
       try {
         await updateReportStatus(id, 'Selesai'); // Ensure it's finished
-        await updateLetterInDb(id, { archived: true } as any); // Reusing updateLetterInDb for generic update if possible, or I should have added updateReportInDb
-        // Actually I'll just use updateDoc directly in a new function or use the one I added
         const { updateDoc, doc } = await import('firebase/firestore');
         const { db } = await import('../../services/firebaseConfig');
         await updateDoc(doc(db, 'reports', id), { archived: true });
@@ -253,7 +272,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   };
 
   const handleArchiveLetter = async (id: string) => {
-    if (window.confirm('Arsipkan surat ini? Surat tidak akan muncul di daftar utama.')) {
+    const isConfirmed = await confirm({
+      title: 'Arsipkan Surat',
+      message: 'Arsipkan surat ini? Surat tidak akan muncul di daftar utama.',
+      confirmLabel: 'Arsipkan'
+    });
+
+    if (isConfirmed) {
       try {
         await updateLetterInDb(id, { archived: true });
         toast.success('Surat berhasil diarsipkan.');
@@ -312,7 +337,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   };
 
   const handleDeleteLetter = async (id: string) => {
-    if (window.confirm('Hapus pengajuan surat ini secara permanen?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Pengajuan Surat',
+      message: 'Apakah Anda yakin ingin menghapus pengajuan surat ini secara permanen? Data yang sudah dihapus tidak dapat dikembalikan.',
+      confirmLabel: 'Hapus Permanen',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteLetterFromDb(id);
         toast.success('Pengajuan surat berhasil dihapus.');

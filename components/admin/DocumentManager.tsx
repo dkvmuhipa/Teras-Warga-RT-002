@@ -3,13 +3,15 @@ import { FileText, Plus, Trash2, Search, Filter, Upload, X, Clock, User, Downloa
 import { motion, AnimatePresence } from 'motion/react';
 import { Document } from '../../types';
 import { subscribeToDocuments, addDocumentToDb, deleteDocumentFromDb, uploadImageToStorage, handleFirestoreError, OperationType } from '../../services/databaseService';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface DocumentManagerProps {
   documents: Document[];
 }
 
 export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) => {
+  const confirm = useConfirm();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<'All' | Document['category']>('All');
   const [isAdding, setIsAdding] = useState(false);
@@ -62,7 +64,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus dokumen ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Dokumen',
+      message: 'Apakah Anda yakin ingin menghapus dokumen ini?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteDocumentFromDb(id);
         toast.success('Dokumen dihapus');

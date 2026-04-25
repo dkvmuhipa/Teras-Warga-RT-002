@@ -52,6 +52,7 @@ import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useConfirm, usePrompt } from '../../context/ConfirmContext';
 
 interface ResidentManagerProps {
   role: Role;
@@ -188,27 +189,47 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   });
 
   const handleGenerateAllPins = async () => {
-    if (window.confirm('Apakah Anda yakin ingin meng-generate PIN untuk semua warga yang belum memiliki PIN?')) {
-        setIsGenerating(true);
-        try {
-            const count = await generateAllAccessCodes(houses);
-            if (count > 0) {
-              toast.success(`PIN berhasil di-generate untuk ${count} warga yang belum memiliki PIN.`);
-            } else {
-              toast.info('Semua data warga sudah memiliki PIN. Tidak ada PIN baru yang di-generate.');
-            }
-        } catch (e) {
-            handleFirestoreError(e, OperationType.UPDATE, "houses");
-            toast.error('Gagal meng-generate PIN.');
-        } finally {
-            setIsGenerating(false);
-        }
+    const isConfirmed = await confirm({
+      title: 'Generate PIN Warga',
+      message: 'Apakah Anda yakin ingin meng-generate PIN untuk semua warga yang belum memiliki PIN? Ini akan memudahkan warga untuk login ke aplikasi.',
+      confirmLabel: 'Generate PIN'
+    });
+
+    if (isConfirmed) {
+      setIsGenerating(true);
+      try {
+          const count = await generateAllAccessCodes(houses);
+          if (count > 0) {
+            toast.success(`PIN berhasil di-generate untuk ${count} warga yang belum memiliki PIN.`);
+          } else {
+            toast.info('Semua data warga sudah memiliki PIN. Tidak ada PIN baru yang di-generate.');
+          }
+      } catch (e) {
+          handleFirestoreError(e, OperationType.UPDATE, "houses");
+          toast.error('Gagal meng-generate PIN.');
+      } finally {
+          setIsGenerating(false);
+      }
     }
   };
 
   const handleCleanupPlaceholders = async () => {
-    if (window.confirm('Aksi ini akan mengubah status semua data dengan nama default "Warga [Blok]-[Nomor]" menjadi "Kosong" (Empty) dan mengosongkan detail data mereka. Lanjutkan?')) {
-        const verification = window.prompt('Ketik "BERSIHKAN" untuk mengonfirmasi pembersihan data warga default:');
+    const isConfirmed = await confirm({
+        title: 'Bersihkan Data Default',
+        message: 'Aksi ini akan mengubah status semua data dengan nama default "Warga [Blok]-[Nomor]" menjadi "Kosong" (Empty) dan mengosongkan detail data mereka. Apakah Anda yakin ingin melanjutkan?',
+        confirmLabel: 'Ya, Bersihkan',
+        isDanger: true
+    });
+
+    if (isConfirmed) {
+        const verification = await prompt({
+            title: 'Konfirmasi Keamanan',
+            message: 'Ketik "BERSIHKAN" untuk mengonfirmasi pembersihan data warga default:',
+            confirmLabel: 'Bersihkan Sekarang',
+            placeholder: 'BERSIHKAN',
+            isDanger: true
+        });
+
         if (verification !== 'BERSIHKAN') {
             if (verification !== null) toast.error('Verifikasi gagal. Kata kunci tidak cocok.');
             return;
@@ -278,7 +299,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (window.confirm('Apakah Anda yakin ingin mengupload data ini? Data yang sudah ada di sistem (berdasarkan Blok dan Nomor) akan diupdate dengan data dari file Excel ini.')) {
+    const isConfirmed = await confirm({
+      title: 'Import Data Excel',
+      message: 'Apakah Anda yakin ingin mengupload data ini? Data yang sudah ada di sistem (berdasarkan Blok dan Nomor) akan diupdate dengan data dari file Excel ini.',
+      confirmLabel: 'Upload & Update',
+      confirmIcon: <Upload size={18} />
+    });
+
+    if (isConfirmed) {
       setIsUploading(true);
       try {
         const parsedData = await parseExcelFile(file);
@@ -392,9 +420,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     }
   };
 
-  const handleBulkVerify = async () => {
+  const handleBulkVerify = () => {
     if (selectedIds.size === 0) return;
-    if (window.confirm(`Apakah Anda yakin ingin memverifikasi ${selectedIds.size} warga terpilih?`)) {
+    setConfirmState({
+      isOpen: true,
+      title: 'Verifikasi Massal',
+      message: `Apakah Anda yakin ingin memverifikasi ${selectedIds.size} warga terpilih secara sekaligus?`,
+      confirmLabel: 'Verifikasi',
+      onConfirm: async () => {
         try {
             const updates = Array.from(selectedIds).map(id => ({ id, isVerified: true }));
             await batchUpdateHouses(updates);
@@ -405,12 +438,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             handleFirestoreError(e, OperationType.UPDATE, "houses");
             toast.error('Gagal memverifikasi warga.');
         }
-    }
+      }
+    });
   };
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = () => {
     if (selectedIds.size === 0) return;
-    if (window.confirm(`PERINGATAN: Apakah Anda yakin ingin MENGHAPUS PERMANEN ${selectedIds.size} warga terpilih?`)) {
+    setConfirmState({
+      isOpen: true,
+      title: 'Hapus Massal Warga',
+      message: `PERINGATAN: Apakah Anda yakin ingin MENGHAPUS PERMANEN ${selectedIds.size} warga terpilih? Tindakan ini tidak dapat dibatalkan.`,
+      confirmLabel: 'Hapus Semua',
+      isDanger: true,
+      onConfirm: async () => {
         try {
             for (const id of Array.from(selectedIds)) {
                 const houseToDelete = houses.find(h => h.id === id);
@@ -440,7 +480,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             handleFirestoreError(e, OperationType.DELETE, "houses");
             toast.error('Gagal menghapus warga terpilih.');
         }
-    }
+      }
+    });
   };
 
   const resetForm = () => {
@@ -830,6 +871,49 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               familyCount: oldHouse.occupants || 1
             }
           });
+        } else if (oldHouse.status === 'Occupied' && data.status === 'Occupied') {
+          // 4. Case: Addition of family members (including births)
+          const oldOccupants = oldHouse.occupants || 1;
+          const newOccupants = data.occupants || 1;
+          const oldFamilyCount = oldHouse.familyMembers?.length || 0;
+          const newFamilyCount = data.familyMembers?.length || 0;
+          
+          if (newOccupants > oldOccupants || newFamilyCount > oldFamilyCount || data.headOfFamily !== oldHouse.headOfFamily) {
+            const isNewHead = data.headOfFamily !== oldHouse.headOfFamily;
+            const diff = Math.max(newOccupants - oldOccupants, newFamilyCount - oldFamilyCount, 0);
+            const oldBabyCount = oldHouse.babyCount || 0;
+            const newBabyCount = data.babyCount || 0;
+            const isBirth = newBabyCount > oldBabyCount;
+
+            await addPopulationLogToDb({
+              id: Date.now().toString(),
+              type: isNewHead ? 'Newcomer' : (isBirth ? 'Birth' : 'Newcomer'),
+              name: data.headOfFamily,
+              phone: data.phone,
+              houseId: data.id,
+              date: logDate,
+              description: isNewHead 
+                ? 'Pergantian Kepala Keluarga / Warga Baru'
+                : (isBirth 
+                  ? `Kelahiran ${newBabyCount - oldBabyCount} bayi baru di keluarga` 
+                  : `Penambahan ${diff} anggota keluarga baru`),
+              details: {
+                previousAddress: isBirth ? 'Lahir di RT 02' : '-',
+                reasonForMoving: isNewHead ? 'Pindahan / Ganti KK' : (isBirth ? 'Kelahiran' : 'Penambahan Anggota Keluarga'),
+                familyCount: isNewHead ? (data.occupants || 1) : diff,
+                familyMembers: data.familyMembers || [],
+                residenceType: data.residenceType || 'Tetap',
+                religion: data.religion || '-',
+                vulnerability: vulnerability,
+                kkNumber: data.kkNumber || '-',
+                jobCategory: data.jobCategory || '-',
+                education: data.education || '-',
+                // For Birth specific fields in details
+                gender: isBirth ? 'Laki-laki/Perempuan' : undefined,
+                motherName: isBirth ? data.headOfFamily : undefined // Placeholder or logic to find mother
+              }
+            });
+          }
         }
       }
 
@@ -897,39 +981,46 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setSelectedIds(newSet);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data warga ini?')) {
-      try {
-        const houseToDelete = houses.find(h => h.id === id);
-        await deleteHouseFromDb(id);
-        
-        if (houseToDelete && houseToDelete.status === 'Occupied') {
-          await addPopulationLogToDb({
-            id: Date.now().toString(),
-            type: 'MovedOut',
-            name: houseToDelete.headOfFamily,
-            phone: houseToDelete.phone,
-            houseId: houseToDelete.id,
-            date: new Date().toISOString().split('T')[0],
-            description: 'Data warga dihapus dari sistem',
-            details: {
-              newAddress: '-',
-              reasonForMoving: '-',
-              familyCount: houseToDelete.occupants || 1
-            }
-          });
-        }
+  const handleDelete = (id: string) => {
+    const houseToDelete = houses.find(h => h.id === id);
+    setConfirmState({
+      isOpen: true,
+      title: 'Hapus Data Warga',
+      message: `Apakah Anda yakin ingin menghapus data warga di ${houseToDelete?.block}-${houseToDelete?.number} (${houseToDelete?.headOfFamily || 'Kosong'})? Tindakan ini tidak dapat dibatalkan.`,
+      confirmLabel: 'Hapus Permanen',
+      isDanger: true,
+      onConfirm: async () => {
+        try {
+          await deleteHouseFromDb(id);
+          
+          if (houseToDelete && houseToDelete.status === 'Occupied') {
+            await addPopulationLogToDb({
+              id: Date.now().toString(),
+              type: 'MovedOut',
+              name: houseToDelete.headOfFamily,
+              phone: houseToDelete.phone,
+              houseId: houseToDelete.id,
+              date: new Date().toISOString().split('T')[0],
+              description: 'Data warga dihapus dari sistem',
+              details: {
+                newAddress: '-',
+                reasonForMoving: '-',
+                familyCount: houseToDelete.occupants || 1
+              }
+            });
+          }
 
-        toast.success('Data warga dihapus.');
-        if (selectedResident?.id === id) {
-          setIsDrawerOpen(false);
-          setSelectedResident(null);
+          toast.success('Data warga dihapus.');
+          if (selectedResident?.id === id) {
+            setIsDrawerOpen(false);
+            setSelectedResident(null);
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.DELETE, "houses");
+          toast.error('Gagal menghapus data warga.');
         }
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, "houses");
-        toast.error('Gagal menghapus data warga.');
       }
-    }
+    });
   };
 
   const openDetail = (house: House) => {
@@ -940,7 +1031,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const handleSendWhatsApp = async (house: House) => {
     if (!house.phone) return toast.error('Nomor WhatsApp tidak tersedia.');
     
-    const message = window.prompt(`Kirim pesan WhatsApp ke ${house.headOfFamily}:`, `Halo Bapak/Ibu ${house.headOfFamily}, ada informasi dari pengurus RT 02...`);
+    const defaultMsg = `Halo Bapak/Ibu ${house.headOfFamily}, ada informasi dari pengurus RT 02...`;
+    const message = await prompt({
+      title: `Kirim WhatsApp ke ${house.headOfFamily}`,
+      message: 'Masukkan pesan yang ingin dikirim:',
+      initialValue: defaultMsg,
+      placeholder: 'Tulis pesan di sini...'
+    });
     
     if (message) {
       try {

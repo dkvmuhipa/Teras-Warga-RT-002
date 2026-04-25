@@ -18,6 +18,7 @@ import {
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { DashboardOverview } from './DashboardOverview';
+import { useConfirm } from '../../context/ConfirmContext';
 import { ResidentManager } from './ResidentManager';
 import { FinanceManager } from './FinanceManager';
 import { ContentManager } from './ContentManager';
@@ -87,6 +88,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   houses, announcements, news, cashFlow, officials, reports, letters, 
   ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, settings, onUpdateSettings
 }) => {
+  const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
@@ -126,9 +128,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             pdfConfig={pdfConfig} 
             setPdfConfig={setPdfConfig} 
             onDeleteReport={async (id) => {
-              if (window.confirm('Hapus laporan warga ini?')) {
+              const isConfirmed = await confirm({
+                title: 'Hapus Laporan',
+                message: 'Apakah Anda yakin ingin menghapus laporan warga ini?',
+                confirmLabel: 'Hapus',
+                isDanger: true
+              });
+
+              if (isConfirmed) {
                 try {
                   await deleteReportFromDb(id);
+                  toast.success('Laporan berhasil dihapus.');
                 } catch (error) {
                   handleFirestoreError(error, OperationType.DELETE, `reports/${id}`);
                 }
@@ -153,7 +163,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <NotificationCombined 
             notifications={notifications} 
             onDeleteNotification={async (id) => {
-              if (window.confirm('Hapus notifikasi ini?')) {
+              const isConfirmed = await confirm({
+                title: 'Hapus Notifikasi',
+                message: 'Apakah Anda yakin ingin menghapus notifikasi ini?',
+                confirmLabel: 'Hapus',
+                isDanger: true
+              });
+
+              if (isConfirmed) {
                 try {
                   await deleteNotificationFromDb(id);
                 } catch (error) {
@@ -190,7 +207,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               }
             }}
             onDeleteReport={async (id) => {
-              if (window.confirm('Hapus laporan kependudukan ini?')) {
+              const isConfirmed = await confirm({
+                title: 'Hapus Laporan',
+                message: 'Apakah Anda yakin ingin menghapus laporan kependudukan ini?',
+                confirmLabel: 'Hapus',
+                isDanger: true
+              });
+
+              if (isConfirmed) {
                 try {
                   await deletePopulationReportFromDb(id);
                 } catch (error) {

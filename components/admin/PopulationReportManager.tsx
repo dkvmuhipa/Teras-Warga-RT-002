@@ -1,16 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
 import { generatePopulationReportPDF } from '../../services/pdfService';
+import { generatePopulationReportExcel } from '../../services/excelService';
 import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { 
   Plus, FileText, Trash2, TrendingUp, TrendingDown, 
   Users, Baby, Accessibility, Heart, User, 
-  Calendar, ArrowRight, Activity, Clock, Filter,
-  BarChart3, PieChart as PieChartIcon, List, LayoutGrid, Download, Edit2
+  Calendar, ArrowRight, Activity, Clock, Filter, Search, MapPin as MapIcon,
+  BarChart3, PieChart as PieChartIcon, List, LayoutGrid, Download, Edit2,
+  RefreshCw, Filter as FilterIcon
 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { motion, AnimatePresence } from 'motion/react';
+import { useConfirm } from '../../context/ConfirmContext';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, BarChart, Bar, Cell, Legend 
@@ -29,11 +32,14 @@ interface PopulationReportManagerProps {
 export const PopulationReportManager: React.FC<PopulationReportManagerProps> = ({ 
   reports, onAddReport, onUpdateReport, onDeleteReport, populationLogs, setPopulationLogs, houses 
 }) => {
+  const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [editingReportId, setEditingReportId] = useState<string | null>(null);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [logSearchTerm, setLogSearchTerm] = useState('');
+  const [logTypeFilter, setLogTypeFilter] = useState<'All' | 'Newcomer' | 'MovedOut' | 'Birth' | 'Death'>('All');
   const [autoUpdateHouse, setAutoUpdateHouse] = useState(true);
   const [formData, setFormData] = useState<Omit<PopulationReport, 'id' | 'createdAt'>>({
     month: new Date().toISOString().slice(0, 7),
@@ -86,6 +92,15 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   });
 
   const handleSyncAllResidents = async () => {
+    const isConfirmed = await confirm({
+      title: 'Sinkronisasi Data Warga',
+      message: 'Sistem akan memeriksa semua warga yang "Menempati" (Occupied) namun belum memiliki catatan di Log Mutasi. Data lama yang sudah ada di sistem (Legacy Data) mungkin akan terdeteksi sebagai Warga Baru jika belum pernah dicatat. Apakah Anda ingin melanjutkan?',
+      confirmLabel: 'Sync Semua Data',
+      cancelLabel: 'Batal'
+    });
+
+    if (!isConfirmed) return;
+
     let syncCount = 0;
     for (const house of houses) {
       if (house.status === 'Occupied' && house.joiningDate) {
@@ -248,6 +263,14 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       }
     });
 
+    // Try to find the previous month's report for initial population
+    const prevMonthStr = new Date(new Date(targetMonth + '-01').setMonth(new Date(targetMonth + '-01').getMonth() - 1)).toISOString().slice(0, 7);
+    const lastMonthReport = reports.find(r => r.month === prevMonthStr);
+    
+    let initialPopulation = lastMonthReport ? 
+      (lastMonthReport.initialPopulation + lastMonthReport.birthCount + lastMonthReport.newcomerCount - lastMonthReport.movedOutCount - (lastMonthReport.deathCount || 0)) : 
+      (currentTotal - (newcomerCount - movedOutCount));
+
     if (missingLogs.length > 0) {
       toast.success(`Berhasil menyinkronkan ${missingLogs.length} data warga baru ke dalam log mutasi.`);
     }
@@ -269,7 +292,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       adultCount: currentAdult,
       elderlyCount: currentElderly,
       widowCount: currentWidow,
-      initialPopulation: currentTotal - (newcomerCount - movedOutCount) // Estimate initial population
+      initialPopulation: initialPopulation
     }));
     setEditingReportId(null);
     setIsModalOpen(true);
@@ -445,8 +468,16 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   };
 
   const handleDeleteLog = async (id: string) => {
-    if (window.confirm('Hapus log mutasi ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Log Mutasi',
+      message: 'Apakah Anda yakin ingin menghapus catatan mutasi ini? Data yang sudah dihapus tidak dapat dikembalikan.',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       await deletePopulationLogFromDb(id);
+      toast.success('Log mutasi berhasil dihapus.');
     }
   };
 
@@ -457,6 +488,15 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       mutasi: r.birthCount + r.newcomerCount - r.movedOutCount - (r.deathCount || 0)
     })).slice(-6);
   }, [reports]);
+
+  const filteredLogs = useMemo(() => {
+    return populationLogs.filter(log => {
+      const matchesSearch = (log.name || '').toLowerCase().includes(logSearchTerm.toLowerCase()) || 
+                           (log.houseId || '').toLowerCase().includes(logSearchTerm.toLowerCase());
+      const matchesFilter = logTypeFilter === 'All' || log.type === logTypeFilter;
+      return matchesSearch && matchesFilter;
+    }).sort((a, b) => b.date.localeCompare(a.date));
+  }, [populationLogs, logSearchTerm, logTypeFilter]);
 
   const latestReport = reports[reports.length - 1];
   const totalPopulation = latestReport ? (latestReport.initialPopulation + latestReport.birthCount + latestReport.newcomerCount - latestReport.movedOutCount - (latestReport.deathCount || 0)) : 0;
@@ -481,10 +521,17 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Laporan Kependudukan</h2>
-          <p className="text-slate-500 font-medium mt-1">Analisis pertumbuhan dan mutasi penduduk RT 02.</p>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Mutasi & Laporan Penduduk</h2>
+          <p className="text-slate-500 font-medium mt-1">Kelola log mutasi dan rekapitulasi data kependudukan per periode.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={() => generatePopulationReportExcel(reports, populationLogs)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+            title="Export Excel"
+          >
+            <Download size={18} className="text-indigo-600" /> Excel
+          </button>
           <button 
             onClick={() => {
               setLogFormData({
@@ -735,9 +782,16 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                           <Download size={18} />
                         </button>
                         <button 
-                          onClick={() => {
-                            if (window.confirm("Apakah Anda yakin ingin menghapus laporan ini?")) {
+                          onClick={async () => {
+                            const isConfirmed = await confirm({
+                              title: 'Hapus Laporan',
+                              message: 'Apakah Anda yakin ingin menghapus laporan bulanan ini?',
+                              confirmLabel: 'Hapus',
+                              isDanger: true
+                            });
+                            if (isConfirmed) {
                               onDeleteReport(r.id);
+                              toast.success('Laporan berhasil dihapus.');
                             }
                           }} 
                           className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
@@ -794,111 +848,111 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       </motion.div>
 
       {/* Mutation Log Section */}
-      <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-slate-100 flex justify-between items-center">
+      <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
+        <div className="p-8 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><Activity size={20} /></div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">Log Mutasi Penduduk</h3>
-              <p className="text-xs text-slate-500 font-medium">Daftar kejadian kependudukan real-time</p>
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">Log Mutasi Warga</h3>
+              <p className="text-xs text-slate-500 font-medium">Rekapitulasi perpindahan dan perubahan kependudukan real-time</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={handleSyncAllResidents}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-slate-200"
-            >
-              <Activity size={14} /> Sync Data Warga
-            </button>
-            <button className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline">Lihat Semua Log</button>
+          
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="relative group w-full sm:w-64">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+              <input 
+                type="text" 
+                placeholder="Cari nama atau rumah..."
+                value={logSearchTerm}
+                onChange={(e) => setLogSearchTerm(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-200 transition-all"
+              />
+            </div>
+            
+            <div className="flex gap-2">
+              <select 
+                value={logTypeFilter}
+                onChange={(e) => setLogTypeFilter(e.target.value as any)}
+                className="px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all cursor-pointer"
+              >
+                <option value="All">Semua Mutasi</option>
+                <option value="Newcomer">Warga Baru</option>
+                <option value="MovedOut">Pindah Keluar</option>
+                <option value="Birth">Kelahiran</option>
+                <option value="Death">Kematian</option>
+              </select>
+              
+              <button 
+                onClick={handleSyncAllResidents}
+                className="flex items-center gap-2 px-4 py-3 bg-indigo-50 text-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-100 active:scale-95"
+                title="Sinkronkan Data"
+              >
+                <Activity size={16} /> <span className="hidden sm:inline">Sync</span>
+              </button>
+            </div>
           </div>
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-slate-50/50 text-slate-500 font-bold">
               <tr>
-                <th className="p-6 text-left">Waktu</th>
-                <th className="p-6 text-left">Jenis Kejadian</th>
+                <th className="p-6 text-left">Tanggal</th>
+                <th className="p-6 text-left">Tipe Mutasi</th>
                 <th className="p-6 text-left">Nama Warga</th>
-                <th className="p-6 text-left">Lokasi</th>
-                <th className="p-6 text-left">Keterangan</th>
+                <th className="p-6 text-left">Rumah</th>
+                <th className="p-6 text-left">Keterangan & Detail</th>
                 <th className="p-6 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {populationLogs && populationLogs.length > 0 ? populationLogs.map(log => (
+              {filteredLogs.length > 0 ? filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="p-6">
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <Clock size={14} />
-                      <span className="font-bold">{new Date(log.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                  <td className="p-6 font-bold text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <Clock size={14} className="text-slate-400" />
+                      {new Date(log.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </div>
                   </td>
                   <td className="p-6">
-                    <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                      log.type === 'Birth' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                      log.type === 'Newcomer' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                      log.type === 'MovedOut' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                      'bg-rose-50 text-rose-600 border-rose-100'
-                    }`}>
-                      {log.type === 'Birth' ? 'Kelahiran' : log.type === 'Newcomer' ? 'Pendatang' : log.type === 'MovedOut' ? 'Pindah' : 'Kematian'}
+                    <span className={`
+                      px-3 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-wider
+                      ${log.type === 'Newcomer' ? 'bg-emerald-50 text-emerald-600' : 
+                        log.type === 'MovedOut' ? 'bg-amber-50 text-amber-600' : 
+                        log.type === 'Birth' ? 'bg-indigo-50 text-indigo-600' : 
+                        'bg-rose-50 text-rose-600'}
+                    `}>
+                      {log.type === 'Newcomer' ? 'Warga Baru' : 
+                       log.type === 'MovedOut' ? 'Pindah Keluar' : 
+                       log.type === 'Birth' ? 'Kelahiran' : 'Kematian'}
                     </span>
                   </td>
                   <td className="p-6">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400"><User size={14}/></div>
-                      <p className="font-black text-slate-800">{(log as any).name || '-'}</p>
+                      <div>
+                        <p className="font-black text-slate-800">{log.name}</p>
+                        {log.details?.familyCount && log.details.familyCount > 1 && (
+                          <p className="text-[9px] text-slate-400 font-bold uppercase">+{log.details.familyCount - 1} Anggota</p>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="p-6">
-                    <div className="flex items-center gap-1.5 text-slate-600 font-bold">
-                      <Calendar size={14} className="text-slate-300" />
+                    <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 text-slate-700 rounded-lg font-bold w-fit">
                       {log.houseId}
                     </div>
                   </td>
-                  <td className="p-6">
+                  <td className="p-6 max-w-sm">
                     <div className="space-y-2">
-                      <p className="text-slate-500 font-medium italic">{log.description}</p>
+                      <p className="text-slate-500 font-medium italic line-clamp-1" title={log.description}>{log.description || '-'}</p>
                       {log.details && (
-                        <div className="text-[10px] font-bold text-slate-500 bg-slate-100/50 p-3 rounded-xl border border-slate-200/50 grid grid-cols-1 gap-1">
+                        <div className="text-[10px] font-bold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 grid grid-cols-1 gap-1">
                           {log.type === 'Newcomer' && (
                             <>
                               <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Asal:</span> <span className="text-blue-600">{log.details.previousAddress}</span></div>
-                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Alasan:</span> <span className="text-blue-600">{log.details.reasonForMoving}</span></div>
-                              <div className="flex justify-between"><span>Anggota:</span> <span className="text-blue-600">{log.details.familyCount} Orang</span></div>
-                              {log.details.familyMembers && log.details.familyMembers.length > 0 && (
-                                <div className="mt-2 pt-2 border-t border-slate-200/30">
-                                  <p className="text-[9px] uppercase tracking-tighter text-slate-400 mb-1">Daftar Keluarga:</p>
-                                  {log.details.familyMembers.map((m: any, i: number) => (
-                                    <div key={i} className="flex justify-between text-[9px] gap-2">
-                                      <span className="truncate">{m.name}</span>
-                                      <span className="text-slate-400 shrink-0">({m.relationship})</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {log.details.residenceType && (
-                                <div className="flex justify-between border-t border-slate-200/30 pt-1 mt-1">
-                                  <span>Status:</span> <span className="text-emerald-600">{log.details.residenceType}</span>
-                                </div>
-                              )}
-                              {log.details.kkNumber && (
-                                <div className="flex justify-between border-t border-slate-200/30 pt-1 mt-1">
-                                  <span>No. KK:</span> <span className="text-slate-600">{log.details.kkNumber}</span>
-                                </div>
-                              )}
-                              {log.details.jobCategory && (
-                                <div className="flex justify-between border-t border-slate-200/30 pt-1 mt-1">
-                                  <span>Pekerjaan:</span> <span className="text-slate-600">{log.details.jobCategory}</span>
-                                </div>
-                              )}
-                              {log.details.vulnerability && log.details.vulnerability.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1 pt-1 border-t border-slate-200/30">
-                                  {log.details.vulnerability.map((v: string, i: number) => (
-                                    <span key={i} className="px-1.5 py-0.5 bg-rose-50 text-rose-600 rounded-md text-[8px] border border-rose-100">{v}</span>
-                                  ))}
-                                </div>
-                              )}
+                              <div className="flex justify-between"><span>Alasan:</span> <span className="text-blue-600">{log.details.reasonForMoving}</span></div>
                             </>
                           )}
                           {log.type === 'MovedOut' && (
@@ -909,9 +963,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                           )}
                           {log.type === 'Birth' && (
                             <>
-                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Ayah:</span> <span className="text-emerald-600">{log.details.fatherName}</span></div>
-                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Ibu:</span> <span className="text-emerald-600">{log.details.motherName}</span></div>
-                              <div className="flex justify-between"><span>JK:</span> <span className="text-emerald-600">{log.details.gender}</span></div>
+                              <div className="flex justify-between border-b border-slate-200/30 pb-1"><span>Orang Tua:</span> <span className="text-emerald-600">{log.details.fatherName}/{log.details.motherName}</span></div>
+                              <div className="flex justify-between"><span>Gender:</span> <span className="text-emerald-600">{log.details.gender}</span></div>
                             </>
                           )}
                           {log.type === 'Death' && (
@@ -924,28 +977,34 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                       )}
                     </div>
                   </td>
-                  <td className="p-6 text-center flex items-center justify-center gap-2">
-                    <button 
-                      onClick={() => handleEditLog(log)}
-                      className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-                      title="Edit Log"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteLog(log.id)}
-                      className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <td className="p-6 text-center">
+                    <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => handleEditLog(log)}
+                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                        title="Edit Log"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteLog(log.id)}
+                        className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                        title="Hapus Log"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={6} className="p-12 text-center">
-                    <div className="flex flex-col items-center gap-3 text-slate-400">
-                      <Activity size={48} strokeWidth={1} className="opacity-20" />
-                      <p className="text-sm font-bold italic">Belum ada log mutasi penduduk.</p>
+                  <td colSpan={6} className="p-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="p-6 bg-slate-50 rounded-full text-slate-300"><List size={48} /></div>
+                      <div>
+                        <p className="font-black text-slate-800 text-lg">Tidak ada data mutasi</p>
+                        <p className="text-slate-400 font-medium">Belum ada catatan mutasi yang sesuai dengan kriteria pencarian.</p>
+                      </div>
                     </div>
                   </td>
                 </tr>

@@ -6,6 +6,7 @@ import { Modal } from '../ui/Modal';
 import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel, handleFirestoreError, OperationType, isFirebaseConfigured } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface OfficialManagementProps {
   officials: Official[];
@@ -13,6 +14,7 @@ interface OfficialManagementProps {
 }
 
 export const OfficialManagement: React.FC<OfficialManagementProps> = ({ officials, houses }) => {
+  const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOfficialId, setEditingOfficialId] = useState<string | null>(null);
   
@@ -99,7 +101,14 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
   };
 
   const handleDeleteOfficial = async (id: string) => {
-    if (window.confirm('Hapus data pengurus ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Pengurus',
+      message: 'Apakah Anda yakin ingin menghapus data pengurus ini?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteOfficialFromDb(id);
         toast.success('Data pengurus berhasil dihapus.');

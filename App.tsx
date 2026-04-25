@@ -47,6 +47,7 @@ import { AdminRouteWrapper } from './components/AdminComponents';
 import { AdminDashboard } from './components/admin/AdminDashboard'; 
 import { DocumentManager } from './components/admin/DocumentManager';
 import { FinancialProvider } from './context/FinancialContext';
+import { useConfirm } from './context/ConfirmContext';
 import { ResidentRegistrationForm } from './components/ResidentRegistrationForm';
 import { GuestReportForm } from './components/GuestReportForm';
 import { ChatBot } from './components/ChatBot';
@@ -203,6 +204,7 @@ import { subscribeToMapPoints, subscribeToCollection,
 
 
 export const App = () => {
+  const confirm = useConfirm();
   const [houses, setHouses] = useState<House[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [news, setNews] = useState<News[]>([]);
@@ -421,13 +423,25 @@ export const App = () => {
                             notifications={notifications} 
                             onMarkRead={markNotificationAsRead} 
                             onDeleteNotification={async (id) => {
-                                if (window.confirm('Hapus notifikasi ini?')) {
-                                    await deleteNotificationFromDb(id);
+                                const isConfirmed = await confirm({
+                                    title: 'Hapus Notifikasi',
+                                    message: 'Apakah Anda yakin ingin menghapus notifikasi ini?',
+                                    confirmLabel: 'Hapus',
+                                    isDanger: true
+                                });
+                                if (isConfirmed) {
+                                  await deleteNotificationFromDb(id);
                                 }
                             }}
                             onDeleteAllNotifications={async () => {
-                                if (window.confirm('Hapus semua notifikasi?')) {
-                                    await deleteAllNotificationsFromDb();
+                                const isConfirmed = await confirm({
+                                    title: 'Hapus Semua Notifikasi',
+                                    message: 'Apakah Anda yakin ingin menghapus semua notifikasi?',
+                                    confirmLabel: 'Hapus Semua',
+                                    isDanger: true
+                                });
+                                if (isConfirmed) {
+                                  await deleteAllNotificationsFromDb();
                                 }
                             }}
                         />

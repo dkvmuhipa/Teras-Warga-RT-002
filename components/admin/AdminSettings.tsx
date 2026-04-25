@@ -7,6 +7,7 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { seedDatabase, deepSanitize, safeJsonStringify, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
+import { useConfirm, usePrompt } from '../../context/ConfirmContext';
 
 interface AdminSettingsProps {
   houses: House[];
@@ -31,6 +32,8 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   reports, letters, ronda, inventory, umkm, polls, rondaLogs, marketItems, notifications,
   settings, onUpdateSettings
 }) => {
+  const confirm = useConfirm();
+  const prompt = usePrompt();
   const [activeTab, setActiveTab] = useState<'profile' | 'system' | 'fees'>('profile');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -104,10 +107,24 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   };
 
   const handleResetSystem = async () => {
-    if (window.confirm('PERINGATAN: Semua data akan dihapus dan diganti dengan data dummy. Lanjutkan?')) {
-      const verification = window.prompt('Ketik "RESET" untuk mengonfirmasi reset database:');
+    const isConfirmed = await confirm({
+      title: 'Reset Database',
+      message: 'PERINGATAN: Semua data akan dihapus secara permanen dan diganti dengan data dummy awal. Apakah Anda yakin ingin melanjutkan tindakan berisiko ini?',
+      confirmLabel: 'Ya, Saya Yakin',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
+      const verification = await prompt({
+        title: 'Konfirmasi Keamanan',
+        message: 'Ketik "RESET" untuk mengonfirmasi reset database secara permanen:',
+        confirmLabel: 'Reset Sekarang',
+        placeholder: 'Ketik RESET di sini',
+        isDanger: true
+      });
+
       if (verification !== 'RESET') {
-        if (verification !== null) toast.error('Verifikasi gagal.');
+        if (verification !== null) toast.error('Verifikasi gagal. Kata kunci tidak cocok.');
         return;
       }
       try {

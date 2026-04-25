@@ -2,6 +2,7 @@ import React from 'react';
 import { User, Phone } from 'lucide-react';
 import { ResidentRegistration, PaymentStatus, House } from '../../../types';
 import { toast } from 'sonner';
+import { useConfirm } from '../../../context/ConfirmContext';
 import { formatHouseId, handleFirestoreError, OperationType } from '../../../services/databaseService';
 
 interface ResidentRegistrationListProps {
@@ -19,6 +20,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
   addHouse,
   addPopulationLogToDb,
 }) => {
+  const confirm = useConfirm();
   const searchLower = searchTerm.toLowerCase();
   const filteredRegistrations = residentRegistrations.filter(reg => {
     return reg.headOfFamily.toLowerCase().includes(searchLower) ||
@@ -85,25 +87,38 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                   <>
                     <button 
                       onClick={async () => {
-                        if(window.confirm('Tolak pendaftaran ini?')) {
-                          try {
-                            await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Rejected' });
-                            toast.success('Pendaftaran ditolak.');
-                          } catch (error) {
-                            handleFirestoreError(error, OperationType.UPDATE, `residentRegistrations/${reg.id}`);
-                            toast.error('Gagal menolak pendaftaran.');
-                          }
+                      const isConfirmed = await confirm({
+                        title: 'Tolak Pendaftaran',
+                        message: 'Apakah Anda yakin ingin menolak pendaftaran ini?',
+                        confirmLabel: 'Tolak',
+                        isDanger: true
+                      });
+
+                      if (isConfirmed) {
+                        try {
+                          await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Rejected' });
+                          toast.success('Pendaftaran ditolak.');
+                        } catch (error) {
+                          handleFirestoreError(error, OperationType.UPDATE, `residentRegistrations/${reg.id}`);
+                          toast.error('Gagal menolak pendaftaran.');
                         }
-                      }}
+                      }
+                    }}
                       className="flex-1 md:flex-none px-4 py-2 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all"
                     >
                       Tolak
                     </button>
                     <button 
                       onClick={async () => {
-                        if(window.confirm('Setujui pendaftaran ini? Data akan otomatis masuk ke daftar warga.')) {
-                          try {
-                            // 1. Add to houses
+                      const isConfirmed = await confirm({
+                        title: 'Setujui Pendaftaran',
+                        message: 'Apakah Anda yakin ingin menyetujui pendaftaran ini? Data warga akan otomatis ditambahkan ke sistem.',
+                        confirmLabel: 'Setujui',
+                      });
+
+                      if (isConfirmed) {
+                        try {
+                          // 1. Add to houses
                             await addHouse({
                               headOfFamily: reg.headOfFamily,
                               gender: reg.gender,

@@ -52,6 +52,11 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     const religions: Record<string, number> = {};
     const educations: Record<string, number> = {};
     const jobs: Record<string, number> = {};
+    const economicStatuses: Record<string, number> = {};
+    const bpjsStatuses: Record<string, number> = {};
+    const vaccinationStatuses: Record<string, number> = {};
+    const residenceTypes: Record<string, number> = {};
+    
     let totalVehicles = 0;
     let totalPregnant = 0;
     let totalBabies = 0;
@@ -86,13 +91,20 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
           age: calculateAge(h.birthDate),
           job: h.jobCategory || 'Lainnya',
           religion: h.religion || 'Lainnya',
-          education: h.education || 'Lainnya'
+          education: h.education || 'Lainnya',
+          economicStatus: h.economicStatus || 'Sejahtera',
+          bpjsStatus: h.bpjsStatus || 'Tidak Ada',
+          vaccinationStatus: h.vaccinationStatus || 'Belum'
         };
         allResidents.push(hoF);
         
         religions[hoF.religion] = (religions[hoF.religion] || 0) + 1;
         educations[hoF.education] = (educations[hoF.education] || 0) + 1;
         jobs[hoF.job] = (jobs[hoF.job] || 0) + 1;
+        economicStatuses[hoF.economicStatus] = (economicStatuses[hoF.economicStatus] || 0) + 1;
+        bpjsStatuses[hoF.bpjsStatus] = (bpjsStatuses[hoF.bpjsStatus] || 0) + 1;
+        vaccinationStatuses[hoF.vaccinationStatus] = (vaccinationStatuses[hoF.vaccinationStatus] || 0) + 1;
+        residenceTypes[h.residenceType || 'Tetap'] = (residenceTypes[h.residenceType || 'Tetap'] || 0) + 1;
         
         // Add Family Members
         if (h.familyMembers && Array.isArray(h.familyMembers)) {
@@ -103,12 +115,17 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
               age: calculateAge(m.birthDate),
               job: m.job || 'Lainnya',
               religion: h.religion || 'Lainnya', // Assume same as HoF if not specified
-              education: m.education || 'Lainnya'
+              education: m.education || 'Lainnya',
+              economicStatus: h.economicStatus || 'Sejahtera', // Usually same for family
+              bpjsStatus: m.bpjsStatus || 'Tidak Ada',
+              vaccinationStatus: m.vaccinationStatus || 'Belum'
             };
             allResidents.push(member);
             religions[member.religion] = (religions[member.religion] || 0) + 1;
             educations[member.education] = (educations[member.education] || 0) + 1;
             jobs[member.job] = (jobs[member.job] || 0) + 1;
+            bpjsStatuses[member.bpjsStatus] = (bpjsStatuses[member.bpjsStatus] || 0) + 1;
+            vaccinationStatuses[member.vaccinationStatus] = (vaccinationStatuses[member.vaccinationStatus] || 0) + 1;
           });
         }
       }
@@ -119,6 +136,10 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
       religions,
       educations,
       jobs,
+      economicStatuses,
+      bpjsStatuses,
+      vaccinationStatuses,
+      residenceTypes,
       totalVehicles,
       totalPregnant,
       totalBabies,
@@ -137,12 +158,37 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
 
   const { 
     allResidents, religions, educations, jobs, 
+    economicStatuses, bpjsStatuses, vaccinationStatuses, residenceTypes,
     totalVehicles, totalPregnant, totalBabies, 
     totalToddlers, totalChildren, totalTeenagers, totalAdults,
     totalElderly, totalWidows, totalPKH, totalBLT, totalBansosLain, totalOccupied 
   } = stats;
 
-  const totalResidents = allResidents.length || 1; // Prevent division by zero
+  const totalResidents = allResidents.length || 1; 
+  
+  // Data for new charts
+  const economicData = Object.entries(economicStatuses)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  const bpjsData = Object.entries(bpjsStatuses)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  const vaccinationData = Object.entries(vaccinationStatuses)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  const residenceTypeData = Object.entries(residenceTypes)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  const socialAssistanceData = [
+    { name: 'Penerima PKH', value: totalPKH, color: '#6366f1' },
+    { name: 'Penerima BLT', value: totalBLT, color: '#10b981' },
+    { name: 'Bansos Lain', value: totalBansosLain, color: '#f59e0b' },
+    { name: 'Non-Penerima', value: Math.max(0, totalOccupied - totalPKH - totalBLT - totalBansosLain), color: '#f1f5f9' }
+  ];
   
   // Age distribution
   const ageGroups = {
@@ -545,6 +591,103 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                       <span className="text-[10px] font-bold text-slate-500">{item.name}</span>
                     </div>
                   ))}
+                </div>
+              </motion.div>
+
+              {/* Economic Status - PROFESSIONAL CHART */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="lg:col-span-2 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm"
+              >
+                <div className="flex justify-between items-center mb-8">
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Kesejahteraan Ekonomi</h3>
+                    <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Pemetaan Status Ekonomi Warga</p>
+                  </div>
+                  <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-500">
+                    <DollarSign size={20} />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={economicData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {economicData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="space-y-4">
+                    {economicData.map((item, index) => (
+                      <div key={item.name} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                          <span className="text-sm font-bold text-slate-700">{item.name}</span>
+                        </div>
+                        <span className="text-sm font-black text-slate-900">{item.value} KK</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Health & Social Coverage */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm"
+              >
+                <h3 className="text-xl font-black text-slate-900 tracking-tight mb-2">Cakupan Kesehatan</h3>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Status BPJS & Vaksinasi</p>
+                
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Status BPJS</p>
+                    <div className="space-y-2">
+                      {bpjsData.map((item, i) => (
+                        <div key={item.name} className="flex flex-col gap-1">
+                          <div className="flex justify-between text-[10px] font-bold text-slate-600">
+                            <span>{item.name}</span>
+                            <span>{Math.round((item.value / totalResidents) * 100)}%</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-emerald-500" style={{ width: `${(item.value / totalResidents) * 100}%` }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Vaksinasi</p>
+                    <div className="space-y-2">
+                      {vaccinationData.map((item, i) => (
+                        <div key={item.name} className="flex flex-col gap-1">
+                          <div className="flex justify-between text-[10px] font-bold text-slate-600">
+                            <span>{item.name}</span>
+                            <span>{Math.round((item.value / totalResidents) * 100)}%</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-indigo-500" style={{ width: `${(item.value / totalResidents) * 100}%` }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </motion.div>
 

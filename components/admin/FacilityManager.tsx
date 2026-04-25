@@ -22,6 +22,7 @@ import { MapPointManager } from './MapPointManager';
 import { QrCode, Info, Share2 } from 'lucide-react';
 import { sendWhatsAppMessage, formatRondaScheduleForWhatsApp } from '../../services/whatsappService';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface FacilityManagerProps {
   ronda: RondaSchedule[];
@@ -37,6 +38,7 @@ interface FacilityManagerProps {
 }
 
 export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol, reports, officials, mapPoints, activePanicAlerts, rondaAttendance }) => {
+  const confirm = useConfirm();
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [isRondaModalOpen, setIsRondaModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -117,7 +119,13 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   };
 
   const handleAutoRotate = async () => {
-    if (!window.confirm("Sistem akan mengacak ulang seluruh jadwal ronda berdasarkan daftar kepala keluarga yang ada dengan prinsip keadilan (berdasarkan jumlah tugas) dan keragaman blok. Lanjutkan?")) return;
+    const isConfirmed = await confirm({
+      title: 'Acak Jadwal Ronda',
+      message: 'Sistem akan mengacak ulang seluruh jadwal ronda berdasarkan daftar kepala keluarga yang ada dengan prinsip keadilan (berdasarkan jumlah tugas) dan keragaman blok. Lanjutkan?',
+      confirmLabel: 'Acak Ulang',
+      isDanger: true
+    });
+    if (!isConfirmed) return;
 
     // Filter residents: Occupied, not exempt, has headOfFamily
     const eligibleHouses = houses
@@ -226,7 +234,13 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   };
 
   const handleClearSchedule = async () => {
-    if (!window.confirm("Sistem akan mengosongkan seluruh jadwal ronda. Lanjutkan?")) return;
+    const isConfirmed = await confirm({
+      title: 'Kosongkan Jadwal',
+      message: 'Sistem akan mengosongkan seluruh jadwal ronda. Lanjutkan?',
+      confirmLabel: 'Kosongkan',
+      isDanger: true
+    });
+    if (!isConfirmed) return;
     
     for (const schedule of ronda) {
       if (schedule.id) {

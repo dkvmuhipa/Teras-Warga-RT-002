@@ -3,6 +3,7 @@ import { DollarSign, Activity, AlertCircle, CreditCard, Mail, Download, Printer,
 import { House, PdfConfig } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 import { toast } from 'sonner';
+import { useConfirm } from '../../../context/ConfirmContext';
 import { handleFirestoreError, OperationType } from '../../../services/databaseService';
 import { generateIuranReportExcel } from '../../../services/excelService';
 
@@ -39,6 +40,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
   openPayModal,
   onSendWhatsApp,
 }) => {
+  const confirm = useConfirm();
   const [filterType, setFilterType] = React.useState<'All' | 'Air' | 'Sampah'>('All');
   const { 
     selectedMonth, 
@@ -317,7 +319,14 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                         </button>
                         <button 
                           onClick={async () => {
-                            if(window.confirm('Hapus catatan pembayaran ini?')) {
+                            const isConfirmed = await confirm({
+                              title: 'Hapus Pembayaran',
+                              message: 'Apakah Anda yakin ingin menghapus catatan pembayaran ini?',
+                              confirmLabel: 'Hapus',
+                              isDanger: true
+                            });
+
+                            if (isConfirmed) {
                               try {
                                 await deleteIuranPaymentFromDb(payment.id);
                                 toast.success('Catatan pembayaran dihapus.');

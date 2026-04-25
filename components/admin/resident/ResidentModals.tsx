@@ -377,7 +377,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                            <div className="flex gap-4">
                              <input 
                                className="flex-1 py-4 px-6 bg-white/5 border border-white/10 rounded-xl text-2xl font-bold text-white focus:bg-white/10 focus:border-indigo-400 transition-all outline-none text-center tracking-widest" 
-                               value={formData.accessCode} 
+                               value={formData.accessCode ?? ''} 
                                onChange={e => setFormData({...formData, accessCode: e.target.value})} 
                                placeholder="XXXXXX" 
                              />
@@ -421,7 +421,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Pendidikan Terakhir <span className="text-rose-500">*</span></label>
                       <select 
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
-                        value={formData.education} 
+                        value={formData.education ?? ''} 
                         onChange={e => setFormData({...formData, education: e.target.value})}
                       >
                         <option value="">Pilih Jenjang...</option>
@@ -434,7 +434,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Sektor Pekerjaan <span className="text-rose-500">*</span></label>
                       <select 
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
-                        value={formData.jobCategory} 
+                        value={formData.jobCategory ?? ''} 
                         onChange={e => setFormData({...formData, jobCategory: e.target.value})}
                       >
                         <option value="">Pilih Sektor...</option>
@@ -466,7 +466,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     </div>
                     <div className="md:col-span-3">
                       <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Status Ekonomi</label>
-                      <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white" value={formData.economicStatus} onChange={e => setFormData({...formData, economicStatus: e.target.value as any})}>
+                      <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white" value={formData.economicStatus ?? ''} onChange={e => setFormData({...formData, economicStatus: e.target.value as any})}>
                         <option value="Pra-Sejahtera">Pra-Sejahtera (Subsidi)</option>
                         <option value="Sejahtera">Sejahtera</option>
                         <option value="Mampu">Mampu / Mandiri</option>
@@ -523,7 +523,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                <input 
                                  placeholder="Sebutkan nama program bantuan..." 
                                  className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-900 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all outline-none"
-                                 value={formData.bansosLainName}
+                                 value={formData.bansosLainName ?? ''}
                                  onChange={e => setFormData({...formData, bansosLainName: e.target.value})}
                                />
                              </div>
@@ -660,7 +660,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               <label className="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest pl-1">Hubungan</label>
                               <select 
                                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all"
-                                value={member.relation}
+                                value={member.relation ?? ''}
                                 onChange={e => {
                                   const newMembers = [...formData.familyMembers];
                                   newMembers[idx].relation = e.target.value as any;
@@ -808,7 +808,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
     {multiline ? (
       <textarea 
         required={required}
-        value={value}
+        value={value ?? ''}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         rows={4}
@@ -818,7 +818,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
       <input 
         type={type}
         required={required}
-        value={value}
+        value={value ?? ''}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={maxLength}
@@ -1097,7 +1097,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     <input 
                       type="date"
                       className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm font-bold outline-none focus:border-indigo-400 transition-all font-mono"
-                      value={payDate}
+                      value={payDate ?? ''}
                       onChange={e => setPayDate(e.target.value)}
                     />
                  </div>
@@ -1106,7 +1106,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     <textarea 
                       className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm font-medium outline-none focus:border-indigo-400 transition-all placeholder:text-white/10 h-20 resize-none"
                       placeholder="Tulis catatan jika ada..."
-                      value={payNotes}
+                      value={payNotes ?? ''}
                       onChange={e => setPayNotes(e.target.value)}
                     />
                  </div>
@@ -1218,7 +1218,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
                 <select 
                   required
                   className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
-                  value={payType}
+                  value={payType ?? 'Both'}
                   onChange={e => setPayType(e.target.value as any)}
                 >
                   <option value="Both">Sepaket (Air & Sampah)</option>
@@ -1242,7 +1242,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
                     type="date"
                     required
                     className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
-                    value={payDate}
+                    value={payDate ?? ''}
                     onChange={e => setPayDate(e.target.value)}
                   />
                   <button 

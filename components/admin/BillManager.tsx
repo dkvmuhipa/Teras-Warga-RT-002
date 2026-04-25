@@ -4,6 +4,7 @@ import { Bill, House, BillItem } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { addBillToDb, updateBillInDb, deleteBillFromDb, generateMonthlyBills, logAction, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 interface BillManagerProps {
   bills: Bill[];
@@ -14,6 +15,20 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMonth, setFilterMonth] = useState('All');
+  
+  const [confirmState, setConfirmState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    isDanger?: boolean;
+    confirmLabel?: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
   
   // Form State
   const [selectedHouseId, setSelectedHouseId] = useState('');
@@ -79,46 +94,59 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
     }
   };
 
-  const handleGenerateMonthlyBills = async () => {
-    if (!confirm("Generate tagihan otomatis untuk semua rumah yang terisi?")) return;
-    
-    setIsGenerating(true);
-    const month = new Date().toISOString().slice(0, 7);
-    const dueDate = new Date();
-    dueDate.setDate(20);
-    const dueDateStr = dueDate.toISOString().slice(0, 10);
-    
-    const defaultItems = [
-      { name: 'Iuran Keamanan', amount: 25000, manager: 'Koord. Keamanan' },
-      { name: 'Iuran Kebersihan', amount: 15000, manager: 'Petugas Kebersihan' }
-    ];
+  const handleGenerateMonthlyBills = () => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Generate Tagihan Massal',
+      message: 'Apakah Anda yakin ingin meng-generate tagihan otomatis untuk semua rumah yang terisi? Sistem akan membuat tagihan iuran Keamanan dan Kebersihan standar untuk periode berjalan.',
+      confirmLabel: 'Generate Sekarang',
+      onConfirm: async () => {
+        setIsGenerating(true);
+        const month = new Date().toISOString().slice(0, 7);
+        const dueDate = new Date();
+        dueDate.setDate(20);
+        const dueDateStr = dueDate.toISOString().slice(0, 10);
+        
+        const defaultItems = [
+          { name: 'Iuran Keamanan', amount: 25000, manager: 'Koord. Keamanan' },
+          { name: 'Iuran Kebersihan', amount: 15000, manager: 'Petugas Kebersihan' }
+        ];
 
-    try {
-      const success = await generateMonthlyBills(month, dueDateStr, defaultItems);
-      if (success) {
-        await logAction('Generate Tagihan Massal', `Generate tagihan otomatis untuk periode ${month}`);
-        toast.success(`Berhasil generate tagihan untuk periode ${month}`);
-      } else {
-        toast.error("Gagal generate tagihan otomatis");
+        try {
+          const success = await generateMonthlyBills(month, dueDateStr, defaultItems);
+          if (success) {
+            await logAction('Generate Tagihan Massal', `Generate tagihan otomatis untuk periode ${month}`);
+            toast.success(`Berhasil generate tagihan untuk periode ${month}`);
+          } else {
+            toast.error("Gagal generate tagihan otomatis");
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.CREATE, "bills");
+          toast.error("Terjadi kesalahan saat generate tagihan");
+        } finally {
+          setIsGenerating(false);
+        }
       }
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, "bills");
-      toast.error("Terjadi kesalahan saat generate tagihan");
-    } finally {
-      setIsGenerating(false);
-    }
+    });
   };
 
-  const handleDeleteBill = async (id: string) => {
-    if (confirm("Hapus tagihan ini?")) {
-      try {
-        await deleteBillFromDb(id);
-        toast.success("Tagihan dihapus");
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `bills/${id}`);
-        toast.error("Gagal menghapus tagihan");
+  const handleDeleteBill = (id: string) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Hapus Tagihan',
+      message: 'Apakah Anda yakin ingin menghapus tagihan ini? Data yang sudah dihapus tidak dapat dikembalikan.',
+      confirmLabel: 'Hapus',
+      isDanger: true,
+      onConfirm: async () => {
+        try {
+          await deleteBillFromDb(id);
+          toast.success("Tagihan dihapus");
+        } catch (error) {
+          handleFirestoreError(error, OperationType.DELETE, `bills/${id}`);
+          toast.error("Gagal menghapus tagihan");
+        }
       }
-    }
+    });
   };
 
   const toggleItemStatus = async (bill: Bill, itemId: string) => {
@@ -488,6 +516,16 @@ export const BillManager: React.FC<BillManagerProps> = ({ bills, houses }) => {
           </div>
         )}
       </AnimatePresence>
+
+      <ConfirmDialog 
+        isOpen={confirmState.isOpen}
+        onClose={() => setConfirmState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmLabel={confirmState.confirmLabel}
+        isDanger={confirmState.isDanger}
+      />
     </div>
   );
 };

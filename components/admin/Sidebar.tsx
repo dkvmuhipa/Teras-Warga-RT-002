@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert,
-  PieChart, Activity, FileEdit, MessageSquare
+  PieChart, Activity, FileEdit, MessageSquare, FileClock
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
@@ -48,8 +48,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Kependudukan", 
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
-        { id: 'update-requests', icon: FileEdit, label: 'Update Data' },
-        { id: 'population-reports', icon: Users, label: 'Laporan Penduduk' },
+        { id: 'update-requests', icon: FileEdit, label: 'Update Data Warga' },
+        { id: 'population-reports', icon: FileClock, label: 'Mutasi & Laporan' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
         { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },
         { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },

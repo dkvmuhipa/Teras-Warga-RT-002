@@ -696,3 +696,99 @@ export const generateIuranReportExcel = async (
   saveAs(blob, `Laporan_Iuran_${typeLabel.replace(/\s+/g, '_')}_${month.replace(/\s+/g, '_')}.xlsx`);
 };
 
+export const generatePopulationReportExcel = async (reports: any[], logs: any[]) => {
+  const workbook = new ExcelJS.Workbook();
+  
+  // SHEET 1: REKAPITULASI LAPORAN
+  const reportSheet = workbook.addWorksheet('Rekapitulasi Laporan');
+  reportSheet.columns = [
+    { header: 'Periode', key: 'month', width: 15 },
+    { header: 'Tahun', key: 'year', width: 10 },
+    { header: 'Awal (Jiwa)', key: 'initialPopulation', width: 15 },
+    { header: 'Lahir', key: 'birthCount', width: 10 },
+    { header: 'Meninggal', key: 'deathCount', width: 10 },
+    { header: 'Masuk', key: 'newcomerCount', width: 10 },
+    { header: 'Keluar', key: 'movedOutCount', width: 10 },
+    { header: 'Akhir (Jiwa)', key: 'finalPopulation', width: 15 },
+    { header: 'Laki-laki', key: 'maleCount', width: 12 },
+    { header: 'Perempuan', key: 'femaleCount', width: 12 },
+    { header: 'Hamil', key: 'pregnantCount', width: 10 },
+    { header: 'Bayi/Balita', key: 'youngChildren', width: 15 },
+    { header: 'Lansia', key: 'elderlyCount', width: 10 },
+  ];
+
+  const headerRow = reportSheet.getRow(1);
+  headerRow.height = 30;
+  headerRow.eachCell(cell => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+
+  reports.sort((a, b) => b.month.localeCompare(a.month)).forEach(r => {
+    reportSheet.addRow({
+      month: r.month,
+      year: r.year,
+      initialPopulation: r.initialPopulation,
+      birthCount: r.birthCount,
+      deathCount: r.deathCount,
+      newcomerCount: r.newcomerCount,
+      movedOutCount: r.movedOutCount,
+      finalPopulation: r.initialPopulation + r.birthCount + r.newcomerCount - r.movedOutCount - (r.deathCount || 0),
+      maleCount: r.maleCount,
+      femaleCount: r.femaleCount,
+      pregnantCount: r.pregnantCount,
+      youngChildren: (r.babyCount || 0) + (r.toddlerCount || 0),
+      elderlyCount: r.elderlyCount
+    });
+  });
+
+  // SHEET 2: LOG MUTASI
+  const logSheet = workbook.addWorksheet('Log Mutasi Penduduk');
+  logSheet.columns = [
+    { header: 'Tanggal', key: 'date', width: 15 },
+    { header: 'Tipe Mutasi', key: 'type', width: 15 },
+    { header: 'Nama', key: 'name', width: 30 },
+    { header: 'Blok-No', key: 'houseId', width: 12 },
+    { header: 'Keterangan', key: 'description', width: 40 },
+    { header: 'Jumlah Keluarga', key: 'familyCount', width: 15 },
+    { header: 'Detail', key: 'details', width: 50 },
+  ];
+
+  const logHeaderRow = logSheet.getRow(1);
+  logHeaderRow.height = 30;
+  logHeaderRow.eachCell(cell => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE11D48' } }; // Rose-600
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+
+  logs.sort((a, b) => b.date.localeCompare(a.date)).forEach(l => {
+    let detailsStr = '';
+    if (l.type === 'Newcomer' && l.details) {
+      detailsStr = `Asal: ${l.details.previousAddress || '-'}. Alasan: ${l.details.reasonForMoving || '-'}`;
+    } else if (l.type === 'MovedOut' && l.details) {
+      detailsStr = `Tujuan: ${l.details.newAddress || '-'}. Alasan: ${l.details.reasonForMoving || '-'}`;
+    } else if (l.type === 'Birth' && l.details) {
+      detailsStr = `Ayah: ${l.details.fatherName || '-'}. Ibu: ${l.details.motherName || '-'}`;
+    } else if (l.type === 'Death' && l.details) {
+      detailsStr = `Sebab: ${l.details.causeOfDeath || '-'}. Tempat: ${l.details.placeOfDeath || '-'}`;
+    }
+
+    logSheet.addRow({
+      date: l.date,
+      type: l.type === 'Newcomer' ? 'Pendatang' : l.type === 'MovedOut' ? 'Pindah Keluar' : l.type === 'Birth' ? 'Kelahiran' : 'Kematian',
+      name: l.name,
+      houseId: l.houseId,
+      description: l.description,
+      familyCount: l.details?.familyCount || 1,
+      details: detailsStr
+    });
+  });
+
+  // Generate and Save
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Laporan_Mutasi_Kependudukan_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+

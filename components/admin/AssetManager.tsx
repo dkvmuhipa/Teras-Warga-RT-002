@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { InventoryItem, MaintenanceLog } from '../../types';
 import { addInventoryToDb, updateInventoryInDb, deleteInventoryFromDb, addInventoryLogToDb, updateInventoryLogStatus, deleteInventoryLogFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface AssetManagerProps {
   inventory: InventoryItem[];
@@ -15,6 +16,7 @@ interface AssetManagerProps {
 const CATEGORIES = ['Perlengkapan Acara', 'Alat Kebersihan', 'Keamanan', 'Peralatan Tukang', 'Lainnya'] as const;
 
 export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventoryLogs }) => {
+  const confirm = useConfirm();
   const [isInvModalOpen, setIsInvModalOpen] = useState(false);
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
   const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
@@ -113,7 +115,14 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
   };
 
   const handleDeleteInventory = async (id: string) => {
-    if (window.confirm('Hapus barang inventaris ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Barang',
+      message: 'Apakah Anda yakin ingin menghapus barang inventaris ini?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteInventoryFromDb(id);
         toast.success('Aset berhasil dihapus.');
@@ -150,7 +159,13 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
   };
 
   const handleReturn = async (id: string) => {
-    if (window.confirm('Tandai barang sudah dikembalikan?')) {
+    const isConfirmed = await confirm({
+      title: 'Konfirmasi Pengembalian',
+      message: 'Tandai barang sudah dikembalikan?',
+      confirmLabel: 'Sudah Kembali',
+    });
+
+    if (isConfirmed) {
       try {
         await updateInventoryLogStatus(id, 'Returned');
         toast.success('Barang telah dikembalikan.');
@@ -162,7 +177,14 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
   };
 
   const handleDeleteLog = async (id: string) => {
-    if (window.confirm('Hapus riwayat peminjaman ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Riwayat',
+      message: 'Apakah Anda yakin ingin menghapus riwayat peminjaman ini?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteInventoryLogFromDb(id);
         toast.success('Riwayat berhasil dihapus.');
