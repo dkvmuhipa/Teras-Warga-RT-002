@@ -809,16 +809,17 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
     let y = 60;
     const colWidths = {
-        no: 10,
-        blok: 15,
-        no_rumah: 15,
-        nama: 60,
-        status: 25,
-        tipe: 25,
-        jml: 15,
-        kontak: 35,
-        ekonomi: 30,
-        keterangan: 37
+        no: 8,
+        blok: 12,
+        no_rumah: 12,
+        nama: 55,
+        owner: 55,
+        status: 20,
+        tipe: 20,
+        jml: 10,
+        kontak: 30,
+        ekonomi: 25,
+        keterangan: 20
     };
 
     const headers = [
@@ -826,6 +827,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         { label: "BLOK", w: colWidths.blok },
         { label: "NO RMH", w: colWidths.no_rumah },
         { label: "NAMA KEPALA KELUARGA", w: colWidths.nama },
+        { label: "PEMILIK RUMAH", w: colWidths.owner },
         { label: "STATUS", w: colWidths.status },
         { label: "KEPEMILIKAN", w: colWidths.tipe },
         { label: "JIWA", w: colWidths.jml },
@@ -882,6 +884,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
             h.block,
             h.number,
             h.headOfFamily.toUpperCase(),
+            (h.ownerName || '-').toUpperCase(),
             h.status === 'Occupied' ? 'DIHUNI' : h.status === 'Empty' ? 'KOSONG' : 'USAHA',
             h.residenceType || '-',
             (h.occupants || 0).toString(),
@@ -892,7 +895,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
         rowData.forEach((text, idx) => {
             const w = headers[idx].w;
-            const align = (idx === 0 || idx === 1 || idx === 2 || idx === 6) ? "center" : "left";
+            const align = (idx === 0 || idx === 1 || idx === 2 || idx === 7 || idx === 5 || idx === 6) ? "center" : "left";
             const xPos = align === "center" ? currX + (w / 2) : currX + 2;
             
             const truncatedText = doc.getTextWidth(text) > w - 2 ? doc.splitTextToSize(text, w - 5)[0] + "..." : text;

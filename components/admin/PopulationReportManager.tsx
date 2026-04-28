@@ -82,6 +82,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       kkNumber: '',
       jobCategory: '',
       education: '',
+      ownerName: '',
+      ownerPhone: '',
       newAddress: '',
       fatherName: '',
       motherName: '',
@@ -130,6 +132,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               residenceType: house.residenceType || 'Tetap',
               religion: house.religion || '-',
               vulnerability: vulnerability,
+              ownerName: house.ownerName || '',
+              ownerPhone: house.ownerPhone || '',
               kkNumber: house.kkNumber || '-',
               jobCategory: house.jobCategory || '-',
               education: house.education || '-'
@@ -180,6 +184,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               residenceType: house.residenceType || 'Tetap',
               religion: house.religion || '-',
               vulnerability: vulnerability,
+              ownerName: house.ownerName || '',
+              ownerPhone: house.ownerPhone || '',
               kkNumber: house.kkNumber || '-',
               jobCategory: house.jobCategory || '-',
               education: house.education || '-'
@@ -358,6 +364,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         kkNumber: log.details?.kkNumber || '',
         jobCategory: log.details?.jobCategory || '',
         education: log.details?.education || '',
+        ownerName: log.details?.ownerName || '',
+        ownerPhone: log.details?.ownerPhone || '',
         newAddress: log.details?.newAddress || '',
         fatherName: log.details?.fatherName || '',
         motherName: log.details?.motherName || '',
@@ -385,7 +393,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         vulnerability: logFormData.details.vulnerability,
         kkNumber: logFormData.details.kkNumber,
         jobCategory: logFormData.details.jobCategory,
-        education: logFormData.details.education
+        education: logFormData.details.education,
+        ownerName: logFormData.details.ownerName,
+        ownerPhone: logFormData.details.ownerPhone
       } : logFormData.type === 'MovedOut' ? {
         newAddress: logFormData.details.newAddress,
         reasonForMoving: logFormData.details.reasonForMoving,
@@ -480,6 +490,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         kkNumber: '',
         jobCategory: '',
         education: '',
+        ownerName: '',
+        ownerPhone: '',
         newAddress: '',
         fatherName: '',
         motherName: '',
@@ -1352,6 +1364,28 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                       className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
                     />
                   </div>
+                  {logFormData.details.residenceType !== 'Tetap' && (
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="col-span-full grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Nama Pemilik Rumah</label>
+                        <input 
+                          type="text" 
+                          value={logFormData.details.ownerName} 
+                          onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, ownerName: e.target.value } })} 
+                          className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Kontak Pemilik Rumah</label>
+                        <input 
+                          type="text" 
+                          value={logFormData.details.ownerPhone} 
+                          onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, ownerPhone: e.target.value } })} 
+                          className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                        />
+                      </div>
+                    </motion.div>
+                  )}
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Alasan Pindah</label>
                     <input 

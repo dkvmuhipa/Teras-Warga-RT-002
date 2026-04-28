@@ -60,6 +60,9 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
             <h4 className="font-black text-slate-900 text-lg tracking-tight truncate max-w-[160px] leading-tight">
               {house.headOfFamily || 'Unit Kosong'}
             </h4>
+            {house.ownerName && house.ownerName !== house.headOfFamily && (
+              <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-tight -mt-1">Milik: {house.ownerName}</p>
+            )}
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-[0.15em] shadow-sm">
                 Blok {house.block}-{house.number}

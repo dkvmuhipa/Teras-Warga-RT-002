@@ -201,6 +201,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <DetailItem icon={<Users size={16} />} label="Nomor Keluarga" value={selectedResident.kkNumber || '-'} isMain />
                   <DetailItem icon={<Calendar size={16} />} label="Mulai Menempati" value={selectedResident.joiningDate || '-'} />
                   <DetailItem icon={<Activity size={16} />} label="Kepemilikan" value={selectedResident.residenceType || 'Pemilik'} />
+                  {selectedResident.ownerName && (
+                    <DetailItem icon={<User size={16} />} label="Pemilik Rumah" value={selectedResident.ownerName} />
+                  )}
+                  {selectedResident.ownerPhone && (
+                    <DetailItem icon={<Phone size={16} />} label="Kontak Pemilik" value={selectedResident.ownerPhone} isUrgent />
+                  )}
                 </div>
               </section>
 

@@ -601,6 +601,8 @@ export interface PopulationChangeLog {
     kkNumber?: string;
     jobCategory?: string;
     education?: string;
+    ownerName?: string;
+    ownerPhone?: string;
     
     // MovedOut
     newAddress?: string;

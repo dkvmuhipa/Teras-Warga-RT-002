@@ -318,6 +318,27 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                              ))}
                           </div>
                         </div>
+
+                        {formData.residenceType !== 'Tetap' && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="col-span-2 grid grid-cols-2 gap-4 overflow-hidden"
+                          >
+                            <FormField 
+                              label="Nama Pemilik Rumah" 
+                              placeholder="Nama pemilik asli..."
+                              value={formData.ownerName} 
+                              onChange={(v: any) => setFormData({...formData, ownerName: v})} 
+                            />
+                            <FormField 
+                              label="Kontak Pemilik Rumah" 
+                              placeholder="WA Pemilik..."
+                              value={formData.ownerPhone} 
+                              onChange={(v: any) => setFormData({...formData, ownerPhone: v})} 
+                            />
+                          </motion.div>
+                        )}
                         <div className="col-span-2">
                           <FormField 
                             label="Alamat Sesuai KTP" 
