@@ -66,6 +66,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     let totalAdults = 0;
     let totalElderly = 0;
     let totalWidows = 0;
+    let totalDisability = 0;
+    let totalOrphans = 0;
     let totalPKH = 0;
     let totalBLT = 0;
     let totalBansosLain = 0;
@@ -81,6 +83,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
         totalAdults += (h.adultCount || 0);
         totalElderly += (h.elderlyCount || 0);
         totalWidows += (h.widowCount || 0);
+        totalDisability += (h.disabilityCount || 0);
+        totalOrphans += (h.orphanCount || 0);
         if (h.isPKH) totalPKH++;
         if (h.isBLT) totalBLT++;
         if (h.isBansosLain) totalBansosLain++;
@@ -149,6 +153,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
       totalAdults,
       totalElderly,
       totalWidows,
+      totalDisability,
+      totalOrphans,
       totalPKH,
       totalBLT,
       totalBansosLain,
@@ -161,7 +167,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     economicStatuses, bpjsStatuses, vaccinationStatuses, residenceTypes,
     totalVehicles, totalPregnant, totalBabies, 
     totalToddlers, totalChildren, totalTeenagers, totalAdults,
-    totalElderly, totalWidows, totalPKH, totalBLT, totalBansosLain, totalOccupied 
+    totalElderly, totalWidows, totalDisability, totalOrphans, totalPKH, totalBLT, totalBansosLain, totalOccupied 
   } = stats;
 
   const totalResidents = allResidents.length || 1; 
@@ -707,6 +713,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                   { label: 'Dewasa', value: totalAdults, icon: UserCheck, color: 'emerald' },
                   { label: 'Lansia', value: totalElderly, icon: User, color: 'amber' },
                   { label: 'Janda', value: totalWidows, icon: Heart, color: 'pink' },
+                  { label: 'Disabilitas', value: totalDisability, icon: Activity, color: 'rose' },
+                  { label: 'Yatim/Piatu', value: totalOrphans, icon: Users, color: 'blue' },
                   { label: 'Penerima PKH', value: totalPKH, icon: FileText, color: 'indigo' },
                   { label: 'Penerima BLT', value: totalBLT, icon: DollarSign, color: 'emerald' },
                   { label: 'Bansos Lain', value: totalBansosLain, icon: Sparkles, color: 'violet' }

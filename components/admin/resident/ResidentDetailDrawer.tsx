@@ -280,11 +280,17 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     {selectedResident.isOrphan && <BansosBadge label="YATIM / PIATU" color="rose" />}
                   </div>
 
-                  <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+                  <div className="mt-10 grid grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
                      {(selectedResident.pregnantCount || 0) > 0 && <VulnerabilityStat count={selectedResident.pregnantCount || 0} label="Ibu Hamil" />}
                      {(selectedResident.elderlyCount || 0) > 0 && <VulnerabilityStat count={selectedResident.elderlyCount || 0} label="Lansia" />}
                      {(selectedResident.babyCount || 0) > 0 && <VulnerabilityStat count={selectedResident.babyCount || 0} label="Bayi" />}
                      {(selectedResident.toddlerCount || 0) > 0 && <VulnerabilityStat count={selectedResident.toddlerCount || 0} label="Balita" />}
+                     {(selectedResident.childCount || 0) > 0 && <VulnerabilityStat count={selectedResident.childCount || 0} label="Anak" />}
+                     {(selectedResident.teenagerCount || 0) > 0 && <VulnerabilityStat count={selectedResident.teenagerCount || 0} label="Remaja" />}
+                     {(selectedResident.adultCount || 0) > 0 && <VulnerabilityStat count={selectedResident.adultCount || 0} label="Dewasa" />}
+                     {(selectedResident.widowCount || 0) > 0 && <VulnerabilityStat count={selectedResident.widowCount || 0} label="Janda/Duda" />}
+                     {(selectedResident.disabilityCount || 0) > 0 && <VulnerabilityStat count={selectedResident.disabilityCount || 0} label="Disabilitas" />}
+                     {(selectedResident.orphanCount || 0) > 0 && <VulnerabilityStat count={selectedResident.orphanCount || 0} label="Yatim/Piatu" />}
                   </div>
                 </section>
               )}

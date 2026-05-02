@@ -151,7 +151,9 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
         { l: "5. Remaja", v: report.teenagerCount || 0 },
         { l: "6. Dewasa", v: report.adultCount || 0 },
         { l: "7. Lansia", v: report.elderlyCount || 0 },
-        { l: "8. Janda/Duda", v: report.widowCount || 0 }
+        { l: "8. Janda/Duda", v: report.widowCount || 0 },
+        { l: "9. Penyandang Disabilitas", v: report.disabilityCount || 0 },
+        { l: "10. Anak Yatim/Piatu", v: report.orphanCount || 0 }
     ];
 
     stats.forEach((s, i) => addStatRow(s.l, s.v, false, undefined, i % 2 === 0));

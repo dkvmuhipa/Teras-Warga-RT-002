@@ -503,6 +503,80 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       />
                     </div>
                   </div>
+
+                  <div className="mt-12 pt-10 border-t border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-8 relative z-10">
+                    <div className="md:col-span-12 mb-4">
+                      <h4 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <AlertCircle size={14} /> Demografi & Status Rentan
+                      </h4>
+                    </div>
+
+                    {[
+                      { id: 'pregnantCount', label: 'Ibu Hamil', icon: <Heart size={14} /> },
+                      { id: 'babyCount', label: 'Bayi (0-1 th)', icon: <Activity size={14} /> },
+                      { id: 'toddlerCount', label: 'Balita (1-5 th)', icon: <Activity size={14} /> },
+                      { id: 'childCount', label: 'Anak (6-12 th)', icon: <Users size={14} /> },
+                      { id: 'teenagerCount', label: 'Remaja (13-18 th)', icon: <Users size={14} /> },
+                      { id: 'adultCount', label: 'Dewasa', icon: <Users size={14} /> },
+                      { id: 'elderlyCount', label: 'Lansia', icon: <ChevronRight size={14} /> },
+                      { id: 'widowCount', label: 'Janda/Duda', icon: <Users size={14} /> },
+                    ].map(item => (
+                      <div key={item.id} className="md:col-span-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="text-indigo-400">{item.icon}</div>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</label>
+                        </div>
+                        <input 
+                          type="number" 
+                          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
+                          value={formData[item.id] || 0}
+                          onChange={e => setFormData({...formData, [item.id]: parseInt(e.target.value) || 0})}
+                        />
+                      </div>
+                    ))}
+
+                    <div className="md:col-span-6 flex items-center gap-4">
+                      <div className="flex-1">
+                        <BansosCard 
+                          label="Penyandang Disabilitas" 
+                          checked={formData.isDisability} 
+                          onChange={c => setFormData({...formData, isDisability: c})} 
+                        />
+                      </div>
+                      {formData.isDisability && (
+                        <div className="w-24">
+                          <input 
+                            type="number" 
+                            placeholder="Jml"
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
+                            value={formData.disabilityCount || 0}
+                            onChange={e => setFormData({...formData, disabilityCount: parseInt(e.target.value) || 0})}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="md:col-span-6 flex items-center gap-4">
+                      <div className="flex-1">
+                        <BansosCard 
+                          label="Anak Yatim / Piatu" 
+                          checked={formData.isOrphan} 
+                          onChange={c => setFormData({...formData, isOrphan: c})} 
+                        />
+                      </div>
+                      {formData.isOrphan && (
+                        <div className="w-24">
+                          <input 
+                            type="number" 
+                            placeholder="Jml"
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
+                            value={formData.orphanCount || 0}
+                            onChange={e => setFormData({...formData, orphanCount: parseInt(e.target.value) || 0})}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

@@ -133,14 +133,6 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
             <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
           </div>
 
-          {!isFirebaseConfigured && imageType === 'upload' && (
-            <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
-              <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-tight">
-                ⚠️ Firebase Storage Offline. Upload akan digantikan dengan gambar placeholder otomatis. Gunakan "Link URL" untuk foto asli.
-              </p>
-            </div>
-          )}
-
           {imageType === 'upload' ? (
             <div>
                 <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Pilih Foto</label>

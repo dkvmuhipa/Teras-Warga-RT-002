@@ -62,6 +62,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     elderlyCount: 0,
     childCount: 0,
     widowCount: 0,
+    disabilityCount: 0,
+    orphanCount: 0,
   });
 
   const [logFormData, setLogFormData] = useState({
@@ -239,6 +241,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     let currentAdult = 0;
     let currentElderly = 0;
     let currentWidow = 0;
+    let currentDisability = 0;
+    let currentOrphan = 0;
     let currentTotal = 0;
     let currentMale = 0;
     let currentFemale = 0;
@@ -262,6 +266,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         currentAdult += house.adultCount || 0;
         currentElderly += house.elderlyCount || 0;
         currentWidow += house.widowCount || 0;
+        currentDisability += house.disabilityCount || 0;
+        currentOrphan += house.orphanCount || 0;
         
         // Count gender from family members if available, otherwise estimate
         if (house.familyMembers && house.familyMembers.length > 0) {
@@ -318,6 +324,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       adultCount: currentAdult,
       elderlyCount: currentElderly,
       widowCount: currentWidow,
+      disabilityCount: currentDisability,
+      orphanCount: currentOrphan,
       seasonalCount: currentSeasonal,
       seasonalMaleCount: currentSeasonalMale,
       seasonalFemaleCount: currentSeasonalFemale,
@@ -587,6 +595,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                   kkNumber: '',
                   jobCategory: '',
                   education: '',
+                  ownerName: '',
+                  ownerPhone: '',
                   newAddress: '',
                   fatherName: '',
                   motherName: '',
@@ -1189,7 +1199,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 { label: 'Remaja', key: 'teenagerCount', icon: <User size={12}/> },
                 { label: 'Dewasa', key: 'adultCount', icon: <User size={12}/> },
                 { label: 'Lansia', key: 'elderlyCount', icon: <Accessibility size={12}/> },
-                { label: 'Janda', key: 'widowCount', icon: <Heart size={12}/> }
+                { label: 'Janda', key: 'widowCount', icon: <Heart size={12}/> },
+                { label: 'Disabilitas', key: 'disabilityCount', icon: <Accessibility size={12}/> },
+                { label: 'Yatim/Piatu', key: 'orphanCount', icon: <User size={12}/> }
               ].map(field => (
                 <div key={field.key} className="bg-white p-3 rounded-2xl border border-rose-100 shadow-sm">
                   <div className="flex items-center gap-1.5 mb-1 text-rose-400">

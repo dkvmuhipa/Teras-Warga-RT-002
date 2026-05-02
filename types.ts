@@ -648,6 +648,8 @@ export interface PopulationReport {
   adultCount?: number;
   elderlyCount?: number;
   widowCount?: number;
+  disabilityCount?: number;
+  orphanCount?: number;
   
   createdAt: string;
 }
