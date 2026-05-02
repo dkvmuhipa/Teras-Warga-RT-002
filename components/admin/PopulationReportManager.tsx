@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
 import { generatePopulationReportPDF } from '../../services/pdfService';
 import { generatePopulationReportExcel } from '../../services/excelService';
-import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction } from '../../services/databaseService';
+import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction, markAllLogsBeforeDateAsGenerated, unmarkAllLogsBeforeDateAsGenerated } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { 
   Plus, FileText, Trash2, TrendingUp, TrendingDown, 
@@ -126,6 +126,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             houseId: house.id,
             date: house.joiningDate.split('T')[0],
             description: 'Warga baru ditambahkan melalui Data Warga (Manual Sync)',
+            isGenerated: true, // Mark legacy data as generated to exclude from mutation reports
             details: {
               previousAddress: '-',
               reasonForMoving: '-',
@@ -150,6 +151,55 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       toast.success(`Berhasil menyinkronkan ${syncCount} data warga ke log mutasi.`);
     } else {
       toast.info('Semua data warga sudah sinkron dengan log mutasi.');
+    }
+  };
+
+  const handleBulkMarkLogsProcessed = async () => {
+    const isConfirmed = await confirm({
+      title: 'Bersihkan Log Mutasi Lama',
+      message: 'Semua log mutasi sebelum tanggal hari ini akan ditandai sebagai "Sudah Diproses". Ini berguna untuk memastikan data lama tidak muncul lagi saat Anda membuat laporan mutasi bulan ini. Lanjutkan?',
+      confirmLabel: 'Ya, Bersihkan',
+      cancelLabel: 'Batal',
+      isDanger: true
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const count = await markAllLogsBeforeDateAsGenerated(today);
+      if (count > 0) {
+        toast.success(`${count} log mutasi lama berhasil ditandai sebagai sudah diproses.`);
+      } else {
+        toast.info('Tidak ada log mutasi lama yang perlu dibersihkan.');
+      }
+    } catch (error) {
+      toast.error('Gagal membersihkan log lama.');
+      console.error(error);
+    }
+  };
+
+  const handleBulkRestoreLogs = async () => {
+    const isConfirmed = await confirm({
+      title: 'Pulihkan Log Mutasi',
+      message: 'Semua log mutasi yang ditandai sebagai "Sudah Diproses" akan dikembalikan statusnya sehingga bisa muncul kembali di laporan. Lanjutkan?',
+      confirmLabel: 'Ya, Pulihkan',
+      cancelLabel: 'Batal'
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const count = await unmarkAllLogsBeforeDateAsGenerated(today);
+      if (count > 0) {
+        toast.success(`${count} log mutasi lama berhasil dipulihkan.`);
+      } else {
+        toast.info('Tidak ada log mutasi yang perlu dipulihkan.');
+      }
+    } catch (error) {
+      toast.error('Gagal memulihkan log.');
+      console.error(error);
     }
   };
 
@@ -178,6 +228,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             houseId: house.id,
             date: house.joiningDate.split('T')[0],
             description: 'Warga baru ditambahkan melalui Data Warga (Auto-Sync)',
+            isGenerated: false, // For current month newcomers, we want them included in reports
             details: {
               previousAddress: '-',
               reasonForMoving: '-',
@@ -226,8 +277,12 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     }
 
     const allLogs = [...populationLogs, ...missingLogs];
-    const logsThisMonth = allLogs.filter(log => log.date.startsWith(targetMonth));
+    const logsThisMonth = allLogs.filter(log => log.date.startsWith(targetMonth) && !log.isGenerated);
     
+    if (logsThisMonth.length === 0) {
+      toast.info(`Tidak ada log mutasi baru yang belum digenerate untuk bulan ${targetMonth}.`);
+      // We still open the modal because initial population and current counts are still relevant
+    }
     const birthCount = logsThisMonth.filter(l => l.type === 'Birth').length;
     const deathCount = logsThisMonth.filter(l => l.type === 'Death').length;
     const newcomerCount = logsThisMonth.filter(l => l.type === 'Newcomer').reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
@@ -935,6 +990,22 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               >
                 <Activity size={16} /> <span className="hidden sm:inline">Sync</span>
               </button>
+
+              <button 
+                onClick={handleBulkMarkLogsProcessed}
+                className="flex items-center gap-2 px-4 py-3 bg-slate-100 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all border border-slate-200 active:scale-95"
+                title="Bersihkan Log Lama"
+              >
+                <Clock size={16} /> <span className="hidden sm:inline">Bersihkan Log</span>
+              </button>
+
+              <button 
+                onClick={handleBulkRestoreLogs}
+                className="flex items-center gap-2 px-4 py-3 bg-slate-100 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all border border-slate-200 active:scale-95"
+                title="Pulihkan Log"
+              >
+                <RefreshCw size={16} /> <span className="hidden sm:inline">Pulihkan Log</span>
+              </button>
             </div>
           </div>
         </div>
@@ -972,6 +1043,13 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                        log.type === 'MovedOut' ? 'Pindah Keluar' : 
                        log.type === 'Birth' ? 'Kelahiran' : 'Kematian'}
                     </span>
+                    {log.isGenerated && (
+                      <div className="mt-1">
+                        <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded-md font-bold text-[8px] uppercase tracking-wider flex items-center gap-1 w-fit">
+                          <RefreshCw size={8} /> Sudah Digenerate
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td className="p-6">
                     <div className="flex items-center gap-3">

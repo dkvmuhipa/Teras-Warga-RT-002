@@ -186,6 +186,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     kkUrl: '',
     joiningDate: new Date().toISOString().split('T')[0],
     isVerified: true,
+    isInitialData: false, // NEW flag to skip mutation log
     familyMembers: [] as { id?: string; name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     accessCode: ''
   });
@@ -541,6 +542,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       kkUrl: '',
       joiningDate: new Date().toISOString().split('T')[0],
       isVerified: true,
+      isInitialData: false,
       familyMembers: [],
       accessCode: ''
     });
@@ -740,6 +742,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       kkUrl: house.kkUrl || '',
       joiningDate: house.joiningDate || new Date().toISOString().split('T')[0],
       isVerified: house.isVerified !== undefined ? house.isVerified : true,
+      isInitialData: false, // Default to false when editing existing
       familyMembers: (house.familyMembers || []).map(m => ({ ...m, id: m.id || Math.random().toString(36).substr(2, 9) })),
       accessCode: house.accessCode || ''
     });
@@ -817,7 +820,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           phone: data.phone,
           houseId: data.id,
           date: logDate,
-          description: 'Registrasi Awal (Admin)',
+          description: data.isInitialData ? 'Registrasi Awal (Admin)' : 'Warga Baru (Input Admin)',
+          isGenerated: data.isInitialData, // If it's initial data, mark as already generated so it doesn't show in mutation reports
           details: {
             previousAddress: '-',
             reasonForMoving: 'Registrasi Awal',
@@ -892,11 +896,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               phone: data.phone,
               houseId: data.id,
               date: logDate,
-              description: isNewHead 
-                ? 'Pergantian Kepala Keluarga / Warga Baru'
-                : (isBirth 
-                  ? `Kelahiran ${newBabyCount - oldBabyCount} bayi baru di keluarga` 
-                  : `Penambahan ${diff} anggota keluarga baru`),
+              isGenerated: data.isInitialData, // Mark as generated if initial data
+              description: data.isInitialData 
+                ? 'Registrasi Awal (Update Data)'
+                : (isNewHead 
+                  ? 'Pergantian Kepala Keluarga / Warga Baru'
+                  : (isBirth 
+                    ? `Kelahiran ${newBabyCount - oldBabyCount} bayi baru di keluarga` 
+                    : `Penambahan ${diff} anggota keluarga baru`)),
               details: {
                 previousAddress: isBirth ? 'Lahir di RT 02' : '-',
                 reasonForMoving: isNewHead ? 'Pindahan / Ganti KK' : (isBirth ? 'Kelahiran' : 'Penambahan Anggota Keluarga'),

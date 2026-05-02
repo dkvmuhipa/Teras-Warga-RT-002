@@ -181,8 +181,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       </div>
 
                       {role === Role.ADMIN && (
-                        <div className="flex items-center gap-3 p-1.5 bg-slate-50 rounded-2xl border border-slate-200">
-                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-3 pr-2">Status Akun:</span>
+                        <div className="flex flex-wrap items-center gap-3 p-1.5 bg-slate-50 rounded-2xl border border-slate-200">
+                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-3 pr-2">Opsi:</span>
                           <button
                             type="button"
                             onClick={() => setFormData({...formData, isVerified: !formData.isVerified})}
@@ -194,6 +194,19 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           >
                             <ShieldCheck size={14} />
                             {formData.isVerified ? 'Tersahkankan' : 'Belum Sah'}
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => setFormData({...formData, isInitialData: !formData.isInitialData})}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                              formData.isInitialData 
+                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
+                                : 'bg-white text-slate-400 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 shadow-sm'
+                            }`}
+                          >
+                            <Calendar size={14} />
+                            {formData.isInitialData ? '✅ Registrasi Awal' : 'Mutasi Baru'}
                           </button>
                         </div>
                       )}

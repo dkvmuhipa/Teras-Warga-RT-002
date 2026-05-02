@@ -589,6 +589,7 @@ export interface PopulationChangeLog {
   description: string;
   name?: string;
   phone?: string;
+  isGenerated?: boolean;
   details?: {
     // Newcomer
     previousAddress?: string;

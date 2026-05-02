@@ -24,7 +24,9 @@ import {
   orderBy,
   limit,
   where,
-  increment
+  increment,
+  startAt,
+  endAt
 } from "firebase/firestore";
 import { 
   signInWithEmailAndPassword, 
@@ -1880,7 +1882,10 @@ export const getLetterById = async (id: string) => {
 export const addPopulationLogToDb = async (log: any) => {
   try {
     const { id, ...data } = log;
-    await addDoc(collection(db, POPULATION_LOGS_COL), deepSanitize(data));
+    await addDoc(collection(db, POPULATION_LOGS_COL), deepSanitize({
+      ...data,
+      isGenerated: data.isGenerated ?? false
+    }));
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, POPULATION_LOGS_COL);
   }
@@ -1901,6 +1906,125 @@ export const deletePopulationLogFromDb = async (id: string) => {
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, `${POPULATION_LOGS_COL}/${id}`);
   }
+};
+
+export const markPopulationLogsAsGenerated = async (month: string) => {
+    try {
+        // Fetch all logs within the month that are not yet marked as generated
+        const q = query(
+            collection(db, POPULATION_LOGS_COL),
+            orderBy("date"),
+            startAt(month),
+            endAt(month + "\uf8ff")
+        );
+        const snapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        let count = 0;
+
+        snapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            if (!data.isGenerated) {
+                batch.update(doc.ref, { isGenerated: true });
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            await batch.commit();
+        }
+        return count;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, POPULATION_LOGS_COL);
+        return 0;
+    }
+};
+
+export const unmarkPopulationLogsAsGenerated = async (month: string) => {
+    try {
+        const q = query(
+            collection(db, POPULATION_LOGS_COL),
+            orderBy("date"),
+            startAt(month),
+            endAt(month + "\uf8ff")
+        );
+        const snapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        let count = 0;
+
+        snapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            if (data.isGenerated) {
+                batch.update(doc.ref, { isGenerated: false });
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            await batch.commit();
+        }
+        return count;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, POPULATION_LOGS_COL);
+        return 0;
+    }
+};
+
+export const markAllLogsBeforeDateAsGenerated = async (beforeDate: string) => {
+    try {
+        const q = query(
+            collection(db, POPULATION_LOGS_COL),
+            orderBy("date"),
+            endAt(beforeDate)
+        );
+        const snapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        let count = 0;
+
+        snapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            if (!data.isGenerated) {
+                batch.update(doc.ref, { isGenerated: true });
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            await batch.commit();
+        }
+        return count;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, POPULATION_LOGS_COL);
+        return 0;
+    }
+};
+
+export const unmarkAllLogsBeforeDateAsGenerated = async (beforeDate: string) => {
+    try {
+        const q = query(
+            collection(db, POPULATION_LOGS_COL),
+            orderBy("date"),
+            endAt(beforeDate)
+        );
+        const snapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        let count = 0;
+
+        snapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            if (data.isGenerated) {
+                batch.update(doc.ref, { isGenerated: false });
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            await batch.commit();
+        }
+        return count;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, POPULATION_LOGS_COL);
+        return 0;
+    }
 };
 
 export const addPopulationReportToDb = async (report: any) => {

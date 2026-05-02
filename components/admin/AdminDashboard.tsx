@@ -6,6 +6,8 @@ import {
   addPopulationReportToDb, 
   updatePopulationReportToDb, 
   deletePopulationReportFromDb, 
+  markPopulationLogsAsGenerated,
+  unmarkPopulationLogsAsGenerated,
   subscribeToActivePanicAlerts, 
   deleteNotificationFromDb, 
   deleteReportFromDb,
@@ -196,6 +198,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onAddReport={async (r) => {
               try {
                 await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
+                await markPopulationLogsAsGenerated(r.month);
+                toast.success(`Laporan ${r.month} berhasil disimpan. Log mutasi bulan ini telah ditandai sebagai sudah diproses.`);
               } catch (error) {
                 handleFirestoreError(error, OperationType.CREATE, "populationReports");
               }
@@ -210,14 +214,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onDeleteReport={async (id) => {
               const isConfirmed = await confirm({
                 title: 'Hapus Laporan',
-                message: 'Apakah Anda yakin ingin menghapus laporan kependudukan ini?',
+                message: 'Apakah Anda yakin ingin menghapus laporan kependudukan ini? Log mutasi untuk bulan ini akan dapat digenerate kembali.',
                 confirmLabel: 'Hapus',
                 isDanger: true
               });
 
               if (isConfirmed) {
                 try {
+                  const reportToDelete = populationReports.find(r => r.id === id);
+                  if (reportToDelete) {
+                    await unmarkPopulationLogsAsGenerated(reportToDelete.month);
+                  }
                   await deletePopulationReportFromDb(id);
+                  toast.success('Laporan berhasil dihapus. Log mutasi bulan tersebut kini bisa digenerate ulang jika diperlukan.');
                 } catch (error) {
                   handleFirestoreError(error, OperationType.DELETE, `populationReports/${id}`);
                 }
