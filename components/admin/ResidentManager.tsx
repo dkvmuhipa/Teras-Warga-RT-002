@@ -26,7 +26,12 @@ import {
 } from 'lucide-react';
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role } from '../../types';
 import { HouseMap } from '../HouseMap';
-import { generateResidentReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
+import { 
+  generateResidentReportPDF, 
+  generateIuranReceiptPDF,
+  generatePBBReportPDF,
+  generateResidentStatsReportPDF
+} from '../../services/pdfService';
 import { 
   batchUpdateHouses, 
   deleteHouseFromDb, 
@@ -186,7 +191,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     kkUrl: '',
     joiningDate: new Date().toISOString().split('T')[0],
     isVerified: true,
-    isInitialData: false, // NEW flag to skip mutation log
+    isInitialData: false, 
+    pbbStatus: 'Belum Diambil',
+    pbbYear: new Date().getFullYear().toString(),
     familyMembers: [] as { id?: string; name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     accessCode: ''
   });
@@ -543,6 +550,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       joiningDate: new Date().toISOString().split('T')[0],
       isVerified: true,
       isInitialData: false,
+      pbbStatus: 'Belum Diambil',
+      pbbYear: new Date().getFullYear().toString(),
       familyMembers: [],
       accessCode: ''
     });
@@ -742,7 +751,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       kkUrl: house.kkUrl || '',
       joiningDate: house.joiningDate || new Date().toISOString().split('T')[0],
       isVerified: house.isVerified !== undefined ? house.isVerified : true,
-      isInitialData: false, // Default to false when editing existing
+      isInitialData: false,
+      pbbStatus: house.pbbStatus || 'Belum Diambil',
+      pbbYear: house.pbbYear || new Date().getFullYear().toString(),
       familyMembers: (house.familyMembers || []).map(m => ({ ...m, id: m.id || Math.random().toString(36).substr(2, 9) })),
       accessCode: house.accessCode || ''
     });
@@ -957,6 +968,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     else if (filterStatus === 'verified') matchesStatus = h.isVerified === true;
     else if (filterStatus === 'unverified') matchesStatus = !h.isVerified;
     else if (filterStatus === 'arrears') matchesStatus = h.status === 'Occupied' && getArrearsForHouse(h).length > 0;
+    else if (filterStatus === 'pbb_taken') matchesStatus = h.pbbStatus === 'Sudah Diambil';
+    else if (filterStatus === 'pbb_not_taken') matchesStatus = h.pbbStatus !== 'Sudah Diambil' && h.pbbStatus !== undefined && h.status === 'Occupied';
 
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
@@ -1171,6 +1184,31 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <span>Unduh Excel</span>
                     </button>
                     <button 
+                      onClick={() => { 
+                        const year = new Date().getFullYear().toString();
+                        generatePBBReportPDF(filteredHouses, year, pdfConfig); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-amber-600 hover:shadow-sm rounded-2xl transition-all"
+                    >
+                      <div className="p-2 bg-amber-50 text-amber-500 rounded-xl">
+                        <Printer size={14} />
+                      </div>
+                      <span>Cetak Laporan PBB</span>
+                    </button>
+                    <button 
+                      onClick={() => { 
+                        generateResidentStatsReportPDF(houses, pdfConfig); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
+                    >
+                      <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
+                        <Activity size={14} />
+                      </div>
+                      <span>Cetak Statistik Warga</span>
+                    </button>
+                    <button 
                       onClick={() => { fileInputRef.current?.click(); setIsActionMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
                       disabled={isUploading}
@@ -1311,6 +1349,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             setSelectedHouseForBills={setSelectedHouseForBills}
             openPayModal={openPayModal}
             onSendWhatsApp={handleSendWhatsApp}
+            handleUpdateHouse={updateHouseData}
           />
         ) : viewMode === 'iuran' ? (
           <ResidentIuranManager 
@@ -1348,6 +1387,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             handleOpenEdit={handleOpenEdit}
             handleDelete={handleDelete}
             onSendWhatsApp={handleSendWhatsApp}
+            handleUpdateHouse={updateHouseData}
           />
         ) : viewMode === 'map' ? (
       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">

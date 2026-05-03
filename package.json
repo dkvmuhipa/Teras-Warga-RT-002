@@ -39,13 +39,14 @@
     "react-qr-reader": "^3.0.0-beta-1",
     "react-quill-new": "^3.8.3",
     "react-router-dom": "^6.22.1",
-    "react-signature-canvas": "^1.1.0-alpha.2",
+    "react-signature-canvas": "^1.0.6",
     "react-zoom-pan-pinch": "^3.7.0",
     "recharts": "^2.15.4",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "sonner": "^2.0.7",
     "tailwindcss": "^4.2.1",
+    "trim-canvas": "^0.1.2",
     "vite-plugin-pwa": "^1.2.0"
   },
   "devDependencies": {

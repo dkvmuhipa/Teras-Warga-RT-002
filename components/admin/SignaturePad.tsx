@@ -62,7 +62,77 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({ onSave, onClear, ini
       alert('Silakan buat tanda tangan atau upload gambar terlebih dahulu.');
       return;
     }
-    const dataUrl = sigCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+
+    // Custom trim function to avoid "trim-canvas" dependency issues
+    const canvas = sigCanvas.current?.getCanvas();
+    if (!canvas) return;
+
+    const trimCanvas = (canvas: HTMLCanvasElement) => {
+      const context = canvas.getContext('2d');
+      if (!context) return canvas;
+      
+      const width = canvas.width;
+      const height = canvas.height;
+      const pixels = context.getImageData(0, 0, width, height);
+      const l = pixels.data.length;
+      let i;
+      let bound: any = {
+        top: null,
+        left: null,
+        right: null,
+        bottom: null
+      };
+      let x, y;
+
+      for (i = 0; i < l; i += 4) {
+        if (pixels.data[i + 3] !== 0) {
+          x = (i / 4) % width;
+          y = ~~((i / 4) / width);
+
+          if (bound.top === null) {
+            bound.top = y;
+          }
+
+          if (bound.left === null) {
+            bound.left = x;
+          } else if (x < bound.left) {
+            bound.left = x;
+          }
+
+          if (bound.right === null) {
+            bound.right = x;
+          } else if (bound.right < x) {
+            bound.right = x;
+          }
+
+          if (bound.bottom === null) {
+            bound.bottom = y;
+          } else if (bound.bottom < y) {
+            bound.bottom = y;
+          }
+        }
+      }
+
+      if (bound.top === null) return canvas;
+
+      const trimHeight = bound.bottom - bound.top + 1;
+      const trimWidth = bound.right - bound.left + 1;
+      const trimmed = context.getImageData(bound.left, bound.top, trimWidth, trimHeight);
+
+      const copy = document.createElement('canvas');
+      copy.width = trimWidth;
+      copy.height = trimHeight;
+      const copyContext = copy.getContext('2d');
+      if (copyContext) {
+        copyContext.putImageData(trimmed, 0, 0);
+      }
+
+      return copy;
+    };
+
+    const trimmedCanvas = trimCanvas(canvas);
+    const dataUrl = trimmedCanvas.toDataURL('image/png');
+    
     if (dataUrl) {
       onSave(dataUrl);
       toast.success('Tanda tangan berhasil disiapkan!');

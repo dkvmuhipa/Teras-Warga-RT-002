@@ -1,6 +1,6 @@
 import React from 'react';
 import { House, PaymentStatus, Bill } from '../../types';
-import { Phone, CheckCircle, XCircle, DollarSign, Edit2, Trash2, LayoutList, AlertCircle, MessageCircle, MapPin, User, ShieldCheck } from 'lucide-react';
+import { Phone, CheckCircle, XCircle, DollarSign, Edit2, Trash2, LayoutList, AlertCircle, MessageCircle, MapPin, User, ShieldCheck, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface ResidentCardProps {
@@ -12,6 +12,7 @@ interface ResidentCardProps {
   onOpenBills: (house: House) => void;
   onOpenPay: (house: House) => void;
   onSendWhatsApp?: (house: House) => void;
+  onUpdatePBB?: (house: House) => void;
   dynamicStatusAir?: PaymentStatus;
   dynamicStatusSampah?: PaymentStatus;
   arrears?: string[];
@@ -19,6 +20,7 @@ interface ResidentCardProps {
 
 export const ResidentCard: React.FC<ResidentCardProps> = ({ 
   house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills, onOpenPay, onSendWhatsApp,
+  onUpdatePBB,
   dynamicStatusAir, dynamicStatusSampah, arrears = []
 }) => {
   const houseBills = bills.filter(b => b.houseId === house.id);
@@ -95,6 +97,37 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
           </p>
         </div>
       </div>
+
+      {/* PBB Status Tracking */}
+      {house.status === 'Occupied' && (
+        <div className="mb-4 relative z-10">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onUpdatePBB?.(house); }}
+            className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 group/pbb ${
+              house.pbbStatus === 'Sudah Diambil' 
+                ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
+                : 'bg-amber-50 border-amber-100 text-amber-700 hover:bg-amber-100'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                house.pbbStatus === 'Sudah Diambil' ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'
+              }`}>
+                <FileText size={14} />
+              </div>
+              <div className="text-left">
+                <p className="text-[8px] font-black uppercase tracking-widest opacity-60">Status PBB {house.pbbYear || new Date().getFullYear()}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest">{house.pbbStatus || 'Belum Diambil'}</p>
+              </div>
+            </div>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+              house.pbbStatus === 'Sudah Diambil' ? 'bg-emerald-200 text-emerald-700' : 'bg-amber-200 text-amber-700 group-hover/pbb:scale-110'
+            }`}>
+              {house.pbbStatus === 'Sudah Diambil' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* Contact Quick Link */}
       <div className="mb-8 relative z-10">

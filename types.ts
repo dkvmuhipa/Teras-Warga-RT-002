@@ -131,6 +131,11 @@ export interface House {
   rondaDutyCount?: number; // NEW: Jumlah Tugas dalam sebulan/periode
   rondaLastDuty?: string; // NEW: Tanggal Tugas Terakhir (ISO)
 
+  // PBB Management
+  pbbStatus?: 'Sudah Diambil' | 'Belum Diambil'; // NEW: Status Pengambilan PBB
+  pbbYear?: string; // NEW: Tahun PBB
+  isInitialData?: boolean; // NEW: Flag for initial sync
+
   // Family Members
   familyMembers?: {
     id?: string;
@@ -277,7 +282,7 @@ export interface AppNotification {
 
 export interface Report {
   id: string;
-  type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Sosial' | 'Aspirasi/Saran' | 'Lainnya';
+  type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Sosial' | 'Aspirasi/Saran' | 'Temuan Lapangan' | 'Lainnya';
   description: string;
   reporterName: string;
   date: string;

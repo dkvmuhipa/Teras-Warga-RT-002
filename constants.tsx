@@ -302,7 +302,7 @@ export const MOCK_BILLS: Bill[] = [
 ];
 
 export const DEFAULT_PDF_CONFIG: PdfConfig = {
-  logo: "", 
+  logo: LOGO_URL, 
   stamp: "",
   signature: "",
   rtName: "RT.02 / RW.020",

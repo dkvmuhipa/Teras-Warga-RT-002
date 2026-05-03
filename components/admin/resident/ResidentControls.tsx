@@ -121,6 +121,8 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             <option value="verified">🛡️ Terverifikasi</option>
             <option value="unverified">❓ Belum Verifikasi</option>
             <option value="arrears">⚠️ Ada Tunggakan</option>
+            <option value="pbb_taken">📄 PBB Diambil</option>
+            <option value="pbb_not_taken">📄 PBB Belum Diambil</option>
           </select>
         </FilterGroup>
 

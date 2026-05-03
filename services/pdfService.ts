@@ -22,17 +22,18 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
     const centerX = pageWidth / 2;
 
     // --- Professional Header (Kop Surat) ---
-    let logoDrawn = false;
+    let logoData = '';
     try {
-        const logoData = await getImageData(config.logo);
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
-            logoDrawn = true;
-        }
+        logoData = await getImageData(config.logo);
     } catch (e) { console.error(e); }
+
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+    }
 
     doc.setFont("times", "normal"); 
     doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
     doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
     doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
     doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
@@ -173,6 +174,37 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
     addStatRow("1. Total Warga Musiman", report.seasonalCount || 0, true, undefined, true);
     addStatRow("- Laki-laki (Musiman)", report.seasonalMaleCount || 0);
     addStatRow("- Perempuan (Musiman)", report.seasonalFemaleCount || 0, false, undefined, true);
+
+    y += 10;
+    if (y > pageHeight - 50) {
+        doc.addPage();
+        y = 30;
+    }
+
+    const signX = pageWidth - 60;
+    doc.setFontSize(11);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, y, { align: "center" });
+    y += 6;
+    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+    
+    const signSpaceY = y + 2;
+    y += 25;
+    
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    doc.line(signX - 25, y + 1, signX + 25, y + 1);
+
+    // Add Signature then Stamp (Stamp on top)
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 28, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
 
     addPageNumbers(doc);
     doc.save(`Laporan_Penduduk_${report.month}_${report.year}.pdf`);
@@ -445,18 +477,18 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.text(config.rtChairman, rightSignX, cursorY, { align: "center" });
 
   if (!isDraft) {
+      if (config.signature) {
+          try {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY, 30, 20);
+          } catch(e) {}
+      }
+
       if (config.stamp) {
           try {
              const stampImg = await getImageData(config.stamp);
              // Ukuran stempel diperkecil lagi (20x20) dan posisi disesuaikan
              if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 25, signSpaceY - 2, 25, 25);
-          } catch(e) {}
-      }
-
-      if (config.signature) {
-          try {
-            const signImg = await getImageData(config.signature);
-            if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY, 30, 20);
           } catch(e) {}
       }
   }
@@ -662,13 +694,13 @@ export const generateOfficialLetterPDF = async (letter: OfficialLetter, customCo
     // Add Stamp and Signature
     if (letter.status === 'Published') {
       try {
-        if (config.stamp) {
-          const stampImg = await getImageData(config.stamp);
-          if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 5, 25, 25);
-        }
         if (config.signature) {
           const signImg = await getImageData(config.signature);
           if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY, 30, 20);
+        }
+        if (config.stamp) {
+          const stampImg = await getImageData(config.stamp);
+          if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 5, 25, 25);
         }
       } catch (e) {}
 
@@ -731,40 +763,91 @@ export const generateReportReceiptPDF = async (report: Report, customConfig?: Pd
         format: "a5",
         compress: true 
     });
-    const centerX = doc.internal.pageSize.getWidth() / 2;
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("BUKTI LAPORAN WARGA", centerX, 20, { align: "center" });
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`ID Laporan: ${report.id}`, centerX, 28, { align: "center" });
-    doc.text(`Tanggal: ${new Date(report.date).toLocaleDateString('id-ID')}`, centerX, 34, { align: "center" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const centerX = pageWidth / 2;
+    const margin = 10;
 
+    // Fetch Logo once
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
+    // Header / Kop Surat Mini
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', 10, 10, 15, 20);
+    }
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text(`PENGURUS ${config.rtName}`, centerX + 5, 15, { align: "center" });
+    doc.setFontSize(7);
+    doc.setFont("times", "normal");
+    const addressLines = doc.splitTextToSize(config.rtAddress, 80);
+    doc.text(addressLines, centerX + 5, 20, { align: "center" });
     doc.setLineWidth(0.5);
-    doc.line(10, 40, 138, 40);
+    doc.line(margin, 28, pageWidth - margin, 28);
 
-    let y = 50;
-    const addField = (label: string, value: string) => {
-        doc.setFont("helvetica", "bold");
-        doc.text(label, 15, y);
-        doc.setFont("helvetica", "normal");
-        const splitVal = doc.splitTextToSize(value, 80);
-        doc.text(splitVal, 50, y);
-        y += (splitVal.length * 5) + 5;
+    // Title
+    doc.setFont("times", "bold");
+    doc.setFontSize(14);
+    doc.text("BUKTI LAPORAN WARGA", centerX, 38, { align: "center" });
+    
+    doc.setFontSize(8);
+    doc.setFont("times", "normal");
+    doc.text(`No. Ref: ${report.id.substring(0, 8).toUpperCase()}`, pageWidth - margin - 5, 45, { align: "right" });
+
+    let y = 52;
+    const drawRow = (label: string, value: string) => {
+        doc.setFont("times", "bold");
+        doc.setFontSize(9);
+        doc.text(label, margin + 5, y);
+        doc.text(":", margin + 40, y);
+        doc.setFont("times", "normal");
+        const splitVal = doc.splitTextToSize(value || '-', pageWidth - margin - 55);
+        doc.text(splitVal, margin + 43, y);
+        y += (splitVal.length * 5) + 3;
     };
 
-    addField("Kategori", report.type);
-    addField("Pelapor", report.reporterName);
-    addField("Lokasi", report.houseId || "-");
-    addField("Deskripsi", report.description);
-    addField("Status", report.status);
+    drawRow("Tanggal Laporan", new Date(report.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+    drawRow("Kategori", report.type);
+    drawRow("Nama Pelapor", report.reporterName);
+    drawRow("Lokasi/Unit", report.houseId || "-");
+    drawRow("Deskripsi Kejadian", report.description);
+    drawRow("Status Saat Ini", report.status);
 
-    doc.setFontSize(8);
-    doc.text("Simpan bukti ini sebagai referensi.", centerX, y + 10, { align: "center" });
+    y += 10;
+    const signX = pageWidth - 45;
+    doc.setFontSize(9);
+    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, margin + 5, y);
     
-    doc.save(`Bukti_Lapor_${report.id}.pdf`);
+    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+    const signSpaceY = y + 2;
+    y += 20;
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    doc.line(signX - 15, y + 1, signX + 15, y + 1);
+
+    // Add Signature then Stamp (Stamp on top)
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 12, signSpaceY + 2, 24, 15);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 20, signSpaceY - 2, 18, 18);
+        }
+    } catch (e) { console.error(e); }
+
+    doc.setFontSize(7);
+    doc.setFont("times", "italic");
+    doc.setTextColor(150);
+    doc.text("Bukti lapor digital ini sah dan diterbitkan oleh Sistem Teras Warga.", centerX, pageHeight - 8, { align: "center" });
+
+    doc.save(`Bukti_Lapor_${report.id.substring(0, 8)}.pdf`);
 };
 
 export const generateResidentReportPDF = async (houses: House[], customConfig?: PdfConfig) => {
@@ -783,7 +866,17 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const contentWidth = pageWidth - (margin * 2);
     const centerX = pageWidth / 2;
 
+    // Fetch Logo once
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
     const drawHeader = () => {
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 15, 10, 22, 28);
+        }
+
         doc.setFont("times", "bold");
         doc.setFontSize(14);
         doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
@@ -807,7 +900,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     doc.text("DAFTAR INDUK DATA WARGA", centerX, 52, { align: "center" });
     doc.setFontSize(9);
     doc.setFont("times", "normal");
-    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, margin, 52);
+    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, pageWidth - margin, 52, { align: "right" });
 
     let y = 60;
     const colWidths = {
@@ -912,6 +1005,40 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         y += 7;
     });
 
+    // Signature Block
+    if (y > pageHeight - 50) {
+        doc.addPage();
+        drawHeader();
+        y = 60;
+    } else {
+        y += 15;
+    }
+
+    const signX = pageWidth - 60;
+    doc.setFontSize(10);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, y, { align: "center" });
+    y += 6;
+    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+    
+    const signSpaceY = y + 2;
+    y += 25;
+    
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    doc.line(signX - 25, y + 1, signX + 25, y + 1);
+
+    // Add Signature then Stamp (Stamp on top)
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 28, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
+
     // Page Numbers
     const totalPages = doc.getNumberOfPages();
     for(let j = 1; j <= totalPages; j++) {
@@ -938,27 +1065,37 @@ export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfCo
     const centerX = pageWidth / 2;
     const margin = 10;
 
+    // Fetch Logo once
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
     // Header / Kop Surat Mini
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', 10, 10, 15, 20);
+    }
+
     doc.setFont("times", "bold");
     doc.setFontSize(12);
-    doc.text(`PENGURUS ${config.rtName}`, centerX, 15, { align: "center" });
+    doc.text(`PENGURUS ${config.rtName}`, centerX + 5, 15, { align: "center" });
     doc.setFontSize(8);
     doc.setFont("times", "normal");
-    doc.text(config.rtAddress, centerX, 20, { align: "center" });
+    doc.text(config.rtAddress, centerX + 5, 20, { align: "center" });
     doc.setLineWidth(0.5);
-    doc.line(margin, 23, pageWidth - margin, 23);
+    doc.line(margin, 25, pageWidth - margin, 25);
 
     // Title
     doc.setFont("times", "bold");
     doc.setFontSize(14);
-    doc.text("KWITANSI PEMBAYARAN IURAN", centerX, 32, { align: "center" });
+    doc.text("KWITANSI PEMBAYARAN IURAN", centerX, 35, { align: "center" });
     
     doc.setFontSize(9);
     doc.setFont("times", "normal");
-    doc.text(`No. Ref: ${payment.id.substring(0, 8).toUpperCase()}`, pageWidth - margin - 5, 40, { align: "right" });
+    doc.text(`No. Ref: ${payment.id.substring(0, 8).toUpperCase()}`, pageWidth - margin - 5, 42, { align: "right" });
 
     // Content Table-like structure
-    let y = 50;
+    let y = 52;
     const drawRow = (label: string, value: string) => {
         doc.setFont("times", "bold");
         doc.text(label, margin + 5, y);
@@ -983,23 +1120,36 @@ export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfCo
     doc.text(`TERBILANG: Rp ${payment.amount.toLocaleString()},-`, margin + 10, y + 8);
 
     // Signature
-    y += 25;
+    y += 20;
     const signX = pageWidth - 45;
     doc.setFontSize(9);
     doc.setFont("times", "normal");
     doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, y, { align: "center" });
     doc.text("Penerima / Bendahara,", signX, y + 5, { align: "center" });
     
-    y += 20;
+    const signSpaceY = y + 7;
+    y += 25;
     doc.setFont("times", "bold");
     doc.text(config.rtChairman, signX, y, { align: "center" });
     doc.line(signX - 15, y + 1, signX + 15, y + 1);
+
+    // Add Signature then Stamp (Stamp on top)
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
 
     // Footer
     doc.setFontSize(7);
     doc.setFont("times", "italic");
     doc.setTextColor(150);
-    doc.text("* Bukti pembayaran ini sah dan diterbitkan secara digital.", margin + 5, pageHeight - 10);
+    doc.text("* Bukti pembayaran ini sah dan diterbitkan secara digital melalui SiTeras.", margin + 5, pageHeight - 10);
 
     doc.save(`Kwitansi_Iuran_${payment.headOfFamily}_${payment.month.replace(/\s+/g, '_')}.pdf`);
 };
@@ -1146,14 +1296,15 @@ export const generateCashFlowReportPDF = async (cashFlow: any[], month: string, 
     doc.text(config.rtChairman, signX, y + 35, { align: "center" });
     doc.line(signX - 20, y + 36, signX + 20, y + 36);
 
+    // Add Signature then Stamp (Stamp on top)
     try {
-        if (config.stamp) {
-            const stampImg = await getImageData(config.stamp);
-            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY, 25, 25);
-        }
         if (config.signature) {
             const signImg = await getImageData(config.signature);
             if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY, 25, 25);
         }
     } catch (e) {}
 
@@ -1254,6 +1405,663 @@ export const generateGuestReportPDF = async (guestReports: any[], customConfig?:
         doc.rect(margin, y, contentWidth, rowHeight);
         y += rowHeight;
     });
+    
+    // Signature Block
+    y += 10;
+    if (y > pageHeight - 50) {
+        doc.addPage();
+        y = 30;
+    }
+
+    const signX = pageWidth - 60;
+    doc.setFontSize(10);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, y, { align: "center" });
+    y += 6;
+    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+    
+    const signSpaceY = y + 2;
+    y += 25;
+    
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    doc.line(signX - 25, y + 1, signX + 25, y + 1);
+
+    // Add Signature then Stamp (Stamp on top)
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 28, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
 
     doc.save(`Laporan_Tamu_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
+export const generatePBBReportPDF = async (houses: House[], year: string, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    // --- SORTING LOGIC ---
+    // Custom sort to handle alphanumeric blocks like C5, C10, etc.
+    const sortedHouses = [...houses].sort((a, b) => {
+        // Extract block code and number
+        const getBlockParts = (blockStr: string) => {
+            const matches = (blockStr || '').match(/([a-zA-Z]+)(\d+)/);
+            if (matches) {
+                return { alpha: matches[1], num: parseInt(matches[2]) };
+            }
+            return { alpha: blockStr || '', num: 0 };
+        };
+
+        const partsA = getBlockParts(a.block || '');
+        const partsB = getBlockParts(b.block || '');
+
+        // Sort by alpha first (e.g., 'C')
+        if (partsA.alpha < partsB.alpha) return -1;
+        if (partsA.alpha > partsB.alpha) return 1;
+
+        // Then sort by block number (e.g., 5 vs 10)
+        if (partsA.num < partsB.num) return -1;
+        if (partsA.num > partsB.num) return 1;
+        
+        // Then sort by house number numerically
+        const numA = parseInt((a.number || '0').replace(/\D/g, '')) || 0;
+        const numB = parseInt((b.number || '0').replace(/\D/g, '')) || 0;
+        return numA - numB;
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    // Fetch Logo once
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
+    // Statistics
+    const totalResidents = sortedHouses.length;
+    const takenCount = sortedHouses.filter(h => h.pbbStatus === 'Sudah Diambil').length;
+    const pendingCount = totalResidents - takenCount;
+
+    const drawHeader = () => {
+        // --- Professional Header (Kop Surat) ---
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+        }
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.setDrawColor(0, 0, 0);
+
+        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+        doc.setFontSize(11);
+        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+        // Double lines below header
+        doc.setLineWidth(1.0);
+        doc.line(margin, 42, pageWidth - margin, 42);
+        doc.setLineWidth(0.3);
+        doc.line(margin, 43, pageWidth - margin, 43);
+
+        // Title
+        doc.setFont("times", "bold");
+        doc.setFontSize(12);
+        doc.text(`DAFTAR PENERIMA SPPT PBB TAHUN ${year}`, centerX, 55, { align: "center" });
+        const titleWidth = doc.getTextWidth(`DAFTAR PENERIMA SPPT PBB TAHUN ${year}`);
+        doc.line(centerX - (titleWidth / 2), 56, centerX + (titleWidth / 2), 56);
+        
+        // Summary Stats (Solid and Clear)
+        doc.setFont("times", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0); // Black for Total
+        doc.text(`TOTAL WARGA: ${totalResidents}`, margin + 5, 75);
+        
+        doc.setTextColor(0, 128, 0); // Dark Green for Taken
+        doc.text(`DIAMBIL: ${takenCount}`, margin + (contentWidth / 2), 75, { align: "center" });
+        
+        doc.setTextColor(200, 0, 0); // Dark Red for Pending
+        doc.text(`BELUM DIAMBIL: ${pendingCount}`, pageWidth - margin - 5, 75, { align: "right" });
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.2);
+        doc.line(margin, 78, pageWidth - margin, 78);
+        
+        doc.setTextColor(0, 0, 0);
+    };
+
+    drawHeader();
+    let y = 92;
+
+    const colWidths = [10, 22, 63, 35, 40]; 
+    const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA", "STATUS", "TANDA TANGAN"];
+    
+    const drawTableHeaders = (startY: number) => {
+        doc.setFillColor(40, 40, 40); // Darker for better contrast
+        doc.rect(margin, startY - 6, contentWidth, 9, 'F');
+        
+        doc.setFont("times", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        let curX = margin;
+        headers.forEach((h, i) => {
+            const align = (i === 0 || i === 1 || i === 3) ? "center" : "left";
+            const xPos = align === "center" ? curX + (colWidths[i] / 2) : curX + 3;
+            doc.text(h, xPos, startY, { align });
+            curX += colWidths[i];
+        });
+    };
+
+    drawTableHeaders(y);
+    y += 9;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+
+    let currentBlock = "";
+
+    sortedHouses.forEach((house, index) => {
+        const houseBlock = (house.block || '').toString().toUpperCase();
+        const isNewBlock = houseBlock !== currentBlock;
+        
+        if (isNewBlock) {
+            currentBlock = houseBlock;
+            
+            // Check for page break before block header
+            if (y > 270) {
+                doc.addPage();
+                drawHeader();
+                y = 92;
+                drawTableHeaders(y);
+                y += 9;
+            }
+
+            // Draw Block Header Row
+            doc.setFillColor(240, 240, 240);
+            doc.rect(margin, y - 6, contentWidth, 8, 'F');
+            doc.setFont("times", "bold");
+            doc.setTextColor(0);
+            doc.text(`BLOK ${houseBlock}`, margin + 5, y);
+            doc.setFont("times", "normal");
+            y += 8;
+        }
+
+        if (y > 275) {
+            doc.addPage();
+            drawHeader();
+            y = 92;
+            drawTableHeaders(y);
+            y += 9;
+            doc.setFont("times", "normal");
+            doc.setFontSize(9);
+            
+            // Re-draw block header on new page if item continues
+            doc.setFillColor(240, 240, 240);
+            doc.rect(margin, y - 6, contentWidth, 8, 'F');
+            doc.setFont("times", "bold");
+            doc.text(`BLOK ${houseBlock} (Lanjutan)`, margin + 5, y);
+            doc.setFont("times", "normal");
+            y += 8;
+        }
+
+        let curX = margin;
+        
+        // No
+        doc.text((index + 1).toString(), curX + (colWidths[0] / 2), y, { align: "center" });
+        curX += colWidths[0];
+
+        // Unit
+        doc.text(`${house.block}-${house.number}`, curX + (colWidths[1] / 2), y, { align: "center" });
+        curX += colWidths[1];
+
+        // Name
+        const name = house.headOfFamily?.toUpperCase() || "-";
+        doc.text(doc.splitTextToSize(name, colWidths[2] - 5), curX + 3, y);
+        curX += colWidths[2];
+
+        // Status
+        const isTaken = house.pbbStatus === 'Sudah Diambil';
+        if (isTaken) {
+            doc.setTextColor(0, 128, 0); // Darker Green
+            doc.setFont("times", "bold");
+        } else {
+            doc.setTextColor(80, 80, 80); // Darker Grey
+        }
+        doc.text(isTaken ? "DIAMBIL" : "BELUM", curX + (colWidths[3] / 2), y, { align: "center" });
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("times", "normal");
+        curX += colWidths[3];
+
+        // Signature Box
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(curX + 2, y - 5, colWidths[4] - 4, 7, 'S');
+        if (!isTaken) {
+            doc.setFontSize(6);
+            doc.setTextColor(180, 180, 180);
+            doc.text(`${index + 1}.`, curX + 4, y);
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+        }
+
+        // Thin separator
+        doc.setDrawColor(240, 240, 240);
+        doc.line(margin, y + 2, pageWidth - margin, y + 2);
+
+        y += 8;
+    });
+
+    // Signature Area
+    const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    if (y > 240) {
+        doc.addPage();
+        y = 30;
+    } else {
+        y += 15;
+    }
+
+    const signX = pageWidth - 60;
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    doc.text(`Palu, ${dateString}`, signX, y, { align: "center" });
+    y += 6;
+    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+    
+    const signSpaceY = y + 2;
+    y += 25;
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    const chairmanWidth = doc.getTextWidth(config.rtChairman);
+    doc.line(signX - (chairmanWidth / 2), y + 1.5, signX + (chairmanWidth / 2), y + 1.5);
+
+    // Add Signature then Stamp (Stamp on top)
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 28, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
+
+    // Footer
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont("times", "italic");
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Halaman ${i} dari ${totalPages} - Laporan SPPT PBB ${year}`, centerX, pageHeight - 10, { align: "center" });
+    }
+
+    doc.save(`Laporan_PBB_${year}.pdf`);
+};
+
+export const generateResidentStatsReportPDF = async (houses: House[], customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    // --- Data Analysis ---
+    const totalHouses = houses.length;
+    const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
+    const emptyHouses = houses.filter(h => h.status === 'Empty').length;
+    const businessHouses = houses.filter(h => h.status === 'Business').length;
+    
+    const verifiedResidentCount = houses.filter(h => h.isVerified).length;
+    const totalOccupants = houses.reduce((sum, h) => sum + (h.occupants || 0), 0);
+    const maleCount = houses.filter(h => h.gender === 'Laki-laki').length;
+    const femaleCount = houses.filter(h => h.gender === 'Perempuan').length;
+
+    // Fetch Logo once
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
+    const drawHeader = () => {
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+        }
+        doc.setFont("times", "normal");
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+        doc.setFontSize(11);
+        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+        doc.setLineWidth(1.0);
+        doc.line(margin, 42, pageWidth - margin, 42);
+        doc.setLineWidth(0.3);
+        doc.line(margin, 43, pageWidth - margin, 43);
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(14);
+        doc.text("LAPORAN STATISTIK & REKAPITULASI WARGA", centerX, 55, { align: "center" });
+        doc.setFont("times", "normal");
+        doc.setFontSize(10);
+        doc.text(`Tanggal Cetak: ${new Date().toLocaleString('id-ID')}`, margin, 65);
+    };
+
+    drawHeader();
+    let y = 75;
+
+    // --- Occupancy Summary Section ---
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 9, 'F');
+    doc.setFont("times", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(255);
+    doc.text("I. REKAPITULASI HUNIAN (RUMAH)", margin + 3, y);
+    doc.setTextColor(0);
+    y += 12;
+
+    const addStatRow = (label: string, value: string | number, percentage?: string, isTotal = false) => {
+        if (isTotal) {
+            doc.setFillColor(241, 245, 249);
+            doc.rect(margin, y - 5, contentWidth, 8, 'F');
+            doc.setFont("times", "bold");
+        } else {
+            doc.setFont("times", "normal");
+        }
+        doc.setFontSize(10);
+        doc.text(label, margin + 5, y + 1);
+        doc.text(value.toString(), margin + 110, y + 1, { align: "right" });
+        if (percentage) {
+            doc.text(percentage, pageWidth - margin - 5, y + 1, { align: "right" });
+        }
+        
+        doc.setDrawColor(241, 245, 249);
+        doc.line(margin, y + 3, pageWidth - margin, y + 3);
+        y += 8;
+    };
+
+    addStatRow("Total Unit Rumah", totalHouses, "100%", true);
+    addStatRow("Rumah Dihuni (Occupied)", occupiedHouses, `${((occupiedHouses / totalHouses) * 100).toFixed(1)}%`);
+    addStatRow("Rumah Kosong (Empty)", emptyHouses, `${((emptyHouses / totalHouses) * 100).toFixed(1)}%`);
+    addStatRow("Tempat Usaha (Business)", businessHouses, `${((businessHouses / totalHouses) * 100).toFixed(1)}%`);
+    
+    y += 10;
+
+    // --- Resident Summary Section ---
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 9, 'F');
+    doc.setFont("times", "bold");
+    doc.setTextColor(255);
+    doc.text("II. STATISTIK WARGA (KEPALA KELUARGA)", margin + 3, y);
+    doc.setTextColor(0);
+    y += 12;
+
+    addStatRow("Total Kepala Keluarga Terdata", totalHouses, "100%", true);
+    addStatRow("Status Terverifikasi", verifiedResidentCount, `${((verifiedResidentCount / totalHouses) * 100).toFixed(1)}%`);
+    addStatRow("Belum Verifikasi", totalHouses - verifiedResidentCount, `${(((totalHouses - verifiedResidentCount) / totalHouses) * 100).toFixed(1)}%`);
+    addStatRow("Kepala Keluarga Laki-laki", maleCount, `${((maleCount / totalHouses) * 100).toFixed(1)}%`);
+    addStatRow("Kepala Keluarga Perempuan", femaleCount, `${((femaleCount / totalHouses) * 100).toFixed(1)}%`);
+
+    y += 10;
+
+    // --- Occupants Section ---
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 9, 'F');
+    doc.setFont("times", "bold");
+    doc.setTextColor(255);
+    doc.text("III. KOMPOSISI JIWA (ANGGOTA KELUARGA)", margin + 3, y);
+    doc.setTextColor(0);
+    y += 12;
+
+    addStatRow("Total Seluruh Jiwa / Anggota", totalOccupants, "-", true);
+    addStatRow("Rata-rata Jiwa per Rumah", (totalOccupants / occupiedHouses).toFixed(1), "-");
+
+    // --- Footer / Signature ---
+    if (y > 230) {
+        doc.addPage();
+        y = 30;
+    } else {
+        y += 20;
+    }
+
+    const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const signX = pageWidth - 60;
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    doc.text(`Palu, ${dateString}`, signX, y, { align: "center" });
+    y += 6;
+    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+
+    const signSpaceY = y + 2;
+    y += 25;
+    
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    const chairmanWidth = doc.getTextWidth(config.rtChairman);
+    doc.line(signX - (chairmanWidth / 2), y + 1, signX + (chairmanWidth / 2), y + 1);
+
+    // Add Signature then Stamp (Stamp on top)
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
+
+    // Page Numbers
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont("times", "italic");
+        doc.setTextColor(150);
+        doc.text(`Halaman ${i} dari ${totalPages} - Laporan Statistik Warga`, centerX, pageHeight - 10, { align: "center" });
+    }
+
+    doc.save(`Laporan_Statistik_Warga_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
+export const generateIncidentReportPDF = async (reports: Report[], houses: House[], customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    // Fetch Logo once
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
+    const drawHeader = () => {
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+        }
+        doc.setFont("times", "normal");
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+        doc.setFontSize(11);
+        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+        
+        doc.setLineWidth(1.0);
+        doc.line(margin, 42, pageWidth - margin, 42);
+        doc.setLineWidth(0.3);
+        doc.line(margin, 43, pageWidth - margin, 43);
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(12);
+        doc.text("REKAPITULASI LAPORAN & TEMUAN LAPANGAN", centerX, 55, { align: "center" });
+        doc.line(centerX - 45, 56, centerX + 45, 56);
+    };
+
+    drawHeader();
+    let y = 65;
+
+    // Statistics Summary
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, margin, y);
+    doc.text(`Total Laporan: ${reports.length}`, pageWidth - margin, y, { align: "right" });
+    y += 10;
+
+    const sortedReports = [...reports].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    if (sortedReports.length === 0) {
+        doc.setFont("times", "italic");
+        doc.text("Tidak ada data laporan ditemukan.", centerX, y + 10, { align: "center" });
+    } else {
+        sortedReports.forEach((report, index) => {
+            // Check for page break
+            if (y > 240) {
+                doc.addPage();
+                drawHeader();
+                y = 65;
+            }
+
+            // Report Header Box
+            doc.setFillColor(245, 245, 245);
+            doc.rect(margin, y - 5, contentWidth, 8, 'F');
+            doc.setFont("times", "bold");
+            doc.setFontSize(10);
+            doc.text(`${index + 1}. [${report.type.toUpperCase()}] - ${new Date(report.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`, margin + 3, y);
+            
+            // Status Tag
+            const isDone = report.status === 'Selesai';
+            doc.setFillColor(isDone ? 200 : 255, isDone ? 255 : 220, isDone ? 200 : 150);
+            doc.roundedRect(pageWidth - margin - 25, y - 4, 22, 6, 1, 1, 'F');
+            doc.setFontSize(8);
+            doc.setTextColor(isDone ? 0 : 150, isDone ? 100 : 0, 0);
+            doc.text(report.status.toUpperCase(), pageWidth - margin - 14, y, { align: "center" });
+            doc.setTextColor(0);
+            y += 8;
+
+            // Details Section
+            doc.setFont("times", "normal");
+            doc.setFontSize(9);
+            
+            // Reporter & House Info
+            const house = houses.find(h => h.id === report.reporterHouseId || h.id === report.houseId);
+            const reporterText = `Pelapor: ${report.reporterName || 'Anonim'}`;
+            const houseText = house ? `Unit: ${house.block}-${house.number} (${house.status === 'Occupied' ? 'Dihuni' : 'Kosong/Lainnya'})` : `Unit: ${report.houseId || '-'}`;
+            
+            doc.text(reporterText, margin + 5, y);
+            doc.text(houseText, margin + 80, y);
+            y += 5;
+
+            // Resident Details
+            if (house) {
+                const residentInfo = `Penghuni: ${house.headOfFamily || '-'} | Telp: ${house.phone || '-'}`;
+                doc.text(residentInfo, margin + 5, y);
+                y += 5;
+            }
+
+            // Description
+            doc.setFont("times", "bold");
+            doc.text("Keterangan/Aduan:", margin + 5, y);
+            y += 4;
+            doc.setFont("times", "normal");
+            const splitDesc = doc.splitTextToSize(report.description, contentWidth - 20);
+            doc.text(splitDesc, margin + 10, y);
+            y += (splitDesc.length * 4.5) + 5;
+
+            // Separator
+            doc.setDrawColor(230, 230, 230);
+            doc.line(margin, y - 2, pageWidth - margin, y - 2);
+            y += 5;
+        });
+    }
+
+    // Signature Area
+    if (y > 240) {
+        doc.addPage();
+        drawHeader();
+        y = 65;
+    } else {
+        y += 10;
+    }
+
+    const signX = pageWidth - 60;
+    doc.setFontSize(11);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, y, { align: "center" });
+    y += 6;
+    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+    
+    const signSpaceY = y + 2;
+    y += 25;
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    doc.line(signX - 25, y + 1, signX + 25, y + 1);
+
+    // Add Signature then Stamp (Stamp on top)
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 28, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
+
+    // Page Numbers
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont("times", "italic");
+        doc.setTextColor(150);
+        doc.text(`Halaman ${i} dari ${totalPages} - SiTeras RT02`, centerX, pageHeight - 10, { align: "center" });
+    }
+
+    doc.save(`Rekap_Laporan_RT02_${new Date().toISOString().split('T')[0]}.pdf`);
 };

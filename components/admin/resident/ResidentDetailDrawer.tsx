@@ -197,6 +197,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
                   <DetailItem icon={<Phone size={16} />} label="Nomor WhatsApp" value={selectedResident.phone || 'N/A'} isUrgent={!!selectedResident.phone} />
                   <DetailItem icon={<MapPin size={16} />} label="Unit Hunian" value={`Blok ${selectedResident.block} - Nomor ${selectedResident.number}`} />
+                  <DetailItem 
+                    icon={<FileText size={16} />} 
+                    label={`Doc. PBB ${selectedResident.pbbYear || new Date().getFullYear()}`} 
+                    value={selectedResident.pbbStatus || 'Belum Diambil'} 
+                    isUrgent={selectedResident.pbbStatus !== 'Sudah Diambil'} 
+                  />
                   <DetailItem icon={<FileText size={16} />} label="Nomor NIK" value={selectedResident.nik || '-'} isMain />
                   <DetailItem icon={<Users size={16} />} label="Nomor Keluarga" value={selectedResident.kkNumber || '-'} isMain />
                   <DetailItem icon={<Calendar size={16} />} label="Mulai Menempati" value={selectedResident.joiningDate || '-'} />

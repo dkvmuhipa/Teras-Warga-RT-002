@@ -12,6 +12,7 @@ interface ResidentGridViewProps {
   setSelectedHouseForBills: (house: House) => void;
   openPayModal: (house: House) => void;
   onSendWhatsApp?: (house: House) => void;
+  handleUpdateHouse: (id: string, data: Partial<House>) => Promise<void>;
 }
 
 export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
@@ -23,6 +24,7 @@ export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
   setSelectedHouseForBills,
   openPayModal,
   onSendWhatsApp,
+  handleUpdateHouse,
 }) => {
   const { getPaymentStatus, getArrearsForHouse } = useFinancial();
   
@@ -57,6 +59,11 @@ export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
                 onOpenBills={setSelectedHouseForBills}
                 onOpenPay={openPayModal}
                 onSendWhatsApp={onSendWhatsApp}
+                onUpdatePBB={async (house) => {
+                  const newStatus = house.pbbStatus === 'Sudah Diambil' ? 'Belum Diambil' : 'Sudah Diambil';
+                  const year = house.pbbYear || new Date().getFullYear().toString();
+                  await handleUpdateHouse(house.id, { pbbStatus: newStatus, pbbYear: year });
+                }}
                 dynamicStatusAir={getPaymentStatus(house, 'Air', selectedMonth)}
                 dynamicStatusSampah={getPaymentStatus(house, 'Sampah', selectedMonth)}
                 arrears={house.status === 'Occupied' ? getArrearsForHouse(house) : []}

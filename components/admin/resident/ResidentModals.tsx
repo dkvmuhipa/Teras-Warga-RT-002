@@ -208,6 +208,25 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             <Calendar size={14} />
                             {formData.isInitialData ? '✅ Registrasi Awal' : 'Mutasi Baru'}
                           </button>
+
+                          <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
+                          <button
+                            type="button"
+                            onClick={() => setFormData({
+                              ...formData, 
+                              pbbStatus: formData.pbbStatus === 'Sudah Diambil' ? 'Belum Diambil' : 'Sudah Diambil',
+                              pbbYear: formData.pbbYear || new Date().getFullYear().toString()
+                            })}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                              formData.pbbStatus === 'Sudah Diambil' 
+                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' 
+                                : 'bg-amber-50 text-amber-600 border border-amber-100 hover:bg-amber-100 shadow-sm'
+                            }`}
+                          >
+                            <FileText size={14} />
+                            {formData.pbbStatus === 'Sudah Diambil' ? `PBB ${formData.pbbYear || ''} Diambil` : 'Ambil PBB'}
+                          </button>
                         </div>
                       )}
                     </div>

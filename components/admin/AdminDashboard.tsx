@@ -128,6 +128,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <ServiceManager 
             letters={letters} 
             reports={reports} 
+            houses={houses}
             pdfConfig={pdfConfig} 
             setPdfConfig={setPdfConfig} 
             onDeleteReport={async (id) => {

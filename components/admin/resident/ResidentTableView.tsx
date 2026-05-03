@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, XCircle, ChevronRight, Edit2, Trash2, MessageCircle, User, MapPin } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, Edit2, Trash2, MessageCircle, User, MapPin, AlertCircle } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 
@@ -13,6 +13,7 @@ interface ResidentTableViewProps {
   handleOpenEdit: (house: House) => void;
   handleDelete: (id: string) => void;
   onSendWhatsApp?: (house: House) => void;
+  handleUpdateHouse: (id: string, data: Partial<House>) => Promise<void>;
 }
 
 export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
@@ -25,6 +26,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
   handleOpenEdit,
   handleDelete,
   onSendWhatsApp,
+  handleUpdateHouse,
 }) => {
   const { getPaymentStatus, getArrearsForHouse } = useFinancial();
   
@@ -71,6 +73,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                   <th className="px-6 py-4 text-left font-black text-slate-400 uppercase tracking-widest text-[10px]">Lokasi</th>
                   <th className="px-6 py-4 text-left font-black text-slate-400 uppercase tracking-widest text-[10px]">Kontak</th>
                   <th className="px-6 py-4 text-left font-black text-slate-400 uppercase tracking-widest text-[10px]">Jiwa</th>
+                  <th className="px-6 py-4 text-left font-black text-slate-400 uppercase tracking-widest text-[10px]">SPPT PBB</th>
                   <th className="px-6 py-4 text-left font-black text-slate-400 uppercase tracking-widest text-[10px]">Hunian</th>
                   <th className="px-6 py-4 text-left font-black text-slate-400 uppercase tracking-widest text-[10px]">Iuran Sampah</th>
                   <th className="px-6 py-4 text-left font-black text-slate-400 uppercase tracking-widest text-[10px]">Iuran Air</th>
@@ -137,6 +140,23 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                       </td>
                       <td className="px-6 py-5">
                         <span className="text-xs font-black text-slate-500 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">{house.occupants || 0} Jiwa</span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <button 
+                          onClick={() => {
+                            const newStatus = house.pbbStatus === 'Sudah Diambil' ? 'Belum Diambil' : 'Sudah Diambil';
+                            const year = house.pbbYear || new Date().getFullYear().toString();
+                            handleUpdateHouse(house.id, { pbbStatus: newStatus, pbbYear: year });
+                          }}
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                            house.pbbStatus === 'Sudah Diambil' 
+                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                              : 'bg-amber-50 text-amber-600 border-amber-100'
+                          }`}
+                        >
+                          {house.pbbStatus === 'Sudah Diambil' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                          {house.pbbStatus === 'Sudah Diambil' ? `Diambil` : 'Belum'}
+                        </button>
                       </td>
                       <td className="px-6 py-5">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${

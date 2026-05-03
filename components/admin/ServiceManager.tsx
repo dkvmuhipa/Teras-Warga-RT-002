@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw } from 'lucide-react';
-import { LetterRequest, Report, PdfConfig, OfficialLetter } from '../../types';
+import { LetterRequest, Report, PdfConfig, OfficialLetter, House } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
-import { generateSuratPengantar } from '../../services/pdfService';
+import { generateSuratPengantar, generateIncidentReportPDF } from '../../services/pdfService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { SignaturePad } from './SignaturePad';
@@ -17,6 +17,7 @@ import { useConfirm } from '../../context/ConfirmContext';
 interface ServiceManagerProps {
   reports: Report[];
   letters: LetterRequest[];
+  houses: House[];
   pdfConfig: PdfConfig;
   setPdfConfig: (config: PdfConfig) => void;
   onDeleteReport?: (id: string) => void;
@@ -25,6 +26,7 @@ interface ServiceManagerProps {
 export const ServiceManager: React.FC<ServiceManagerProps> = ({ 
   reports, 
   letters, 
+  houses,
   pdfConfig, 
   setPdfConfig,
   onDeleteReport
@@ -602,9 +604,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             </Button>
           )}
           {activeTab === 'reports' && (
-            <Button onClick={() => setIsCreatingReport(true)} className="bg-rose-600 hover:bg-rose-700">
-              <Plus size={18} className="mr-2" /> Buat Aspirasi/Pengaduan
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => generateIncidentReportPDF(filteredReports, houses, pdfConfig)} 
+                className="bg-slate-800 hover:bg-slate-900 border border-slate-700 shadow-lg shadow-slate-200"
+              >
+                <Printer size={18} className="mr-2" /> Cetak Rekap Harian
+              </Button>
+              <Button onClick={() => setIsCreatingReport(true)} className="bg-rose-600 hover:bg-rose-700">
+                <Plus size={18} className="mr-2" /> Buat Aspirasi/Pengaduan
+              </Button>
+            </div>
           )}
           <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
              <Filter size={14} className="text-slate-400"/>
@@ -1337,7 +1347,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <span className="text-xs font-medium text-slate-400">{new Date(report.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })}</span>
                   </div>
                   <h3 className="text-lg font-black text-slate-900 mb-1 truncate">{report.description}</h3>
-                  <p className="text-sm font-medium text-slate-500">Pelapor: <span className="text-slate-800">{report.reporterName}</span> {report.houseId && `(Blok ${report.houseId})`}</p>
+                  <p className="text-sm font-medium text-slate-500">
+                    Pelapor: <span className="text-slate-800">{report.reporterName}</span> 
+                    {(() => {
+                      const house = houses.find(h => h.id === report.houseId || h.id === report.reporterHouseId);
+                      return house ? ` (Blok ${house.block}-${house.number})` : (report.houseId ? ` (${report.houseId})` : '');
+                    })()}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3 w-full md:w-auto">
@@ -1891,8 +1907,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <AlertTriangle size={18} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-rose-900">Pencatatan Aspirasi/Pengaduan Langsung</h4>
-              <p className="text-xs text-rose-700/80 mt-1">Gunakan ini untuk mencatat temuan atau aspirasi yang diterima langsung saat kunjungan ke rumah warga.</p>
+              <h4 className="text-sm font-bold text-rose-900">Pencatatan Laporan & Temuan Lapangan</h4>
+              <p className="text-xs text-rose-700/80 mt-1">Gunakan ini untuk mencatat aspirasi warga atau temuan petugas saat kontrol lapangan (misal: air tumpah, lampu mati).</p>
             </div>
           </div>
 
@@ -1911,15 +1927,24 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             </div>
 
             <div className="group">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Blok / Nomor Rumah</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pilih Unit Rumah (Opsional)</label>
               <div className="relative">
-                <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold uppercase focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
+                <select 
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all appearance-none"
                   value={adminReportForm.houseId || ''} 
                   onChange={e=>setAdminReportForm({...adminReportForm, houseId: e.target.value})} 
-                  placeholder="Cth: C7-02" 
-                />
+                >
+                  <option value="">-- Lokasi Fasilitas / Unit --</option>
+                  {[...houses].sort((a, b) => {
+                    if (a.block !== b.block) return (a.block || '').localeCompare(b.block || '');
+                    return parseInt(a.number || '0') - parseInt(b.number || '0');
+                  }).map(h => (
+                    <option key={h.id} value={h.id}>
+                      {h.block}-{h.number} ({h.headOfFamily})
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -1937,6 +1962,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <option value="Fasilitas">Fasilitas</option>
                 <option value="Sosial">Sosial</option>
                 <option value="Aspirasi/Saran">Aspirasi/Saran</option>
+                <option value="Temuan Lapangan">Temuan Lapangan (Petugas)</option>
                 <option value="Lainnya">Lainnya</option>
               </select>
             </div>
@@ -2021,8 +2047,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <p className="font-bold text-slate-800">{selectedReport.reporterName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Lokasi/Blok</p>
-                  <p className="font-bold text-slate-800">{selectedReport.houseId || '-'}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Lokasi/Unit</p>
+                  <p className="font-bold text-slate-800">
+                    {(() => {
+                      const house = houses.find(h => h.id === selectedReport.houseId || h.id === selectedReport.reporterHouseId);
+                      return house ? `${house.block}-${house.number}` : (selectedReport.houseId || '-');
+                    })()}
+                  </p>
                 </div>
               </div>
             </div>
