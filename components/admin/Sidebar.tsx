@@ -38,7 +38,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
   const navGroups = [
     { 
-      title: "Utama", 
+      title: "Pusat Kendali", 
       items: [
         { id: 'overview', icon: LayoutDashboard, label: 'Dashboard' },
         { id: 'analytics', icon: BarChart3, label: 'Pusat Analitik' },
@@ -48,36 +48,33 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Kependudukan", 
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
-        { id: 'update-requests', icon: FileEdit, label: 'Update Data Warga' },
-        { id: 'population-reports', icon: FileClock, label: 'Mutasi & Laporan' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
         { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },
-        { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
       ] 
     },
     { 
       title: "Layanan & Keuangan", 
       items: [
+        { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan' },
         { id: 'services', icon: FileText, label: 'Surat & Pengaduan' },
-        { id: 'finance', icon: DollarSign, label: 'Keuangan' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
       ] 
     },
     { 
-      title: "Operasional", 
+      title: "Operasional & Media", 
       items: [
         { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
-        { id: 'activities', icon: Calendar, label: 'Presensi Kegiatan' },
-        { id: 'waste-bank', icon: Box, label: 'Bank Sampah' },
+        { id: 'content', icon: Megaphone, label: 'Pusat Informasi' },
+        { id: 'activities', icon: Calendar, label: 'Agenda & Presensi' },
         { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
-        { id: 'content', icon: Megaphone, label: 'Konten & Informasi' },
+        { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
       ] 
     },
     { 
-      title: "Sistem & Log", 
+      title: "Sistem", 
       items: [
-        { id: 'audit', icon: Activity, label: 'Audit Log' },
         { id: 'notifications', icon: Bell, label: 'Notifikasi' },
+        { id: 'audit', icon: Activity, label: 'Log Aktivitas' },
         { id: 'settings', icon: Settings, label: 'Pengaturan' }
       ] 
     }
@@ -90,13 +87,13 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       if (role === Role.ADMIN) return true;
       
       if (role === Role.TREASURER) {
-        const allowed = ['overview', 'analytics', 'finance', 'waste-bank', 'settings', 'notifications'];
+        const allowed = ['overview', 'analytics', 'finance', 'settings', 'notifications'];
         return allowed.includes(item.id);
       }
       
       if (role === Role.SECRETARY) {
         const allowed = [
-          'overview', 'analytics', 'residents', 'update-requests', 'population-reports', 
+          'overview', 'analytics', 'residents', 
           'health', 'guests', 'officials', 'services', 'documents', 'activities', 
           'assets', 'content', 'audit', 'notifications', 'settings'
         ];

@@ -8,9 +8,10 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   maxWidth?: string;
+  stickyHeader?: React.ReactNode;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md', stickyHeader }) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -29,14 +30,21 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className={`bg-white rounded-3xl shadow-2xl w-full ${maxWidth} max-h-[90vh] overflow-hidden pointer-events-auto flex flex-col`}
             >
-              <div className="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
-                <h3 className="text-lg font-black text-slate-800">{title}</h3>
-                <button 
-                  onClick={onClose}
-                  className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
-                >
-                  <X size={20} />
-                </button>
+              <div className="flex flex-col border-b border-slate-100/80 shrink-0">
+                <div className="flex items-center justify-between p-6">
+                  <h3 className="text-lg font-black text-slate-800">{title}</h3>
+                  <button 
+                    onClick={onClose}
+                    className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                {stickyHeader && (
+                  <div className="px-6 pb-4">
+                    {stickyHeader}
+                  </div>
+                )}
               </div>
               <div className="p-6 pb-12 overflow-y-auto custom-scrollbar">
                 {children}

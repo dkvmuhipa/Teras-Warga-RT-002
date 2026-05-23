@@ -4,6 +4,7 @@ import { subscribeToCheckpoints, addCheckpointToDb, updateCheckpointInDb, delete
 import { Button } from '../ui/Button';
 import { Plus, Trash2, Edit2, Save, X, MapPin, Wand2, ShieldCheck } from 'lucide-react';
 import { Modal } from '../ui/Modal';
+import { useConfirm } from '../../context/ConfirmContext';
 import toast from 'react-hot-toast';
 import { MapLayout } from '../HouseMap';
 
@@ -12,6 +13,7 @@ interface CheckpointManagerProps {
 }
 
 export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) => {
+    const confirm = useConfirm();
     const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCheckpoint, setEditingCheckpoint] = useState<Checkpoint | null>(null);
@@ -82,7 +84,14 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
     };
 
     const handleDelete = async (id: string) => {
-        if (window.confirm("Apakah Anda yakin ingin menghapus checkpoint ini?")) {
+        const isConfirmed = await confirm({
+            title: 'Hapus Checkpoint',
+            message: 'Apakah Anda yakin ingin menghapus checkpoint ini?',
+            confirmLabel: 'Hapus',
+            isDanger: true
+        });
+
+        if (isConfirmed) {
             try {
                 await deleteCheckpointFromDb(id);
                 toast.success("Checkpoint dihapus.");

@@ -135,6 +135,7 @@ export interface House {
   pbbStatus?: 'Sudah Diambil' | 'Belum Diambil'; // NEW: Status Pengambilan PBB
   pbbYear?: string; // NEW: Tahun PBB
   isInitialData?: boolean; // NEW: Flag for initial sync
+  useManualDemographics?: boolean; // NEW: Allow manual override of auto counts
 
   // Family Members
   familyMembers?: {
@@ -143,6 +144,7 @@ export interface House {
     nik?: string;
     gender?: 'Laki-laki' | 'Perempuan';
     relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
+    education?: string;
     birthDate?: string;
     job?: string;
   }[];
@@ -179,12 +181,14 @@ export interface ResidentRegistration {
   bansosLainName?: string;
   ktpUrl?: string;
   kkUrl?: string;
+  useManualDemographics?: boolean;
   familyMembers?: {
     id?: string;
     name: string;
     nik?: string;
     gender: 'Laki-laki' | 'Perempuan';
     relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
+    education?: string;
     birthDate?: string;
     job?: string;
   }[];

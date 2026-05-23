@@ -2514,13 +2514,17 @@ export const addWasteDepositToDb = async (deposit: any) => {
     }
 };
 
-export const updateWasteDepositStatus = async (id: string, status: 'Confirmed', totalValue: number, houseId: string) => {
+export const updateWasteDepositStatus = async (id: string, status: 'Confirmed', totalValue: number, houseId: string, weight?: number, pricePerUnit?: number) => {
     try {
         const batch = writeBatch(db);
         
-        // Update deposit status
+        // Update deposit status and values if provided
         const depositRef = doc(db, WASTE_DEPOSITS_COL, id);
-        batch.update(depositRef, { status });
+        const updates: any = { status, totalValue };
+        if (weight !== undefined) updates.weight = weight;
+        if (pricePerUnit !== undefined) updates.pricePerUnit = pricePerUnit;
+        
+        batch.update(depositRef, updates);
 
         // Update house balance
         const balanceRef = doc(db, WASTE_BALANCES_COL, houseId);

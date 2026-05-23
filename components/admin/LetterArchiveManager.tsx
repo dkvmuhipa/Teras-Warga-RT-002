@@ -7,12 +7,14 @@ import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface LetterArchiveManagerProps {
   pdfConfig: PdfConfig;
 }
 
 export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfConfig }) => {
+  const confirm = useConfirm();
   const [letters, setLetters] = useState<OfficialLetter[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
@@ -111,7 +113,14 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus arsip surat ini secara permanen?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Arsip Surat',
+      message: 'Apakah Anda yakin ingin menghapus arsip surat ini secara permanen?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteOfficialLetterFromDb(id);
         toast.success('Arsip berhasil dihapus');

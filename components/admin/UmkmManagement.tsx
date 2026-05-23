@@ -16,12 +16,14 @@ import {
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface UmkmManagementProps {
   umkm: UMKM[];
 }
 
 export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
+  const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState<'list' | 'orders'>('list');
   const [orders, setOrders] = useState<UMKMOrder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -138,24 +140,22 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
   };
 
   const handleDeleteUMKM = async (id: string) => {
-    toast.info('Hapus data UMKM ini?', {
-      action: {
-        label: 'Hapus',
-        onClick: async () => {
-          try {
-            await deleteUMKMFromDb(id);
-            toast.success('Data UMKM berhasil dihapus.');
-          } catch (error) {
-            handleFirestoreError(error, OperationType.DELETE, `umkm/${id}`);
-            toast.error('Gagal menghapus data UMKM.');
-          }
-        }
-      },
-      cancel: {
-        label: 'Batal',
-        onClick: () => {}
-      }
+    const isConfirmed = await confirm({
+      title: 'Hapus Data UMKM',
+      message: 'Apakah Anda yakin ingin menghapus data UMKM ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmLabel: 'Hapus',
+      isDanger: true
     });
+
+    if (isConfirmed) {
+      try {
+        await deleteUMKMFromDb(id);
+        toast.success('Data UMKM berhasil dihapus.');
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `umkm/${id}`);
+        toast.error('Gagal menghapus data UMKM.');
+      }
+    }
   };
 
   const handleUpdateOrderStatus = async (orderId: string, status: UMKMOrder['status']) => {

@@ -11,6 +11,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface OfficialLetterManagerProps {
   pdfConfig: PdfConfig;
@@ -18,6 +19,7 @@ interface OfficialLetterManagerProps {
 }
 
 export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pdfConfig, setPdfConfig }) => {
+  const confirm = useConfirm();
   const [letters, setLetters] = useState<OfficialLetter[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
@@ -173,7 +175,14 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus surat ini secara permanen?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Surat Resmi',
+      message: 'Apakah Anda yakin ingin menghapus surat resmi ini secara permanen?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteOfficialLetterFromDb(id);
         toast.success('Surat berhasil dihapus');

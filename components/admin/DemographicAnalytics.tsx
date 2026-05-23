@@ -9,15 +9,17 @@ import {
   ChevronRight, Info, Sparkles, FileText, AlertTriangle, Activity, DollarSign
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { House, CashFlow, Report } from '../../types';
+import { House, CashFlow, Report, PdfConfig } from '../../types';
+import { generateDemographicAnalyticsReportPDF } from '../../services/pdfService';
 
 interface DemographicAnalyticsProps {
   houses: House[];
   cashFlow: CashFlow[];
   reports: Report[];
+  pdfConfig: PdfConfig;
 }
 
-export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ houses = [], cashFlow = [], reports = [] }) => {
+export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ houses = [], cashFlow = [], reports = [], pdfConfig }) => {
   const [activeTab, setActiveTab] = useState<'demographics' | 'advanced'>('demographics');
 
   // Early return if data is missing
@@ -58,6 +60,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     const residenceTypes: Record<string, number> = {};
     
     let totalVehicles = 0;
+    let totalSoul = 0;
     let totalPregnant = 0;
     let totalBabies = 0;
     let totalToddlers = 0;
@@ -71,10 +74,15 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     let totalPKH = 0;
     let totalBLT = 0;
     let totalBansosLain = 0;
+    let totalOccupied = 0;
 
     houses.forEach(h => {
       if (h && h.status === 'Occupied') {
         totalVehicles += (h.vehicleCount || 0);
+        const occupantsCount = h.occupants || 1;
+        totalSoul += occupantsCount;
+        
+        // ... (vulnerable group increments) ...
         totalPregnant += (h.pregnantCount || 0);
         totalBabies += (h.babyCount || 0);
         totalToddlers += (h.toddlerCount || 0);
@@ -85,14 +93,17 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
         totalWidows += (h.widowCount || 0);
         totalDisability += (h.disabilityCount || 0);
         totalOrphans += (h.orphanCount || 0);
+        
         if (h.isPKH) totalPKH++;
         if (h.isBLT) totalBLT++;
         if (h.isBansosLain) totalBansosLain++;
+        totalOccupied++;
 
-        // Add Head of Family
+        // Process Head of Family
+        const hoFAge = calculateAge(h.birthDate);
         const hoF = {
           gender: h.gender || 'Laki-laki',
-          age: calculateAge(h.birthDate),
+          age: hoFAge,
           job: h.jobCategory || 'Lainnya',
           religion: h.religion || 'Lainnya',
           education: h.education || 'Lainnya',
@@ -101,7 +112,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
           vaccinationStatus: h.vaccinationStatus || 'Belum'
         };
         allResidents.push(hoF);
-        
+
         religions[hoF.religion] = (religions[hoF.religion] || 0) + 1;
         educations[hoF.education] = (educations[hoF.education] || 0) + 1;
         jobs[hoF.job] = (jobs[hoF.job] || 0) + 1;
@@ -110,17 +121,22 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
         vaccinationStatuses[hoF.vaccinationStatus] = (vaccinationStatuses[hoF.vaccinationStatus] || 0) + 1;
         residenceTypes[h.residenceType || 'Tetap'] = (residenceTypes[h.residenceType || 'Tetap'] || 0) + 1;
         
+        // Track registered count for this house to calculate gap
+        let houseRegisteredCount = 1;
+
         // Add Family Members
         if (h.familyMembers && Array.isArray(h.familyMembers)) {
           h.familyMembers.forEach((m: any) => {
             if (!m) return;
+            houseRegisteredCount++;
+            const mAge = calculateAge(m.birthDate);
             const member = {
               gender: m.gender || 'Laki-laki',
-              age: calculateAge(m.birthDate),
+              age: mAge,
               job: m.job || 'Lainnya',
-              religion: h.religion || 'Lainnya', // Assume same as HoF if not specified
+              religion: h.religion || 'Lainnya',
               education: m.education || 'Lainnya',
-              economicStatus: h.economicStatus || 'Sejahtera', // Usually same for family
+              economicStatus: h.economicStatus || 'Sejahtera',
               bpjsStatus: m.bpjsStatus || 'Tidak Ada',
               vaccinationStatus: m.vaccinationStatus || 'Belum'
             };
@@ -131,6 +147,41 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
             bpjsStatuses[member.bpjsStatus] = (bpjsStatuses[member.bpjsStatus] || 0) + 1;
             vaccinationStatuses[member.vaccinationStatus] = (vaccinationStatuses[member.vaccinationStatus] || 0) + 1;
           });
+        }
+
+        // --- GAP ADJUSTMENT: Account for occupants not registered in familyMembers ---
+        if (occupantsCount > houseRegisteredCount) {
+          const gap = occupantsCount - houseRegisteredCount;
+          // Estimate missing genders (split 50/50 or based on HoF)
+          const maleGap = Math.ceil(gap / 2);
+          const femaleGap = Math.floor(gap / 2);
+          
+          // We can't easily push to allResidents without full detail, 
+          // so we'll adjust the distribution maps directly if needed, 
+          // but for DemographicAnalytics charts that use filtered allResidents, we should probably push "Generic" residents
+          for (let i = 0; i < gap; i++) {
+            const isMale = i < maleGap;
+            const genericResident = {
+              gender: isMale ? 'Laki-laki' : 'Perempuan',
+              age: 30, // Average age for generic stats
+              job: 'Lainnya',
+              religion: h.religion || 'Lainnya',
+              education: 'Lainnya',
+              economicStatus: h.economicStatus || 'Sejahtera',
+              bpjsStatus: 'Tidak Ada',
+              vaccinationStatus: 'Belum'
+            };
+            // Note: Don't push to allResidents here to avoid cluttering detailed views, 
+            // but the charts below will use allResidents. Actually, it's better to push them 
+            // but marked as "Estimasi" if we had that.
+            // For now, let's just make sure the charts sum up to totalSoul by pushing them.
+            allResidents.push(genericResident);
+            
+            // Increment maps
+            religions[genericResident.religion] = (religions[genericResident.religion] || 0) + 1;
+            jobs[genericResident.job] = (jobs[genericResident.job] || 0) + 1;
+            // ... educations, etc if needed
+          }
         }
       }
     });
@@ -145,6 +196,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
       vaccinationStatuses,
       residenceTypes,
       totalVehicles,
+      totalSoul,
       totalPregnant,
       totalBabies,
       totalToddlers,
@@ -158,19 +210,33 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
       totalPKH,
       totalBLT,
       totalBansosLain,
-      totalOccupied: houses.filter(h => h.status === 'Occupied').length
+      totalOccupied
     };
   }, [houses]);
 
   const { 
     allResidents, religions, educations, jobs, 
     economicStatuses, bpjsStatuses, vaccinationStatuses, residenceTypes,
-    totalVehicles, totalPregnant, totalBabies, 
+    totalVehicles, totalSoul, totalPregnant, totalBabies, 
     totalToddlers, totalChildren, totalTeenagers, totalAdults,
     totalElderly, totalWidows, totalDisability, totalOrphans, totalPKH, totalBLT, totalBansosLain, totalOccupied 
   } = stats;
 
-  const totalResidents = allResidents.length || 1; 
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrintReport = async () => {
+    setIsPrinting(true);
+    try {
+      await generateDemographicAnalyticsReportPDF(houses, cashFlow, reports, pdfConfig);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+
+  const totalResidents = totalSoul; 
+  const totalRegistered = allResidents.length; 
   
   // Data for new charts
   const economicData = Object.entries(economicStatuses)
@@ -198,12 +264,12 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
   
   // Age distribution
   const ageGroups = {
-    bayi: allResidents.filter(r => r.age < 1).length,
-    balita: allResidents.filter(r => r.age >= 1 && r.age <= 5).length,
-    anak: allResidents.filter(r => r.age > 5 && r.age <= 12).length,
-    remaja: allResidents.filter(r => r.age > 12 && r.age <= 18).length,
-    dewasa: allResidents.filter(r => r.age > 18 && r.age <= 55).length,
-    lansia: allResidents.filter(r => r.age > 55).length,
+    bayi: totalBabies,
+    balita: totalToddlers,
+    anak: totalChildren,
+    remaja: totalTeenagers,
+    dewasa: totalAdults,
+    lansia: totalElderly,
   };
 
   const ageDistribution = [
@@ -338,9 +404,9 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
             {/* Primary Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { icon: Users, label: 'Total Jiwa', value: totalResidents, sub: 'Penduduk Terdaftar', color: 'blue' },
-                { icon: Baby, label: 'Balita & Anak', value: ageGroups.balita + ageGroups.anak, sub: 'Generasi Penerus', color: 'emerald' },
-                { icon: Heart, label: 'Lansia', value: ageGroups.lansia, sub: 'Warga Senior', color: 'amber' },
+                { icon: Users, label: 'Total Jiwa', value: totalSoul, sub: 'Penduduk Terdaftar', color: 'blue' },
+                { icon: Baby, label: 'Balita & Anak', value: totalToddlers + totalChildren, sub: 'Generasi Penerus', color: 'emerald' },
+                { icon: Heart, label: 'Lansia', value: totalElderly, sub: 'Warga Senior', color: 'amber' },
                 { icon: Car, label: 'Total Kendaraan', value: totalVehicles, sub: 'Mobilitas Warga', color: 'indigo' }
               ].map((stat, i) => (
                 <motion.div 
@@ -418,7 +484,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                         <div className="flex items-center gap-3">
                           <span className="text-sm font-black text-slate-900">{item.value}</span>
                           <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                            {Math.round((item.value / totalResidents) * 100)}%
+                            {totalResidents > 0 ? Math.round((item.value / totalResidents) * 100) : 0}%
                           </span>
                         </div>
                       </div>
@@ -453,13 +519,13 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                       <div className="h-3 bg-white/10 rounded-full overflow-hidden">
                         <motion.div 
                           initial={{ width: 0 }}
-                          animate={{ width: `${(item.value / totalResidents) * 100}%` }}
+                          animate={{ width: `${totalResidents > 0 ? (item.value / totalResidents) * 100 : 0}%` }}
                           transition={{ duration: 1, delay: 0.5 }}
                           className={`h-full rounded-full ${i === 0 ? 'bg-blue-400' : 'bg-pink-400'}`}
                         />
                       </div>
                       <p className="text-[10px] font-black text-white/40 text-right uppercase tracking-widest">
-                        {Math.round((item.value / totalResidents) * 100)}% dari total populasi
+                        {totalResidents > 0 ? Math.round((item.value / totalResidents) * 100) : 0}% dari total populasi
                       </p>
                     </div>
                   ))}
@@ -545,7 +611,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                         <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-indigo-500 rounded-full" 
-                            style={{ width: `${(item.value / totalResidents) * 100}%` }}
+                            style={{ width: `${totalRegistered > 0 ? (item.value / totalRegistered) * 100 : 0}%` }}
                           ></div>
                         </div>
                       </div>
@@ -668,10 +734,10 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                         <div key={item.name} className="flex flex-col gap-1">
                           <div className="flex justify-between text-[10px] font-bold text-slate-600">
                             <span>{item.name}</span>
-                            <span>{Math.round((item.value / totalResidents) * 100)}%</span>
+                            <span>{totalRegistered > 0 ? Math.round((item.value / totalRegistered) * 100) : 0}%</span>
                           </div>
                           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-emerald-500" style={{ width: `${(item.value / totalResidents) * 100}%` }}></div>
+                            <div className="h-full bg-emerald-500" style={{ width: `${totalRegistered > 0 ? (item.value / totalRegistered) * 100 : 0}%` }}></div>
                           </div>
                         </div>
                       ))}
@@ -685,10 +751,10 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                         <div key={item.name} className="flex flex-col gap-1">
                           <div className="flex justify-between text-[10px] font-bold text-slate-600">
                             <span>{item.name}</span>
-                            <span>{Math.round((item.value / totalResidents) * 100)}%</span>
+                            <span>{totalRegistered > 0 ? Math.round((item.value / totalRegistered) * 100) : 0}%</span>
                           </div>
                           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-indigo-500" style={{ width: `${(item.value / totalResidents) * 100}%` }}></div>
+                            <div className="h-full bg-indigo-500" style={{ width: `${totalRegistered > 0 ? (item.value / totalRegistered) * 100 : 0}%` }}></div>
                           </div>
                         </div>
                       ))}
@@ -737,14 +803,18 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
                 <div className="lg:col-span-2 space-y-4">
                   <h3 className="text-2xl font-black tracking-tight">Ringkasan Wawasan Demografi</h3>
                   <p className="text-slate-400 font-medium leading-relaxed">
-                    Berdasarkan data terbaru, RT 02 memiliki populasi yang didominasi oleh kelompok usia produktif (Dewasa) sebesar {Math.round((ageGroups.dewasa / totalResidents) * 100)}%. 
+                    Berdasarkan data terbaru, RT 02 memiliki populasi yang didominasi oleh kelompok usia produktif (Dewasa) sebesar {totalResidents > 0 ? Math.round((ageGroups.dewasa / totalResidents) * 100) : 0}%. 
                     Tingkat partisipasi ekonomi cukup tinggi dengan mayoritas warga bekerja sebagai {occupationData[0]?.name || 'Karyawan'}. 
-                    Kebutuhan akan fasilitas ramah anak dan lansia tetap menjadi prioritas mengingat terdapat {ageGroups.balita + ageGroups.anak} anak-anak dan {ageGroups.lansia} lansia.
+                    Kebutuhan akan fasilitas ramah anak dan lansia tetap menjadi prioritas mengingat terdapat {totalBabies + totalToddlers + totalChildren} anak-anak dan {totalElderly} lansia.
                   </p>
                 </div>
                 <div className="flex justify-center lg:justify-end">
-                  <button className="px-8 py-4 bg-white text-slate-900 font-black rounded-2xl hover:bg-indigo-50 transition-all shadow-xl shadow-white/5 flex items-center gap-3">
-                    Cetak Laporan Lengkap <FileText size={20} />
+                  <button 
+                    onClick={handlePrintReport}
+                    disabled={isPrinting}
+                    className="px-8 py-4 bg-white text-slate-900 font-black rounded-2xl hover:bg-indigo-50 transition-all shadow-xl shadow-white/5 flex items-center gap-3 disabled:opacity-50 disabled:cursor-wait"
+                  >
+                    {isPrinting ? 'Menyiapkan...' : 'Cetak Laporan Lengkap'} <FileText size={20} />
                   </button>
                 </div>
               </div>

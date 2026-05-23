@@ -6,12 +6,14 @@ import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
 import { MOCK_FAQ } from '../../constants';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface FAQManagementProps {
   faqItems: FAQItem[];
 }
 
 export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
+  const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [question, setQuestion] = useState('');
@@ -37,11 +39,17 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
   };
 
   const handleImportDefaults = async () => {
-    if (window.confirm('Impor FAQ default? Ini akan menambahkan FAQ standar ke sistem.')) {
+    const isConfirmed = await confirm({
+      title: 'Impor FAQ Default',
+      message: 'Apakah Anda yakin ingin mengimpor FAQ default? Ini akan menambahkan FAQ standar ke dalam sistem.',
+      confirmLabel: 'Impor',
+      isDanger: false
+    });
+
+    if (isConfirmed) {
       setIsImporting(true);
       try {
         for (const faq of MOCK_FAQ) {
-          // Check if already exists by question
           if (!faqItems.some(f => f.question === faq.question)) {
             const { id, ...data } = faq;
             await addFAQToDb(data);
@@ -79,7 +87,14 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus FAQ ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus FAQ',
+      message: 'Apakah Anda yakin ingin menghapus FAQ ini?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteFAQFromDb(id);
         toast.success('FAQ berhasil dihapus.');

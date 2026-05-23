@@ -42,11 +42,11 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
         </div>
 
         <div className="relative z-10">
-          <div className="flex items-end gap-5">
-            <h3 className="text-8xl font-black tracking-tighter leading-none bg-gradient-to-t from-slate-300 to-white bg-clip-text text-transparent">{totalResidents}</h3>
-            <div className="mb-2">
-              <span className="block text-indigo-400 font-black text-[10px] uppercase tracking-[0.2em] mb-1">Populasi</span>
-              <span className="block text-white font-black text-xl uppercase tracking-tighter leading-none">Jiwa Terdaftar</span>
+          <div className="flex items-end gap-3 sm:gap-5">
+            <h3 className="text-6xl sm:text-8xl font-black tracking-tighter leading-none bg-gradient-to-t from-slate-300 to-white bg-clip-text text-transparent">{totalResidents}</h3>
+            <div className="mb-1 sm:mb-2">
+              <span className="block text-indigo-400 font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] mb-0.5 sm:mb-1">Populasi</span>
+              <span className="block text-white font-black text-lg sm:text-xl uppercase tracking-tighter leading-none">Jiwa Terdaftar</span>
             </div>
           </div>
           

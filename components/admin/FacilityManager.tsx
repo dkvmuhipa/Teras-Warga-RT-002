@@ -253,7 +253,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         });
       }
     }
-    alert("Jadwal berhasil dikosongkan!");
+    toast.success("Jadwal berhasil dikosongkan!");
   };
 
   const residents = houses

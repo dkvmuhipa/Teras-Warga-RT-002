@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   Users, DollarSign, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Calendar, ArrowRight, Plus, Download, FileText,
-  Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles, Trash2
+  Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles, Trash2,
+  Shield, Package, Bell, LayoutGrid
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
@@ -33,7 +34,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
   const handleGenerateSummary = async () => {
     setIsAiLoading(true);
     const data = {
-      totalResidents: houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0),
+      totalResidents: houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0),
       cashBalance: cashFlow.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0) - cashFlow.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0),
       reportsCount: reports.filter(r => r.status === 'Baru').length,
       unpaidCount: houses.filter(h => h.paymentStatusAir === PaymentStatus.UNPAID || h.paymentStatusSampah === PaymentStatus.UNPAID).length,
@@ -48,7 +49,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
     setIsAiLoading(false);
   };
   // Calculate Stats
-  const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0);
+  const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   
   const income = cashFlow.filter(c => c.type === 'Income').reduce((acc, c) => acc + c.amount, 0);
@@ -180,6 +181,68 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
         </div>
       )}
 
+      {/* Gojek Style Admin Menu Grid */}
+      <motion.div 
+        variants={itemVariants}
+        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/40"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div>
+            <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              Menu Terpadu <span className="bg-gradient-to-r from-emerald-600 to-indigo-600 bg-clip-text text-transparent italic">Administrasi RT</span>
+              <span className="text-[9px] font-black bg-indigo-50 border border-indigo-100/80 text-indigo-600 px-2.5 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">RT 02 DIGIOFFICE</span>
+            </h3>
+            <p className="text-slate-400 font-medium text-xs mt-0.5">Kelola seluruh aspek kependudukan dan operasional dalam satu ketukan praktis.</p>
+          </div>
+        </div>
+
+        {/* Gojek-style grid: 4 columns on mobile, 8 columns on desktop */}
+        <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-y-7 gap-x-2 md:gap-6 w-full">
+          {[
+            { label: 'Data Warga', icon: Users, gradient: 'from-[#2563EB] to-[#3B82F6]', glow: 'shadow-blue-500/20', tab: 'residents', badge: 'DATA' },
+            { label: 'Keuangan RT', icon: DollarSign, gradient: 'from-[#059669] to-[#10B981]', glow: 'shadow-emerald-500/20', tab: 'finance', badge: 'KAS' },
+            { label: 'Persuratan', icon: FileText, gradient: 'from-[#D97706] to-[#F59E0B]', glow: 'shadow-amber-500/20', tab: 'services', badge: 'SURAT' },
+            { label: 'Pos Keamanan', icon: ShieldAlert, gradient: 'from-[#DC2626] to-[#EF4444]', glow: 'shadow-red-500/20', tab: 'facilities', badge: 'RONDA' },
+            { label: 'Inventaris', icon: Package, gradient: 'from-[#7C3AED] to-[#8B5CF6]', glow: 'shadow-purple-500/20', tab: 'assets' },
+            { label: 'Warta RT', icon: Megaphone, gradient: 'from-[#0891B2] to-[#0EA5E9]', glow: 'shadow-cyan-500/20', tab: 'content' },
+            { label: 'Arsip Dokumen', icon: FileText, gradient: 'from-[#4F46E5] to-[#6366F1]', glow: 'shadow-indigo-500/20', tab: 'documents' },
+            { label: 'Pengaturan', icon: LayoutGrid, gradient: 'from-[#475569] to-[#64748B]', glow: 'shadow-slate-500/20', tab: 'settings' }
+          ].map((action, idx) => {
+            const Icon = action.icon;
+            return (
+              <motion.button
+                key={idx}
+                whileHover={{ y: -5, scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onTabChange(action.tab)}
+                className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
+              >
+                {action.badge && (
+                  <span className="absolute -top-1 md:-top-1.5 right-1 md:right-3 z-20 text-[7px] md:text-[8px] font-black bg-rose-600 text-white px-1.5 py-0.5 rounded-full shadow-sm scale-90 md:scale-100 select-none animate-pulse">
+                    {action.badge}
+                  </span>
+                )}
+
+                <div className={`
+                  w-12 h-12 md:w-14 md:h-14 rounded-[1.25rem] 
+                  bg-gradient-to-br ${action.gradient}
+                  flex items-center justify-center text-white
+                  shadow-lg ${action.glow} group-hover:shadow-indigo-500/20
+                  transition-all duration-300 relative overflow-hidden
+                `}>
+                  <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                  <Icon size={20} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
+                </div>
+
+                <span className="font-bold text-slate-700 text-[10px] md:text-xs tracking-tight leading-tight mt-2 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[80px] md:max-w-none">
+                  {action.label}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      </motion.div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
         {/* Warga Card */}
@@ -199,7 +262,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
               </div>
               <div className="flex items-baseline gap-1 md:gap-2">
                 <h3 className="text-xl md:text-2xl font-black text-indigo-600">{occupiedHouses}</h3>
-                <span className="text-[10px] md:text-xs font-bold text-slate-400">KK (Kepala Keluarga)</span>
+                <span className="text-[10px] md:text-xs font-bold text-slate-400"><span className="sm:hidden">KK</span><span className="hidden sm:inline">KK (Kepala Keluarga)</span></span>
               </div>
             </div>
             <div className="mt-2 md:mt-4 flex items-center gap-1.5 md:gap-2 text-[9px] md:text-xs font-bold text-slate-500">

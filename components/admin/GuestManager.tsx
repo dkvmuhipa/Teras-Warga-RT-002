@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { updateGuestReportStatus, deleteGuestReportFromDb } from '../../services/databaseService';
 import { GuestReport, PdfConfig } from '../../types';
 import { generateGuestReportPDF } from '../../services/pdfService';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 interface GuestManagerProps {
   guestReports: GuestReport[];
@@ -13,19 +14,45 @@ interface GuestManagerProps {
 
 export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfConfig }) => {
   const [selectedGuest, setSelectedGuest] = React.useState<GuestReport | null>(null);
+  const [confirmDialog, setConfirmDialog] = React.useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type: 'danger' | 'warning' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'warning'
+  });
+
   const activeGuests = guestReports.filter(g => g.status === 'Active');
   const departedGuests = guestReports.filter(g => g.status === 'Departed');
 
   const handleStatusUpdate = async (id: string, status: 'Active' | 'Departed') => {
-    if (window.confirm(`Ubah status tamu menjadi ${status === 'Departed' ? 'Sudah Pulang' : 'Masih Menginap'}?`)) {
-      await updateGuestReportStatus(id, status);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Update Status Tamu',
+      message: `Apakah Anda yakin ingin mengubah status tamu menjadi ${status === 'Departed' ? 'Sudah Pulang' : 'Masih Menginap'}?`,
+      type: 'warning',
+      onConfirm: async () => {
+        await updateGuestReportStatus(id, status);
+      }
+    });
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus data laporan tamu ini?')) {
-      await deleteGuestReportFromDb(id);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Hapus Laporan Tamu',
+      message: 'Apakah Anda yakin ingin menghapus data laporan tamu ini?',
+      type: 'danger',
+      onConfirm: async () => {
+        await deleteGuestReportFromDb(id);
+      }
+    });
   };
 
   return (
@@ -360,6 +387,15 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
           </div>
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        type={confirmDialog.type}
+      />
     </div>
   );
 };

@@ -17,12 +17,14 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface ActivityManagementProps {
   houses: House[];
 }
 
 export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }) => {
+  const confirm = useConfirm();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
@@ -106,7 +108,14 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus kegiatan ini? Semua data presensi juga akan terhapus.')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Kegiatan',
+      message: 'Apakah Anda yakin ingin menghapus kegiatan ini? Semua data presensi juga akan terhapus.',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteActivityFromDb(id);
         toast.success('Kegiatan berhasil dihapus.');
@@ -118,7 +127,14 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
   };
 
   const handleDeleteAttendance = async (id: string) => {
-    if (window.confirm('Hapus data presensi ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Presensi',
+      message: 'Apakah Anda yakin ingin menghapus data presensi ini?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteAttendanceFromDb(id);
         toast.success('Data presensi berhasil dihapus.');
@@ -132,34 +148,41 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
   const handleApplyCompensations = async () => {
     if (!selectedActivity || !selectedActivity.isMandatory || selectedActivity.compensationApplied) return;
     
-    if (!window.confirm(`Terapkan iuran kompensasi sebesar Rp ${selectedActivity.compensationAmount?.toLocaleString()} bagi warga yang tidak hadir?`)) return;
+    const isConfirmed = await confirm({
+      title: 'Terapkan Kompensasi',
+      message: `Terapkan iuran kompensasi sebesar Rp ${selectedActivity.compensationAmount?.toLocaleString()} bagi warga yang tidak hadir?`,
+      confirmLabel: 'Terapkan',
+      isDanger: false
+    });
 
-    try {
-      const attendedHouseIds = new Set(attendance.map(a => a.houseId));
-      const occupiedHouses = houses.filter(h => h.status === 'Occupied');
-      const absentees = occupiedHouses.filter(h => !attendedHouseIds.has(h.id));
+    if (isConfirmed) {
+      try {
+        const attendedHouseIds = new Set(attendance.map(a => a.houseId));
+        const occupiedHouses = houses.filter(h => h.status === 'Occupied');
+        const absentees = occupiedHouses.filter(h => !attendedHouseIds.has(h.id));
 
-      if (absentees.length === 0) {
-        toast.info('Semua warga hadir! Tidak ada kompensasi yang perlu diterapkan.');
-        return;
+        if (absentees.length === 0) {
+          toast.info('Semua warga hadir! Tidak ada kompensasi yang perlu diterapkan.');
+          return;
+        }
+
+        for (const house of absentees) {
+          await addTransactionToDb({
+            description: `Kompensasi Absen: ${selectedActivity.title} (${house.id})`,
+            amount: selectedActivity.compensationAmount || 20000,
+            type: 'Income',
+            category: 'Kompensasi Kegiatan',
+            date: new Date().toISOString().split('T')[0]
+          });
+        }
+
+        await updateActivityInDb(selectedActivity.id, { compensationApplied: true });
+        toast.success(`Berhasil menerapkan kompensasi untuk ${absentees.length} warga.`);
+        setSelectedActivity({ ...selectedActivity, compensationApplied: true });
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menerapkan kompensasi.');
       }
-
-      for (const house of absentees) {
-        await addTransactionToDb({
-          description: `Kompensasi Absen: ${selectedActivity.title} (${house.id})`,
-          amount: selectedActivity.compensationAmount || 20000,
-          type: 'Income',
-          category: 'Kompensasi Kegiatan',
-          date: new Date().toISOString().split('T')[0]
-        });
-      }
-
-      await updateActivityInDb(selectedActivity.id, { compensationApplied: true });
-      toast.success(`Berhasil menerapkan kompensasi untuk ${absentees.length} warga.`);
-      setSelectedActivity({ ...selectedActivity, compensationApplied: true });
-    } catch (error) {
-      console.error(error);
-      toast.error('Gagal menerapkan kompensasi.');
     }
   };
 

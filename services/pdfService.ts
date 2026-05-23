@@ -1,8 +1,11 @@
 
 import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable';
 import QRCode from "qrcode";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter } from "../types";
+import { toast } from "sonner";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
+import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
 
 // ... (existing helper functions) ...
 
@@ -499,7 +502,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.save(`${filenamePrefix}Surat_${safeTitle}_${safeApplicantName}.pdf`);
   } catch (error) {
     console.error("PDF Generation Error:", error);
-    alert("Gagal membuat PDF: " + (error instanceof Error ? error.message : "Unknown error"));
+    toast.error("Gagal membuat PDF: " + (error instanceof Error ? error.message : "Unknown error"));
   }
 };
 
@@ -751,7 +754,7 @@ export const generateOfficialLetterPDF = async (letter: OfficialLetter, customCo
     doc.save(`Surat_${letter.type}_${letter.letterNumber.replace(/\//g, '-')}.pdf`);
   } catch (error) {
     console.error("Official PDF Generation Error:", error);
-    alert("Gagal membuat PDF: " + (error instanceof Error ? error.message : "Unknown error"));
+    toast.error("Gagal membuat PDF: " + (error instanceof Error ? error.message : "Unknown error"));
   }
 };
 
@@ -1536,10 +1539,10 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
         doc.text(`TOTAL WARGA: ${totalResidents}`, margin + 5, 75);
         
         doc.setTextColor(0, 128, 0); // Dark Green for Taken
-        doc.text(`DIAMBIL: ${takenCount}`, margin + (contentWidth / 2), 75, { align: "center" });
+        doc.text(`SUDAH: ${takenCount}`, margin + (contentWidth / 2), 75, { align: "center" });
         
         doc.setTextColor(200, 0, 0); // Dark Red for Pending
-        doc.text(`BELUM DIAMBIL: ${pendingCount}`, pageWidth - margin - 5, 75, { align: "right" });
+        doc.text(`BELUM: ${pendingCount}`, pageWidth - margin - 5, 75, { align: "right" });
         
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.2);
@@ -1552,7 +1555,7 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
     let y = 92;
 
     const colWidths = [10, 22, 63, 35, 40]; 
-    const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA", "STATUS", "TANDA TANGAN"];
+    const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA", "SUDAH/BELUM", "TANDA TANGAN"];
     
     const drawTableHeaders = (startY: number) => {
         doc.setFillColor(40, 40, 40); // Darker for better contrast
@@ -1646,7 +1649,7 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
         } else {
             doc.setTextColor(80, 80, 80); // Darker Grey
         }
-        doc.text(isTaken ? "DIAMBIL" : "BELUM", curX + (colWidths[3] / 2), y, { align: "center" });
+        doc.text(isTaken ? "[v] Sudah" : "[  ] Belum", curX + (colWidths[3] / 2), y, { align: "center" });
         doc.setTextColor(0, 0, 0);
         doc.setFont("times", "normal");
         curX += colWidths[3];
@@ -2064,4 +2067,539 @@ export const generateIncidentReportPDF = async (reports: Report[], houses: House
     }
 
     doc.save(`Rekap_Laporan_RT02_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
+export const generateBillReportPDF = async (houses: House[], iuranPayments: any[], billType: 'Air' | 'Sampah', month?: string, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    const currentMonth = month || getIndonesianMonthYear(new Date());
+
+    // Helper to check payment status consistently with FinancialContext
+    const checkIsPaid = (house: House) => {
+        const payment = iuranPayments.find(p => {
+            const idMatch = String(p.houseId) === String(house.id) || 
+                            String(p.houseId) === `${house.block}-${house.number}` ||
+                            (p.block === house.block && p.number === house.number);
+            return idMatch && isMonthMatch(p.month, currentMonth) && (p.type === billType || p.type === 'Both');
+        });
+        
+        if (payment) return true;
+        
+        // Fallback to house record if month matches current real-world month
+        const realCurrentMonth = getIndonesianMonthYear(new Date());
+        if (isMonthMatch(currentMonth, realCurrentMonth)) {
+            const status = billType === 'Air' ? house.paymentStatusAir : house.paymentStatusSampah;
+            return status === PaymentStatus.PAID;
+        }
+        
+        return false;
+    };
+
+    const filteredHouses = houses.filter(h => h.status === 'Occupied');
+    const sortedHouses = [...filteredHouses].sort((a, b) => {
+        const blockA = a.block || "";
+        const blockB = b.block || "";
+        if (blockA !== blockB) return blockA.localeCompare(blockB);
+        return a.number.localeCompare(b.number, undefined, { numeric: true });
+    });
+
+    const totalResidents = filteredHouses.length;
+    const paidCount = filteredHouses.filter(h => checkIsPaid(h)).length;
+    const unpaidCount = totalResidents - paidCount;
+
+    // Fetch Logo
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) {}
+
+    const drawHeader = () => {
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+        }
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(14);
+        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+        doc.setFontSize(11);
+        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+        doc.setLineWidth(1.0);
+        doc.line(margin, 42, pageWidth - margin, 42);
+        doc.setLineWidth(0.3);
+        doc.line(margin, 43, pageWidth - margin, 43);
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(12);
+        doc.text(`DAFTAR PEMBAYARAN IURAN ${billType.toUpperCase()} - ${currentMonth.toUpperCase()}`, centerX, 55, { align: "center" });
+        
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0); 
+        doc.text(`TOTAL WARGA: ${totalResidents}`, margin + 5, 75);
+        
+        doc.setTextColor(0, 128, 0);
+        doc.text(`LUNAS: ${paidCount}`, margin + (contentWidth / 2), 75, { align: "center" });
+        
+        doc.setTextColor(200, 0, 0);
+        doc.text(`BELUM LUNAS: ${unpaidCount}`, pageWidth - margin - 5, 75, { align: "right" });
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.2);
+        doc.line(margin, 78, pageWidth - margin, 78);
+        
+        doc.setTextColor(0, 0, 0);
+    };
+
+    drawHeader();
+    let y = 92;
+
+    const colWidths = [10, 22, 63, 35, 40]; 
+    const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA", "STATUS", "KETERANGAN"];
+    
+    const drawTableHeaders = (startY: number) => {
+        doc.setFillColor(40, 40, 40);
+        doc.rect(margin, startY - 6, contentWidth, 9, 'F');
+        
+        doc.setFont("times", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        let curX = margin;
+        headers.forEach((h, i) => {
+            const align = (i === 0 || i === 1 || i === 3) ? "center" : "left";
+            const xPos = align === "center" ? curX + (colWidths[i] / 2) : curX + 3;
+            doc.text(h, xPos, startY, { align });
+            curX += colWidths[i];
+        });
+    };
+
+    drawTableHeaders(y);
+    y += 9;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+
+    let currentBlock = "";
+
+    sortedHouses.forEach((house, index) => {
+        const houseBlock = (house.block || '').toString().toUpperCase();
+        if (houseBlock !== currentBlock) {
+            currentBlock = houseBlock;
+            if (y > 270) {
+                doc.addPage();
+                drawHeader();
+                y = 92;
+                drawTableHeaders(y);
+                y += 9;
+            }
+            doc.setFillColor(240, 240, 240);
+            doc.rect(margin, y - 6, contentWidth, 8, 'F');
+            doc.setFont("times", "bold");
+            doc.text(`BLOK ${houseBlock}`, margin + 5, y);
+            doc.setFont("times", "normal");
+            y += 8;
+        }
+
+        if (y > 275) {
+            doc.addPage();
+            drawHeader();
+            y = 92;
+            drawTableHeaders(y);
+            y += 9;
+            doc.setFont("times", "normal");
+            doc.setFontSize(9);
+        }
+
+        let curX = margin;
+        doc.text((index + 1).toString(), curX + (colWidths[0] / 2), y, { align: "center" });
+        curX += colWidths[0];
+        doc.text(`${house.block}-${house.number}`, curX + (colWidths[1] / 2), y, { align: "center" });
+        curX += colWidths[1];
+        doc.text(doc.splitTextToSize(house.headOfFamily?.toUpperCase() || "-", colWidths[2] - 5), curX + 3, y);
+        curX += colWidths[2];
+
+        const isPaid = checkIsPaid(house);
+        if (isPaid) {
+            doc.setTextColor(0, 128, 0);
+            doc.setFont("times", "bold");
+        } else {
+            doc.setTextColor(200, 0, 0);
+        }
+        doc.text(isPaid ? "LUNAS" : "PENDING", curX + (colWidths[3] / 2), y, { align: "center" });
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("times", "normal");
+        curX += colWidths[3];
+
+        doc.setDrawColor(240, 240, 240);
+        doc.line(margin, y + 2, pageWidth - margin, y + 2);
+        y += 8;
+    });
+
+    const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    if (y > 240) {
+        doc.addPage();
+        y = 30;
+    } else {
+        y += 15;
+    }
+
+    const signX = pageWidth - 60;
+    doc.setFontSize(11);
+    doc.text(`Palu, ${dateString}`, signX, y, { align: "center" });
+    y += 6;
+    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+    const signSpaceY = y + 2;
+    y += 25;
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, y, { align: "center" });
+    const chairmanWidth = doc.getTextWidth(config.rtChairman);
+    doc.line(signX - (chairmanWidth / 2), y + 1.5, signX + (chairmanWidth / 2), y + 1.5);
+
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) {}
+
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont("times", "italic");
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Halaman ${i} dari ${totalPages} - Laporan Iuran ${billType} ${month || ''}`, centerX, pageHeight - 10, { align: "center" });
+    }
+
+    doc.save(`Laporan_Iuran_${billType}_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
+export const generateDemographicAnalyticsReportPDF = async (
+  houses: House[], 
+  cashFlow: CashFlow[], 
+  reports: Report[],
+  customConfig?: PdfConfig
+) => {
+  const config = customConfig || DEFAULT_PDF_CONFIG;
+  const doc = new jsPDF({ 
+    orientation: "portrait", 
+    unit: "mm", 
+    format: "a4",
+    compress: true 
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const contentWidth = pageWidth - (margin * 2);
+  const centerX = pageWidth / 2;
+
+  // Helper to calculate age (consistency with DemographicAnalytics.tsx)
+  const calculateAge = (birthDate?: string) => {
+    if (!birthDate) return 30;
+    const birth = new Date(birthDate);
+    if (isNaN(birth.getTime())) return 30;
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // --- Aggregate Stats ---
+  const allResidents: any[] = [];
+  let totalPregnant = 0, totalBabies = 0, totalToddlers = 0, totalChildren = 0;
+  let totalTeenagers = 0, totalAdults = 0, totalElderly = 0, totalWidows = 0;
+  let totalDisability = 0, totalOrphans = 0, totalPKH = 0, totalBLT = 0;
+  let totalBansosLain = 0, totalOccupied = 0;
+  
+  const religions: Record<string, number> = {};
+  const educations: Record<string, number> = {};
+  const occupations: Record<string, number> = {};
+  const economicStatuses: Record<string, number> = {};
+
+  houses.forEach(h => {
+    if (h.status === 'Occupied') {
+      totalOccupied++;
+      totalPregnant += (h.pregnantCount || 0);
+      totalBabies += (h.babyCount || 0);
+      totalToddlers += (h.toddlerCount || 0);
+      totalChildren += (h.childCount || 0);
+      totalTeenagers += (h.teenagerCount || 0);
+      totalAdults += (h.adultCount || 0);
+      totalElderly += (h.elderlyCount || 0);
+      totalWidows += (h.widowCount || 0);
+      totalDisability += (h.disabilityCount || 0);
+      totalOrphans += (h.orphanCount || 0);
+      if (h.isPKH) totalPKH++;
+      if (h.isBLT) totalBLT++;
+      if (h.isBansosLain) totalBansosLain++;
+
+      // Process HoF
+      const hoF = { gender: h.gender || 'Laki-laki', age: calculateAge(h.birthDate), religion: h.religion || 'Lainnya', education: h.education || 'Lainnya', job: h.jobCategory || 'Lainnya', economic: h.economicStatus || 'Sejahtera' };
+      allResidents.push(hoF);
+      religions[hoF.religion || 'Lainnya'] = (religions[hoF.religion || 'Lainnya'] || 0) + 1;
+      educations[hoF.education || 'Lainnya'] = (educations[hoF.education || 'Lainnya'] || 0) + 1;
+      occupations[hoF.job || 'Lainnya'] = (occupations[hoF.job || 'Lainnya'] || 0) + 1;
+      economicStatuses[hoF.economic || 'Sejahtera'] = (economicStatuses[hoF.economic || 'Sejahtera'] || 0) + 1;
+
+      // Family Members
+      h.familyMembers?.forEach(m => {
+        const member = { gender: m.gender || 'Laki-laki', age: calculateAge(m.birthDate), religion: h.religion || 'Lainnya', education: m.education || 'Lainnya', job: m.job || 'Lainnya' };
+        allResidents.push(member);
+        religions[member.religion] = (religions[member.religion] || 0) + 1;
+        educations[member.education] = (educations[member.education] || 0) + 1;
+        occupations[member.job] = (occupations[member.job] || 0) + 1;
+      });
+    }
+  });
+
+  // Calculate totalSoul using the occupants field from houses to ensure consistency with the dashboard
+  const totalSoul = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0);
+  const totalRegistered = allResidents.length;
+
+  // Header
+  let logoData = '';
+  try { logoData = await getImageData(config.logo); } catch (e) {}
+  if (logoData) doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+
+  doc.setFont("times", "normal");
+  doc.setFontSize(14);
+  doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+  doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+  doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+  doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+  doc.setFontSize(11);
+  doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+  doc.setLineWidth(1); doc.line(20, 42, 190, 42);
+  doc.setLineWidth(0.3); doc.line(20, 43, 190, 43);
+
+  // Report Title
+  doc.setFont("times", "bold");
+  doc.setFontSize(16);
+  doc.text("LAPORAN ANALITIK & DEMOGRAFI TERPADU", centerX, 55, { align: "center" });
+  doc.setFontSize(10);
+  doc.setFont("times", "normal");
+  doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, centerX, 61, { align: "center" });
+
+  let y = 70;
+
+  // Executive Summary Cards
+  const drawCard = (x: number, y: number, w: number, h: number, title: string, data: string, color: [number, number, number]) => {
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.roundedRect(x, y, w, h, 3, 3, 'F');
+    doc.setTextColor(255);
+    doc.setFontSize(8);
+    doc.setFont("times", "normal");
+    doc.text(title, x + (w / 2), y + 7, { align: "center" });
+    doc.setFontSize(14);
+    doc.setFont("times", "bold");
+    doc.text(data, x + (w / 2), y + 17, { align: "center" });
+    doc.setTextColor(0);
+  };
+
+  const cardW = (contentWidth - 10) / 3;
+  drawCard(margin, y, cardW, 25, "TOTAL SELURUH JIWA", totalSoul.toString(), [79, 70, 229]);
+  drawCard(margin + cardW + 5, y, cardW, 25, "RUMAH TANGGA AKTIF", totalOccupied.toString(), [16, 185, 129]);
+  drawCard(margin + (cardW * 2) + 10, y, cardW, 25, "KENDARAAN WARGA", houses.reduce((acc, h) => acc + (h.vehicleCount || 0), 0).toString(), [245, 158, 11]);
+
+  y += 35;
+
+  // I. Demografi Dasar
+  doc.setFillColor(30, 41, 59);
+  doc.rect(margin, y - 6, contentWidth, 9, 'F');
+  doc.setTextColor(255);
+  doc.setFontSize(11);
+  doc.setFont("times", "bold");
+  doc.text("I. KOMPOSISI DEMOGRAFI DASAR", margin + 3, y);
+  doc.setTextColor(0);
+  y += 10;
+
+  autoTable(doc, {
+    startY: y,
+    head: [['Kategori Demografi', 'Jumlah JIwa', 'Persentase']],
+    body: [
+      ['Laki-laki', allResidents.filter(r => r.gender === 'Laki-laki').length, `${((allResidents.filter(r => r.gender === 'Laki-laki').length / totalSoul) * 100).toFixed(1)}%`],
+      ['Perempuan', allResidents.filter(r => r.gender === 'Perempuan').length, `${((allResidents.filter(r => r.gender === 'Perempuan').length / totalSoul) * 100).toFixed(1)}%`],
+      ['Bayi (0-1)', totalBabies, `${((totalBabies / totalSoul) * 100).toFixed(1)}%`],
+      ['Balita (1-5)', totalToddlers, `${((totalToddlers / totalSoul) * 100).toFixed(1)}%`],
+      ['Anak (6-12)', totalChildren, `${((totalChildren / totalSoul) * 100).toFixed(1)}%`],
+      ['Remaja (13-18)', totalTeenagers, `${((totalTeenagers / totalSoul) * 100).toFixed(1)}%`],
+      ['Dewasa (19-55)', totalAdults, `${((totalAdults / totalSoul) * 100).toFixed(1)}%`],
+      ['Lansia (55+)', totalElderly, `${((totalElderly / totalSoul) * 100).toFixed(1)}%`],
+    ],
+    theme: 'striped',
+    headStyles: { fillColor: [79, 70, 229] },
+    margin: { left: margin },
+    tableWidth: contentWidth
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 15;
+
+  // II. Kelompok Rentan & Bantuan Sosial
+  if (y > 200) { doc.addPage(); y = 30; }
+  doc.setFillColor(30, 41, 59);
+  doc.rect(margin, y - 6, contentWidth, 9, 'F');
+  doc.setTextColor(255);
+  doc.text("II. KELOMPOK RENTAN & BANTUAN SOSIAL", margin + 3, y);
+  doc.setTextColor(0);
+  y += 10;
+
+  autoTable(doc, {
+    startY: y,
+    head: [['Indikator Kesejahteraan', 'Jumlah Unit/Jiwa', 'Keterangan']],
+    body: [
+      ['Ibu Hamil', totalPregnant, 'Jiwa'],
+      ['Janda / Duda', totalWidows, 'Jiwa'],
+      ['Penyandang Disabilitas', totalDisability, 'Jiwa'],
+      ['Anak Yatim / Piatu', totalOrphans, 'Jiwa'],
+      ['Penerima PKH', totalPKH, 'Rumah Tangga'],
+      ['Penerima BLT', totalBLT, 'Rumah Tangga'],
+      ['Penerima Bansos Lain', totalBansosLain, 'Rumah Tangga'],
+      ['Status Ekonomi Sejahtera', economicStatuses['Sejahtera'] || 0, 'Rumah Tangga'],
+      ['Status Ekonomi Prasejahtera', economicStatuses['Prasejahtera'] || 0, 'Rumah Tangga'],
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [16, 185, 129] },
+    margin: { left: margin },
+    tableWidth: contentWidth
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 15;
+
+  // III. Pekerjaan & Pendidikan
+  if (y > 200) { doc.addPage(); y = 30; }
+  doc.setFillColor(30, 41, 59);
+  doc.rect(margin, y - 6, contentWidth, 9, 'F');
+  doc.setTextColor(255);
+  doc.text("III. SEBARAN PEKERJAAN & PENDIDIKAN", margin + 3, y);
+  doc.setTextColor(0);
+  y += 10;
+
+  autoTable(doc, {
+    startY: y,
+    head: [['Kategori Pekerjaan', 'Jumlah']],
+    body: Object.entries(occupations).sort((a, b) => b[1] - a[1]).slice(0, 10).map(o => [o[0], o[1]]),
+    theme: 'striped',
+    headStyles: { fillColor: [245, 158, 11] },
+    margin: { left: margin },
+    tableWidth: contentWidth / 2 - 5
+  });
+
+  autoTable(doc, {
+    startY: y,
+    head: [['Jenjang Pendidikan', 'Jumlah']],
+    body: Object.entries(educations).sort((a, b) => b[1] - a[1]).map(e => [e[0], e[1]]),
+    theme: 'striped',
+    headStyles: { fillColor: [236, 72, 153] },
+    margin: { left: centerX + 5 },
+    tableWidth: contentWidth / 2 - 5
+  });
+
+  y = Math.max((doc as any).lastAutoTable.finalY, y + 50) + 15;
+
+  // IV. Ringkasan Keuangan (Garis Besar)
+  if (y > 200) { doc.addPage(); y = 30; }
+  doc.setFillColor(30, 41, 59);
+  doc.rect(margin, y - 6, contentWidth, 9, 'F');
+  doc.setTextColor(255);
+  doc.text("IV. RINGKASAN KEUANGAN & OPERASIONAL", margin + 3, y);
+  doc.setTextColor(0);
+  y += 10;
+
+  const income = cashFlow.filter(c => c.type === 'Income').reduce((acc, c) => acc + c.amount, 0);
+  const expense = cashFlow.filter(c => c.type === 'Expense').reduce((acc, c) => acc + c.amount, 0);
+  const balance = income - expense;
+
+  const formatIDR = (val: number) => `Rp ${val.toLocaleString('id-ID')}`;
+
+  autoTable(doc, {
+    startY: y,
+    body: [
+      ['Total Pemasukan Kas', formatIDR(income)],
+      ['Total Pengeluaran Kas', formatIDR(expense)],
+      ['Saldo Kas Saat Ini', formatIDR(balance)],
+      ['Total Laporan Warga', reports.length.toString()],
+      ['Laporan Selesai Ditangani', reports.filter(r => r.status === 'Selesai').length.toString()],
+    ],
+    theme: 'plain',
+    styles: { fontSize: 10, cellPadding: 4 },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60 }, 1: { halign: 'right' } },
+    margin: { left: margin },
+    tableWidth: 100
+  });
+
+  // Verification
+  y = (doc as any).lastAutoTable.finalY + 15;
+  if (y > 230) { doc.addPage(); y = 30; }
+
+  const signX = pageWidth - 60;
+  doc.setFont("times", "normal");
+  doc.setFontSize(11);
+  doc.text(`Dicetak di Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, y, { align: "center" });
+  y += 6;
+  doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+
+  const signSpaceY = y + 2;
+  y += 25;
+  doc.setFont("times", "bold");
+  doc.text(config.rtChairman, signX, y, { align: "center" });
+  doc.line(signX - 25, y + 1, signX + 25, y + 1);
+
+  try {
+    if (config.signature) {
+      const signImg = await getImageData(config.signature);
+      if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY + 2, 30, 20);
+    }
+    if (config.stamp) {
+      const stampImg = await getImageData(config.stamp);
+      if (stampImg) doc.addImage(stampImg, 'PNG', signX - 28, signSpaceY - 2, 22, 22);
+    }
+  } catch (e) {}
+
+  // SODD Verification
+  const footerY = pageHeight - 40;
+  doc.setDrawColor(200); doc.setLineWidth(0.2);
+  doc.line(margin, footerY, pageWidth - margin, footerY);
+  
+  try {
+    const verificationUrl = `${window.location.origin}/#/analytics-verify/${new Date().getTime()}`;
+    const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { margin: 1, width: 200 });
+    doc.addImage(qrCodeDataUrl, 'PNG', margin, footerY + 5, 20, 20);
+  } catch (e) {}
+
+  doc.setFont("times", "normal"); doc.setFontSize(8); doc.setTextColor(100);
+  doc.text("Laporan ini dihasilkan secara otomatis oleh Sistem Teras Warga RT 02.", margin + 25, footerY + 10);
+  doc.text("Data yang disajikan bersifat real-time berdasarkan input pengurus.", margin + 25, footerY + 15);
+
+  const totalP = doc.getNumberOfPages();
+  for (let i = 1; i <= totalP; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8); doc.text(`Halaman ${i} dari ${totalP}`, pageWidth - margin, pageHeight - 10, { align: "right" });
+  }
+
+  doc.save(`Laporan_Analitik_RT02_${new Date().toISOString().split('T')[0]}.pdf`);
 };

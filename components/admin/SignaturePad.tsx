@@ -59,7 +59,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({ onSave, onClear, ini
     }
 
     if (sigCanvas.current?.isEmpty()) {
-      alert('Silakan buat tanda tangan atau upload gambar terlebih dahulu.');
+      toast.error('Silakan buat tanda tangan atau upload gambar terlebih dahulu.');
       return;
     }
 

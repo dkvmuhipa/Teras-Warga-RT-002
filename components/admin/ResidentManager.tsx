@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   getIndonesianMonthYear, 
   generateMonthOptions, 
-  isMonthMatch 
+  isMonthMatch,
+  calculateAge
 } from '../../src/utils/dateUtils';
 import { BillDetailModal } from './BillDetailModal';
 import { ResidentAnalytics } from './ResidentAnalytics';
@@ -17,12 +18,18 @@ import { AddEditResidentModal, PaymentModal, EditPaymentModal } from './resident
 import { ResidentStats } from './resident/ResidentStats';
 import { ResidentControls } from './resident/ResidentControls';
 import { useFinancial } from '../../context/FinancialContext';
+import { PopulationReportManager } from './PopulationReportManager';
+import { UpdateRequestManager } from './UpdateRequestManager';
+import { GuestManager } from './GuestManager';
+import { HealthManagement } from './HealthManagement';
+import { OfficialManagement } from './OfficialManagement';
 import { 
   Search, Filter, Grid, List, UserPlus, Download, Upload, 
-  Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle, Droplets,
+  Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle, Droplets, Trash,
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
-  PieChart as PieChartIcon, ChevronDown, Settings, MoreVertical
+  PieChart as PieChartIcon, ChevronDown, Settings, MoreVertical, FileClock, FileEdit,
+  ShieldAlert, Briefcase
 } from 'lucide-react';
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role } from '../../types';
 import { HouseMap } from '../HouseMap';
@@ -30,7 +37,8 @@ import {
   generateResidentReportPDF, 
   generateIuranReceiptPDF,
   generatePBBReportPDF,
-  generateResidentStatsReportPDF
+  generateResidentStatsReportPDF,
+  generateBillReportPDF
 } from '../../services/pdfService';
 import { 
   batchUpdateHouses, 
@@ -49,6 +57,11 @@ import {
   updateBillInDb, 
   updateGuestReportInDb,
   addPopulationLogToDb, 
+  addPopulationReportToDb,
+  updatePopulationReportToDb,
+  deletePopulationReportFromDb,
+  markPopulationLogsAsGenerated,
+  unmarkPopulationLogsAsGenerated,
   logAction,
   handleFirestoreError,
   OperationType
@@ -71,17 +84,31 @@ interface ResidentManagerProps {
   residentRegistrations: ResidentRegistration[];
   guestReports: any[];
   settings: any;
+  populationReports: any[];
+  setPopulationReports: (reports: any[]) => void;
+  populationLogs: any[];
+  setPopulationLogs: (logs: any[]) => void;
+  updateRequests: any[];
+  initialViewMode?: 'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'mutations' | 'requests' | 'health' | 'guests' | 'officials';
 }
 
 type FilterStatus = 'all' | 'paid' | 'unpaid' | 'occupied' | 'empty' | 'business';
 
 export const ResidentManager: React.FC<ResidentManagerProps> = ({ 
   role,
-  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, guestReports, settings
+  houses, reports, cashFlow, officials, pdfConfig, iuranPayments, bills, residentRegistrations, guestReports, settings,
+  populationReports, setPopulationReports, populationLogs, setPopulationLogs, updateRequests,
+  initialViewMode = 'grid'
 }) => {
   const confirm = useConfirm();
   const prompt = usePrompt();
-  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'mutations' | 'requests' | 'health' | 'guests' | 'officials'>(initialViewMode);
+  
+  useEffect(() => {
+    if (initialViewMode) {
+      setViewMode(initialViewMode);
+    }
+  }, [initialViewMode]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
   const [filterStatus, setFilterStatus] = useState<any>('all');
@@ -195,8 +222,90 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     pbbStatus: 'Belum Diambil',
     pbbYear: new Date().getFullYear().toString(),
     familyMembers: [] as { id?: string; name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
+    useManualDemographics: false,
     accessCode: ''
   });
+
+  // Auto calculate demographics based on family members
+  useEffect(() => {
+    // Collect all residents to check ages
+    const residents = [];
+    
+    // Add Head of Family
+    if (formData.birthDate) {
+      residents.push({
+        age: calculateAge(formData.birthDate),
+        gender: formData.gender,
+        maritalStatus: formData.maritalStatus
+      });
+    }
+
+    // Add Family Members
+    formData.familyMembers.forEach(m => {
+      if (m.birthDate) {
+        residents.push({
+          age: calculateAge(m.birthDate),
+          gender: m.gender || 'Laki-laki'
+        });
+      }
+    });
+
+    if (formData.useManualDemographics) {
+      const manualOccupants = (formData.babyCount || 0) + 
+                             (formData.toddlerCount || 0) + 
+                             (formData.childCount || 0) + 
+                             (formData.teenagerCount || 0) + 
+                             (formData.adultCount || 0) + 
+                             (formData.elderlyCount || 0);
+      
+      if (manualOccupants !== formData.occupants) {
+        setFormData(prev => ({ ...prev, occupants: manualOccupants }));
+      }
+      return;
+    }
+
+    if (residents.length > 0 || formData.familyMembers.length >= 0) {
+      const counts = {
+        babyCount: residents.filter(r => r.age < 1).length,
+        toddlerCount: residents.filter(r => r.age >= 1 && r.age <= 5).length,
+        childCount: residents.filter(r => r.age > 5 && r.age <= 12).length,
+        teenagerCount: residents.filter(r => r.age > 12 && r.age <= 18).length,
+        adultCount: residents.filter(r => r.age > 18 && r.age <= 55).length,
+        elderlyCount: residents.filter(r => r.age > 55).length,
+        widowCount: residents.filter(r => r.maritalStatus === 'Janda' || r.maritalStatus === 'Duda').length,
+        occupants: 1 + formData.familyMembers.length
+      };
+
+      // Check if any count is different from current formData to avoid infinite loop
+      const hasChanged = 
+        counts.babyCount !== formData.babyCount ||
+        counts.toddlerCount !== formData.toddlerCount ||
+        counts.childCount !== formData.childCount ||
+        counts.teenagerCount !== formData.teenagerCount ||
+        counts.adultCount !== formData.adultCount ||
+        counts.elderlyCount !== formData.elderlyCount ||
+        counts.widowCount !== formData.widowCount ||
+        counts.occupants !== formData.occupants;
+
+      if (hasChanged) {
+        setFormData(prev => ({
+          ...prev,
+          ...counts
+        }));
+      }
+    }
+  }, [
+    formData.birthDate, 
+    formData.familyMembers, 
+    formData.maritalStatus, 
+    formData.useManualDemographics,
+    formData.babyCount,
+    formData.toddlerCount,
+    formData.childCount,
+    formData.teenagerCount,
+    formData.adultCount,
+    formData.elderlyCount
+  ]);
 
   const handleGenerateAllPins = async () => {
     const isConfirmed = await confirm({
@@ -553,6 +662,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       pbbStatus: 'Belum Diambil',
       pbbYear: new Date().getFullYear().toString(),
       familyMembers: [],
+      useManualDemographics: false,
       accessCode: ''
     });
     setEditingHouseId(null);
@@ -563,7 +673,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     if (!payHouse) return;
 
     const currentMonths = targetMonths;
-    if (currentMonths.length === 0) return;
+    if (currentMonths.length === 0) {
+      toast.error('Pilih setidaknya satu bulan untuk pembayaran.');
+      return;
+    }
+
+    const isConfirmed = await confirm({
+      title: 'Konfirmasi Pembayaran',
+      message: `Simpan pembayaran iuran untuk ${payHouse.block}-${payHouse.number} senilai total Rp ${parseInt(payAmount).toLocaleString()}?`,
+      confirmLabel: 'Simpan',
+      cancelLabel: 'Batal'
+    });
+
+    if (!isConfirmed) return;
 
     try {
       const totalAmount = parseInt(payAmount) || 0;
@@ -641,6 +763,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         }
       }
 
+      await logAction('Bayar Iuran', `Pembayaran iuran ${payType} untuk ${payHouse.block}-${payHouse.number} senilai total Rp ${totalAmount} (${currentMonths.length} bulan)`);
       toast.success(`Berhasil merekam pembayaran untuk ${currentMonths.length} bulan!`);
       setIsPayModalOpen(false);
       setPayHouse(null);
@@ -678,6 +801,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const openPayModal = (house: House) => {
     setPayHouse(house);
+    setPayerName(house.headOfFamily || '');
     const arrears = getArrearsForHouse(house);
     if (arrears.length > 0) {
       setTargetMonths([arrears[0]]);
@@ -685,6 +809,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       setTargetMonths([getIndonesianMonthYear(new Date())]);
     }
     setIsPayModalOpen(true);
+    toast.info(`Membuka pembayaran untuk Blok ${house.block}-${house.number}`);
   };
 
   const handleOpenAdd = () => {
@@ -755,6 +880,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       pbbStatus: house.pbbStatus || 'Belum Diambil',
       pbbYear: house.pbbYear || new Date().getFullYear().toString(),
       familyMembers: (house.familyMembers || []).map(m => ({ ...m, id: m.id || Math.random().toString(36).substr(2, 9) })),
+      useManualDemographics: house.useManualDemographics || false,
       accessCode: house.accessCode || ''
     });
     setIsModalOpen(true);
@@ -980,7 +1106,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   });
 
   // Stats
-  const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0);
+  const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const emptyHouses = houses.filter(h => h.status === 'Empty').length;
   const verifiedCount = houses.filter(h => h.isVerified).length;
@@ -1183,6 +1309,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       </div>
                       <span>Unduh Excel</span>
                     </button>
+                    <div className="h-px bg-slate-100 mx-3 my-2"></div>
+                    <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Laporan PBB</div>
+                    
                     <button 
                       onClick={() => { 
                         const year = new Date().getFullYear().toString();
@@ -1194,7 +1323,60 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <div className="p-2 bg-amber-50 text-amber-500 rounded-xl">
                         <Printer size={14} />
                       </div>
-                      <span>Cetak Laporan PBB</span>
+                      <span>Cetak PBB (Filter Aktif)</span>
+                    </button>
+
+                    <button 
+                      onClick={() => { 
+                        const year = new Date().getFullYear().toString();
+                        const takenOnly = houses.filter(h => h.status === 'Occupied' && h.pbbStatus === 'Sudah Diambil');
+                        generatePBBReportPDF(takenOnly, year, pdfConfig); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-all pl-10"
+                    >
+                      <span>PBB Sudah Diambil</span>
+                    </button>
+
+                    <button 
+                      onClick={() => { 
+                        const year = new Date().getFullYear().toString();
+                        const notTakenOnly = houses.filter(h => h.status === 'Occupied' && h.pbbStatus !== 'Sudah Diambil');
+                        generatePBBReportPDF(notTakenOnly, year, pdfConfig); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:text-rose-600 hover:shadow-sm rounded-2xl transition-all pl-10"
+                    >
+                      <span>PBB Belum Diambil</span>
+                    </button>
+
+                    <div className="h-px bg-slate-100 mx-3 my-2"></div>
+                    <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Laporan Iuran</div>
+
+                    <button 
+                      onClick={() => { 
+                        generateBillReportPDF(houses, iuranPayments, 'Air', selectedMonth, pdfConfig); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-blue-600 hover:shadow-sm rounded-2xl transition-all"
+                    >
+                      <div className="p-2 bg-blue-50 text-blue-500 rounded-xl">
+                        <Droplets size={14} />
+                      </div>
+                      <span>Laporan Iuran Air</span>
+                    </button>
+
+                    <button 
+                      onClick={() => { 
+                        generateBillReportPDF(houses, iuranPayments, 'Sampah', selectedMonth, pdfConfig); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-orange-600 hover:shadow-sm rounded-2xl transition-all"
+                    >
+                      <div className="p-2 bg-orange-50 text-orange-500 rounded-xl">
+                        <Trash size={14} />
+                      </div>
+                      <span>Laporan Iuran Sampah</span>
                     </button>
                     <button 
                       onClick={() => { 
@@ -1337,7 +1519,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         {viewMode === 'analytics' ? (
           <div className="space-y-6 animate-fade-in">
             <ResidentAnalytics houses={houses} />
-            <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />
+            <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} pdfConfig={pdfConfig} />
           </div>
         ) : viewMode === 'grid' ? (
           <ResidentGridView 
@@ -1376,6 +1558,57 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             addHouse={addHouse}
             addPopulationLogToDb={addPopulationLogToDb}
           />
+        ) : viewMode === 'mutations' ? (
+           <PopulationReportManager 
+              reports={populationReports} 
+              onAddReport={async (r) => {
+                try {
+                  await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
+                  await markPopulationLogsAsGenerated(r.month);
+                  toast.success(`Laporan ${r.month} berhasil disimpan.`);
+                } catch (error) {
+                  handleFirestoreError(error, OperationType.CREATE, "populationReports");
+                }
+              }} 
+              onUpdateReport={async (id, r) => {
+                try {
+                  await updatePopulationReportToDb(id, r);
+                } catch (error) {
+                  handleFirestoreError(error, OperationType.UPDATE, `populationReports/${id}`);
+                }
+              }}
+              onDeleteReport={async (id) => {
+                const isConfirmed = await confirm({
+                  title: 'Hapus Laporan',
+                  message: 'Apakah Anda yakin?',
+                  confirmLabel: 'Hapus',
+                  isDanger: true
+                });
+
+                if (isConfirmed) {
+                  try {
+                    const reportToDelete = populationReports.find(r => r.id === id);
+                    if (reportToDelete) await unmarkPopulationLogsAsGenerated(reportToDelete.month);
+                    await deletePopulationReportFromDb(id);
+                    toast.success('Laporan dihapus.');
+                  } catch (error) {
+                    handleFirestoreError(error, OperationType.DELETE, `populationReports/${id}`);
+                  }
+                }
+              }} 
+              populationLogs={populationLogs} 
+              setPopulationLogs={setPopulationLogs} 
+              houses={houses} 
+              embedded={true}
+            />
+        ) : viewMode === 'requests' ? (
+           <UpdateRequestManager requests={updateRequests} houses={houses} embedded={true} />
+        ) : viewMode === 'health' ? (
+           <HealthManagement houses={houses} />
+        ) : viewMode === 'guests' ? (
+           <GuestManager guestReports={guestReports} pdfConfig={pdfConfig} />
+        ) : viewMode === 'officials' ? (
+           <OfficialManagement officials={officials} houses={houses} />
         ) : viewMode === 'table' ? (
           <ResidentTableView 
             filteredHouses={filteredHouses}

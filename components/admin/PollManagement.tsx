@@ -6,12 +6,14 @@ import { Modal } from '../ui/Modal';
 import { addPollToDb, updatePollStatus, deletePollFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface PollManagementProps {
   polls: Poll[];
 }
 
 export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
+  const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Form State
@@ -75,46 +77,41 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
   };
 
   const handleClosePoll = async (id: string) => {
-    toast.info('Tutup voting ini?', {
-      description: 'Warga tidak akan bisa memilih lagi.',
-      action: {
-        label: 'Tutup',
-        onClick: async () => {
-          try {
-            await updatePollStatus(id, 'Closed');
-            toast.success('Voting berhasil ditutup.');
-          } catch (error) {
-            handleFirestoreError(error, OperationType.UPDATE, `polls/${id}`);
-            toast.error('Gagal menutup voting.');
-          }
-        }
-      },
-      cancel: {
-        label: 'Batal',
-        onClick: () => {}
-      }
+    const isConfirmed = await confirm({
+      title: 'Tutup Voting',
+      message: 'Apakah Anda yakin ingin menutup voting ini? Warga tidak akan bisa memilih lagi.',
+      confirmLabel: 'Tutup',
+      isDanger: true
     });
+
+    if (isConfirmed) {
+      try {
+        await updatePollStatus(id, 'Closed');
+        toast.success('Voting berhasil ditutup.');
+      } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `polls/${id}`);
+        toast.error('Gagal menutup voting.');
+      }
+    }
   };
 
   const handleDeletePoll = async (id: string) => {
-    toast.info('Hapus voting ini permanen?', {
-      action: {
-        label: 'Hapus',
-        onClick: async () => {
-          try {
-            await deletePollFromDb(id);
-            toast.success('Voting berhasil dihapus.');
-          } catch (error) {
-            console.error(error);
-            toast.error('Gagal menghapus voting.');
-          }
-        }
-      },
-      cancel: {
-        label: 'Batal',
-        onClick: () => {}
-      }
+    const isConfirmed = await confirm({
+      title: 'Hapus Voting',
+      message: 'Apakah Anda yakin ingin menghapus voting ini permanen? Tindakan ini tidak dapat dibatalkan.',
+      confirmLabel: 'Hapus',
+      isDanger: true
     });
+
+    if (isConfirmed) {
+      try {
+        await deletePollFromDb(id);
+        toast.success('Voting berhasil dihapus.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Gagal menghapus voting.');
+      }
+    }
   };
 
   const containerVariants = {

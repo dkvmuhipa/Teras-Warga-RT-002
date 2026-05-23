@@ -24,9 +24,10 @@ import { toast } from 'sonner';
 interface UpdateRequestManagerProps {
   requests: UpdateRequest[];
   houses: House[];
+  embedded?: boolean;
 }
 
-export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requests, houses }) => {
+export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requests, houses, embedded = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Menunggu' | 'Disetujui' | 'Ditolak'>('All');
   const [selectedRequest, setSelectedRequest] = useState<UpdateRequest | null>(null);

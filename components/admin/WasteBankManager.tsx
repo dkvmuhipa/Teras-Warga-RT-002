@@ -18,12 +18,14 @@ import {
   OperationType
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface WasteBankManagerProps {
   houses: House[];
 }
 
 export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) => {
+  const confirm = useConfirm();
   const [deposits, setDeposits] = useState<WasteDeposit[]>([]);
   const [prices, setPrices] = useState<WastePrice[]>([]);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -43,6 +45,14 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
     type: '',
     weight: 0,
     date: new Date().toISOString().split('T')[0]
+  });
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [selectedDeposit, setSelectedDeposit] = useState<WasteDeposit | null>(null);
+  const [confirmForm, setConfirmForm] = useState({
+    weight: 0,
+    pricePerUnit: 0,
+    totalValue: 0
   });
 
   useEffect(() => {
@@ -118,20 +128,51 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
     }
   };
 
-  const handleConfirmDeposit = async (deposit: WasteDeposit) => {
-    if (window.confirm(`Konfirmasi setoran ini? Saldo sebesar Rp ${deposit.totalValue.toLocaleString()} akan ditambahkan ke tabungan warga.`)) {
-      try {
-        await updateWasteDepositStatus(deposit.id, 'Confirmed', deposit.totalValue, deposit.houseId);
-        toast.success('Setoran berhasil dikonfirmasi!');
-      } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `wasteDeposits/${deposit.id}`);
-        toast.error('Gagal mengonfirmasi setoran.');
-      }
+  const handleConfirmDeposit = (deposit: WasteDeposit) => {
+    setSelectedDeposit(deposit);
+    setConfirmForm({
+      weight: deposit.weight,
+      pricePerUnit: deposit.pricePerUnit,
+      totalValue: deposit.totalValue
+    });
+    setIsConfirmModalOpen(true);
+  };
+
+  const submitConfirmation = async () => {
+    if (!selectedDeposit) return;
+    
+    try {
+      await updateWasteDepositStatus(
+        selectedDeposit.id, 
+        'Confirmed', 
+        confirmForm.totalValue, 
+        selectedDeposit.houseId,
+        confirmForm.weight,
+        confirmForm.pricePerUnit
+      );
+      setIsConfirmModalOpen(false);
+      setSelectedDeposit(null);
+      toast.success('Setoran berhasil dikonfirmasi!');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `wasteDeposits/${selectedDeposit.id}`);
+      toast.error('Gagal mengonfirmasi setoran.');
     }
   };
 
+  const handleConfirmWeightChange = (weight: number) => {
+    const totalValue = weight * confirmForm.pricePerUnit;
+    setConfirmForm(prev => ({ ...prev, weight, totalValue }));
+  };
+
   const handleDeleteDeposit = async (id: string) => {
-    if (window.confirm('Hapus data setoran ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Setoran',
+      message: 'Apakah Anda yakin ingin menghapus data setoran ini?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteWasteDepositFromDb(id);
         toast.success('Data setoran berhasil dihapus.');
@@ -166,7 +207,14 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (window.confirm('Hapus kategori sampah ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Kategori',
+      message: 'Apakah Anda yakin ingin menghapus kategori sampah ini?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteWastePriceFromDb(id);
         toast.success('Kategori berhasil dihapus.');
@@ -360,6 +408,76 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
           </table>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <Modal 
+        isOpen={isConfirmModalOpen} 
+        onClose={() => setIsConfirmModalOpen(false)} 
+        title="Konfirmasi Setoran Sampah"
+      >
+        <div className="space-y-6">
+          {selectedDeposit && (
+            <>
+              <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center font-black shadow-sm">
+                    {selectedDeposit.residentName?.[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-slate-800 leading-none mb-1">{selectedDeposit.residentName}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                      Blok {getHouseLabel(selectedDeposit.houseId)} • {selectedDeposit.type}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Berat Aktual (kg)</label>
+                    <div className="relative">
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        autoFocus
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-black text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                        value={confirmForm.weight}
+                        onChange={e => handleConfirmWeightChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Harga Satuan</label>
+                    <div className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-lg font-black text-slate-500">
+                      Rp {confirmForm.pricePerUnit.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 bg-slate-800 rounded-2xl text-center">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Total Saldo Ditambahkan</p>
+                <p className="text-3xl font-black text-white">Rp {confirmForm.totalValue.toLocaleString()}</p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setIsConfirmModalOpen(false)} 
+                  variant="outline" 
+                  className="flex-1 py-4 border-slate-200 text-slate-500"
+                >
+                  Batal
+                </Button>
+                <Button 
+                   onClick={submitConfirmation}
+                   className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-100"
+                >
+                  Konfirmasi Sekarang
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </Modal>
 
       {/* Input Deposit Modal */}
       <Modal isOpen={isDepositModalOpen} onClose={() => {

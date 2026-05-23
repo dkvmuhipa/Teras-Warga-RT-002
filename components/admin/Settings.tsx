@@ -5,6 +5,8 @@ import { motion } from 'motion/react';
 import { updateAdminPassword, seedDatabase, deepSanitize, safeJsonStringify } from '../../services/databaseService';
 import { generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, INITIAL_OFFICIALS, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_WASTE_PRICES, MOCK_FAQ, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS, MOCK_BILLS } from '../../constants';
 import { toast } from 'sonner';
+import { ConfirmModal } from '../ui/ConfirmModal';
+import { PromptDialog } from '../ui/PromptDialog';
 
 interface SettingsProps {
   pdfConfig: PdfConfig;
@@ -17,6 +19,8 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig, set
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isConfirmResetOpen, setIsConfirmResetOpen] = useState(false);
+  const [isPromptResetOpen, setIsPromptResetOpen] = useState(false);
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
@@ -43,36 +47,39 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig, set
   };
 
   const handleResetSystem = async () => {
-    if (window.confirm("PERINGATAN: Tindakan ini akan MENGHAPUS SEMUA DATA REAL dan me-reset sistem ke data dummy awal. Apakah Anda yakin?")) {
-        const confirmation = prompt("Ketik 'RESET' untuk konfirmasi penghapusan data:");
-        if (confirmation === 'RESET') {
-            try {
-                const initialData = { 
-                    houses: generateHouses(), 
-                    announcements: MOCK_ANNOUNCEMENTS, 
-                    cashFlow: MOCK_CASHFLOW, 
-                    officials: INITIAL_OFFICIALS, 
-                    reports: INITIAL_REPORTS, 
-                    ronda: MOCK_RONDA, 
-                    inventory: MOCK_INVENTORY, 
-                    umkm: MOCK_UMKM, 
-                    polls: MOCK_POLLS, 
-                    rondaLogs: MOCK_RONDA_LOGS,
-                    wastePrices: MOCK_WASTE_PRICES,
-                    faq: MOCK_FAQ,
-                    events: MOCK_EVENTS,
-                    checkpoints: CHECKPOINTS,
-                    mapPoints: MOCK_MAP_POINTS,
-                    bills: MOCK_BILLS
-                };
-                await seedDatabase(initialData);
-                toast.success("Reset sistem berhasil. Halaman akan dimuat ulang."); 
-                window.location.reload();
-            } catch (e) { 
-                console.error(e);
-                toast.error("Gagal melakukan reset sistem."); 
-            }
+    setIsConfirmResetOpen(true);
+  };
+
+  const executeReset = async (confirmation: string) => {
+    if (confirmation === 'RESET') {
+        try {
+            const initialData = { 
+                houses: generateHouses(), 
+                announcements: MOCK_ANNOUNCEMENTS, 
+                cashFlow: MOCK_CASHFLOW, 
+                officials: INITIAL_OFFICIALS, 
+                reports: INITIAL_REPORTS, 
+                ronda: MOCK_RONDA, 
+                inventory: MOCK_INVENTORY, 
+                umkm: MOCK_UMKM, 
+                polls: MOCK_POLLS, 
+                rondaLogs: MOCK_RONDA_LOGS,
+                wastePrices: MOCK_WASTE_PRICES,
+                faq: MOCK_FAQ,
+                events: MOCK_EVENTS,
+                checkpoints: CHECKPOINTS,
+                mapPoints: MOCK_MAP_POINTS,
+                bills: MOCK_BILLS
+            };
+            await seedDatabase(initialData);
+            toast.success("Reset sistem berhasil. Halaman akan dimuat ulang."); 
+            window.location.reload();
+        } catch (e) { 
+            console.error(e);
+            toast.error("Gagal melakukan reset sistem."); 
         }
+    } else {
+        toast.error("Konfirmasi salah. Reset dibatalkan.");
     }
   };
 
@@ -238,6 +245,27 @@ export const Settings: React.FC<SettingsProps> = ({ pdfConfig, setPdfConfig, set
           </div>
         </motion.div>
       </div>
+
+      <ConfirmModal 
+        isOpen={isConfirmResetOpen}
+        onClose={() => setIsConfirmResetOpen(false)}
+        onConfirm={() => setIsPromptResetOpen(true)}
+        title="Konfirmasi Reset Sistem"
+        message="PERINGATAN: Tindakan ini akan MENGHAPUS SEMUA DATA REAL dan me-reset sistem ke data dummy awal. Apakah Anda benar-benar yakin?"
+        type="danger"
+        confirmText="Lanjut ke Verifikasi"
+      />
+
+      <PromptDialog 
+        isOpen={isPromptResetOpen}
+        onClose={() => setIsPromptResetOpen(false)}
+        onConfirm={executeReset}
+        title="Verifikasi Reset"
+        message="Untuk melanjutkan, silakan ketik 'RESET' di bawah ini untuk konfirmasi penghapusan seluruh data:"
+        placeholder="Ketik RESET di sini"
+        confirmLabel="Reset Sekarang"
+        isDanger={true}
+      />
     </motion.div>
   );
 };

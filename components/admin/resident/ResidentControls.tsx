@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Calendar, Users, LayoutList, MapPin, DollarSign, UserPlus, Activity, Filter, ArrowUpDown, X, ChevronDown } from 'lucide-react';
+import { Search, Calendar, Users, LayoutList, MapPin, DollarSign, UserPlus, Activity, Filter, ArrowUpDown, X, ChevronDown, FileClock, FileEdit, ShieldAlert, Briefcase } from 'lucide-react';
 import { generateMonthOptions } from '../../../src/utils/dateUtils';
 import { ResidentRegistration } from '../../../types';
 
@@ -31,40 +31,44 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
   residentRegistrations
 }) => {
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col xl:flex-row gap-6 items-stretch xl:items-center">
+    <div className="space-y-4">
+      <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center">
         {/* Search Bar - Professional & Clean */}
         <div className="relative flex-1 group">
-          <div className="absolute inset-x-4 inset-y-0 bg-indigo-500/5 rounded-[2rem] blur-xl group-focus-within:bg-indigo-500/10 transition-all duration-500"></div>
-          <div className="relative flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-4 focus-within:ring-indigo-600/5 transition-all overflow-hidden px-2 py-1">
-            <div className="w-12 h-12 flex items-center justify-center text-slate-400 group-focus-within:text-indigo-600 transition-colors">
-              <Search size={22} strokeWidth={2} />
+          <div className="relative flex items-center bg-white border border-slate-200 rounded-xl shadow-xs hover:border-slate-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-150 transition-all overflow-hidden px-2 py-0.5">
+            <div className="w-10 h-10 flex items-center justify-center text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+              <Search size={18} strokeWidth={2} />
             </div>
             <input 
               type="text" 
-              placeholder="Cari warga, nomor blok, atau kategori..." 
-              className="flex-1 bg-transparent px-3 py-4 text-sm font-bold text-slate-800 placeholder:text-slate-300 placeholder:font-medium outline-none"
+              placeholder="Cari warga, nomor blok, status..." 
+              className="flex-1 bg-transparent px-2.5 py-2.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 outline-none"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
             {searchTerm && (
               <button 
                 onClick={() => setSearchTerm('')}
-                className="w-10 h-10 flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-xl"
+                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-lg"
               >
-                <X size={18} />
+                <X size={15} />
               </button>
             )}
           </div>
         </div>
 
         {/* View Selection - Elegant Integrated Design */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl self-center xl:self-auto overflow-x-auto no-scrollbar shadow-inner border border-slate-200/50">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full xl:w-auto overflow-x-auto no-scrollbar border border-slate-200/60 shadow-xs">
             {[
               { id: 'grid', icon: Users, label: 'Grid' },
               { id: 'table', icon: LayoutList, label: 'Tabel' },
               { id: 'map', icon: MapPin, label: 'Peta' },
               { id: 'analytics', icon: Activity, label: 'Intel' },
+              { id: 'mutations', icon: FileClock, label: 'Mutasi' },
+              { id: 'requests', icon: FileEdit, label: 'Update' },
+              { id: 'health', icon: Activity, label: 'Posyandu' },
+              { id: 'guests', icon: ShieldAlert, label: 'Tamu' },
+              { id: 'officials', icon: Briefcase, label: 'Pengurus' },
               { id: 'registrations', 
                 icon: UserPlus, 
                 label: 'Antrean', 
@@ -74,16 +78,16 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
               <button 
                 key={mode.id}
                 onClick={() => setViewMode(mode.id)} 
-                className={`relative flex items-center gap-2.5 px-6 py-3 rounded-xl transition-all whitespace-nowrap active:scale-95 ${
+                className={`relative flex items-center gap-1 px-3 py-1.5 rounded-lg transition-all whitespace-nowrap active:scale-97 ${
                   viewMode === mode.id 
-                    ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60 font-black' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 font-bold'
+                    ? 'bg-white text-indigo-600 shadow-xs border border-slate-200/50 font-bold text-xs' 
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/40 font-semibold text-xs'
                 }`}
               >
-                <mode.icon size={16} className={viewMode === mode.id ? 'text-indigo-600' : 'text-slate-400'} />
-                <span className="text-[10px] uppercase tracking-[0.1em] hidden sm:inline">{mode.label}</span>
+                <mode.icon size={13} className={viewMode === mode.id ? 'text-indigo-600' : 'text-slate-400'} />
+                <span className="text-[10px] uppercase tracking-wide hidden md:inline">{mode.label}</span>
                 {mode.badge ? (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-white shadow-lg">
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[8px] font-bold text-white border border-white shadow-xs">
                     {mode.badge}
                   </span>
                 ) : null}
@@ -93,10 +97,10 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
       </div>
 
       {/* Advanced Filters Row */}
-      <div className="flex flex-wrap items-end gap-5">
-        <FilterGroup icon={<Calendar size={14} className="text-indigo-500" />} label="Periode Data">
+      <div className="flex flex-wrap items-end gap-3 pt-1">
+        <FilterGroup icon={<Calendar size={13} className="text-indigo-500" />} label="Periode Data">
           <select 
-            className="bg-transparent w-full text-xs font-black outline-none text-slate-800 appearance-none pr-8 cursor-pointer focus:ring-0" 
+            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
             value={selectedMonth} 
             onChange={e => setSelectedMonth(e.target.value)}
           >
@@ -106,9 +110,9 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           </select>
         </FilterGroup>
 
-        <FilterGroup icon={<Filter size={14} className="text-emerald-500" />} label="Status Filter">
+        <FilterGroup icon={<Filter size={13} className="text-emerald-500" />} label="Status Filter">
           <select 
-            className="bg-transparent w-full text-xs font-black outline-none text-slate-800 appearance-none pr-8 cursor-pointer focus:ring-0" 
+            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
             value={filterStatus} 
             onChange={e => setFilterStatus(e.target.value as any)}
           >
@@ -126,9 +130,9 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           </select>
         </FilterGroup>
 
-        <FilterGroup icon={<ArrowUpDown size={14} className="text-amber-500" />} label="Urutan Daftar">
+        <FilterGroup icon={<ArrowUpDown size={13} className="text-amber-500" />} label="Urutan Daftar">
           <select 
-            className="bg-transparent w-full text-xs font-black outline-none text-slate-800 appearance-none pr-8 cursor-pointer focus:ring-0" 
+            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
             value={sortBy} 
             onChange={e => setSortBy(e.target.value as any)}
           >
@@ -137,14 +141,14 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           </select>
         </FilterGroup>
 
-        <div className="ml-auto flex items-center gap-3 self-center">
-           <div className="hidden lg:flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
-             <div className="flex -space-x-2">
+        <div className="ml-auto flex items-center gap-2 self-center pt-2">
+           <div className="hidden lg:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-xl shadow-xs">
+             <div className="flex -space-x-1.5">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className={`w-6 h-6 rounded-full border-2 border-white bg-slate-${i*100 + 100} flex items-center justify-center text-[8px] font-black`}>W</div>
+                  <div key={i} className={`w-5 h-5 rounded-full border border-white bg-slate-${i*100 + 100} flex items-center justify-center text-[7px] font-bold`}>W</div>
                 ))}
              </div>
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest"><span className="text-slate-900">142</span> Warga Terdaftar</p>
+             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider"><span className="text-slate-850 font-bold">142</span> Keluarga</p>
            </div>
         </div>
       </div>
@@ -154,14 +158,14 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
 
 // Helper component for uniform filter styling
 const FilterGroup = ({ icon, label, children }: { icon: React.ReactNode, label: string, children: React.ReactNode }) => (
-  <div className="flex flex-col gap-2 min-w-[180px] group">
-    <div className="flex items-center gap-2 px-1">
-       <span className="text-slate-300 group-hover:text-slate-900 transition-colors">{icon}</span>
-       <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-slate-600 transition-colors">{label}</p>
+  <div className="flex flex-col gap-1 min-w-[170px] group">
+    <div className="flex items-center gap-1.5 px-0.5">
+       <span className="text-slate-300 group-hover:text-slate-750 transition-colors">{icon}</span>
+       <p className="text-[9px] font-bold text-slate-405 uppercase tracking-wide group-hover:text-slate-600 transition-colors">{label}</p>
     </div>
-    <div className="relative bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm hover:border-slate-900 focus-within:border-slate-900 transition-all flex items-center justify-between">
+    <div className="relative bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-xs hover:border-indigo-400 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-100 transition-all flex items-center justify-between">
       {children}
-      <ChevronDown size={14} className="text-slate-300 group-hover:text-slate-900 transition-colors pointer-events-none absolute right-4" />
+      <ChevronDown size={13} className="text-slate-400 group-hover:text-slate-700 pointer-events-none absolute right-3" />
     </div>
   </div>
 );

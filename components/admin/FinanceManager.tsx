@@ -1,6 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { DollarSign, Plus, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Filter, Search, Download, PieChart, Wallet, User, CreditCard, Upload, X, Eye, FileText, CheckCircle2, AlertCircle, Trash2, RefreshCw } from 'lucide-react';
-import { CashFlow } from '../../types';
+import React, { useState, useRef, useEffect } from 'react';
+import { DollarSign, Box, Plus, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Filter, Search, Download, PieChart, Wallet, User, CreditCard, Upload, X, Eye, FileText, CheckCircle2, AlertCircle, Trash2, RefreshCw } from 'lucide-react';
+import { WasteBankManager } from './WasteBankManager';
+import { ResidentIuranManager } from './resident/ResidentIuranManager';
+import { PaymentModal, EditPaymentModal } from './resident/ResidentModals';
+import { House, CashFlow, PaymentStatus } from '../../types';
 import { getIndonesianMonthYear, generateMonthOptions } from '../../src/utils/dateUtils';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -8,18 +11,37 @@ import {
 } from 'recharts';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb, logAction, handleFirestoreError, OperationType, uploadImageToStorage } from '../../services/databaseService';
+import { 
+  addTransactionToDb, updateTransactionInDb, deleteTransactionFromDb, logAction, 
+  handleFirestoreError, OperationType, uploadImageToStorage,
+  deleteIuranPaymentFromDb, updateIuranPaymentInDb, addIuranPaymentToDb
+} from '../../services/databaseService';
 import { toast } from 'sonner';
-import { generateCashFlowReportPDF } from '../../services/pdfService';
+import { generateCashFlowReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
 import { useConfirm } from '../../context/ConfirmContext';
+import { useFinancial } from '../../context/FinancialContext';
 
 interface FinanceManagerProps {
   cashFlow: CashFlow[];
   pdfConfig: any;
+  houses: House[];
+  iuranPayments: any[];
+  initialSubTab?: 'cashflow' | 'wastebank' | 'iuran';
 }
 
-export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfConfig }) => {
+export const FinanceManager: React.FC<FinanceManagerProps> = ({ 
+  cashFlow, pdfConfig, houses, iuranPayments, initialSubTab = 'cashflow'
+}) => {
   const confirm = useConfirm();
+  const { getArrearsForHouse } = useFinancial();
+  const [activeSubTab, setActiveSubTab] = useState<'cashflow' | 'wastebank' | 'iuran'>(initialSubTab);
+  
+  useEffect(() => {
+    if (initialSubTab) {
+      setActiveSubTab(initialSubTab);
+    }
+  }, [initialSubTab]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'All' | 'Income' | 'Expense'>('All');
   const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
@@ -39,6 +61,21 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
   const [referenceNumber, setReferenceNumber] = useState('');
   const [evidenceUrl, setEvidenceUrl] = useState('');
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
+
+  // States for ResidentIuranManager integration
+  const [editingPayment, setEditingPayment] = useState<any>(null);
+  const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
+  const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Air');
+  const [payAmount, setPayAmount] = useState('');
+  const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
+  const [payNotes, setPayNotes] = useState('');
+  const [payerName, setPayerName] = useState('');
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [selectedHouseForPay, setSelectedHouseForPay] = useState<House | null>(null);
+  const [targetMonths, setTargetMonths] = useState<string[]>([]);
+
+  // States for Financial Context values if needed
+  const [payMonth, setPayMonth] = useState(getIndonesianMonthYear(new Date()));
 
   // Stats Calculation
   const totalIncome = cashFlow.filter(cf => cf.type === 'Income').reduce((acc, cf) => acc + cf.amount, 0);
@@ -169,6 +206,69 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
     setIsModalOpen(true);
   };
 
+  const handleOpenPayModal = (house: House) => {
+    setSelectedHouseForPay(house);
+    setPayerName(house.headOfFamily || '');
+    
+    // Pre-select arrears if any, otherwise select current month
+    const arrears = getArrearsForHouse(house);
+    if (arrears.length > 0) {
+      setTargetMonths([arrears[0]]);
+    } else {
+      setTargetMonths([getIndonesianMonthYear(new Date())]);
+    }
+    
+    setPayAmount('');
+    setPayNotes('');
+    setPayDate(new Date().toISOString().split('T')[0]);
+    setIsPayModalOpen(true);
+    toast.info(`Membuka pembayaran untuk Blok ${house.block}-${house.number}`);
+  };
+
+  const handleSaveIuranPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedHouseForPay || targetMonths.length === 0) return;
+
+    const isConfirmed = await confirm({
+      title: 'Konfirmasi Pembayaran',
+      message: `Simpan pembayaran iuran untuk ${selectedHouseForPay.block}-${selectedHouseForPay.number} senilai total Rp ${parseInt(payAmount).toLocaleString()}?`,
+      confirmLabel: 'Simpan',
+      cancelLabel: 'Batal'
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      const amountPerMonth = parseInt(payAmount) / targetMonths.length;
+      
+      for (const month of targetMonths) {
+        const paymentData = {
+          houseId: selectedHouseForPay.id,
+          block: selectedHouseForPay.block,
+          number: selectedHouseForPay.number,
+          headOfFamily: selectedHouseForPay.headOfFamily,
+          month,
+          amount: amountPerMonth,
+          date: payDate,
+          type: payType,
+          notes: payNotes,
+          payerName: payerName || selectedHouseForPay.headOfFamily,
+          recordedBy: 'Admin (System)',
+          createdAt: new Date().toISOString()
+        };
+
+        await addIuranPaymentToDb(paymentData);
+      }
+
+      await logAction('Bayar Iuran', `Pembayaran iuran ${payType} untuk ${selectedHouseForPay.block}-${selectedHouseForPay.number} senilai total Rp ${payAmount} (${targetMonths.length} bulan)`);
+      toast.success('Pembayaran berhasil dicatat!');
+      setIsPayModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal mencatat pembayaran');
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
@@ -186,6 +286,30 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
       animate="visible"
       className="space-y-8"
     >
+      {/* Sub-tabs Selection */}
+      <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-full sm:w-fit overflow-x-auto no-scrollbar shadow-inner border border-slate-200/50">
+        {[
+          { id: 'cashflow', icon: DollarSign, label: 'Kas Utama' },
+          { id: 'wastebank', icon: Box, label: 'Bank Sampah' },
+          { id: 'iuran', icon: CreditCard, label: 'Iuran Warga' },
+        ].map((tab) => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveSubTab(tab.id as any)} 
+            className={`flex items-center gap-2.5 px-6 py-3 rounded-xl transition-all whitespace-nowrap active:scale-95 ${
+              activeSubTab === tab.id 
+                ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60 font-black' 
+                : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 font-bold'
+            }`}
+          >
+            <tab.icon size={16} className={activeSubTab === tab.id ? 'text-indigo-600' : 'text-slate-400'} />
+            <span className="text-[10px] uppercase tracking-[0.1em]">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {activeSubTab === 'cashflow' ? (
+        <>
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="w-full lg:w-auto">
@@ -514,6 +638,80 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
          </form>
       </Modal>
 
+      {/* Payment Modal */}
+      <PaymentModal 
+        isOpen={isPayModalOpen}
+        onClose={() => setIsPayModalOpen(false)}
+        payHouse={selectedHouseForPay}
+        payType={payType}
+        setPayType={setPayType}
+        payAmount={payAmount}
+        setPayAmount={setPayAmount}
+        payDate={payDate}
+        setPayDate={setPayDate}
+        targetMonths={targetMonths}
+        setTargetMonths={setTargetMonths}
+        payNotes={payNotes}
+        setPayNotes={setPayNotes}
+        payerName={payerName}
+        setPayerName={setPayerName}
+        handleSavePayment={handleSaveIuranPayment}
+        getIndonesianMonthYear={getIndonesianMonthYear}
+      />
+
+      {/* Edit Payment Modal */}
+      <Modal isOpen={isEditPaymentModalOpen} onClose={() => setIsEditPaymentModalOpen(false)} title="Edit Catatan Iuran" maxWidth="max-w-md">
+        {editingPayment && (
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              const updatedData = {
+                type: payType,
+                amount: parseInt(payAmount),
+                date: payDate,
+                notes: payNotes,
+                payerName: payerName
+              };
+              await updateIuranPaymentInDb(editingPayment.id, updatedData);
+              toast.success('Berhasil diperbarui');
+              setIsEditPaymentModalOpen(false);
+            } catch (error) {
+              toast.error('Gagal memperbarui');
+            }
+          }} className="space-y-6">
+            <div className="p-4 bg-slate-100 rounded-2xl">
+               <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Detail Transaksi</p>
+               <p className="font-bold text-slate-800">{editingPayment.headOfFamily} (Blok {editingPayment.block}-{editingPayment.number})</p>
+               <p className="text-[10px] font-black text-indigo-600 mt-1 uppercase tracking-widest">{editingPayment.month}</p>
+            </div>
+            
+            <div className="space-y-4">
+               <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Jenis</label>
+                  <select value={payType} onChange={(e: any) => setPayType(e.target.value)} className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold">
+                    <option value="Both">Air & Sampah</option>
+                    <option value="Air">Hanya Air</option>
+                    <option value="Sampah">Hanya Sampah</option>
+                  </select>
+               </div>
+               <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Nominal</label>
+                  <input type="number" value={payAmount} onChange={e => setPayAmount(e.target.value)} className="w-full p-4 border border-slate-200 rounded-2xl text-sm font-bold" />
+               </div>
+               <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Nama Pembayar</label>
+                  <input value={payerName} onChange={e => setPayerName(e.target.value)} className="w-full p-4 border border-slate-200 rounded-2xl text-sm font-bold" />
+               </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1 py-4 rounded-2xl" onClick={() => setIsEditPaymentModalOpen(false)}>Batal</Button>
+              <Button type="submit" className="flex-[2] py-4 rounded-2xl shadow-lg shadow-indigo-600/20 bg-indigo-600 text-white">Simpan</Button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
       {/* Evidence Preview Modal */}
       <Modal isOpen={!!selectedEvidence} onClose={() => setSelectedEvidence(null)} title="Bukti Transaksi">
         <div className="p-2">
@@ -523,6 +721,35 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({ cashFlow, pdfCon
           </div>
         </div>
       </Modal>
+      </>
+      ) : activeSubTab === 'wastebank' ? (
+        <WasteBankManager houses={houses} />
+      ) : (
+        <ResidentIuranManager 
+          houses={houses}
+          searchTerm={searchTerm}
+          generateIuranReceiptPDF={generateIuranReceiptPDF}
+          pdfConfig={pdfConfig}
+          deleteIuranPaymentFromDb={deleteIuranPaymentFromDb}
+          setEditingPayment={setEditingPayment}
+          setPayType={setPayType}
+          setPayAmount={setPayAmount}
+          setPayDate={setPayDate}
+          setPayNotes={setPayNotes}
+          setPayerName={setPayerName}
+          setIsEditPaymentModalOpen={setIsEditPaymentModalOpen}
+          openPayModal={handleOpenPayModal}
+          onSendWhatsApp={(house, msg) => {
+            const phone = house.phone || '';
+            if (phone) {
+              const cleanedPhone = phone.replace(/\D/g, '').replace(/^0/, '62');
+              window.open(`https://wa.me/${cleanedPhone}?text=${encodeURIComponent(msg || '')}`, '_blank');
+            } else {
+              toast.error('Nomor WhatsApp tidak tersedia');
+            }
+          }}
+        />
+      )}
     </motion.div>
   );
 };

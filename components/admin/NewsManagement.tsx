@@ -7,12 +7,14 @@ import { addNewsToDb, deleteNewsFromDb, updateNewsInDb, handleFirestoreError, Op
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface NewsManagementProps {
   news: News[];
 }
 
 export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
+  const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -114,24 +116,22 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
   };
 
   const handleDeleteNews = async (id: string) => {
-    toast.info('Hapus berita ini?', {
-      action: {
-        label: 'Hapus',
-        onClick: async () => {
-          try {
-            await deleteNewsFromDb(id);
-            toast.success('Berita berhasil dihapus.');
-          } catch (error) {
-            handleFirestoreError(error, OperationType.DELETE, `news/${id}`);
-            toast.error('Gagal menghapus berita.');
-          }
-        }
-      },
-      cancel: {
-        label: 'Batal',
-        onClick: () => {}
-      }
+    const isConfirmed = await confirm({
+      title: 'Hapus Berita',
+      message: 'Apakah Anda yakin ingin menghapus berita ini secara permanen?',
+      confirmLabel: 'Hapus',
+      isDanger: true
     });
+
+    if (isConfirmed) {
+      try {
+        await deleteNewsFromDb(id);
+        toast.success('Berita berhasil dihapus.');
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `news/${id}`);
+        toast.error('Gagal menghapus berita.');
+      }
+    }
   };
 
   const containerVariants = {

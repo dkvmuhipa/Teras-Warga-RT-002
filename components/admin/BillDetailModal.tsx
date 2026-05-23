@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Bill, BillItem, House } from '../../types';
 import { X, CheckCircle, AlertCircle, DollarSign } from 'lucide-react';
 import { updateBillInDb } from '../../services/databaseService';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface BillDetailModalProps {
   house: House;
@@ -11,20 +12,32 @@ interface BillDetailModalProps {
 }
 
 export const BillDetailModal: React.FC<BillDetailModalProps> = ({ house, bills, onClose }) => {
+  const confirm = useConfirm();
   const houseBills = bills.filter(b => b.houseId === house.id).sort((a, b) => b.month.localeCompare(a.month));
 
   const handleMarkAsPaid = async (billId: string, itemId: string) => {
     const bill = houseBills.find(b => b.id === billId);
     if (!bill) return;
 
-    const updatedItems = bill.items.map(item => 
-      item.id === itemId ? { ...item, status: 'Paid' as const, paymentDate: new Date().toISOString() } : item
-    );
-    
-    await updateBillInDb(billId, { 
-        items: updatedItems,
-        total: updatedItems.reduce((acc, curr) => acc + (curr.status === 'Paid' ? 0 : curr.amount), 0)
+    const item = bill.items.find(i => i.id === itemId);
+    if (!item) return;
+
+    const isConfirmed = await confirm({
+      title: 'Konfirmasi Pembayaran',
+      message: `Apakah Anda yakin ingin menandai "${item.name}" sebesar Rp${item.amount.toLocaleString()} sebagai sudah lunas?`,
+      confirmLabel: 'Konfirmasi Bayar',
     });
+
+    if (isConfirmed) {
+      const updatedItems = bill.items.map(item => 
+        item.id === itemId ? { ...item, status: 'Paid' as const, paymentDate: new Date().toISOString() } : item
+      );
+      
+      await updateBillInDb(billId, { 
+          items: updatedItems,
+          total: updatedItems.reduce((acc, curr) => acc + (curr.status === 'Paid' ? 0 : curr.amount), 0)
+      });
+    }
   };
 
   return (

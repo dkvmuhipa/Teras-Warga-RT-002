@@ -13,12 +13,14 @@ import {
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface HealthManagementProps {
   houses: House[];
 }
 
 export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) => {
+  const confirm = useConfirm();
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -125,7 +127,14 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus data kesehatan ini?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Data Kesehatan',
+      message: 'Apakah Anda yakin ingin menghapus data kesehatan ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteHealthRecordFromDb(id);
         toast.success('Data kesehatan berhasil dihapus.');

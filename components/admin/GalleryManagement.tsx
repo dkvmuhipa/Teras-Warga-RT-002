@@ -6,12 +6,14 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { addGalleryItemToDb, deleteGalleryItemFromDb, uploadImageToStorage, handleFirestoreError, OperationType, isFirebaseConfigured } from '../../services/databaseService';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface GalleryManagementProps {
   gallery: GalleryItem[];
 }
 
 export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery }) => {
+  const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [imageType, setImageType] = useState<'upload' | 'link'>('upload');
@@ -50,7 +52,14 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Hapus foto ini dari galeri?')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Foto',
+      message: 'Apakah Anda yakin ingin menghapus foto ini dari galeri?',
+      confirmLabel: 'Hapus',
+      isDanger: true
+    });
+
+    if (isConfirmed) {
       try {
         await deleteGalleryItemFromDb(id);
         toast.success('Foto berhasil dihapus dari galeri.');

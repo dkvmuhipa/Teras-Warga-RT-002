@@ -7,7 +7,7 @@ import {
   Sparkles, FileText, ChevronRight, Info, GraduationCap, Briefcase,
   LayoutDashboard
 } from 'lucide-react';
-import { RondaCheckLog, Report, House, Official, CashFlow, LetterRequest } from '../../types';
+import { RondaCheckLog, Report, House, Official, CashFlow, LetterRequest, PdfConfig } from '../../types';
 import { DemographicAnalytics } from './DemographicAnalytics';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFinancial } from '../../context/FinancialContext';
@@ -18,9 +18,10 @@ interface AdminAnalyticsProps {
   houses: House[];
   officials: Official[];
   letters: LetterRequest[];
+  pdfConfig: PdfConfig;
 }
 
-export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, reports, houses, officials, letters }) => {
+export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, reports, houses, officials, letters, pdfConfig }) => {
   const { cashFlow, getArrearsForHouse } = useFinancial();
   const [activeTab, setActiveTab] = useState<'overview' | 'demographics' | 'operational'>('overview');
 
@@ -233,7 +234,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, repor
                   </div>
                 </div>
                 <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Total Warga</h3>
-                <p className="text-2xl font-black text-slate-900">{houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 0), 0)} <span className="text-sm font-bold text-slate-400">Jiwa</span></p>
+                <p className="text-2xl font-black text-slate-900">{houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0)} <span className="text-sm font-bold text-slate-400">Jiwa</span></p>
               </motion.div>
             </div>
 
@@ -319,7 +320,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ rondaLogs, repor
             exit={{ opacity: 0, y: -10 }}
             className="space-y-10"
           >
-            <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} />
+            <DemographicAnalytics houses={houses} cashFlow={cashFlow} reports={reports} pdfConfig={pdfConfig} />
           </motion.div>
         )}
 

@@ -136,14 +136,65 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   };
 
   const quickActions = [
-    { label: 'Dashboard', icon: User, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/resident' },
-    { label: 'Buat Surat', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', link: '/services' },
-    { label: 'Lapor Tamu', icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', link: '/services?tab=tamu' },
-    { label: 'Registrasi Penghuni', icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/register' },
-    { label: 'Pasar Warga', icon: ShoppingCart, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', link: '/market' },
-    { label: 'Info Publik', icon: Megaphone, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', link: '/info' },
-    { label: 'E-Voting', icon: Vote, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', link: '/voting' },
-    { label: 'Aspirasi & Pengaduan', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', action: () => setIsReportModalOpen(true) }
+    { 
+      label: 'Profil Warga', 
+      icon: User, 
+      gradient: 'from-[#4F46E5] to-[#6366F1]', // Indigo
+      glow: 'shadow-indigo-500/30',
+      link: '/resident' 
+    },
+    { 
+      label: 'Buat Surat', 
+      icon: FileText, 
+      gradient: 'from-[#0284C7] to-[#0EA5E9]', // Blue/Sky
+      glow: 'shadow-sky-500/30',
+      link: '/services' 
+    },
+    { 
+      label: 'Lapor Tamu', 
+      icon: ShieldAlert, 
+      gradient: 'from-[#EA580C] to-[#F97316]', // Orange
+      glow: 'shadow-orange-500/30',
+      link: '/services?tab=tamu',
+      badge: 'PENTING'
+    },
+    { 
+      label: 'Daftar Warga', 
+      icon: UserPlus, 
+      gradient: 'from-[#8B5CF6] to-[#A78BFA]', // Purple/Violet
+      glow: 'shadow-purple-500/30',
+      link: '/register' 
+    },
+    { 
+      label: 'Pasar Warga', 
+      icon: ShoppingCart, 
+      gradient: 'from-[#10B981] to-[#34D399]', // Emerald/Green (Gojek vibes)
+      glow: 'shadow-emerald-500/30',
+      link: '/market',
+      badge: 'UMKM'
+    },
+    { 
+      label: 'Warta RT', 
+      icon: Megaphone, 
+      gradient: 'from-[#06B6D4] to-[#22D3EE]', // Cyan
+      glow: 'shadow-cyan-500/30',
+      link: '/info' 
+    },
+    { 
+      label: 'E-Voting', 
+      icon: Vote, 
+      gradient: 'from-[#6366F1] to-[#818CF8]', // Indigo-light
+      glow: 'shadow-indigo-400/30',
+      link: '/voting',
+      badge: 'PEMILU'
+    },
+    { 
+      label: 'Lapor RT', 
+      icon: AlertTriangle, 
+      gradient: 'from-[#E11D48] to-[#F43F5E]', // Rose/Red (Action)
+      glow: 'shadow-rose-500/30',
+      action: () => setIsReportModalOpen(true) 
+    }
   ];
 
   const [filterType, setFilterType] = React.useState<'All' | 'General' | 'Urgent' | 'Event'>('All');
@@ -305,34 +356,59 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
       <ServiceStats houses={houses} reports={reports} letters={letters} />
 
-      {/* Quick Actions - Bento Style */}
-      <div className="flex md:grid md:grid-cols-8 gap-4 -mt-8 relative z-10 overflow-x-auto no-scrollbar pb-4 md:pb-0 px-2 md:px-0">
-        {quickActions.map((action, idx) => (
-          <motion.button
-            key={idx}
-            variants={itemVariants}
-            whileHover={{ y: -8, scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={action.action || (() => navigate(action.link))}
-            className={`
-              flex flex-col items-center justify-center gap-3 p-5 min-w-[140px] md:min-w-0
-              bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-slate-200/40 border ${action.border}
-              transition-all duration-500 group relative overflow-hidden flex-shrink-0 md:flex-shrink
-            `}
-          >
-            <div className={`absolute inset-0 ${action.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-            <div className={`
-              relative z-10 p-3 rounded-2xl ${action.bg} ${action.color} 
-              group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm
-            `}>
-              <action.icon size={24} strokeWidth={2.5} />
-            </div>
-            <span className="relative z-10 font-black text-slate-700 text-xs uppercase tracking-widest group-hover:text-slate-900 transition-colors">
-              {action.label}
-            </span>
-          </motion.button>
-        ))}
-      </div>
+      {/* Quick Actions - Gojek Style Grid Menu */}
+      <motion.div 
+        variants={itemVariants}
+        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2.5rem] p-6 md:p-8 shadow-xl shadow-slate-200/50 -mt-8 relative z-10"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 md:mb-8">
+          <div>
+            <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              Layanan <span className="bg-gradient-to-r from-emerald-600 to-indigo-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
+              <span className="text-[9px] font-black bg-emerald-50 border border-emerald-100/80 text-emerald-600 px-2.5 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">RT 02 DIGIOFFICE</span>
+            </h3>
+            <p className="text-slate-400 font-medium text-xs mt-0.5">Semua urusan warga dan administrasi kini serba praktis dalam satu ketukan.</p>
+          </div>
+        </div>
+
+        {/* Gojek Style Grid: 4 columns on mobile, 8 columns on desktop */}
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-y-7 gap-x-2 md:gap-6 w-full">
+          {quickActions.map((action, idx) => (
+            <motion.button
+              key={idx}
+              whileHover={{ y: -5, scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={action.action || (() => navigate(action.link!))}
+              className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
+            >
+              {/* Gojek Style Badges (e.g. BARU, PENTING, HOT) */}
+              {action.badge && (
+                <span className="absolute -top-1 md:-top-1.5 right-1 md:right-3 z-20 text-[7px] md:text-[8px] font-black bg-rose-600 text-white px-1.5 py-0.5 rounded-full shadow-sm scale-90 md:scale-100 select-none animate-pulse">
+                  {action.badge}
+                </span>
+              )}
+
+              {/* Icon Container with Gradient Plate */}
+              <div className={`
+                w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] md:rounded-[1.5rem] 
+                bg-gradient-to-br ${action.gradient}
+                flex items-center justify-center text-white
+                shadow-lg ${action.glow} group-hover:shadow-indigo-500/20
+                transition-all duration-300 relative overflow-hidden
+              `}>
+                {/* Overlay shine */}
+                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                <action.icon size={24} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
+              </div>
+
+              {/* Service Label */}
+              <span className="font-semibold text-slate-700 text-[10px] md:text-xs tracking-tight leading-tight mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[80px] md:max-w-full">
+                {action.label}
+              </span>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
 
       {/* Quick Report Modal */}
       <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Aspirasi & Pengaduan Warga" maxWidth="max-w-xl">

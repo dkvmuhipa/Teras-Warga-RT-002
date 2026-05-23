@@ -27,21 +27,18 @@ import { ContentManager } from './ContentManager';
 import { FacilityManager } from './FacilityManager';
 import { ServiceManager } from './ServiceManager';
 import { AdminSettings } from './AdminSettings';
-import { OfficialManagement } from './OfficialManagement';
 import { DocumentManager } from './DocumentManager';
-import { PopulationReportManager } from './PopulationReportManager';
 import { EventManager } from './EventManager';
 import { AssetManager } from './AssetManager';
-import { GuestManager } from './GuestManager';
 import { ActivityManagement } from './ActivityManagement';
-import { WasteBankManager } from './WasteBankManager';
-import { HealthManagement } from './HealthManagement';
-import { UpdateRequestManager } from './UpdateRequestManager';
 import { AuditLogManager } from './AuditLogManager';
 import { NotificationCombined } from './NotificationCombined';
 import { AdminAnalytics } from './AdminAnalytics';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { 
+  Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle,
+  LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid
+} from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 import { toast } from 'sonner';
 
@@ -97,6 +94,66 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
   const navigate = useNavigate();
 
+  const navItemsList = [
+    { id: 'overview', icon: LayoutDashboard, label: 'Dashboard', desc: 'Ringkasan & status RT terbaru', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
+    { id: 'analytics', icon: BarChart3, label: 'Pusat Analitik', desc: 'Statistik & demografi kependudukan', color: 'bg-blue-50 text-blue-600 border-blue-100/60 hover:bg-blue-100/50' },
+    { id: 'residents', icon: Users, label: 'Data Warga', desc: 'Database KK & data penduduk', color: 'bg-emerald-50 text-emerald-600 border-emerald-100/60 hover:bg-emerald-100/50' },
+    { id: 'health', icon: Activity, label: 'Posyandu Digital', desc: 'Pemantauan kesehatan & lansia', color: 'bg-teal-50 text-teal-600 border-teal-100/60 hover:bg-teal-100/50' },
+    { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu', desc: 'Log tamu wajib lapor 24 jam', color: 'bg-amber-50 text-amber-600 border-amber-100/60 hover:bg-amber-100/50' },
+    { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan', desc: 'Pengelolaan keuangan & iuran warga', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
+    { id: 'services', icon: FileText, label: 'Surat & Pengaduan', desc: 'Pengajuan dokumen & keluhan warga', color: 'bg-violet-50 text-violet-600 border-violet-100/60 hover:bg-violet-100/50' },
+    { id: 'documents', icon: FileText, label: 'Arsip Dokumen', desc: 'Penyimpanan regulasi & AD/ART', color: 'bg-purple-50 text-purple-600 border-purple-100/60 hover:bg-purple-100/50' },
+    { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda', desc: 'Jadwal ronda & alarm darurat', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
+    { id: 'content', icon: Megaphone, label: 'Pusat Informasi', desc: 'Pengumuman, berita, & info UMKM', color: 'bg-sky-50 text-sky-600 border-sky-100/60 hover:bg-sky-100/50' },
+    { id: 'activities', icon: Calendar, label: 'Agenda & Presensi', desc: 'Kegiatan gotong royong & rapat', color: 'bg-orange-50 text-orange-600 border-orange-100/60 hover:bg-orange-100/50' },
+    { id: 'assets', icon: Box, label: 'Aset & Inventaris', desc: 'Peminjaman alat & status inventaris', color: 'bg-cyan-50 text-cyan-600 border-cyan-100/60 hover:bg-cyan-100/50' },
+    { id: 'officials', icon: Briefcase, label: 'Pengurus RT', desc: 'Struktur kepengurusan aktif', color: 'bg-pink-50 text-pink-600 border-pink-100/60 hover:bg-pink-100/50' },
+    { id: 'notifications', icon: Bell, label: 'Notifikasi', desc: 'Kirim notifikasi broadcast', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
+    { id: 'audit', icon: Activity, label: 'Log Aktivitas', desc: 'Audit aksi & transaksi sistem', color: 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' },
+    { id: 'settings', icon: Settings, label: 'Pengaturan', desc: 'Konfigurasi sistem & besaran iuran', color: 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' },
+  ];
+
+  const allowedItems = navItemsList.filter(item => {
+    if (role === Role.ADMIN) return true;
+    
+    if (role === Role.TREASURER) {
+      const allowed = ['overview', 'analytics', 'finance', 'settings', 'notifications'];
+      return allowed.includes(item.id);
+    }
+    
+    if (role === Role.SECRETARY) {
+      const allowed = [
+        'overview', 'analytics', 'residents', 
+        'health', 'guests', 'officials', 'services', 'documents', 'activities', 
+        'assets', 'content', 'audit', 'notifications', 'settings'
+      ];
+      return allowed.includes(item.id);
+    }
+    
+    return false;
+  });
+
+  const bottomNavItems = [
+    { id: 'overview', icon: LayoutDashboard, label: 'Beranda' },
+    { id: 'residents', icon: Users, label: 'Warga' },
+    { id: 'finance', icon: DollarSign, label: 'Keuangan' },
+    { id: 'services', icon: FileText, label: 'Surat' },
+  ].filter(item => {
+    if (item.id === 'overview') return true;
+    
+    if (role === Role.ADMIN) return true;
+    
+    if (role === Role.TREASURER) {
+      return ['finance'].includes(item.id);
+    }
+    
+    if (role === Role.SECRETARY) {
+      return ['residents', 'services'].includes(item.id);
+    }
+    
+    return false;
+  });
+
   React.useEffect(() => {
     const unsubscribe = subscribeToActivePanicAlerts((data) => {
       setActivePanicAlerts(data as PanicAlert[]);
@@ -118,11 +175,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'overview':
         return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
       case 'residents':
-        return <ResidentManager role={role} houses={houses} reports={reports} cashFlow={cashFlow} officials={officials} pdfConfig={pdfConfig} iuranPayments={iuranPayments} bills={bills} residentRegistrations={residentRegistrations} guestReports={guestReports} settings={settings} />;
-      case 'update-requests':
-        return <UpdateRequestManager requests={updateRequests} houses={houses} />;
+      case 'health':
+      case 'guests':
+      case 'officials':
+        return (
+          <ResidentManager 
+            role={role} 
+            houses={houses} 
+            reports={reports} 
+            cashFlow={cashFlow} 
+            officials={officials} 
+            pdfConfig={pdfConfig} 
+            iuranPayments={iuranPayments} 
+            bills={bills} 
+            residentRegistrations={residentRegistrations} 
+            guestReports={guestReports} 
+            settings={settings}
+            populationReports={populationReports}
+            setPopulationReports={setPopulationReports}
+            populationLogs={populationLogs}
+            setPopulationLogs={setPopulationLogs}
+            updateRequests={updateRequests}
+            initialViewMode={activeTab as any}
+          />
+        );
       case 'finance':
-        return <FinanceManager cashFlow={cashFlow} pdfConfig={pdfConfig} />;
+      case 'waste-bank':
+        return (
+          <FinanceManager 
+            cashFlow={cashFlow} 
+            pdfConfig={pdfConfig} 
+            houses={houses} 
+            iuranPayments={iuranPayments} 
+            initialSubTab={activeTab === 'waste-bank' ? 'wastebank' : 'cashflow'}
+          />
+        );
       case 'services':
         return (
           <ServiceManager 
@@ -154,14 +241,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaAttendance={rondaAttendance} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
       case 'assets':
         return <AssetManager inventory={inventory} inventoryLogs={inventoryLogs} />;
-      case 'guests':
-        return <GuestManager guestReports={guestReports} pdfConfig={pdfConfig} />;
       case 'audit':
         return <AuditLogManager logs={auditLogs} />;
       case 'content':
         return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} events={events} faqItems={faqItems} houses={houses} pdfConfig={pdfConfig} />;
-      case 'officials':
-        return <OfficialManagement officials={officials} houses={houses} />;
       case 'notifications':
         return (
           <NotificationCombined 
@@ -188,56 +271,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <DocumentManager documents={documents} />;
       case 'activities':
         return <ActivityManagement houses={houses} />;
-      case 'waste-bank':
-        return <WasteBankManager houses={houses} />;
-      case 'health':
-        return <HealthManagement houses={houses} />;
-      case 'population-reports':
-        return (
-          <PopulationReportManager 
-            reports={populationReports} 
-            onAddReport={async (r) => {
-              try {
-                await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
-                await markPopulationLogsAsGenerated(r.month);
-                toast.success(`Laporan ${r.month} berhasil disimpan. Log mutasi bulan ini telah ditandai sebagai sudah diproses.`);
-              } catch (error) {
-                handleFirestoreError(error, OperationType.CREATE, "populationReports");
-              }
-            }} 
-            onUpdateReport={async (id, r) => {
-              try {
-                await updatePopulationReportToDb(id, r);
-              } catch (error) {
-                handleFirestoreError(error, OperationType.UPDATE, `populationReports/${id}`);
-              }
-            }}
-            onDeleteReport={async (id) => {
-              const isConfirmed = await confirm({
-                title: 'Hapus Laporan',
-                message: 'Apakah Anda yakin ingin menghapus laporan kependudukan ini? Log mutasi untuk bulan ini akan dapat digenerate kembali.',
-                confirmLabel: 'Hapus',
-                isDanger: true
-              });
-
-              if (isConfirmed) {
-                try {
-                  const reportToDelete = populationReports.find(r => r.id === id);
-                  if (reportToDelete) {
-                    await unmarkPopulationLogsAsGenerated(reportToDelete.month);
-                  }
-                  await deletePopulationReportFromDb(id);
-                  toast.success('Laporan berhasil dihapus. Log mutasi bulan tersebut kini bisa digenerate ulang jika diperlukan.');
-                } catch (error) {
-                  handleFirestoreError(error, OperationType.DELETE, `populationReports/${id}`);
-                }
-              }
-            }} 
-            populationLogs={populationLogs} 
-            setPopulationLogs={setPopulationLogs} 
-            houses={houses} 
-          />
-        );
       case 'settings':
         return (
           <AdminSettings 
@@ -266,6 +299,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             houses={houses}
             officials={officials}
             letters={letters}
+            pdfConfig={pdfConfig}
           />
         );
       default:
@@ -391,6 +425,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </AnimatePresence>
           </div>
         </main>
+
+        {/* Mobile bottom navigation bar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 z-40 pb-safe-area-pb">
+          <div className="flex justify-around items-center h-16 px-2 shadow-inner">
+            {bottomNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button 
+                  key={item.id} 
+                  onClick={() => setActiveTab(item.id)} 
+                  className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-all ${isActive ? 'text-indigo-600 font-extrabold' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-indigo-50/70' : ''}`}>
+                    <Icon size={18} className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.8px]'} />
+                  </div>
+                  <span className="text-[9px] font-bold tracking-tight">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -27,10 +27,11 @@ interface PopulationReportManagerProps {
   populationLogs: PopulationChangeLog[];
   setPopulationLogs: (logs: PopulationChangeLog[]) => void;
   houses: House[];
+  embedded?: boolean;
 }
 
 export const PopulationReportManager: React.FC<PopulationReportManagerProps> = ({ 
-  reports, onAddReport, onUpdateReport, onDeleteReport, populationLogs, setPopulationLogs, houses 
+  reports, onAddReport, onUpdateReport, onDeleteReport, populationLogs, setPopulationLogs, houses, embedded = false
 }) => {
   const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -307,12 +308,13 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
     houses.forEach(house => {
       if (house.status === 'Occupied') {
+        const occupantsCount = house.occupants || 1;
         const isSeasonal = house.residenceType === 'Kontrak' || house.residenceType === 'Kost';
         if (isSeasonal) {
-          currentSeasonal += house.occupants || 0;
+          currentSeasonal += occupantsCount;
         }
 
-        currentTotal += house.occupants || 0;
+        currentTotal += occupantsCount;
         currentPregnant += house.pregnantCount || 0;
         currentBaby += house.babyCount || 0;
         currentToddler += house.toddlerCount || 0;
@@ -326,6 +328,13 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         
         // Count gender from family members if available, otherwise estimate
         if (house.familyMembers && house.familyMembers.length > 0) {
+          // We must count at least the Head of Family
+          currentMale += (house.gender === 'Laki-laki' || !house.gender) ? 1 : 0;
+          if (isSeasonal && (house.gender === 'Laki-laki' || !house.gender)) currentSeasonalMale++;
+          
+          currentFemale += house.gender === 'Perempuan' ? 1 : 0;
+          if (isSeasonal && house.gender === 'Perempuan') currentSeasonalFemale++;
+
           house.familyMembers.forEach(m => {
             if (m.gender === 'Laki-laki') {
               currentMale++;
@@ -336,10 +345,24 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               if (isSeasonal) currentSeasonalFemale++;
             }
           });
+
+          // Adjust if occupants count is higher than registered members
+          const registeredCount = 1 + house.familyMembers.length;
+          if (occupantsCount > registeredCount) {
+             const diff = occupantsCount - registeredCount;
+             const m = Math.ceil(diff / 2);
+             const f = Math.floor(diff / 2);
+             currentMale += m;
+             currentFemale += f;
+             if (isSeasonal) {
+               currentSeasonalMale += m;
+               currentSeasonalFemale += f;
+             }
+          }
         } else {
           // Fallback: assume head of family gender or split
-          const m = Math.ceil((house.occupants || 0) / 2);
-          const f = Math.floor((house.occupants || 0) / 2);
+          const m = Math.ceil(occupantsCount / 2);
+          const f = Math.floor(occupantsCount / 2);
           currentMale += m;
           currentFemale += f;
           if (isSeasonal) {
@@ -596,6 +619,43 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     }).sort((a, b) => b.date.localeCompare(a.date));
   }, [populationLogs, logSearchTerm, logTypeFilter]);
 
+  // LIVE STATS (from houses) to match Dashboard/ResidentManager
+  const liveStats = useMemo(() => {
+    let totalSoul = 0;
+    let totalPregnant = 0;
+    let totalBaby = 0;
+    let totalToddler = 0;
+    let totalChild = 0;
+    let totalTeenager = 0;
+    let totalAdult = 0;
+    let totalElderly = 0;
+    let totalWidow = 0;
+    let totalDisability = 0;
+    let totalOrphan = 0;
+
+    houses.forEach(h => {
+      if (h.status === 'Occupied') {
+        totalSoul += (h.occupants || 1);
+        totalPregnant += (h.pregnantCount || 0);
+        totalBaby += (h.babyCount || 0);
+        totalToddler += (h.toddlerCount || 0);
+        totalChild += (h.childCount || 0);
+        totalTeenager += (h.teenagerCount || 0);
+        totalAdult += (h.adultCount || 0);
+        totalElderly += (h.elderlyCount || 0);
+        totalWidow += (h.widowCount || 0);
+        totalDisability += (h.disabilityCount || 0);
+        totalOrphan += (h.orphanCount || 0);
+      }
+    });
+
+    return {
+      totalSoul,
+      vulnerableTotal: totalPregnant + totalBaby + totalToddler + totalDisability + totalOrphan + totalWidow,
+      totalPregnant, totalBaby, totalToddler, totalChild, totalTeenager, totalAdult, totalElderly, totalWidow, totalDisability, totalOrphan
+    };
+  }, [houses]);
+
   const latestReport = reports[reports.length - 1];
   const totalPopulation = latestReport ? (latestReport.initialPopulation + latestReport.birthCount + latestReport.newcomerCount - latestReport.movedOutCount - (latestReport.deathCount || 0)) : 0;
 
@@ -715,9 +775,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><Users size={20} /></div>
             <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Total Penduduk</span>
           </div>
-          <h3 className="text-3xl font-black text-slate-900">{totalPopulation} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
+          <h3 className="text-3xl font-black text-slate-900">{liveStats.totalSoul} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
           <div className="mt-2 flex items-center gap-1 text-xs font-bold text-emerald-600">
-            <TrendingUp size={14} /> <span>Update Terakhir</span>
+            <TrendingUp size={14} /> <span>Data Terdaftar Saat Ini</span>
           </div>
         </motion.div>
 
@@ -728,11 +788,11 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Kelompok Rentan</span>
           </div>
           <h3 className="text-3xl font-black text-slate-900">
-            {(latestReport?.pregnantCount || 0) + (latestReport?.babyCount || 0) + (latestReport?.toddlerCount || 0) + (latestReport?.childCount || 0) + (latestReport?.teenagerCount || 0) + (latestReport?.adultCount || 0) + (latestReport?.elderlyCount || 0) + (latestReport?.widowCount || 0)}
+            {liveStats.vulnerableTotal}
             <span className="text-xs font-bold text-slate-400"> Jiwa</span>
           </h3>
           <div className="mt-2 flex items-center gap-1 text-xs font-bold text-slate-500">
-            <Activity size={14} /> <span>Prioritas Layanan</span>
+            <Activity size={14} /> <span>Prioritas Layanan (Live)</span>
           </div>
         </motion.div>
 

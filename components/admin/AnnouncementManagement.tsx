@@ -8,6 +8,7 @@ import { sendWhatsAppMessage, formatAnnouncementForWhatsApp, broadcastWhatsApp }
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface AnnouncementManagementProps {
   announcements: Announcement[];
@@ -16,6 +17,7 @@ interface AnnouncementManagementProps {
 }
 
 export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ announcements, houses, pdfConfig }) => {
+  const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
   const [selectedAnnForBroadcast, setSelectedAnnForBroadcast] = useState<Announcement | null>(null);
@@ -139,24 +141,22 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
-    toast.info('Hapus pengumuman ini?', {
-      action: {
-        label: 'Hapus',
-        onClick: async () => {
-          try {
-            await deleteAnnouncementFromDb(id);
-            toast.success('Pengumuman berhasil dihapus.');
-          } catch (error) {
-            handleFirestoreError(error, OperationType.DELETE, `announcements/${id}`);
-            toast.error('Gagal menghapus pengumuman.');
-          }
-        }
-      },
-      cancel: {
-        label: 'Batal',
-        onClick: () => {}
-      }
+    const isConfirmed = await confirm({
+      title: 'Hapus Pengumuman',
+      message: 'Apakah Anda yakin ingin menghapus pengumuman ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmLabel: 'Hapus',
+      isDanger: true
     });
+
+    if (isConfirmed) {
+      try {
+        await deleteAnnouncementFromDb(id);
+        toast.success('Pengumuman berhasil dihapus.');
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `announcements/${id}`);
+        toast.error('Gagal menghapus pengumuman.');
+      }
+    }
   };
 
   const containerVariants = {

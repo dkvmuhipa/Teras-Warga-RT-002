@@ -6,6 +6,7 @@ import { Plus, Trash2, Edit2, MapPin, Shield, Move, Lightbulb, Video, Droplets, 
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
 import { MapLayout } from '../HouseMap';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 interface MapPointManagerProps {
     mapPoints: MapPoint[];
@@ -15,6 +16,19 @@ interface MapPointManagerProps {
 export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, houses }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPoint, setEditingPoint] = useState<MapPoint | null>(null);
+    const [confirmDialog, setConfirmDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        type: 'danger' | 'warning' | 'info';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {},
+        type: 'warning'
+    });
     
     // Form State
     const [label, setLabel] = useState('');
@@ -75,15 +89,21 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
     };
 
     const handleDelete = async (id: string) => {
-        if (window.confirm("Hapus titik informasi ini?")) {
-            try {
-                await deleteMapPointFromDb(id);
-                toast.success("Titik informasi dihapus.");
-            } catch (error) {
-                handleFirestoreError(error, OperationType.DELETE, `mapPoints/${id}`);
-                toast.error("Gagal menghapus data.");
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Hapus Penanda',
+            message: 'Apakah Anda yakin ingin menghapus titik informasi ini?',
+            type: 'danger',
+            onConfirm: async () => {
+                try {
+                    await deleteMapPointFromDb(id);
+                    toast.success("Titik informasi dihapus.");
+                } catch (error) {
+                    handleFirestoreError(error, OperationType.DELETE, `mapPoints/${id}`);
+                    toast.error("Gagal menghapus data.");
+                }
             }
-        }
+        });
     };
 
     const getIcon = (type: MapPoint['type']) => {
@@ -249,6 +269,15 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                     </div>
                 </form>
             </Modal>
+
+            <ConfirmModal 
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmDialog.onConfirm}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                type={confirmDialog.type}
+            />
         </div>
     );
 };

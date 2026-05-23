@@ -1,0 +1,18 @@
+{
+  "short_name": "Teras RT02",
+  "name": "Teras RT 02 - Layanan Warga Terpadu",
+  "description": "Sistem Informasi Digital TERAS RT 02. Mengusung Teknologi, Ekraf, Rukun, Aman, dan Sinergi.",
+  "icons": [
+    {
+      "src": "/logo-rt.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "orientation": "portrait"
+}

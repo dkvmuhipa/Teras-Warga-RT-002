@@ -390,7 +390,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
 
     const getHouseColor = () => {
         if (showHeatmap) {
-          const occupants = house.occupants || 0;
+          const occupants = house.status === 'Occupied' ? (house.occupants || 1) : (house.occupants || 0);
           if (occupants > 5) return "bg-rose-500 border-rose-700 text-white";
           if (occupants > 3) return "bg-orange-400 border-orange-600 text-white";
           if (occupants > 0) return "bg-emerald-400 border-emerald-600 text-white";

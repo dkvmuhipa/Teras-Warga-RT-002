@@ -39,15 +39,17 @@ export const ResidentGridView: React.FC<ResidentGridViewProps> = ({
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {sortedBlocks.map(([block, houses]) => (
-        <div key={block} className="space-y-4 p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-1.5 h-8 bg-indigo-500 rounded-full"></div>
-            <h3 className="text-xl font-black text-slate-800">Blok {block}</h3>
-            <span className="text-xs font-bold text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200">{houses.length} Rumah</span>
+        <div key={block} className="space-y-4 p-5 bg-slate-50/50 rounded-xl border border-slate-200/60">
+          <div className="flex items-center gap-2.5 px-1">
+            <div className="w-1 h-5 bg-indigo-500 rounded-full"></div>
+            <h3 className="text-base font-bold text-slate-800">Blok {block}</h3>
+            <span className="text-[10px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+              {houses.length} Keluarga
+            </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {houses.map((house) => (
               <ResidentCard 
                 key={house.id}
