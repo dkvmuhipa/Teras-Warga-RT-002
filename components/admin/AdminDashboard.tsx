@@ -90,6 +90,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState('overview');
+  const [contentSubTab, setContentSubTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq'>('announcements');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
   const navigate = useNavigate();
@@ -173,7 +174,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
+        return (
+          <DashboardOverview 
+            houses={houses} 
+            cashFlow={cashFlow} 
+            reports={reports} 
+            announcements={announcements} 
+            guestReports={guestReports} 
+            iuranPayments={iuranPayments} 
+            onTabChange={(tab, subTab) => {
+              setActiveTab(tab);
+              if (subTab) {
+                setContentSubTab(subTab as any);
+              }
+            }} 
+          />
+        );
       case 'residents':
       case 'health':
       case 'guests':
@@ -244,11 +260,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'audit':
         return <AuditLogManager logs={auditLogs} />;
       case 'content':
-        return <ContentManager announcements={announcements} news={news} polls={polls} umkm={umkm} gallery={gallery} events={events} faqItems={faqItems} houses={houses} pdfConfig={pdfConfig} />;
+        return (
+          <ContentManager 
+            announcements={announcements} 
+            news={news} 
+            polls={polls} 
+            umkm={umkm} 
+            gallery={gallery} 
+            events={events} 
+            faqItems={faqItems} 
+            houses={houses} 
+            pdfConfig={pdfConfig} 
+            initialTab={contentSubTab} 
+          />
+        );
       case 'notifications':
         return (
           <NotificationCombined 
             notifications={notifications} 
+            houses={houses}
+            bills={bills}
+            pdfConfig={pdfConfig}
             onDeleteNotification={async (id) => {
               const isConfirmed = await confirm({
                 title: 'Hapus Notifikasi',
@@ -303,7 +335,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           />
         );
       default:
-        return <DashboardOverview houses={houses} cashFlow={cashFlow} reports={reports} announcements={announcements} guestReports={guestReports} iuranPayments={iuranPayments} onTabChange={setActiveTab} />;
+        return (
+          <DashboardOverview 
+            houses={houses} 
+            cashFlow={cashFlow} 
+            reports={reports} 
+            announcements={announcements} 
+            guestReports={guestReports} 
+            iuranPayments={iuranPayments} 
+            onTabChange={(tab, subTab) => {
+              setActiveTab(tab);
+              if (subTab) {
+                setContentSubTab(subTab as any);
+              }
+            }} 
+          />
+        );
     }
   };
 

@@ -102,11 +102,15 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 }) => {
   const confirm = useConfirm();
   const prompt = usePrompt();
-  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'mutations' | 'requests' | 'health' | 'guests' | 'officials'>(initialViewMode);
+  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'mutations' | 'requests' | 'health' | 'guests' | 'officials'>('grid');
   
   useEffect(() => {
     if (initialViewMode) {
-      setViewMode(initialViewMode);
+      if (initialViewMode as string === 'residents') {
+        setViewMode('grid');
+      } else {
+        setViewMode(initialViewMode as any);
+      }
     }
   }, [initialViewMode]);
   const [searchTerm, setSearchTerm] = useState('');

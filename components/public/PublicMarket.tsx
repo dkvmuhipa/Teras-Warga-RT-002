@@ -121,7 +121,7 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="sticky top-20 z-30 bg-white/80 backdrop-blur-xl p-4 rounded-[2rem] border border-slate-200/50 shadow-lg shadow-slate-200/20 mb-12 flex flex-col md:flex-row justify-between items-center gap-4 transition-all">
+      <div className="sticky top-[64px] md:top-[80px] z-30 bg-white/90 backdrop-blur-xl p-4 rounded-[2rem] border border-slate-200/50 shadow-lg shadow-slate-200/20 mb-12 flex flex-col md:flex-row justify-between items-center gap-4 transition-all">
         <div className="flex w-full md:w-auto gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
           {['All', 'Jual', 'Barter', 'Gratis'].map(cat => (
             <button 

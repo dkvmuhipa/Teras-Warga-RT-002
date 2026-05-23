@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
-  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets
+  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint } from '../../types';
@@ -139,60 +139,63 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     { 
       label: 'Profil Warga', 
       icon: User, 
-      gradient: 'from-[#4F46E5] to-[#6366F1]', // Indigo
-      glow: 'shadow-indigo-500/30',
+      color: 'bg-[#5856d6]', 
+      shadow: 'shadow-[#5856d6]/30', 
       link: '/resident' 
     },
     { 
       label: 'Buat Surat', 
       icon: FileText, 
-      gradient: 'from-[#0284C7] to-[#0EA5E9]', // Blue/Sky
-      glow: 'shadow-sky-500/30',
+      color: 'bg-[#00a2e0]', 
+      shadow: 'shadow-[#00a2e0]/30', 
       link: '/services' 
     },
     { 
       label: 'Lapor Tamu', 
-      icon: ShieldAlert, 
-      gradient: 'from-[#EA580C] to-[#F97316]', // Orange
-      glow: 'shadow-orange-500/30',
+      icon: Shield, 
+      color: 'bg-[#ff6200]', 
+      shadow: 'shadow-[#ff6200]/30', 
       link: '/services?tab=tamu',
-      badge: 'PENTING'
+      badge: 'PENTING',
+      badgeColor: 'bg-[#ff3b30]'
     },
     { 
       label: 'Daftar Warga', 
       icon: UserPlus, 
-      gradient: 'from-[#8B5CF6] to-[#A78BFA]', // Purple/Violet
-      glow: 'shadow-purple-500/30',
+      color: 'bg-[#af52de]', 
+      shadow: 'shadow-[#af52de]/30', 
       link: '/register' 
     },
     { 
       label: 'Pasar Warga', 
       icon: ShoppingCart, 
-      gradient: 'from-[#10B981] to-[#34D399]', // Emerald/Green (Gojek vibes)
-      glow: 'shadow-emerald-500/30',
+      color: 'bg-[#00c781]', 
+      shadow: 'shadow-[#00c781]/30', 
       link: '/market',
-      badge: 'UMKM'
+      badge: 'UMKM',
+      badgeColor: 'bg-[#e13f70]'
     },
     { 
       label: 'Warta RT', 
       icon: Megaphone, 
-      gradient: 'from-[#06B6D4] to-[#22D3EE]', // Cyan
-      glow: 'shadow-cyan-500/30',
+      color: 'bg-[#00b2cc]', 
+      shadow: 'shadow-[#00b2cc]/30', 
       link: '/info' 
     },
     { 
       label: 'E-Voting', 
-      icon: Vote, 
-      gradient: 'from-[#6366F1] to-[#818CF8]', // Indigo-light
-      glow: 'shadow-indigo-400/30',
+      icon: CheckSquare, 
+      color: 'bg-[#5c72e6]', 
+      shadow: 'shadow-[#5c72e6]/30', 
       link: '/voting',
-      badge: 'PEMILU'
+      badge: 'PEMILU',
+      badgeColor: 'bg-[#d946ef]'
     },
     { 
       label: 'Lapor RT', 
       icon: AlertTriangle, 
-      gradient: 'from-[#E11D48] to-[#F43F5E]', // Rose/Red (Action)
-      glow: 'shadow-rose-500/30',
+      color: 'bg-[#ff3b30]', 
+      shadow: 'shadow-[#ff3b30]/30', 
       action: () => setIsReportModalOpen(true) 
     }
   ];
@@ -356,53 +359,51 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
       <ServiceStats houses={houses} reports={reports} letters={letters} />
 
-      {/* Quick Actions - Gojek Style Grid Menu */}
+      {/* Quick Actions - Layanan Warga Terpadu Grid from User Image */}
       <motion.div 
         variants={itemVariants}
-        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2.5rem] p-6 md:p-8 shadow-xl shadow-slate-200/50 -mt-8 relative z-10"
+        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2.5rem] p-6 md:p-10 shadow-xl shadow-slate-200/30 -mt-8 relative z-10"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 md:mb-8">
-          <div>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-              Layanan <span className="bg-gradient-to-r from-emerald-600 to-indigo-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
-              <span className="text-[9px] font-black bg-emerald-50 border border-emerald-100/80 text-emerald-600 px-2.5 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">RT 02 DIGIOFFICE</span>
-            </h3>
-            <p className="text-slate-400 font-medium text-xs mt-0.5">Semua urusan warga dan administrasi kini serba praktis dalam satu ketukan.</p>
-          </div>
+        <div className="mb-8">
+          <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight">
+            Layanan <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
+          </h3>
+          <p className="text-slate-400 font-medium text-xs md:text-sm mt-1 max-w-xl">
+            Semua urusan warga dan administrasi kini serba praktis dalam satu ketukan.
+          </p>
         </div>
 
-        {/* Gojek Style Grid: 4 columns on mobile, 8 columns on desktop */}
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-y-7 gap-x-2 md:gap-6 w-full">
+        {/* Grid layout matching Gojek/Grab/Citizen apps exactly: 4 columns on mobile, 8 columns on desktop */}
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-y-8 gap-x-2 md:gap-x-8 w-full max-w-5xl">
           {quickActions.map((action, idx) => (
             <motion.button
               key={idx}
-              whileHover={{ y: -5, scale: 1.05 }}
+              whileHover={{ y: -4, scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={action.action || (() => navigate(action.link!))}
               className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
             >
-              {/* Gojek Style Badges (e.g. BARU, PENTING, HOT) */}
+              {/* Beautiful Badges directly layered on top of squircles */}
               {action.badge && (
-                <span className="absolute -top-1 md:-top-1.5 right-1 md:right-3 z-20 text-[7px] md:text-[8px] font-black bg-rose-600 text-white px-1.5 py-0.5 rounded-full shadow-sm scale-90 md:scale-100 select-none animate-pulse">
+                <span className={`absolute -top-1 md:-top-1.5 right-[5%] sm:right-[15%] md:right-[20%] z-20 text-[6px] md:text-[8px] font-black uppercase tracking-widest ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 md:px-2 py-[1px] md:py-0.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)] animate-pulse select-none scale-95`}>
                   {action.badge}
                 </span>
               )}
 
-              {/* Icon Container with Gradient Plate */}
+              {/* Highly Polished Squircles with match drop-shadow */}
               <div className={`
-                w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] md:rounded-[1.5rem] 
-                bg-gradient-to-br ${action.gradient}
-                flex items-center justify-center text-white
-                shadow-lg ${action.glow} group-hover:shadow-indigo-500/20
+                w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] md:rounded-[1.75rem]
+                ${action.color} text-white
+                flex items-center justify-center
+                shadow-lg ${action.shadow} group-hover:scale-105
                 transition-all duration-300 relative overflow-hidden
               `}>
-                {/* Overlay shine */}
-                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <action.icon size={24} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
+                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <action.icon size={24} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.4} />
               </div>
 
               {/* Service Label */}
-              <span className="font-semibold text-slate-700 text-[10px] md:text-xs tracking-tight leading-tight mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[80px] md:max-w-full">
+              <span className="font-extrabold text-slate-700 text-[11px] md:text-sm tracking-tight leading-snug mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[85px] md:max-w-none">
                 {action.label}
               </span>
             </motion.button>

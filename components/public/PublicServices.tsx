@@ -514,8 +514,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       </div>
 
       {/* Modern Tabs Navigation */}
-      <div className="sticky top-4 z-50 flex justify-center mb-16 px-4">
-        <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-[2rem] inline-flex shadow-2xl shadow-indigo-500/10 border border-white/50 overflow-x-auto no-scrollbar max-w-full">
+      <div className="sticky top-[64px] md:top-[80px] z-30 flex justify-center mb-8 md:mb-16 px-4 pointer-events-none">
+        <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-[2rem] inline-flex shadow-2xl shadow-indigo-500/10 border border-white/50 overflow-x-auto no-scrollbar max-w-full pointer-events-auto">
           {[
             { id: 'surat', label: 'Layanan Surat', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
             { id: 'tamu', label: 'Lapor Tamu', icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50' },

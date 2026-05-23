@@ -3,7 +3,7 @@ import {
   Users, DollarSign, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Calendar, ArrowRight, Plus, Download, FileText,
   Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles, Trash2,
-  Shield, Package, Bell, LayoutGrid
+  Shield, Package, Bell, LayoutGrid, UserPlus, ShoppingCart, CheckSquare
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
@@ -24,7 +24,7 @@ interface DashboardOverviewProps {
   announcements: Announcement[];
   guestReports: GuestReport[];
   iuranPayments: any[];
-  onTabChange: (tab: string) => void;
+  onTabChange: (tab: string, subTab?: string) => void;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, cashFlow, reports, announcements, guestReports, iuranPayments, onTabChange }) => {
@@ -181,60 +181,118 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
         </div>
       )}
 
-      {/* Gojek Style Admin Menu Grid */}
+      {/* Layanan Warga Terpadu Grid from User Image */}
       <motion.div 
         variants={itemVariants}
-        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/40"
+        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2.5rem] p-6 md:p-10 shadow-xl shadow-slate-200/30"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-          <div>
-            <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-              Menu Terpadu <span className="bg-gradient-to-r from-emerald-600 to-indigo-600 bg-clip-text text-transparent italic">Administrasi RT</span>
-              <span className="text-[9px] font-black bg-indigo-50 border border-indigo-100/80 text-indigo-600 px-2.5 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">RT 02 DIGIOFFICE</span>
-            </h3>
-            <p className="text-slate-400 font-medium text-xs mt-0.5">Kelola seluruh aspek kependudukan dan operasional dalam satu ketukan praktis.</p>
-          </div>
+        <div className="mb-8">
+          <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight">
+            Layanan <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
+          </h3>
+          <p className="text-slate-400 font-medium text-xs md:text-sm mt-1 max-w-xl">
+            Semua urusan warga dan administrasi kini serba praktis dalam satu ketukan.
+          </p>
         </div>
 
-        {/* Gojek-style grid: 4 columns on mobile, 8 columns on desktop */}
-        <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-y-7 gap-x-2 md:gap-6 w-full">
+        {/* Grid layout matching Gojek/Grab/Citizen apps exactly: 4 columns */}
+        <div className="grid grid-cols-4 gap-y-8 gap-x-2 md:gap-x-8 max-w-4xl">
           {[
-            { label: 'Data Warga', icon: Users, gradient: 'from-[#2563EB] to-[#3B82F6]', glow: 'shadow-blue-500/20', tab: 'residents', badge: 'DATA' },
-            { label: 'Keuangan RT', icon: DollarSign, gradient: 'from-[#059669] to-[#10B981]', glow: 'shadow-emerald-500/20', tab: 'finance', badge: 'KAS' },
-            { label: 'Persuratan', icon: FileText, gradient: 'from-[#D97706] to-[#F59E0B]', glow: 'shadow-amber-500/20', tab: 'services', badge: 'SURAT' },
-            { label: 'Pos Keamanan', icon: ShieldAlert, gradient: 'from-[#DC2626] to-[#EF4444]', glow: 'shadow-red-500/20', tab: 'facilities', badge: 'RONDA' },
-            { label: 'Inventaris', icon: Package, gradient: 'from-[#7C3AED] to-[#8B5CF6]', glow: 'shadow-purple-500/20', tab: 'assets' },
-            { label: 'Warta RT', icon: Megaphone, gradient: 'from-[#0891B2] to-[#0EA5E9]', glow: 'shadow-cyan-500/20', tab: 'content' },
-            { label: 'Arsip Dokumen', icon: FileText, gradient: 'from-[#4F46E5] to-[#6366F1]', glow: 'shadow-indigo-500/20', tab: 'documents' },
-            { label: 'Pengaturan', icon: LayoutGrid, gradient: 'from-[#475569] to-[#64748B]', glow: 'shadow-slate-500/20', tab: 'settings' }
+            { 
+              label: 'Profil Warga', 
+              icon: User, 
+              color: 'bg-[#5856d6]', 
+              shadow: 'shadow-[#5856d6]/30', 
+              tab: 'residents' 
+            },
+            { 
+              label: 'Buat Surat', 
+              icon: FileText, 
+              color: 'bg-[#00a2e0]', 
+              shadow: 'shadow-[#00a2e0]/30', 
+              tab: 'services' 
+            },
+            { 
+              label: 'Lapor Tamu', 
+              icon: Shield, 
+              color: 'bg-[#ff6200]', 
+              shadow: 'shadow-[#ff6200]/30', 
+              tab: 'guests', 
+              badge: 'PENTING',
+              badgeColor: 'bg-[#ff3b30]'
+            },
+            { 
+              label: 'Daftar Warga', 
+              icon: UserPlus, 
+              color: 'bg-[#af52de]', 
+              shadow: 'shadow-[#af52de]/30', 
+              tab: 'residents' 
+            },
+            { 
+              label: 'Pasar Warga', 
+              icon: ShoppingCart, 
+              color: 'bg-[#00c781]', 
+              shadow: 'shadow-[#00c781]/30', 
+              tab: 'content', 
+              subTab: 'umkm',
+              badge: 'UMKM',
+              badgeColor: 'bg-[#e13f70]'
+            },
+            { 
+              label: 'Warta RT', 
+              icon: Megaphone, 
+              color: 'bg-[#00b2cc]', 
+              shadow: 'shadow-[#00b2cc]/30', 
+              tab: 'content',
+              subTab: 'announcements'
+            },
+            { 
+              label: 'E-Voting', 
+              icon: CheckSquare, 
+              color: 'bg-[#5c72e6]', 
+              shadow: 'shadow-[#5c72e6]/30', 
+              tab: 'content', 
+              subTab: 'polls',
+              badge: 'PEMILU',
+              badgeColor: 'bg-[#d946ef]'
+            },
+            { 
+              label: 'Lapor RT', 
+              icon: AlertTriangle, 
+              color: 'bg-[#ff3b30]', 
+              shadow: 'shadow-[#ff3b30]/30', 
+              tab: 'services' 
+            }
           ].map((action, idx) => {
             const Icon = action.icon;
             return (
               <motion.button
                 key={idx}
-                whileHover={{ y: -5, scale: 1.05 }}
+                whileHover={{ y: -4, scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => onTabChange(action.tab)}
+                onClick={() => onTabChange(action.tab, action.subTab)}
                 className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
               >
+                {/* Beautiful Badges directly layered on top of squircles */}
                 {action.badge && (
-                  <span className="absolute -top-1 md:-top-1.5 right-1 md:right-3 z-20 text-[7px] md:text-[8px] font-black bg-rose-600 text-white px-1.5 py-0.5 rounded-full shadow-sm scale-90 md:scale-100 select-none animate-pulse">
+                  <span className={`absolute -top-1 md:-top-1.5 right-[5%] sm:right-[15%] md:right-[20%] z-20 text-[6px] md:text-[8px] font-black uppercase tracking-widest ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 md:px-2 py-[1px] md:py-0.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)] animate-pulse select-none scale-95`}>
                     {action.badge}
                   </span>
                 )}
 
+                {/* Highly Polished Squircles with match drop-shadow */}
                 <div className={`
-                  w-12 h-12 md:w-14 md:h-14 rounded-[1.25rem] 
-                  bg-gradient-to-br ${action.gradient}
-                  flex items-center justify-center text-white
-                  shadow-lg ${action.glow} group-hover:shadow-indigo-500/20
+                  w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] md:rounded-[1.75rem]
+                  ${action.color} text-white
+                  flex items-center justify-center
+                  shadow-lg ${action.shadow} group-hover:scale-105
                   transition-all duration-300 relative overflow-hidden
                 `}>
-                  <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                  <Icon size={20} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  <Icon size={24} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.4} />
                 </div>
 
-                <span className="font-bold text-slate-700 text-[10px] md:text-xs tracking-tight leading-tight mt-2 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[80px] md:max-w-none">
+                <span className="font-extrabold text-slate-700 text-[11px] md:text-sm tracking-tight leading-snug mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[85px] md:max-w-none">
                   {action.label}
                 </span>
               </motion.button>

@@ -9,6 +9,27 @@ import path from "path";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import "dotenv/config";
+import { GoogleGenAI } from "@google/genai";
+
+// Initialize Gemini Admin on backend
+let aiAdmin: GoogleGenAI | null = null;
+const getAiAdmin = () => {
+  if (!aiAdmin) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.warn("⚠️ GEMINI_API_KEY is not configured on the server.");
+    }
+    aiAdmin = new GoogleGenAI({
+      apiKey: apiKey || "",
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+  return aiAdmin;
+};
 
 // Configure Cloudinary
 cloudinary.config({
@@ -288,6 +309,139 @@ async function startServer() {
     } catch (error: any) {
       console.error("WhatsApp Groups error:", error);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // 1. Generate Announcement Draft
+  app.post("/api/gemini/announcement-draft", async (req, res) => {
+    const { topic, tone } = req.body;
+    try {
+      const ai = getAiAdmin();
+      const prompt = `Buatkan draf pengumuman untuk warga RT (Rukun Tetangga) dengan topik: "${topic}".
+      Gaya bahasa: ${tone || 'Formal'}.
+      Struktur: Judul menarik, Salam pembuka, Isi pengumuman (singkat & jelas), Detail (Waktu/Tempat jika perlu), Salam penutup.
+      Format: Plain text. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Bahasa Indonesia yang baik dan benar.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.5-flash',
+        contents: prompt,
+      });
+
+      res.json({ success: true, text: response.text || "Gagal membuat draf." });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // 2. Analyze Reports
+  app.post("/api/gemini/analyze-reports", async (req, res) => {
+    const { reports } = req.body;
+    try {
+      const ai = getAiAdmin();
+      const prompt = `Berikut adalah daftar laporan warga minggu ini:
+      ${reports.map((r: string) => `- ${r}`).join('\n')}
+      
+      Berikan ringkasan eksekutif singkat (maksimal 3 poin) mengenai isu utama yang perlu ditangani oleh Ketua RT. DILARANG menggunakan karakter asterik (*) atau format bold/italic.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.5-flash',
+        contents: prompt,
+      });
+
+      res.json({ success: true, text: response.text || "Tidak ada analisis." });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // 3. Generate Dashboard Summary
+  app.post("/api/gemini/dashboard-summary", async (req, res) => {
+    const { data } = req.body;
+    try {
+      const ai = getAiAdmin();
+      const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
+      Analisis data realtime dashboard RT 02 berikut:
+      - Jumlah Penduduk: ${data.totalResidents} jiwa
+      - Kas Keuangan: Rp ${(data.cashBalance || 0).toLocaleString('id-ID')}
+      - Laporan Masalah Baru (Aktif): ${data.reportsCount}
+      - Warga Menunggak Iuran: ${data.unpaidCount} KK
+      - Kelompok Rentan: ${data.babyCount || 0} Bayi, ${data.toddlerCount || 0} Balita, ${data.pregnantCount || 0} Ibu Hamil, ${data.elderlyCount || 0} Lansia, ${data.widowCount || 0} Janda
+      
+      Berikan laporan singkat dan padat (maksimal 150 kata) yang mencakup:
+      1. 💰 Status Kesehatan Keuangan (Aman/Waspada)
+      2. 🛡️ Tingkat Keresahan Warga (berdasarkan jumlah laporan)
+      3. 👶 Analisis Kelompok Rentan (apakah perlu perhatian khusus minggu ini)
+      4. 💡 Satu rekomendasi aksi prioritas untuk pengurus RT minggu ini.
+
+      Format output menggunakan daftar poin (list) agar mudah dibaca. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.5-flash',
+        contents: prompt,
+      });
+
+      res.json({ success: true, text: response.text || "Tidak ada analisis yang dihasilkan." });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // 4. Ask Rit Virtual Assistant
+  app.post("/api/gemini/ask-rit", async (req, res) => {
+    const { question, systemInstruction } = req.body;
+    try {
+      const ai = getAiAdmin();
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.5-flash',
+        contents: question,
+        config: {
+          systemInstruction: systemInstruction,
+        }
+      });
+
+      res.json({ success: true, text: response.text || "Maaf, saya tidak mengerti pertanyaan tersebut." });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // 5. Generate Broadcast Draft (For WhatsApp Broadcast Manager)
+  app.post("/api/gemini/generate-broadcast", async (req, res) => {
+    const { topic, type, tone, dataContext } = req.body;
+    try {
+      const ai = getAiAdmin();
+      let prompt = "";
+      if (type === 'billing') {
+        prompt = `Buatkan draf pengingat tagihan iuran Rukun Tetangga (RT 02) terpersonalisasi untuk warga dengan data berikut:
+        Nama Warga: ${dataContext?.headOfFamily || ''}
+        Blok/No: ${dataContext?.block || ''}/${dataContext?.number || ''}
+        Tunggakan Periode: ${dataContext?.unpaidMonths || ''}
+        Total Tunggakan: Rp ${Number(dataContext?.totalAmount || 0).toLocaleString('id-ID')}
+        Rincian tunggakan: ${dataContext?.itemsDetail || 'Iuran rutin'}
+        Metode Pembayaran: Transfer Rekening RT atau Bendahara RT
+        
+        Gaya bahasa/Suasana: ${tone || 'Formal'}
+        Format: Teks siap kirim di WhatsApp. DILARANG menggunakan karakter double asterik (**) atau format Markdown berat. Gunakan bullet points, baris baru, dan susunan emoji yang sopan, ramah, tertata rapi, dan meyakinkan agar warga segera melunasi iurannya secara proaktif.`;
+      } else {
+        prompt = `Buatkan draf pengumuman/siaran WhatsApp untuk warga RT (Rukun Tetangga) dengan topik: "${topic}".
+        Gaya bahasa/Suasana: ${tone || 'Formal'}
+        Struktur: Judul menarik dilengkapi emoji, Salam pembuka hangat, Isi pengumuman (jelas, singkat, & padat), Rincian detail info pelaksanaan (Waktu/Tempat jika relevan), Salam penutup, dan ajakan kerja sama yang harmonis.
+        Format: Teks siap dikirim di WhatsApp dengan susunan emoji yang rukun, rapi, dan terstruktur. DILARANG menggunakan karakter asterisk (*) secara ganda (**) atau format Markdown berat yang merusak keterbacaan pesan di HP.`;
+      }
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.5-flash',
+        contents: prompt,
+      });
+
+      res.json({ success: true, text: response.text || "Gagal menghasilkan draf." });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ success: false, error: error.message });
     }
   });
 

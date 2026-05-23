@@ -100,7 +100,7 @@ export const MobileBottomNav: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-200 z-50 pb-safe-area-pb">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800/80 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_-8px_30px_rgb(0,0,0,0.2)] z-50 pb-safe-area-pb">
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -108,7 +108,7 @@ export const MobileBottomNav: React.FC = () => {
               <button 
                 key={item.path} 
                 onClick={() => navigate(item.path)} 
-                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
               >
                 <item.icon size={20} className={isActive ? 'fill-current' : ''} />
                 <span className="text-[10px] font-bold">{item.label}</span>
@@ -117,7 +117,7 @@ export const MobileBottomNav: React.FC = () => {
           })}
           <button 
             onClick={() => setIsMenuOpen(true)} 
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isMenuOpen ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isMenuOpen ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
           >
             <Menu size={20} />
             <span className="text-[10px] font-bold">Menu</span>

@@ -20,10 +20,20 @@ interface ContentManagerProps {
   faqItems: FAQItem[];
   houses: House[];
   pdfConfig: PdfConfig;
+  initialTab?: 'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq';
 }
 
-export const ContentManager: React.FC<ContentManagerProps> = ({ announcements, news, polls, umkm, gallery, events, faqItems, houses, pdfConfig }) => {
-  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq'>('announcements');
+export const ContentManager: React.FC<ContentManagerProps> = ({ 
+  announcements, news, polls, umkm, gallery, events, faqItems, houses, pdfConfig,
+  initialTab = 'announcements'
+}) => {
+  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq'>(initialTab);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

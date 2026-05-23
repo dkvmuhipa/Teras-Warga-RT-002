@@ -2,15 +2,25 @@ import React, { useState } from 'react';
 import { Bell, Shield, DollarSign, Megaphone, Calendar, Info, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '../ui/Button';
-import { AppNotification } from '../../types';
+import { AppNotification, House, Bill, PdfConfig } from '../../types';
+import { WhatsAppBroadcastManager } from './WhatsAppBroadcastManager';
 
 interface NotificationCombinedProps {
   notifications: AppNotification[];
   onDeleteNotification?: (id: string) => void;
+  houses: House[];
+  bills: Bill[];
+  pdfConfig: PdfConfig;
 }
 
-export const NotificationCombined: React.FC<NotificationCombinedProps> = ({ notifications, onDeleteNotification }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'list' | 'settings'>('list');
+export const NotificationCombined: React.FC<NotificationCombinedProps> = ({ 
+  notifications, 
+  onDeleteNotification,
+  houses = [],
+  bills = [],
+  pdfConfig
+}) => {
+  const [activeSubTab, setActiveSubTab] = useState<'list' | 'broadcast' | 'settings'>('list');
   const [settings, setSettings] = useState({
     announcements: true,
     finance: true,
@@ -31,14 +41,15 @@ export const NotificationCombined: React.FC<NotificationCombinedProps> = ({ noti
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Notifikasi</h2>
-          <p className="text-slate-500 font-medium mt-1">Kelola notifikasi dan preferensi Anda.</p>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Notifikasi & Siaran</h2>
+          <p className="text-slate-500 font-medium mt-1">Kelola notifikasi sistem dan siaran WhatsApp warga secara instan.</p>
         </div>
-        <div className="flex bg-slate-100 p-1 rounded-2xl">
-          <button onClick={() => setActiveSubTab('list')} className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'list' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Daftar</button>
-          <button onClick={() => setActiveSubTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'settings' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Pengaturan</button>
+        <div className="flex bg-slate-100 p-1 rounded-2xl self-start sm:self-auto overflow-x-auto">
+          <button onClick={() => setActiveSubTab('list')} className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSubTab === 'list' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Daftar</button>
+          <button onClick={() => setActiveSubTab('broadcast')} className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSubTab === 'broadcast' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Siaran WA 💬</button>
+          <button onClick={() => setActiveSubTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSubTab === 'settings' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Pengaturan</button>
         </div>
       </div>
 
@@ -76,6 +87,8 @@ export const NotificationCombined: React.FC<NotificationCombinedProps> = ({ noti
             )}
           </div>
         </div>
+      ) : activeSubTab === 'broadcast' ? (
+        <WhatsAppBroadcastManager houses={houses} bills={bills} pdfConfig={pdfConfig} />
       ) : (
         <div className="space-y-6">
           {options.map(opt => (

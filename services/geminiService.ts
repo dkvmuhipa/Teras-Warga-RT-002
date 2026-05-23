@@ -1,63 +1,38 @@
-
-// Fix: Use the correct import for GoogleGenAI and ensure initialization follows the latest guidelines
-import { GoogleGenAI } from "@google/genai";
 import { Announcement, RondaSchedule, Official } from "../types";
 
-let aiInstance: GoogleGenAI | null = null;
-
-function getAiInstance(): GoogleGenAI {
-  if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("API key must be set when using the Gemini API.");
-    }
-    aiInstance = new GoogleGenAI({ apiKey });
-  }
-  return aiInstance;
-}
-
-// Fix: Always use new GoogleGenAI({ apiKey: process.env.API_KEY }) to initialize the client
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
   try {
-    const ai = getAiInstance();
-    const prompt = `Buatkan draf pengumuman untuk warga RT (Rukun Tetangga) dengan topik: "${topic}".
-    Gaya bahasa: ${tone}.
-    Struktur: Judul menarik, Salam pembuka, Isi pengumuman (singkat & jelas), Detail (Waktu/Tempat jika perlu), Salam penutup.
-    Format: Plain text. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Bahasa Indonesia yang baik dan benar.`;
-
-    // Fix: Use ai.models.generateContent with the model name directly
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
+    const response = await fetch('/api/gemini/announcement-draft', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ topic, tone })
     });
-
-    // Fix: Access response.text as a property, not a method
-    return response.text || "Gagal membuat draf.";
+    const result = await response.json();
+    return result.text || "Gagal membuat draf.";
   } catch (error) {
-    console.error("Gemini Error:", error);
+    console.error("Gemini Client Service Error:", error);
     return "Terjadi kesalahan saat menghubungi AI Assistant.";
   }
 };
 
 export const analyzeReports = async (reports: string[]): Promise<string> => {
    try {
-     const ai = getAiInstance();
-     const prompt = `Berikut adalah daftar laporan warga minggu ini:
-     ${reports.join('\n- ')}
-     
-     Berikan ringkasan eksekutif singkat (maksimal 3 poin) mengenai isu utama yang perlu ditangani oleh Ketua RT. DILARANG menggunakan karakter asterik (*) atau format bold/italic.`;
-     
-     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
+     const response = await fetch('/api/gemini/analyze-reports', {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({ reports })
      });
-     
-     return response.text || "Tidak ada analisis.";
+     const result = await response.json();
+     return result.text || "Tidak ada analisis.";
    } catch (error) {
       console.error(error);
       return "Gagal menganalisis data.";
    }
-}
+};
 
 export const generateDashboardSummary = async (data: {
   totalResidents: number,
@@ -71,45 +46,35 @@ export const generateDashboardSummary = async (data: {
   widowCount?: number
 }): Promise<string> => {
    try {
-     const ai = getAiInstance();
-     const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
-     Analisis data realtime dashboard RT 02 berikut:
-     - Jumlah Penduduk: ${data.totalResidents} jiwa
-     - Kas Keuangan: Rp ${data.cashBalance.toLocaleString('id-ID')}
-     - Laporan Masalah Baru (Aktif): ${data.reportsCount}
-     - Warga Menunggak Iuran: ${data.unpaidCount} KK
-     - Kelompok Rentan: ${data.babyCount || 0} Bayi, ${data.toddlerCount || 0} Balita, ${data.pregnantCount || 0} Ibu Hamil, ${data.elderlyCount || 0} Lansia, ${data.widowCount || 0} Janda
-     
-     Berikan laporan singkat dan padat (maksimal 150 kata) yang mencakup:
-     1. 💰 Status Kesehatan Keuangan (Aman/Waspada)
-     2. 🛡️ Tingkat Keresahan Warga (berdasarkan jumlah laporan)
-     3. 👶 Analisis Kelompok Rentan (apakah perlu perhatian khusus minggu ini)
-     4. 💡 Satu rekomendasi aksi prioritas untuk pengurus RT minggu ini.
-
-     Format output menggunakan daftar poin (list) agar mudah dibaca. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
-     
-     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
+     const response = await fetch('/api/gemini/dashboard-summary', {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({ data })
      });
-     
-     return response.text || "Tidak ada analisis yang dihasilkan.";
+     const result = await response.json();
+     return result.text || "Tidak ada analisis yang dihasilkan.";
    } catch (error) {
       console.error(error);
       return "Gagal melakukan analisis data. Cek koneksi internet.";
    }
-}
+};
 
 export const askRit = async (question: string, contextData: { announcements: Announcement[], ronda: RondaSchedule[], officials: Official[] }): Promise<string> => {
   try {
-    const ai = getAiInstance();
     const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     
     const announcementContext = contextData.announcements.length > 0 
       ? contextData.announcements.slice(0, 5).map(a => `- [${a.date}] ${a.title}: ${a.content} (Tipe: ${a.type})`).join('\n')
       : "Belum ada pengumuman terbaru.";
       
-    const rondaContext = contextData.ronda.map(r => `- ${r.day}: ${r.members.join(', ')}`).join('\n');
+    const rondoDays = contextData.ronda.map(r => {
+      const dayName = r.day || '';
+      const membersStr = Array.isArray(r.members) ? r.members.join(', ') : '';
+      return `- ${dayName}: ${membersStr}`;
+    }).join('\n');
+    
     const officialsContext = contextData.officials.map(o => `- ${o.role}: ${o.name} (Rumah: ${o.houseId}, HP: ${o.phone})`).join('\n');
 
     const systemInstruction = `Anda adalah "Rit", Asisten Virtual Cerdas untuk RT 02 RW 020 (Aplikasi: TERAS RT 02).
@@ -121,7 +86,7 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     ${announcementContext}
 
     JADWAL RONDA MINGGUAN:
-    ${rondaContext}
+    ${rondoDays}
 
     STRUKTUR PENGURUS RT SAAT INI:
     ${officialsContext}
@@ -143,15 +108,16 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     7. DILARANG menggunakan karakter asterik (*) atau format bold/italic dalam jawaban Anda.
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: question,
-      config: {
-        systemInstruction: systemInstruction,
-      }
+    const response = await fetch('/api/gemini/ask-rit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ question, systemInstruction })
     });
-
-    return response.text || "Maaf, saya tidak mengerti pertanyaan tersebut.";
+    
+    const result = await response.json();
+    return result.text || "Maaf, saya tidak mengerti pertanyaan tersebut.";
 
   } catch (error) {
     console.error("Gemini Chat Error:", error);
