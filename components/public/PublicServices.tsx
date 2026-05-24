@@ -259,7 +259,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
         familyStatus,
         bloodType,
         status: 'Menunggu', 
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString(),
         estimatedTime: estimatedTimes[finalRequestType] || estimatedTimes['Lainnya']
       }; 
       

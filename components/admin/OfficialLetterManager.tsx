@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Filter, Edit2, Trash2, Printer, Send, Eye, X, Save, Calendar, User, MessageSquare, Upload, Download, File as FileIcon, RefreshCw } from 'lucide-react';
-import { OfficialLetter, PdfConfig } from '../../types';
-import { subscribeToOfficialLetters, addOfficialLetterToDb, updateOfficialLetterInDb, deleteOfficialLetterFromDb, uploadFile } from '../../services/databaseService';
+import { OfficialLetter, PdfConfig, LetterRequest } from '../../types';
+import { subscribeToOfficialLetters, addOfficialLetterToDb, updateOfficialLetterInDb, deleteOfficialLetterFromDb, uploadFile, updatePdfConfig } from '../../services/databaseService';
 import { generateOfficialLetterPDF } from '../../services/pdfService';
 import { sendWhatsAppMessage } from '../../services/whatsappService';
 import { Button } from '../ui/Button';
@@ -16,9 +16,10 @@ import { useConfirm } from '../../context/ConfirmContext';
 interface OfficialLetterManagerProps {
   pdfConfig: PdfConfig;
   setPdfConfig: (config: PdfConfig) => void;
+  residentLetters?: LetterRequest[];
 }
 
-export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pdfConfig, setPdfConfig }) => {
+export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pdfConfig, setPdfConfig, residentLetters = [] }) => {
   const confirm = useConfirm();
   const [letters, setLetters] = useState<OfficialLetter[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,6 +44,20 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
     source: 'Internal'
   });
 
+  const extractNum = (str: string) => {
+    const parts = str.split('/');
+    if (parts.length >= 2) {
+      const num = parseInt(parts[1], 10);
+      if (!isNaN(num) && num < 1000) return num;
+    }
+    const match = str.match(/\/(\d+)\//) || str.match(/(\d+)/);
+    if (match) {
+      const num = parseInt(match[1] || match[0], 10);
+      if (!isNaN(num) && num < 1000) return num;
+    }
+    return 0;
+  };
+
   useEffect(() => {
     const unsubscribe = subscribeToOfficialLetters(setLetters);
     return () => unsubscribe();
@@ -52,13 +67,32 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
     if (isModalOpen && !editingLetter) {
       generateAutoLetterNumber();
     }
-  }, [isModalOpen, editingLetter, formData.type, pdfConfig.lastLetterNumber, pdfConfig.rtName, formData.date]);
+  }, [isModalOpen, editingLetter, formData.type, pdfConfig.lastLetterNumber, pdfConfig.rtName, formData.date, residentLetters, letters]);
 
   const generateAutoLetterNumber = () => {
     const letterDate = new Date(formData.date);
     const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][letterDate.getMonth()];
     const currentYear = letterDate.getFullYear();
-    const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+    
+    let maxNum = pdfConfig.lastLetterNumber || 0;
+    
+    // Scan resident letters
+    residentLetters.forEach(l => {
+      if (l.letterNumber) {
+        const num = extractNum(l.letterNumber);
+        if (num > maxNum) maxNum = num;
+      }
+    });
+
+    // Scan official letters
+    letters.forEach(ol => {
+      if (ol.letterNumber) {
+        const num = extractNum(ol.letterNumber);
+        if (num > maxNum) maxNum = num;
+      }
+    });
+
+    const nextNum = maxNum + 1;
     const paddedNum = nextNum.toString().padStart(3, '0');
     
     let letterCode = 'SR'; // Surat Resmi
@@ -162,6 +196,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
       if (nextNum > (pdfConfig.lastLetterNumber || 0)) {
         const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
         setPdfConfig(newConfig);
+        await updatePdfConfig(newConfig);
       }
 
       setIsModalOpen(false);

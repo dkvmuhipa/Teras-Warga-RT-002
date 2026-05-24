@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw, Phone } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig, OfficialLetter, House } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb } from '../../services/databaseService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb, subscribeToOfficialLetters } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar, generateIncidentReportPDF } from '../../services/pdfService';
@@ -51,6 +51,55 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const [isVerifyingGroup, setIsVerifyingGroup] = useState(false);
   const [availableGroups, setAvailableGroups] = useState<{id: string, name: string}[]>([]);
   const [showGroupList, setShowGroupList] = useState(false);
+  const [officialLetters, setOfficialLetters] = useState<OfficialLetter[]>([]);
+  
+  const extractNum = (str: string) => {
+    const parts = str.split('/');
+    if (parts.length >= 2) {
+      const num = parseInt(parts[1], 10);
+      if (!isNaN(num) && num < 1000) return num;
+    }
+    const match = str.match(/\/(\d+)\//) || str.match(/(\d+)/);
+    if (match) {
+      const num = parseInt(match[1] || match[0], 10);
+      if (!isNaN(num) && num < 1000) return num;
+    }
+    return 0;
+  };
+
+  useEffect(() => {
+    const unsubscribe = subscribeToOfficialLetters(setOfficialLetters);
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!pdfConfig) return;
+    let maxNum = 0;
+
+    // Check resident letters
+    letters.forEach(l => {
+      if (l.letterNumber) {
+        const num = extractNum(l.letterNumber);
+        if (num > maxNum) maxNum = num;
+      }
+    });
+
+    // Check official letters
+    officialLetters.forEach(ol => {
+      if (ol.letterNumber) {
+        const num = extractNum(ol.letterNumber);
+        if (num > maxNum) maxNum = num;
+      }
+    });
+
+    if (maxNum > (pdfConfig.lastLetterNumber || 0)) {
+      const newConfig = { ...pdfConfig, lastLetterNumber: maxNum };
+      setPdfConfig(newConfig);
+      updatePdfConfig(newConfig).catch(err => {
+        console.error("Auto-sync pdfConfig error:", err);
+      });
+    }
+  }, [letters, officialLetters, pdfConfig, setPdfConfig]);
   
   // Admin Form State
   const [adminForm, setAdminForm] = useState<Partial<LetterRequest>>({
@@ -103,10 +152,29 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         type: selectedLetter.type
       });
 
-      if (selectedLetter.status === 'Menunggu') {
+      if (selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') {
         const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
         const currentYear = new Date().getFullYear();
-        const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+        
+        let maxNum = pdfConfig.lastLetterNumber || 0;
+        
+        // Scan resident letters
+        letters.forEach(l => {
+          if (l.letterNumber) {
+            const num = extractNum(l.letterNumber);
+            if (num > maxNum) maxNum = num;
+          }
+        });
+
+        // Scan official letters
+        officialLetters.forEach(ol => {
+          if (ol.letterNumber) {
+            const num = extractNum(ol.letterNumber);
+            if (num > maxNum) maxNum = num;
+          }
+        });
+
+        const nextNum = maxNum + 1;
         const paddedNum = nextNum.toString().padStart(3, '0');
         
         const words = selectedLetter.type.split(' ').filter(w => w.length > 0);
@@ -118,13 +186,32 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         setLetterNumberInput(selectedLetter.letterNumber);
       }
     }
-  }, [selectedLetter, pdfConfig.lastLetterNumber, pdfConfig.rtName]);
+  }, [selectedLetter, pdfConfig.lastLetterNumber, pdfConfig.rtName, letters, officialLetters]);
 
   React.useEffect(() => {
     if (isCreatingLetter) {
       const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
       const currentYear = new Date().getFullYear();
-      const nextNum = (pdfConfig.lastLetterNumber || 0) + 1;
+      
+      let maxNum = pdfConfig.lastLetterNumber || 0;
+      
+      // Scan resident letters
+      letters.forEach(l => {
+        if (l.letterNumber) {
+          const num = extractNum(l.letterNumber);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+
+      // Scan official letters
+      officialLetters.forEach(ol => {
+        if (ol.letterNumber) {
+          const num = extractNum(ol.letterNumber);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+
+      const nextNum = maxNum + 1;
       const paddedNum = nextNum.toString().padStart(3, '0');
       
       const words = (adminForm.type || '').split(' ').filter(w => w.length > 0);
@@ -133,7 +220,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       
       setAdminLetterNumber(`${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
     }
-  }, [isCreatingLetter, adminForm.type, pdfConfig.lastLetterNumber, pdfConfig.rtName]);
+  }, [isCreatingLetter, adminForm.type, pdfConfig.lastLetterNumber, pdfConfig.rtName, letters, officialLetters]);
 
   const handleAnalyzeReports = async () => {
     setIsAiLoading(true);
@@ -184,6 +271,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
         const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
         setPdfConfig(newConfig);
+        await updatePdfConfig(newConfig);
         
         setSelectedLetter(null);
         setLetterNumberInput('');
@@ -223,6 +311,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       if (nextNum > (pdfConfig.lastLetterNumber || 0)) {
         const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
         setPdfConfig(newConfig);
+        await updatePdfConfig(newConfig);
       }
       
       toast.success("Detail surat berhasil disimpan!");
@@ -363,7 +452,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       ...adminForm as LetterRequest,
       id: Date.now().toString(),
       status: 'Disetujui',
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString(),
       letterNumber: adminLetterNumber
     };
 
@@ -392,6 +481,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
     const newConfig = { ...pdfConfig, lastLetterNumber: nextNum };
     setPdfConfig(newConfig);
+    await updatePdfConfig(newConfig);
 
     setIsCreatingLetter(false);
     toast.success("Surat berhasil dibuat dan diunduh!");
@@ -460,6 +550,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     const matchStatus = filterStatus === 'All' || l.status === filterStatus;
     const matchArchived = showArchived ? l.archived === true : !l.archived;
     return matchSearch && matchStatus && matchArchived;
+  }).sort((a, b) => {
+    const isNewA = a.status === 'Menunggu' || a.status === 'Pending';
+    const isNewB = b.status === 'Menunggu' || b.status === 'Pending';
+    if (isNewA && !isNewB) return -1;
+    if (!isNewA && isNewB) return 1;
+    
+    const timeA = a.date ? new Date(a.date).getTime() : 0;
+    const timeB = b.date ? new Date(b.date).getTime() : 0;
+    return timeB - timeA;
   });
 
   const filteredReports = reports.filter(r => {
@@ -517,7 +616,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               }`}
             >
               <FileText size={14} className="sm:w-4 sm:h-4" />
-              <span>Surat ({letters.filter(l => l.status === 'Menunggu').length})</span>
+              <span>Surat ({letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length})</span>
             </button>
             <button 
               onClick={() => setActiveTab('reports')} 
@@ -668,7 +767,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <OfficialLetterManager pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} />
+            <OfficialLetterManager pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} residentLetters={letters} />
           </motion.div>
         ) : activeTab === 'letter-archive' ? (
           <motion.div
@@ -743,11 +842,22 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           placeholder="0"
                         />
                         <button 
-                          onClick={() => {
+                          onClick={async () => {
                             let maxNum = 0;
+                            // Scan resident letters
                             letters.forEach(l => {
                               if (l.letterNumber) {
-                                const match = l.letterNumber.match(/\/(\d+)\//) || l.letterNumber.match(/(\d+)/);
+                                const match = ["", (extractNum(l.letterNumber) || 0).toString()];
+                                if (match) {
+                                  const num = parseInt(match[1]);
+                                  if (!isNaN(num) && num > maxNum) maxNum = num;
+                                }
+                              }
+                            });
+                            // Scan official letters
+                            officialLetters.forEach(ol => {
+                              if (ol.letterNumber) {
+                                const match = ["", (extractNum(ol.letterNumber) || 0).toString()];
                                 if (match) {
                                   const num = parseInt(match[1]);
                                   if (!isNaN(num) && num > maxNum) maxNum = num;
@@ -757,7 +867,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             if (maxNum > 0) {
                               const newConfig = { ...pdfConfig, lastLetterNumber: maxNum };
                               setPdfConfig(newConfig);
-                              toast.success(`Counter disinkronkan ke nomor: ${maxNum}`);
+                              try {
+                                await updatePdfConfig(newConfig);
+                                toast.success(`Counter disinkronkan ke nomor: ${maxNum} (dari seluruh dokumen surat)`);
+                              } catch (err) {
+                                console.error(err);
+                                toast.error("Gagal menyimpan sinkronisasi nomor surat ke cloud.");
+                              }
                             } else {
                               toast.error("Tidak ditemukan nomor surat valid untuk sinkronisasi.");
                             }
@@ -1228,87 +1344,111 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             exit={{ opacity: 0, y: -20 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filteredLetters.map((letter) => (
-              <motion.div 
-                key={letter.id}
-                layout
-                className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/50 transition-all group relative overflow-hidden"
-              >
-                <div className={`absolute top-0 right-0 w-24 h-24 rounded-bl-[2.5rem] flex items-center justify-center ${
-                  letter.status === 'Menunggu' ? 'bg-amber-50 text-amber-600' :
-                  letter.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600' :
-                  'bg-rose-50 text-rose-600'
-                }`}>
-                  {letter.status === 'Menunggu' && <Clock size={24} />}
-                  {letter.status === 'Disetujui' && <CheckCircle2 size={24} />}
-                  {letter.status === 'Ditolak' && <XCircle size={24} />}
-                </div>
-
-                <div className="mb-6 relative z-10">
-                  <span className="inline-block px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-3 border border-indigo-100">
-                    {letter.type}
-                  </span>
-                  <h3 className="text-lg font-black text-slate-900 leading-tight mb-1">{letter.applicantName}</h3>
-                  <p className="text-sm font-medium text-slate-500">Blok {letter.houseId}</p>
-                </div>
-
-                <div className="space-y-3 mb-6 relative z-10">
-                  <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                    <Clock size={14} />
-                    <span>Diajukan: {new Date(letter.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            {filteredLetters.map((letter) => {
+              const dateObj = new Date(letter.date);
+              const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Makassar' });
+              const hasTime = letter.date && (letter.date.includes('T') || letter.date.includes(':'));
+              const formattedTime = hasTime && !isNaN(dateObj.getTime()) ? dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Makassar' }) + ' WITA' : '';
+              
+              return (
+                <motion.div 
+                  key={letter.id}
+                  layout
+                  className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/50 transition-all group relative overflow-hidden"
+                >
+                  <div className={`absolute top-0 right-0 w-24 h-24 rounded-bl-[2.5rem] flex items-center justify-center ${
+                    letter.status === 'Menunggu' || letter.status === 'Pending' ? 'bg-amber-50 text-amber-600' :
+                    letter.status === 'Disetujui' || letter.status === 'Approved' ? 'bg-emerald-50 text-emerald-600' :
+                    'bg-rose-50 text-rose-600'
+                  }`}>
+                    {(letter.status === 'Menunggu' || letter.status === 'Pending') && <Clock size={24} />}
+                    {(letter.status === 'Disetujui' || letter.status === 'Approved') && <CheckCircle2 size={24} />}
+                    {(letter.status === 'Ditolak' || letter.status === 'Rejected') && <XCircle size={24} />}
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-2xl text-xs text-slate-600 leading-relaxed border border-slate-100">
-                    <span className="font-bold block mb-1 text-slate-400 uppercase tracking-wider text-[10px]">Keperluan:</span>
-                    {letter.purposeDetail || '-'}
+
+                  <div className="mb-6 relative z-10">
+                    <span className="inline-block px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-3 border border-indigo-100">
+                      {letter.type}
+                    </span>
+                    <h3 className="text-lg font-black text-slate-900 leading-tight mb-1">{letter.applicantName}</h3>
+                    <div className="flex flex-wrap gap-2 text-xs font-bold text-slate-500 mt-1">
+                      <span className="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md">Blok {letter.houseId}</span>
+                      {letter.nik && <span className="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md text-slate-400">NIK {letter.nik}</span>}
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex gap-2 relative z-10">
-                  <button 
-                    onClick={() => setSelectedLetter(letter)}
-                    className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
-                  >
-                    <Eye size={14} /> Detail
-                  </button>
-                  
-                  {letter.status === 'Disetujui' && (
+                  <div className="space-y-3 mb-6 relative z-10">
+                    <div className="bg-slate-50/50 rounded-2xl p-3 border border-slate-100/80 space-y-1 text-xs">
+                      <div className="flex items-center gap-2 text-slate-500 font-bold">
+                        <Clock size={13} className="text-slate-400" />
+                        <span>Waktu Pengajuan:</span>
+                      </div>
+                      <div className="pl-5 text-slate-700 font-black flex flex-col">
+                        <span>{formattedDate}</span>
+                        {formattedTime && <span className="text-indigo-600 text-[11px] font-bold">{formattedTime}</span>}
+                      </div>
+                    </div>
+
+                    {letter.phone && (
+                      <div className="flex items-center gap-2 pl-3 text-xs text-slate-500 font-bold">
+                        <Phone size={13} className="text-indigo-500" />
+                        <span>Telepon: <span className="text-slate-700 font-extrabold">{letter.phone}</span></span>
+                      </div>
+                    )}
+
+                    <div className="p-3 bg-slate-50 rounded-2xl text-xs text-slate-600 leading-relaxed border border-slate-100">
+                      <span className="font-bold block mb-1 text-slate-400 uppercase tracking-wider text-[10px]">Keperluan:</span>
+                      <p className="line-clamp-2 text-slate-600 font-medium">{letter.purposeDetail || '-'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 relative z-10">
                     <button 
-                      onClick={async () => {
-                        try {
-                          await generateSuratPengantar(letter, pdfConfig, false);
-                          toast.success('Surat sedang diunduh...');
-                        } catch (err) {
-                          console.error("Print Error:", err);
-                          toast.error("Gagal mencetak surat. Pastikan data lengkap.");
-                        }
-                      }}
-                      className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100"
-                      title="Cetak Surat"
+                      onClick={() => setSelectedLetter(letter)}
+                      className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
                     >
-                      <Printer size={16} />
+                      <Eye size={14} /> Detail
                     </button>
-                  )}
+                    
+                    {letter.status === 'Disetujui' && (
+                      <button 
+                        onClick={async () => {
+                          try {
+                            await generateSuratPengantar(letter, pdfConfig, false);
+                            toast.success('Surat sedang diunduh...');
+                          } catch (err) {
+                            console.error("Print Error:", err);
+                            toast.error("Gagal mencetak surat. Pastikan data lengkap.");
+                          }
+                        }}
+                        className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100"
+                        title="Cetak Surat"
+                      >
+                        <Printer size={16} />
+                      </button>
+                    )}
 
-                  <button 
-                    onClick={() => handleDeleteLetter(letter.id)}
-                    className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100"
-                    title="Hapus Pengajuan"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-
-                  {!letter.archived && (letter.status === 'Disetujui' || letter.status === 'Ditolak') && (
                     <button 
-                      onClick={() => handleArchiveLetter(letter.id)}
-                      className="p-3 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors border border-amber-100"
-                      title="Arsipkan"
+                      onClick={() => handleDeleteLetter(letter.id)}
+                      className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100"
+                      title="Hapus Pengajuan"
                     >
-                      <Archive size={16} />
+                      <Trash2 size={16} />
                     </button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+
+                    {!letter.archived && (letter.status === 'Disetujui' || letter.status === 'Ditolak') && (
+                      <button 
+                        onClick={() => handleArchiveLetter(letter.id)}
+                        className="p-3 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors border border-amber-100"
+                        title="Arsipkan"
+                      >
+                        <Archive size={16} />
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </motion.div>
         ) : (
           <motion.div 
@@ -1408,8 +1548,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Saat Ini</p>
                       <span className={`inline-block px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
-                        selectedLetter.status === 'Menunggu' ? 'bg-amber-100 text-amber-700' :
-                        selectedLetter.status === 'Disetujui' ? 'bg-emerald-100 text-emerald-700' :
+                        (selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') ? 'bg-amber-100 text-amber-700' :
+                        (selectedLetter.status === 'Disetujui' || selectedLetter.status === 'Approved') ? 'bg-emerald-100 text-emerald-700' :
                         'bg-rose-100 text-rose-700'
                       }`}>
                         {selectedLetter.status}
@@ -1534,7 +1674,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   </div>
                 </div>
 
-                {selectedLetter.status === 'Menunggu' && (
+                {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') && (
                   <div className="space-y-4">
                     <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
                       <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Tanda Tangan Ketua RT (Opsional)</p>

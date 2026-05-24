@@ -374,7 +374,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                         <p className="text-xs text-slate-500 line-clamp-2 mb-4">{event.description}</p>
                                         <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
                                             <Clock size={14} />
-                                            <span>{new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</span>
+                                            <span>{new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Makassar' })} WITA</span>
                                             <span className="mx-1">•</span>
                                             <MapPin size={14} />
                                             <span>{event.location}</span>

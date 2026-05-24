@@ -565,36 +565,64 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   <p className="text-slate-500 font-bold">Belum ada pengajuan surat.</p>
                 </div>
               ) : (
-                letters.map(letter => (
-                  <Card key={letter.id} className="bg-white border-slate-100 hover:border-indigo-200 transition-all">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                          <FileText size={20} />
+                [...letters].sort((a, b) => {
+                  const isNewA = a.status === 'Menunggu' || a.status === 'Pending';
+                  const isNewB = b.status === 'Menunggu' || b.status === 'Pending';
+                  if (isNewA && !isNewB) return -1;
+                  if (!isNewA && isNewB) return 1;
+                  
+                  const timeA = a.date ? new Date(a.date).getTime() : 0;
+                  const timeB = b.date ? new Date(b.date).getTime() : 0;
+                  return timeB - timeA;
+                }).map(letter => {
+                  const dateObj = new Date(letter.date);
+                  const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Makassar' });
+                  const hasTime = letter.date && (letter.date.includes('T') || letter.date.includes(':'));
+                  const formattedTime = hasTime && !isNaN(dateObj.getTime()) ? dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Makassar' }) + ' WITA' : '';
+                  
+                  return (
+                    <Card key={letter.id} className="bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50/50 transition-all">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                            <FileText size={20} />
+                          </div>
+                          <div>
+                            <h4 className="font-black text-slate-800">{letter.type}</h4>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex flex-col mt-0.5">
+                              <span>Diajukan: {formattedDate}</span>
+                              {formattedTime && <span className="text-indigo-600 font-extrabold mt-0.5">{formattedTime}</span>}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-black text-slate-800">{letter.type}</h4>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                            {new Date(letter.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                          letter.status === 'Disetujui' || letter.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                          letter.status === 'Ditolak' || letter.status === 'Rejected' ? 'bg-rose-50 text-rose-600 border-rose-200' :
+                          'bg-amber-50 text-amber-600 border-amber-200'
+                        }`}>
+                          {letter.status === 'Approved' ? 'Disetujui' : letter.status === 'Rejected' ? 'Ditolak' : letter.status === 'Pending' ? 'Menunggu' : letter.status}
+                        </span>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="p-3 bg-slate-50 rounded-xl">
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
+                          <p className="text-xs font-semibold text-slate-700 leading-relaxed">{letter.purposeDetail}</p>
+                        </div>
+                        {letter.nik && (
+                          <p className="text-[11px] font-bold text-slate-500">
+                            NIK Pemohon: <span className="text-slate-700">{letter.nik}</span>
                           </p>
-                        </div>
+                        )}
+                        {letter.letterNumber && (
+                          <div className="p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl text-xs">
+                            <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">Nomor Surat Resmi</p>
+                            <p className="font-black text-indigo-700">{letter.letterNumber}</p>
+                          </div>
+                        )}
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                        letter.status === 'Disetujui' || letter.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
-                        letter.status === 'Ditolak' || letter.status === 'Rejected' ? 'bg-rose-50 text-rose-600 border-rose-200' :
-                        'bg-amber-50 text-amber-600 border-amber-200'
-                      }`}>
-                        {letter.status}
-                      </span>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
-                        <p className="text-xs font-bold text-slate-700 line-clamp-2">{letter.purposeDetail}</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))
+                    </Card>
+                  );
+                })
               )}
             </div>
           </motion.div>
@@ -1271,7 +1299,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                     </div>
                     <div className="text-right hidden md:block">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Dilaporkan Pada</p>
-                      <p className="text-xs font-bold text-slate-700">{new Date(guest.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</p>
+                      <p className="text-xs font-bold text-slate-700">{new Date(guest.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Makassar' })} WITA</p>
                     </div>
                   </Card>
                 ))
