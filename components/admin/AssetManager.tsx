@@ -195,16 +195,58 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
     }
   };
 
+  const totalAssets = inventory.length;
+  const goodAssets = inventory.filter(i => i.condition === 'Baik').length;
+  const activeBorrows = inventoryLogs.filter(l => l.status === 'Borrowed').length;
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-20">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Manajemen Aset & Inventaris</h2>
-          <p className="text-slate-500 font-medium mt-1">Kelola aset dan perlengkapan RT 02.</p>
+          <p className="text-slate-500 font-medium mt-1">Kelola aset, peminjaman barang warga, dan pencatatan kondisi perlengkapan RT 02.</p>
         </div>
-        <Button onClick={() => { resetInvForm(); setIsInvModalOpen(true); }}>
-          <Plus size={16} /> Tambah Aset
+        <Button onClick={() => { resetInvForm(); setIsInvModalOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all hover:scale-105 active:scale-95">
+          <Plus size={16} className="mr-1.5" /> Tambah Aset
         </Button>
+      </div>
+
+      {/* Asset Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-indigo-50 via-white to-indigo-50/30 p-6 rounded-[2rem] border border-indigo-100/60 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">Aset Terdaftar</p>
+            <p className="text-3xl font-black text-indigo-950 leading-none">{totalAssets} <span className="text-xs font-bold text-indigo-500">Kategori</span></p>
+            <p className="text-[11px] text-indigo-600 font-medium">Jumlah total jenis barang inventaris RT</p>
+          </div>
+          <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-indigo-600">
+            <Package size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 p-6 rounded-[2rem] border border-emerald-100/60 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest">Kondisi Prima (Baik)</p>
+            <p className="text-3xl font-black text-emerald-950 leading-none">
+              {totalAssets > 0 ? Math.round((goodAssets / totalAssets) * 100) : 100}%
+            </p>
+            <p className="text-[11px] text-emerald-600/90 font-medium">{goodAssets} dari {totalAssets} barang berstatus BAIK</p>
+          </div>
+          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-emerald-600">
+            <CheckCircle2 size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50/30 p-6 rounded-[2rem] border border-amber-100/60 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] text-amber-500 font-extrabold uppercase tracking-widest">Sedang Dipinjam</p>
+            <p className="text-3xl font-black text-amber-950 leading-none">{activeBorrows} <span className="text-xs font-bold text-amber-500">Warga</span></p>
+            <p className="text-[11px] text-amber-600 font-medium">Log peminjaman aktif belum dikembalikan</p>
+          </div>
+          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-600">
+            <ClipboardList size={24} />
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">

@@ -191,16 +191,56 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
     a.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const totalActivities = activities.length;
+  const upcomingActivities = activities.filter(a => a.status === 'Upcoming').length;
+  const ongoingActivities = activities.filter(a => a.status === 'Ongoing').length;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Presensi Kegiatan Digital</h2>
-          <p className="text-slate-500 text-sm font-medium">Kelola kegiatan warga dan pantau kehadiran secara real-time.</p>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Presensi Kegiatan Digital</h2>
+          <p className="text-slate-500 font-medium mt-1">Buat jadwal agenda rapat atau gotong royong warga, kelola QR kehadiran, dan pantau data presensi.</p>
         </div>
-        <Button onClick={() => { resetForm(); setIsModalOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200">
+        <Button onClick={() => { resetForm(); setIsModalOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95">
           <Plus size={18} className="mr-2" /> Buat Kegiatan
         </Button>
+      </div>
+
+      {/* Activity Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-indigo-50 via-white to-indigo-50/30 p-6 rounded-[2rem] border border-indigo-100/60 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">Total Agenda</p>
+            <p className="text-3xl font-black text-indigo-950 leading-none">{totalActivities} <span className="text-xs font-bold text-indigo-500">Kegiatan</span></p>
+            <p className="text-[11px] text-indigo-600 font-medium">Seluruh kegiatan yang tercatat secara digital</p>
+          </div>
+          <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-indigo-600">
+            <Calendar size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50/30 p-6 rounded-[2rem] border border-amber-100/60 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] text-amber-500 font-extrabold uppercase tracking-widest font-black text-slate-600">Mendatang (Upcoming)</p>
+            <p className="text-3xl font-black text-amber-950 leading-none">{upcomingActivities} <span className="text-xs font-bold text-amber-500">Agenda</span></p>
+            <p className="text-[11px] text-amber-600 font-medium">Kegiatan terjadwal yang akan segera dilaksanakan</p>
+          </div>
+          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-600 font-black text-slate-600">
+            <Clock size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 p-6 rounded-[2rem] border border-emerald-100/60 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest font-black text-slate-600">Sedang Berjalan (Ongoing)</p>
+            <p className="text-3xl font-black text-emerald-950 leading-none">{ongoingActivities} <span className="text-xs font-bold text-emerald-500">Aktif</span></p>
+            <p className="text-[11px] text-emerald-600 font-medium">Kegiatan sedang berlangsung hari ini</p>
+          </div>
+          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-emerald-600 font-black text-slate-600">
+            <Users size={24} />
+          </div>
+        </div>
       </div>
 
       <div className="relative group">

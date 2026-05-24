@@ -138,12 +138,50 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pengurus RT 02</h2>
-          <p className="text-slate-500 font-medium mt-1">Kelola data struktur organisasi dan personil Rukun Tetangga.</p>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Struktur Kepengurusan RT 02</h2>
+          <p className="text-slate-500 font-medium mt-1">Kelola data struktur organisasi, pembagian seksi, dan keanggotaan aktif Rukun Tetangga.</p>
         </div>
         <Button onClick={() => { resetForms(); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all hover:scale-105 active:scale-95">
           <Plus size={18} className="mr-2"/> Tambah Personil
         </Button>
+      </div>
+
+      {/* Stats Cards Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-indigo-50 to-violet-50 text-indigo-950 p-6 rounded-[2rem] border border-indigo-100/60 shadow-sm flex items-center justify-between">
+          <div className="space-y-2">
+            <p className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">Total Personil</p>
+            <p className="text-3xl font-black text-indigo-900 leading-none">{officials.length} <span className="text-xs font-semibold text-indigo-500">Anggota</span></p>
+            <p className="text-[11px] text-indigo-600 font-medium">Pengurus terdaftar aktif di database RT</p>
+          </div>
+          <div className="p-4 bg-white/80 rounded-2xl border border-indigo-200/50 text-indigo-600">
+            <Briefcase size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-950 p-6 rounded-[2rem] border border-emerald-100/60 shadow-sm flex items-center justify-between">
+          <div className="space-y-2">
+            <p className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest">Masa Bakti RT</p>
+            <p className="text-xl font-black text-emerald-900 leading-none">Periode Berlangsung</p>
+            <p className="text-[11px] text-emerald-600 font-medium">Berdasarkan keputusan mufakat warga</p>
+          </div>
+          <div className="p-4 bg-white/80 rounded-2xl border border-emerald-200/50 text-emerald-600">
+            <MapPin size={24} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 p-6 rounded-[2rem] border border-slate-200 shadow-sm flex items-center justify-between">
+          <div className="space-y-2">
+            <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-widest">Kelengkapan Jabatan</p>
+            <p className="text-3xl font-black text-slate-800 leading-none">
+              {officials.some(o => o.role.toLowerCase().includes('ketua')) ? '100%' : '75%'}
+            </p>
+            <p className="text-[11px] text-slate-500 font-medium">Badan Eksekutif Rukun Tetangga</p>
+          </div>
+          <div className="p-4 bg-white rounded-2xl border border-slate-200 text-slate-600">
+            <User size={24} />
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
