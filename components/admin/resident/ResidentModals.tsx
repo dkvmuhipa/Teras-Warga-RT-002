@@ -52,7 +52,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
     if (tab === 'basic') {
       const requiredFields = [
-        { key: 'headOfFamily', label: 'Kepala Keluarga' },
+        { key: 'headOfFamily', label: 'Kepala Keluarga / Penghuni' },
         { key: 'nik', label: 'NIK' },
         { key: 'kkNumber', label: 'Nomor KK' },
         { key: 'gender', label: 'Jenis Kelamin' },
@@ -238,7 +238,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 relative z-10">
                       <div className="md:col-span-8">
                         <FormField 
-                          label="Nama Lengkap Kepala Keluarga" 
+                          label="Nama Lengkap Kepala Keluarga / Penghuni" 
                           required 
                           placeholder="Nama lengkap..."
                           value={formData.headOfFamily} 
@@ -384,8 +384,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           {formData.status !== 'Empty' && (
                             <div>
                               <label className="block text-xs font-bold text-slate-705 mb-1.5">Status Kepemilikan Rumah</label>
-                              <div className="grid grid-cols-4 gap-2">
-                                 {['Tetap', 'Keluarga', 'Kontrak', 'Kost'].map((st) => (
+                              <div className="grid grid-cols-3 gap-2">
+                                 {['Tetap', 'Keluarga', 'Sewa'].map((st) => (
                                    <button
                                      key={st}
                                      type="button"

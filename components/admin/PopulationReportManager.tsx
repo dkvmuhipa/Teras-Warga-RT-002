@@ -79,7 +79,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       reasonForMoving: '',
       familyCount: 1,
       familyMembers: [] as {name: string, relationship: string, nik?: string}[],
-      residenceType: 'Tetap' as 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga',
+      residenceType: 'Tetap' as 'Tetap' | 'Sewa' | 'Rumah Keluarga',
       religion: '',
       vulnerability: [] as string[],
       kkNumber: '',
@@ -309,7 +309,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     houses.forEach(house => {
       if (house.status === 'Occupied') {
         const occupantsCount = house.occupants || 1;
-        const isSeasonal = house.residenceType === 'Kontrak' || house.residenceType === 'Kost';
+        const isSeasonal = house.residenceType === 'Sewa';
         if (isSeasonal) {
           currentSeasonal += occupantsCount;
         }
@@ -1305,7 +1305,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           {/* Musiman Section */}
           <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-4 shadow-sm">
             <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
-              <Clock size={14} /> Warga Musiman / Kontrak
+              <Clock size={14} /> Warga Musiman / Sewa
             </h4>
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -1611,8 +1611,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     >
                       <option value="Tetap">Tetap</option>
                       <option value="Rumah Keluarga">Rumah Keluarga</option>
-                      <option value="Kontrak">Kontrak</option>
-                      <option value="Kost">Kost</option>
+                      <option value="Sewa">Sewa</option>
                     </select>
                   </div>
                   <div>

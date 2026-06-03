@@ -429,7 +429,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-8">
                     <div className="space-y-4 md:space-y-6">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Nama Kepala Keluarga</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Nama Kepala Keluarga / Penghuni</p>
                         <p className="text-2xl md:text-4xl font-black tracking-tight">{currentHouse?.headOfFamily}</p>
                       </div>
                       <div className="flex flex-wrap gap-4 md:gap-12">
@@ -707,11 +707,11 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 <div className="space-y-4">
                   <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
                     <h4 className="text-xs font-black text-indigo-900 uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <User size={14} /> Identitas Kepala Keluarga
+                      <User size={14} /> Identitas Kepala Keluarga / Penghuni
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Kepala Keluarga</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Kepala Keluarga / Penghuni</label>
                         <input 
                           type="text" 
                           required
@@ -809,8 +809,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                           onChange={e => setUpdateForm({...updateForm, residenceType: e.target.value as any})}
                         >
                           <option value="Tetap">Tetap</option>
-                          <option value="Kontrak">Kontrak</option>
-                          <option value="Kost">Kost</option>
+                          <option value="Sewa">Sewa</option>
                           <option value="Rumah Keluarga">Rumah Keluarga</option>
                         </select>
                       </div>
@@ -1131,7 +1130,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   <div className="space-y-4">
                     <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
                       <h4 className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <User size={12} /> Identitas Kepala Keluarga
+                        <User size={12} /> Identitas Kepala Keluarga / Penghuni
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="p-2 bg-white/50 rounded-lg">

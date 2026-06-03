@@ -13,7 +13,7 @@
         "role": { "type": "string", "enum": ["Admin", "Bendahara", "Sekretaris", "Warga"] },
         "isVerified": { "type": "boolean" },
         "status": { "type": "string", "enum": ["Occupied", "Empty", "Business"] },
-        "residenceType": { "type": "string", "enum": ["Tetap", "Kontrak", "Kost", "Rumah Keluarga"] },
+        "residenceType": { "type": "string", "enum": ["Tetap", "Sewa", "Rumah Keluarga"] },
         "occupants": { "type": "number" },
         "accessCode": { "type": "string" }
       },

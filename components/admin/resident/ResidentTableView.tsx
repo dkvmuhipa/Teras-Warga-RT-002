@@ -77,6 +77,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                   <th className="px-5 py-3">Kontak / WA</th>
                   <th className="px-5 py-3 w-24 text-center">Jiwa</th>
                   <th className="px-5 py-3 w-36">SPPT PBB</th>
+                  <th className="px-5 py-3 w-36">Kepemilikan</th>
                   <th className="px-5 py-3 w-28">Status Hunian</th>
                   <th className="px-5 py-3 w-32 text-center">Sampah</th>
                   <th className="px-5 py-3 w-32 text-center">Air</th>
@@ -173,6 +174,25 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                           <span className={`w-1.5 h-1.5 rounded-full ${house.pbbStatus === 'Sudah Diambil' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                           <span>{house.pbbStatus === 'Sudah Diambil' ? 'Diambil' : 'Sisa SPT'}</span>
                         </button>
+                      </td>
+
+                      {/* Kepemilikan Status Quick Setter */}
+                      <td className="px-5 py-3.5">
+                        <select
+                          value={house.residenceType || 'Tetap'}
+                          onChange={(e) => handleUpdateHouse(house.id, { residenceType: e.target.value as any })}
+                          className={`appearance-none px-2.5 py-1 rounded-lg text-[10px] font-bold border outline-none cursor-pointer transition-all ${
+                            (house.residenceType || 'Tetap') === 'Tetap'
+                              ? 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
+                              : (house.residenceType || 'Tetap') === 'Sewa'
+                              ? 'bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100/55'
+                              : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100/55'
+                          }`}
+                        >
+                          <option value="Tetap" className="bg-white text-slate-800">🏠 Tetap</option>
+                          <option value="Sewa" className="bg-white text-slate-800">🔑 Sewa</option>
+                          <option value="Rumah Keluarga" className="bg-white text-slate-800">👨‍👩‍👦 Keluarga</option>
+                        </select>
                       </td>
 
                       {/* Occupany Status */}

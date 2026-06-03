@@ -12,6 +12,8 @@ interface ResidentControlsProps {
   setFilterStatus: (status: any) => void;
   filterResidenceType: string;
   setFilterResidenceType: (type: string) => void;
+  filterBlock: string;
+  setFilterBlock: (block: string) => void;
   sortBy: 'name' | 'block';
   setSortBy: (sort: 'name' | 'block') => void;
   viewMode: string;
@@ -28,6 +30,8 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
   setFilterStatus,
   filterResidenceType,
   setFilterResidenceType,
+  filterBlock,
+  setFilterBlock,
   sortBy,
   setSortBy,
   viewMode,
@@ -142,9 +146,25 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           >
             <option value="all">Semua Status</option>
             <option value="Tetap">Tetap</option>
-            <option value="Kontrak">Kontrak</option>
-            <option value="Kost">Kost</option>
+            <option value="Sewa">Sewa</option>
             <option value="Rumah Keluarga">Rumah Keluarga</option>
+          </select>
+        </FilterGroup>
+
+        <FilterGroup icon={<MapPin size={13} className="text-blue-500" />} label="Filter Blok">
+          <select 
+            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
+            value={filterBlock} 
+            onChange={e => setFilterBlock(e.target.value)}
+          >
+            <option value="all">Semua Blok</option>
+            <option value="C5">Blok C5</option>
+            <option value="C7">Blok C7</option>
+            <option value="C8">Blok C8</option>
+            <option value="C9">Blok C9</option>
+            <option value="C10">Blok C10</option>
+            <option value="C11">Blok C11</option>
+            <option value="C12">Blok C12</option>
           </select>
         </FilterGroup>
 

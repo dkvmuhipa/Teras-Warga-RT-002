@@ -929,7 +929,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const allPdfCols = [
         { id: 'block', label: "BLOK", baseWidth: 10 },
         { id: 'number', label: "NO RUMAH", baseWidth: 14 },
-        { id: 'headOfFamily', label: "NAMA KEPALA KELUARGA", baseWidth: 35 },
+        { id: 'headOfFamily', label: "NAMA KEPALA KELUARGA (PENGHUNI)", baseWidth: 50 },
         { id: 'gender', label: "L/P", baseWidth: 8 },
         { id: 'birthDate', label: "TGL LAHIR", baseWidth: 18 },
         { id: 'religion', label: "AGAMA", baseWidth: 14 },
@@ -1089,12 +1089,9 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
                 if (text === 'Tetap') {
                     doc.setFont("times", "bold");
                     doc.setTextColor(15, 118, 110); // Teal-700
-                } else if (text === 'Kontrak') {
+                } else if (text === 'Kontrak' || text === 'Sewa' || text === 'Kost') {
                     doc.setFont("times", "bold");
                     doc.setTextColor(180, 83, 9); // Amber-700
-                } else if (text === 'Kost') {
-                    doc.setFont("times", "bold");
-                    doc.setTextColor(190, 24, 93); // Pink-700
                 } else if (text === 'Keluarga' || text === 'Rumah Keluarga') {
                     doc.setFont("times", "bold");
                     doc.setTextColor(79, 70, 229); // Indigo-600
@@ -1152,12 +1149,11 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const businessCount = houses.filter(h => h.status === 'Business').length;
 
     const tetaps = houses.filter(h => h.residenceType === 'Tetap').length;
-    const kontraks = houses.filter(h => h.residenceType === 'Kontrak').length;
-    const kosts = houses.filter(h => h.residenceType === 'Kost').length;
+    const sewas = houses.filter(h => h.residenceType === 'Sewa').length;
     const keluargas = houses.filter(h => h.residenceType === 'Rumah Keluarga').length;
 
     const row1Txt = `Status Hunian      :  Dihuni = ${occupiedCount}  |  Belum Dihuni (Kosong) = ${emptyCount}  |  Usaha = ${businessCount}`;
-    const row2Txt = `Status Kepemilikan :  Tetap = ${tetaps}  |  Kontrak = ${kontraks}  |  Kost = ${kosts}  |  Keluarga = ${keluargas}`;
+    const row2Txt = `Status Kepemilikan :  Tetap = ${tetaps}  |  Sewa / Kontrak = ${sewas}  |  Keluarga = ${keluargas}`;
 
     doc.text(row1Txt, margin + 4, y + 11);
     doc.text(row2Txt, margin + 4, y + 17);
@@ -1755,7 +1751,7 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
     let y = 92;
 
     const colWidths = [8, 18, 69, 35, 40]; 
-    const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA", "SUDAH/BELUM", "TANDA TANGAN"];
+    const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA (PENGHUNI)", "SUDAH/BELUM", "TANDA TANGAN"];
     
     const drawTableHeaders = (startY: number) => {
         doc.setFillColor(40, 40, 40); // Darker for better contrast
@@ -2398,7 +2394,7 @@ export const generateBillReportPDF = async (houses: House[], iuranPayments: any[
     let y = 92;
 
     const colWidths = [8, 18, 69, 35, 40]; 
-    const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA", "STATUS", "KETERANGAN"];
+    const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA (PENGHUNI)", "STATUS", "KETERANGAN"];
     
     const drawTableHeaders = (startY: number) => {
         doc.setFillColor(40, 40, 40);

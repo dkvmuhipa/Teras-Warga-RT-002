@@ -62,8 +62,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
     const businessCount = houses.filter(h => h.status === 'Business').length;
 
     const tetapCount = houses.filter(h => h.residenceType === 'Tetap').length;
-    const kontrakCount = houses.filter(h => h.residenceType === 'Kontrak').length;
-    const kostCount = houses.filter(h => h.residenceType === 'Kost').length;
+    const sewaCount = houses.filter(h => h.residenceType === 'Sewa').length;
 
     const pregnantTotal = houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0);
     const babyTotal = houses.reduce((acc, h) => acc + (h.babyCount || 0), 0);
@@ -958,12 +957,8 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                     <span className="text-xs font-black text-indigo-600">{tetapCount}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs font-bold text-slate-600">Kontrak/Sewa</span>
-                                    <span className="text-xs font-black text-amber-600">{kontrakCount}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-xs font-bold text-slate-600">Kost</span>
-                                    <span className="text-xs font-black text-cyan-600">{kostCount}</span>
+                                    <span className="text-xs font-bold text-slate-600">Sewa / Kontrakan</span>
+                                    <span className="text-xs font-black text-amber-600">{sewaCount}</span>
                                 </div>
                             </div>
                         </div>

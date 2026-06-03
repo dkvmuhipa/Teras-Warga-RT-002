@@ -96,7 +96,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [deathCause, setDeathCause] = useState('');
   const [deathPlace, setDeathPlace] = useState('');
   const [familyMembers, setFamilyMembers] = useState<{name: string, relationship: string, nik?: string}[]>([]);
-  const [mutationResidenceType, setMutationResidenceType] = useState<'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga'>('Tetap');
+  const [mutationResidenceType, setMutationResidenceType] = useState<'Tetap' | 'Sewa' | 'Rumah Keluarga'>('Tetap');
   const [mutationReligion, setMutationReligion] = useState('Islam');
   const [mutationVulnerability, setMutationVulnerability] = useState<string[]>([]);
 
@@ -658,7 +658,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <input className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" value={nik} onChange={e=>setNik(e.target.value)} required placeholder="320..."/>
                     </div>
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Kepala Keluarga</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Kepala Keluarga / Penghuni</label>
                       <input className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" value={familyHeadName} onChange={e=>setFamilyHeadName(e.target.value)} required placeholder="Nama di KK"/>
                     </div>
 
@@ -1455,7 +1455,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           <div className="group">
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Status Hunian <span className="text-rose-500">*</span></label>
                             <div className="flex flex-wrap gap-2">
-                              {['Tetap', 'Kontrak', 'Kost', 'Rumah Keluarga'].map((type) => (
+                              {['Tetap', 'Sewa', 'Rumah Keluarga'].map((type) => (
                                 <button
                                   key={type}
                                   type="button"

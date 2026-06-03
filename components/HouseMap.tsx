@@ -193,7 +193,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                             {house.headOfFamily.charAt(0)}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] leading-none mb-1.5">Kepala Keluarga</p>
+                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] leading-none mb-1.5">Kepala Keluarga / Penghuni</p>
                                             <h3 className="font-black text-slate-900 text-xl truncate leading-tight">{house.headOfFamily}</h3>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <div className="flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
@@ -401,8 +401,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
         if (officialRole) return "bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 border-amber-400 text-white shadow-lg shadow-indigo-500/40 z-10 ring-2 ring-amber-300";
         if (house.status === 'Empty') return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
         if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
-        if (house.residenceType === 'Kost') return "bg-gradient-to-br from-cyan-100 to-blue-200 border-cyan-500 text-cyan-900";
-        if (house.residenceType === 'Kontrak') return "bg-gradient-to-br from-amber-100 to-orange-200 border-amber-500 text-amber-900";
+        if (house.residenceType === 'Sewa') return "bg-gradient-to-br from-amber-100 to-orange-200 border-amber-500 text-amber-900";
         return "bg-gradient-to-br from-emerald-100 to-teal-200 border-emerald-500 text-emerald-900";
     };
 
@@ -431,8 +430,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                     <Store size={12} className="opacity-80"/>
                 ) : (
                     <div className="flex flex-wrap items-center justify-center gap-0.5">
-                        {house.residenceType === 'Kost' ? <GraduationCap size={10} className="opacity-80 text-cyan-800" /> :
-                         house.residenceType === 'Kontrak' ? <Key size={10} className="opacity-80 text-amber-800" /> : 
+                        {(house.residenceType === 'Sewa') ? <Key size={10} className="opacity-80 text-amber-800" /> : 
                          <Home size={10} className="opacity-80"/>}
                         
                         {house.paymentStatusSampah === PaymentStatus.PAID && (
@@ -1039,11 +1037,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded bg-gradient-to-br from-amber-100 to-orange-200 border border-amber-500"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kontrak</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded bg-gradient-to-br from-cyan-100 to-blue-200 border border-cyan-500"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kost</span>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Sewa / Kontrak</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded bg-slate-100 border border-slate-300 border-dashed"></div>
@@ -1222,8 +1216,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                     <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Status Hunian</h4>
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-100 border border-emerald-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Tetap</span></div>
-                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-amber-100 border border-amber-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kontrak</span></div>
-                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-cyan-100 border border-cyan-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kost</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-amber-100 border border-amber-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Sewa / Kontrak</span></div>
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-100 border border-slate-300 border-dashed"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kosong</span></div>
                                     </div>
                                 </div>

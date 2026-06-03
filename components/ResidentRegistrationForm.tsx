@@ -364,11 +364,10 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                   <div className="md:col-span-2 space-y-3">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status Kepemilikan Rumah <span className="text-rose-500">*</span></label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {[
                         { id: 'Tetap', label: 'Milik Sendiri', desc: 'Sertifikat pribadi/keluarga' },
-                        { id: 'Kontrak', label: 'Kontrak / Sewa', desc: 'Sewa per bulan / tahun' },
-                        { id: 'Kost', label: 'Kost / Singgah', desc: 'Indekos non-permanen' },
+                        { id: 'Sewa', label: 'Sewa / Kontrak', desc: 'Sewa / indekos per bulan / tahun' },
                         { id: 'Rumah Keluarga', label: 'Rumah Keluarga', desc: 'Kerabat / Orang tua' }
                       ].map((type) => {
                         const isSel = formData.residenceType === type.id;
@@ -448,12 +447,12 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center border border-blue-100">
                     <User size={15} />
                   </div>
-                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Profil Kepala Keluarga</h3>
+                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Profil Kepala Keluarga / Penghuni</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap Kepala Keluarga <span className="text-rose-500">*</span></label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap Kepala Keluarga / Penghuni <span className="text-rose-500">*</span></label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                       <input 
@@ -809,7 +808,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                 {uploadType === 'file' ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">KTP Kepala Keluarga</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">KTP Kepala Keluarga / Penghuni</label>
                       <div className={`
                         relative h-44 rounded-3xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2 cursor-pointer overflow-hidden p-6 text-center
                         ${ktpFile ? 'border-indigo-500 bg-indigo-50/40 text-indigo-600' : 'border-slate-200 bg-slate-50 hover:border-indigo-400 hover:bg-slate-50/50'}

@@ -117,6 +117,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
   const [filterStatus, setFilterStatus] = useState<any>('all');
   const [filterResidenceType, setFilterResidenceType] = useState<string>('all');
+  const [filterBlock, setFilterBlock] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'name' | 'block'>('block');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedResident, setSelectedResident] = useState<House | null>(null);
@@ -589,6 +590,27 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       } catch (e) {
           handleFirestoreError(e, OperationType.UPDATE, "houses");
           toast.error('Gagal memverifikasi warga.');
+      }
+    }
+  };
+
+  const handleBulkChangeResidenceType = async (type: 'Tetap' | 'Sewa' | 'Rumah Keluarga') => {
+    if (selectedIds.size === 0) return;
+    const isConfirmed = await confirm({
+      title: 'Ubah Kepemilikan Massal',
+      message: `Apakah Anda yakin ingin mengubah status kepemilikan ${selectedIds.size} warga terpilih menjadi "${type}" secara sekaligus?`,
+      confirmLabel: 'Ubah Status',
+    });
+    if (isConfirmed) {
+      try {
+          const updates = Array.from(selectedIds).map(id => ({ id, residenceType: type }));
+          await batchUpdateHouses(updates);
+          await logAction('Ubah Kepemilikan Massal', `Ubah status kepemilikan ${selectedIds.size} warga terpilih menjadi ${type}`);
+          toast.success(`Status kepemilikan terpilih berhasil diubah menjadi ${type}.`);
+          setSelectedIds(new Set());
+      } catch (e) {
+          handleFirestoreError(e, OperationType.UPDATE, "houses");
+          toast.error('Gagal mengubah status kepemilikan warga.');
       }
     }
   };
@@ -1135,7 +1157,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       matchesResidenceType = (h.residenceType || 'Tetap') === filterResidenceType;
     }
 
-    return matchesSearch && matchesStatus && matchesResidenceType;
+    let matchesBlock = true;
+    if (filterBlock !== 'all') {
+      matchesBlock = h.block === filterBlock;
+    }
+
+    return matchesSearch && matchesStatus && matchesResidenceType && matchesBlock;
   }).sort((a, b) => {
     if (sortBy === 'name') return a.headOfFamily.localeCompare(b.headOfFamily);
     const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
@@ -1288,6 +1315,24 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 <Trash2 size={14} className="group-hover:scale-110 transition-transform" /> 
                 <span>Hapus</span>
               </button>
+
+              <div className="relative">
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleBulkChangeResidenceType(e.target.value as any);
+                      e.target.value = ""; // Reset value
+                    }
+                  }}
+                  className="px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-650 hover:text-white transition-all border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
+                  defaultValue=""
+                >
+                  <option value="" disabled>🏠 Status Kepemilikan</option>
+                  <option value="Tetap" className="bg-white text-slate-850 font-bold">🏠 Tetap (Milik)</option>
+                  <option value="Sewa" className="bg-white text-slate-850 font-bold">🔑 Sewa (Sewa/Kontrak)</option>
+                  <option value="Rumah Keluarga" className="bg-white text-slate-850 font-bold">👨‍👩‍👦 Keluarga</option>
+                </select>
+              </div>
             </div>
           )}
           
@@ -1348,6 +1393,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     
                     <div className="h-px bg-slate-100 mx-3 my-2"></div>
                     <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Impor & Ekspor</div>
+                    
+                    <button 
+                      onClick={() => { 
+                        handleDownloadTemplate(); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
+                    >
+                      <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
+                        <FileText size={14} />
+                      </div>
+                      <span>Unduh Template Excel</span>
+                    </button>
                     
                     <button 
                       onClick={() => { 
@@ -1512,6 +1570,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         setFilterStatus={setFilterStatus}
         filterResidenceType={filterResidenceType}
         setFilterResidenceType={setFilterResidenceType}
+        filterBlock={filterBlock}
+        setFilterBlock={setFilterBlock}
         sortBy={sortBy}
         setSortBy={setSortBy}
         viewMode={viewMode}

@@ -104,7 +104,7 @@ export const generateHouses = (): House[] => {
         headOfFamily: status === 'Empty' ? '-' : `Warga ${config.code}-${number}`,
         occupants,
         status,
-        residenceType: status === 'Occupied' ? (isRenter ? 'Kontrak' : 'Tetap') : 'Tetap',
+        residenceType: status === 'Occupied' ? (isRenter ? 'Sewa' : 'Tetap') : 'Tetap',
         paymentStatusAir: getRandStatus(),
         paymentStatusSampah: getRandStatus(),
         phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,

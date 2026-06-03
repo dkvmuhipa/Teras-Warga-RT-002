@@ -1777,7 +1777,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     />
                   </div>
                   <div className="group">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Kepala Keluarga</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Kepala Keluarga / Penghuni</label>
                     <input 
                       className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
                       value={adminForm.familyHeadName || ''} 

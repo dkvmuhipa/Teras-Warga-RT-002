@@ -48,7 +48,7 @@ export interface House {
   birthDate?: string;
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business';
-  residenceType?: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga'; // NEW: Status Kepemilikan including Kost
+  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga'; // NEW: Status Kepemilikan (Tetap, Sewa, Rumah Keluarga)
   ownerName?: string; // NEW: Nama Pemilik Rumah (jika berbeda dengan penghuni)
   ownerPhone?: string; // NEW: Kontak Pemilik Rumah
   paymentStatus?: PaymentStatus; // Status Iuran Umum
@@ -160,7 +160,7 @@ export interface ResidentRegistration {
   number: string;
   phone: string;
   status: 'Occupied' | 'Empty' | 'Business';
-  residenceType: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga';
+  residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
   occupants: number;
   kkNumber?: string;
   education?: string;
@@ -605,7 +605,7 @@ export interface PopulationChangeLog {
     reasonForMoving?: string;
     familyCount?: number;
     familyMembers?: { name: string; relationship: string; nik?: string }[];
-    residenceType?: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga';
+    residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
     religion?: string;
     vulnerability?: string[];
     kkNumber?: string;
@@ -812,7 +812,7 @@ export interface UpdateRequest {
   birthDate?: string;
   phone: string;
   occupants: number;
-  residenceType?: 'Tetap' | 'Kontrak' | 'Kost' | 'Rumah Keluarga';
+  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
   nik?: string;
   kkNumber?: string;
   maritalStatus?: 'Belum Kawin' | 'Kawin' | 'Cerai Hidup' | 'Cerai Mati';
