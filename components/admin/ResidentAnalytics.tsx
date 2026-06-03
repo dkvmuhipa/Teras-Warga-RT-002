@@ -16,6 +16,7 @@ export const ResidentAnalytics: React.FC<ResidentAnalyticsProps> = ({ houses }) 
   const residenceTypeData = [
     { name: 'Tetap', value: houses.filter(h => h.residenceType === 'Tetap').length },
     { name: 'Sewa', value: houses.filter(h => h.residenceType === 'Sewa').length },
+    { name: 'Mengunjungi', value: houses.filter(h => h.residenceType === 'Mengunjungi').length },
   ];
 
   return (

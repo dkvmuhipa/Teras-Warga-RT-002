@@ -66,9 +66,14 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
               <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[9px] font-bold uppercase tracking-wider">
                 Blok {house.block}-{house.number}
               </span>
-              {house.residenceType && house.status === 'Occupied' && (
-                <span className="text-[9px] font-semibold text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wide">
-                  {house.residenceType}
+              {house.residenceType && (
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border ${
+                  house.residenceType === 'Tetap' ? 'bg-slate-50 text-slate-600 border-slate-200' :
+                  house.residenceType === 'Sewa' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                  house.residenceType === 'Rumah Keluarga' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' :
+                  'bg-emerald-50 text-emerald-600 border-emerald-200'
+                }`}>
+                  {house.residenceType === 'Mengunjungi' ? 'Mengunjungi' : house.residenceType}
                 </span>
               )}
             </div>

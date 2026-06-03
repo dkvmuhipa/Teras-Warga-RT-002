@@ -186,12 +186,15 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                               ? 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
                               : (house.residenceType || 'Tetap') === 'Sewa'
                               ? 'bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100/55'
-                              : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100/55'
+                              : (house.residenceType || 'Tetap') === 'Rumah Keluarga'
+                              ? 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100/55'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100/55'
                           }`}
                         >
                           <option value="Tetap" className="bg-white text-slate-800">🏠 Tetap</option>
                           <option value="Sewa" className="bg-white text-slate-800">🔑 Sewa</option>
                           <option value="Rumah Keluarga" className="bg-white text-slate-800">👨‍👩‍👦 Keluarga</option>
+                          <option value="Mengunjungi" className="bg-white text-slate-800">🧹 Mengunjungi (Kunjungan)</option>
                         </select>
                       </td>
 

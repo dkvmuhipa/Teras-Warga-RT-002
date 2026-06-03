@@ -289,6 +289,7 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
   const tetaps = houses.filter(h => h.residenceType === 'Tetap').length;
   const sewas = houses.filter(h => h.residenceType === 'Sewa').length;
   const keluargas = houses.filter(h => h.residenceType === 'Rumah Keluarga').length;
+  const singgahs = houses.filter(h => h.residenceType === 'Mengunjungi').length;
 
   const statusRow = worksheet.addRow([
     'Status Hunian:',
@@ -310,7 +311,8 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
     'Status Kepemilikan:',
     `Tetap: ${tetaps} Rumah`,
     `Sewa / Kontrak: ${sewas} Rumah`,
-    `Rumah Keluarga: ${keluargas} Rumah`
+    `Rumah Keluarga: ${keluargas} Rumah`,
+    `Mengunjungi: ${singgahs} Rumah`
   ]);
   kepemilikanRow.height = 20;
   kepemilikanRow.eachCell((cell, colNumber) => {
@@ -622,10 +624,11 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     else if (paymentStatusSampahRaw?.toLowerCase() === 'belum lunas' || paymentStatusSampahRaw?.toLowerCase() === 'pending') paymentStatusSampah = PaymentStatus.PENDING;
 
     // Map residence type
-    let residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | undefined = undefined;
+    let residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Mengunjungi' | undefined = undefined;
     if (residenceTypeRaw?.toLowerCase() === 'tetap') residenceType = 'Tetap';
     else if (residenceTypeRaw?.toLowerCase() === 'kontrak' || residenceTypeRaw?.toLowerCase() === 'sewa' || residenceTypeRaw?.toLowerCase() === 'kost') residenceType = 'Sewa';
     else if (residenceTypeRaw?.toLowerCase() === 'keluarga' || residenceTypeRaw?.toLowerCase() === 'rumah keluarga') residenceType = 'Rumah Keluarga';
+    else if (residenceTypeRaw?.toLowerCase() === 'singgah' || residenceTypeRaw?.toLowerCase() === 'kunjungan' || residenceTypeRaw?.toLowerCase() === 'mengunjungi') residenceType = 'Mengunjungi';
 
     data.push({
       block,

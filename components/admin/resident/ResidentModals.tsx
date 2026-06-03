@@ -384,8 +384,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           {formData.status !== 'Empty' && (
                             <div>
                               <label className="block text-xs font-bold text-slate-705 mb-1.5">Status Kepemilikan Rumah</label>
-                              <div className="grid grid-cols-3 gap-2">
-                                 {['Tetap', 'Keluarga', 'Sewa'].map((st) => (
+                              <div className="grid grid-cols-4 gap-2">
+                                 {['Tetap', 'Keluarga', 'Sewa', 'Mengunjungi'].map((st) => (
                                    <button
                                      key={st}
                                      type="button"

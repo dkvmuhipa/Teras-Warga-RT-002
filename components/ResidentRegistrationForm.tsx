@@ -364,11 +364,12 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                   <div className="md:col-span-2 space-y-3">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status Kepemilikan Rumah <span className="text-rose-500">*</span></label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                       {[
                         { id: 'Tetap', label: 'Milik Sendiri', desc: 'Sertifikat pribadi/keluarga' },
                         { id: 'Sewa', label: 'Sewa / Kontrak', desc: 'Sewa / indekos per bulan / tahun' },
-                        { id: 'Rumah Keluarga', label: 'Rumah Keluarga', desc: 'Kerabat / Orang tua' }
+                        { id: 'Rumah Keluarga', label: 'Rumah Keluarga', desc: 'Kerabat / Orang tua' },
+                        { id: 'Mengunjungi', label: 'Mengunjungi', desc: 'Belum menetap tapi sering berkunjung & merawat hunian' }
                       ].map((type) => {
                         const isSel = formData.residenceType === type.id;
                         return (

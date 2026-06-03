@@ -1151,9 +1151,10 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const tetaps = houses.filter(h => h.residenceType === 'Tetap').length;
     const sewas = houses.filter(h => h.residenceType === 'Sewa').length;
     const keluargas = houses.filter(h => h.residenceType === 'Rumah Keluarga').length;
+    const mengunjungis = houses.filter(h => h.residenceType === 'Mengunjungi').length;
 
     const row1Txt = `Status Hunian      :  Dihuni = ${occupiedCount}  |  Belum Dihuni (Kosong) = ${emptyCount}  |  Usaha = ${businessCount}`;
-    const row2Txt = `Status Kepemilikan :  Tetap = ${tetaps}  |  Sewa / Kontrak = ${sewas}  |  Keluarga = ${keluargas}`;
+    const row2Txt = `Status Kepemilikan :  Tetap = ${tetaps}  |  Sewa / Kontrak = ${sewas}  |  Keluarga = ${keluargas}  |  Mengunjungi = ${mengunjungis}`;
 
     doc.text(row1Txt, margin + 4, y + 11);
     doc.text(row2Txt, margin + 4, y + 17);

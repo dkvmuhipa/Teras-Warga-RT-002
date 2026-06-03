@@ -148,6 +148,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             <option value="Tetap">Tetap</option>
             <option value="Sewa">Sewa</option>
             <option value="Rumah Keluarga">Rumah Keluarga</option>
+            <option value="Mengunjungi">Mengunjungi</option>
           </select>
         </FilterGroup>
 

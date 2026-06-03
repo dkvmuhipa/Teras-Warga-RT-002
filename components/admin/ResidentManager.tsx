@@ -127,6 +127,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Excel Import Preview States
+  const [isExcelPreviewOpen, setIsExcelPreviewOpen] = useState(false);
+  const [excelPreviewData, setExcelPreviewData] = useState<any[]>([]);
+  const [previewFileName, setPreviewFileName] = useState('');
+  const [previewStats, setPreviewStats] = useState({ add: 0, update: 0, invalid: 0 });
+  const [previewFilterTab, setPreviewFilterTab] = useState<'all' | 'add' | 'update' | 'invalid'>('all');
+
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
@@ -448,127 +455,226 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     }
   };
 
+  const FIELD_LABELS: Record<string, string> = {
+    headOfFamily: 'Kepala Keluarga',
+    status: 'Status Hunian',
+    residenceType: 'Kepemilikan',
+    occupants: 'Jumlah Jiwa',
+    phone: 'Kontak WhatsApp',
+    ownerName: 'Nama Pemilik',
+    ownerPhone: 'WA Pemilik',
+    vehicleCount: 'Jumlah Kendaraan',
+    pregnantCount: 'Jumlah Ibu Hamil',
+    babyCount: 'Jumlah Bayi (<1 thn)',
+    toddlerCount: 'Jumlah Balita (1-5 thn)',
+    childCount: 'Jumlah Anak (6-12 thn)',
+    teenagerCount: 'Jumlah Remaja (13-18 thn)',
+    adultCount: 'Jumlah Dewasa (19-55 thn)',
+    elderlyCount: 'Jumlah Lansia (>55 thn)',
+    widowCount: 'Jumlah Janda/Duda',
+    isBPNT: 'Penerima BPNT',
+    isDisability: 'Ada Disabilitas',
+    disabilityCount: 'Jumlah Disabilitas',
+    isOrphan: 'Ada Anak Yatim/Piatu',
+    orphanCount: 'Jumlah Anak Yatim/Piatu',
+    economicStatus: 'Status Ekonomi',
+    paymentStatusAir: 'Status Bayar Air',
+    paymentStatusSampah: 'Status Bayar Sampah',
+    education: 'Pendidikan',
+    jobCategory: 'Pekerjaan',
+    religion: 'Agama',
+    gender: 'Jenis Kelamin',
+    birthDate: 'Tanggal Lahir'
+  };
+
   const handleUploadExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const isConfirmed = await confirm({
-      title: 'Import Data Excel',
-      message: 'Apakah Anda yakin ingin mengupload data ini? Data yang sudah ada di sistem (berdasarkan Blok dan Nomor) akan diupdate dengan data dari file Excel ini.',
-      confirmLabel: 'Upload & Update',
-      confirmIcon: <Upload size={18} />
-    });
+    setIsUploading(true);
+    try {
+      const parsedData = await parseExcelFile(file);
+      const previewRows: any[] = [];
+      let addCount = 0;
+      let updateCount = 0;
+      let invalidCount = 0;
 
-    if (isConfirmed) {
-      setIsUploading(true);
-      try {
-        const parsedData = await parseExcelFile(file);
-        
-        let addedCount = 0;
-        let updatedCount = 0;
-        let failCount = 0;
-        
-        const updatesToApply: any[] = [];
-        const addsToApply: any[] = [];
+      for (const houseData of parsedData) {
+        const errors: string[] = [];
+        const warnings: string[] = [];
+        const changes: { field: string; label: string; from: any; to: any }[] = [];
+        let rowStatus: 'add' | 'update' | 'invalid' = 'add';
 
-        for (const houseData of parsedData) {
-          try {
-            // Basic validation
-            if (!houseData.block || !houseData.number) {
-              console.warn('Skipping invalid row:', houseData);
-              failCount++;
-              continue;
+        // Basic validation
+        if (!houseData.block || !houseData.number) {
+          errors.push('Informasi Blok & Nomor rumah wajib diisi.');
+          rowStatus = 'invalid';
+        }
+
+        const block = houseData.block || '';
+        const number = houseData.number || '';
+        const headOfFamily = houseData.headOfFamily || '-';
+
+        // Find existing house
+        let existingHouse: House | undefined = undefined;
+        if (block && number) {
+          existingHouse = houses.find(
+            h => h.block.toLowerCase() === block.toLowerCase() && 
+                 h.number.toLowerCase() === number.toLowerCase()
+          );
+        }
+
+        if (rowStatus !== 'invalid') {
+          if (existingHouse) {
+            rowStatus = 'update';
+            // Compare fields to build proposed changes
+            const updates: any = { ...houseData };
+            // Don't overwrite headOfFamily if it's empty in Excel
+            if (!houseData.headOfFamily || houseData.headOfFamily === '-') {
+              delete updates.headOfFamily;
             }
 
-            // Check for existing block and number
-            const existingHouse = houses.find(
-              h => h.block.toLowerCase() === houseData.block?.toLowerCase() && 
-                   h.number.toLowerCase() === houseData.number?.toLowerCase()
-            );
+            for (const key in updates) {
+              if (key === 'block' || key === 'number') continue;
+              const newValue = updates[key];
+              const oldValue = (existingHouse as any)[key];
 
-            if (existingHouse) {
-              // Update existing house
-              const updates: any = { ...houseData };
-              
-              // Don't overwrite headOfFamily if it's empty in Excel
-              if (!houseData.headOfFamily || houseData.headOfFamily === '-') {
-                delete updates.headOfFamily;
-              }
-
-              // Check if there are actual changes
-              let hasChanges = false;
-              for (const key in updates) {
-                if (key === 'block' || key === 'number') continue;
+              if (newValue !== undefined && newValue !== oldValue) {
+                // If it's a numeric field, skip if basically the same value
+                if (typeof oldValue === 'number' && Number(newValue) === oldValue) continue;
                 
-                const newValue = updates[key];
-                const oldValue = (existingHouse as any)[key];
-                
-                if (newValue !== oldValue) {
-                  hasChanges = true;
-                  break;
-                }
+                changes.push({
+                  field: key,
+                  label: FIELD_LABELS[key] || key,
+                  from: oldValue !== undefined ? oldValue : 'Kosong',
+                  to: newValue !== undefined ? newValue : 'Kosong'
+                });
               }
-
-              if (hasChanges) {
-                updatesToApply.push({ id: existingHouse.id, ...updates });
-              }
-            } else {
-              // Add new house
-              addsToApply.push({
-                ...houseData,
-                headOfFamily: houseData.headOfFamily || '-',
-                location: { x: 0, y: 0 },
-                familyMembers: [],
-                paymentStatusAir: houseData.paymentStatusAir || PaymentStatus.UNPAID,
-                paymentStatusSampah: houseData.paymentStatusSampah || PaymentStatus.UNPAID,
-                status: houseData.status || 'Occupied',
-                occupants: houseData.occupants || 1,
-                vehicleCount: houseData.vehicleCount || 0,
-                pregnantCount: houseData.pregnantCount || 0,
-                babyCount: houseData.babyCount || 0,
-                toddlerCount: houseData.toddlerCount || 0,
-                teenagerCount: houseData.teenagerCount || 0,
-                adultCount: houseData.adultCount || 0,
-                elderlyCount: houseData.elderlyCount || 0,
-                childCount: houseData.childCount || 0,
-                widowCount: houseData.widowCount || 0,
-                isBPNT: houseData.isBPNT || false,
-                isDisability: houseData.isDisability || false,
-                disabilityCount: houseData.disabilityCount || 0,
-                isOrphan: houseData.isOrphan || false,
-                orphanCount: houseData.orphanCount || 0,
-                economicStatus: houseData.economicStatus || 'Sejahtera'
-              });
             }
-          } catch (err) {
-            handleFirestoreError(err, OperationType.WRITE, "houses");
-            failCount++;
+          } else {
+            rowStatus = 'add';
+            // Validation warnings for additions
+            if (headOfFamily === '-') {
+              warnings.push('Nama kepala keluarga kosong, otomatis diisi "-"');
+            }
           }
         }
 
-        // Apply updates in batch
-        if (updatesToApply.length > 0) {
-            await batchUpdateHouses(updatesToApply);
-            updatedCount += updatesToApply.length;
-        }
+        if (rowStatus === 'add') addCount++;
+        else if (rowStatus === 'update') updateCount++;
+        else if (rowStatus === 'invalid') invalidCount++;
 
-        // Apply additions
-        for (const add of addsToApply) {
-            await addHouse(add);
-            addedCount++;
-        }
-
-        toast.success(`Upload selesai.`, {
-          description: `Data Baru Ditambahkan: ${addedCount}\nData Diperbarui: ${updatedCount}\nGagal/Format Salah: ${failCount}\nData Tidak Berubah: ${parsedData.length - addedCount - updatedCount - failCount}`
+        previewRows.push({
+          block,
+          number,
+          headOfFamily,
+          status: rowStatus,
+          errors,
+          warnings,
+          changes,
+          parsedData: houseData,
+          existingHouse
         });
-      } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, "houses");
-        toast.error('Gagal memproses file Excel.');
-      } finally {
-        setIsUploading(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
       }
-    } else {
+
+      setExcelPreviewData(previewRows);
+      setPreviewStats({ add: addCount, update: updateCount, invalid: invalidCount });
+      setPreviewFileName(file.name);
+      setPreviewFilterTab('all');
+      setIsExcelPreviewOpen(true);
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal membaca & memparsing file Excel.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handlePerformImportPreview = async () => {
+    setIsUploading(true);
+    let addedCount = 0;
+    let updatedCount = 0;
+    let failCount = 0;
+
+    const updatesToApply: any[] = [];
+    const addsToApply: any[] = [];
+
+    // Filter out rows with status = 'invalid'
+    const validRows = excelPreviewData.filter(row => row.status !== 'invalid');
+
+    for (const previewItem of validRows) {
+      const houseData = previewItem.parsedData;
+      try {
+        if (previewItem.status === 'update' && previewItem.existingHouse) {
+          const updates: any = { ...houseData };
+          if (!houseData.headOfFamily || houseData.headOfFamily === '-') {
+            delete updates.headOfFamily;
+          }
+
+          // Check if there are actual changes
+          if (previewItem.changes.length > 0) {
+            updatesToApply.push({ id: previewItem.existingHouse.id, ...updates });
+          }
+        } else {
+          // Add new house
+          addsToApply.push({
+            ...houseData,
+            headOfFamily: houseData.headOfFamily || '-',
+            location: { x: 0, y: 0 },
+            familyMembers: [],
+            paymentStatusAir: houseData.paymentStatusAir || PaymentStatus.UNPAID,
+            paymentStatusSampah: houseData.paymentStatusSampah || PaymentStatus.UNPAID,
+            status: houseData.status || 'Occupied',
+            occupants: houseData.occupants !== undefined ? houseData.occupants : 1,
+            vehicleCount: houseData.vehicleCount !== undefined ? houseData.vehicleCount : 0,
+            pregnantCount: houseData.pregnantCount !== undefined ? houseData.pregnantCount : 0,
+            babyCount: houseData.babyCount !== undefined ? houseData.babyCount : 0,
+            toddlerCount: houseData.toddlerCount !== undefined ? houseData.toddlerCount : 0,
+            teenagerCount: houseData.teenagerCount !== undefined ? houseData.teenagerCount : 0,
+            adultCount: houseData.adultCount !== undefined ? houseData.adultCount : 0,
+            elderlyCount: houseData.elderlyCount !== undefined ? houseData.elderlyCount : 0,
+            childCount: houseData.childCount !== undefined ? houseData.childCount : 0,
+            widowCount: houseData.widowCount !== undefined ? houseData.widowCount : 0,
+            isBPNT: houseData.isBPNT || false,
+            isDisability: houseData.isDisability || false,
+            disabilityCount: houseData.disabilityCount !== undefined ? houseData.disabilityCount : 0,
+            isOrphan: houseData.isOrphan || false,
+            orphanCount: houseData.orphanCount !== undefined ? houseData.orphanCount : 0,
+            economicStatus: houseData.economicStatus || 'Sejahtera'
+          });
+        }
+      } catch (err) {
+        console.error('Error preparing item:', err);
+        failCount++;
+      }
+    }
+
+    try {
+      // Apply updates in batch
+      if (updatesToApply.length > 0) {
+        await batchUpdateHouses(updatesToApply);
+        updatedCount += updatesToApply.length;
+      }
+
+      // Apply additions
+      for (const add of addsToApply) {
+        await addHouse(add);
+        addedCount++;
+      }
+
+      await logAction('Import Excel', `Berhasil mengimport data warga (Tambah: ${addedCount}, Update: ${updatedCount})`);
+      setIsExcelPreviewOpen(false);
+      excelPreviewData.splice(0, excelPreviewData.length);
+      setExcelPreviewData([]);
+      toast.success(`Import data Excel selesai!`, {
+        description: `Warga baru ditambah: ${addedCount} • Data diupdate: ${updatedCount} • Lewat/Format salah: ${failCount}`
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, "houses");
+      toast.error('Gagal memproses data import Excel.');
+    } finally {
+      setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -1331,6 +1437,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   <option value="Tetap" className="bg-white text-slate-850 font-bold">🏠 Tetap (Milik)</option>
                   <option value="Sewa" className="bg-white text-slate-850 font-bold">🔑 Sewa (Sewa/Kontrak)</option>
                   <option value="Rumah Keluarga" className="bg-white text-slate-850 font-bold">👨‍👩‍👦 Keluarga</option>
+                  <option value="Mengunjungi" className="bg-white text-slate-850 font-bold">🧹 Mengunjungi</option>
                 </select>
               </div>
             </div>
@@ -2036,6 +2143,242 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 </div>
               </div>
 
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Excel Instant Validation & Preview Modal */}
+      <AnimatePresence>
+        {isExcelPreviewOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-full max-w-5xl bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden p-8 flex flex-col my-8 h-[90vh] max-h-[800px]"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => {
+                  setIsExcelPreviewOpen(false);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }}
+                className="absolute top-6 right-6 p-2 bg-slate-100 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              {/* Title & Description */}
+              <div className="flex items-center gap-3 mb-2 shrink-0">
+                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                  <FileText size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-800">Validasi & Preview Instan Sebelum Import</h3>
+                  <p className="text-slate-500 text-sm">Menampilkan data hasil analisa file <span className="font-semibold text-slate-700">{previewFileName}</span></p>
+                </div>
+              </div>
+
+              <hr className="border-slate-100 my-4 shrink-0" />
+
+              {/* Statistics Row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0">
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                  <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Total Baris</span>
+                  <p className="text-2xl font-black text-slate-800 mt-1">{excelPreviewData.length}</p>
+                </div>
+                <div className="bg-indigo-50/55 rounded-2xl p-4 border border-indigo-50">
+                  <span className="text-[10px] font-black tracking-widest text-indigo-500 uppercase">Warga Baru (Tambah)</span>
+                  <p className="text-2xl font-black text-indigo-650 mt-1">+{previewStats.add}</p>
+                </div>
+                <div className="bg-amber-50/55 rounded-2xl p-4 border border-amber-50">
+                  <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase">Perbarui Data</span>
+                  <p className="text-2xl font-black text-amber-650 mt-1">↺ {previewStats.update}</p>
+                </div>
+                <div className="bg-rose-50/55 rounded-2xl p-4 border border-rose-50">
+                  <span className="text-[10px] font-black tracking-widest text-rose-500 uppercase">Format Salah</span>
+                  <p className="text-2xl font-black text-rose-650 mt-1">{previewStats.invalid}</p>
+                </div>
+              </div>
+
+              {/* Filter Tabs inside preview */}
+              <div className="flex items-center justify-between gap-4 mb-4 shrink-0">
+                <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1">
+                  {(['all', 'add', 'update', 'invalid'] as const).map((tab) => {
+                    const label = tab === 'all' ? 'Semua' : tab === 'add' ? 'Akan Ditambah' : tab === 'update' ? 'Akan Diperbarui' : 'Format Salah';
+                    const count = tab === 'all' ? excelPreviewData.length : tab === 'add' ? previewStats.add : tab === 'update' ? previewStats.update : previewStats.invalid;
+                    const isActive = previewFilterTab === tab;
+                    return (
+                      <button
+                        key={tab}
+                        onClick={() => setPreviewFilterTab(tab)}
+                        className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                          isActive
+                            ? 'bg-white text-slate-800 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'
+                        }`}
+                      >
+                        {label} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Scrollable table of preview data */}
+              <div className="flex-1 overflow-auto border border-slate-100 rounded-2xl bg-slate-50/35">
+                <table className="w-full text-left border-collapse font-sans">
+                  <thead>
+                    <tr className="bg-slate-100/80 sticky top-0 border-b border-slate-200">
+                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-24">Blok</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-24">No Rumah</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Kepala Keluarga</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-40 text-center">Rencana Aksi</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Detail Perubahan / Pesan Validasi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {excelPreviewData
+                      .filter(item => {
+                        if (previewFilterTab === 'all') return true;
+                        return item.status === previewFilterTab;
+                      })
+                      .map((item, idx) => {
+                        return (
+                          <tr key={idx} className="hover:bg-slate-100/35 transition-colors">
+                            <td className="px-5 py-4 text-xs font-black text-slate-800 uppercase">
+                              {item.block || (
+                                <span className="text-rose-500 font-bold italic text-[11px]">Kosong</span>
+                              )}
+                            </td>
+                            <td className="px-5 py-4 text-xs font-black text-slate-800">
+                              {item.number || (
+                                <span className="text-rose-500 font-bold italic text-[11px]">Kosong</span>
+                              )}
+                            </td>
+                            <td className="px-5 py-4 text-xs font-medium text-slate-650">
+                              {item.headOfFamily}
+                            </td>
+                            <td className="px-5 py-4 text-center">
+                              {item.status === 'add' && (
+                                <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-150 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                  🆕 Baru
+                                </span>
+                              )}
+                              {item.status === 'update' && (
+                                <span className="inline-block px-3 py-1 bg-amber-50 text-amber-700 border border-amber-150 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                  🔄 Update
+                                </span>
+                              )}
+                              {item.status === 'invalid' && (
+                                <span className="inline-block px-3 py-1 bg-rose-50 text-rose-700 border border-rose-150 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                  ❌ Lewati
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-5 py-4 text-xs">
+                              {item.status === 'invalid' && (
+                                <div className="space-y-1">
+                                  {item.errors.map((err: string, i: number) => (
+                                    <div key={i} className="text-rose-600 font-black flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-full" />
+                                      {err}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {item.status === 'add' && (
+                                <div className="text-slate-400">
+                                  {item.warnings.length > 0 ? (
+                                    <div className="space-y-1">
+                                      {item.warnings.map((warn: string, i: number) => (
+                                        <div key={i} className="text-amber-600 font-bold flex items-center gap-1">
+                                          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                                          {warn}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <span className="text-indigo-500 font-bold font-sans">Rumah baru akan ditambahkan ke sistem</span>
+                                  )}
+                                </div>
+                              )}
+                              {item.status === 'update' && (
+                                <div className="space-y-1">
+                                  {item.changes.length > 0 ? (
+                                    <div className="grid grid-cols-1 gap-1 text-[11px] font-sans">
+                                      {item.changes.map((change: any, i: number) => (
+                                        <div key={i} className="text-slate-600 flex items-center flex-wrap gap-x-1.5">
+                                          <span className="font-bold text-slate-800">{change.label}:</span>
+                                          <span className="line-through text-slate-400">{change.from !== undefined ? String(change.from) : 'Kosong'}</span>
+                                          <span className="text-slate-400">➔</span>
+                                          <span className="text-indigo-600 font-bold">{String(change.to)}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <span className="text-slate-400 italic font-sans">Data sama dengan yang ada di sistem (tidak diupdate)</span>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    {excelPreviewData.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-5 py-12 text-center text-slate-400 font-medium font-sans">
+                          Tidak ada data yang tersedia untuk divalidasi.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Warning footer message if any invalids exist */}
+              {previewStats.invalid > 0 && (
+                <div className="mt-4 p-3.5 bg-rose-50 text-rose-700 rounded-2xl flex items-center gap-2 border border-rose-100 shrink-0">
+                  <AlertCircle size={16} className="shrink-0" />
+                  <p className="text-xs font-semibold">Terdapat <span className="font-black">{previewStats.invalid}</span> baris dengan kesalahan format. Baris-baris ini akan dilewati secara otomatis untuk mencegah kerusakan data.</p>
+                </div>
+              )}
+
+              {/* Confirm & Process Panel */}
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100 shrink-0">
+                <div className="text-[11px] text-slate-400 font-sans max-w-lg">
+                  Pastikan seluruh data hasil parsing di atas telah sesuai sebelum menyimpannya ke database warga RT 02.
+                </div>
+
+                <div className="flex gap-3 w-full sm:w-auto">
+                  <button
+                    onClick={() => {
+                      setIsExcelPreviewOpen(false);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                    disabled={isUploading}
+                    className="flex-1 sm:flex-initial px-6 py-3 border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider text-slate-600 hover:bg-slate-55 transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handlePerformImportPreview}
+                    disabled={isUploading || (previewStats.add === 0 && previewStats.update === 0)}
+                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-white shadow-lg transition-all ${
+                      isUploading 
+                        ? 'bg-indigo-400 cursor-not-allowed shadow-none' 
+                        : (previewStats.add === 0 && previewStats.update === 0)
+                          ? 'bg-slate-300 cursor-not-allowed shadow-none text-slate-400'
+                          : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-indigo-600/30'
+                    }`}
+                  >
+                    {isUploading ? 'Menyimpan...' : `Konfirmasi & Import (${previewStats.add + previewStats.update} Data)`}
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
             </motion.div>
           </div>
         )}

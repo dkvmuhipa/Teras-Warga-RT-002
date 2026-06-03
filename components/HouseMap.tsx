@@ -399,9 +399,10 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
 
         if (hasIssue && activeLayers.includes('Security')) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
         if (officialRole) return "bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 border-amber-400 text-white shadow-lg shadow-indigo-500/40 z-10 ring-2 ring-amber-300";
-        if (house.status === 'Empty') return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
+        if (house.status === 'Empty' && house.residenceType !== 'Mengunjungi') return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
         if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
         if (house.residenceType === 'Sewa') return "bg-gradient-to-br from-amber-100 to-orange-200 border-amber-500 text-amber-900";
+        if (house.residenceType === 'Mengunjungi') return "bg-gradient-to-br from-sky-50 to-indigo-150 border-indigo-400 text-indigo-900";
         return "bg-gradient-to-br from-emerald-100 to-teal-200 border-emerald-500 text-emerald-900";
     };
 
@@ -431,6 +432,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 ) : (
                     <div className="flex flex-wrap items-center justify-center gap-0.5">
                         {(house.residenceType === 'Sewa') ? <Key size={10} className="opacity-80 text-amber-800" /> : 
+                         (house.residenceType === 'Mengunjungi') ? <Clock size={10} className="opacity-80 text-indigo-800" /> :
                          <Home size={10} className="opacity-80"/>}
                         
                         {house.paymentStatusSampah === PaymentStatus.PAID && (

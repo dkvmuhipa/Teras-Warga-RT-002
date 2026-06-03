@@ -79,7 +79,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       reasonForMoving: '',
       familyCount: 1,
       familyMembers: [] as {name: string, relationship: string, nik?: string}[],
-      residenceType: 'Tetap' as 'Tetap' | 'Sewa' | 'Rumah Keluarga',
+      residenceType: 'Tetap' as 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Mengunjungi',
       religion: '',
       vulnerability: [] as string[],
       kkNumber: '',
@@ -1612,6 +1612,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                       <option value="Tetap">Tetap</option>
                       <option value="Rumah Keluarga">Rumah Keluarga</option>
                       <option value="Sewa">Sewa</option>
+                      <option value="Mengunjungi">Mengunjungi</option>
                     </select>
                   </div>
                   <div>
