@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
+import { naturalSortBlockAndNumber } from "./excelService";
 
 // ... (existing helper functions) ...
 
@@ -853,7 +854,7 @@ export const generateReportReceiptPDF = async (report: Report, customConfig?: Pd
     doc.save(`Bukti_Lapor_${report.id.substring(0, 8)}.pdf`);
 };
 
-export const generateResidentReportPDF = async (houses: House[], customConfig?: PdfConfig) => {
+export const generateResidentReportPDF = async (houses: House[], customConfig?: PdfConfig, selectedCols?: string[]) => {
     const config = customConfig || DEFAULT_PDF_CONFIG;
     
     const doc = new jsPDF({ 
@@ -906,32 +907,47 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, pageWidth - margin, 52, { align: "right" });
 
     let y = 60;
-    const colWidths = {
-        no: 8,
-        blok: 12,
-        no_rumah: 12,
-        nama: 55,
-        owner: 55,
-        status: 20,
-        tipe: 20,
-        jml: 10,
-        kontak: 30,
-        ekonomi: 25,
-        keterangan: 20
-    };
+    
+    // Configurable PDF Column Definitions
+    const allPdfCols = [
+        { id: 'block', label: "BLOK", baseWidth: 15 },
+        { id: 'number', label: "NO RMH", baseWidth: 15 },
+        { id: 'headOfFamily', label: "NAMA KEPALA KELUARGA", baseWidth: 55 },
+        { id: 'gender', label: "L/P", baseWidth: 14 },
+        { id: 'birthDate', label: "TGL LAHIR", baseWidth: 20 },
+        { id: 'religion', label: "AGAMA", baseWidth: 18 },
+        { id: 'ownerName', label: "PEMILIK RUMAH", baseWidth: 45 },
+        { id: 'ownerPhone', label: "TLP PEMILIK", baseWidth: 28 },
+        { id: 'phone', label: "TELEPON", baseWidth: 28 },
+        { id: 'status', label: "STATUS", baseWidth: 20 },
+        { id: 'residenceType', label: "KEPEMILIKAN", baseWidth: 24 },
+        { id: 'occupants', label: "JIWA", baseWidth: 12 },
+        { id: 'education', label: "PENDIDIKAN", baseWidth: 22 },
+        { id: 'jobCategory', label: "PEKERJAAN", baseWidth: 25 },
+        { id: 'economicStatus', label: "EKONOMI", baseWidth: 22 },
+        { id: 'isVerified', label: "KET", baseWidth: 18 }
+    ];
+
+    let selectedDefs = allPdfCols;
+    if (selectedCols && selectedCols.length > 0) {
+        selectedDefs = allPdfCols.filter(col => selectedCols.includes(col.id));
+    }
+    if (selectedDefs.length === 0) {
+        // Fallback: at least show Blok, No Rumah, Nama KK, Status, Jml Penghuni
+        selectedDefs = [allPdfCols[0], allPdfCols[1], allPdfCols[2], allPdfCols[9], allPdfCols[11]];
+    }
+
+    const noWidth = 8;
+    const availableWidth = contentWidth - noWidth;
+    const totalBaseWidth = selectedDefs.reduce((sum, c) => sum + c.baseWidth, 0);
 
     const headers = [
-        { label: "NO", w: colWidths.no },
-        { label: "BLOK", w: colWidths.blok },
-        { label: "NO RMH", w: colWidths.no_rumah },
-        { label: "NAMA KEPALA KELUARGA", w: colWidths.nama },
-        { label: "PEMILIK RUMAH", w: colWidths.owner },
-        { label: "STATUS", w: colWidths.status },
-        { label: "KEPEMILIKAN", w: colWidths.tipe },
-        { label: "JIWA", w: colWidths.jml },
-        { label: "TELEPON", w: colWidths.kontak },
-        { label: "EKONOMI", w: colWidths.ekonomi },
-        { label: "KET", w: colWidths.keterangan }
+        { id: 'no', label: "NO", w: noWidth },
+        ...selectedDefs.map(c => ({
+            id: c.id,
+            label: c.label,
+            w: (c.baseWidth / totalBaseWidth) * availableWidth
+        }))
     ];
 
     const drawTableHeader = (startY: number) => {
@@ -952,11 +968,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     drawTableHeader(y);
     y += 8;
 
-    const sortedHouses = [...houses].sort((a,b) => {
-        const blockComp = a.block.localeCompare(b.block);
-        if (blockComp !== 0) return blockComp;
-        return a.number.localeCompare(b.number, undefined, { numeric: true });
-    });
+    const sortedHouses = [...houses].sort((a,b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
 
     sortedHouses.forEach((h, i) => {
         if (y > pageHeight - 20) {
@@ -977,26 +989,40 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         doc.setFontSize(8.5);
         
         let currX = margin;
-        const rowData = [
-            (i + 1).toString(),
-            h.block,
-            h.number,
-            h.headOfFamily.toUpperCase(),
-            (h.ownerName || '-').toUpperCase(),
-            h.status === 'Occupied' ? 'DIHUNI' : h.status === 'Empty' ? 'KOSONG' : 'USAHA',
-            h.residenceType || '-',
-            (h.occupants || 0).toString(),
-            h.phone || '-',
-            h.economicStatus || '-',
-            h.isVerified ? 'VERIF' : 'PENDING'
-        ];
+        const rowData = headers.map((header) => {
+            if (header.id === 'no') return (i + 1).toString();
+            
+            const val = h[header.id as keyof House];
+            if (header.id === 'status') {
+                return h.status === 'Occupied' ? 'DIHUNI' : h.status === 'Empty' ? 'KOSONG' : 'USAHA';
+            }
+            if (header.id === 'isVerified') {
+                return h.isVerified ? 'VERIF' : 'PENDING';
+            }
+            if (header.id === 'headOfFamily' || header.id === 'ownerName') {
+                return (val?.toString() || '-').toUpperCase();
+            }
+            if (header.id === 'occupants') {
+                return (h.occupants || 0).toString();
+            }
+            return (val?.toString() || '-');
+        });
 
         rowData.forEach((text, idx) => {
-            const w = headers[idx].w;
-            const align = (idx === 0 || idx === 1 || idx === 2 || idx === 7 || idx === 5 || idx === 6) ? "center" : "left";
+            const hDef = headers[idx];
+            const w = hDef.w;
+            const centerKeys = ['no', 'block', 'number', 'gender', 'birthDate', 'religion', 'status', 'residenceType', 'occupants', 'isVerified'];
+            const align = centerKeys.includes(hDef.id) ? "center" : "left";
             const xPos = align === "center" ? currX + (w / 2) : currX + 2;
             
-            const truncatedText = doc.getTextWidth(text) > w - 2 ? doc.splitTextToSize(text, w - 5)[0] + "..." : text;
+            let truncatedText = text;
+            if (doc.getTextWidth(text) > w - 2) {
+                // Handle splitting and truncation nicely to context width
+                truncatedText = doc.splitTextToSize(text, w - 4)[0];
+                if (text.length > truncatedText.length) {
+                    truncatedText = truncatedText.substring(0, Math.max(2, truncatedText.length - 2)) + "..";
+                }
+            }
             doc.text(truncatedText, xPos, y, { align: align as any });
             currX += w;
         });

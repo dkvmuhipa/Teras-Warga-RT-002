@@ -85,7 +85,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
         (h.ownerName && h.ownerName.toLowerCase().includes(searchLower));
       return isOccupied && matchesSearch;
     }).sort((a, b) => {
-      const blockCompare = a.block.localeCompare(b.block);
+      const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
       if (blockCompare !== 0) return blockCompare;
       return a.number.localeCompare(b.number, undefined, { numeric: true });
     });
@@ -101,7 +101,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
       const matchesType = filterType === 'All' || p.type === filterType || p.type === 'Both';
       return matchesMonth && matchesSearch && matchesType;
     }).sort((a, b) => {
-      const blockCompare = a.block.localeCompare(b.block);
+      const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
       if (blockCompare !== 0) return blockCompare;
       return a.number.localeCompare(b.number, undefined, { numeric: true });
     });

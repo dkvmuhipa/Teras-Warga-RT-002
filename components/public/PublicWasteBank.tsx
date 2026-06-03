@@ -114,8 +114,8 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
         const pB = getBlockPriority(b.block);
         
         if (pA !== pB) return pA - pB;
-        if (a.block !== b.block) return a.block.localeCompare(b.block);
-        return parseInt(a.number) - parseInt(b.number);
+        if (a.block !== b.block) return a.block.localeCompare(b.block, undefined, { numeric: true });
+        return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true });
       });
 
     return (

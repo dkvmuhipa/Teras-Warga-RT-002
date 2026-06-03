@@ -2077,8 +2077,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 >
                   <option value="">-- Lokasi Fasilitas / Unit --</option>
                   {[...houses].sort((a, b) => {
-                    if (a.block !== b.block) return (a.block || '').localeCompare(b.block || '');
-                    return parseInt(a.number || '0') - parseInt(b.number || '0');
+                    const blockCompare = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true });
+                    if (blockCompare !== 0) return blockCompare;
+                    return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true });
                   }).map(h => (
                     <option key={h.id} value={h.id}>
                       {h.block}-{h.number} ({h.headOfFamily})

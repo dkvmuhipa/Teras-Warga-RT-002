@@ -131,6 +131,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
   const [targetMonths, setTargetMonths] = useState<string[]>([]);
+  
+  // Custom Export States
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'excel' | 'pdf'>('excel');
+  const [exportTarget, setExportTarget] = useState<'all' | 'filtered'>('all');
+  const [selectedExportCols, setSelectedExportCols] = useState<string[]>([
+    'block', 'number', 'headOfFamily', 'phone', 'status', 'residenceType', 'occupants', 'isVerified'
+  ]);
   const { 
     selectedMonth, 
     setSelectedMonth, 
@@ -416,6 +424,26 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const handleDownloadTemplate = () => {
     generateExcelTemplate();
+  };
+
+  const handlePerformExport = async () => {
+    setIsGenerating(true);
+    const resolvedHouses = exportTarget === 'all' ? houses : filteredHouses;
+    try {
+      if (exportFormat === 'excel') {
+        await generateProfessionalExcel(resolvedHouses, selectedExportCols);
+        toast.success(`Berhasil mengunduh Excel berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
+      } else {
+        await generateResidentReportPDF(resolvedHouses, pdfConfig, selectedExportCols);
+        toast.success(`Berhasil mencetak PDF berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
+      }
+      setIsExportModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal mengekspor data warga.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleUploadExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1104,7 +1132,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
     if (sortBy === 'name') return a.headOfFamily.localeCompare(b.headOfFamily);
-    const blockCompare = a.block.localeCompare(b.block);
+    const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
     if (blockCompare !== 0) return blockCompare;
     return a.number.localeCompare(b.number, undefined, { numeric: true });
   });
@@ -1257,6 +1285,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             </div>
           )}
           
+          <button 
+            onClick={() => {
+              setExportTarget('all');
+              setIsExportModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 text-emerald-700 hover:text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm active:scale-95"
+          >
+            <Download size={14} />
+            <span>Ekspor / Cetak</span>
+          </button>
+          
           <div className="relative">
             <button 
               onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
@@ -1305,13 +1344,32 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Impor & Ekspor</div>
                     
                     <button 
-                      onClick={() => { generateProfessionalExcel(houses); setIsActionMenuOpen(false); }}
+                      onClick={() => { 
+                        setExportTarget('all');
+                        setIsExportModalOpen(true);
+                        setIsActionMenuOpen(false); 
+                      }}
                       className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-all"
                     >
                       <div className="p-2 bg-emerald-50 text-emerald-500 rounded-xl">
                         <Download size={14} />
                       </div>
-                      <span>Unduh Excel</span>
+                      <span>Ekspor Data (Semua Warga)</span>
+                    </button>
+                    
+                    <button 
+                      onClick={() => { 
+                        setExportTarget('filtered');
+                        setIsExportModalOpen(true);
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
+                      disabled={filteredHouses.length === 0}
+                    >
+                      <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
+                        <Download size={14} />
+                      </div>
+                      <span>Ekspor Data (Filter Aktif)</span>
                     </button>
                     <div className="h-px bg-slate-100 mx-3 my-2"></div>
                     <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Laporan PBB</div>
@@ -1671,6 +1729,249 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         activeFormTab={activeFormTab}
         setActiveFormTab={setActiveFormTab}
       />
+
+      {/* Customizable Export Modal */}
+      <AnimatePresence>
+        {isExportModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-full max-w-4xl bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden p-8 flex flex-col my-8"
+            >
+              {/* Close Button */}
+              <button 
+                onClick={() => setIsExportModalOpen(false)}
+                className="absolute top-6 right-6 p-2 bg-slate-100 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                  <Download size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-800">Kustomisasi Ekspor Data</h3>
+                  <p className="text-slate-500 text-sm">Pilih format, lingkup data, dan kolom yang ingin Anda tampilkan.</p>
+                </div>
+              </div>
+
+              <hr className="border-slate-100 my-4" />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">1. Format Dokumen</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => setExportFormat('excel')}
+                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border text-center transition-all ${
+                          exportFormat === 'excel'
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="text-emerald-500 text-xl font-bold">EXCEL</div>
+                        <span className="text-[10px] font-bold">Spreadsheet (.xlsx)</span>
+                      </button>
+                      <button
+                        onClick={() => setExportFormat('pdf')}
+                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border text-center transition-all ${
+                          exportFormat === 'pdf'
+                            ? 'border-rose-500 bg-rose-50 text-rose-800 shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="text-rose-600 text-xl font-bold">PDF</div>
+                        <span className="text-[10px] font-bold">Laporan (.pdf)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">2. Lingkup Data</label>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setExportTarget('all')}
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all ${
+                          exportTarget === 'all'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-950 font-bold'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div>
+                          <div className="text-xs">Semua Warga</div>
+                          <div className="text-[10px] text-slate-500 font-normal">Seluruh data yang terdaftar ({houses.length} baris)</div>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${exportTarget === 'all' ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300'}`}>
+                          {exportTarget === 'all' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => setExportTarget('filtered')}
+                        disabled={filteredHouses.length === 0}
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all ${
+                          exportTarget === 'filtered'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-950 font-bold'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50'
+                        }`}
+                      >
+                        <div>
+                          <div className="text-xs">Filter Aktif</div>
+                          <div className="text-[10px] text-slate-500 font-normal font-sans">Sesuai filter pencarian ({filteredHouses.length} baris)</div>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${exportTarget === 'filtered' ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300'}`}>
+                          {exportTarget === 'filtered' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 flex flex-col border border-slate-100 rounded-3xl bg-slate-50/50 p-5">
+                  <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
+                    <label className="block text-xs font-black text-slate-650 uppercase tracking-wider">3. Pilih Kolom Untuk Diekspor</label>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => setSelectedExportCols(['block', 'number', 'headOfFamily', 'phone', 'status', 'residenceType', 'occupants', 'isVerified'])}
+                        className="text-[10px] uppercase font-black text-indigo-600 hover:text-indigo-800"
+                      >
+                        Bawaan
+                      </button>
+                      <span className="text-slate-300 text-xs">|</span>
+                      <button 
+                        onClick={() => setSelectedExportCols([
+                          'block', 'number', 'headOfFamily', 'phone', 'ownerName', 'ownerPhone',
+                          'status', 'residenceType', 'gender', 'birthDate', 'religion',
+                          'occupants', 'education', 'jobCategory', 'economicStatus', 'isVerified', 'accessCode'
+                        ])}
+                        className="text-[10px] uppercase font-black text-indigo-600 hover:text-indigo-800"
+                      >
+                        Semua
+                      </button>
+                      <span className="text-slate-300 text-xs">|</span>
+                      <button 
+                        onClick={() => setSelectedExportCols(['block', 'number'])}
+                        className="text-[10px] uppercase font-black text-rose-600 hover:text-rose-800"
+                      >
+                        Kosongkan
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="overflow-y-auto max-h-[250px] pr-2 space-y-4 font-sans">
+                    {[
+                      { name: 'Dasar', items: [
+                        { id: 'block', label: 'Blok' },
+                        { id: 'number', label: 'No Rumah' },
+                        { id: 'headOfFamily', label: 'Kepala Keluarga' },
+                        { id: 'status', label: 'Status Hunian' },
+                        { id: 'residenceType', label: 'Status Kepemilikan' }
+                      ]},
+                      { name: 'Kontak', items: [
+                        { id: 'phone', label: 'No Telepon' },
+                        { id: 'ownerName', label: 'Pemilik Rumah' },
+                        { id: 'ownerPhone', label: 'Kontak Pemilik' }
+                      ]},
+                      { name: 'Demografi', items: [
+                        { id: 'gender', label: 'Jenis Kelamin' },
+                        { id: 'birthDate', label: 'Tgl Lahir' },
+                        { id: 'religion', label: 'Agama' },
+                        { id: 'occupants', label: 'Jumlah Jiwa' }
+                      ]},
+                      { name: 'Pelengkap', items: [
+                        { id: 'education', label: 'Pendidikan' },
+                        { id: 'jobCategory', label: 'Pekerjaan' },
+                        { id: 'economicStatus', label: 'Status Ekonomi' }
+                      ]},
+                      { name: 'Sistem', items: [
+                        { id: 'isVerified', label: 'Status Verifikasi' },
+                        { id: 'accessCode', label: 'KODE AKSES (PIN)' }
+                      ]}
+                    ].map((group) => {
+                      return (
+                        <div key={group.name} className="space-y-1.5">
+                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{group.name}</h4>
+                          <div className="grid grid-cols-2 gap-2">
+                            {group.items.map((col) => {
+                              const isChecked = selectedExportCols.includes(col.id);
+                              const isMandatory = ['block', 'number'].includes(col.id);
+                              return (
+                                <button
+                                  key={col.id}
+                                  onClick={() => {
+                                    if (isMandatory) return;
+                                    if (isChecked) {
+                                      setSelectedExportCols(selectedExportCols.filter(c => c !== col.id));
+                                    } else {
+                                      setSelectedExportCols([...selectedExportCols, col.id]);
+                                    }
+                                  }}
+                                  className={`flex items-center gap-2 px-3 py-2 text-xs rounded-xl border text-left transition-all ${
+                                    isChecked
+                                      ? 'bg-white border-indigo-200 text-slate-800 shadow-sm font-semibold'
+                                      : 'bg-slate-100/55 border-slate-200 text-slate-500 hover:bg-slate-150'
+                                  }`}
+                                >
+                                  <div className={`w-3.5 h-3.5 rounded flex items-center justify-center border text-[9px] text-white ${
+                                    isChecked ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300 bg-white'
+                                  }`}>
+                                    {isChecked && '✓'}
+                                  </div>
+                                  <span className="truncate">{col.label} {isMandatory && <span className="text-rose-450 font-normal">*</span>}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-auto flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                <div className="text-[11px] text-slate-400 max-w-sm">
+                  {exportFormat === 'pdf' ? (
+                    <span className="flex items-center gap-1 text-amber-600">
+                      <ShieldAlert size={12} className="shrink-0" />
+                      Orientasi PDF diatur landscape A4 dengan skala lebar serasi.
+                    </span>
+                  ) : (
+                    <span className="text-slate-500 font-sans">
+                      Excel akan disusun secara optimal dengan pewarnaan visual modern.
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex gap-3 w-full sm:w-auto">
+                  <button
+                    onClick={() => setIsExportModalOpen(false)}
+                    className="flex-1 sm:flex-initial px-6 py-3 border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider text-slate-600 hover:bg-slate-55 transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handlePerformExport}
+                    disabled={isGenerating || selectedExportCols.length === 0}
+                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-indigo-600/20 transition-all ${
+                      isGenerating ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-indigo-600/30'
+                    }`}
+                  >
+                    {isGenerating ? 'Memproses...' : 'Ekspor Laporan'}
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

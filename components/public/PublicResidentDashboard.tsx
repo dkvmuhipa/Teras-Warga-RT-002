@@ -286,8 +286,8 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     const sortedHouses = [...houses]
       .filter(h => h.status === 'Occupied')
       .sort((a, b) => {
-        if (a.block !== b.block) return a.block.localeCompare(b.block);
-        return parseInt(a.number) - parseInt(b.number);
+        if (a.block !== b.block) return a.block.localeCompare(b.block, undefined, { numeric: true });
+        return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true });
       });
 
     return (

@@ -42,6 +42,14 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
   const validateTab = (tab: 'basic' | 'demographics' | 'family') => {
     const isAdmin = role === Role.ADMIN;
 
+    if (formData.status === 'Empty') {
+      if (!formData.block || !formData.number) {
+        toast.error('Blok dan Nomor Rumah wajib diisi.');
+        return false;
+      }
+      return true;
+    }
+
     if (tab === 'basic') {
       const requiredFields = [
         { key: 'headOfFamily', label: 'Kepala Keluarga' },
@@ -338,24 +346,68 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           onChange={(v: any) => setFormData({...formData, number: v})} 
                         />
 
-                        <div className="col-span-2">
-                          <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Hunian</label>
-                          <div className="grid grid-cols-4 gap-2">
-                             {['Tetap', 'Keluarga', 'Kontrak', 'Kost'].map((st) => (
-                               <button
-                                 key={st}
-                                 type="button"
-                                 onClick={() => setFormData({...formData, residenceType: (st === 'Keluarga' ? 'Rumah Keluarga' : st) as any})}
-                                 className={`py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                                   formData.residenceType === (st === 'Keluarga' ? 'Rumah Keluarga' : st) 
-                                     ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' 
-                                     : 'bg-slate-50 text-slate-500 border border-slate-200/80 hover:bg-white hover:text-slate-800'
-                                 }`}
-                               >
-                                 {st}
-                               </button>
-                             ))}
+                        <div className="col-span-2 flex flex-col gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Status Hunian (Keberadaan Rumah)</label>
+                            <div className="grid grid-cols-3 gap-2">
+                               {[
+                                 { id: 'Occupied', label: 'Dihuni' },
+                                 { id: 'Empty', label: 'Kosong (Belum Dihuni)' },
+                                 { id: 'Business', label: 'Tempat Usaha' }
+                               ].map((st) => (
+                                 <button
+                                   key={st.id}
+                                   type="button"
+                                   onClick={() => {
+                                     if (st.id === 'Empty') {
+                                       setFormData({
+                                         ...formData,
+                                         status: 'Empty' as any,
+                                         headOfFamily: formData.headOfFamily || 'Rumah Kosong',
+                                         occupants: 0
+                                       });
+                                     } else {
+                                       setFormData({
+                                         ...formData,
+                                         status: st.id as any,
+                                         headOfFamily: formData.headOfFamily === 'Rumah Kosong' ? '' : formData.headOfFamily,
+                                         occupants: formData.occupants || 1
+                                       });
+                                     }
+                                   }}
+                                   className={`py-1.5 rounded-lg text-xs font-bold border transition-all text-center ${
+                                     formData.status === st.id 
+                                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
+                                       : 'bg-slate-50 text-slate-500 border border-slate-200/80 hover:bg-white hover:text-slate-800'
+                                   }`}
+                                 >
+                                   {st.label}
+                                 </button>
+                               ))}
+                            </div>
                           </div>
+
+                          {formData.status !== 'Empty' && (
+                            <div>
+                              <label className="block text-xs font-bold text-slate-705 mb-1.5">Status Kepemilikan Rumah</label>
+                              <div className="grid grid-cols-4 gap-2">
+                                 {['Tetap', 'Keluarga', 'Kontrak', 'Kost'].map((st) => (
+                                   <button
+                                     key={st}
+                                     type="button"
+                                     onClick={() => setFormData({...formData, residenceType: (st === 'Keluarga' ? 'Rumah Keluarga' : st) as any})}
+                                     className={`py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                       formData.residenceType === (st === 'Keluarga' ? 'Rumah Keluarga' : st) 
+                                         ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' 
+                                         : 'bg-slate-50 text-slate-500 border border-slate-200/80 hover:bg-white hover:text-slate-800'
+                                     }`}
+                                   >
+                                     {st}
+                                   </button>
+                                 ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {formData.residenceType !== 'Tetap' && (

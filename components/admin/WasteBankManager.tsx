@@ -506,8 +506,8 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                   const pA = getBlockPriority(a.block);
                   const pB = getBlockPriority(b.block);
                   if (pA !== pB) return pA - pB;
-                  if (a.block !== b.block) return a.block.localeCompare(b.block);
-                  return parseInt(a.number) - parseInt(b.number);
+                  if (a.block !== b.block) return a.block.localeCompare(b.block, undefined, { numeric: true });
+                  return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true });
                 })
                 .map(h => (
                   <option key={h.id} value={h.id}>{h.block}-{h.number} - {h.headOfFamily}</option>
