@@ -883,28 +883,38 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         logoData = await getImageData(config.logo);
     } catch (e) { console.error(e); }
 
-    const drawHeader = () => {
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', 15, 10, 22, 28);
+    const drawHeader = (isFirstPage = false) => {
+        if (isFirstPage) {
+            if (logoData) {
+                doc.addImage(logoData, 'PNG', 15, 10, 22, 28);
+            }
+
+            doc.setFont("times", "bold");
+            doc.setFontSize(14);
+            doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+            doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+            doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+            doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+            doc.setFont("times", "normal");
+            doc.setFontSize(10);
+            doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+            doc.setLineWidth(0.8);
+            doc.line(margin, 42, pageWidth - margin, 42);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 43, pageWidth - margin, 43);
+        } else {
+            doc.setFont("times", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139); // Slate-500
+            doc.text(`PENGURUS ${config.rtName} | DAFTAR INDUK DATA WARGA (Lanjutan)`, margin, 12);
+            doc.setTextColor(0);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 14, pageWidth - margin, 14);
         }
-
-        doc.setFont("times", "bold");
-        doc.setFontSize(14);
-        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-        doc.setFont("times", "normal");
-        doc.setFontSize(10);
-        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-
-        doc.setLineWidth(0.8);
-        doc.line(margin, 42, pageWidth - margin, 42);
-        doc.setLineWidth(0.2);
-        doc.line(margin, 43, pageWidth - margin, 43);
     };
 
-    drawHeader();
+    drawHeader(true);
     
     doc.setFont("times", "bold");
     doc.setFontSize(12);
@@ -919,7 +929,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const allPdfCols = [
         { id: 'block', label: "BLOK", baseWidth: 10 },
         { id: 'number', label: "NO RUMAH", baseWidth: 14 },
-        { id: 'headOfFamily', label: "NAMA KEPALA KELUARGA", baseWidth: 55 },
+        { id: 'headOfFamily', label: "NAMA KEPALA KELUARGA", baseWidth: 35 },
         { id: 'gender', label: "L/P", baseWidth: 8 },
         { id: 'birthDate', label: "TGL LAHIR", baseWidth: 18 },
         { id: 'religion', label: "AGAMA", baseWidth: 14 },
@@ -977,17 +987,51 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
     const sortedHouses = [...houses].sort((a,b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
 
+    let currentBlock = '';
+    let residentNo = 0;
+
     sortedHouses.forEach((h, i) => {
+        const houseBlock = (h.block || '').toUpperCase();
+        if (houseBlock !== currentBlock) {
+            currentBlock = houseBlock;
+            
+            // Check for page break before drawing block separator
+            if (y > pageHeight - 20) {
+                doc.addPage();
+                drawHeader(false);
+                y = 22;
+                drawTableHeader(y);
+                y += 8;
+            }
+            
+            // Block section header row
+            doc.setFillColor(241, 245, 249); // slate-100 background
+            doc.rect(margin, y - 5, contentWidth, 7, 'F');
+            
+            doc.setFont("times", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(15, 23, 42); // slate-900
+            doc.text(`BLOK ${houseBlock}`, margin + 4, y);
+            
+            doc.setDrawColor(203, 213, 225); // slate-300
+            doc.setLineWidth(0.3);
+            doc.line(margin, y + 2, pageWidth - margin, y + 2);
+            
+            y += 7;
+        }
+
         if (y > pageHeight - 20) {
             doc.addPage();
-            drawHeader();
-            y = 60;
+            drawHeader(false);
+            y = 22;
             drawTableHeader(y);
             y += 8;
         }
 
+        residentNo++;
+
         // Zebra striping
-        if (i % 2 !== 0) {
+        if (residentNo % 2 !== 0) {
             doc.setFillColor(248, 250, 252);
             doc.rect(margin, y - 5, contentWidth, 7, 'F');
         }
@@ -997,7 +1041,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         
         let currX = margin;
         const rowData = headers.map((header) => {
-            if (header.id === 'no') return (i + 1).toString();
+            if (header.id === 'no') return residentNo.toString();
             
             const val = h[header.id as keyof House];
             if (header.id === 'status') {
@@ -1083,8 +1127,8 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     // Statistics / Summary Block (Rekapitulasi Data Status Hunian & Kepemilikan)
     if (y > pageHeight - 55) {
         doc.addPage();
-        drawHeader();
-        y = 60;
+        drawHeader(false);
+        y = 22;
     } else {
         y += 8;
     }
@@ -1126,8 +1170,8 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     // Signature Block
     if (y > pageHeight - 50) {
         doc.addPage();
-        drawHeader();
-        y = 60;
+        drawHeader(false);
+        y = 22;
     } else {
         y += 15;
     }
@@ -1646,58 +1690,68 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
     const takenCount = sortedHouses.filter(h => h.pbbStatus === 'Sudah Diambil').length;
     const pendingCount = totalResidents - takenCount;
 
-    const drawHeader = () => {
-        // --- Professional Header (Kop Surat) ---
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+    const drawHeader = (isFirstPage = false) => {
+        if (isFirstPage) {
+            // --- Professional Header (Kop Surat) ---
+            if (logoData) {
+                doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+            }
+
+            doc.setFont("times", "normal");
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.setDrawColor(0, 0, 0);
+
+            doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+            doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+            doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+            doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+            doc.setFontSize(11);
+            doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+            // Double lines below header
+            doc.setLineWidth(1.0);
+            doc.line(margin, 42, pageWidth - margin, 42);
+            doc.setLineWidth(0.3);
+            doc.line(margin, 43, pageWidth - margin, 43);
+
+            // Title
+            doc.setFont("times", "bold");
+            doc.setFontSize(12);
+            doc.text(`DAFTAR PENERIMA SPPT PBB TAHUN ${year}`, centerX, 55, { align: "center" });
+            const titleWidth = doc.getTextWidth(`DAFTAR PENERIMA SPPT PBB TAHUN ${year}`);
+            doc.line(centerX - (titleWidth / 2), 56, centerX + (titleWidth / 2), 56);
+            
+            // Summary Stats (Solid and Clear)
+            doc.setFont("times", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0); // Black for Total
+            doc.text(`TOTAL WARGA: ${totalResidents}`, margin + 5, 75);
+            
+            doc.setTextColor(0, 128, 0); // Dark Green for Taken
+            doc.text(`SUDAH: ${takenCount}`, margin + (contentWidth / 2), 75, { align: "center" });
+            
+            doc.setTextColor(200, 0, 0); // Dark Red for Pending
+            doc.text(`BELUM: ${pendingCount}`, pageWidth - margin - 5, 75, { align: "right" });
+            
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 78, pageWidth - margin, 78);
+            
+            doc.setTextColor(0, 0, 0);
+        } else {
+            doc.setFont("times", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`PENGURUS ${config.rtName} | DAFTAR PENERIMA SPPT PBB TAHUN ${year} (Lanjutan)`, margin, 12);
+            doc.setTextColor(0);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 14, pageWidth - margin, 14);
         }
-
-        doc.setFont("times", "normal");
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.setDrawColor(0, 0, 0);
-
-        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-
-        doc.setFontSize(11);
-        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-
-        // Double lines below header
-        doc.setLineWidth(1.0);
-        doc.line(margin, 42, pageWidth - margin, 42);
-        doc.setLineWidth(0.3);
-        doc.line(margin, 43, pageWidth - margin, 43);
-
-        // Title
-        doc.setFont("times", "bold");
-        doc.setFontSize(12);
-        doc.text(`DAFTAR PENERIMA SPPT PBB TAHUN ${year}`, centerX, 55, { align: "center" });
-        const titleWidth = doc.getTextWidth(`DAFTAR PENERIMA SPPT PBB TAHUN ${year}`);
-        doc.line(centerX - (titleWidth / 2), 56, centerX + (titleWidth / 2), 56);
-        
-        // Summary Stats (Solid and Clear)
-        doc.setFont("times", "bold");
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0); // Black for Total
-        doc.text(`TOTAL WARGA: ${totalResidents}`, margin + 5, 75);
-        
-        doc.setTextColor(0, 128, 0); // Dark Green for Taken
-        doc.text(`SUDAH: ${takenCount}`, margin + (contentWidth / 2), 75, { align: "center" });
-        
-        doc.setTextColor(200, 0, 0); // Dark Red for Pending
-        doc.text(`BELUM: ${pendingCount}`, pageWidth - margin - 5, 75, { align: "right" });
-        
-        doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.2);
-        doc.line(margin, 78, pageWidth - margin, 78);
-        
-        doc.setTextColor(0, 0, 0);
     };
 
-    drawHeader();
+    drawHeader(true);
     let y = 92;
 
     const colWidths = [8, 18, 69, 35, 40]; 
@@ -1738,8 +1792,8 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
             // Check for page break before block header
             if (y > 270) {
                 doc.addPage();
-                drawHeader();
-                y = 92;
+                drawHeader(false);
+                y = 22;
                 drawTableHeaders(y);
                 y += 9;
             }
@@ -1756,8 +1810,8 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
 
         if (y > 275) {
             doc.addPage();
-            drawHeader();
-            y = 92;
+            drawHeader(false);
+            y = 22;
             drawTableHeaders(y);
             y += 9;
             doc.setFont("times", "normal");
@@ -2072,32 +2126,42 @@ export const generateIncidentReportPDF = async (reports: Report[], houses: House
         logoData = await getImageData(config.logo);
     } catch (e) { console.error(e); }
 
-    const drawHeader = () => {
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
-        }
-        doc.setFont("times", "normal");
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-        doc.setFontSize(11);
-        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-        
-        doc.setLineWidth(1.0);
-        doc.line(margin, 42, pageWidth - margin, 42);
-        doc.setLineWidth(0.3);
-        doc.line(margin, 43, pageWidth - margin, 43);
+    const drawHeader = (isFirstPage = false) => {
+        if (isFirstPage) {
+            if (logoData) {
+                doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+            }
+            doc.setFont("times", "normal");
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+            doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+            doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+            doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+            doc.setFontSize(11);
+            doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+            
+            doc.setLineWidth(1.0);
+            doc.line(margin, 42, pageWidth - margin, 42);
+            doc.setLineWidth(0.3);
+            doc.line(margin, 43, pageWidth - margin, 43);
 
-        doc.setFont("times", "bold");
-        doc.setFontSize(12);
-        doc.text("REKAPITULASI LAPORAN & TEMUAN LAPANGAN", centerX, 55, { align: "center" });
-        doc.line(centerX - 45, 56, centerX + 45, 56);
+            doc.setFont("times", "bold");
+            doc.setFontSize(12);
+            doc.text("REKAPITULASI LAPORAN & TEMUAN LAPANGAN", centerX, 55, { align: "center" });
+            doc.line(centerX - 45, 56, centerX + 45, 56);
+        } else {
+            doc.setFont("times", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`PENGURUS ${config.rtName} | LAPORAN & TEMUAN LAPANGAN (Lanjutan)`, margin, 12);
+            doc.setTextColor(0);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 14, pageWidth - margin, 14);
+        }
     };
 
-    drawHeader();
+    drawHeader(true);
     let y = 65;
 
     // Statistics Summary
@@ -2119,8 +2183,8 @@ export const generateIncidentReportPDF = async (reports: Report[], houses: House
             // Check for page break
             if (y > 240) {
                 doc.addPage();
-                drawHeader();
-                y = 65;
+                drawHeader(false);
+                y = 22;
             }
 
             // Report Header Box
@@ -2179,8 +2243,8 @@ export const generateIncidentReportPDF = async (reports: Report[], houses: House
     // Signature Area
     if (y > 240) {
         doc.addPage();
-        drawHeader();
-        y = 65;
+        drawHeader(false);
+        y = 22;
     } else {
         y += 10;
     }
@@ -2279,48 +2343,58 @@ export const generateBillReportPDF = async (houses: House[], iuranPayments: any[
         logoData = await getImageData(config.logo);
     } catch (e) {}
 
-    const drawHeader = () => {
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+    const drawHeader = (isFirstPage = false) => {
+        if (isFirstPage) {
+            if (logoData) {
+                doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+            }
+
+            doc.setFont("times", "normal");
+            doc.setFontSize(14);
+            doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+            doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+            doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+            doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+            doc.setFontSize(11);
+            doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+            doc.setLineWidth(1.0);
+            doc.line(margin, 42, pageWidth - margin, 42);
+            doc.setLineWidth(0.3);
+            doc.line(margin, 43, pageWidth - margin, 43);
+
+            doc.setFont("times", "bold");
+            doc.setFontSize(12);
+            doc.text(`DAFTAR PEMBAYARAN IURAN ${billType.toUpperCase()} - ${currentMonth.toUpperCase()}`, centerX, 55, { align: "center" });
+            
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0); 
+            doc.text(`TOTAL WARGA: ${totalResidents}`, margin + 5, 75);
+            
+            doc.setTextColor(0, 128, 0);
+            doc.text(`LUNAS: ${paidCount}`, margin + (contentWidth / 2), 75, { align: "center" });
+            
+            doc.setTextColor(200, 0, 0);
+            doc.text(`BELUM LUNAS: ${unpaidCount}`, pageWidth - margin - 5, 75, { align: "right" });
+            
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 78, pageWidth - margin, 78);
+            
+            doc.setTextColor(0, 0, 0);
+        } else {
+            doc.setFont("times", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`PENGURUS ${config.rtName} | LAPORAN IURAN ${billType.toUpperCase()} - ${currentMonth.toUpperCase()} (Lanjutan)`, margin, 12);
+            doc.setTextColor(0);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 14, pageWidth - margin, 14);
         }
-
-        doc.setFont("times", "normal");
-        doc.setFontSize(14);
-        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-
-        doc.setFontSize(11);
-        doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-
-        doc.setLineWidth(1.0);
-        doc.line(margin, 42, pageWidth - margin, 42);
-        doc.setLineWidth(0.3);
-        doc.line(margin, 43, pageWidth - margin, 43);
-
-        doc.setFont("times", "bold");
-        doc.setFontSize(12);
-        doc.text(`DAFTAR PEMBAYARAN IURAN ${billType.toUpperCase()} - ${currentMonth.toUpperCase()}`, centerX, 55, { align: "center" });
-        
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0); 
-        doc.text(`TOTAL WARGA: ${totalResidents}`, margin + 5, 75);
-        
-        doc.setTextColor(0, 128, 0);
-        doc.text(`LUNAS: ${paidCount}`, margin + (contentWidth / 2), 75, { align: "center" });
-        
-        doc.setTextColor(200, 0, 0);
-        doc.text(`BELUM LUNAS: ${unpaidCount}`, pageWidth - margin - 5, 75, { align: "right" });
-        
-        doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.2);
-        doc.line(margin, 78, pageWidth - margin, 78);
-        
-        doc.setTextColor(0, 0, 0);
     };
 
-    drawHeader();
+    drawHeader(true);
     let y = 92;
 
     const colWidths = [8, 18, 69, 35, 40]; 
@@ -2357,8 +2431,8 @@ export const generateBillReportPDF = async (houses: House[], iuranPayments: any[
             currentBlock = houseBlock;
             if (y > 270) {
                 doc.addPage();
-                drawHeader();
-                y = 92;
+                drawHeader(false);
+                y = 22;
                 drawTableHeaders(y);
                 y += 9;
             }
@@ -2372,8 +2446,8 @@ export const generateBillReportPDF = async (houses: House[], iuranPayments: any[
 
         if (y > 275) {
             doc.addPage();
-            drawHeader();
-            y = 92;
+            drawHeader(false);
+            y = 22;
             drawTableHeaders(y);
             y += 9;
             doc.setFont("times", "normal");
