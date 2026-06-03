@@ -97,17 +97,11 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
         }
       }
     } else if (tab === 'family') {
-      if (!isAdmin) {
-        for (let i = 0; i < formData.familyMembers.length; i++) {
-          const member = formData.familyMembers[i];
-          if (!member.name || !member.nik || !member.birthDate || !member.job) {
-            toast.error(`Lengkapi data anggota keluarga ke-${i + 1}.`);
-            return false;
-          }
-          if (member.nik && member.nik.length !== 16) {
-            toast.error(`NIK anggota keluarga ke-${i + 1} harus 16 digit.`);
-            return false;
-          }
+      for (let i = 0; i < formData.familyMembers.length; i++) {
+        const member = formData.familyMembers[i];
+        if (member.nik && member.nik.trim() !== "" && member.nik.trim().length !== 16) {
+          toast.error(`NIK anggota keluarga ke-${i + 1} harus 16 digit.`);
+          return false;
         }
       }
     }
@@ -881,7 +875,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
                           <FormField 
                             label="Nama Lengkap" 
-                            required
+                            showAsterisk
                             placeholder="Nama sesuai KTP..." 
                             value={member.name}
                             onChange={(v: any) => {
@@ -940,7 +934,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           <div className="grid grid-cols-2 gap-4">
                             <FormField 
                               label="NIK" 
-                              required
+                              showAsterisk
                               placeholder="16 Digit NIK" 
                               value={member.nik}
                               onChange={(v: any) => {
@@ -952,7 +946,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             />
                             <FormField 
                               label="Tanggal Lahir" 
-                              required
+                              showAsterisk
                               type="date"
                               value={member.birthDate}
                               onChange={(v: any) => {
@@ -965,7 +959,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
                           <FormField 
                             label="Pekerjaan / Aktivitas" 
-                            required
+                            showAsterisk
                             placeholder="Contoh: Pekerja Swasta, Pelajar" 
                             value={member.job}
                             onChange={(v: any) => {
@@ -1051,14 +1045,14 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
 
 // UI Helpers
-const FormField = ({ label, value, onChange, placeholder, type = 'text', required = false, multiline = false, maxLength, options }: any) => (
+const FormField = ({ label, value, onChange, placeholder, type = 'text', required = false, showAsterisk = false, multiline = false, maxLength, options }: any) => (
   <div className="w-full group/field">
     <label className="block text-xs font-semibold text-slate-600 mb-1.5 group-focus-within/field:text-indigo-600 transition-colors">
-      {label} {required && <span className="text-rose-500">*</span>}
+      {label} {(required || showAsterisk) && <span className="text-rose-500">*</span>}
     </label>
     {multiline ? (
       <textarea 
-        required={required}
+        required={required ? true : undefined}
         value={value ?? ''}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
@@ -1070,7 +1064,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
         <select
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
-          required={required}
+          required={required ? true : undefined}
           className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
         >
           <option value="">Pilih...</option>
@@ -1084,7 +1078,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
       <div className="relative">
         <input 
           type={type}
-          required={required}
+          required={required ? true : undefined}
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}

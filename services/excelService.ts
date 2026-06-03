@@ -188,7 +188,8 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
 
     // Style Data Rows
     row.height = 28;
-    row.eachCell((cell) => {
+    row.eachCell((cell, colNumber) => {
+      const colKey = columnsToUse[colNumber - 1]?.key;
       cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF334155' } }; // Slate-700
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
       cell.border = {
@@ -201,27 +202,48 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
       const valStr = cell.value?.toString() || '';
 
       // Conditional styling for Status Hunian (Dihuni / Kosong / Usaha)
-      if (valStr === 'Dihuni') {
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF0284C7' }, bold: true }; // Sky-700
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0F2FE' } }; // Sky-100
-      } else if (valStr === 'Kosong') {
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF64748B' }, bold: true }; // Slate-500
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; // Slate-100
-      } else if (valStr === 'Usaha') {
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFD97706' }, bold: true }; // Amber-600
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } }; // Amber-100
+      if (colKey === 'status') {
+        if (valStr === 'Dihuni') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF0284C7' }, bold: true }; // Sky-700
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0F2FE' } }; // Sky-100
+        } else if (valStr === 'Kosong') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF64748B' }, bold: true }; // Slate-500
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; // Slate-100
+        } else if (valStr === 'Usaha') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFD97706' }, bold: true }; // Amber-600
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } }; // Amber-100
+        }
       }
 
-      // Conditional styling for Payment Status
-      if (valStr === PaymentStatus.PAID || valStr === 'Terverifikasi' || valStr === 'Lunas') {
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF059669' }, bold: true }; // Emerald-600
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFECFDF5' } }; // Emerald-50
-      } else if (valStr === PaymentStatus.UNPAID || valStr === 'Belum Verifikasi' || valStr === 'Menunggak' || valStr === 'Belum Lunas') {
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFDC2626' }, bold: true }; // Rose-600
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF1F2' } }; // Rose-50
-      } else if (valStr === PaymentStatus.PENDING) {
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFD97706' }, bold: true }; // Amber-600
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } }; // Amber-50
+      // Conditional styling for Status Kepemilikan (Tetap / Kontrak / Kost / Rumah Keluarga)
+      if (colKey === 'residenceType') {
+        if (valStr === 'Tetap') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF0F766E' }, bold: true }; // Teal-700
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0F2F1' } }; // Teal-100
+        } else if (valStr === 'Kontrak') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFB45309' }, bold: true }; // Amber-700
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } }; // Amber-100
+        } else if (valStr === 'Kost') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFBE185D' }, bold: true }; // Pink-700
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE7F3' } }; // Pink-100
+        } else if (valStr === 'Keluarga' || valStr === 'Rumah Keluarga') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF4F46E5' }, bold: true }; // Indigo-600
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E7FF' } }; // Indigo-100
+        }
+      }
+
+      // Conditional styling for Payment Status / Verification
+      if (colKey === 'paymentStatusAir' || colKey === 'paymentStatusSampah' || colKey === 'paymentStatusKeamanan' || colKey === 'isVerified') {
+        if (valStr === PaymentStatus.PAID || valStr === 'Terverifikasi' || valStr === 'Lunas') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF059669' }, bold: true }; // Emerald-600
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFECFDF5' } }; // Emerald-50
+        } else if (valStr === PaymentStatus.UNPAID || valStr === 'Belum Verifikasi' || valStr === 'Menunggak' || valStr === 'Belum Lunas') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFDC2626' }, bold: true }; // Rose-600
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF1F2' } }; // Rose-50
+        } else if (valStr === PaymentStatus.PENDING) {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFD97706' }, bold: true }; // Amber-600
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } }; // Amber-50
+        }
       }
 
       if (typeof cell.value === 'number') {
@@ -254,6 +276,55 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
     });
     const finalWidth = Math.min(Math.max(12, maxColumnLength + 5), 50);
     column.width = finalWidth;
+  });
+
+  // Add Recap Rows to Main Sheet
+  worksheet.addRow([]); // Blank row
+  const recapTitleRow = worksheet.addRow(['REKAPITULASI DATA STATUS HUNIAN & KEPEMILIKAN']);
+  recapTitleRow.height = 24;
+  const recapTitleCell = recapTitleRow.getCell(1);
+  recapTitleCell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FF1E293B' } };
+
+  const occupiedCount = houses.filter(h => h.status === 'Occupied').length;
+  const emptyCount = houses.filter(h => h.status === 'Empty').length;
+  const businessCount = houses.filter(h => h.status === 'Business').length;
+
+  const tetaps = houses.filter(h => h.residenceType === 'Tetap').length;
+  const kontraks = houses.filter(h => h.residenceType === 'Kontrak').length;
+  const kosts = houses.filter(h => h.residenceType === 'Kost').length;
+  const keluargas = houses.filter(h => h.residenceType === 'Rumah Keluarga').length;
+
+  const statusRow = worksheet.addRow([
+    'Status Hunian:',
+    `Dihuni: ${occupiedCount} Rumah`,
+    `Belum Dihuni (Kosong): ${emptyCount} Rumah`,
+    `Usaha: ${businessCount} Rumah`
+  ]);
+  statusRow.height = 20;
+  statusRow.eachCell((cell, colNumber) => {
+    cell.font = {
+      name: 'Segoe UI',
+      size: 10,
+      bold: colNumber === 1,
+      color: { argb: colNumber === 1 ? 'FF1E293B' : 'FF475569' }
+    };
+  });
+
+  const kepemilikanRow = worksheet.addRow([
+    'Status Kepemilikan:',
+    `Tetap: ${tetaps} Rumah`,
+    `Kontrak: ${kontraks} Rumah`,
+    `Kost: ${kosts} Rumah`,
+    `Rumah Keluarga: ${keluargas} Rumah`
+  ]);
+  kepemilikanRow.height = 20;
+  kepemilikanRow.eachCell((cell, colNumber) => {
+    cell.font = {
+      name: 'Segoe UI',
+      size: 10,
+      bold: colNumber === 1,
+      color: { argb: colNumber === 1 ? 'FF1E293B' : 'FF475569' }
+    };
   });
 
   // Add Family Members Sheet

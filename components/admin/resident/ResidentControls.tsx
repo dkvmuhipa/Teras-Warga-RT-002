@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Calendar, Users, LayoutList, MapPin, DollarSign, UserPlus, Activity, Filter, ArrowUpDown, X, ChevronDown, FileClock, FileEdit, ShieldAlert, Briefcase } from 'lucide-react';
+import { Search, Calendar, Users, LayoutList, MapPin, DollarSign, UserPlus, Activity, Filter, ArrowUpDown, X, ChevronDown, FileClock, FileEdit, ShieldAlert, Briefcase, Home } from 'lucide-react';
 import { generateMonthOptions } from '../../../src/utils/dateUtils';
 import { ResidentRegistration } from '../../../types';
 
@@ -10,6 +10,8 @@ interface ResidentControlsProps {
   setSelectedMonth: (month: string) => void;
   filterStatus: string;
   setFilterStatus: (status: any) => void;
+  filterResidenceType: string;
+  setFilterResidenceType: (type: string) => void;
   sortBy: 'name' | 'block';
   setSortBy: (sort: 'name' | 'block') => void;
   viewMode: string;
@@ -24,6 +26,8 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
   setSelectedMonth,
   filterStatus,
   setFilterStatus,
+  filterResidenceType,
+  setFilterResidenceType,
   sortBy,
   setSortBy,
   viewMode,
@@ -127,6 +131,20 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             <option value="arrears">⚠️ Ada Tunggakan</option>
             <option value="pbb_taken">📄 PBB Diambil</option>
             <option value="pbb_not_taken">📄 PBB Belum Diambil</option>
+          </select>
+        </FilterGroup>
+
+        <FilterGroup icon={<Home size={13} className="text-rose-500" />} label="Status Kepemilikan">
+          <select 
+            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
+            value={filterResidenceType} 
+            onChange={e => setFilterResidenceType(e.target.value)}
+          >
+            <option value="all">Semua Status</option>
+            <option value="Tetap">Tetap</option>
+            <option value="Kontrak">Kontrak</option>
+            <option value="Kost">Kost</option>
+            <option value="Rumah Keluarga">Rumah Keluarga</option>
           </select>
         </FilterGroup>
 

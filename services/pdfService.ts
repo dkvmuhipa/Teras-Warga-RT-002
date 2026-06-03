@@ -8,6 +8,13 @@ import { DEFAULT_PDF_CONFIG } from "../constants";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
 import { naturalSortBlockAndNumber } from "./excelService";
 
+// Override jsPDF setFont prototype to replace "times" with "helvetica" for a clean, modern look
+const originalSetFont = jsPDF.prototype.setFont;
+jsPDF.prototype.setFont = function (this: any, fontName: string, fontStyle?: string, ...args: any[]) {
+    const resolvedFont = fontName === "times" ? "helvetica" : fontName;
+    return originalSetFont.call(this, resolvedFont, fontStyle, ...args);
+};
+
 // ... (existing helper functions) ...
 
 export const generatePopulationReportPDF = async (report: PopulationReport, customConfig?: PdfConfig) => {
@@ -910,22 +917,22 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     
     // Configurable PDF Column Definitions
     const allPdfCols = [
-        { id: 'block', label: "BLOK", baseWidth: 15 },
-        { id: 'number', label: "NO RMH", baseWidth: 15 },
+        { id: 'block', label: "BLOK", baseWidth: 10 },
+        { id: 'number', label: "NO RUMAH", baseWidth: 14 },
         { id: 'headOfFamily', label: "NAMA KEPALA KELUARGA", baseWidth: 55 },
-        { id: 'gender', label: "L/P", baseWidth: 14 },
-        { id: 'birthDate', label: "TGL LAHIR", baseWidth: 20 },
-        { id: 'religion', label: "AGAMA", baseWidth: 18 },
+        { id: 'gender', label: "L/P", baseWidth: 8 },
+        { id: 'birthDate', label: "TGL LAHIR", baseWidth: 18 },
+        { id: 'religion', label: "AGAMA", baseWidth: 14 },
         { id: 'ownerName', label: "PEMILIK RUMAH", baseWidth: 45 },
-        { id: 'ownerPhone', label: "TLP PEMILIK", baseWidth: 28 },
-        { id: 'phone', label: "TELEPON", baseWidth: 28 },
-        { id: 'status', label: "STATUS", baseWidth: 20 },
-        { id: 'residenceType', label: "KEPEMILIKAN", baseWidth: 24 },
-        { id: 'occupants', label: "JIWA", baseWidth: 12 },
-        { id: 'education', label: "PENDIDIKAN", baseWidth: 22 },
+        { id: 'ownerPhone', label: "TLP PEMILIK", baseWidth: 24 },
+        { id: 'phone', label: "TELEPON", baseWidth: 24 },
+        { id: 'status', label: "STATUS", baseWidth: 16 },
+        { id: 'residenceType', label: "KEPEMILIKAN", baseWidth: 18 },
+        { id: 'occupants', label: "JIWA", baseWidth: 8 },
+        { id: 'education', label: "PENDIDIKAN", baseWidth: 16 },
         { id: 'jobCategory', label: "PEKERJAAN", baseWidth: 25 },
-        { id: 'economicStatus', label: "EKONOMI", baseWidth: 22 },
-        { id: 'isVerified', label: "KET", baseWidth: 18 }
+        { id: 'economicStatus', label: "EKONOMI", baseWidth: 16 },
+        { id: 'isVerified', label: "KET", baseWidth: 12 }
     ];
 
     let selectedDefs = allPdfCols;
@@ -1015,6 +1022,41 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
             const align = centerKeys.includes(hDef.id) ? "center" : "left";
             const xPos = align === "center" ? currX + (w / 2) : currX + 2;
             
+            // Set default font and text color
+            doc.setFont("times", "normal");
+            doc.setTextColor(51, 65, 85); // Slate-700
+            
+            // Highlight Status Hunian
+            if (hDef.id === 'status') {
+                if (text === 'DIHUNI') {
+                    doc.setFont("times", "bold");
+                    doc.setTextColor(2, 132, 199); // Sky-700
+                } else if (text === 'KOSONG') {
+                    doc.setFont("times", "bold");
+                    doc.setTextColor(100, 116, 139); // Slate-500
+                } else if (text === 'USAHA') {
+                    doc.setFont("times", "bold");
+                    doc.setTextColor(217, 119, 6); // Amber-600
+                }
+            }
+            
+            // Highlight Keberadaan / Kepemilikan Rumah (residenceType)
+            if (hDef.id === 'residenceType') {
+                if (text === 'Tetap') {
+                    doc.setFont("times", "bold");
+                    doc.setTextColor(15, 118, 110); // Teal-700
+                } else if (text === 'Kontrak') {
+                    doc.setFont("times", "bold");
+                    doc.setTextColor(180, 83, 9); // Amber-700
+                } else if (text === 'Kost') {
+                    doc.setFont("times", "bold");
+                    doc.setTextColor(190, 24, 93); // Pink-700
+                } else if (text === 'Keluarga' || text === 'Rumah Keluarga') {
+                    doc.setFont("times", "bold");
+                    doc.setTextColor(79, 70, 229); // Indigo-600
+                }
+            }
+
             let truncatedText = text;
             if (doc.getTextWidth(text) > w - 2) {
                 // Handle splitting and truncation nicely to context width
@@ -1027,12 +1069,59 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
             currX += w;
         });
 
+        // Reset default style after row
+        doc.setFont("times", "normal");
+        doc.setTextColor(0);
+
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.1);
         doc.line(margin, y + 2, pageWidth - margin, y + 2);
         
         y += 7;
     });
+
+    // Statistics / Summary Block (Rekapitulasi Data Status Hunian & Kepemilikan)
+    if (y > pageHeight - 55) {
+        doc.addPage();
+        drawHeader();
+        y = 60;
+    } else {
+        y += 8;
+    }
+
+    doc.setFillColor(248, 250, 252); // Slate 50 background
+    doc.setDrawColor(226, 232, 240); // Slate 200 border
+    doc.setLineWidth(0.2);
+    doc.rect(margin, y, contentWidth, 22, 'FD');
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(30, 41, 59); // Slate 800
+    doc.text("REKAPITULASI STATUS HUNIAN & KEPEMILIKAN", margin + 4, y + 5);
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(71, 85, 105); // Slate 600
+
+    const occupiedCount = houses.filter(h => h.status === 'Occupied').length;
+    const emptyCount = houses.filter(h => h.status === 'Empty').length;
+    const businessCount = houses.filter(h => h.status === 'Business').length;
+
+    const tetaps = houses.filter(h => h.residenceType === 'Tetap').length;
+    const kontraks = houses.filter(h => h.residenceType === 'Kontrak').length;
+    const kosts = houses.filter(h => h.residenceType === 'Kost').length;
+    const keluargas = houses.filter(h => h.residenceType === 'Rumah Keluarga').length;
+
+    const row1Txt = `Status Hunian      :  Dihuni = ${occupiedCount}  |  Belum Dihuni (Kosong) = ${emptyCount}  |  Usaha = ${businessCount}`;
+    const row2Txt = `Status Kepemilikan :  Tetap = ${tetaps}  |  Kontrak = ${kontraks}  |  Kost = ${kosts}  |  Keluarga = ${keluargas}`;
+
+    doc.text(row1Txt, margin + 4, y + 11);
+    doc.text(row2Txt, margin + 4, y + 17);
+
+    // Reset style
+    doc.setTextColor(0);
+
+    y += 24;
 
     // Signature Block
     if (y > pageHeight - 50) {
@@ -1269,18 +1358,22 @@ export const generateCashFlowReportPDF = async (cashFlow: any[], month: string, 
     y += 8;
 
     const cols = [
-        { header: "Tgl", width: 25, x: margin },
-        { header: "Keterangan", width: 80, x: margin + 25 },
-        { header: "Kategori", width: 30, x: margin + 105 },
-        { header: "Pemasukan", width: 30, x: margin + 135 },
-        { header: "Pengeluaran", width: 30, x: margin + 165 },
+        { header: "Tgl", width: 18, x: margin },
+        { header: "Keterangan", width: 64, x: margin + 18 },
+        { header: "Kategori", width: 28, x: margin + 82 },
+        { header: "Pemasukan", width: 30, x: margin + 110 },
+        { header: "Pengeluaran", width: 30, x: margin + 140 },
     ];
 
     // Table Header
     doc.setFillColor(240, 240, 240);
     doc.rect(margin, y - 5, contentWidth, 7, 'F');
     doc.setFontSize(9);
-    cols.forEach(col => doc.text(col.header, col.x + 2, y));
+    cols.forEach(col => {
+        const align = (col.header === "Pemasukan" || col.header === "Pengeluaran") ? "right" : "left";
+        const xPos = align === "right" ? col.x + col.width - 2 : col.x + 2;
+        doc.text(col.header, xPos, y, { align });
+    });
     doc.line(margin, y + 2, pageWidth - margin, y + 2);
     y += 7;
 
@@ -1296,12 +1389,26 @@ export const generateCashFlowReportPDF = async (cashFlow: any[], month: string, 
         const desc = doc.splitTextToSize(cf.description, cols[1].width - 4);
         doc.text(desc, cols[1].x + 2, y);
         
-        doc.text(cf.category, cols[2].x + 2, y);
+        const categoryVal = cf.category || '-';
+        let truncatedCategory = categoryVal;
+        if (doc.getTextWidth(categoryVal) > cols[2].width - 4) {
+            truncatedCategory = doc.splitTextToSize(categoryVal, cols[2].width - 5)[0];
+            if (categoryVal.length > truncatedCategory.length) {
+                truncatedCategory = truncatedCategory.substring(0, Math.max(2, truncatedCategory.length - 2)) + "..";
+            }
+        }
+        doc.text(truncatedCategory, cols[2].x + 2, y);
         
         if (cf.type === 'Income') {
-            doc.text(cf.amount.toLocaleString(), pageWidth - margin - 35, y, { align: "right" });
+            doc.text(cf.amount.toLocaleString('id-ID'), cols[3].x + cols[3].width - 2, y, { align: "right" });
         } else {
-            doc.text(cf.amount.toLocaleString(), pageWidth - margin - 5, y, { align: "right" });
+            doc.text("-", cols[3].x + (cols[3].width / 2), y, { align: "center" });
+        }
+        
+        if (cf.type === 'Expense') {
+            doc.text(cf.amount.toLocaleString('id-ID'), cols[4].x + cols[4].width - 2, y, { align: "right" });
+        } else {
+            doc.text("-", cols[4].x + (cols[4].width / 2), y, { align: "center" });
         }
 
         const rowLines = desc.length;
@@ -1405,6 +1512,19 @@ export const generateGuestReportPDF = async (guestReports: any[], customConfig?:
     doc.rect(margin, y, contentWidth, rowHeight);
     y += rowHeight;
 
+    const getColText = (text: string, colIdx: number) => {
+        const rawText = text || '-';
+        const w = cols[colIdx].width;
+        if (doc.getTextWidth(rawText) > w - 3) {
+            let truncated = doc.splitTextToSize(rawText, w - 5)[0];
+            if (rawText.length > truncated.length) {
+                return truncated.substring(0, Math.max(2, truncated.length - 2)) + "..";
+            }
+            return truncated;
+        }
+        return rawText;
+    };
+
     doc.setFont("times", "normal");
     guestReports.forEach((guest, index) => {
         if (y > pageHeight - 20) {
@@ -1421,14 +1541,14 @@ export const generateGuestReportPDF = async (guestReports: any[], customConfig?:
         }
 
         doc.text((index + 1).toString(), cols[0].x + 2, y + 5);
-        doc.text(guest.guestName, cols[1].x + 2, y + 5);
-        doc.text(guest.guestNik || '-', cols[2].x + 2, y + 5);
-        doc.text(guest.relationship, cols[3].x + 2, y + 5);
-        doc.text(guest.residentName, cols[4].x + 2, y + 5);
-        doc.text(guest.purpose || '-', cols[5].x + 2, y + 5);
+        doc.text(getColText(guest.guestName, 1), cols[1].x + 2, y + 5);
+        doc.text(getColText(guest.guestNik, 2), cols[2].x + 2, y + 5);
+        doc.text(getColText(guest.relationship, 3), cols[3].x + 2, y + 5);
+        doc.text(getColText(guest.residentName, 4), cols[4].x + 2, y + 5);
+        doc.text(getColText(guest.purpose, 5), cols[5].x + 2, y + 5);
         doc.text(new Date(guest.arrivalDate).toLocaleDateString('id-ID'), cols[6].x + 2, y + 5);
-        doc.text(guest.stayDuration, cols[7].x + 2, y + 5);
-        doc.text(guest.phone, cols[8].x + 2, y + 5);
+        doc.text(getColText(guest.stayDuration, 7), cols[7].x + 2, y + 5);
+        doc.text(getColText(guest.phone, 8), cols[8].x + 2, y + 5);
         doc.text(guest.status === 'Active' ? 'Aktif' : 'Pulang', cols[9].x + 2, y + 5);
 
         doc.rect(margin, y, contentWidth, rowHeight);
@@ -1580,7 +1700,7 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
     drawHeader();
     let y = 92;
 
-    const colWidths = [10, 22, 63, 35, 40]; 
+    const colWidths = [8, 18, 69, 35, 40]; 
     const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA", "SUDAH/BELUM", "TANDA TANGAN"];
     
     const drawTableHeaders = (startY: number) => {
@@ -1664,7 +1784,14 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
 
         // Name
         const name = house.headOfFamily?.toUpperCase() || "-";
-        doc.text(doc.splitTextToSize(name, colWidths[2] - 5), curX + 3, y);
+        let truncatedName = name;
+        if (doc.getTextWidth(name) > colWidths[2] - 4) {
+            truncatedName = doc.splitTextToSize(name, colWidths[2] - 5)[0];
+            if (name.length > truncatedName.length) {
+                truncatedName = truncatedName.substring(0, Math.max(2, truncatedName.length - 2)) + "..";
+            }
+        }
+        doc.text(truncatedName, curX + 3, y);
         curX += colWidths[2];
 
         // Status
@@ -2196,7 +2323,7 @@ export const generateBillReportPDF = async (houses: House[], iuranPayments: any[
     drawHeader();
     let y = 92;
 
-    const colWidths = [10, 22, 63, 35, 40]; 
+    const colWidths = [8, 18, 69, 35, 40]; 
     const headers = ["NO", "UNIT/BLOK", "NAMA KEPALA KELUARGA", "STATUS", "KETERANGAN"];
     
     const drawTableHeaders = (startY: number) => {
@@ -2258,7 +2385,15 @@ export const generateBillReportPDF = async (houses: House[], iuranPayments: any[
         curX += colWidths[0];
         doc.text(`${house.block}-${house.number}`, curX + (colWidths[1] / 2), y, { align: "center" });
         curX += colWidths[1];
-        doc.text(doc.splitTextToSize(house.headOfFamily?.toUpperCase() || "-", colWidths[2] - 5), curX + 3, y);
+        const name = house.headOfFamily?.toUpperCase() || "-";
+        let truncatedName = name;
+        if (doc.getTextWidth(name) > colWidths[2] - 4) {
+            truncatedName = doc.splitTextToSize(name, colWidths[2] - 5)[0];
+            if (name.length > truncatedName.length) {
+                truncatedName = truncatedName.substring(0, Math.max(2, truncatedName.length - 2)) + "..";
+            }
+        }
+        doc.text(truncatedName, curX + 3, y);
         curX += colWidths[2];
 
         const isPaid = checkIsPaid(house);

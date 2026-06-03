@@ -116,6 +116,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
   const [filterStatus, setFilterStatus] = useState<any>('all');
+  const [filterResidenceType, setFilterResidenceType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'name' | 'block'>('block');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedResident, setSelectedResident] = useState<House | null>(null);
@@ -1129,7 +1130,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     else if (filterStatus === 'pbb_taken') matchesStatus = h.pbbStatus === 'Sudah Diambil';
     else if (filterStatus === 'pbb_not_taken') matchesStatus = h.pbbStatus !== 'Sudah Diambil' && h.pbbStatus !== undefined && h.status === 'Occupied';
 
-    return matchesSearch && matchesStatus;
+    let matchesResidenceType = true;
+    if (filterResidenceType !== 'all') {
+      matchesResidenceType = (h.residenceType || 'Tetap') === filterResidenceType;
+    }
+
+    return matchesSearch && matchesStatus && matchesResidenceType;
   }).sort((a, b) => {
     if (sortBy === 'name') return a.headOfFamily.localeCompare(b.headOfFamily);
     const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
@@ -1504,6 +1510,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         setSelectedMonth={setSelectedMonth}
         filterStatus={filterStatus}
         setFilterStatus={setFilterStatus}
+        filterResidenceType={filterResidenceType}
+        setFilterResidenceType={setFilterResidenceType}
         sortBy={sortBy}
         setSortBy={setSortBy}
         viewMode={viewMode}
