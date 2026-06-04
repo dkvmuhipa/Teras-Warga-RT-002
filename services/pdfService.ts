@@ -1141,13 +1141,14 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 
     doc.setFont("times", "bold");
     doc.setFontSize(10);
-    doc.setTextColor(30, 41, 59); // Slate 800
+    doc.setTextColor(0); // Pure black
     doc.text("REKAPITULASI STATUS HUNIAN & KEPENGHUNIAN", margin + 4, y + 6);
 
     doc.setFont("times", "normal");
     doc.setFontSize(9);
-    doc.setTextColor(71, 85, 105); // Slate 600
+    doc.setTextColor(0); // Pure black
 
+    const totalHouses = houses.length;
     const occupiedCount = houses.filter(h => h.status === 'Occupied').length;
     const emptyCount = houses.filter(h => h.status === 'Empty').length;
     const businessCount = houses.filter(h => h.status === 'Business').length;
@@ -1157,31 +1158,41 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     const keluargas = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Rumah Keluarga').length;
 
     const visitingCount = houses.filter(h => h.status === 'Visiting').length;
+    const totalKepenghunian = tetaps + sewas + keluargas;
 
-    const row1Txt = `Status Hunian      :  Dihuni = ${occupiedCount}  |  Belum Dihuni (Kosong) = ${emptyCount}  |  Usaha = ${businessCount}  |  Mengunjungi = ${visitingCount}`;
-    const row2Txt = `Status Kepenghunian :  Menghuni sesuai SK Tetap = ${tetaps}  |  Sewa / Kontrak = ${sewas}  |  Keluarga = ${keluargas}`;
+    const row1Txt = `Status Hunian      :  Total Rumah = ${totalHouses}  |  Dihuni = ${occupiedCount}  |  Kosong = ${emptyCount}  |  Usaha = ${businessCount}  |  Mengunjungi = ${visitingCount}`;
+    const row2Txt = `Status Kepenghunian :  Total KK Menghuni = ${totalKepenghunian}  |  SK Tetap = ${tetaps}  |  Sewa / Kontrak = ${sewas}  |  Keluarga = ${keluargas}`;
 
     doc.text(row1Txt, margin + 4, y + 13);
     doc.text(row2Txt, margin + 4, y + 20);
 
     // Decorative explanation line
-    doc.setDrawColor(241, 245, 249); // Slate 100
+    doc.setDrawColor(226, 232, 240); // Slate 200
     doc.line(margin + 4, y + 24, margin + contentWidth - 4, y + 24);
 
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139); // Slate 500
-    const note1 = `* Catatan: Rumah dengan status "Belum Dihuni (Kosong)" otomatis dikecualikan (tidak dihitung) dari persentase Status Kepenghunian.`;
-    const note2 = `* Status Tetap (SK Tetap): Rumah ditempati sendiri secara sah oleh pemilik utamanya (bukan penyewa atau keluarga jauh).`;
-    const note3 = `* Status Sewa / Kontrak: Warga yang menyewa atau mengontrak rumah.`;
-    const note4 = `* Status Rumah Keluarga: Warga yang menempati dan menggunakan rumah milik keluarga atau kerabat dekat.`;
-    const note5 = `* Status Mengunjungi: Rumah/warga dengan status tinggal sementara atau hanya berkunjung/silaturahmi untuk waktu terbatas.`;
-    doc.text(note1, margin + 4, y + 29);
-    doc.text(note2, margin + 4, y + 35);
-    doc.text(note3, margin + 4, y + 41);
-    doc.text(note4, margin + 4, y + 47);
-    doc.text(note5, margin + 4, y + 53);
+    doc.setFontSize(8.5); // Clearer 8.5 font size
+    doc.setTextColor(0); // Pure black for high contrast and readability as requested
+
+    const notes = [
+        { label: "* Catatan:", text: ' Rumah dengan status "Belum Dihuni (Kosong)" otomatis dikecualikan (tidak dihitung) dari persentase Status Kepenghunian.' },
+        { label: "* Status Tetap (SK Tetap):", text: " Rumah ditempati sendiri secara sah oleh pemilik utamanya (bukan penyewa atau keluarga jauh)." },
+        { label: "* Status Sewa / Kontrak:", text: " Warga yang menyewa atau mengontrak rumah." },
+        { label: "* Status Rumah Keluarga:", text: " Warga yang menempati dan menggunakan rumah milik keluarga atau kerabat dekat." },
+        { label: "* Status Mengunjungi:", text: " Rumah/warga dengan status tinggal sementara atau hanya berkunjung/silaturahmi untuk waktu terbatas." }
+    ];
+
+    let noteY = y + 29;
+    notes.forEach(note => {
+        doc.setFont("times", "bold");
+        doc.text(note.label, margin + 4, noteY);
+        const labelWidth = doc.getTextWidth(note.label);
+        doc.setFont("times", "normal");
+        doc.text(note.text, margin + 4 + labelWidth, noteY);
+        noteY += 6;
+    });
 
     // Reset style
+    doc.setFont("times", "normal");
     doc.setTextColor(0);
 
     y += 66;

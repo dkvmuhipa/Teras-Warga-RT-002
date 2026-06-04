@@ -286,13 +286,16 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
   const emptyCount = houses.filter(h => h.status === 'Empty').length;
   const businessCount = houses.filter(h => h.status === 'Business').length;
   const visitingCount = houses.filter(h => h.status === 'Visiting').length;
+  const totalHouses = houses.length;
 
   const tetaps = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Tetap').length;
   const sewas = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Sewa').length;
   const keluargas = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Rumah Keluarga').length;
+  const totalKepenghunian = tetaps + sewas + keluargas;
 
   const statusRow = worksheet.addRow([
     'Status Hunian:',
+    `Total: ${totalHouses} Rumah`,
     `Dihuni: ${occupiedCount} Rumah`,
     `Kosong: ${emptyCount} Rumah`,
     `Usaha: ${businessCount} Rumah`,
@@ -304,12 +307,13 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
       name: 'Segoe UI',
       size: 10,
       bold: colNumber === 1,
-      color: { argb: colNumber === 1 ? 'FF1E293B' : 'FF475569' }
+      color: { argb: 'FF000000' } // Pure black for better contrast and clarity
     };
   });
 
   const kepemilikanRow = worksheet.addRow([
     'Status Kepenghunian:',
+    `Total KK Menghuni: ${totalKepenghunian} Rumah`,
     `Tetap: ${tetaps} Rumah`,
     `Sewa / Kontrak: ${sewas} Rumah`,
     `Rumah Keluarga: ${keluargas} Rumah`
@@ -320,7 +324,7 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
       name: 'Segoe UI',
       size: 10,
       bold: colNumber === 1,
-      color: { argb: colNumber === 1 ? 'FF1E293B' : 'FF475569' }
+      color: { argb: 'FF000000' } // Pure black
     };
   });
 
@@ -361,8 +365,8 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
   exp5Row.height = 20;
 
   [exp1Row, exp2Row, exp3Row, exp4Row, exp5Row].forEach(row => {
-    row.getCell(1).font = { name: 'Segoe UI', size: 10, bold: true, italic: true, color: { argb: 'FF475569' } };
-    row.getCell(2).font = { name: 'Segoe UI', size: 10, italic: true, color: { argb: 'FF64748B' } };
+    row.getCell(1).font = { name: 'Segoe UI', size: 10, bold: true, italic: true, color: { argb: 'FF000000' } };
+    row.getCell(2).font = { name: 'Segoe UI', size: 10, italic: true, color: { argb: 'FF000000' } };
   });
 
   // Add Family Members Sheet
