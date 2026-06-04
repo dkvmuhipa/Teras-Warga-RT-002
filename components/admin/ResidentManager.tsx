@@ -458,7 +458,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const FIELD_LABELS: Record<string, string> = {
     headOfFamily: 'Kepala Keluarga',
     status: 'Status Hunian',
-    residenceType: 'Kepemilikan',
+    residenceType: 'Kepenghunian',
     occupants: 'Jumlah Jiwa',
     phone: 'Kontak WhatsApp',
     ownerName: 'Nama Pemilik',
@@ -703,20 +703,42 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const handleBulkChangeResidenceType = async (type: 'Tetap' | 'Sewa' | 'Rumah Keluarga') => {
     if (selectedIds.size === 0) return;
     const isConfirmed = await confirm({
-      title: 'Ubah Kepemilikan Massal',
-      message: `Apakah Anda yakin ingin mengubah status kepemilikan ${selectedIds.size} warga terpilih menjadi "${type}" secara sekaligus?`,
+      title: 'Ubah Kepenghunian Massal',
+      message: `Apakah Anda yakin ingin mengubah status kepenghunian ${selectedIds.size} warga terpilih menjadi "${type}" secara sekaligus?`,
       confirmLabel: 'Ubah Status',
     });
     if (isConfirmed) {
       try {
           const updates = Array.from(selectedIds).map(id => ({ id, residenceType: type }));
           await batchUpdateHouses(updates);
-          await logAction('Ubah Kepemilikan Massal', `Ubah status kepemilikan ${selectedIds.size} warga terpilih menjadi ${type}`);
-          toast.success(`Status kepemilikan terpilih berhasil diubah menjadi ${type}.`);
+          await logAction('Ubah Kepenghunian Massal', `Ubah status kepenghunian ${selectedIds.size} warga terpilih menjadi ${type}`);
+          toast.success(`Status kepenghunian terpilih berhasil diubah menjadi ${type}.`);
           setSelectedIds(new Set());
       } catch (e) {
           handleFirestoreError(e, OperationType.UPDATE, "houses");
-          toast.error('Gagal mengubah status kepemilikan warga.');
+          toast.error('Gagal mengubah status kepenghunian warga.');
+      }
+    }
+  };
+
+  const handleBulkChangeStatus = async (status: 'Occupied' | 'Empty' | 'Business' | 'Visiting') => {
+    if (selectedIds.size === 0) return;
+    const label = status === 'Occupied' ? 'Dihuni' : status === 'Empty' ? 'Kosong' : status === 'Business' ? 'Tempat Usaha' : 'Mengunjungi';
+    const isConfirmed = await confirm({
+      title: 'Ubah Status Hunian Massal',
+      message: `Apakah Anda yakin ingin mengubah status hunian ${selectedIds.size} warga terpilih menjadi "${label}" secara sekaligus?`,
+      confirmLabel: 'Ubah Status',
+    });
+    if (isConfirmed) {
+      try {
+          const updates = Array.from(selectedIds).map(id => ({ id, status }));
+          await batchUpdateHouses(updates);
+          await logAction('Ubah Status Hunian Massal', `Ubah status hunian ${selectedIds.size} warga terpilih menjadi ${label}`);
+          toast.success(`Status hunian terpilih berhasil diubah menjadi ${label}.`);
+          setSelectedIds(new Set());
+      } catch (e) {
+          handleFirestoreError(e, OperationType.UPDATE, "houses");
+          toast.error('Gagal mengubah status hunian warga.');
       }
     }
   };
@@ -1252,11 +1274,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     else if (filterStatus === 'occupied') matchesStatus = h.status?.toLowerCase() === 'occupied';
     else if (filterStatus === 'empty') matchesStatus = h.status?.toLowerCase() === 'empty';
     else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business';
+    else if (filterStatus === 'visiting') matchesStatus = h.status?.toLowerCase() === 'visiting';
     else if (filterStatus === 'verified') matchesStatus = h.isVerified === true;
     else if (filterStatus === 'unverified') matchesStatus = !h.isVerified;
-    else if (filterStatus === 'arrears') matchesStatus = h.status === 'Occupied' && getArrearsForHouse(h).length > 0;
+    else if (filterStatus === 'arrears') matchesStatus = (h.status === 'Occupied' || h.status === 'Visiting') && getArrearsForHouse(h).length > 0;
     else if (filterStatus === 'pbb_taken') matchesStatus = h.pbbStatus === 'Sudah Diambil';
-    else if (filterStatus === 'pbb_not_taken') matchesStatus = h.pbbStatus !== 'Sudah Diambil' && h.pbbStatus !== undefined && h.status === 'Occupied';
+    else if (filterStatus === 'pbb_not_taken') matchesStatus = h.pbbStatus !== 'Sudah Diambil' && h.pbbStatus !== undefined && (h.status === 'Occupied' || h.status === 'Visiting');
 
     let matchesResidenceType = true;
     if (filterResidenceType !== 'all') {
@@ -1433,11 +1456,29 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   className="px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-650 hover:text-white transition-all border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
                   defaultValue=""
                 >
-                  <option value="" disabled>🏠 Status Kepemilikan</option>
+                  <option value="" disabled>🏠 Status Kepenghunian</option>
                   <option value="Tetap" className="bg-white text-slate-850 font-bold">🏠 Tetap (Milik)</option>
                   <option value="Sewa" className="bg-white text-slate-850 font-bold">🔑 Sewa (Sewa/Kontrak)</option>
                   <option value="Rumah Keluarga" className="bg-white text-slate-850 font-bold">👨‍👩‍👦 Keluarga</option>
-                  <option value="Mengunjungi" className="bg-white text-slate-850 font-bold">🧹 Mengunjungi</option>
+                </select>
+              </div>
+
+              <div className="relative">
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleBulkChangeStatus(e.target.value as any);
+                      e.target.value = ""; // Reset value
+                    }
+                  }}
+                  className="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-650 hover:text-white transition-all border border-emerald-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
+                  defaultValue=""
+                >
+                  <option value="" disabled>🧹 Status Hunian</option>
+                  <option value="Occupied" className="bg-white text-slate-850 font-bold">🏠 Dihuni</option>
+                  <option value="Empty" className="bg-white text-slate-850 font-bold">📭 Kosong</option>
+                  <option value="Business" className="bg-white text-slate-850 font-bold">🏢 Tempat Usaha</option>
+                  <option value="Visiting" className="bg-white text-slate-850 font-bold">🧹 Mengunjungi</option>
                 </select>
               </div>
             </div>
@@ -2045,7 +2086,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         { id: 'number', label: 'No Rumah' },
                         { id: 'headOfFamily', label: 'Kepala Keluarga' },
                         { id: 'status', label: 'Status Hunian' },
-                        { id: 'residenceType', label: 'Status Kepemilikan' }
+                        { id: 'residenceType', label: 'Status Kepenghunian' }
                       ]},
                       { name: 'Kontak', items: [
                         { id: 'phone', label: 'No Telepon' },

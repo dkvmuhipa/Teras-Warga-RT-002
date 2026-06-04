@@ -343,30 +343,31 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         <div className="col-span-2 flex flex-col gap-4">
                           <div>
                             <label className="block text-xs font-bold text-slate-700 mb-1.5">Status Hunian (Keberadaan Rumah)</label>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                {[
                                  { id: 'Occupied', label: 'Dihuni' },
                                  { id: 'Empty', label: 'Kosong (Belum Dihuni)' },
-                                 { id: 'Business', label: 'Tempat Usaha' }
+                                 { id: 'Business', label: 'Tempat Usaha' },
+                                 { id: 'Visiting', label: 'Mengunjungi' }
                                ].map((st) => (
                                  <button
                                    key={st.id}
                                    type="button"
                                    onClick={() => {
                                      if (st.id === 'Empty') {
-                                       setFormData({
-                                         ...formData,
-                                         status: 'Empty' as any,
-                                         headOfFamily: formData.headOfFamily || 'Rumah Kosong',
-                                         occupants: 0
-                                       });
+                                        setFormData({
+                                          ...formData,
+                                          status: 'Empty' as any,
+                                          headOfFamily: formData.headOfFamily || 'Rumah Kosong',
+                                          occupants: 0
+                                        });
                                      } else {
-                                       setFormData({
-                                         ...formData,
-                                         status: st.id as any,
-                                         headOfFamily: formData.headOfFamily === 'Rumah Kosong' ? '' : formData.headOfFamily,
-                                         occupants: formData.occupants || 1
-                                       });
+                                        setFormData({
+                                          ...formData,
+                                          status: st.id as any,
+                                          headOfFamily: formData.headOfFamily === 'Rumah Kosong' ? '' : formData.headOfFamily,
+                                          occupants: formData.occupants || 1
+                                        });
                                      }
                                    }}
                                    className={`py-1.5 rounded-lg text-xs font-bold border transition-all text-center ${
@@ -383,9 +384,9 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
                           {formData.status !== 'Empty' && (
                             <div>
-                              <label className="block text-xs font-bold text-slate-705 mb-1.5">Status Kepemilikan Rumah</label>
-                              <div className="grid grid-cols-4 gap-2">
-                                 {['Tetap', 'Keluarga', 'Sewa', 'Mengunjungi'].map((st) => (
+                              <label className="block text-xs font-bold text-slate-705 mb-1.5">Status Kepenghunian Rumah</label>
+                              <div className="grid grid-cols-3 gap-2">
+                                 {['Tetap', 'Keluarga', 'Sewa'].map((st) => (
                                    <button
                                      key={st}
                                      type="button"
@@ -1195,7 +1196,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     <Home size={12} /> {payHouse.residenceType || 'Warga'}
                   </span>
                   <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Activity size={12} /> {payHouse.status === 'Occupied' ? 'AKTIF' : 'KOSONG'}
+                    <Activity size={12} /> {payHouse.status === 'Occupied' ? 'DIHUNI' : payHouse.status === 'Empty' ? 'KOSONG' : payHouse.status === 'Business' ? 'USAHA' : 'MENGUNJUNGI'}
                   </span>
                 </div>
               </div>

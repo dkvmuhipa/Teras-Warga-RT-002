@@ -1062,6 +1062,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
                   { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
                   { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
+                  { type: 'Surat Keterangan Kematian', suggestion: 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan.' },
+                  { type: 'Surat Keterangan Kelahiran', suggestion: 'Persyaratan pembuatan akta kelahiran anak baru / pendaftaran ke dalam Kartu Keluarga.' },
+                  { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Persyaratan administrasi pengurusan hak waris / pembagian harta waris keluarga.' },
+                  { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Persyaratan pengurusan surat pindah domisili keluar daerah atau pelaporan kedatangan warga baru.' },
+                  { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Persyaratan rekomendasi pernikahan untuk pengurusan berkas administrasi N1 - N4 di Kantor Kelurahan.' },
                 ]).map((template, idx) => (
                   <div key={idx} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 relative group">
                     <button 
@@ -1094,6 +1099,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                                 { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
                                 { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
                                 { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
+                                { type: 'Surat Keterangan Kematian', suggestion: 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan.' },
+                                { type: 'Surat Keterangan Kelahiran', suggestion: 'Persyaratan pembuatan akta kelahiran anak baru / pendaftaran ke dalam Kartu Keluarga.' },
+                                { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Persyaratan administrasi pengurusan hak waris / pembagian harta waris keluarga.' },
+                                { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Persyaratan pengurusan surat pindah domisili keluar daerah atau pelaporan kedatangan warga baru.' },
+                                { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Persyaratan rekomendasi pernikahan untuk pengurusan berkas administrasi N1 - N4 di Kantor Kelurahan.' },
                               ]);
                             }
                             newTemplates[idx].type = e.target.value;
@@ -1120,6 +1130,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                                 { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
                                 { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
                                 { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
+                                { type: 'Surat Keterangan Kematian', suggestion: 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan.' },
+                                { type: 'Surat Keterangan Kelahiran', suggestion: 'Persyaratan pembuatan akta kelahiran anak baru / pendaftaran ke dalam Kartu Keluarga.' },
+                                { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Persyaratan administrasi pengurusan hak waris / pembagian harta waris keluarga.' },
+                                { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Persyaratan pengurusan surat pindah domisili keluar daerah atau pelaporan kedatangan warga baru.' },
+                                { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Persyaratan rekomendasi pernikahan untuk pengurusan berkas administrasi N1 - N4 di Kantor Kelurahan.' },
                               ]);
                             }
                             newTemplates[idx].suggestion = e.target.value;
@@ -1951,7 +1966,19 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       onChange={e=>setAdminForm({...adminForm, type: e.target.value})}
                     >
                       {(pdfConfig.letterTemplates || [
-                        { type: 'Surat Pengantar KTP' }, { type: 'Surat Pengantar KK' }, { type: 'Surat Keterangan Domisili' }
+                        { type: 'Surat Pengantar' },
+                        { type: 'Surat Pengantar KTP' },
+                        { type: 'Surat Pengantar KK' },
+                        { type: 'Surat Keterangan Domisili' },
+                        { type: 'Surat Keterangan Tidak Mampu' },
+                        { type: 'Surat Izin Keramaian' },
+                        { type: 'Surat Keterangan Usaha' },
+                        { type: 'Surat Keterangan Berkelakuan Baik' },
+                        { type: 'Surat Keterangan Kematian' },
+                        { type: 'Surat Keterangan Kelahiran' },
+                        { type: 'Surat Keterangan Waris / Ahli Waris' },
+                        { type: 'Surat Keterangan Pindah / Datang' },
+                        { type: 'Surat Pengantar Nikah (N1 - N4)' },
                       ]).map(t => <option key={t.type}>{t.type}</option>)}
                       <option>Lainnya</option>
                     </select>

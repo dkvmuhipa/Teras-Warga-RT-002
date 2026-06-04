@@ -131,6 +131,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     'Surat Izin Keramaian': 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Locasi].',
     'Surat Keterangan Usaha': 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.',
     'Surat Keterangan Berkelakuan Baik': 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.',
+    'Surat Keterangan Kematian': 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan.',
+    'Surat Keterangan Kelahiran': 'Persyaratan pembuatan akta kelahiran anak baru / pendaftaran ke dalam Kartu Keluarga.',
+    'Surat Keterangan Waris / Ahli Waris': 'Persyaratan administrasi pengurusan hak waris / pembagian harta waris keluarga.',
+    'Surat Keterangan Pindah / Datang': 'Persyaratan pengurusan surat pindah domisili keluar daerah atau pelaporan kedatangan warga baru.',
+    'Surat Pengantar Nikah (N1 - N4)': 'Persyaratan rekomendasi pernikahan untuk pengurusan berkas administrasi N1 - N4 di Kantor Kelurahan.',
   };
 
   const letterRequirements: Record<string, string[]> = {
@@ -140,6 +145,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     'Surat Keterangan Domisili': ['Fotokopi KTP', 'Fotokopi KK', 'Surat Keterangan Kerja (jika untuk melamar)'],
     'Surat Keterangan Tidak Mampu': ['Fotokopi KK & KTP', 'Foto Rumah (tampak depan)', 'Surat Pernyataan Bermaterai'],
     'Surat Keterangan Usaha': ['Fotokopi KTP', 'Foto Lokasi Usaha', 'Surat Pernyataan Usaha'],
+    'Surat Keterangan Berkelakuan Baik': ['Fotokopi KTP & KK', 'Pas Foto 4x6 (2 lembar)'],
+    'Surat Keterangan Kematian': ['Surat Kematian dari RS / RT lama', 'Fotokopi KTP Alm/Almh', 'Fotokopi KK Terkait'],
+    'Surat Keterangan Kelahiran': ['Surat Bidan/Rumah Sakit', 'Fotokopi Buku Nikah', 'Fotokopi KK Orang Tua'],
+    'Surat Keterangan Waris / Ahli Waris': ['Surat Kematian Pewaris', 'Fotokopi KTP Semua Ahli Waris', 'Fotokopi KK Semua Ahli Waris'],
+    'Surat Keterangan Pindah / Datang': ['Surat Pindah dari asal (untuk datang)', 'Fotokopi KTP & KK Pemohon'],
+    'Surat Pengantar Nikah (N1 - N4)': ['Fotokopi KTP & KK Calon Pengantin', 'Fotokopi Akta Kelahiran / Surat Kelahiran', 'Fotokopi KTP & KK Orang Tua', 'Pas Foto Latar Biru (2x3 & 3x4)'],
   };
 
   const [reportPhoto, setReportPhoto] = useState<string | null>(null);
@@ -153,6 +164,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     'Surat Izin Keramaian': '1x24 Jam',
     'Surat Keterangan Usaha': '1-2 Hari Kerja',
     'Surat Keterangan Berkelakuan Baik': '1x24 Jam',
+    'Surat Keterangan Kematian': '1x24 Jam',
+    'Surat Keterangan Kelahiran': '1x24 Jam',
+    'Surat Keterangan Waris / Ahli Waris': '1-2 Hari Kerja',
+    'Surat Keterangan Pindah / Datang': '1-2 Hari Kerja',
+    'Surat Pengantar Nikah (N1 - N4)': '1x24 Jam',
     'Lainnya': 'Menunggu Konfirmasi RT'
   };
 

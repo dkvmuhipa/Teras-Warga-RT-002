@@ -937,7 +937,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         { id: 'ownerPhone', label: "TLP PEMILIK", baseWidth: 24 },
         { id: 'phone', label: "TELEPON", baseWidth: 24 },
         { id: 'status', label: "STATUS", baseWidth: 16 },
-        { id: 'residenceType', label: "KEPEMILIKAN", baseWidth: 18 },
+        { id: 'residenceType', label: "KEPENGHUNIAN", baseWidth: 18 },
         { id: 'occupants', label: "JIWA", baseWidth: 8 },
         { id: 'education', label: "PENDIDIKAN", baseWidth: 16 },
         { id: 'jobCategory', label: "PEKERJAAN", baseWidth: 25 },
@@ -1045,7 +1045,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
             
             const val = h[header.id as keyof House];
             if (header.id === 'status') {
-                return h.status === 'Occupied' ? 'DIHUNI' : h.status === 'Empty' ? 'KOSONG' : 'USAHA';
+                return h.status === 'Occupied' ? 'DIHUNI' : h.status === 'Empty' ? 'KOSONG' : h.status === 'Business' ? 'USAHA' : 'MENGUNJUNGI';
             }
             if (header.id === 'isVerified') {
                 return h.isVerified ? 'VERIF' : 'PENDING';
@@ -1055,6 +1055,10 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
             }
             if (header.id === 'occupants') {
                 return (h.occupants || 0).toString();
+            }
+            if (header.id === 'residenceType') {
+                if (h.status === 'Empty') return '-';
+                return (val?.toString() || '-');
             }
             return (val?.toString() || '-');
         });
@@ -1084,7 +1088,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
                 }
             }
             
-            // Highlight Keberadaan / Kepemilikan Rumah (residenceType)
+            // Highlight Keberadaan / Kepenghunian Rumah (residenceType)
             if (hDef.id === 'residenceType') {
                 if (text === 'Tetap') {
                     doc.setFont("times", "bold");
@@ -1121,8 +1125,8 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         y += 7;
     });
 
-    // Statistics / Summary Block (Rekapitulasi Data Status Hunian & Kepemilikan)
-    if (y > pageHeight - 55) {
+    // Statistics / Summary Block (Rekapitulasi Data Status Hunian & Kepenghunian)
+    if (y > pageHeight - 105) {
         doc.addPage();
         drawHeader(false);
         y = 22;
@@ -1133,36 +1137,54 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     doc.setFillColor(248, 250, 252); // Slate 50 background
     doc.setDrawColor(226, 232, 240); // Slate 200 border
     doc.setLineWidth(0.2);
-    doc.rect(margin, y, contentWidth, 22, 'FD');
+    doc.rect(margin, y, contentWidth, 60, 'FD');
 
     doc.setFont("times", "bold");
-    doc.setFontSize(8.5);
+    doc.setFontSize(10);
     doc.setTextColor(30, 41, 59); // Slate 800
-    doc.text("REKAPITULASI STATUS HUNIAN & KEPEMILIKAN", margin + 4, y + 5);
+    doc.text("REKAPITULASI STATUS HUNIAN & KEPENGHUNIAN", margin + 4, y + 6);
 
     doc.setFont("times", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(9);
     doc.setTextColor(71, 85, 105); // Slate 600
 
     const occupiedCount = houses.filter(h => h.status === 'Occupied').length;
     const emptyCount = houses.filter(h => h.status === 'Empty').length;
     const businessCount = houses.filter(h => h.status === 'Business').length;
 
-    const tetaps = houses.filter(h => h.residenceType === 'Tetap').length;
-    const sewas = houses.filter(h => h.residenceType === 'Sewa').length;
-    const keluargas = houses.filter(h => h.residenceType === 'Rumah Keluarga').length;
-    const mengunjungis = houses.filter(h => h.residenceType === 'Mengunjungi').length;
+    const tetaps = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Tetap').length;
+    const sewas = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Sewa').length;
+    const keluargas = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Rumah Keluarga').length;
 
-    const row1Txt = `Status Hunian      :  Dihuni = ${occupiedCount}  |  Belum Dihuni (Kosong) = ${emptyCount}  |  Usaha = ${businessCount}`;
-    const row2Txt = `Status Kepemilikan :  Tetap = ${tetaps}  |  Sewa / Kontrak = ${sewas}  |  Keluarga = ${keluargas}  |  Mengunjungi = ${mengunjungis}`;
+    const visitingCount = houses.filter(h => h.status === 'Visiting').length;
 
-    doc.text(row1Txt, margin + 4, y + 11);
-    doc.text(row2Txt, margin + 4, y + 17);
+    const row1Txt = `Status Hunian      :  Dihuni = ${occupiedCount}  |  Belum Dihuni (Kosong) = ${emptyCount}  |  Usaha = ${businessCount}  |  Mengunjungi = ${visitingCount}`;
+    const row2Txt = `Status Kepenghunian :  Menghuni sesuai SK Tetap = ${tetaps}  |  Sewa / Kontrak = ${sewas}  |  Keluarga = ${keluargas}`;
+
+    doc.text(row1Txt, margin + 4, y + 13);
+    doc.text(row2Txt, margin + 4, y + 20);
+
+    // Decorative explanation line
+    doc.setDrawColor(241, 245, 249); // Slate 100
+    doc.line(margin + 4, y + 24, margin + contentWidth - 4, y + 24);
+
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139); // Slate 500
+    const note1 = `* Catatan: Rumah dengan status "Belum Dihuni (Kosong)" otomatis dikecualikan (tidak dihitung) dari persentase Status Kepenghunian.`;
+    const note2 = `* Status Tetap (SK Tetap): Rumah ditempati sendiri secara sah oleh pemilik utamanya (bukan penyewa atau keluarga jauh).`;
+    const note3 = `* Status Sewa / Kontrak: Warga yang menyewa atau mengontrak rumah.`;
+    const note4 = `* Status Rumah Keluarga: Warga yang menempati dan menggunakan rumah milik keluarga atau kerabat dekat.`;
+    const note5 = `* Status Mengunjungi: Rumah/warga dengan status tinggal sementara atau hanya berkunjung/silaturahmi untuk waktu terbatas.`;
+    doc.text(note1, margin + 4, y + 29);
+    doc.text(note2, margin + 4, y + 35);
+    doc.text(note3, margin + 4, y + 41);
+    doc.text(note4, margin + 4, y + 47);
+    doc.text(note5, margin + 4, y + 53);
 
     // Reset style
     doc.setTextColor(0);
 
-    y += 24;
+    y += 66;
 
     // Signature Block
     if (y > pageHeight - 50) {

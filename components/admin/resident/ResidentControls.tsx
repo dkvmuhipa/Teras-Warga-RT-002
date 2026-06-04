@@ -130,6 +130,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             <option value="occupied">🏠 Rumah Terisi</option>
             <option value="empty">📭 Rumah Kosong</option>
             <option value="business">🏢 Tempat Usaha</option>
+            <option value="visiting">🧹 Mengunjungi</option>
             <option value="verified">🛡️ Terverifikasi</option>
             <option value="unverified">❓ Belum Verifikasi</option>
             <option value="arrears">⚠️ Ada Tunggakan</option>
@@ -138,7 +139,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           </select>
         </FilterGroup>
 
-        <FilterGroup icon={<Home size={13} className="text-rose-500" />} label="Status Kepemilikan">
+        <FilterGroup icon={<Home size={13} className="text-rose-500" />} label="Status Kepenghunian">
           <select 
             className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
             value={filterResidenceType} 
@@ -148,7 +149,6 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
             <option value="Tetap">Tetap</option>
             <option value="Sewa">Sewa</option>
             <option value="Rumah Keluarga">Rumah Keluarga</option>
-            <option value="Mengunjungi">Mengunjungi</option>
           </select>
         </FilterGroup>
 

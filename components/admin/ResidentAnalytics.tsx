@@ -10,13 +10,14 @@ export const ResidentAnalytics: React.FC<ResidentAnalyticsProps> = ({ houses }) 
   const statusData = [
     { name: 'Dihuni', value: houses.filter(h => h.status === 'Occupied').length, color: '#10b981' },
     { name: 'Kosong', value: houses.filter(h => h.status === 'Empty').length, color: '#64748b' },
-    { name: 'Usaha', value: houses.filter(h => h.status === 'Business').length, color: '#f59e0b' },
+    { name: 'Usaha', value: houses.filter(h => h.status === 'Business').length, color: '#a855f7' },
+    { name: 'Mengunjungi', value: houses.filter(h => h.status === 'Visiting').length, color: '#0ea5e9' },
   ];
 
   const residenceTypeData = [
     { name: 'Tetap', value: houses.filter(h => h.residenceType === 'Tetap').length },
     { name: 'Sewa', value: houses.filter(h => h.residenceType === 'Sewa').length },
-    { name: 'Mengunjungi', value: houses.filter(h => h.residenceType === 'Mengunjungi').length },
+    { name: 'Keluarga', value: houses.filter(h => h.residenceType === 'Rumah Keluarga').length },
   ];
 
   return (
@@ -36,7 +37,7 @@ export const ResidentAnalytics: React.FC<ResidentAnalyticsProps> = ({ houses }) 
         </div>
       </div>
       <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm">
-        <h3 className="text-sm md:text-lg font-black text-slate-800 mb-4 md:mb-6">Tipe Kepemilikan</h3>
+        <h3 className="text-sm md:text-lg font-black text-slate-800 mb-4 md:mb-6">Tipe Kepenghunian</h3>
         <div className="h-48 sm:h-56 md:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={residenceTypeData}>

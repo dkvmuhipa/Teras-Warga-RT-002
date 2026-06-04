@@ -77,7 +77,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                   <th className="px-5 py-3">Kontak / WA</th>
                   <th className="px-5 py-3 w-24 text-center">Jiwa</th>
                   <th className="px-5 py-3 w-36">SPPT PBB</th>
-                  <th className="px-5 py-3 w-36">Kepemilikan</th>
+                  <th className="px-5 py-3 w-36">Kepenghunian</th>
                   <th className="px-5 py-3 w-28">Status Hunian</th>
                   <th className="px-5 py-3 w-32 text-center">Sampah</th>
                   <th className="px-5 py-3 w-32 text-center">Air</th>
@@ -176,7 +176,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         </button>
                       </td>
 
-                      {/* Kepemilikan Status Quick Setter */}
+                      {/* Kepenghunian Status Quick Setter */}
                       <td className="px-5 py-3.5">
                         <select
                           value={house.residenceType || 'Tetap'}
@@ -186,15 +186,12 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                               ? 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
                               : (house.residenceType || 'Tetap') === 'Sewa'
                               ? 'bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100/55'
-                              : (house.residenceType || 'Tetap') === 'Rumah Keluarga'
-                              ? 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100/55'
-                              : 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100/55'
+                              : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100/55'
                           }`}
                         >
                           <option value="Tetap" className="bg-white text-slate-800">🏠 Tetap</option>
                           <option value="Sewa" className="bg-white text-slate-800">🔑 Sewa</option>
                           <option value="Rumah Keluarga" className="bg-white text-slate-800">👨‍👩‍👦 Keluarga</option>
-                          <option value="Mengunjungi" className="bg-white text-slate-800">🧹 Mengunjungi (Kunjungan)</option>
                         </select>
                       </td>
 
@@ -202,9 +199,13 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                       <td className="px-5 py-3.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                           house.status === 'Occupied' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 
-                          house.status === 'Empty' ? 'bg-slate-50 text-slate-400 border-slate-200' : 'bg-amber-50 text-amber-700 border-amber-100'
+                          house.status === 'Empty' ? 'bg-slate-50 text-slate-400 border-slate-200' : 
+                          house.status === 'Business' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                          'bg-sky-50 text-sky-700 border-sky-200'
                         }`}>
-                          {house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha'}
+                          {house.status === 'Occupied' ? 'Dihuni' : 
+                           house.status === 'Empty' ? 'Kosong' : 
+                           house.status === 'Business' ? 'Usaha' : 'Mengunjungi'}
                         </span>
                       </td>
 

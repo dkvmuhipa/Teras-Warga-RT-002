@@ -70,7 +70,7 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
     { header: 'KONTAK PEMILIK (Opsional)', key: 'ownerPhone', width: 25 },
     { header: 'TELEPON', key: 'phone', width: 20 },
     { header: 'STATUS HUNIAN (Dihuni/Kosong/Usaha)', key: 'status', width: 35 },
-    { header: 'STATUS KEPEMILIKAN (Tetap/Sewa)', key: 'residenceType', width: 40 },
+    { header: 'STATUS KEPENGHUNIAN (Tetap/Sewa)', key: 'residenceType', width: 40 },
     { header: 'JUMLAH PENGHUNI', key: 'occupants', width: 20 },
     { header: 'PENDIDIKAN', key: 'education', width: 20 },
     { header: 'PEKERJAAN', key: 'jobCategory', width: 25 },
@@ -158,8 +158,8 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
       ownerName: house.ownerName || '-',
       ownerPhone: house.ownerPhone || '-',
       phone: house.phone || '-',
-      status: house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : 'Usaha',
-      residenceType: house.residenceType || '-',
+      status: house.status === 'Occupied' ? 'Dihuni' : house.status === 'Empty' ? 'Kosong' : house.status === 'Business' ? 'Usaha' : 'Mengunjungi',
+      residenceType: house.status === 'Empty' ? '-' : (house.residenceType || '-'),
       occupants: house.occupants || 0,
       education: house.education || '-',
       jobCategory: house.jobCategory || '-',
@@ -215,7 +215,7 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
         }
       }
 
-      // Conditional styling for Status Kepemilikan (Tetap / Sewa / Rumah Keluarga)
+      // Conditional styling for Status Kepenghunian (Tetap / Sewa / Rumah Keluarga)
       if (colKey === 'residenceType') {
         if (valStr === 'Tetap') {
           cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF0F766E' }, bold: true }; // Teal-700
@@ -277,7 +277,7 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
 
   // Add Recap Rows to Main Sheet
   worksheet.addRow([]); // Blank row
-  const recapTitleRow = worksheet.addRow(['REKAPITULASI DATA STATUS HUNIAN & KEPEMILIKAN']);
+  const recapTitleRow = worksheet.addRow(['REKAPITULASI DATA STATUS HUNIAN & KEPENGHUNIAN']);
   recapTitleRow.height = 24;
   const recapTitleCell = recapTitleRow.getCell(1);
   recapTitleCell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FF1E293B' } };
@@ -285,17 +285,18 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
   const occupiedCount = houses.filter(h => h.status === 'Occupied').length;
   const emptyCount = houses.filter(h => h.status === 'Empty').length;
   const businessCount = houses.filter(h => h.status === 'Business').length;
+  const visitingCount = houses.filter(h => h.status === 'Visiting').length;
 
-  const tetaps = houses.filter(h => h.residenceType === 'Tetap').length;
-  const sewas = houses.filter(h => h.residenceType === 'Sewa').length;
-  const keluargas = houses.filter(h => h.residenceType === 'Rumah Keluarga').length;
-  const singgahs = houses.filter(h => h.residenceType === 'Mengunjungi').length;
+  const tetaps = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Tetap').length;
+  const sewas = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Sewa').length;
+  const keluargas = houses.filter(h => h.status !== 'Empty' && h.residenceType === 'Rumah Keluarga').length;
 
   const statusRow = worksheet.addRow([
     'Status Hunian:',
     `Dihuni: ${occupiedCount} Rumah`,
-    `Belum Dihuni (Kosong): ${emptyCount} Rumah`,
-    `Usaha: ${businessCount} Rumah`
+    `Kosong: ${emptyCount} Rumah`,
+    `Usaha: ${businessCount} Rumah`,
+    `Mengunjungi: ${visitingCount} Rumah`
   ]);
   statusRow.height = 20;
   statusRow.eachCell((cell, colNumber) => {
@@ -308,11 +309,10 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
   });
 
   const kepemilikanRow = worksheet.addRow([
-    'Status Kepemilikan:',
+    'Status Kepenghunian:',
     `Tetap: ${tetaps} Rumah`,
     `Sewa / Kontrak: ${sewas} Rumah`,
-    `Rumah Keluarga: ${keluargas} Rumah`,
-    `Mengunjungi: ${singgahs} Rumah`
+    `Rumah Keluarga: ${keluargas} Rumah`
   ]);
   kepemilikanRow.height = 20;
   kepemilikanRow.eachCell((cell, colNumber) => {
@@ -322,6 +322,47 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
       bold: colNumber === 1,
       color: { argb: colNumber === 1 ? 'FF1E293B' : 'FF475569' }
     };
+  });
+
+  // Add explanatory clarification rows
+  worksheet.addRow([]); // Blank spacer
+  const explanationTitleRow = worksheet.addRow(['Keterangan & Penjelasan Status Kepenghunian:']);
+  explanationTitleRow.height = 22;
+  explanationTitleRow.getCell(1).font = { name: 'Segoe UI', size: 10.5, bold: true, color: { argb: 'FF1E293B' } };
+
+  const exp1Row = worksheet.addRow([
+    '• Catatan Kosong:',
+    'Rumah dengan status "Belum Dihuni (Kosong)" otomatis dilewati/tidak dihitung ke dalam "Status Kepenghunian".'
+  ]);
+  exp1Row.height = 20;
+
+  const exp2Row = worksheet.addRow([
+    '• Tetap (SK Tetap):',
+    'Rumah ditempati sendiri secara sah oleh pemilik utamanya (bukan penyewa atau keluarga jauh).'
+  ]);
+  exp2Row.height = 20;
+
+  const exp3Row = worksheet.addRow([
+    '• Sewa / Kontrak:',
+    'Warga yang menyewa atau mengontrak rumah.'
+  ]);
+  exp3Row.height = 20;
+
+  const exp4Row = worksheet.addRow([
+    '• Rumah Keluarga:',
+    'Warga yang menempati dan menggunakan rumah milik keluarga atau kerabat dekat.'
+  ]);
+  exp4Row.height = 20;
+
+  const exp5Row = worksheet.addRow([
+    '• Mengunjungi:',
+    'Rumah/warga dengan status tinggal sementara atau hanya berkunjung/silaturahmi untuk waktu terbatas.'
+  ]);
+  exp5Row.height = 20;
+
+  [exp1Row, exp2Row, exp3Row, exp4Row, exp5Row].forEach(row => {
+    row.getCell(1).font = { name: 'Segoe UI', size: 10, bold: true, italic: true, color: { argb: 'FF475569' } };
+    row.getCell(2).font = { name: 'Segoe UI', size: 10, italic: true, color: { argb: 'FF64748B' } };
   });
 
   // Add Family Members Sheet
@@ -450,7 +491,7 @@ export const generateExcelTemplate = async () => {
     { header: 'KONTAK PEMILIK (Opsional)', key: 'ownerPhone', width: 25 },
     { header: 'TELEPON', key: 'phone', width: 20 },
     { header: 'STATUS HUNIAN (Dihuni/Kosong/Usaha)', key: 'status', width: 35 },
-    { header: 'STATUS KEPEMILIKAN (Tetap/Sewa)', key: 'residenceType', width: 40 },
+    { header: 'STATUS KEPENGHUNIAN (Tetap/Sewa)', key: 'residenceType', width: 40 },
     { header: 'JUMLAH PENGHUNI', key: 'occupants', width: 20 },
     { header: 'PENDIDIKAN', key: 'education', width: 20 },
     { header: 'PEKERJAAN', key: 'jobCategory', width: 25 },
@@ -532,7 +573,7 @@ export const generateExcelTemplate = async () => {
   instructionRow.font = { name: 'Segoe UI', bold: true, color: { argb: 'FFDC2626' }, size: 11 };
   worksheet.addRow(['1. Kolom bertanda (Wajib) tidak boleh kosong.']);
   worksheet.addRow(['2. Status Hunian harus diisi salah satu dari: Dihuni, Kosong, atau Usaha.']);
-  worksheet.addRow(['3. Status Kepemilikan harus diisi: Tetap, Sewa, atau Rumah Keluarga.']);
+  worksheet.addRow(['3. Status Kepenghunian harus diisi: Tetap, Sewa, atau Rumah Keluarga.']);
   worksheet.addRow(['4. Status Iuran (Air/Sampah) harus diisi: Lunas atau Belum Lunas.']);
   worksheet.addRow(['5. Kolom Jumlah (Kendaraan, Ibu Hamil, Bayi, Balita, Remaja, Lansia, Janda) diisi dengan angka.']);
   worksheet.addRow(['6. Format Tanggal adalah YYYY-MM-DD (Contoh: 1990-01-31).']);
@@ -608,10 +649,11 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     else if (genderRaw?.toLowerCase() === 'perempuan' || genderRaw?.toLowerCase() === 'wanita') gender = 'Perempuan';
 
     // Map status
-    let status: 'Occupied' | 'Empty' | 'Business' | undefined = undefined;
+    let status: 'Occupied' | 'Empty' | 'Business' | 'Visiting' | undefined = undefined;
     if (statusRaw?.toLowerCase() === 'empty' || statusRaw?.toLowerCase() === 'kosong') status = 'Empty';
     else if (statusRaw?.toLowerCase() === 'business' || statusRaw?.toLowerCase() === 'usaha') status = 'Business';
     else if (statusRaw?.toLowerCase() === 'occupied' || statusRaw?.toLowerCase() === 'dihuni') status = 'Occupied';
+    else if (statusRaw?.toLowerCase() === 'visiting' || statusRaw?.toLowerCase() === 'mengunjungi' || statusRaw?.toLowerCase() === 'singgah' || statusRaw?.toLowerCase() === 'kunjungan') status = 'Visiting';
 
     // Map payment status Air
     let paymentStatusAir: PaymentStatus | undefined = undefined;
@@ -624,11 +666,10 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     else if (paymentStatusSampahRaw?.toLowerCase() === 'belum lunas' || paymentStatusSampahRaw?.toLowerCase() === 'pending') paymentStatusSampah = PaymentStatus.PENDING;
 
     // Map residence type
-    let residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Mengunjungi' | undefined = undefined;
+    let residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | undefined = undefined;
     if (residenceTypeRaw?.toLowerCase() === 'tetap') residenceType = 'Tetap';
     else if (residenceTypeRaw?.toLowerCase() === 'kontrak' || residenceTypeRaw?.toLowerCase() === 'sewa' || residenceTypeRaw?.toLowerCase() === 'kost') residenceType = 'Sewa';
     else if (residenceTypeRaw?.toLowerCase() === 'keluarga' || residenceTypeRaw?.toLowerCase() === 'rumah keluarga') residenceType = 'Rumah Keluarga';
-    else if (residenceTypeRaw?.toLowerCase() === 'singgah' || residenceTypeRaw?.toLowerCase() === 'kunjungan' || residenceTypeRaw?.toLowerCase() === 'mengunjungi') residenceType = 'Mengunjungi';
 
     data.push({
       block,

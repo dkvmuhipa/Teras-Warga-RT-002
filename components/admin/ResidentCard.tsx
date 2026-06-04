@@ -43,6 +43,8 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm border transition-colors ${
               house.status === 'Occupied' 
                 ? 'bg-indigo-50 text-indigo-600 border-indigo-150' 
+                : house.status === 'Visiting'
+                ? 'bg-sky-50 text-sky-600 border-sky-150'
                 : 'bg-slate-50 text-slate-400 border-slate-200'
             }`}>
               {house.headOfFamily ? house.headOfFamily.charAt(0).toUpperCase() : <MapPin size={16} />}
@@ -66,14 +68,23 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
               <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[9px] font-bold uppercase tracking-wider">
                 Blok {house.block}-{house.number}
               </span>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border ${
+                house.status === 'Occupied' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' :
+                house.status === 'Empty' ? 'bg-slate-50 text-slate-400 border-slate-200' :
+                house.status === 'Business' ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                'bg-sky-50 text-sky-600 border-sky-200'
+              }`}>
+                {house.status === 'Occupied' ? 'Dihuni' : 
+                 house.status === 'Empty' ? 'Kosong' : 
+                 house.status === 'Business' ? 'Usaha' : 'Mengunjungi'}
+              </span>
               {house.residenceType && (
                 <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border ${
                   house.residenceType === 'Tetap' ? 'bg-slate-50 text-slate-600 border-slate-200' :
                   house.residenceType === 'Sewa' ? 'bg-amber-50 text-amber-600 border-amber-200' :
-                  house.residenceType === 'Rumah Keluarga' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' :
-                  'bg-emerald-50 text-emerald-600 border-emerald-200'
+                  'bg-indigo-50 text-indigo-600 border-indigo-200'
                 }`}>
-                  {house.residenceType === 'Mengunjungi' ? 'Mengunjungi' : house.residenceType}
+                  {house.residenceType === 'Rumah Keluarga' ? 'Keluarga' : house.residenceType}
                 </span>
               )}
             </div>

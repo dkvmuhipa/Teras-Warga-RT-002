@@ -363,13 +363,45 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   </div>
 
                   <div className="md:col-span-2 space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status Kepemilikan Rumah <span className="text-rose-500">*</span></label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status Hunian Rumah <span className="text-rose-500">*</span></label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {[
+                        { id: 'Occupied', label: 'Dihuni', desc: 'Menetap dan tinggal di rumah ini' },
+                        { id: 'Business', label: 'Tempat Usaha', desc: 'Digunakan sebagai lokasi tempat usaha' },
+                        { id: 'Visiting', label: 'Mengunjungi / Kunjungan', desc: 'Caretaker / sering berkunjung untuk merawat rumah' }
+                      ].map((t) => {
+                        const isSel = formData.status === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setFormData({...formData, status: t.id as any})}
+                            className={`p-4 text-left border rounded-[1.5rem] transition-all relative overflow-hidden group active:scale-[0.98] ${
+                              isSel 
+                                ? 'bg-emerald-50/70 border-emerald-500/60 shadow-sm ring-2 ring-emerald-500/5' 
+                                : 'bg-slate-50/30 border-slate-200/80 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex justify-between items-center mb-1.5">
+                              <span className={`text-xs font-black ${isSel ? 'text-emerald-600' : 'text-slate-700'}`}>{t.label}</span>
+                              <div className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center ${isSel ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300'}`}>
+                                {isSel && <Check size={10} className="stroke-[3]" />}
+                              </div>
+                            </div>
+                            <p className="text-[9px] font-semibold text-slate-400 leading-relaxed">{t.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2 space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status Kepenghunian Rumah <span className="text-rose-500">*</span></label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {[
                         { id: 'Tetap', label: 'Milik Sendiri', desc: 'Sertifikat pribadi/keluarga' },
                         { id: 'Sewa', label: 'Sewa / Kontrak', desc: 'Sewa / indekos per bulan / tahun' },
-                        { id: 'Rumah Keluarga', label: 'Rumah Keluarga', desc: 'Kerabat / Orang tua' },
-                        { id: 'Mengunjungi', label: 'Mengunjungi', desc: 'Belum menetap tapi sering berkunjung & merawat hunian' }
+                        { id: 'Rumah Keluarga', label: 'Rumah Keluarga', desc: 'Kerabat / Orang tua' }
                       ].map((type) => {
                         const isSel = formData.residenceType === type.id;
                         return (
