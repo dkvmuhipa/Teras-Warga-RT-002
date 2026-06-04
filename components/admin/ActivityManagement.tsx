@@ -9,6 +9,7 @@ import {
   updateActivityInDb, 
   deleteActivityFromDb,
   subscribeToAttendance,
+  addAttendanceToDb,
   deleteAttendanceFromDb,
   addTransactionToDb,
   handleFirestoreError,
@@ -32,6 +33,11 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+
+  // New states for manual event attendance logging
+  const [attendanceTab, setAttendanceTab] = useState<'list' | 'manual'>('list');
+  const [manualSearchQuery, setManualSearchQuery] = useState('');
+  const [customAttendeeNames, setCustomAttendeeNames] = useState<Record<string, string>>({});
   
   const [form, setForm] = useState({
     title: '',
@@ -55,6 +61,42 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
       return () => unsubscribe();
     }
   }, [selectedActivity]);
+
+  useEffect(() => {
+    if (!isAttendanceModalOpen) {
+      setAttendanceTab('list');
+      setManualSearchQuery('');
+      setCustomAttendeeNames({});
+    }
+  }, [isAttendanceModalOpen]);
+
+  const handleMarkAttendance = async (house: House, nameToUse?: string) => {
+    if (!selectedActivity) return;
+    
+    const isDuplicate = attendance.some(a => a.houseId.toLowerCase() === house.id.toLowerCase());
+    if (isDuplicate) {
+      toast.warning(`Rumah ${house.id} sudah tercatat hadir!`);
+      return;
+    }
+
+    const finalName = (nameToUse !== undefined ? nameToUse : (customAttendeeNames[house.id] !== undefined ? customAttendeeNames[house.id] : house.headOfFamily)).trim();
+    if (!finalName) {
+      toast.error("Nama warga tidak boleh kosong!");
+      return;
+    }
+
+    try {
+      await addAttendanceToDb({
+        activityId: selectedActivity.id,
+        residentName: finalName,
+        houseId: house.id,
+        timestamp: new Date().toISOString()
+      });
+      toast.success(`Kehadiran ${finalName} (${house.id}) berhasil dicatat`);
+    } catch (e) {
+      toast.error("Gagal mencatat kehadiran manual.");
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -475,43 +517,157 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
             )}
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-            {attendance.length > 0 ? (
-              attendance.map((record) => (
-                <div key={record.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 font-black shadow-sm group-hover:text-indigo-600 transition-colors">
-                      {record.residentName.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-slate-800 leading-none mb-1">{record.residentName}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Blok {record.houseId}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1 flex items-center gap-1">
-                        <CheckCircle size={10} /> Hadir
-                      </p>
-                      <p className="text-[10px] font-bold text-slate-400 leading-none flex items-center gap-1">
-                        <Clock size={10} /> {new Date(record.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                    <button onClick={() => handleDeleteAttendance(record.id)} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="py-12 text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-300 mx-auto mb-4">
-                  <Users size={32} />
-                </div>
-                <p className="text-slate-400 font-bold">Belum ada warga yang hadir.</p>
-              </div>
-            )}
+          {/* Navigation Tabs for Attendance */}
+          <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/40">
+            <button
+              onClick={() => setAttendanceTab('list')}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                attendanceTab === 'list'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Daftar Presensi ({attendance.length})
+            </button>
+            <button
+              onClick={() => setAttendanceTab('manual')}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                attendanceTab === 'manual'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Catat Manual ({houses.filter(h => h.status === 'Occupied').length - attendance.length} Belum)
+            </button>
           </div>
+
+          {attendanceTab === 'list' ? (
+            <div className="max-h-[350px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+              {attendance.length > 0 ? (
+                attendance.map((record) => (
+                  <div key={record.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 font-black shadow-sm group-hover:text-indigo-600 transition-colors">
+                        {record.residentName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-slate-800 leading-none mb-1">{record.residentName}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Blok {record.houseId}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1 flex items-center gap-1">
+                          <CheckCircle size={10} /> Hadir
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-400 leading-none flex items-center gap-1">
+                          <Clock size={10} /> {new Date(record.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      <button onClick={() => handleDeleteAttendance(record.id)} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-12 text-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-300 mx-auto mb-4">
+                    <Users size={32} />
+                  </div>
+                  <p className="text-slate-400 font-bold">Belum ada warga yang hadir.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  type="text"
+                  placeholder="Cari warga atau nomor rumah..."
+                  value={manualSearchQuery}
+                  onChange={e => setManualSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                />
+              </div>
+
+              <div className="max-h-[300px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                {(() => {
+                  const occupied = houses.filter(h => h.status === 'Occupied');
+                  const filtered = occupied.filter(h => 
+                    h.id.toLowerCase().includes(manualSearchQuery.toLowerCase()) ||
+                    h.headOfFamily.toLowerCase().includes(manualSearchQuery.toLowerCase())
+                  );
+
+                  if (filtered.length === 0) {
+                    return (
+                      <p className="text-center text-slate-400 text-xs py-8 italic font-bold">Warga atau rumah tidak ditemukan.</p>
+                    );
+                  }
+
+                  return filtered.map((house) => {
+                    const existingRecord = attendance.find(a => a.houseId.toLowerCase() === house.id.toLowerCase());
+                    const currentNameInput = customAttendeeNames[house.id] !== undefined ? customAttendeeNames[house.id] : house.headOfFamily;
+                    
+                    return (
+                      <div key={house.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-white transition-all gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-black text-slate-800 text-xs bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-lg border border-indigo-100/30">
+                              {house.id}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Penghuni Tetap</span>
+                          </div>
+                          {!existingRecord ? (
+                            <div className="mt-2 flex items-center gap-1.5 w-full">
+                              <span className="text-[10px] text-slate-400 font-extrabold uppercase whitespace-nowrap">Nama:</span>
+                              <input
+                                type="text"
+                                value={currentNameInput}
+                                onChange={e => setCustomAttendeeNames({ ...customAttendeeNames, [house.id]: e.target.value })}
+                                className="px-2 py-1 text-xs border border-slate-200 rounded-lg bg-white font-black text-slate-800 w-full outline-indigo-500"
+                              />
+                            </div>
+                          ) : (
+                            <p className="mt-1.5 text-xs text-slate-700 font-extrabold flex items-center gap-1">
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">Peserta:</span>
+                              {existingRecord.residentName}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-end">
+                          {existingRecord ? (
+                            <div className="flex items-center gap-2">
+                              <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 flex items-center gap-1">
+                                <CheckCircle size={10} /> Hadir
+                              </span>
+                              <button 
+                                onClick={() => handleDeleteAttendance(existingRecord.id)}
+                                className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                title="Batalkan kehadiran"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          ) : (
+                            <Button 
+                              onClick={() => handleMarkAttendance(house)}
+                              size="sm"
+                              className="bg-indigo-600 hover:bg-indigo-700 text-[10px] font-black uppercase tracking-widest px-4 py-2 shadow-sm rounded-xl"
+                            >
+                              + Hadir
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          )}
         </div>
       </Modal>
     </div>

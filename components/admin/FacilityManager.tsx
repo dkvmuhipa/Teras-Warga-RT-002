@@ -13,6 +13,7 @@ import {
   updateRondaSwapRequestStatus, 
   updatePanicAlertStatus,
   addRondaAttendance,
+  updateRondaAttendance,
   updateHouseData,
   addReportToDb
 } from '../../services/databaseService';
@@ -72,6 +73,17 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const existing = rondaAttendance?.find(a => a.date === attendanceDate);
+    if (existing) {
+      setPresentMembers(existing.presentMembers || []);
+      setAttendanceNotes(existing.notes || '');
+    } else {
+      setPresentMembers([]);
+      setAttendanceNotes('');
+    }
+  }, [attendanceDate, rondaAttendance]);
 
   const handleEditRonda = (schedule: RondaSchedule) => {
     setEditingRonda(schedule);
@@ -334,43 +346,87 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   };
 
   const handleSaveAttendance = async () => {
-    const day = new Date(attendanceDate).toLocaleDateString('id-ID', { weekday: 'long' });
+    const [yr, mo, dy] = attendanceDate.split('-').map(Number);
+    const localDate = new Date(yr, mo - 1, dy);
+    const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
+    
     const schedule = ronda.find(r => r.day === day);
     if (!schedule) {
-      toast.error("Jadwal tidak ditemukan untuk hari ini.");
+      toast.error(`Jadwal tidak ditemukan untuk hari ${day}.`);
       return;
     }
 
     const allMembers = schedule.members || [];
     const absent = allMembers.filter(m => !presentMembers.includes(m));
-
     const adminName = localStorage.getItem('admin_name') || 'Admin';
 
-    await addRondaAttendance({
-      date: attendanceDate,
-      day,
-      presentMembers,
-      absentMembers: absent,
-      notes: attendanceNotes,
-      recordedBy: adminName,
-      timestamp: new Date().toISOString()
-    });
+    const existingRecord = rondaAttendance.find(a => a.date === attendanceDate);
 
-    // Update Points and Duty Count for present members
-    for (const memberName of presentMembers) {
-      const house = houses.find(h => h.headOfFamily === memberName);
-      if (house) {
-        await updateHouseData(house.id, {
-          rondaPoints: (house.rondaPoints || 0) + 10, // 10 points per duty
-          rondaDutyCount: (house.rondaDutyCount || 0) + 1,
-          rondaLastDuty: new Date().toISOString()
-        });
+    if (existingRecord) {
+      // Update existing record
+      await updateRondaAttendance(existingRecord.id, {
+        presentMembers,
+        absentMembers: absent,
+        notes: attendanceNotes,
+        recordedBy: adminName,
+        timestamp: new Date().toISOString()
+      });
+
+      // Calculate newly present members (add points)
+      const oldPresent = existingRecord.presentMembers || [];
+      const newlyPresent = presentMembers.filter(m => !oldPresent.includes(m));
+      for (const memberName of newlyPresent) {
+        const house = houses.find(h => h.headOfFamily === memberName);
+        if (house) {
+          await updateHouseData(house.id, {
+            rondaPoints: (house.rondaPoints || 0) + 10,
+            rondaDutyCount: (house.rondaDutyCount || 0) + 1,
+            rondaLastDuty: new Date().toISOString()
+          });
+        }
       }
-    }
 
-    toast.success("Absensi berhasil disimpan dan poin telah ditambahkan!");
-    setPresentMembers([]);
-    setAttendanceNotes('');
+      // Calculate newly absent members (subtract points/duty)
+      const newlyAbsent = oldPresent.filter(m => !presentMembers.includes(m));
+      for (const memberName of newlyAbsent) {
+        const house = houses.find(h => h.headOfFamily === memberName);
+        if (house) {
+          await updateHouseData(house.id, {
+            rondaPoints: Math.max(0, (house.rondaPoints || 0) - 10),
+            rondaDutyCount: Math.max(0, (house.rondaDutyCount || 0) - 1)
+          });
+        }
+      }
+
+      toast.success("Absensi berhasil diperbarui!");
+    } else {
+      // Create new record
+      await addRondaAttendance({
+        date: attendanceDate,
+        day,
+        presentMembers,
+        absentMembers: absent,
+        notes: attendanceNotes,
+        recordedBy: adminName,
+        timestamp: new Date().toISOString()
+      });
+
+      // Update Points and Duty Count for present members
+      for (const memberName of presentMembers) {
+        const house = houses.find(h => h.headOfFamily === memberName);
+        if (house) {
+          await updateHouseData(house.id, {
+            rondaPoints: (house.rondaPoints || 0) + 10, // 10 points per duty
+            rondaDutyCount: (house.rondaDutyCount || 0) + 1,
+            rondaLastDuty: new Date().toISOString()
+          });
+        }
+      }
+
+      toast.success("Absensi berhasil disimpan dan poin telah ditambahkan!");
+      setPresentMembers([]);
+      setAttendanceNotes('');
+    }
   };
 
   const handleSendTomorrowReminder = async () => {
@@ -975,7 +1031,10 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Daftar Petugas (Centang yang Hadir)</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {(() => {
-                      const day = new Date(attendanceDate).toLocaleDateString('id-ID', { weekday: 'long' });
+                      const [yr, mo, dy] = attendanceDate.split('-').map(Number);
+                      const localDate = new Date(yr, mo - 1, dy);
+                      const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
+                      
                       const schedule = ronda.find(r => r.day === day);
                       if (!schedule) return <p className="text-slate-400 text-xs italic">Tidak ada jadwal untuk hari {day}</p>;
                       
@@ -1012,10 +1071,9 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   <div className="mt-8 flex justify-end">
                     <Button 
                       onClick={handleSaveAttendance}
-                      disabled={presentMembers.length === 0}
-                      className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 px-8 py-3 rounded-2xl"
+                      className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs"
                     >
-                      Simpan Absensi
+                      {rondaAttendance.some(a => a.date === attendanceDate) ? "Perbarui Absensi" : "Simpan Absensi"}
                     </Button>
                   </div>
                 </div>

@@ -2120,6 +2120,15 @@ export const addRondaAttendance = async (data: Omit<RondaAttendance, 'id'>) => {
     }
 };
 
+export const updateRondaAttendance = async (id: string, data: Partial<RondaAttendance>) => {
+    try {
+        const { id: _, ...cleanData } = data;
+        await updateDoc(doc(db, "rondaAttendance", id), deepSanitize(cleanData));
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `rondaAttendance/${id}`);
+    }
+};
+
 export const getRondaAttendance = (callback: (data: RondaAttendance[]) => void) => {
     const q = query(collection(db, "rondaAttendance"), orderBy('date', 'desc'), limit(100));
     return onSnapshot(q, (snapshot) => {
