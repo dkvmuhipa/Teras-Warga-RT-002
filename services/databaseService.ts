@@ -1797,7 +1797,7 @@ export const addLetterToDb = async (letter: any) => {
     // Add notification for admin
     await addNotificationToDb({
       title: 'Permohonan Surat Baru',
-      message: `Ada permohonan surat ${data.type} baru dari ${data.name} (Rumah ${data.houseId})`,
+      message: `Ada permohonan surat ${data.type} baru dari ${data.applicantName || data.name || 'Warga'} (Rumah ${data.houseId})`,
       type: 'Letter',
       date: new Date().toISOString(),
       isRead: false

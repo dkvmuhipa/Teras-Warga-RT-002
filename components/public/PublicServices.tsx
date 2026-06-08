@@ -219,9 +219,107 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     } catch (e) { console.error("Error saving history", e); } 
   };
 
+  const handleNextToStep2 = () => {
+    if (!applicantName.trim()) {
+      toast.error("Validasi Gagal", { description: "Nama Lengkap wajib diisi sesuai KTP." });
+      return;
+    }
+    if (!nik.trim()) {
+      toast.error("Validasi Gagal", { description: "NIK (16 Digit) wajib diisi." });
+      return;
+    }
+    if (!/^\d{16}$/.test(nik.trim())) {
+      toast.error("Validasi Gagal", { description: "NIK harus terdiri dari 16 digit angka." });
+      return;
+    }
+    if (!familyHeadName.trim()) {
+      toast.error("Validasi Gagal", { description: "Nama Kepala Keluarga / Penghuni wajib diisi." });
+      return;
+    }
+    if (!birthPlace.trim()) {
+      toast.error("Validasi Gagal", { description: "Tempat Lahir wajib diisi." });
+      return;
+    }
+    if (!birthDate) {
+      toast.error("Validasi Gagal", { description: "Tanggal Lahir wajib diisi." });
+      return;
+    }
+    if (!nationality.trim()) {
+      toast.error("Validasi Gagal", { description: "Kewarganegaraan wajib diisi." });
+      return;
+    }
+    if (!job.trim()) {
+      toast.error("Validasi Gagal", { description: "Pekerjaan wajib diisi." });
+      return;
+    }
+    if (!addressKtp.trim()) {
+      toast.error("Validasi Gagal", { description: "Alamat Sesuai KTP wajib diisi." });
+      return;
+    }
+    if (!isSameAddress && !currentAddress.trim()) {
+      toast.error("Validasi Gagal", { description: "Alamat Domisili Saat Ini wajib diisi karena berbeda dengan KTP." });
+      return;
+    }
+    setLetterStep(2);
+  };
+
+  const handleNextToStep3 = () => {
+    const cleanPhone = phone.trim().replace(/[^0-9+]/g, '');
+    if (!cleanPhone) {
+      toast.error("Validasi Gagal", { description: "Nomor HP / WhatsApp wajib diisi." });
+      return;
+    }
+    if (!/^(0|62|\+62)/.test(cleanPhone) || cleanPhone.replace(/\D/g, '').length < 9 || cleanPhone.replace(/\D/g, '').length > 15) {
+      toast.error("Validasi Gagal", { description: "Format nomor HP / WhatsApp tidak valid. Masukkan nomor yang benar (contoh: 08123456789 atau +628123456789)." });
+      return;
+    }
+    if (requestType === 'Lainnya' && !customRequestType.trim()) {
+      toast.error("Validasi Gagal", { description: "Silakan sebutkan jenis surat lainnya secara spesifik." });
+      return;
+    }
+    if (!purposeDetail.trim()) {
+      toast.error("Validasi Gagal", { description: "Tujuan / Keperluan Surat wajib diisi." });
+      return;
+    }
+    setLetterStep(3);
+  };
+
   const handleSubmitSurat = async (e: React.FormEvent) => { 
     e.preventDefault(); 
     try {
+      // Re-validate All Steps
+      if (!applicantName.trim() || !nik.trim() || !/^\d{16}$/.test(nik.trim()) || !familyHeadName.trim() || !birthPlace.trim() || !birthDate || !nationality.trim() || !job.trim() || !addressKtp.trim() || (!isSameAddress && !currentAddress.trim())) {
+        toast.error("Validasi Gagal", { description: "Tolong lengkapi semua data identitas diri di Step 1 dengan benar." });
+        setLetterStep(1);
+        return;
+      }
+      const cleanPhone = phone.trim().replace(/[^0-9+]/g, '');
+      if (!cleanPhone || !/^(0|62|\+62)/.test(cleanPhone) || cleanPhone.replace(/\D/g, '').length < 9 || cleanPhone.replace(/\D/g, '').length > 15) {
+        toast.error("Validasi Gagal", { description: "Nomor HP / WhatsApp wajib diisi dengan format yang benar." });
+        setLetterStep(2);
+        return;
+      }
+      if (requestType === 'Lainnya' && !customRequestType.trim()) {
+        toast.error("Validasi Gagal", { description: "Silakan sebutkan jenis surat lainnya di Step 2." });
+        setLetterStep(2);
+        return;
+      }
+      if (!purposeDetail.trim()) {
+        toast.error("Validasi Gagal", { description: "Tujuan / Keperluan Surat wajib diisi pada Step 2." });
+        setLetterStep(2);
+        return;
+      }
+      if (!houseId.trim()) {
+        toast.error("Validasi Gagal", { description: "Blok Rumah wajib diisi pada Step 3." });
+        setLetterStep(3);
+        return;
+      }
+      if (!accessCode.trim()) {
+        toast.error("Validasi Gagal", { description: "PIN Akses wajib diisi pada Step 3." });
+        setLetterStep(3);
+        return;
+      }
+
       const isValid = await validateResidentAccess(houseId, accessCode);
       if (!isValid) {
         toast.error("Verifikasi Gagal!", {
@@ -773,7 +871,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <div className="flex justify-end pt-8">
                     <button 
                       type="button"
-                      onClick={() => setLetterStep(2)}
+                      onClick={handleNextToStep2}
                       className="px-12 py-5 bg-indigo-600 text-white rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-3"
                     >
                       Lanjut ke Keperluan <ArrowRight size={20} />
@@ -822,6 +920,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         </div>
                       </div>
                     </div>
+
+                    {requestType === 'Lainnya' && (
+                      <div className="group">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Sebutkan Jenis Surat Lainnya <span className="text-red-500">*</span></label>
+                        <input 
+                          className="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
+                          value={customRequestType} 
+                          onChange={e => setCustomRequestType(e.target.value)} 
+                          placeholder="Sebutkan jenis surat (contoh: Surat Keterangan Usaha)" 
+                          required 
+                        />
+                      </div>
+                    )}
 
                     {letterRequirements[requestType] && (
                       <motion.div 
@@ -880,7 +991,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </button>
                     <button 
                       type="button"
-                      onClick={() => setLetterStep(3)}
+                      onClick={handleNextToStep3}
                       className="px-12 py-5 bg-indigo-600 text-white rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-3"
                     >
                       Lanjut ke Verifikasi <ArrowRight size={20} />

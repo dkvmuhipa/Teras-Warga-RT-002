@@ -219,8 +219,38 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
 
     if (isConfirmed) {
       try {
+        const letterToDelete = letters.find(l => l.id === id);
         await deleteOfficialLetterFromDb(id);
         toast.success('Surat berhasil dihapus');
+
+        if (letterToDelete && letterToDelete.letterNumber) {
+          const deletedNum = extractNum(letterToDelete.letterNumber);
+          if (deletedNum > 0) {
+            let maxNumOfOthers = 0;
+            // Scan occupant letters
+            residentLetters.forEach(l => {
+              if (l.letterNumber) {
+                const num = extractNum(l.letterNumber);
+                if (num > maxNumOfOthers) maxNumOfOthers = num;
+              }
+            });
+            // Scan other remaining official letters
+            letters.forEach(ol => {
+              if (ol.id !== id && ol.letterNumber) {
+                const num = extractNum(ol.letterNumber);
+                if (num > maxNumOfOthers) maxNumOfOthers = num;
+              }
+            });
+
+            // If the deleted number is the max or exceeds the remaining, adjust the config
+            if (deletedNum >= (pdfConfig.lastLetterNumber || 0)) {
+              const newConfig = { ...pdfConfig, lastLetterNumber: maxNumOfOthers };
+              setPdfConfig(newConfig);
+              await updatePdfConfig(newConfig);
+              toast.success(`Nomor surat terakhir disesuaikan kembali menjadi: ${maxNumOfOthers}`);
+            }
+          }
+        }
       } catch (error) {
         console.error(error);
         toast.error('Gagal menghapus surat');

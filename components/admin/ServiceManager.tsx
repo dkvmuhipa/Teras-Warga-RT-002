@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw, Phone } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw, Phone, Hash, Briefcase, BookOpen, Heart, Mail, CreditCard, UserCheck, MapPin, Info, Calendar, ChevronRight, ClipboardList, Users, Flag } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig, OfficialLetter, House } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb, subscribeToOfficialLetters } from '../../services/databaseService';
@@ -52,6 +52,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const [availableGroups, setAvailableGroups] = useState<{id: string, name: string}[]>([]);
   const [showGroupList, setShowGroupList] = useState(false);
   const [officialLetters, setOfficialLetters] = useState<OfficialLetter[]>([]);
+  const [detailModalTab, setDetailModalTab] = useState<'profil' | 'keperluan' | 'penerbitan'>('profil');
+  const lastLoadedIdRef = React.useRef<string | null>(null);
   
   const extractNum = (str: string) => {
     const parts = str.split('/');
@@ -74,6 +76,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
   useEffect(() => {
     if (!pdfConfig) return;
+    // Only auto-initialize if lastLetterNumber is not set yet (0 or undefined)
+    if (pdfConfig.lastLetterNumber !== undefined && pdfConfig.lastLetterNumber !== 0) return;
     let maxNum = 0;
 
     // Check resident letters
@@ -92,7 +96,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       }
     });
 
-    if (maxNum > (pdfConfig.lastLetterNumber || 0)) {
+    if (maxNum > 0) {
       const newConfig = { ...pdfConfig, lastLetterNumber: maxNum };
       setPdfConfig(newConfig);
       updatePdfConfig(newConfig).catch(err => {
@@ -136,7 +140,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   });
 
   React.useEffect(() => {
-    if (selectedLetter) {
+    if (!selectedLetter) {
+      lastLoadedIdRef.current = null;
+      return;
+    }
+
+    if (selectedLetter.id !== lastLoadedIdRef.current) {
+      lastLoadedIdRef.current = selectedLetter.id;
+      setDetailModalTab('profil');
       setEditLetterData({
         applicantName: selectedLetter.applicantName,
         nik: selectedLetter.nik,
@@ -149,7 +160,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         addressKtp: selectedLetter.addressKtp,
         currentAddress: selectedLetter.currentAddress,
         purposeDetail: selectedLetter.purposeDetail,
-        type: selectedLetter.type
+        type: selectedLetter.type,
+        familyHeadName: selectedLetter.familyHeadName || '',
+        birthPlace: selectedLetter.birthPlace || '',
+        birthDate: selectedLetter.birthDate || '',
+        religion: selectedLetter.religion || '',
+        gender: selectedLetter.gender || 'Laki-laki',
+        maritalStatus: selectedLetter.maritalStatus || 'Belum Kawin',
+        nationality: selectedLetter.nationality || 'WNI'
       });
 
       if (selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') {
@@ -287,10 +305,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const handleSaveLetterDetails = async () => {
     if (!selectedLetter) return;
     try {
-      await updateLetterInDb(selectedLetter.id, {
+      const updatedFields = {
         ...editLetterData,
         letterNumber: letterNumberInput
-      });
+      };
+      await updateLetterInDb(selectedLetter.id, updatedFields);
+
+      // Keep local selectedLetter current so that other UI parts reflect it
+      setSelectedLetter({
+        ...selectedLetter,
+        ...updatedFields
+      } as LetterRequest);
       
       // Update lastLetterNumber in config if it's a valid number
       let nextNum = (pdfConfig.lastLetterNumber || 0);
@@ -318,6 +343,55 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     } catch (error) {
       console.error("Error saving letter details:", error);
       toast.error("Gagal menyimpan detail surat.");
+    }
+  };
+
+  const handleSyncLetterSequence = async () => {
+    if (!selectedLetter) return;
+    try {
+      let maxNum = 0;
+      
+      // Scan remaining occupant letters
+      letters.forEach(l => {
+        if (l.id !== selectedLetter.id && l.letterNumber) {
+          const num = extractNum(l.letterNumber);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+      
+      // Scan official letters
+      officialLetters.forEach(ol => {
+        if (ol.letterNumber) {
+          const num = extractNum(ol.letterNumber);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+
+      const nextNum = maxNum + 1;
+      const paddedNum = nextNum.toString().padStart(3, '0');
+      
+      // Update pdfConfig
+      const newConfig = { ...pdfConfig, lastLetterNumber: maxNum };
+      setPdfConfig(newConfig);
+      await updatePdfConfig(newConfig);
+
+      // Format proposed number string
+      const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
+      const currentYear = new Date().getFullYear();
+      
+      const words = (editLetterData.type || selectedLetter.type || 'S').split(' ').filter(w => w.length > 0);
+      let letterCode = words.map(w => w[0].toUpperCase()).join('');
+      if (!letterCode) letterCode = 'S';
+      
+      const suggestedNumber = `${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`;
+      setLetterNumberInput(suggestedNumber);
+      
+      toast.success("Sinkronisasi Berhasil!", {
+        description: `Nomor surat terhitung dari maksimal database (${maxNum}). Nomor diusulkan: ${suggestedNumber}`
+      });
+    } catch (e) {
+      console.error("Error syncing sequence", e);
+      toast.error("Gagal melakukan sinkronisasi penomoran surat.");
     }
   };
 
@@ -437,8 +511,38 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
     if (isConfirmed) {
       try {
+        const letterToDelete = letters.find(l => l.id === id);
         await deleteLetterFromDb(id);
         toast.success('Pengajuan surat berhasil dihapus.');
+
+        if (letterToDelete && letterToDelete.letterNumber) {
+          const deletedNum = extractNum(letterToDelete.letterNumber);
+          if (deletedNum > 0) {
+            let maxNumOfOthers = 0;
+            // Scan other occupant letters
+            letters.forEach(l => {
+              if (l.id !== id && l.letterNumber) {
+                const num = extractNum(l.letterNumber);
+                if (num > maxNumOfOthers) maxNumOfOthers = num;
+              }
+            });
+            // Scan official letters
+            officialLetters.forEach(ol => {
+              if (ol.letterNumber) {
+                const num = extractNum(ol.letterNumber);
+                if (num > maxNumOfOthers) maxNumOfOthers = num;
+              }
+            });
+
+            // If the deleted number is the max or exceeds the remaining, adjust the config
+            if (deletedNum >= (pdfConfig.lastLetterNumber || 0)) {
+              const newConfig = { ...pdfConfig, lastLetterNumber: maxNumOfOthers };
+              setPdfConfig(newConfig);
+              await updatePdfConfig(newConfig);
+              toast.success(`Nomor surat terakhir disesuaikan kembali menjadi: ${maxNumOfOthers}`);
+            }
+          }
+        }
       } catch (error) {
         console.error(error);
         toast.error('Gagal menghapus pengajuan surat.');
@@ -602,7 +706,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Layanan & Aduan</h2>
-          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">Pusat pengelolaan surat pengantar dan laporan warga.</p>
+          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">Pusat pengelolaan surat pengantar dan laporan warga secara transparan dan responsif.</p>
         </div>
         
         <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200/50 shadow-inner overflow-x-auto no-scrollbar w-full md:w-auto">
@@ -662,6 +766,61 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <Settings size={14} className="sm:w-4 sm:h-4" />
               <span>Pengaturan</span>
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Analytics Card Widget */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI: Surat Menunggu */}
+        <div className="bg-gradient-to-br from-amber-50 to-amber-100/30 p-5 rounded-3xl border border-amber-200/50 shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] hover:shadow-md">
+          <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm border border-amber-100 shrink-0">
+            <Clock size={18} className="animate-pulse" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-black text-amber-600 tracking-wider uppercase truncate">Surat Pending</p>
+            <h4 className="text-xl sm:text-2xl font-black text-slate-850 leading-none mt-1">
+              {letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length}
+            </h4>
+          </div>
+        </div>
+
+        {/* KPI: Surat Disetujui */}
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/30 p-5 rounded-3xl border border-emerald-200/50 shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] hover:shadow-md">
+          <div className="p-3 bg-white text-emerald-600 rounded-2xl shadow-sm border border-emerald-100 shrink-0">
+            <CheckCircle2 size={18} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-black text-emerald-600 tracking-wider uppercase truncate">Surat Disetujui</p>
+            <h4 className="text-xl sm:text-2xl font-black text-slate-850 leading-none mt-1">
+              {letters.filter(l => l.status === 'Disetujui' || l.status === 'Approved').length}
+            </h4>
+          </div>
+        </div>
+
+        {/* KPI: Aduan Baru */}
+        <div className="bg-gradient-to-br from-rose-50 to-rose-100/30 p-5 rounded-3xl border border-rose-200/50 shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] hover:shadow-md">
+          <div className="p-3 bg-white text-rose-600 rounded-2xl shadow-sm border border-rose-100 shrink-0">
+            <AlertTriangle size={18} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-black text-rose-600 tracking-wider uppercase truncate">Aduan Baru</p>
+            <h4 className="text-xl sm:text-2xl font-black text-slate-850 leading-none mt-1">
+              {reports.filter(r => r.status === 'Baru').length}
+            </h4>
+          </div>
+        </div>
+
+        {/* KPI: Aduan Diproses */}
+        <div className="bg-gradient-to-br from-sky-50 to-sky-100/30 p-5 rounded-3xl border border-sky-200/50 shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] hover:shadow-md">
+          <div className="p-3 bg-white text-sky-600 rounded-2xl shadow-sm border border-sky-100 shrink-0">
+            <RefreshCw size={18} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-black text-sky-600 tracking-wider uppercase truncate">Laporan Diproses</p>
+            <h4 className="text-xl sm:text-2xl font-black text-slate-850 leading-none mt-1">
+              {reports.filter(r => r.status === 'Diproses').length}
+            </h4>
           </div>
         </div>
       </div>
@@ -1365,67 +1524,102 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               const hasTime = letter.date && (letter.date.includes('T') || letter.date.includes(':'));
               const formattedTime = hasTime && !isNaN(dateObj.getTime()) ? dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Makassar' }) + ' WITA' : '';
               
+              const isWaiting = letter.status === 'Menunggu' || letter.status === 'Pending';
+              const isApproved = letter.status === 'Disetujui' || letter.status === 'Approved';
+              const isRejected = letter.status === 'Ditolak' || letter.status === 'Rejected';
+
               return (
                 <motion.div 
                   key={letter.id}
                   layout
-                  className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/50 transition-all group relative overflow-hidden"
+                  className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/40 transition-all group relative overflow-hidden flex flex-col justify-between"
                 >
-                  <div className={`absolute top-0 right-0 w-24 h-24 rounded-bl-[2.5rem] flex items-center justify-center ${
-                    letter.status === 'Menunggu' || letter.status === 'Pending' ? 'bg-amber-50 text-amber-600' :
-                    letter.status === 'Disetujui' || letter.status === 'Approved' ? 'bg-emerald-50 text-emerald-600' :
-                    'bg-rose-50 text-rose-600'
-                  }`}>
-                    {(letter.status === 'Menunggu' || letter.status === 'Pending') && <Clock size={24} />}
-                    {(letter.status === 'Disetujui' || letter.status === 'Approved') && <CheckCircle2 size={24} />}
-                    {(letter.status === 'Ditolak' || letter.status === 'Rejected') && <XCircle size={24} />}
-                  </div>
+                  <div>
+                    {/* Status badge ring absolute indicator */}
+                    <div className={`absolute top-0 right-0 w-20 h-20 rounded-bl-[2.5rem] flex items-center justify-center ${
+                      isWaiting ? 'bg-amber-50 text-amber-600' :
+                      isApproved ? 'bg-emerald-50 text-emerald-600' :
+                      'bg-rose-50 text-rose-600'
+                    }`}>
+                      {isWaiting && (
+                        <div className="relative">
+                          <span className="absolute -inset-1 rounded-full bg-amber-400/20 animate-ping" />
+                          <Clock size={20} className="relative" />
+                        </div>
+                      )}
+                      {isApproved && <CheckCircle2 size={20} />}
+                      {isRejected && <XCircle size={20} />}
+                    </div>
 
-                  <div className="mb-6 relative z-10">
-                    <span className="inline-block px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-3 border border-indigo-100">
-                      {letter.type}
-                    </span>
-                    <h3 className="text-lg font-black text-slate-900 leading-tight mb-1">{letter.applicantName}</h3>
-                    <div className="flex flex-wrap gap-2 text-xs font-bold text-slate-500 mt-1">
-                      <span className="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md">Blok {letter.houseId}</span>
-                      {letter.nik && <span className="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md text-slate-400">NIK {letter.nik}</span>}
+                    <div className="mb-5 relative z-10">
+                      <span className="inline-flex px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-3 border border-indigo-100/50">
+                        {letter.type}
+                      </span>
+                      <h3 className="text-lg font-black text-slate-900 leading-tight mb-1 group-hover:text-indigo-650 transition-colors">
+                        {letter.applicantName}
+                      </h3>
+                      <div className="flex flex-wrap gap-2 text-[11px] font-bold text-slate-500 mt-1">
+                        <span className="bg-slate-50 border border-slate-150 px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <Home size={10} className="text-indigo-400" /> Blok {letter.houseId}
+                        </span>
+                        {letter.nik && (
+                          <span className="bg-slate-50 border border-slate-150 px-2 py-0.5 rounded-md text-slate-400 tracking-wider">
+                            NIK {letter.nik}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2.5 mb-6 relative z-10">
+                      {/* Date details */}
+                      <div className="bg-slate-50/70 rounded-2xl p-3 border border-slate-100 space-y-1 text-xs">
+                        <div className="flex items-center gap-2 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
+                          <Clock size={12} />
+                          <span>Waktu Pengajuan:</span>
+                        </div>
+                        <div className="pl-5 text-slate-700 font-black flex flex-col">
+                          <span>{formattedDate}</span>
+                          {formattedTime && <span className="text-indigo-600 text-[11px] font-bold">{formattedTime}</span>}
+                        </div>
+                      </div>
+
+                      {/* WhatsApp Quick Link */}
+                      {letter.phone && (
+                        <div className="flex items-center justify-between p-3 bg-emerald-50/40 rounded-2xl border border-emerald-100/60 transition-colors hover:bg-emerald-50/70">
+                          <div className="flex items-center gap-2 text-xs text-slate-600 font-bold">
+                            <Phone size={12} className="text-emerald-500 shrink-0" />
+                            <span>Kontak: <span className="text-slate-700 font-extrabold">{letter.phone}</span></span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const templateText = formatLetterStatusForWhatsApp(letter.applicantName, letter.type, letter.status);
+                              sendWhatsAppMessage(letter.phone, templateText);
+                            }}
+                            className="p-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors flex items-center gap-1 shadow-sm shadow-emerald-600/10"
+                            title="Kirim status update via WhatsApp"
+                          >
+                            <MessageCircle size={10} /> Kirim WA
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Necessity description */}
+                      <div className="p-3.5 bg-slate-50 rounded-2xl text-xs text-slate-650 leading-relaxed border border-slate-100">
+                        <span className="font-bold block mb-1 text-slate-400 uppercase tracking-widest text-[9px]">Keperluan:</span>
+                        <p className="line-clamp-2 text-slate-600 font-medium italic">"{letter.purposeDetail || '-'}"</p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-3 mb-6 relative z-10">
-                    <div className="bg-slate-50/50 rounded-2xl p-3 border border-slate-100/80 space-y-1 text-xs">
-                      <div className="flex items-center gap-2 text-slate-500 font-bold">
-                        <Clock size={13} className="text-slate-400" />
-                        <span>Waktu Pengajuan:</span>
-                      </div>
-                      <div className="pl-5 text-slate-700 font-black flex flex-col">
-                        <span>{formattedDate}</span>
-                        {formattedTime && <span className="text-indigo-600 text-[11px] font-bold">{formattedTime}</span>}
-                      </div>
-                    </div>
-
-                    {letter.phone && (
-                      <div className="flex items-center gap-2 pl-3 text-xs text-slate-500 font-bold">
-                        <Phone size={13} className="text-indigo-500" />
-                        <span>Telepon: <span className="text-slate-700 font-extrabold">{letter.phone}</span></span>
-                      </div>
-                    )}
-
-                    <div className="p-3 bg-slate-50 rounded-2xl text-xs text-slate-600 leading-relaxed border border-slate-100">
-                      <span className="font-bold block mb-1 text-slate-400 uppercase tracking-wider text-[10px]">Keperluan:</span>
-                      <p className="line-clamp-2 text-slate-600 font-medium">{letter.purposeDetail || '-'}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 relative z-10">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2 relative z-10 pt-4 border-t border-slate-100 mt-auto">
                     <button 
                       onClick={() => setSelectedLetter(letter)}
-                      className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
+                      className="flex-1 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md flex items-center justify-center gap-1.5"
                     >
-                      <Eye size={14} /> Detail
+                      <Eye size={13} /> Detail & Proses
                     </button>
                     
-                    {letter.status === 'Disetujui' && (
+                    {isApproved && (
                       <button 
                         onClick={async () => {
                           try {
@@ -1436,28 +1630,28 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             toast.error("Gagal mencetak surat. Pastikan data lengkap.");
                           }
                         }}
-                        className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100"
-                        title="Cetak Surat"
+                        className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-100 hover:scale-[1.03] transition-all border border-emerald-100"
+                        title="Cetak File PDF Surat"
                       >
-                        <Printer size={16} />
+                        <Printer size={15} />
                       </button>
                     )}
 
                     <button 
                       onClick={() => handleDeleteLetter(letter.id)}
-                      className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100"
-                      title="Hapus Pengajuan"
+                      className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 hover:scale-[1.03] transition-all border border-rose-100"
+                      title="Hapus Permanen"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={15} />
                     </button>
 
-                    {!letter.archived && (letter.status === 'Disetujui' || letter.status === 'Ditolak') && (
+                    {!letter.archived && (isApproved || isRejected) && (
                       <button 
                         onClick={() => handleArchiveLetter(letter.id)}
-                        className="p-3 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors border border-amber-100"
-                        title="Arsipkan"
+                        className="p-3 bg-amber-50 text-amber-600 rounded-2xl hover:bg-amber-100 hover:scale-[1.03] transition-all border border-amber-100"
+                        title="Arsipkan data"
                       >
-                        <Archive size={16} />
+                        <Archive size={15} />
                       </button>
                     )}
                   </div>
@@ -1473,276 +1667,626 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             exit={{ opacity: 0, y: -20 }}
             className="space-y-4"
           >
-            {filteredReports.map((report) => (
-              <motion.div 
-                key={report.id}
-                layout
-                className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-rose-100/50 transition-all flex flex-col md:flex-row gap-6 items-start md:items-center group"
-              >
-                <div className={`p-4 rounded-2xl shrink-0 ${
-                  report.type === 'Keamanan' ? 'bg-rose-50 text-rose-600' :
-                  report.type === 'Kebersihan' ? 'bg-emerald-50 text-emerald-600' :
-                  'bg-blue-50 text-blue-600'
-                }`}>
-                  <AlertTriangle size={24} />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-3 mb-2">
-                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
-                      report.status === 'Baru' ? 'bg-rose-100 text-rose-700 border-rose-200' :
-                      report.status === 'Diproses' ? 'bg-amber-100 text-amber-700 border-amber-200' :
-                      'bg-slate-100 text-slate-600 border-slate-200'
+            {filteredReports.map((report) => {
+              const isNew = report.status === 'Baru';
+              const isProcessing = report.status === 'Diproses';
+              
+              return (
+                <motion.div 
+                  key={report.id}
+                  layout
+                  className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md hover:shadow-slate-100 transition-all flex flex-col md:flex-row gap-5 items-start md:items-center justify-between group relative overflow-hidden"
+                >
+                  <div className="flex flex-col md:flex-row gap-5 items-start md:items-center flex-1 min-w-0">
+                    <div className={`p-4 rounded-2xl shrink-0 ${
+                      report.type === 'Keamanan' ? 'bg-rose-550/10 text-rose-600' :
+                      report.type === 'Kebersihan' ? 'bg-emerald-50 text-emerald-600' :
+                      'bg-blue-50 text-blue-600'
                     }`}>
-                      {report.status}
-                    </span>
-                    <span className="text-xs font-bold text-slate-400">•</span>
-                    <span className="text-xs font-bold text-slate-500">{report.type}</span>
-                    <span className="text-xs font-bold text-slate-400">•</span>
-                    <span className="text-xs font-medium text-slate-400">{new Date(report.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })}</span>
+                      <AlertTriangle size={22} />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2.5 mb-1">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                          isNew ? 'bg-rose-100/60 text-rose-700 border-rose-200/50' :
+                          isProcessing ? 'bg-amber-150/60 text-amber-700 border-amber-200/50' :
+                          'bg-emerald-100/60 text-emerald-700 border-emerald-200/50'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${isNew ? 'bg-rose-500 animate-ping' : isProcessing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                          {report.status}
+                        </span>
+                        <span className="text-xs font-bold text-slate-300">•</span>
+                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest text-[9px]">{report.type}</span>
+                        <span className="text-xs font-bold text-slate-300">•</span>
+                        <span className="text-xs font-semibold text-slate-400">{new Date(report.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black text-slate-850 mb-0.5 leading-snug text-slate-900 pr-4">{report.description}</h3>
+                      <p className="text-xs sm:text-sm font-medium text-slate-500 flex items-center gap-1.5">
+                        Pelapor: <span className="text-slate-800 font-bold">{report.reporterName}</span> 
+                        {(() => {
+                          const house = houses.find(h => h.id === report.houseId || h.id === report.reporterHouseId);
+                          return house ? (
+                            <span className="bg-slate-100/70 border border-slate-200/50 text-slate-500 px-1.5 py-0.5 rounded text-[10px] font-bold">Blok {house.block}-{house.number}</span>
+                          ) : (report.houseId ? (
+                            <span className="bg-slate-100/70 border border-slate-200/50 text-slate-500 px-1.5 py-0.5 rounded text-[10px] font-bold">{report.houseId}</span>
+                          ) : '');
+                        })()}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-black text-slate-900 mb-1 truncate">{report.description}</h3>
-                  <p className="text-sm font-medium text-slate-500">
-                    Pelapor: <span className="text-slate-800">{report.reporterName}</span> 
-                    {(() => {
-                      const house = houses.find(h => h.id === report.houseId || h.id === report.reporterHouseId);
-                      return house ? ` (Blok ${house.block}-${house.number})` : (report.houseId ? ` (${report.houseId})` : '');
-                    })()}
-                  </p>
-                </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                  <button 
-                    onClick={() => setSelectedReport(report)}
-                    className="flex-1 md:flex-none px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap flex items-center gap-2 justify-center"
-                  >
-                    <Eye size={14} /> Lihat Detail
-                  </button>
-                  {onDeleteReport && (
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full md:w-auto pt-3 md:pt-0 border-t md:border-none border-slate-100/60 shrink-0">
+                    {/* Inline Quick Action Status Transition Steps - highly user friendly */}
+                    {isNew && (
+                      <button 
+                        onClick={() => handleUpdateReportStatus(report.id, 'Diproses')}
+                        className="flex-1 sm:flex-none px-4 py-3 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200/60 rounded-2xl font-black text-[11px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                        title="Langsung respon dan tandai sedang dikerjakan"
+                      >
+                        <RefreshCw size={13} className="animate-spin-slow" /> Tangani
+                      </button>
+                    )}
+                    {isProcessing && (
+                      <button 
+                        onClick={() => handleUpdateReportStatus(report.id, 'Selesai')}
+                        className="flex-1 sm:flex-none px-4 py-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60 rounded-2xl font-black text-[11px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                        title="Tandai aduan warga selesai tuntas ditangani"
+                      >
+                        <CheckCircle2 size={13} /> Selesai
+                      </button>
+                    )}
+
                     <button 
-                      onClick={() => onDeleteReport(report.id)}
-                      className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100"
-                      title="Hapus Laporan"
+                      onClick={() => setSelectedReport(report)}
+                      className="flex-1 sm:flex-none px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white border-none rounded-2xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-[0.98]"
                     >
-                      <Trash2 size={16} />
+                      <Eye size={13} /> Detail
                     </button>
-                  )}
-                  {!report.archived && report.status === 'Selesai' && (
-                    <button 
-                      onClick={() => handleArchiveReport(report.id)}
-                      className="p-3 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors border border-amber-100"
-                      title="Arsipkan"
-                    >
-                      <Archive size={16} />
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+
+                    {onDeleteReport && (
+                      <button 
+                        onClick={() => onDeleteReport(report.id)}
+                        className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 hover:scale-[1.03] transition-all border border-rose-100"
+                        title="Hapus Laporan permanen"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    )}
+
+                    {!report.archived && report.status === 'Selesai' && (
+                      <button 
+                        onClick={() => handleArchiveReport(report.id)}
+                        className="p-3 bg-amber-50 text-amber-600 rounded-2xl hover:bg-amber-100 hover:scale-[1.03] transition-all border border-amber-100"
+                        title="Arsipkan laporan"
+                      >
+                        <Archive size={15} />
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Letter Detail Modal */}
-      <Modal isOpen={!!selectedLetter} onClose={() => setSelectedLetter(null)} title="Detail Permohonan Surat" maxWidth="max-w-2xl">
+      <Modal isOpen={!!selectedLetter} onClose={() => setSelectedLetter(null)} title="Detail Permohonan Surat" maxWidth="max-w-3xl">
             {selectedLetter && (
               <div className="space-y-6">
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Surat <span className="text-rose-500">*</span></p>
-                      <select 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.type || ''}
-                        onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
-                      >
-                        {(pdfConfig.letterTemplates || []).map(t => <option key={t.type}>{t.type}</option>)}
-                        <option>Lainnya</option>
-                      </select>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Saat Ini</p>
-                      <span className={`inline-block px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
-                        (selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') ? 'bg-amber-100 text-amber-700' :
-                        (selectedLetter.status === 'Disetujui' || selectedLetter.status === 'Approved') ? 'bg-emerald-100 text-emerald-700' :
-                        'bg-rose-100 text-rose-700'
-                      }`}>
-                        {selectedLetter.status}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nama Pemohon</p>
-                      <input 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.applicantName || ''}
-                        onChange={e => setEditLetterData({...editLetterData, applicantName: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">NIK</p>
-                      <input 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.nik || ''}
-                        onChange={e => setEditLetterData({...editLetterData, nik: e.target.value})}
-                      />
-                    </div>
-                    
-                    {/* New Fields */}
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">No. HP / WA</p>
-                      <input 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.phone || ''}
-                        onChange={e => setEditLetterData({...editLetterData, phone: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email</p>
-                      <input 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.email || ''}
-                        onChange={e => setEditLetterData({...editLetterData, email: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pendidikan</p>
-                      <input 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.education || ''}
-                        onChange={e => setEditLetterData({...editLetterData, education: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Gol. Darah</p>
-                      <select 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.bloodType || ''}
-                        onChange={e => setEditLetterData({...editLetterData, bloodType: e.target.value as any})}
-                      >
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="AB">AB</option>
-                        <option value="O">O</option>
-                        <option value="-">-</option>
-                      </select>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Keluarga</p>
-                      <select 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.familyStatus || ''}
-                        onChange={e => setEditLetterData({...editLetterData, familyStatus: e.target.value as any})}
-                      >
-                        <option value="Kepala Keluarga">Kepala Keluarga</option>
-                        <option value="Istri">Istri</option>
-                        <option value="Anak">Anak</option>
-                        <option value="Lainnya">Lainnya</option>
-                      </select>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pekerjaan</p>
-                      <input 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-bold"
-                        value={editLetterData.job || ''}
-                        onChange={e => setEditLetterData({...editLetterData, job: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="col-span-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat KTP</p>
-                      <textarea 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-16 resize-none"
-                        value={editLetterData.addressKtp || ''}
-                        onChange={e => setEditLetterData({...editLetterData, addressKtp: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="col-span-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alamat Domisili Saat Ini</p>
-                      <textarea 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-16 resize-none"
-                        value={editLetterData.currentAddress || ''}
-                        onChange={e => setEditLetterData({...editLetterData, currentAddress: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="col-span-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
-                      <textarea 
-                        className="w-full p-2 bg-white border border-slate-200 rounded-xl text-sm font-medium h-20 resize-none"
-                        value={editLetterData.purposeDetail || ''}
-                        onChange={e => setEditLetterData({...editLetterData, purposeDetail: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="col-span-2 pt-4 border-t border-slate-200">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nomor Surat (Dapat Diedit)</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
-                        value={letterNumberInput}
-                        onChange={(e) => setLetterNumberInput(e.target.value)}
-                        placeholder="Contoh: 001/RT02/III/2026"
-                      />
-                      <p className="text-[10px] font-medium text-slate-400 mt-2 italic">* Nomor ini akan dicetak pada dokumen resmi.</p>
-                    </div>
-                  </div>
+                {/* Modern Navigation Tab Bar */}
+                <div className="flex border border-slate-150 p-1.5 rounded-2xl bg-slate-50/50">
+                  <button
+                    type="button"
+                    onClick={() => setDetailModalTab('profil')}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                      detailModalTab === 'profil'
+                        ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <User size={13} className={detailModalTab === 'profil' ? 'text-indigo-600' : 'text-slate-400'} />
+                    <span>Profil Pemohon</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDetailModalTab('keperluan')}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                      detailModalTab === 'keperluan'
+                        ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <FileText size={13} className={detailModalTab === 'keperluan' ? 'text-indigo-600' : 'text-slate-400'} />
+                    <span>Keperluan & Berkas</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDetailModalTab('penerbitan')}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                      detailModalTab === 'penerbitan'
+                        ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <CheckCircle2 size={13} className={detailModalTab === 'penerbitan' ? 'text-indigo-600' : 'text-slate-400'} />
+                    <span>Penerbitan & TTD</span>
+                  </button>
                 </div>
 
-                {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') && (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Tanda Tangan Ketua RT (Opsional)</p>
-                      <div className="bg-white rounded-xl border border-indigo-200 overflow-hidden">
-                        <SignaturePad 
-                          onSave={(sig) => setTempSignature(sig)} 
-                          onClear={() => setTempSignature(null)}
-                        />
+                {/* Tab 1: Profil Pemohon */}
+                {detailModalTab === 'profil' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                  >
+                    {/* Section 1: Identitas Pokok & KK */}
+                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-4">
+                      <h4 className="text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-1">
+                        <CreditCard size={14} className="text-indigo-500" />
+                        <span>Identitas Pokok & Kartu Keluarga (KK)</span>
+                      </h4>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <User size={11} className="text-indigo-500" /> Nama Lengkap Sesuai KTP
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.applicantName || ''}
+                            onChange={e => setEditLetterData({...editLetterData, applicantName: e.target.value})}
+                            placeholder="Contoh: Budi Santoso"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Hash size={11} className="text-indigo-500" /> NIK (16 Digit)
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.nik || ''}
+                            onChange={e => setEditLetterData({...editLetterData, nik: e.target.value})}
+                            placeholder="Contoh: 7271xxxxxxxxxxxx"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Users size={11} className="text-indigo-500" /> Nama Kepala Keluarga (KK)
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.familyHeadName || ''}
+                            onChange={e => setEditLetterData({...editLetterData, familyHeadName: e.target.value})}
+                            placeholder="Nama Kepala Keluarga di Kartu Keluarga"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <UserCheck size={11} className="text-indigo-500" /> Hubungan Keluarga
+                          </label>
+                          <select 
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.familyStatus || ''}
+                            onChange={e => setEditLetterData({...editLetterData, familyStatus: e.target.value as any})}
+                          >
+                            <option value="Kepala Keluarga">Kepala Keluarga</option>
+                            <option value="Istri">Istri</option>
+                            <option value="Anak">Anak</option>
+                            <option value="Lainnya">Lainnya</option>
+                          </select>
+                        </div>
                       </div>
-                      <p className="text-[10px] text-indigo-400 mt-2 italic">* Jika tidak diisi, akan menggunakan tanda tangan default di pengaturan.</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <Button 
-                        onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Ditolak')}
-                        className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none"
-                      >
-                        <XCircle size={18} className="mr-2" /> Tolak
-                      </Button>
-                      <Button 
-                        onClick={() => {
-                          // If tempSignature exists, we might want to pass it to handleUpdateLetterStatus
-                          // or update pdfConfig temporarily. For now, let's just use it in the generation.
-                          handleUpdateLetterStatus(selectedLetter.id, 'Disetujui', {
-                            ...selectedLetter,
-                            ...editLetterData,
-                            letterNumber: letterNumberInput,
-                            // We can't easily pass tempSignature through handleUpdateLetterStatus without changing its signature
-                            // but we can use it if we modify handleUpdateLetterStatus
-                          }, tempSignature);
-                        }}
-                        className="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
-                      >
-                        <CheckCircle2 size={18} className="mr-2" /> Setujui & Cetak
-                      </Button>
+                    {/* Section 2: Birth, Gender & Marital Status */}
+                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-4">
+                      <h4 className="text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-1">
+                        <Calendar size={14} className="text-indigo-500" />
+                        <span>Kelahiran, Jenis Kelamin, & Perkawinan</span>
+                      </h4>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <MapPin size={11} className="text-indigo-500" /> Tempat Kelahiran
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.birthPlace || ''}
+                            onChange={e => setEditLetterData({...editLetterData, birthPlace: e.target.value})}
+                            placeholder="Contoh: Palu"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Calendar size={11} className="text-indigo-500" /> Tanggal Lahir (Format Terang / ISO)
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.birthDate || ''}
+                            onChange={e => setEditLetterData({...editLetterData, birthDate: e.target.value})}
+                            placeholder="Format: DD-MM-YYYY, misal: 15-08-1995"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <UserCheck size={11} className="text-indigo-500" /> Jenis Kelamin
+                          </label>
+                          <select 
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.gender || 'Laki-laki'}
+                            onChange={e => setEditLetterData({...editLetterData, gender: e.target.value as any})}
+                          >
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Heart size={11} className="text-indigo-500" /> Status Perkawinan
+                          </label>
+                          <select 
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.maritalStatus || 'Belum Kawin'}
+                            onChange={e => setEditLetterData({...editLetterData, maritalStatus: e.target.value as any})}
+                          >
+                            <option value="Belum Kawin">Belum Kawin</option>
+                            <option value="Kawin">Kawin</option>
+                            <option value="Cerai Hidup">Cerai Hidup</option>
+                            <option value="Cerai Mati">Cerai Mati</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Section 3: Sosial, Pendidikan & Latar Belakang */}
+                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-4">
+                      <h4 className="text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-1">
+                        <BookOpen size={14} className="text-indigo-500" />
+                        <span>Sosial, Pendidikan, Agama & Latar Belakang</span>
+                      </h4>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Info size={11} className="text-indigo-500" /> Agama / Keyakinan
+                          </label>
+                          <select 
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.religion || ''}
+                            onChange={e => setEditLetterData({...editLetterData, religion: e.target.value})}
+                          >
+                            <option value="">-- Pilih Agama --</option>
+                            <option value="Islam">Islam</option>
+                            <option value="Kristen Protestan">Kristen Protestan</option>
+                            <option value="Katolik">Katolik</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Buddha">Buddha</option>
+                            <option value="Khonghucu">Khonghucu</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Flag size={11} className="text-indigo-500" /> Kewarganegaraan
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.nationality || ''}
+                            onChange={e => setEditLetterData({...editLetterData, nationality: e.target.value})}
+                            placeholder="Contoh: WNI atau WNA"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <BookOpen size={11} className="text-indigo-500" /> Pendidikan Terakhir
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.education || ''}
+                            onChange={e => setEditLetterData({...editLetterData, education: e.target.value})}
+                            placeholder="Contoh: SMA, Diploma, S1, S2, dll."
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Briefcase size={11} className="text-indigo-500" /> Pekerjaan Saat Ini
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.job || ''}
+                            onChange={e => setEditLetterData({...editLetterData, job: e.target.value})}
+                            placeholder="Contoh: PNS, Swasta, Mahasiswa, Ibu Rumah Tangga"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 4: Kontak & Medis */}
+                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-4">
+                      <h4 className="text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-1">
+                        <Phone size={14} className="text-indigo-500" />
+                        <span>Kontak & Data Medis</span>
+                      </h4>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1 col-span-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Phone size={11} className="text-indigo-500" /> No. WhatsApp Pemohon
+                          </label>
+                          <input 
+                            type="text"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.phone || ''}
+                            onChange={e => setEditLetterData({...editLetterData, phone: e.target.value})}
+                            placeholder="Contoh: 081234567890"
+                          />
+                        </div>
+
+                        <div className="space-y-1 col-span-1 border-t md:border-t-0 pt-3 md:pt-0">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Mail size={11} className="text-indigo-500" /> Alamat Email
+                          </label>
+                          <input 
+                            type="email"
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.email || ''}
+                            onChange={e => setEditLetterData({...editLetterData, email: e.target.value})}
+                            placeholder="Contoh: email@domain.com"
+                          />
+                        </div>
+
+                        <div className="space-y-1 col-span-1 border-t md:border-t-0 pt-3 md:pt-0">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Heart size={11} className="text-indigo-500" /> Golongan Darah
+                          </label>
+                          <select 
+                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            value={editLetterData.bloodType || ''}
+                            onChange={e => setEditLetterData({...editLetterData, bloodType: e.target.value as any})}
+                          >
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="AB">AB</option>
+                            <option value="O">O</option>
+                            <option value="-">Tidak Tahu / -</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
                 )}
 
-                <div className="flex gap-3 mt-4">
+                {/* Tab 2: Keperluan & Berkas */}
+                {detailModalTab === 'keperluan' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-5"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <FileText size={11} className="text-indigo-500" /> Format / Jenis Surat Keterangan <span className="text-rose-500">*</span>
+                        </label>
+                        <select 
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                          value={editLetterData.type || ''}
+                          onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
+                        >
+                          {(pdfConfig.letterTemplates || []).map(t => <option key={t.type}>{t.type}</option>)}
+                          <option>Lainnya</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                        <ClipboardList size={11} className="text-indigo-500" /> Detail Keperluan & Maksud Pembuatan Surat
+                      </label>
+                      <textarea 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 resize-none"
+                        value={editLetterData.purposeDetail || ''}
+                        onChange={e => setEditLetterData({...editLetterData, purposeDetail: e.target.value})}
+                        placeholder="Detail keperluan warga (misal: pengurusan pendaftaran beasiswa anak, pembuatan paspor dsb.)"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <MapPin size={11} className="text-indigo-500" /> Alamat Sesuai KTP Resmi
+                        </label>
+                        <textarea 
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 resize-none"
+                          value={editLetterData.addressKtp || ''}
+                          onChange={e => setEditLetterData({...editLetterData, addressKtp: e.target.value})}
+                          placeholder="Tulis alamat persis sesuai KTP daerah asal"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <Home size={11} className="text-indigo-500" /> Alamat Domisili Saat Ini (RT 02)
+                        </label>
+                        <textarea 
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 resize-none"
+                          value={editLetterData.currentAddress || ''}
+                          onChange={e => setEditLetterData({...editLetterData, currentAddress: e.target.value})}
+                          placeholder="Alamat domisili saat ini di wilayah RT"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Tab 3: Penerbitan & TTD */}
+                {detailModalTab === 'penerbitan' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-5"
+                  >
+                    {/* Status Visual Banner */}
+                    <div className="relative overflow-hidden rounded-2xl border">
+                      {selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending' ? (
+                        <div className="bg-amber-50/80 border-amber-100 p-4 flex items-start gap-3">
+                          <div className="p-2 bg-amber-100 text-amber-600 rounded-xl shrink-0">
+                            <Clock size={16} className="animate-pulse" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-black text-amber-800 uppercase tracking-wide">Status: Menunggu Persetujuan Ketua RT</h4>
+                            <p className="text-[11px] text-amber-700 mt-0.5 leading-relaxed">
+                              Permohonan masuk antrean. Anda dapat menyelaraskan format nomor surat di bawah, membubuhkan tanda tangan (opsional) atau langsung mencetak format resmi.
+                            </p>
+                          </div>
+                        </div>
+                      ) : selectedLetter.status === 'Disetujui' || selectedLetter.status === 'Approved' ? (
+                        <div className="bg-emerald-50/80 border-emerald-100 p-4 flex items-start gap-3">
+                          <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl shrink-0">
+                            <CheckCircle2 size={16} />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-black text-emerald-800 uppercase tracking-wide">Status: Telah Disetujui (Diterbitkan)</h4>
+                            <p className="text-[11px] text-emerald-700 mt-0.5 leading-relaxed">
+                              Dokumen pengantar telah selesai diproses dengan nomor surat <span className="font-extrabold">{selectedLetter.letterNumber}</span>. Berkas siap cetak kapan saja diperlukan.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-rose-50/80 border-rose-100 p-4 flex items-start gap-3">
+                          <div className="p-2 bg-rose-100 text-rose-600 rounded-xl shrink-0">
+                            <XCircle size={16} />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-black text-rose-800 uppercase tracking-wide">Status: Pengajuan Ditolak</h4>
+                            <p className="text-[11px] text-rose-700 mt-0.5 leading-relaxed">
+                              Permohonan tidak disetujui karena ketidaksesuaian administrasi RT. Silakan komunikasikan perbaikan kepada pemohon bersangkutan.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Letter Number Input Group WITH SYNC BUTTON - Extremely User Friendly & Professional */}
+                    <div className="bg-slate-50/50 rounded-2xl p-4.5 border border-slate-150 space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">
+                          Nomor Surat Resmi (Format Terbuka untuk Diedit)
+                        </label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                              <Hash size={14} />
+                            </div>
+                            <input 
+                              type="text"
+                              className="w-full pl-10 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-300"
+                              value={letterNumberInput}
+                              onChange={(e) => setLetterNumberInput(e.target.value)}
+                              placeholder="Contoh: SK/008/RT02/VI/2026"
+                            />
+                          </div>
+
+                          {/* SINKRONISASI DAFTAR NOMOR SURAT BUTTON */}
+                          <button
+                            type="button"
+                            onClick={handleSyncLetterSequence}
+                            className="px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 active:scale-[0.98]"
+                            title="Samakan nomor surat dengan data historis tertinggi di database"
+                          >
+                            <RefreshCw size={13} className="animate-spin-slow text-amber-600" />
+                            <span>Sinkronkan Nomor</span>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 bg-white/70 border border-slate-100 rounded-xl flex items-start gap-2.5">
+                        <Info size={14} className="text-slate-400 shrink-0 mt-0.5" />
+                        <p className="text-[10.5px] text-slate-500 leading-relaxed">
+                          Tombol <span className="font-extrabold text-amber-700">Sinkronkan Nomor</span> akan otomatis scanning database terhadap surat warga dan surat dinas lain, serta mengusulkan nomor urut selanjutnya agar urutan penomoran tidak melompat.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Signature pad - only for pending */}
+                    {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') && (
+                      <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100/70">
+                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2.5 flex items-center gap-1">
+                          <Sparkles size={11} /> Tanda Tangan Digital Ketua RT (Opsional Untuk Persetujuan Instan)
+                        </p>
+                        <div className="bg-white rounded-xl border border-indigo-150 overflow-hidden shadow-sm">
+                          <SignaturePad 
+                            onSave={(sig) => setTempSignature(sig)} 
+                            onClear={() => setTempSignature(null)}
+                          />
+                        </div>
+                        <p className="text-[10px] text-indigo-400 mt-2 italic">
+                          * Apabila tidak ditandatangani manual, sistem akan menggunakan tanda tangan digital default yang tersimpan di pengaturan RT.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Review inline actions status change */}
+                    {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') && (
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <Button 
+                          onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Ditolak')}
+                          className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none py-3.5 hover:scale-[1.01] transition-all"
+                        >
+                          <XCircle size={15} className="mr-1.5" /> Tolak Pengajuan
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            handleUpdateLetterStatus(selectedLetter.id, 'Disetujui', {
+                              ...selectedLetter,
+                              ...editLetterData,
+                              letterNumber: letterNumberInput,
+                            }, tempSignature);
+                          }}
+                          className="bg-emerald-600 hover:bg-emerald-750 font-black tracking-wide text-xs py-3.5 hover:scale-[1.01] transition-all shadow-md shadow-emerald-200"
+                        >
+                          <CheckCircle2 size={15} className="mr-1.5" /> Setujui & Terbitkan
+                        </Button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Persistent Footer Changes Actions */}
+                <div className="flex gap-2.5 pt-5 border-t border-slate-100/80 mt-6 justify-end">
                   <Button 
                     onClick={handleSaveLetterDetails}
                     variant="secondary"
-                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-none"
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-none font-bold py-3 text-xs"
                   >
-                    <Save size={18} className="mr-2" /> Simpan Perubahan
+                    <Save size={15} className="mr-1.5" /> Simpan Perubahan Data
                   </Button>
                   
                   <Button 
                     onClick={() => sendWhatsAppMessage(selectedLetter.phone, formatLetterStatusForWhatsApp(selectedLetter.applicantName, selectedLetter.type, selectedLetter.status))}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.01] transition-all font-bold py-3 text-xs shadow-md shadow-emerald-200"
                   >
-                    <MessageCircle size={18} className="mr-2" /> Update WA
+                    <MessageCircle size={15} className="mr-1.5" /> Kirim Update WhatsApp
                   </Button>
                 </div>
               </div>

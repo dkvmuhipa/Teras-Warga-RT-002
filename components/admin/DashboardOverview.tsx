@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
 import { generateDashboardSummary } from '../../services/geminiService';
 import { Button } from '../ui/Button';
+import { toast } from 'sonner';
 
 import { CHECKPOINTS, RT_NAME } from '../../constants';
 
@@ -48,6 +49,31 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
     setAiSummary(summary);
     setIsAiLoading(false);
   };
+
+  const handleExportData = () => {
+    try {
+      const exportPayload = {
+        exportedAt: new Date().toISOString(),
+        residentCount: totalResidents,
+        houseCount: occupiedHouses,
+        financeBalance: balance,
+        newReportsCount: newReports,
+        activeGuestsCount: activeGuests,
+        timestamp: Date.now()
+      };
+      
+      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `teraswarga-ringkasan-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      toast.success('Ringkasan data berhasil diekspor!');
+    } catch (e) {
+      toast.error('Gagal mengekspor data ringkasan.');
+    }
+  };
+
   // Calculate Stats
   const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
@@ -152,14 +178,28 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
       {/* Welcome Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 md:gap-6">
         <div>
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Halo, Admin! 👋</h2>
-          <p className="text-slate-500 font-medium mt-1 text-xs md:text-sm lg:text-base">Berikut adalah ringkasan aktivitas {RT_NAME} hari ini.</p>
+          {(() => {
+            const hr = new Date().getHours();
+            let greet = 'Selamat Hari';
+            if (hr >= 5 && hr < 11) greet = 'Selamat Pagi';
+            else if (hr >= 11 && hr < 15) greet = 'Selamat Siang';
+            else if (hr >= 15 && hr < 19) greet = 'Selamat Sore';
+            else if (hr >= 19 || hr < 5) greet = 'Selamat Malam';
+            
+            return (
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <span>{greet}, Admin! </span>
+                <span className="inline-block animate-bounce-slow origin-bottom">👋</span>
+              </h2>
+            );
+          })()}
+          <p className="text-slate-500 font-semibold mt-1 text-xs md:text-sm">Berikut adalah ringkasan aktivitas {RT_NAME} hari ini.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 md:gap-3">
-          <Button onClick={handleGenerateSummary} className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-[10px] md:text-xs lg:text-sm py-2 px-3 md:py-2.5 md:px-4 h-auto">
+          <Button onClick={handleGenerateSummary} className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-[10px] md:text-xs lg:text-sm py-2 px-3 md:py-2.5 md:px-4 h-auto shadow-md">
             <Sparkles size={14} className="mr-1.5 md:mr-2" /> {isAiLoading ? 'Memproses...' : 'Ringkasan AI'}
           </Button>
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-slate-200 rounded-xl md:rounded-2xl text-[10px] md:text-xs lg:text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
+          <button onClick={handleExportData} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-slate-200 rounded-xl md:rounded-2xl text-[10px] md:text-xs lg:text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
             <Download size={14} />
             <span>Ekspor</span>
           </button>
@@ -429,15 +469,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
         {/* Chart Section */}
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6 md:space-y-8">
           <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm">
-            <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-6 md:mb-8">Arus Kas Mingguan</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight">Arus Kas Mingguan</h3>
+              <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100/30 px-2.5 py-1 rounded-lg uppercase tracking-wider">Aktual</span>
+            </div>
             <div className="h-[200px] sm:h-[250px] md:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorCashDoc" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25}/>
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#94a3b8'}} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#94a3b8'}} tickFormatter={(v) => `Rp${v/1000}k`} />
-                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                  <Area type="monotone" dataKey="amount" stroke="#6366f1" fill="#6366f1" fillOpacity={0.1} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#94a3b8', fontWeight: 600}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#94a3b8', fontWeight: 600}} tickFormatter={(v) => `Rp${v/1000}k`} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.05)' }}
+                    labelStyle={{ fontWeight: 800, color: '#1e293b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                  />
+                  <Area type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={3} fill="url(#colorCashDoc)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -445,29 +497,41 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
             <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm">
-              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-6 md:mb-8">Demografi Warga</h3>
+              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-6">Demografi Warga</h3>
               <div className="h-[180px] sm:h-[200px] md:h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={demographicData}>
+                    <defs>
+                      <linearGradient id="colorDemographic" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#c084fc" stopOpacity={0.8}/>
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8'}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8'}} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                    <Bar dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8', fontWeight: 600}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8', fontWeight: 600}} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.05)' }} />
+                    <Bar dataKey="value" fill="url(#colorDemographic)" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
             <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm">
-              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-6 md:mb-8">Status Laporan</h3>
+              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-6">Status Laporan</h3>
               <div className="h-[180px] sm:h-[200px] md:h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={reportStatusData}>
+                    <defs>
+                      <linearGradient id="colorReportStatus" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f43f5e" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.8}/>
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8'}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8'}} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                    <Bar dataKey="value" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8', fontWeight: 600}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8', fontWeight: 600}} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.05)' }} />
+                    <Bar dataKey="value" fill="url(#colorReportStatus)" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

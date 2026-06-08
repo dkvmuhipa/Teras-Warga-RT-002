@@ -1,7 +1,9 @@
-import React from 'react';
-import { Search, Calendar, Users, LayoutList, MapPin, DollarSign, UserPlus, Activity, Filter, ArrowUpDown, X, ChevronDown, FileClock, FileEdit, ShieldAlert, Briefcase, Home } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Calendar, Users, LayoutList, MapPin, UserPlus, Activity, Filter, ArrowUpDown, X, ChevronDown, FileClock, FileEdit, ShieldAlert, Briefcase, Home, SlidersHorizontal, Check } from 'lucide-react';
 import { generateMonthOptions } from '../../../src/utils/dateUtils';
 import { ResidentRegistration } from '../../../types';
+import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 interface ResidentControlsProps {
   searchTerm: string;
@@ -38,174 +40,269 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
   setViewMode,
   residentRegistrations
 }) => {
+  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
+
+  // Calculate active filter count (excluding defaults)
+  const activeFiltersCount = [
+    filterStatus !== 'all',
+    filterResidenceType !== 'all',
+    filterBlock !== 'all',
+    sortBy !== 'block'
+  ].filter(Boolean).length;
+
+  const handleResetFilters = () => {
+    setFilterStatus('all');
+    setFilterResidenceType('all');
+    setFilterBlock('all');
+    setSortBy('block');
+    toast.success('Filter berhasil disetel ulang');
+  };
+
+  const navModes = [
+    { id: 'grid', icon: Users, label: 'Grid' },
+    { id: 'table', icon: LayoutList, label: 'Tabel' },
+    { id: 'map', icon: MapPin, label: 'Peta' },
+    { id: 'analytics', icon: Activity, label: 'Statistik' },
+    { id: 'mutations', icon: FileClock, label: 'Mutasi' },
+    { id: 'requests', icon: FileEdit, label: 'Update' },
+    { id: 'health', icon: Activity, label: 'Posyandu' },
+    { id: 'guests', icon: ShieldAlert, label: 'Tamu' },
+    { id: 'officials', icon: Briefcase, label: 'Pengurus' },
+    { id: 'registrations', 
+      icon: UserPlus, 
+      label: 'Antrean', 
+      badge: residentRegistrations.filter(r => r.approvalStatus === 'Pending').length 
+    }
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center">
-        {/* Search Bar - Professional & Clean */}
-        <div className="relative flex-1 group">
-          <div className="relative flex items-center bg-white border border-slate-200 rounded-xl shadow-xs hover:border-slate-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-150 transition-all overflow-hidden px-2 py-0.5">
-            <div className="w-10 h-10 flex items-center justify-center text-slate-400 group-focus-within:text-indigo-500 transition-colors">
-              <Search size={18} strokeWidth={2} />
+      {/* 1. Main Compact Multi-bar System (Optimized for Mobile) */}
+      <div className="flex flex-col gap-3.5 bg-white p-3.5 md:p-5 rounded-[2rem] border border-slate-100 shadow-[0_10px_30px_rgba(241,245,249,0.5)]">
+        
+        {/* Search Input Row with Filter Toggle */}
+        <div className="flex items-center gap-2.5">
+          {/* Search Input */}
+          <div className="relative flex-1 group">
+            <div className="relative flex items-center bg-slate-50 border border-slate-100 rounded-2xl focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100/50 transition-all duration-300 overflow-hidden px-2.5 py-0.5">
+              <div className="w-9 h-9 flex items-center justify-center text-slate-400 group-focus-within:text-indigo-505 transition-colors">
+                <Search size={16} strokeWidth={2.5} />
+              </div>
+              <input 
+                type="text" 
+                placeholder="Cari warga, blok, status..." 
+                className="flex-1 bg-transparent px-2.5 py-2 text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm('')}
+                  className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-lg"
+                >
+                  <X size={13} strokeWidth={2.5} />
+                </button>
+              )}
             </div>
-            <input 
-              type="text" 
-              placeholder="Cari warga, nomor blok, status..." 
-              className="flex-1 bg-transparent px-2.5 py-2.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 outline-none"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-            {searchTerm && (
-              <button 
-                onClick={() => setSearchTerm('')}
-                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-lg"
-              >
-                <X size={15} />
-              </button>
-            )}
           </div>
+
+          {/* Collapsible Selector Toggle for Mobile Filters */}
+          <button
+            onClick={() => setShowFiltersMobile(!showFiltersMobile)}
+            className={`lg:hidden flex items-center gap-1.5 px-4 py-3 rounded-2xl border transition-all active:scale-95 shrink-0 ${
+              showFiltersMobile || activeFiltersCount > 0
+                ? 'bg-indigo-50 border-indigo-200/60 text-indigo-700 font-extrabold shadow-sm'
+                : 'bg-slate-50 border-slate-100 text-slate-650 font-bold hover:bg-slate-100'
+            }`}
+          >
+            <SlidersHorizontal size={14} className={showFiltersMobile ? 'text-indigo-650 animate-pulse' : 'text-slate-550'} />
+            <span className="text-[11px] font-black uppercase tracking-wider hidden sm:inline">Filter</span>
+            {activeFiltersCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-black text-white shadow-sm leading-none">
+                {activeFiltersCount}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* View Selection - Elegant Integrated Design */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full xl:w-auto overflow-x-auto no-scrollbar border border-slate-200/60 shadow-xs">
-            {[
-              { id: 'grid', icon: Users, label: 'Grid' },
-              { id: 'table', icon: LayoutList, label: 'Tabel' },
-              { id: 'map', icon: MapPin, label: 'Peta' },
-              { id: 'analytics', icon: Activity, label: 'Intel' },
-              { id: 'mutations', icon: FileClock, label: 'Mutasi' },
-              { id: 'requests', icon: FileEdit, label: 'Update' },
-              { id: 'health', icon: Activity, label: 'Posyandu' },
-              { id: 'guests', icon: ShieldAlert, label: 'Tamu' },
-              { id: 'officials', icon: Briefcase, label: 'Pengurus' },
-              { id: 'registrations', 
-                icon: UserPlus, 
-                label: 'Antrean', 
-                badge: residentRegistrations.filter(r => r.approvalStatus === 'Pending').length 
-              }
-            ].map((mode) => (
-              <button 
-                key={mode.id}
-                onClick={() => setViewMode(mode.id)} 
-                className={`relative flex items-center gap-1 px-3 py-1.5 rounded-lg transition-all whitespace-nowrap active:scale-97 ${
-                  viewMode === mode.id 
-                    ? 'bg-white text-indigo-600 shadow-xs border border-slate-200/50 font-bold text-xs' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/40 font-semibold text-xs'
-                }`}
-              >
-                <mode.icon size={13} className={viewMode === mode.id ? 'text-indigo-600' : 'text-slate-400'} />
-                <span className="text-[10px] uppercase tracking-wide hidden md:inline">{mode.label}</span>
-                {mode.badge ? (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[8px] font-bold text-white border border-white shadow-xs">
-                    {mode.badge}
-                  </span>
-                ) : null}
-              </button>
-            ))}
+        {/* View Mode Switching - Polished iOS-style horizontal controller */}
+        <div className="relative">
+          <div className="flex items-center gap-1 bg-slate-50/70 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-100 shadow-[inset_0_1px_3px_rgba(241,245,249,0.8)] scroll-smooth snap-x">
+            {navModes.map((mode) => {
+              const Icon = mode.icon;
+              const isActive = viewMode === mode.id;
+              
+              return (
+                <button 
+                  key={mode.id}
+                  onClick={() => setViewMode(mode.id)} 
+                  className={`snap-center flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 whitespace-nowrap active:scale-95 shrink-0 select-none ${
+                    isActive 
+                      ? 'bg-indigo-600 text-white font-black text-xs shadow-[0_4px_12px_rgba(99,102,241,0.25)] border border-indigo-500/10' 
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 bg-transparent font-extrabold text-xs'
+                  }`}
+                >
+                  <Icon size={14} className={isActive ? 'text-white stroke-[2.5px]' : 'text-slate-400 stroke-[2px]'} />
+                  <span className="text-[10px] uppercase tracking-wider">{mode.label}</span>
+                  {mode.badge ? (
+                    <span className={`flex h-4 min-w-4 items-center justify-center rounded-full text-[9px] font-bold px-1 ${
+                      isActive ? 'bg-white text-indigo-600' : 'bg-rose-500 text-white'
+                    }`}>
+                      {mode.badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+          {/* Subtle horizontal scroll fading indicators */}
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none rounded-r-2xl hidden md:block" />
         </div>
       </div>
 
-      {/* Advanced Filters Row */}
-      <div className="flex flex-wrap items-end gap-3 pt-1">
-        <FilterGroup icon={<Calendar size={13} className="text-indigo-500" />} label="Periode Data">
-          <select 
-            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
-            value={selectedMonth} 
-            onChange={e => setSelectedMonth(e.target.value)}
-          >
-            {generateMonthOptions(12, 60).map((m: string) => (
-              <option key={m} value={m}>{m}</option>
+      {/* 2. Responsive Filters Block */}
+      <AnimatePresence initial={false}>
+        {(showFiltersMobile || !showFiltersMobile) && (
+          <div className={`${showFiltersMobile ? 'block' : 'hidden lg:block'}`}>
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="bg-white border border-slate-100/80 p-4 md:p-5 rounded-[2rem] shadow-[0_4px_24px_rgba(148,163,184,0.04)] space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal size={14} className="text-indigo-650" />
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest">Prameter Filter Lanjutan</h4>
+                </div>
+                {activeFiltersCount > 0 && (
+                  <button 
+                    onClick={handleResetFilters}
+                    className="text-[10px] font-black text-rose-500 hover:text-rose-700 bg-rose-50 border border-rose-100/50 px-2.5 py-1 rounded-xl uppercase tracking-wider transition-colors"
+                  >
+                    Setel Ulang Filter ({activeFiltersCount})
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                {/* Month/Period Data */}
+                <FilterGroup icon={<Calendar size={13} className="text-indigo-500 stroke-[2.5px]" />} label="Periode Data">
+                  <select 
+                    className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
+                    value={selectedMonth} 
+                    onChange={e => setSelectedMonth(e.target.value)}
+                  >
+                    {generateMonthOptions(12, 60).map((m: string) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </FilterGroup>
+
+                {/* Filter Status */}
+                <FilterGroup icon={<Filter size={13} className="text-emerald-500 stroke-[2.5px]" />} label="Status Filter">
+                  <select 
+                    className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
+                    value={filterStatus} 
+                    onChange={e => setFilterStatus(e.target.value as any)}
+                  >
+                    <option value="all">🛡️ Semua Kategori</option>
+                    <option value="paid">✅ Lunas Iuran</option>
+                    <option value="unpaid">❌ Belum Lunas</option>
+                    <option value="occupied">🏠 Rumah Terisi</option>
+                    <option value="empty">📭 Rumah Kosong</option>
+                    <option value="business">🏢 Tempat Usaha</option>
+                    <option value="visiting">🧹 Mengunjungi</option>
+                    <option value="verified">🛡️ Terverifikasi</option>
+                    <option value="unverified">❓ Belum Verifikasi</option>
+                    <option value="arrears">⚠️ Ada Tunggakan</option>
+                    <option value="pbb_taken">📄 PBB Diambil</option>
+                    <option value="pbb_not_taken">📄 PBB Belum Diambil</option>
+                  </select>
+                </FilterGroup>
+
+                {/* Residence status */}
+                <FilterGroup icon={<Home size={13} className="text-rose-500 stroke-[2.5px]" />} label="Status Kepenghunian">
+                  <select 
+                    className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
+                    value={filterResidenceType} 
+                    onChange={e => setFilterResidenceType(e.target.value)}
+                  >
+                    <option value="all">Semua Status</option>
+                    <option value="Tetap">Tetap</option>
+                    <option value="Sewa">Sewa</option>
+                    <option value="Rumah Keluarga">Rumah Keluarga</option>
+                  </select>
+                </FilterGroup>
+
+                {/* Block and Map Pin filter */}
+                <FilterGroup icon={<MapPin size={13} className="text-blue-500 stroke-[2.5px]" />} label="Filter Blok">
+                  <select 
+                    className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
+                    value={filterBlock} 
+                    onChange={e => setFilterBlock(e.target.value)}
+                  >
+                    <option value="all">Semua Blok</option>
+                    <option value="C5">Blok C5</option>
+                    <option value="C7">Blok C7</option>
+                    <option value="C8">Blok C8</option>
+                    <option value="C9">Blok C9</option>
+                    <option value="C10">Blok C10</option>
+                    <option value="C11">Blok C11</option>
+                    <option value="C12">Blok C12</option>
+                  </select>
+                </FilterGroup>
+
+                {/* Sorting options */}
+                <FilterGroup icon={<ArrowUpDown size={13} className="text-amber-500 stroke-[2.5px]" />} label="Urutan Daftar">
+                  <select 
+                    className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
+                    value={sortBy} 
+                    onChange={e => setSortBy(e.target.value as any)}
+                  >
+                    <option value="block">Blok & Nomor</option>
+                    <option value="name">Alfabetis (A-Z)</option>
+                  </select>
+                </FilterGroup>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 3. Dynamic Interactive Info / Badge Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-2xl text-[10px] font-black text-slate-550 uppercase tracking-widest shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+          <span>
+            Filter Aktif: <span className="text-indigo-600 bg-white border border-slate-100 px-2 py-0.5 rounded-lg shadow-xs overflow-hidden max-w-[150px] inline-block truncate align-bottom font-black">{filterStatus === 'all' ? 'semua warga' : filterStatus}</span>
+          </span>
+        </div>
+        <div className="flex items-center justify-between sm:justify-end gap-3.5 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/55">
+          <div className="flex -space-x-1 overflow-hidden">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[7px] font-black text-indigo-600 shadow-xs uppercase">RT</div>
             ))}
-          </select>
-        </FilterGroup>
-
-        <FilterGroup icon={<Filter size={13} className="text-emerald-500" />} label="Status Filter">
-          <select 
-            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
-            value={filterStatus} 
-            onChange={e => setFilterStatus(e.target.value as any)}
-          >
-            <option value="all">Semua Warga</option>
-            <option value="paid">✅ Lunas Iuran</option>
-            <option value="unpaid">❌ Belum Lunas</option>
-            <option value="occupied">🏠 Rumah Terisi</option>
-            <option value="empty">📭 Rumah Kosong</option>
-            <option value="business">🏢 Tempat Usaha</option>
-            <option value="visiting">🧹 Mengunjungi</option>
-            <option value="verified">🛡️ Terverifikasi</option>
-            <option value="unverified">❓ Belum Verifikasi</option>
-            <option value="arrears">⚠️ Ada Tunggakan</option>
-            <option value="pbb_taken">📄 PBB Diambil</option>
-            <option value="pbb_not_taken">📄 PBB Belum Diambil</option>
-          </select>
-        </FilterGroup>
-
-        <FilterGroup icon={<Home size={13} className="text-rose-500" />} label="Status Kepenghunian">
-          <select 
-            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
-            value={filterResidenceType} 
-            onChange={e => setFilterResidenceType(e.target.value)}
-          >
-            <option value="all">Semua Status</option>
-            <option value="Tetap">Tetap</option>
-            <option value="Sewa">Sewa</option>
-            <option value="Rumah Keluarga">Rumah Keluarga</option>
-          </select>
-        </FilterGroup>
-
-        <FilterGroup icon={<MapPin size={13} className="text-blue-500" />} label="Filter Blok">
-          <select 
-            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
-            value={filterBlock} 
-            onChange={e => setFilterBlock(e.target.value)}
-          >
-            <option value="all">Semua Blok</option>
-            <option value="C5">Blok C5</option>
-            <option value="C7">Blok C7</option>
-            <option value="C8">Blok C8</option>
-            <option value="C9">Blok C9</option>
-            <option value="C10">Blok C10</option>
-            <option value="C11">Blok C11</option>
-            <option value="C12">Blok C12</option>
-          </select>
-        </FilterGroup>
-
-        <FilterGroup icon={<ArrowUpDown size={13} className="text-amber-500" />} label="Urutan Daftar">
-          <select 
-            className="bg-transparent w-full text-xs font-bold outline-none text-slate-800 appearance-none pr-6 cursor-pointer focus:ring-0" 
-            value={sortBy} 
-            onChange={e => setSortBy(e.target.value as any)}
-          >
-            <option value="block">Blok & Nomor</option>
-            <option value="name">Alfabetis (A-Z)</option>
-          </select>
-        </FilterGroup>
-
-        <div className="ml-auto flex items-center gap-2 self-center pt-2">
-           <div className="hidden lg:flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-xl shadow-xs">
-             <div className="flex -space-x-1.5">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className={`w-5 h-5 rounded-full border border-white bg-slate-${i*100 + 100} flex items-center justify-center text-[7px] font-bold`}>W</div>
-                ))}
-             </div>
-             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider"><span className="text-slate-850 font-bold">142</span> Keluarga</p>
-           </div>
+          </div>
+          <span className="text-right">
+            terverifikasi: <span className="text-slate-800 font-extrabold">142 Keluarga</span>
+          </span>
         </div>
       </div>
     </div>
   );
 };
 
-// Helper component for uniform filter styling
+// Compact polished filter grouping element
 const FilterGroup = ({ icon, label, children }: { icon: React.ReactNode, label: string, children: React.ReactNode }) => (
-  <div className="flex flex-col gap-1 min-w-[170px] group">
-    <div className="flex items-center gap-1.5 px-0.5">
-       <span className="text-slate-300 group-hover:text-slate-750 transition-colors">{icon}</span>
-       <p className="text-[9px] font-bold text-slate-405 uppercase tracking-wide group-hover:text-slate-600 transition-colors">{label}</p>
+  <div className="flex flex-col gap-1.5 group w-full">
+    <div className="flex items-center gap-1.5 px-1">
+       <span className="text-slate-400 group-hover:text-indigo-500 transition-colors duration-250">{icon}</span>
+       <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider group-hover:text-slate-700 transition-colors duration-250">{label}</span>
     </div>
-    <div className="relative bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-xs hover:border-indigo-400 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-100 transition-all flex items-center justify-between">
+    <div className="relative bg-slate-50/75 border border-slate-100/80 rounded-2xl px-3 py-2.5 hover:border-indigo-400/80 focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100/50 transition-all duration-350 flex items-center justify-between">
       {children}
-      <ChevronDown size={13} className="text-slate-400 group-hover:text-slate-700 pointer-events-none absolute right-3" />
+      <ChevronDown size={13} className="text-slate-400 group-hover:text-slate-650 pointer-events-none absolute right-3 transition-colors duration-200" strokeWidth={2.5} />
     </div>
   </div>
 );
-

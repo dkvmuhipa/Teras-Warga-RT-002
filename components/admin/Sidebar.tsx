@@ -27,8 +27,9 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   activeTab, setActiveTab, isOpen, setIsOpen, onLogout, residentRegistrations = [], guestReports = [], updateRequests = []
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(["Utama", "Administrasi"]);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(["Pusat Kendali", "Kependudukan", "Layanan & Keuangan", "Operasional & Media", "Sistem"]);
 
   const toggleGroup = (title: string) => {
     setExpandedGroups(prev => 
@@ -80,29 +81,35 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     }
   ];
 
-  // Filter navGroups based on role
-  const filteredNavGroups = navGroups.map(group => ({
-    ...group,
-    items: group.items.filter(item => {
-      if (role === Role.ADMIN) return true;
-      
-      if (role === Role.TREASURER) {
-        const allowed = ['overview', 'analytics', 'finance', 'settings', 'notifications'];
-        return allowed.includes(item.id);
-      }
-      
-      if (role === Role.SECRETARY) {
-        const allowed = [
+  // Filter navGroups based on role and search term
+  const filteredNavGroups = navGroups.map(group => {
+    const matchedItems = group.items.filter(item => {
+      // Role validation
+      let isAllowed = false;
+      if (role === Role.ADMIN) {
+        isAllowed = true;
+      } else if (role === Role.TREASURER) {
+        isAllowed = ['overview', 'analytics', 'finance', 'settings', 'notifications'].includes(item.id);
+      } else if (role === Role.SECRETARY) {
+        isAllowed = [
           'overview', 'analytics', 'residents', 
           'health', 'guests', 'officials', 'services', 'documents', 'activities', 
           'assets', 'content', 'audit', 'notifications', 'settings'
-        ];
-        return allowed.includes(item.id);
+        ].includes(item.id);
       }
-      
-      return false;
-    })
-  })).filter(group => group.items.length > 0);
+
+      // Search validation
+      if (!isAllowed) return false;
+      if (!searchTerm) return true;
+      return item.label.toLowerCase().includes(searchTerm.toLowerCase()) || 
+             item.id.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
+    return {
+      ...group,
+      items: matchedItems
+    };
+  }).filter(group => group.items.length > 0);
 
   const getRoleBadge = () => {
     const roleLower = String(role).toLowerCase();
@@ -166,9 +173,19 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={15} />
                 <input 
                   type="text" 
-                  placeholder="Cari fitur administrasi..." 
-                  className="w-full bg-slate-950/40 border border-slate-800/80 rounded-xl py-2 pl-9 pr-4 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/80 transition-all placeholder:text-slate-500 text-slate-200"
+                  placeholder="Cari menu admin..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-slate-950/40 border border-slate-800/80 rounded-xl py-2 pl-9 pr-8 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/80 transition-all placeholder:text-slate-550 text-slate-200"
                 />
+                {searchTerm && (
+                  <button 
+                    onClick={() => setSearchTerm('')} 
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 hover:bg-slate-800/80 p-0.5 rounded-full transition-colors"
+                  >
+                    <X size={12} className="stroke-[3px]" />
+                  </button>
+                )}
               </div>
             </div>
           )}

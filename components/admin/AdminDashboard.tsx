@@ -382,15 +382,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="flex items-center gap-3">
               <Logo showText={true} imageSize="h-8 md:h-10" className="hidden sm:flex" />
               <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
-              <div className="hidden sm:flex items-center gap-2 text-sm font-bold text-slate-400">
-                <span>Admin</span>
-                <span className="text-slate-300">/</span>
-                <span className="text-slate-800 capitalize truncate max-w-[100px] md:max-w-none">{activeTab.replace('-', ' ')}</span>
-              </div>
-            </div>
-            
-            <div className="sm:hidden font-black text-slate-800 text-sm truncate max-w-[120px]">
-              {activeTab.replace('-', ' ')}
+              {(() => {
+                const currentNavItem = navItemsList.find(item => item.id === activeTab);
+                const CurrentIcon = currentNavItem?.icon || LayoutGrid;
+                
+                return (
+                  <>
+                    <div className="hidden sm:flex items-center gap-2.5 text-xs md:text-sm font-extrabold text-slate-400">
+                      <span>Panel Admin</span>
+                      <span className="text-slate-300 font-normal">/</span>
+                      <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-250/30 px-3 py-1 rounded-xl text-xs font-black text-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                        <CurrentIcon size={13} className="text-indigo-600 stroke-[2.5px] shrink-0" />
+                        <span>{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="sm:hidden flex items-center gap-1.5 bg-slate-50 border border-slate-200/50 px-2.5 py-1 rounded-xl text-[11px] font-black text-slate-800 shadow-sm truncate max-w-[140px]">
+                      <CurrentIcon size={12} className="text-indigo-600 stroke-[2.5px] shrink-0" />
+                      <span className="truncate">{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
 
@@ -474,8 +487,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </main>
 
         {/* Mobile bottom navigation bar */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 z-40 pb-safe-area-pb">
-          <div className="flex justify-around items-center h-16 px-2 shadow-inner">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 z-40 pb-[env(safe-area-inset-bottom,16px)] shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
+          <div className="flex justify-around items-center h-16 px-2">
             {bottomNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
