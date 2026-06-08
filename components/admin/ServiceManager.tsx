@@ -2093,8 +2093,22 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           value={editLetterData.type || ''}
                           onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
                         >
-                          {(pdfConfig.letterTemplates || []).map(t => <option key={t.type}>{t.type}</option>)}
-                          <option>Lainnya</option>
+                          {(pdfConfig.letterTemplates || [
+                            { type: 'Surat Pengantar' },
+                            { type: 'Surat Pengantar KTP' },
+                            { type: 'Surat Pengantar KK' },
+                            { type: 'Surat Keterangan Domisili' },
+                            { type: 'Surat Keterangan Tidak Mampu' },
+                            { type: 'Surat Izin Keramaian' },
+                            { type: 'Surat Keterangan Usaha' },
+                            { type: 'Surat Keterangan Berkelakuan Baik' },
+                            { type: 'Surat Keterangan Kematian' },
+                            { type: 'Surat Keterangan Kelahiran' },
+                            { type: 'Surat Keterangan Waris / Ahli Waris' },
+                            { type: 'Surat Keterangan Pindah / Datang' },
+                            { type: 'Surat Pengantar Nikah (N1 - N4)' },
+                          ]).map(t => <option key={t.type} value={t.type}>{t.type}</option>)}
+                          <option value="Lainnya">Lainnya</option>
                         </select>
                       </div>
                     </div>
