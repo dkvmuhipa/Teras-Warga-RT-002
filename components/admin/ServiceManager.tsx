@@ -1776,42 +1776,42 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             {selectedLetter && (
               <div className="space-y-6">
                 {/* Modern Navigation Tab Bar */}
-                <div className="flex border border-slate-150 p-1.5 rounded-2xl bg-slate-50/50">
+                <div className="flex border border-slate-150 p-1 sm:p-1.5 rounded-2xl bg-slate-50/50">
                   <button
                     type="button"
                     onClick={() => setDetailModalTab('profil')}
-                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all flex items-center justify-center gap-1 sm:gap-2 ${
                       detailModalTab === 'profil'
                         ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
                     <User size={13} className={detailModalTab === 'profil' ? 'text-indigo-600' : 'text-slate-400'} />
-                    <span>Profil Pemohon</span>
+                    <span>Profil <span className="hidden sm:inline">Pemohon</span></span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setDetailModalTab('keperluan')}
-                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all flex items-center justify-center gap-1 sm:gap-2 ${
                       detailModalTab === 'keperluan'
                         ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
                     <FileText size={13} className={detailModalTab === 'keperluan' ? 'text-indigo-600' : 'text-slate-400'} />
-                    <span>Keperluan & Berkas</span>
+                    <span>Keperluan<span className="hidden sm:inline"> & Berkas</span></span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setDetailModalTab('penerbitan')}
-                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all flex items-center justify-center gap-1 sm:gap-2 ${
                       detailModalTab === 'penerbitan'
                         ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
                     <CheckCircle2 size={13} className={detailModalTab === 'penerbitan' ? 'text-indigo-600' : 'text-slate-400'} />
-                    <span>Penerbitan & TTD</span>
+                    <span>Penerbitan<span className="hidden sm:inline"> & TTD</span></span>
                   </button>
                 </div>
 
@@ -1823,20 +1823,20 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     className="space-y-6"
                   >
                     {/* Section 1: Identitas Pokok & KK */}
-                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-4">
-                      <h4 className="text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-1">
-                        <CreditCard size={14} className="text-indigo-500" />
+                    <div className="bg-slate-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 space-y-3 sm:space-y-4">
+                      <h4 className="text-[11px] sm:text-xs font-black text-indigo-655 uppercase tracking-widest flex items-center gap-2 mb-0.5">
+                        <CreditCard size={13} className="text-indigo-500" />
                         <span>Identitas Pokok & Kartu Keluarga (KK)</span>
                       </h4>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <User size={11} className="text-indigo-500" /> Nama Lengkap Sesuai KTP
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <User size={10} className="text-indigo-500" /> Nama Lengkap Sesuai KTP
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.applicantName || ''}
                             onChange={e => setEditLetterData({...editLetterData, applicantName: e.target.value})}
                             placeholder="Contoh: Budi Santoso"
@@ -1844,12 +1844,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Hash size={11} className="text-indigo-500" /> NIK (16 Digit)
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Hash size={10} className="text-indigo-500" /> NIK (16 Digit)
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.nik || ''}
                             onChange={e => setEditLetterData({...editLetterData, nik: e.target.value})}
                             placeholder="Contoh: 7271xxxxxxxxxxxx"
@@ -1857,12 +1857,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Users size={11} className="text-indigo-500" /> Nama Kepala Keluarga (KK)
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Users size={10} className="text-indigo-500" /> Nama Kepala Keluarga (KK)
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.familyHeadName || ''}
                             onChange={e => setEditLetterData({...editLetterData, familyHeadName: e.target.value})}
                             placeholder="Nama Kepala Keluarga di Kartu Keluarga"
@@ -1870,11 +1870,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <UserCheck size={11} className="text-indigo-500" /> Hubungan Keluarga
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <UserCheck size={10} className="text-indigo-500" /> Hubungan Keluarga
                           </label>
                           <select 
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.familyStatus || ''}
                             onChange={e => setEditLetterData({...editLetterData, familyStatus: e.target.value as any})}
                           >
@@ -1888,20 +1888,20 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
 
                     {/* Section 2: Birth, Gender & Marital Status */}
-                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-4">
-                      <h4 className="text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-1">
-                        <Calendar size={14} className="text-indigo-500" />
+                    <div className="bg-slate-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 space-y-3 sm:space-y-4">
+                      <h4 className="text-[11px] sm:text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
+                        <Calendar size={13} className="text-indigo-500" />
                         <span>Kelahiran, Jenis Kelamin, & Perkawinan</span>
                       </h4>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <MapPin size={11} className="text-indigo-500" /> Tempat Kelahiran
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <MapPin size={10} className="text-indigo-500" /> Tempat Kelahiran
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.birthPlace || ''}
                             onChange={e => setEditLetterData({...editLetterData, birthPlace: e.target.value})}
                             placeholder="Contoh: Palu"
@@ -1909,12 +1909,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Calendar size={11} className="text-indigo-500" /> Tanggal Lahir (Format Terang / ISO)
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Calendar size={10} className="text-indigo-500" /> Tanggal Lahir (Format Terang / ISO)
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.birthDate || ''}
                             onChange={e => setEditLetterData({...editLetterData, birthDate: e.target.value})}
                             placeholder="Format: DD-MM-YYYY, misal: 15-08-1995"
@@ -1922,11 +1922,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <UserCheck size={11} className="text-indigo-500" /> Jenis Kelamin
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <UserCheck size={10} className="text-indigo-500" /> Jenis Kelamin
                           </label>
                           <select 
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.gender || 'Laki-laki'}
                             onChange={e => setEditLetterData({...editLetterData, gender: e.target.value as any})}
                           >
@@ -1936,11 +1936,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Heart size={11} className="text-indigo-500" /> Status Perkawinan
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Heart size={10} className="text-indigo-500" /> Status Perkawinan
                           </label>
                           <select 
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.maritalStatus || 'Belum Kawin'}
                             onChange={e => setEditLetterData({...editLetterData, maritalStatus: e.target.value as any})}
                           >
@@ -1954,19 +1954,19 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
 
                     {/* Section 3: Sosial, Pendidikan & Latar Belakang */}
-                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-4">
-                      <h4 className="text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-1">
-                        <BookOpen size={14} className="text-indigo-500" />
+                    <div className="bg-slate-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 space-y-3 sm:space-y-4">
+                      <h4 className="text-[11px] sm:text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
+                        <BookOpen size={13} className="text-indigo-500" />
                         <span>Sosial, Pendidikan, Agama & Latar Belakang</span>
                       </h4>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Info size={11} className="text-indigo-500" /> Agama / Keyakinan
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Info size={10} className="text-indigo-500" /> Agama / Keyakinan
                           </label>
                           <select 
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.religion || ''}
                             onChange={e => setEditLetterData({...editLetterData, religion: e.target.value})}
                           >
@@ -1981,12 +1981,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Flag size={11} className="text-indigo-500" /> Kewarganegaraan
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Flag size={10} className="text-indigo-500" /> Kewarganegaraan
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.nationality || ''}
                             onChange={e => setEditLetterData({...editLetterData, nationality: e.target.value})}
                             placeholder="Contoh: WNI atau WNA"
@@ -1994,12 +1994,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <BookOpen size={11} className="text-indigo-500" /> Pendidikan Terakhir
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <BookOpen size={10} className="text-indigo-500" /> Pendidikan Terakhir
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.education || ''}
                             onChange={e => setEditLetterData({...editLetterData, education: e.target.value})}
                             placeholder="Contoh: SMA, Diploma, S1, S2, dll."
@@ -2007,12 +2007,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Briefcase size={11} className="text-indigo-500" /> Pekerjaan Saat Ini
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Briefcase size={10} className="text-indigo-500" /> Pekerjaan Saat Ini
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.job || ''}
                             onChange={e => setEditLetterData({...editLetterData, job: e.target.value})}
                             placeholder="Contoh: PNS, Swasta, Mahasiswa, Ibu Rumah Tangga"
@@ -2022,45 +2022,45 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
 
                     {/* Section 4: Kontak & Medis */}
-                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-4">
-                      <h4 className="text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-1">
-                        <Phone size={14} className="text-indigo-500" />
+                    <div className="bg-slate-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 space-y-3 sm:space-y-4">
+                      <h4 className="text-[11px] sm:text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
+                        <Phone size={13} className="text-indigo-500" />
                         <span>Kontak & Data Medis</span>
                       </h4>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <div className="space-y-1 col-span-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Phone size={11} className="text-indigo-500" /> No. WhatsApp Pemohon
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Phone size={10} className="text-indigo-500" /> No. WhatsApp
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.phone || ''}
                             onChange={e => setEditLetterData({...editLetterData, phone: e.target.value})}
                             placeholder="Contoh: 081234567890"
                           />
                         </div>
 
-                        <div className="space-y-1 col-span-1 border-t md:border-t-0 pt-3 md:pt-0">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Mail size={11} className="text-indigo-500" /> Alamat Email
+                        <div className="space-y-1 col-span-1 border-t sm:border-t-0 pt-2.5 sm:pt-0">
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Mail size={10} className="text-indigo-500" /> Alamat Email
                           </label>
                           <input 
                             type="email"
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.email || ''}
                             onChange={e => setEditLetterData({...editLetterData, email: e.target.value})}
                             placeholder="Contoh: email@domain.com"
                           />
                         </div>
 
-                        <div className="space-y-1 col-span-1 border-t md:border-t-0 pt-3 md:pt-0">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                            <Heart size={11} className="text-indigo-500" /> Golongan Darah
+                        <div className="space-y-1 col-span-1 border-t sm:border-t-0 pt-2.5 sm:pt-0">
+                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                            <Heart size={10} className="text-indigo-500" /> Golongan Darah
                           </label>
                           <select 
-                            className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                             value={editLetterData.bloodType || ''}
                             onChange={e => setEditLetterData({...editLetterData, bloodType: e.target.value as any})}
                           >
@@ -2081,15 +2081,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-5"
+                    className="space-y-4 sm:space-y-5"
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-5">
+                    <div className="grid grid-cols-1 gap-4">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                          <FileText size={11} className="text-indigo-500" /> Format / Jenis Surat Keterangan <span className="text-rose-500">*</span>
+                        <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <FileText size={10} className="text-indigo-500" /> Format / Jenis Surat Keterangan <span className="text-rose-500">*</span>
                         </label>
                         <select 
-                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                          className="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                           value={editLetterData.type || ''}
                           onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
                         >
@@ -2114,24 +2114,24 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                        <ClipboardList size={11} className="text-indigo-500" /> Detail Keperluan & Maksud Pembuatan Surat
+                      <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                        <ClipboardList size={10} className="text-indigo-500" /> Detail Keperluan & Maksud Pembuatan Surat
                       </label>
                       <textarea 
-                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 resize-none"
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 sm:h-24 resize-none"
                         value={editLetterData.purposeDetail || ''}
                         onChange={e => setEditLetterData({...editLetterData, purposeDetail: e.target.value})}
                         placeholder="Detail keperluan warga (misal: pengurusan pendaftaran beasiswa anak, pembuatan paspor dsb.)"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                          <MapPin size={11} className="text-indigo-500" /> Alamat Sesuai KTP Resmi
+                        <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <MapPin size={10} className="text-indigo-500" /> Alamat Sesuai KTP Resmi
                         </label>
                         <textarea 
-                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 resize-none"
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 sm:h-24 resize-none"
                           value={editLetterData.addressKtp || ''}
                           onChange={e => setEditLetterData({...editLetterData, addressKtp: e.target.value})}
                           placeholder="Tulis alamat persis sesuai KTP daerah asal"
@@ -2139,11 +2139,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                          <Home size={11} className="text-indigo-500" /> Alamat Domisili Saat Ini (RT 02)
+                        <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <Home size={10} className="text-indigo-500" /> Alamat Domisili Saat Ini (RT 02)
                         </label>
                         <textarea 
-                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 resize-none"
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 sm:h-24 resize-none"
                           value={editLetterData.currentAddress || ''}
                           onChange={e => setEditLetterData({...editLetterData, currentAddress: e.target.value})}
                           placeholder="Alamat domisili saat ini di wilayah RT"
@@ -2158,42 +2158,42 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-5"
+                    className="space-y-4 sm:space-y-5"
                   >
                     {/* Status Visual Banner */}
-                    <div className="relative overflow-hidden rounded-2xl border">
+                    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border">
                       {selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending' ? (
-                        <div className="bg-amber-50/80 border-amber-100 p-4 flex items-start gap-3">
+                        <div className="bg-amber-50/80 border-amber-100 p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3">
                           <div className="p-2 bg-amber-100 text-amber-600 rounded-xl shrink-0">
                             <Clock size={16} className="animate-pulse" />
                           </div>
                           <div>
-                            <h4 className="text-xs font-black text-amber-800 uppercase tracking-wide">Status: Menunggu Persetujuan Ketua RT</h4>
-                            <p className="text-[11px] text-amber-700 mt-0.5 leading-relaxed">
+                            <h4 className="text-[11px] sm:text-xs font-black text-amber-800 uppercase tracking-wide">Status: Menunggu Persetujuan Ketua RT</h4>
+                            <p className="text-[10px] sm:text-[11px] text-amber-700 mt-0.5 leading-relaxed">
                               Permohonan masuk antrean. Anda dapat menyelaraskan format nomor surat di bawah, membubuhkan tanda tangan (opsional) atau langsung mencetak format resmi.
                             </p>
                           </div>
                         </div>
                       ) : selectedLetter.status === 'Disetujui' || selectedLetter.status === 'Approved' ? (
-                        <div className="bg-emerald-50/80 border-emerald-100 p-4 flex items-start gap-3">
+                        <div className="bg-emerald-50/80 border-emerald-105 p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3">
                           <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl shrink-0">
                             <CheckCircle2 size={16} />
                           </div>
                           <div>
-                            <h4 className="text-xs font-black text-emerald-800 uppercase tracking-wide">Status: Telah Disetujui (Diterbitkan)</h4>
-                            <p className="text-[11px] text-emerald-700 mt-0.5 leading-relaxed">
+                            <h4 className="text-[11px] sm:text-xs font-black text-emerald-800 uppercase tracking-wide">Status: Telah Disetujui (Diterbitkan)</h4>
+                            <p className="text-[10px] sm:text-[11px] text-emerald-700 mt-0.5 leading-relaxed">
                               Dokumen pengantar telah selesai diproses dengan nomor surat <span className="font-extrabold">{selectedLetter.letterNumber}</span>. Berkas siap cetak kapan saja diperlukan.
                             </p>
                           </div>
                         </div>
                       ) : (
-                        <div className="bg-rose-50/80 border-rose-100 p-4 flex items-start gap-3">
+                        <div className="bg-rose-50/80 border-rose-100 p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3">
                           <div className="p-2 bg-rose-100 text-rose-600 rounded-xl shrink-0">
                             <XCircle size={16} />
                           </div>
                           <div>
-                            <h4 className="text-xs font-black text-rose-800 uppercase tracking-wide">Status: Pengajuan Ditolak</h4>
-                            <p className="text-[11px] text-rose-700 mt-0.5 leading-relaxed">
+                            <h4 className="text-[11px] sm:text-xs font-black text-rose-800 uppercase tracking-wide">Status: Pengajuan Ditolak</h4>
+                            <p className="text-[10px] sm:text-[11px] text-rose-700 mt-0.5 leading-relaxed">
                               Permohonan tidak disetujui karena ketidaksesuaian administrasi RT. Silakan komunikasikan perbaikan kepada pemohon bersangkutan.
                             </p>
                           </div>
@@ -2202,19 +2202,19 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
 
                     {/* Letter Number Input Group WITH SYNC BUTTON - Extremely User Friendly & Professional */}
-                    <div className="bg-slate-50/50 rounded-2xl p-4.5 border border-slate-150 space-y-3">
+                    <div className="bg-slate-50/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-4.5 border border-slate-150 space-y-3">
                       <div>
-                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">
+                        <label className="block text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">
                           Nomor Surat Resmi (Format Terbuka untuk Diedit)
                         </label>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                               <Hash size={14} />
                             </div>
                             <input 
                               type="text"
-                              className="w-full pl-10 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-300"
+                              className="w-full pl-10 pr-4 py-2.5 sm:py-3.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-300"
                               value={letterNumberInput}
                               onChange={(e) => setLetterNumberInput(e.target.value)}
                               placeholder="Contoh: SK/008/RT02/VI/2026"
@@ -2225,18 +2225,18 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           <button
                             type="button"
                             onClick={handleSyncLetterSequence}
-                            className="px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 active:scale-[0.98]"
+                            className="py-2.5 px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
                             title="Samakan nomor surat dengan data historis tertinggi di database"
                           >
-                            <RefreshCw size={13} className="animate-spin-slow text-amber-600" />
+                            <RefreshCw size={13} className="animate-spin-slow text-amber-600 shrink-0" />
                             <span>Sinkronkan Nomor</span>
                           </button>
                         </div>
                       </div>
                       
-                      <div className="p-3 bg-white/70 border border-slate-100 rounded-xl flex items-start gap-2.5">
-                        <Info size={14} className="text-slate-400 shrink-0 mt-0.5" />
-                        <p className="text-[10.5px] text-slate-500 leading-relaxed">
+                      <div className="p-2.5 sm:p-3 bg-white/70 border border-slate-100 rounded-xl flex items-start gap-2.5">
+                        <Info size={13} className="text-slate-400 shrink-0 mt-0.5" />
+                        <p className="text-[10px] sm:text-[10.5px] text-slate-500 leading-relaxed">
                           Tombol <span className="font-extrabold text-amber-700">Sinkronkan Nomor</span> akan otomatis scanning database terhadap surat warga dan surat dinas lain, serta mengusulkan nomor urut selanjutnya agar urutan penomoran tidak melompat.
                         </p>
                       </div>
@@ -2244,8 +2244,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     {/* Signature pad - only for pending */}
                     {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') && (
-                      <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100/70">
-                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2.5 flex items-center gap-1">
+                      <div className="p-3 sm:p-4 bg-indigo-50/50 rounded-xl sm:rounded-2xl border border-indigo-100/70">
+                        <p className="text-[9px] sm:text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2 flex items-center gap-1">
                           <Sparkles size={11} /> Tanda Tangan Digital Ketua RT (Opsional Untuk Persetujuan Instan)
                         </p>
                         <div className="bg-white rounded-xl border border-indigo-150 overflow-hidden shadow-sm">
@@ -2254,7 +2254,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             onClear={() => setTempSignature(null)}
                           />
                         </div>
-                        <p className="text-[10px] text-indigo-400 mt-2 italic">
+                        <p className="text-[9px] text-indigo-400 mt-2 italic leading-normal">
                           * Apabila tidak ditandatangani manual, sistem akan menggunakan tanda tangan digital default yang tersimpan di pengaturan RT.
                         </p>
                       </div>
@@ -2262,12 +2262,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     {/* Review inline actions status change */}
                     {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') && (
-                      <div className="grid grid-cols-2 gap-3 pt-2">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2">
                         <Button 
                           onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Ditolak')}
-                          className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none py-3.5 hover:scale-[1.01] transition-all"
+                          className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none py-2.5 sm:py-3.5 text-[10px] sm:text-xs hover:scale-[1.01] transition-all"
                         >
-                          <XCircle size={15} className="mr-1.5" /> Tolak Pengajuan
+                          <XCircle size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Tolak Pengajuan
                         </Button>
                         <Button 
                           onClick={() => {
@@ -2277,9 +2277,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                               letterNumber: letterNumberInput,
                             }, tempSignature);
                           }}
-                          className="bg-emerald-600 hover:bg-emerald-750 font-black tracking-wide text-xs py-3.5 hover:scale-[1.01] transition-all shadow-md shadow-emerald-200"
+                          className="bg-emerald-600 hover:bg-emerald-750 font-black tracking-wide text-[10px] sm:text-xs py-2.5 sm:py-3.5 hover:scale-[1.01] transition-all shadow-md shadow-emerald-200"
                         >
-                          <CheckCircle2 size={15} className="mr-1.5" /> Setujui & Terbitkan
+                          <CheckCircle2 size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Setujui & Terbitkan
                         </Button>
                       </div>
                     )}
@@ -2287,20 +2287,20 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 )}
 
                 {/* Persistent Footer Changes Actions */}
-                <div className="flex gap-2.5 pt-5 border-t border-slate-100/80 mt-6 justify-end">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2.5 pt-4 sm:pt-5 border-t border-slate-100/80 mt-5 sm:mt-6">
                   <Button 
                     onClick={handleSaveLetterDetails}
                     variant="secondary"
-                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-none font-bold py-3 text-xs"
+                    className="w-full sm:flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-none font-bold py-2.5 sm:py-3 text-xs"
                   >
-                    <Save size={15} className="mr-1.5" /> Simpan Perubahan Data
+                    <Save size={14} className="mr-1.5 shrink-0" /> Simpan Perubahan Data
                   </Button>
                   
                   <Button 
                     onClick={() => sendWhatsAppMessage(selectedLetter.phone, formatLetterStatusForWhatsApp(selectedLetter.applicantName, selectedLetter.type, selectedLetter.status))}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.01] transition-all font-bold py-3 text-xs shadow-md shadow-emerald-200"
+                    className="w-full sm:flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.01] transition-all font-bold py-2.5 sm:py-3 text-xs shadow-md shadow-emerald-200"
                   >
-                    <MessageCircle size={15} className="mr-1.5" /> Kirim Update WhatsApp
+                    <MessageCircle size={14} className="mr-1.5 shrink-0" /> Kirim Update WhatsApp
                   </Button>
                 </div>
               </div>
