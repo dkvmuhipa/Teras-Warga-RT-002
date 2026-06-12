@@ -114,11 +114,53 @@ async function startServer() {
       console.log(`Successfully sent ${response.successCount} messages; ${response.failureCount} errors.`);
       
       if (response.failureCount > 0) {
+        // Collect tokens that have expired or unregistered, then clean them up from Firestore
+        const tokensToCleanup: string[] = [];
+        
         response.responses.forEach((resp, idx) => {
           if (!resp.success) {
-            console.error(`Token ${tokens[idx]} failed with error:`, resp.error);
+            const failedToken = tokens[idx];
+            const errorObj = resp.error as any;
+            const errCode = errorObj?.code || "";
+            const errBaseMessage = errorObj?.message || "";
+            
+            console.warn(`Token at index ${idx} failed with [${errCode}]:`, errBaseMessage);
+            
+            // Check for unregistration or invalid token indications
+            if (
+              errCode === "messaging/registration-token-not-registered" ||
+              errCode === "messaging/invalid-registration-token" ||
+              errBaseMessage.toLowerCase().includes("unregistered") ||
+              errBaseMessage.toLowerCase().includes("not registered") ||
+              errBaseMessage.toLowerCase().includes("invalid-registration-token")
+            ) {
+              if (failedToken) {
+                tokensToCleanup.push(failedToken);
+              }
+            }
           }
         });
+
+        if (tokensToCleanup.length > 0) {
+          console.log(`🧹 Attempting to auto-clean up ${tokensToCleanup.length} defunct FCM tokens from database...`);
+          try {
+            const fcmTokensRef = admin.firestore().collection("fcmTokens");
+            // Delete documents matching those tokens
+            for (const token of tokensToCleanup) {
+              const querySnapshot = await fcmTokensRef.where("token", "==", token).get();
+              if (!querySnapshot.empty) {
+                const batch = admin.firestore().batch();
+                querySnapshot.docs.forEach((doc) => {
+                  batch.delete(doc.ref);
+                });
+                await batch.commit();
+                console.log(`Success deleting document associated with token ending with ...${token.substring(Math.max(0, token.length - 15))}`);
+              }
+            }
+          } catch (dbError) {
+            console.warn("⚠️ Defunct token DB cleanup non-blocking error:", dbError);
+          }
+        }
       }
 
       res.json({ success: true, response });

@@ -1059,7 +1059,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         onChange={e => {
                           const newConfig = {...pdfConfig, kelurahan: e.target.value};
                           setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                         }} 
                         placeholder="TONDO"
                       />
@@ -1073,7 +1073,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         onChange={e => {
                           const newConfig = {...pdfConfig, kecamatan: e.target.value};
                           setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                         }} 
                         placeholder="MANTIKULORE"
                       />
@@ -1087,7 +1087,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         onChange={e => {
                           const newConfig = {...pdfConfig, kota: e.target.value};
                           setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                         }} 
                         placeholder="PALU"
                       />
@@ -1103,7 +1103,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       onChange={e => {
                         const newConfig = {...pdfConfig, rtAddress: e.target.value};
                         setPdfConfig(newConfig);
-                        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                        localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                       }} 
                       placeholder="Alamat lengkap untuk kop surat..."
                     />
@@ -1122,7 +1122,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             onClick={() => {
                               const newConfig = {...pdfConfig, logo: ''};
                               setPdfConfig(newConfig);
-                              localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                             }}
                             className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
                           >
@@ -1152,7 +1152,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             onClick={() => {
                               const newConfig = {...pdfConfig, stamp: ''};
                               setPdfConfig(newConfig);
-                              localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                             }}
                             className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
                           >
@@ -1203,7 +1203,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     const newTemplates = [...(pdfConfig.letterTemplates || []), { type: 'Jenis Surat Baru', suggestion: 'Isi saran pengisian di sini...' }];
                     const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
                     setPdfConfig(newConfig);
-                    localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                    localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                   }}
                   className="bg-indigo-600 hover:bg-indigo-700"
                 >
@@ -1233,7 +1233,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         const newTemplates = (pdfConfig.letterTemplates || []).filter((_, i) => i !== idx);
                         const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
                         setPdfConfig(newConfig);
-                        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                        localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                       }}
                       className="absolute top-4 right-4 p-2 text-rose-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all"
                     >
@@ -1268,7 +1268,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             newTemplates[idx].type = e.target.value;
                             const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
                             setPdfConfig(newConfig);
-                            localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                            localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                           }}
                         />
                       </div>
@@ -1299,7 +1299,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             newTemplates[idx].suggestion = e.target.value;
                             const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
                             setPdfConfig(newConfig);
-                            localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                            localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                           }}
                         />
                       </div>
@@ -1317,7 +1317,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     onChange={(e) => {
                       const newConfig = { ...pdfConfig, introText: e.target.value };
                       setPdfConfig(newConfig);
-                      localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                      localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                     }}
                   />
                 </div>
@@ -1329,7 +1329,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     onChange={(e) => {
                       const newConfig = { ...pdfConfig, closingText: e.target.value };
                       setPdfConfig(newConfig);
-                      localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                      localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                     }}
                   />
                 </div>
@@ -1388,7 +1388,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                               };
                               const newConfig = { ...pdfConfig, visibleFields: newVisibleFields };
                               setPdfConfig(newConfig);
-                              localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                             }}
                           />
                           <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
@@ -1405,7 +1405,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           };
                           const newConfig = { ...pdfConfig, fieldLabels: newLabels };
                           setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                         }}
                         placeholder={field.defaultLabel}
                         disabled={pdfConfig.visibleFields?.[field.id] === false}
@@ -1438,7 +1438,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         onChange={e => {
                           const newConfig = {...pdfConfig, whatsappGroupId: e.target.value};
                           setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                         }} 
                       />
                       <button 
@@ -1488,7 +1488,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       onChange={e => {
                         const newConfig = {...pdfConfig, whatsappGroupName: e.target.value};
                         setPdfConfig(newConfig);
-                        localStorage.setItem('pdf_config', JSON.stringify(deepSanitize(newConfig)));
+                        localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                       }} 
                     />
                   </div>

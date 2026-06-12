@@ -621,8 +621,13 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
     const constructor = data.constructor;
     const constructorName = constructor?.name;
     
+    // Check if it's a custom class instance
+    const proto = Object.getPrototypeOf(data);
+    const isCustomClass = proto !== null && proto !== Object.prototype && !Array.isArray(data) && !(data instanceof Date);
+    
     // Detect internal/complex objects
     const isComplex = 
+      isCustomClass ||
       data.nodeType || 
       data instanceof Element ||
       (typeof window !== 'undefined' && (
