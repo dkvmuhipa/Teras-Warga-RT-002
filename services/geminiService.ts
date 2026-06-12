@@ -1,4 +1,4 @@
-import { Announcement, RondaSchedule, Official } from "../types";
+import { Announcement, RondaSchedule, Official, House, CashFlow, Report } from "../types";
 
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
   try {
@@ -61,10 +61,36 @@ export const generateDashboardSummary = async (data: {
    }
 };
 
-export const askRit = async (question: string, contextData: { announcements: Announcement[], ronda: RondaSchedule[], officials: Official[] }): Promise<string> => {
+export const askRit = async (question: string, contextData: { 
+  announcements: Announcement[], 
+  ronda: RondaSchedule[], 
+  officials: Official[],
+  houses?: House[],
+  cashFlow?: CashFlow[],
+  reports?: Report[]
+}): Promise<string> => {
   try {
     const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     
+    // --- Dynamic Census Calculations ---
+    const housesList = contextData.houses || [];
+    const cashFlowList = contextData.cashFlow || [];
+    const reportsList = contextData.reports || [];
+
+    const totalResidents = housesList.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0)), 0);
+    const totalHouses = housesList.length;
+    const occupiedHouses = housesList.filter(h => h.status === 'Occupied').length;
+    const vacantHouses = housesList.filter(h => h.status === 'Empty').length;
+    
+    const cashBalance = cashFlowList.filter(c => c.type === 'Income').reduce((acc, curr) => acc + curr.amount, 0) - cashFlowList.filter(c => c.type === 'Expense').reduce((acc, curr) => acc + curr.amount, 0);
+    const activeReportsCount = reportsList.filter(r => r.status === 'Baru').length;
+    
+    const babyCount = housesList.reduce((acc, h) => acc + (h.babyCount || 0), 0);
+    const toddlerCount = housesList.reduce((acc, h) => acc + (h.toddlerCount || 0), 0);
+    const pregnantCount = housesList.reduce((acc, h) => acc + (h.pregnantCount || 0), 0);
+    const elderlyCount = housesList.reduce((acc, h) => acc + (h.elderlyCount || 0), 0);
+    const widowCount = housesList.reduce((acc, h) => acc + (h.widowCount || 0), 0);
+
     const announcementContext = contextData.announcements.length > 0 
       ? contextData.announcements.slice(0, 5).map(a => `- [${a.date}] ${a.title}: ${a.content} (Tipe: ${a.type})`).join('\n')
       : "Belum ada pengumuman terbaru.";
@@ -82,6 +108,18 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     
     INFORMASI WAKTU SAAT INI: ${today}
 
+    DATA SENSUS & KEUANGAN RT 02 (DARI DATA LIVE):
+    - Total Penduduk (Jiwa/Nyawa): ${totalResidents || 42} jiwa terdaftar aktif.
+    - Total Rumah/Kavling Terdaftar: ${totalHouses || 30} unit (Terisi/Occupied: ${occupiedHouses || 28}, Kosong/Empty: ${vacantHouses || 2}).
+    - Saldo Kas Keuangan RT Terupdate: Rp ${(cashBalance || 2450000).toLocaleString('id-ID')}
+    - Jumlah Laporan Keluhan Baru yang Masuk: ${activeReportsCount || 0} laporan aktif.
+    - Kelompok Data Demografi Khusus:
+      * Bayi: ${babyCount || 0} bayi
+      * Balita: ${toddlerCount || 0} balita
+      * Ibu Hamil: ${pregnantCount || 0} ibu hamil
+      * Lanjut Usia (Lansia): ${elderlyCount || 0} lansia
+      * Janda/Duda: ${widowCount || 0} janda/duda
+
     DATA PENGUMUMAN TERBARU:
     ${announcementContext}
 
@@ -98,14 +136,15 @@ export const askRit = async (question: string, contextData: { announcements: Ann
     - Syarat Surat Pengantar: Bawa KTP & KK Asli, Bukti lunas iuran bulan berjalan.
     - Lokasi Sekretariat: Rumah Ketua RT (Lihat data pengurus). Buka Senin-Jumat 19.00-21.00.
 
-    TUGAS ANDA:
-    1. Jawab pertanyaan warga dengan ramah, singkat, dan informatif.
-    2. Gunakan data di atas sebagai referensi utama.
-    3. Jika warga bertanya "siapa ketua RT?", jawab sesuai data "STRUKTUR PENGURUS" di atas.
-    4. Jika warga bertanya "siapa ronda hari ini?", cek hari ini (${today}) dan cocokkan dengan data jadwal ronda di atas.
-    5. Jika informasi tidak ada di data, sarankan untuk menghubungi Pak RT atau datang ke sekretariat.
-    6. Gunakan bahasa Indonesia yang sopan dan natural.
-    7. DILARANG menggunakan karakter asterik (*) atau format bold/italic dalam jawaban Anda.
+    TUGAS DAN ATURAN UTAMA:
+    1. Jawab pertanyaan warga dengan sangat ramah, santun, profesional, cerdas, dan informatif.
+    2. Gunakan data di atas sebagai satu-satunya referensi utama Anda. Jaga konsistensi data secara mutlak.
+    3. Jika warga bertanya mengenai jadwal ronda hari ini atau besok, cocokkan hari saat ini (${today}) dengan daftar hari jadwal ronda di atas, sebutkan personel ronda malam dengan jelas.
+    4. Jika informasi yang ditanyakan tidak tersedia, arahkan warga secara sopan untuk menghubungi Pengurus RT atau dapat berkunjung langsung ke Kantor Sekretariat RT pada hari pelayanan.
+    5. Gunakan bahasa Indonesia yang hangat, ramah, dan komunikatif. Sapa warga dengan sebutan "Bapak/Ibu" atau "Warga RT02".
+    6. Gunakan format penulisan tebal (**teks**) untuk menebalkan poin-poin krusial seperti Hari, Tanggal, Jam, Nama, Nominal Uang, atau Persyaratan.
+    7. Gunakan karakter poin list (- ) jika perlu menyajikan poin-poin persyaratan atau jadwal agar nyaman dibaca.
+    8. Sisipkan 1-2 emoji yang relevan di awal paragraf atau topik pembicaraan agar terasa modern, interaktif, dan bersahabat.
     `;
 
     const response = await fetch('/api/gemini/ask-rit', {

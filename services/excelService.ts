@@ -427,7 +427,7 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
   });
 
-  const totalJiwa = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0);
+  const totalJiwa = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0)), 0);
   const totalRumah = houses.length;
   const totalDihuni = houses.filter(h => h.status === 'Occupied').length;
   const totalKosong = houses.filter(h => h.status === 'Empty').length;

@@ -177,8 +177,11 @@ export interface ResidentRegistration {
   childCount?: number;
   isPKH?: boolean;
   isBLT?: boolean;
+  isBPNT?: boolean;
   isBansosLain?: boolean;
   bansosLainName?: string;
+  isDisability?: boolean;
+  isOrphan?: boolean;
   ktpUrl?: string;
   kkUrl?: string;
   useManualDemographics?: boolean;
@@ -342,7 +345,7 @@ export interface LetterRequest {
   phone: string;
   email?: string;
   education: string;
-  familyStatus: 'Kepala Keluarga' | 'Istri' | 'Anak' | 'Lainnya';
+  familyStatus: 'Kepala Keluarga' | 'Suami' | 'Istri' | 'Anak' | 'Menantu' | 'Cucu' | 'Orang Tua' | 'Mertua' | 'Saudara/Adik/Kakak' | 'Famili Lain' | 'Pembantu' | 'Lainnya';
   bloodType: 'A' | 'B' | 'AB' | 'O' | '-';
   
   status: 'Pending' | 'Approved' | 'Rejected' | 'Menunggu' | 'Disetujui' | 'Ditolak';

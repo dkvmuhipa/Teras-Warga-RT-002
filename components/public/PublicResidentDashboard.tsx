@@ -34,7 +34,11 @@ import {
   AlertTriangle,
   Send,
   Camera,
-  FileText
+  FileText,
+  Wrench,
+  Eye,
+  EyeOff,
+  Download
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
@@ -55,7 +59,7 @@ import {
 import { NotificationToggle } from '../PushNotificationManager';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 
 interface PublicResidentDashboardProps {
   houses: House[];
@@ -282,6 +286,16 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     }
   };
 
+  const [showPin, setShowPin] = useState(false);
+  const [copiedText, setCopiedText] = useState<'pin' | 'houseId' | null>(null);
+
+  const handleCopyToClipboard = (text: string, type: 'pin' | 'houseId') => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(type);
+    toast.success(`${type === 'pin' ? 'PIN Akses' : 'ID Rumah'} berhasil disalin ke clipboard!`);
+    setTimeout(() => setCopiedText(null), 2000);
+  };
+
   if (!selectedHouseId) {
     const sortedHouses = [...houses]
       .filter(h => h.status === 'Occupied')
@@ -291,28 +305,77 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       });
 
     return (
-      <div className="max-w-md mx-auto px-4 py-20 text-center">
-        <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
-          <User size={40} />
-        </div>
-        <h2 className="text-2xl font-black text-slate-800 mb-2">Dashboard Warga</h2>
-        <p className="text-slate-500 font-medium mb-8">Akses Kartu Warga Digital, update data, dan pantau log tamu rumah Anda.</p>
-        
-        <div className="space-y-4">
-          <select 
-            className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-black focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm"
-            value={tempHouseId}
-            onChange={(e) => {
-              setTempHouseId(e.target.value);
-              if (e.target.value) setIsPinModalOpen(true);
-            }}
-          >
-            <option value="">Pilih Nomor Rumah...</option>
-            {sortedHouses.map(h => (
-              <option key={h.id} value={h.id}>{h.block}-{h.number} - {h.headOfFamily}</option>
-            ))}
-          </select>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gunakan PIN rumah untuk masuk.</p>
+      <div className="max-w-4xl mx-auto px-4 py-8 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl p-6 md:p-12 relative overflow-hidden">
+          {/* Atmospheric Background glow */}
+          <div className="absolute top-[-20%] left-[-20%] w-[50%] h-[50%] bg-indigo-100/40 blur-[100px] rounded-full pointer-events-none" />
+          
+          {/* Left illustration/info column */}
+          <div className="md:col-span-7 space-y-6 md:pr-6 relative z-10 text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600">
+              <Shield size={14} className="animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Warga Hub Gateway</span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+              Akses Gateway Mandiri <br/>
+              <span className="text-indigo-600">Terpercaya & Aman</span>
+            </h2>
+            
+            <p className="text-slate-500 font-medium text-sm leading-relaxed">
+              Masuk ke dashboard personal Anda untuk memantau status iuran kependudukan, memeriksa riwayat administrasi surat, melaporkan log kunjungan tamu, serta memperbarui data Kartu Keluarga secara praktis.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              {[
+                { title: "E-ID Card Digital", desc: "Verifikasi barcode identitas RT secara instan", icon: QrCode, color: "text-indigo-600 bg-indigo-50" },
+                { title: "Update KK Mandiri", desc: "Ubah data penghuni & keluarga kapan saja", icon: FileEdit, color: "text-emerald-600 bg-emerald-50" },
+                { title: "Log Tamu Keamanan", desc: "Pantau & atur kedatangan tamu bermalam", icon: History, color: "text-amber-600 bg-amber-50" },
+                { title: "Laporan & Aduan", desc: "Sampaikan keluhan fasilitas secara digital", icon: AlertTriangle, color: "text-rose-600 bg-rose-50" }
+              ].map((feat, idx) => (
+                <div key={idx} className="flex gap-3 text-left">
+                  <div className={`p-2.5 rounded-xl shrink-0 h-10 w-10 flex items-center justify-center ${feat.color}`}>
+                    <feat.icon size={16} />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-black text-slate-800">{feat.title}</h5>
+                    <p className="text-[11px] text-slate-400 font-medium mt-0.5">{feat.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Login form column */}
+          <div className="md:col-span-5 bg-slate-50/60 p-6 md:p-8 rounded-3xl border border-slate-100 flex flex-col justify-center relative z-10">
+            <div className="w-16 h-16 bg-white text-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100/50 mb-6">
+              <User size={32} />
+            </div>
+            
+            <h3 className="text-xl font-black text-slate-800 mb-1 text-left">Pilih Rumah Anda</h3>
+            <p className="text-xs text-slate-400 font-medium mb-6 text-left">Silakan tentukan identitas hunian aktif Anda di bawah ini:</p>
+
+            <div className="space-y-4">
+              <select 
+                className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm cursor-pointer hover:border-slate-350"
+                value={tempHouseId}
+                onChange={(e) => {
+                  setTempHouseId(e.target.value);
+                  if (e.target.value) setIsPinModalOpen(true);
+                }}
+              >
+                <option value="">Pilih Hunian Kelurahan...</option>
+                {sortedHouses.map(h => (
+                  <option key={h.id} value={h.id}>Blok {h.block}-{h.number} ({h.headOfFamily})</option>
+                ))}
+              </select>
+              
+              <div className="flex items-center gap-1.5 pl-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-left">
+                <Info size={12} className="text-slate-400 shrink-0" />
+                <span>Gunakan PIN 6-digit rahasia rumah Anda</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <Modal isOpen={isPinModalOpen} onClose={() => {
@@ -320,32 +383,46 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           setTempHouseId('');
           setPinInput('');
         }} title="Verifikasi PIN Akses">
-          <form onSubmit={handlePinSubmit} className="space-y-6">
+          <form onSubmit={handlePinSubmit} className="space-y-6 p-2">
             <div className="text-center">
               <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Shield size={32} />
               </div>
               <h3 className="text-lg font-black text-slate-800">Masukkan PIN Rumah</h3>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Verifikasi akses untuk rumah <span className="font-bold text-indigo-600">{houses.find(h => h.id === tempHouseId)?.block}-{houses.find(h => h.id === tempHouseId)?.number}</span>
+                Akses masuk aman untuk warga <span className="font-bold text-indigo-600">Blok {houses.find(h => h.id === tempHouseId)?.block}-{houses.find(h => h.id === tempHouseId)?.number}</span>
               </p>
             </div>
 
-            <input 
-              type="password"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              required
-              autoFocus
-              className={`w-full px-6 py-4 bg-slate-50 border ${pinError ? 'border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'} rounded-2xl text-center text-2xl font-black tracking-[1em] outline-none transition-all`}
-              value={pinInput}
-              onChange={e => setPinInput(e.target.value)}
-              placeholder="••••••"
-            />
+            <div className="relative">
+              <input 
+                type={showPin ? "text" : "password"}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                required
+                autoFocus
+                className={`w-full px-6 py-4 bg-slate-50 border ${pinError ? 'border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'} rounded-2xl text-center text-3xl font-black tracking-[0.5em] outline-none transition-all`}
+                value={pinInput}
+                onChange={e => setPinInput(e.target.value.replace(/\D/g, ''))}
+                placeholder="••••••"
+              />
+              <button 
+                type="button" 
+                onClick={() => setShowPin(!showPin)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                title={showPin ? "Sembunyikan" : "Tampilkan"}
+              >
+                {showPin ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
 
-            <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100">
-              Masuk ke Dashboard
+            {pinError && (
+              <p className="text-xs text-rose-500 font-bold text-center animate-bounce">PIN Salah! Periksa sandi unik hunian Anda kembali.</p>
+            )}
+
+            <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 cursor-pointer font-black text-xs uppercase tracking-widest">
+              Verifikasi & Masuk <ChevronRight size={16} />
             </Button>
           </form>
         </Modal>
@@ -356,44 +433,50 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 mb-24">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Dashboard Warga</h2>
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-200">
-              Blok {currentHouse?.block}-{currentHouse?.number}
-            </span>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white border border-slate-100/80 p-6 md:p-8 rounded-[2rem] shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <User size={24} />
           </div>
-          <p className="text-slate-500 font-medium">Selamat datang, Bpk/Ibu {currentHouse?.headOfFamily}.</p>
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-0.5">
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Dashboard Warga</h2>
+              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                Blok {currentHouse?.block}-{currentHouse?.number}
+              </span>
+            </div>
+            <p className="text-slate-400 text-xs font-semibold">Selamat datang, Bpk/Ibu <span className="text-slate-700 font-extrabold">{currentHouse?.headOfFamily}</span>.</p>
+          </div>
         </div>
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all"
+          className="flex items-center gap-2 px-5 py-3 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-slate-200/60 hover:bg-rose-5 text-rose-600 hover:border-rose-100 hover:shadow-sm transition-all cursor-pointer"
         >
-          <LogOut size={16} /> Keluar
+          <LogOut size={14} /> Keluar Sesi
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 bg-white p-1.5 border border-slate-200 rounded-3xl shadow-sm mb-8 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 bg-slate-100/80 p-1.5 border border-slate-200/50 rounded-3xl mb-8 overflow-x-auto no-scrollbar">
         {[
-          { id: 'eid', label: 'E-ID Warga', icon: QrCode },
-          { id: 'letters', label: 'Status Surat', icon: FileText },
-          { id: 'update', label: 'Update Data', icon: FileEdit },
-          { id: 'guests', label: 'Log Tamu', icon: History },
-          { id: 'reports', label: 'Laporan', icon: AlertTriangle }
+          { id: 'eid', label: 'E-ID Warga', shortLabel: 'E-ID', icon: QrCode },
+          { id: 'letters', label: 'Status Surat', shortLabel: 'Surat', icon: FileText },
+          { id: 'update', label: 'Update Data', shortLabel: 'Update', icon: FileEdit },
+          { id: 'guests', label: 'Log Tamu', shortLabel: 'Tamu', icon: History },
+          { id: 'reports', label: 'Laporan', shortLabel: 'Aduan', icon: AlertTriangle }
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer ${
               activeTab === tab.id 
-              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' 
-              : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+              ? 'bg-white text-indigo-600 shadow-sm' 
+              : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            <tab.icon size={16} />
-            {tab.label}
+            <tab.icon size={15} />
+            <span className="hidden md:inline">{tab.label}</span>
+            <span className="inline md:hidden">{tab.shortLabel}</span>
           </button>
         ))}
       </div>
@@ -405,137 +488,517 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start"
+            className="space-y-8"
           >
-            {/* E-ID Card */}
-            <div className="lg:col-span-2">
-              <Card className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 text-white border-none shadow-2xl p-0 min-h-[350px]">
-                {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
-                
-                <div className="relative h-full flex flex-col p-8 md:p-12">
-                  <div className="flex justify-between items-start mb-auto">
-                    <div>
-                      <h3 className="text-xl md:text-2xl font-black tracking-tighter uppercase">Kartu Warga Digital</h3>
-                      <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] opacity-60">Rukun Tetangga 02 / RW 05</p>
-                    </div>
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20">
-                      <Home size={24} className="md:hidden" />
-                      <Home size={32} className="hidden md:block" />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-8">
-                    <div className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+              {/* E-ID Card */}
+              <div className="lg:col-span-2">
+                <motion.div 
+                  whileHover={{ y: -4, scale: 1.005 }}
+                  className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 text-white border-none shadow-2xl rounded-[2.5rem] p-0 min-h-[350px] transition-all id-card-printable"
+                >
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
+                  
+                  <div className="relative h-full flex flex-col p-8 md:p-12 justify-between">
+                    <div className="flex justify-between items-start mb-12">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Nama Kepala Keluarga / Penghuni</p>
-                        <p className="text-2xl md:text-4xl font-black tracking-tight">{currentHouse?.headOfFamily}</p>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-wider mb-2 backdrop-blur-md">
+                          <CheckCircle size={10} className="text-emerald-450" />
+                          <span>E-ID Aktif</span>
+                        </div>
+                        <h3 className="text-xl md:text-2xl font-black tracking-tighter uppercase whitespace-nowrap">Kartu Warga Digital</h3>
+                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] opacity-60">Rukun Tetangga 02 / RW 05</p>
                       </div>
-                      <div className="flex flex-wrap gap-4 md:gap-12">
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">ID Rumah</p>
-                          <p className="text-lg md:text-xl font-black">{currentHouse?.block}-{currentHouse?.number}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Status Iuran ({currentMonth})</p>
-                          <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                            isAllPaid 
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
-                            : (isMandatory ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30')
-                          }`}>
-                            {isAllPaid ? 'Lunas' : (isMandatory ? 'Wajib Bayar' : 'Tagihan Baru')}
-                          </span>
-                        </div>
+                      <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shrink-0">
+                        <Home size={32} className="text-white/80" />
                       </div>
                     </div>
 
-                    <div className="bg-white p-3 rounded-2xl shadow-2xl">
-                      <QRCodeSVG 
-                        value={`RESIDENT:${selectedHouseId}`} 
-                        size={100} 
-                        level="H"
-                        includeMargin={false}
-                      />
+                    <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-8 mt-auto">
+                      <div className="space-y-4 md:space-y-6 text-left w-full md:w-auto">
+                        <div>
+                          <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Nama Kepala Keluarga / Penghuni</p>
+                          <p className="text-2xl md:text-3.5xl font-black tracking-tight">{currentHouse?.headOfFamily}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-4 md:gap-12">
+                          <div>
+                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">ID Rumah</p>
+                            <span 
+                              onClick={() => currentHouse?.id && handleCopyToClipboard(currentHouse.id, 'houseId')}
+                              className="text-lg md:text-xl font-black hover:text-indigo-200 hover:underline cursor-pointer flex items-center gap-1.5"
+                            >
+                              {currentHouse?.block}-{currentHouse?.number}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Status Iuran ({currentMonth})</p>
+                            <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                              isAllPaid 
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
+                              : (isMandatory ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30')
+                            }`}>
+                              {isAllPaid ? 'Lunas' : (isMandatory ? 'Wajib Bayar' : 'Tagihan Baru')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white p-3.5 rounded-2xl shadow-2xl self-start md:self-auto flex-shrink-0 animate-fade-in">
+                        <QRCodeSVG 
+                          value={`RESIDENT:${selectedHouseId}`} 
+                          size={110} 
+                          level="H"
+                          includeMargin={false}
+                        />
+                        <div style={{ display: 'none' }}>
+                          <QRCodeCanvas 
+                            id="resident-qrcode-canvas"
+                            value={`RESIDENT:${selectedHouseId}`} 
+                            size={256}
+                            level="H"
+                            includeMargin={false}
+                          />
+                        </div>
+                        <p className="text-[8px] font-black tracking-widest uppercase text-slate-400 text-center mt-2.5">Klik Verifikasi</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </motion.div>
+              </div>
+
+              {/* Quick Info Sidebar */}
+              <div className="space-y-6 text-left">
+                {/* Iuran Warning */}
+                {!isAllPaid && (
+                  <div className={`p-6 rounded-[2rem] border-2 ${isMandatory ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100'}`}>
+                    <div className="flex flex-col sm:flex-row items-start gap-4">
+                      <div className={`p-3.5 rounded-2xl shadow-sm shrink-0 ${isMandatory ? 'bg-white text-rose-600' : 'bg-white text-amber-600'}`}>
+                        <AlertTriangle size={24} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className={`text-sm font-black uppercase tracking-widest mb-1 ${isMandatory ? 'text-rose-900' : 'text-amber-900'}`}>
+                          {isMandatory ? 'Layanan Ditangguhkan' : 'Tagihan Iuran Tersedia'}
+                        </h4>
+                        <p className={`text-xs font-semibold leading-relaxed mb-4 ${isMandatory ? 'text-rose-700' : 'text-amber-700'}`}>
+                          {isMandatory 
+                            ? `Layanan administrasi ditangguhkan sementara karena iuran bulan ${currentMonth} belum diselesaikan (melewati jatuh tempo tgl 20).` 
+                            : `Tagihan pembayaran iuran bulan ${currentMonth} telah dirilis. Harap koordinasi sebelum jatuh tempo.`}
+                        </p>
+                        <div className="flex flex-col gap-2">
+                          <Button 
+                            onClick={() => setIsIuranModalOpen(true)}
+                            className={`h-11 px-6 text-[10px] font-black uppercase tracking-widest w-full shadow-md cursor-pointer ${isMandatory ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-100' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-55'}`}
+                          >
+                            Lihat Rincian
+                          </Button>
+                          <Button 
+                            variant="secondary" 
+                            onClick={() => window.open(`https://wa.me/${(currentHouse?.phone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}`, '_blank')}
+                            className="h-11 px-6 text-[10px] font-black uppercase tracking-widest w-full bg-white border-slate-200 cursor-pointer"
+                          >
+                            Hubungi Pengurus RT
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <Card className="bg-white border-slate-100 shadow-sm">
+                  <h4 className="font-black text-slate-800 text-sm mb-4 flex items-center gap-2">
+                    <Info size={16} className="text-indigo-600" /> Informasi Hunian & Kunci
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Jumlah Penghuni</span>
+                      <span className="text-xs font-black text-slate-800">{currentHouse?.occupants || 0} Jiwa</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Status Tinggal</span>
+                      <span className="text-xs font-black text-slate-800">{currentHouse?.residenceType || 'Tetap'}</span>
+                    </div>
+                    {currentHouse?.phone && (
+                      <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">No. Telepon WA</span>
+                        <span className="text-xs font-black text-slate-800">{currentHouse.phone}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">PIN Akses Rumah</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-black text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 select-all relative group">
+                          {showPin ? currentHouse?.accessCode : '••••••'}
+                        </span>
+                        <button 
+                          onClick={() => setShowPin(!showPin)} 
+                          className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all"
+                          title="Tampilkan PIN"
+                        >
+                          {showPin ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                        <button 
+                          onClick={() => currentHouse?.accessCode && handleCopyToClipboard(currentHouse.accessCode, 'pin')} 
+                          className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all"
+                          title="Salin PIN"
+                        >
+                          <CreditCard size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-indigo-50 border-indigo-100 shadow-sm p-5 text-left">
+                  <h4 className="font-black text-indigo-900 text-sm mb-2 flex items-center gap-1.5">
+                    <QrCode size={16} /> Manfaat E-ID Aktif
+                  </h4>
+                  <p className="text-[11px] text-indigo-700 font-medium leading-relaxed mb-4">
+                    Gunakan Barcode di samping saat verifikasi kehadiran rapat RT, pengambilan kupon bantuan, kerja bakti, maupun saat pembayaran retribusi iuran tunai.
+                  </p>
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={() => {
+                        try {
+                          // Create high-res canvas for crisp rendering
+                          const canvas = document.createElement('canvas');
+                          canvas.width = 1012;
+                          canvas.height = 638;
+                          const ctx = canvas.getContext('2d');
+                          if (!ctx) {
+                            throw new Error('Canvas context not available');
+                          }
+
+                          // 1. Clip boundaries as rounded corner card
+                          ctx.beginPath();
+                          if (ctx.roundRect) {
+                            ctx.roundRect(0, 0, 1012, 638, 48);
+                          } else {
+                            ctx.rect(0, 0, 1012, 638);
+                          }
+                          ctx.clip();
+
+                          // 2. Draw modern luxury cosmic deep space gradient
+                          const gradient = ctx.createLinearGradient(0, 0, 1012, 638);
+                          gradient.addColorStop(0, '#4f46e5'); // Indigo-600
+                          gradient.addColorStop(0.5, '#312e81'); // Indigo-900
+                          gradient.addColorStop(1, '#0f172a'); // Slate-900
+                          ctx.fillStyle = gradient;
+                          ctx.fillRect(0, 0, 1012, 638);
+
+                          // Ambient background layers/glows
+                          ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+                          ctx.beginPath();
+                          ctx.arc(1012, 0, 380, 0, Math.PI * 2);
+                          ctx.fill();
+
+                          ctx.fillStyle = 'rgba(99, 102, 241, 0.15)';
+                          ctx.beginPath();
+                          ctx.arc(0, 638, 300, 0, Math.PI * 2);
+                          ctx.fill();
+
+                          // 3. Draw Header "KARTU WARGA DIGITAL"
+                          ctx.fillStyle = '#ffffff';
+                          ctx.font = '900 36px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.textAlign = 'left';
+                          ctx.fillText('KARTU WARGA DIGITAL', 80, 150);
+
+                          ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                          ctx.font = 'bold 16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText('RUKUN TETANGGA 02 / RW 05', 80, 185);
+
+                          // "E-ID AKTIF" pill badge
+                          ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                          ctx.beginPath();
+                          if (ctx.roundRect) {
+                            ctx.roundRect(80, 70, 140, 34, 17);
+                          } else {
+                            ctx.rect(80, 70, 140, 34);
+                          }
+                          ctx.fill();
+
+                          // Green circle
+                          ctx.fillStyle = '#10b981';
+                          ctx.beginPath();
+                          ctx.arc(102, 87, 5, 0, Math.PI * 2);
+                          ctx.fill();
+
+                          ctx.fillStyle = '#ffffff';
+                          ctx.font = '900 11px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText('E-ID AKTIF', 115, 91);
+
+                          // 4. Draw family head/resident name
+                          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                          ctx.font = '900 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText('NAMA KEPALA KELUARGA / PENGHUNI', 80, 290);
+
+                          ctx.fillStyle = '#ffffff';
+                          ctx.font = '900 38px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText((currentHouse?.headOfFamily || 'Anggota RT 02').toUpperCase(), 80, 345);
+
+                          // 5. Draw ID Hunian
+                          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                          ctx.font = '900 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText('NOMOR HUNIAN AKTIF', 80, 435);
+
+                          ctx.fillStyle = '#ffffff';
+                          ctx.font = '900 28px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText(`BLOK ${currentHouse?.block}-${currentHouse?.number}`, 80, 480);
+
+                          // 6. Draw Status Iuran Pill
+                          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                          ctx.font = '900 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText('REKENING IURAN RT', 380, 435);
+
+                          ctx.fillStyle = isAllPaid ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+                          ctx.beginPath();
+                          if (ctx.roundRect) {
+                            ctx.roundRect(380, 452, 175, 36, 10);
+                          } else {
+                            ctx.rect(380, 452, 175, 36);
+                          }
+                          ctx.fill();
+
+                          ctx.fillStyle = isAllPaid ? '#34d399' : '#fbbf24';
+                          ctx.font = '900 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText(isAllPaid ? '✔ LUNAS AKTIF' : '⚠ TAGIHAN BARU', 396, 474);
+
+                          // 7. Watermark / Credit footer
+                          ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+                          ctx.font = '800 11px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillText('TERAS WARGA RT02 • DIKELOLA SECARA MANDIRI & TRANSPARAN', 80, 565);
+
+                          // 8. Draw QR Code White Container
+                          ctx.fillStyle = '#ffffff';
+                          ctx.beginPath();
+                          if (ctx.roundRect) {
+                            ctx.roundRect(660, 140, 272, 318, 32);
+                          } else {
+                            ctx.rect(660, 140, 272, 318);
+                          }
+                          ctx.fill();
+
+                          // 9. Fetch and draw QR Code from our hidden QRCodeCanvas
+                          const qrCanvas = document.getElementById('resident-qrcode-canvas') as HTMLCanvasElement;
+                          if (qrCanvas) {
+                            ctx.drawImage(qrCanvas, 696, 172, 200, 200);
+                          }
+
+                          // Text inside white card below QR
+                          ctx.fillStyle = '#475569'; // Slate 600
+                          ctx.font = '900 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.textAlign = 'center';
+                          ctx.fillText('PINDAI VERIFIKASI', 796, 405);
+                          ctx.font = 'bold 9px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                          ctx.fillStyle = '#94a3b8'; // Slate 400
+                          ctx.fillText('PEMERINTAH KOTA KELURAHAN', 796, 423);
+
+                          // 10. Generate PNG Data & Trigger Download
+                          const dataUrl = canvas.toDataURL('image/png');
+                          const link = document.createElement('a');
+                          link.download = `E-ID_RT02_Blok_${currentHouse?.block || 'RT'}_${currentHouse?.number || '02'}.png`;
+                          link.href = dataUrl;
+                          link.click();
+                          
+                          toast.success('Kartu E-ID Berhasil Diunduh!', {
+                            description: 'Kartu E-ID Warga Digital Anda telah disimpan ke galeri perangkat Anda.'
+                          });
+                        } catch (err) {
+                          console.error('Error generating card image:', err);
+                          toast.error('Gagal Mengunduh Kartu', {
+                            description: 'Terjadi kegagalan render identitas digital lokal.'
+                          });
+                        }
+                      }}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-[10px] font-black uppercase tracking-widest h-11 cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Download size={14} /> Unduh & Simpan Kartu E-ID
+                    </Button>
+                    <div className="pt-2 border-t border-indigo-200/50 text-left">
+                      <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Notifikasi Pemberitahuan</p>
+                      <NotificationToggle userId={selectedHouseId} />
+                    </div>
+                  </div>
+                </Card>
+              </div>
             </div>
 
-            {/* Quick Info */}
-            <div className="space-y-6">
-              {/* Iuran Warning */}
-              {!isAllPaid && (
-                <div className={`p-6 rounded-[2rem] border-2 ${isMandatory ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100'}`}>
-                  <div className="flex flex-col sm:flex-row items-start gap-5">
-                    <div className={`p-4 rounded-2xl shadow-sm shrink-0 ${isMandatory ? 'bg-white text-rose-600' : 'bg-white text-amber-600'}`}>
-                      <AlertTriangle size={28} />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className={`text-base font-black uppercase tracking-widest mb-2 ${isMandatory ? 'text-rose-900' : 'text-amber-900'}`}>
-                        {isMandatory ? 'Layanan Ditangguhkan' : 'Tagihan Iuran Tersedia'}
-                      </h4>
-                      <p className={`text-sm font-medium leading-relaxed mb-6 ${isMandatory ? 'text-rose-700' : 'text-amber-700'}`}>
-                        {isMandatory 
-                          ? `Mohon maaf, layanan pengajuan surat dan mutasi ditangguhkan karena iuran bulan ${currentMonth} belum diselesaikan (melewati tgl 20).` 
-                          : `Tagihan iuran bulan ${currentMonth} sudah tersedia. Mohon selesaikan sebelum tanggal 20 untuk tetap dapat mengakses layanan digital.`}
-                      </p>
-                      <div className="flex flex-col xl:flex-row gap-3 flex-wrap">
-                        <Button 
-                          onClick={() => setIsIuranModalOpen(true)}
-                          className={`h-12 sm:h-10 px-8 sm:px-6 text-[10px] font-black uppercase tracking-widest w-full xl:w-auto shadow-lg ${isMandatory ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100'}`}
-                        >
-                          Lihat Rincian
-                        </Button>
-                        <Button 
-                          variant="secondary" 
-                          onClick={() => window.open(`https://wa.me/${(currentHouse?.phone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}`, '_blank')}
-                          className="h-12 sm:h-10 px-8 sm:px-6 text-[10px] font-black uppercase tracking-widest w-full xl:w-auto bg-white border-slate-200"
-                        >
-                          Hubungi Pengurus RT
-                        </Button>
+            {/* A. DAFTAR ANGGOTA KELUARGA (Family Members Section) */}
+            <div className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 md:p-8 text-left mt-8">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-50">
+                <div>
+                  <h3 className="text-lg font-black text-slate-800">Anggota Keluarga Terdaftar</h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">Daftar anggota keluarga penghuni yang terdaftar resmi pada database rukun tetangga.</p>
+                </div>
+                <button 
+                  onClick={() => setActiveTab('update')}
+                  className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                >
+                  Edit KK Mandiri →
+                </button>
+              </div>
+
+              {currentHouse?.familyMembers && currentHouse.familyMembers.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {currentHouse.familyMembers.map((member: any, index: number) => {
+                    const isMale = member.gender === 'Laki-laki';
+                    return (
+                      <div key={index} className="p-4 bg-slate-50/50 hover:bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3.5 transition-all">
+                        <div className={`p-2.5 rounded-xl shrink-0 ${isMale ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}`}>
+                          <User size={18} />
+                        </div>
+                        <div className="flex-1 space-y-1 overflow-hidden">
+                          <h4 className="font-extrabold text-slate-800 text-sm truncate">{member.name || '-' }</h4>
+                          <p className="text-[10px] bg-slate-200/60 text-slate-500 font-black px-2 py-0.5 rounded w-fit uppercase tracking-wider">{member.relation || 'Anggota'}</p>
+                          <p className="text-[11px] text-slate-400 font-semibold truncate">NIK: <span className="font-mono text-slate-500">{member.nik || '-' }</span></p>
+                          {member.birthDate && (
+                            <p className="text-[10px] text-slate-400 font-medium font-mono">{member.birthDate}</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-150 p-6 flex flex-col items-center justify-center">
+                  <p className="text-slate-400 text-xs font-medium">Belum ada anggota keluarga sekunder yang didaftarkan secara detail.</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setActiveTab('update')} 
+                    className="mt-3 text-[10px] font-black uppercase tracking-widest cursor-pointer scale-90 border-slate-200"
+                  >
+                    Lengkapi Anggota KK Sekarang
+                  </Button>
                 </div>
               )}
+            </div>
 
-              <Card className="bg-white border-slate-100 shadow-sm">
-                <h4 className="font-black text-slate-800 mb-4 flex items-center gap-2">
-                  <Info size={18} className="text-indigo-600" /> Informasi Hunian
-                </h4>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Jumlah Penghuni</span>
-                    <span className="text-sm font-black text-slate-800">{currentHouse?.occupants} Orang</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Status Tinggal</span>
-                    <span className="text-sm font-black text-slate-800">{currentHouse?.residenceType || 'Tetap'}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">No. Telepon</span>
-                    <span className="text-sm font-black text-slate-800">{currentHouse?.phone || '-'}</span>
-                  </div>
-                </div>
-              </Card>
+            {/* B. AKTIVITAS & LOG LAINNYA TERBARU TIMELINE (Recent activity list widget) */}
+            <div className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 md:p-8 text-left mt-8">
+              <div className="mb-6 pb-4 border-b border-slate-50">
+                <h3 className="text-lg font-black text-slate-800">Timeline Pelacakan & Aktivitas</h3>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">Pantau update terbaru dari segala aduan, surat, dan permohonan yang diajukan oleh hunian Anda.</p>
+              </div>
 
-              <Card className="bg-indigo-50 border-indigo-100 shadow-sm">
-                <h4 className="font-black text-indigo-900 mb-2">Manfaat E-ID</h4>
-                <p className="text-xs text-indigo-700 font-medium leading-relaxed mb-4">
-                  Gunakan QR Code di atas untuk verifikasi identitas saat kegiatan RT, pengambilan bantuan, atau akses fasilitas lingkungan.
-                </p>
-                <div className="space-y-3">
-                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-[10px] font-black uppercase tracking-widest">
-                    Unduh Kartu (PDF)
-                  </Button>
-                  <div className="pt-2 border-t border-indigo-200/50">
-                    <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Pengaturan Notifikasi</p>
-                    <NotificationToggle userId={selectedHouseId} />
+              {(() => {
+                const combinedActivities: any[] = [];
+                
+                letters.forEach(item => {
+                  combinedActivities.push({
+                    id: item.id,
+                    title: `Permohonan: ${item.type}`,
+                    createdAt: item.date || (item as any).createdAt || '',
+                    status: item.status,
+                    tag: 'surat',
+                    color: 'text-indigo-600 bg-indigo-50',
+                    desc: item.purposeDetail || 'Pengurusan surat pengantar rujukan.'
+                  });
+                });
+
+                reports.forEach(item => {
+                  combinedActivities.push({
+                    id: item.id,
+                    title: `Aduan Warga: ${item.type}`,
+                    createdAt: item.date || (item as any).createdAt || '',
+                    status: item.status,
+                    tag: 'lapor',
+                    color: 'text-rose-600 bg-rose-50',
+                    desc: item.description || 'Laporan kejadian / aduan kerusakan.'
+                  });
+                });
+
+                guestReports.forEach(item => {
+                  combinedActivities.push({
+                    id: item.id,
+                    title: `Tamu Bermalam: ${item.guestName}`,
+                    createdAt: item.createdAt || '',
+                    status: item.status === 'Active' ? 'Active' : 'Checkout',
+                    tag: 'guests',
+                    color: 'text-amber-600 bg-amber-50',
+                    desc: `Tamu hubungan ${item.relationship} menginap selama ${item.stayDuration}.`
+                  });
+                });
+
+                updateRequests.forEach(item => {
+                  combinedActivities.push({
+                    id: item.id,
+                    title: `Update KK Mandiri`,
+                    createdAt: item.createdAt || '',
+                    status: item.status || 'Menunggu',
+                    tag: 'update',
+                    color: 'text-emerald-600 bg-emerald-50',
+                    desc: item.reason || 'Permohonan pembaruan data kependudukan.'
+                  });
+                });
+
+                // Sort descending
+                const sortedHistoryList = combinedActivities.sort((a, b) => {
+                  const dateA = new Date(a.createdAt || 0).getTime();
+                  const dateB = new Date(b.createdAt || 0).getTime();
+                  return dateB - dateA;
+                }).slice(0, 4);
+
+                if (sortedHistoryList.length === 0) {
+                  return (
+                    <div className="py-12 text-center bg-slate-50/50 rounded-2xl flex flex-col items-center justify-center">
+                      <History className="text-slate-350 mb-2" size={32} />
+                      <p className="text-slate-400 text-xs font-semibold">Belum ada catatan permohonan administrasi atau laporan.</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="relative border-l-2 border-slate-100 pl-6 ml-4 space-y-8 py-2 text-left">
+                    {sortedHistoryList.map((act, index) => {
+                      const dateText = act.createdAt ? new Date(act.createdAt).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : 'Menunggu antrean';
+
+                      const isDone = ['disetujui', 'approved', 'selesai', 'issued', 'tuntas', 'completed', 'active', 'aktif'].includes(String(act.status).toLowerCase());
+                      const isRejected = ['ditolak', 'rejected', 'batal'].includes(String(act.status).toLowerCase());
+                      
+                      let badgeStyle = "bg-amber-50 text-amber-700 border-amber-100";
+                      if (isDone) badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-100";
+                      if (isRejected) badgeStyle = "bg-rose-50 text-rose-700 border-rose-100";
+
+                      return (
+                        <div key={act.id} className="relative group text-left">
+                          {/* Dot item list */}
+                          <span className="absolute -left-[35px] top-1.5 focus:outline-none w-4.5 h-4.5 rounded-full border-4 border-white bg-indigo-500 shadow-sm shrink-0" />
+                          
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-black text-slate-800 hover:text-indigo-600 transition-colors">{act.title}</span>
+                              <span className="text-[10px] font-bold text-slate-400 truncate max-w-[80px] font-mono">#{act.id.slice(0,6)}...</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 self-start md:self-auto">
+                              <span className="text-[9px] font-mono text-slate-400 font-bold">{dateText}</span>
+                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${badgeStyle}`}>
+                                {act.status === 'Active' ? 'Aktif' : act.status}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">{act.desc}</p>
+                          
+                          <button
+                            onClick={() => setActiveTab(act.tag as any)}
+                            className="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 mt-2 hover:underline tracking-wider uppercase block"
+                          >
+                            Lihat di Tab {act.tag.toUpperCase()} →
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-              </Card>
+                );
+              })()}
             </div>
           </motion.div>
         )}
@@ -1438,47 +1901,74 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       </Modal>
 
       {/* Report Issue Modal */}
-      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Buat Laporan Masalah" maxWidth="max-w-xl">
+      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Buat Laporan Masalah Baru" maxWidth="max-w-xl">
         <div className="p-6">
           <form onSubmit={handleSubmitReport} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Laporan</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {['Keamanan', 'Kebersihan', 'Fasilitas', 'Sosial', 'Lainnya'].map(type => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setReportForm({...reportForm, type: type as any})}
-                    className={`
-                      p-4 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all duration-300
-                      ${reportForm.type === type 
-                        ? 'bg-rose-600 text-white border-rose-600 shadow-lg shadow-rose-200' 
-                        : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-rose-300 hover:text-rose-600'}
-                    `}
-                  >
-                    {type}
-                  </button>
-                ))}
+            <div className="space-y-3">
+              <label className="block text-[10.5px] font-black text-slate-400 uppercase tracking-widest ml-1">Pilih Kategori Masalah <span className="text-rose-500">*</span></label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { id: 'Keamanan', title: 'Keamanan', desc: 'Sengketa, gatal, maling', icon: Shield, color: 'text-rose-600', activeBg: 'bg-rose-50 border-rose-500' },
+                  { id: 'Kebersihan', title: 'Kebersihan', desc: 'Sampah liar, got mampet', icon: Trash2, color: 'text-emerald-600', activeBg: 'bg-emerald-50 border-emerald-500' },
+                  { id: 'Fasilitas', title: 'Fasilitas', desc: 'Lampu mati, aspal berlubang', icon: Wrench, color: 'text-blue-600', activeBg: 'bg-blue-50 border-blue-500' },
+                  { id: 'Sosial', title: 'Sosial', desc: 'Keributan, keramaian', icon: Users, color: 'text-amber-600', activeBg: 'bg-amber-50 border-amber-500' },
+                  { id: 'Lainnya', title: 'Lainnya', desc: 'Aspirasi & masalah lainnya', icon: AlertTriangle, color: 'text-slate-600', activeBg: 'bg-slate-100 border-slate-400' },
+                ].map(item => {
+                  const Icon = item.icon;
+                  const isSelected = reportForm.type === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setReportForm({...reportForm, type: item.id as any})}
+                      className={`
+                        p-3 rounded-xl border text-left flex gap-3 transition-all duration-200 cursor-pointer w-full
+                        ${isSelected 
+                          ? `${item.activeBg} border border-rose-500 shadow-sm text-slate-900 ring-2 ring-rose-500/10` 
+                          : 'bg-slate-50 hover:bg-slate-100/70 text-slate-600 border-slate-200'
+                        }
+                      `}
+                    >
+                      <div className={`p-2 bg-white rounded-lg shadow-xs self-start shrink-0 ${item.color} transition-all`}>
+                        <Icon size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-black uppercase tracking-wide">{item.title}</p>
+                        <p className="text-[9.5px] text-slate-400 font-semibold mt-0.5 leading-normal">{item.desc}</p>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Deskripsi Masalah</label>
+              <label className="block text-[10.5px] font-black text-slate-400 uppercase tracking-widest ml-1">Deskripsi & Kronologi Masalah <span className="text-rose-500">*</span></label>
               <textarea 
                 rows={4}
-                placeholder="Jelaskan secara detail masalah yang Anda temukan..."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none"
+                placeholder="Ceritakan kronologi masalah secara jelas, detail, dan apa saja yang berdampak..."
+                className="w-full px-4.5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all resize-none shadow-xs placeholder:font-medium leading-relaxed"
                 value={reportForm.description}
                 onChange={e => setReportForm({...reportForm, description: e.target.value})}
                 required
               />
             </div>
 
+            {/* Note box */}
+            <div className="p-3 bg-rose-50/50 border border-rose-100/70 rounded-xl flex gap-3.5">
+              <div className="p-2 bg-white rounded-lg shadow-xs self-start text-rose-500">
+                <Info size={14} />
+              </div>
+              <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                Laporan ini akan langsung dikirimkan ke database RT 02 atas nama Anda selaku warga resmi yang terdaftar secara sah di sistem siber kependudukan.
+              </p>
+            </div>
+
             <div className="flex gap-3 pt-2">
               <Button 
                 type="button" 
                 variant="outline" 
-                className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest"
+                className="flex-1 py-4.5 rounded-xl text-xs font-black uppercase tracking-widest"
                 onClick={() => setIsReportModalOpen(false)}
               >
                 Batal
@@ -1486,11 +1976,11 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               <Button 
                 type="submit" 
                 disabled={isSubmittingReport}
-                className="flex-[2] py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-100"
+                className="flex-[2] py-4.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-200/50 hover:shadow-rose-300 transition-all"
               >
                 {isSubmittingReport ? 'Mengirim...' : (
-                  <span className="flex items-center gap-2">
-                    <Send size={16} /> Kirim Laporan
+                  <span className="flex items-center justify-center gap-2">
+                    <Send size={14} /> Kirim Laporan Resmi
                   </span>
                 )}
               </Button>

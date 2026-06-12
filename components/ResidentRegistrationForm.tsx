@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, Home, Phone, Users, Send, CheckCircle, ArrowLeft, Plus, Trash2, 
   GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, 
-  FileText, Camera, ShieldCheck, MapPin, Calendar, Check, AlertCircle, Info
+  FileText, Camera, ShieldCheck, MapPin, Calendar, Check, AlertCircle, Info,
+  ShieldAlert
 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { 
@@ -54,6 +55,13 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     adultCount: 0,
     elderlyCount: 0,
     widowCount: 0,
+    isPKH: false,
+    isBLT: false,
+    isBPNT: false,
+    isBansosLain: false,
+    bansosLainName: '',
+    isDisability: false,
+    isOrphan: false,
     familyMembers: [] as { id?: string; name: string; nik?: string; gender: 'Laki-laki' | 'Perempuan'; relation: any; birthDate?: string; job?: string }[]
   });
 
@@ -798,6 +806,114 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       </div>
                     )}
                   </div>
+                </div>
+
+                {/* Section for Kondisi Khusus & Bantuan Sosial */}
+                <div className="pt-6 border-t border-slate-100">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center border border-indigo-100 p-1.5">
+                      <ShieldAlert size={15} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Kondisi Khusus & Bantuan Sosial</h3>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-bold mb-4 uppercase tracking-wide leading-relaxed">
+                    Centang jika ada anggota keluarga di dalam rumah yang memenuhi kriteria kondisi khusus atau penerima bantuan pemerintah di bawah ini.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isPKH ? 'bg-indigo-50/50 border-indigo-400 shadow-xs' : 'bg-slate-50/50 border-slate-200/60 hover:border-indigo-300 hover:bg-white'}`}>
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+                        checked={formData.isPKH}
+                        onChange={e => setFormData({...formData, isPKH: e.target.checked})}
+                      />
+                      <div>
+                        <span className="block text-xs font-bold text-slate-700">Penerima PKH</span>
+                        <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wide">Prog. Keluarga Harapan</span>
+                      </div>
+                    </label>
+
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isBLT ? 'bg-indigo-50/50 border-indigo-400 shadow-xs' : 'bg-slate-50/50 border-slate-200/60 hover:border-indigo-300 hover:bg-white'}`}>
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+                        checked={formData.isBLT}
+                        onChange={e => setFormData({...formData, isBLT: e.target.checked})}
+                      />
+                      <div>
+                        <span className="block text-xs font-bold text-slate-700">Penerima BLT</span>
+                        <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wide">Bantuan Langsung Tunai</span>
+                      </div>
+                    </label>
+
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isBPNT ? 'bg-indigo-50/50 border-indigo-400 shadow-xs' : 'bg-slate-50/50 border-slate-200/60 hover:border-indigo-300 hover:bg-white'}`}>
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+                        checked={formData.isBPNT}
+                        onChange={e => setFormData({...formData, isBPNT: e.target.checked})}
+                      />
+                      <div>
+                        <span className="block text-xs font-bold text-slate-700">Sembako / BPNT</span>
+                        <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wide">Bantuan Pangan Non-Tunai</span>
+                      </div>
+                    </label>
+
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isDisability ? 'bg-indigo-50/50 border-indigo-400 shadow-xs' : 'bg-slate-50/50 border-slate-200/60 hover:border-indigo-300 hover:bg-white'}`}>
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+                        checked={formData.isDisability}
+                        onChange={e => setFormData({...formData, isDisability: e.target.checked})}
+                      />
+                      <div>
+                        <span className="block text-xs font-bold text-slate-700">Disabilitas</span>
+                        <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wide">Keterbatasan Fisik/Mental</span>
+                      </div>
+                    </label>
+
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isOrphan ? 'bg-indigo-50/50 border-indigo-400 shadow-xs' : 'bg-slate-50/50 border-slate-200/60 hover:border-indigo-300 hover:bg-white'}`}>
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+                        checked={formData.isOrphan}
+                        onChange={e => setFormData({...formData, isOrphan: e.target.checked})}
+                      />
+                      <div>
+                        <span className="block text-xs font-bold text-slate-700">Yatim / Piatu</span>
+                        <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wide">Anak Yatim/Piatu</span>
+                      </div>
+                    </label>
+
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isBansosLain ? 'bg-indigo-50/50 border-indigo-400 shadow-xs' : 'bg-slate-50/50 border-slate-200/60 hover:border-indigo-300 hover:bg-white'}`}>
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+                        checked={formData.isBansosLain}
+                        onChange={e => setFormData({...formData, isBansosLain: e.target.checked})}
+                      />
+                      <div>
+                        <span className="block text-xs font-bold text-slate-700">Bansos Lainnya</span>
+                        <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wide">Program Bansos Lain</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  {formData.isBansosLain && (
+                    <div className="mt-3">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Program Bantuan Lainnya</label>
+                      <input 
+                        type="text" 
+                        placeholder="Contoh: KIP, KJS, Program Swadaya, dll..." 
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-sans"
+                        value={formData.bansosLainName}
+                        onChange={e => setFormData({...formData, bansosLainName: e.target.value})}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             )}

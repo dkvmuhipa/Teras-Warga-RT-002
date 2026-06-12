@@ -1878,6 +1878,171 @@ export const getLetterById = async (id: string) => {
   }
 };
 
+export const getReportById = async (id: string) => {
+  try {
+    // Also support checking in REPORTS_COL
+    const docRef = doc(db, REPORTS_COL, id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id };
+    }
+    return null;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, `${REPORTS_COL}/${id}`);
+    return null;
+  }
+};
+
+export const getGuestReportById = async (id: string) => {
+  try {
+    const docRef = doc(db, GUEST_REPORTS_COL, id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id };
+    }
+    return null;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, `${GUEST_REPORTS_COL}/${id}`);
+    return null;
+  }
+};
+
+export const getPopulationLogById = async (id: string) => {
+  try {
+    const docRef = doc(db, POPULATION_LOGS_COL, id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id };
+    }
+    return null;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, `${POPULATION_LOGS_COL}/${id}`);
+    return null;
+  }
+};
+
+export const getRequestsByPhoneOrHouse = async (phone?: string, houseId?: string) => {
+  try {
+    const results: any[] = [];
+    const cleanPhone = phone ? phone.trim().replace(/\D/g, '') : '';
+    const cleanHouse = houseId ? houseId.trim().toLowerCase() : '';
+
+    if (!cleanPhone && !cleanHouse) return [];
+
+    // Let's fetch all 4 collections in parallel
+    const [lettersSnap, reportsSnap, guestReportsSnap, populationLogsSnap] = await Promise.all([
+      getDocs(collection(db, LETTERS_COL)),
+      getDocs(collection(db, REPORTS_COL)),
+      getDocs(collection(db, GUEST_REPORTS_COL)),
+      getDocs(collection(db, POPULATION_LOGS_COL))
+    ]);
+
+    // Helper to match phone suffix (to match 0812... with 62812... or +62812...)
+    const phoneMatches = (val: any) => {
+      if (!val || !cleanPhone) return false;
+      const valStr = String(val).replace(/\D/g, '');
+      if (valStr === cleanPhone) return true;
+      if (cleanPhone.length >= 9 && valStr.endsWith(cleanPhone.slice(-9))) return true;
+      if (valStr.length >= 9 && cleanPhone.endsWith(valStr.slice(-9))) return true;
+      return false;
+    };
+
+    // Helper to match houseId
+    const houseMatches = (val: any) => {
+      if (!val || !cleanHouse) return false;
+      const valStr = String(val).trim().toLowerCase();
+      return valStr === cleanHouse || 
+             valStr.replace(/\D/g, '') === cleanHouse.replace(/\D/g, '') ||
+             valStr.includes(cleanHouse) ||
+             cleanHouse.includes(valStr);
+    };
+
+    // 1. Letters
+    lettersSnap.forEach(d => {
+      const data = d.data();
+      const matchPhone = cleanPhone && (phoneMatches(data.phone) || phoneMatches(data.applicantPhone) || phoneMatches(data.whatsapp));
+      const matchHouse = cleanHouse && (houseMatches(data.houseId) || houseMatches(data.reporterHouseId));
+      
+      const isMatch = (cleanPhone && cleanHouse) ? (matchPhone && matchHouse) : (matchPhone || matchHouse);
+      
+      if (isMatch) {
+        results.push({
+          ...data,
+          id: d.id,
+          category: 'Surat',
+          title: data.title || `Surat ${data.type || data.requestType || 'Pengantar'}`
+        });
+      }
+    });
+
+    // 2. Reports
+    reportsSnap.forEach(d => {
+      const data = d.data();
+      const matchPhone = cleanPhone && (phoneMatches(data.phone) || phoneMatches(data.reporterPhone) || phoneMatches(data.whatsapp));
+      const matchHouse = cleanHouse && (houseMatches(data.houseId) || houseMatches(data.reporterHouseId) || houseMatches(data.hostHouseId) || houseMatches(data.reporterHouseId));
+      
+      const isMatch = (cleanPhone && cleanHouse) ? (matchPhone && matchHouse) : (matchPhone || matchHouse);
+      
+      if (isMatch) {
+        results.push({
+          ...data,
+          id: d.id,
+          category: 'Laporan',
+          title: data.title || `Laporan ${data.type || 'Aduan'}`
+        });
+      }
+    });
+
+    // 3. Guest Reports
+    guestReportsSnap.forEach(d => {
+      const data = d.data();
+      const matchPhone = cleanPhone && (phoneMatches(data.phone) || phoneMatches(data.reporterPhone) || phoneMatches(data.whatsapp) || phoneMatches(data.hostPhone));
+      const matchHouse = cleanHouse && (houseMatches(data.houseId) || houseMatches(data.reporterHouseId) || houseMatches(data.hostHouseId));
+      
+      const isMatch = (cleanPhone && cleanHouse) ? (matchPhone && matchHouse) : (matchPhone || matchHouse);
+      
+      if (isMatch) {
+        results.push({
+          ...data,
+          id: d.id,
+          category: 'Tamu',
+          title: data.title || `Lapor Tamu: ${data.guestName || 'Tamu Bermalam'}`
+        });
+      }
+    });
+
+    // 4. Population Logs
+    populationLogsSnap.forEach(d => {
+      const data = d.data();
+      const matchPhone = cleanPhone && phoneMatches(data.phone);
+      const matchHouse = cleanHouse && (houseMatches(data.houseId) || houseMatches(data.reporterHouseId));
+      
+      const isMatch = (cleanPhone && cleanHouse) ? (matchPhone && matchHouse) : (matchPhone || matchHouse);
+      
+      if (isMatch) {
+        results.push({
+          ...data,
+          id: d.id,
+          category: 'Mutasi',
+          title: data.title || `${data.type === 'Newcomer' ? 'Warga Baru' : 'Mutasi Warga'}: ${data.name || data.reporterName || 'Sensus'}`
+        });
+      }
+    });
+
+    // Sort by Date descending
+    results.sort((a, b) => {
+      const dateA = new Date(a.date || a.createdAt || 0).getTime();
+      const dateB = new Date(b.date || b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
+
+    return results;
+  } catch (error) {
+    console.error("Error searching requests:", error);
+    return [];
+  }
+};
+
 // --- 6.5 MUTATIONS ---
 export const addPopulationLogToDb = async (log: any) => {
   try {

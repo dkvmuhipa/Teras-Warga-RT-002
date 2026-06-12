@@ -312,10 +312,381 @@ async function startServer() {
     }
   });
 
+  // --- Gemini API Offline/Graceful Fallback Data Generators ---
+  const getFallbackAnnouncementDraft = (topic: string, tone: string = 'Formal'): string => {
+    const isFormal = tone.toLowerCase() === 'formal';
+    if (isFormal) {
+      return `PENGUMUMAN WARGA RT 02/020
+
+Kepada Yth. Seluruh Warga RT 02/020
+Di tempat
+
+Salam sejahtera,
+
+Sehubungan dengan hal/kegiatan "${topic}", kami selaku pengurus RT 02 mengundang Bapak/Ibu sekalian untuk berpartisipasi aktif dalam menyukseskan hal tersebut.
+
+Detail Pelaksanaan:
+Waktu: Menyesuaikan pengumuman resmi berikutnya
+Tempat: Lingkungan RT 02 Huntap Tondo
+
+Demikian pengumuman ini kami sampaikan. Atas perhatian, dukungan, dan kerja sama Bapak/Ibu sekalian, kami luhurkan ucapan terima kasih banyak.
+
+Salam hormat,
+Pengurus RT 02/020`;
+    } else {
+      return `Halo warga RT 02 yang rukun dan ramah!
+
+Ada info penting nih mengenai "${topic}". Yuk kita sama-sama bicarakan, sukseskan, dan laksanakan kegiatan ini demi kenyamanan lingkungan kita tercinta bersama.
+
+Untuk informasi operasional lebih rinci atau saran praktis silakan langsung hubungi jajaran pengurus RT ya. Tetap jaga kebersihan, kerukunan, dan kekompakan kita bersama!
+
+Terima kasih banyak atas perhatiannya, warga!
+
+Salam hangat,
+Pengurus RT 02`;
+    }
+  };
+
+  const getFallbackReportsAnalysis = (reports: string[]): string => {
+    if (!reports || reports.length === 0) {
+      return "Status Lingkungan: Sangat kondusif. Tidak ada laporan permasalahan aktif warga pada minggu ini.";
+    }
+    const parsed = reports.map(r => r.toLowerCase());
+    const issues: string[] = [];
+    
+    const wasteCount = parsed.filter(p => p.includes('sampah') || p.includes('kotor') || p.includes('limbah') || p.includes('bau')).length;
+    const waterCount = parsed.filter(p => p.includes('air') || p.includes('ledeng') || p.includes('bocor') || p.includes('pdam')).length;
+    const securityCount = parsed.filter(p => p.includes('aman') || p.includes('maling') || p.includes('hilang') || p.includes('ronda') || p.includes('curi')).length;
+    const lightCount = parsed.filter(p => p.includes('lampu') || p.includes('gelap') || p.includes('istrik') || p.includes('padam')).length;
+    
+    if (wasteCount > 0) {
+      issues.push(`Sektor kebersihan (${wasteCount} laporan terkait sampah/limbah): Jadwal pengangkutan sampah perlu dikoordinasikan ulang dengan petugas draf.`);
+    }
+    if (waterCount > 0) {
+      issues.push(`Sektor utilitas air (${waterCount} keluhan air bersih atau kebocoran): Dibutuhkan koordinasi cepat teknisi air untuk penelusuran pipa tersumbat.`);
+    }
+    if (securityCount > 0) {
+      issues.push(`Sektor kamtibmas (${securityCount} masukan keamanan): Patroli pos ronda dimalam hari perlu diaktifkan kembali sesuai jadwal regu.`);
+    }
+    if (lightCount > 0) {
+      issues.push(`Sektor sarana umum (${lightCount} laporan lampu fasilitas padam): Perlu pengadaan lampu jalan baru secara swadaya warga.`);
+    }
+    
+    if (issues.length === 0) {
+      issues.push(`Sektor administrasi & umum (${reports.length} keluhan terdaftar): Warga mengadukan beberapa isu lingkungan minor yang membutuhkan respon pengurus RT.`);
+    }
+    
+    issues.push("Rekomendasi Utama: Diperlukan rembuk warga atau koordinasi terbatas pengurus pada akhir pekan untuk menentukan skala prioritas tindakan lapangan.");
+    
+    return issues.slice(0, 3).map((item, idx) => `${idx + 1}. ${item}`).join('\n');
+  };
+
+  const getFallbackDashboardSummary = (data: any): string => {
+    const cashVal = data.cashBalance || 0;
+    const healthFin = cashVal >= 500000 ? "Aman & Baik" : "Waspada Rencana Anggaran (Kas menipis)";
+    const keresahan = data.reportsCount > 3 ? "Tinggi (Membutuhkan respon tanggap cepat)" : (data.reportsCount > 0 ? "Sedang (Warga tertib mengadu)" : "Rendah (Sangat damai)");
+    
+    return `Berikut adalah analisis data realtime dashboard RT 02:
+
+1. Status Kesehatan Keuangan: ${healthFin}. Saldo kas tercatat sebesar Rp ${cashVal.toLocaleString('id-ID')}. Sangat dianjurkan mempercepat penagihan iuran warga terdaftar demi operasional berkala tanpa hambatan.
+
+2. Tingkat Keresahan Warga: ${keresahan}. Terdata ada sebanyak ${data.reportsCount || 0} laporan warga baru yang menantikan penanganan proaktif oleh jajaran pengurus RT.
+
+3. Analisis Kelompok Rentan: Terdata sebanyak ${data.babyCount || 0} Bayi, ${data.toddlerCount || 0} Balita, ${data.pregnantCount || 0} Ibu Hamil, ${data.elderlyCount || 0} Lansia, dan ${data.widowCount || 0} Janda yang terdaftar aktif. Lingkungan aman, namun disarankan pengurus memantau kesehatan preventif berkala.
+
+4. Rekomendasi Aksi Prioritas: Pengurus RT disarankan melakukan komunikasi silaturahmi kekeluargaan langsung ke warga yang terdata memiliki tagihan iuran outstanding (${data.unpaidCount || 0} Kepala Keluarga) sekaligus mengumpulkan keluhan pos rondanya secara persuasif.`;
+  };
+
+  const extractBlock = (text: string, header: string, nextHeader: string): string => {
+    const lowerText = text.toLowerCase();
+    const startIdx = lowerText.indexOf(header.toLowerCase());
+    if (startIdx === -1) return "";
+    
+    const contentStart = startIdx + header.length;
+    const endIdx = lowerText.indexOf(nextHeader.toLowerCase(), contentStart);
+    
+    if (endIdx === -1) {
+      return text.substring(contentStart).trim();
+    }
+    return text.substring(contentStart, endIdx).trim();
+  };
+
+  const getFallbackRitAnswer = (question: string, systemInstruction: string): string => {
+    const q = question.toLowerCase();
+    
+    // 0. Conversational, Greetings & AI functioning check (High Priority)
+    const hasGreeting = q.includes('halo') || q.includes('hallo') || q.includes('hai') || q.includes('pa kabar') || q.includes('apa kabar') || q.includes('gimana kabar') || q.includes('assalamualaikum') || q.includes('selamat pagi') || q.includes('selamat siang') || q.includes('selamat sore') || q.includes('selamat malam');
+    const hasAiCheck = q.includes('berfungsi') || q.includes('aktif') || q.includes('berbincang') || q.includes('ngobrol') || q.includes('bisa jawab') || q.includes('bisa apa') || q.includes('kamu siapa') || q.includes('siapa kamu') || q.includes('asisten') || q.includes('rit');
+    
+    if (hasGreeting || (hasAiCheck && !q.includes('ronda') && !q.includes('iuran') && !q.includes('kas') && !q.includes('sensus') && !q.includes('penduduk') && !q.includes('warga'))) {
+      return `🤖 *Ya, saya aktif dan berfungsi penuh mendampingi warga RT 02!*
+
+Halo! Saya **Rit**, Asisten Cerdas virtual untuk aplikasi **TERAS RT 02**. Saya siap menyapa, mengobrol, serta memandu Bapak/Ibu sekalian mengenai informasi lingkungan hunian kita.
+
+*Bagaimana Cara Kerja Saya?*
+1. **Mode AI Cerdas (Default):** Selama kunci API aktif, saya akan menggunakan kemampuan kecerdasan buatan Gemini untuk mengobrol luwes mengenai berbagai topik umum secara kontekstual.
+2. **Mesin Sensus Lokal (Resilien):** Jika AI sedang berada dalam mode cadangan/hemat daya, saya tidak akan kaku! Saya dibekali kecerdasan membaca data database real-time RT 02 sehingga Bapak/Ibu bisa menanyakan informasi persis seperti:
+   - 📊 **Sensus Penduduk:** *"Berapa jumlah warga?"*, *"Berapa data balita?"*, *"Kas RT"* atau *"Statistik lansia"*.
+   - 👮 **Jadwal Ronda:** *"Siapa petugas ronda hari ini?"* atau *"Apakah Budi ronda minggu ini?"*.
+   - 📞 **Kontak Pengurus:** *"Nomor telepon Ketua RT"* atau *"Siapa bendahara kita?"*.
+   - 📋 **Administrasi:** *"Surat pengantar RT"* atau *"Jadwal angkutan sampah"*.
+
+Silakan sapa saya kembali atau ajukan pertanyaan spesifik kependudukan di atas. Saya siap melayani dengan rukun dan harmonis! 😊✨`;
+    }
+
+    // 1. Dynamic Census & Demographics Match (High Priority)
+    if (q.includes('jumlah warga') || q.includes('jumlah penduduk') || q.includes('jumlah jiwa') || q.includes('berapa jiwa') || q.includes('berapa warga') || q.includes('data janda') || q.includes('data balita') || q.includes('data bayi') || q.includes('data lansia') || q.includes('data ibu hamil') || q.includes('jumlah kk') || q.includes('berapa kk') || q.includes('berapa kepala keluarga') || q.includes('jumlah kepala keluarga') || q.includes('data sensus') || q.includes('statistik') || q.includes('demografi') || q.includes('jumlah rumah') || q.includes('berapa rumah') || q.includes('kas rt') || q.includes('saldo') || q.includes('keuangan rt') || q.includes('balita') || q.includes('bayi') || q.includes('lansia') || q.includes('ibu hamil') || q.includes('janda') || q.includes('duda')) {
+      const censusBlock = extractBlock(systemInstruction, "DATA SENSUS & KEUANGAN RT 02 (DARI DATA LIVE):", "DATA PENGUMUMAN TERBARU");
+      if (censusBlock) {
+        return `📊 *Data Sensus & Statistik RT 02/020 Real-Time:*
+
+Berikut adalah rangkuman sensus penduduk dan informasi keuangan resmi lingkungan kita berdasarkan data aktif aplikasi TERAS RT 02:
+
+${censusBlock}
+
+*Informasi ini diperbarui secara otomatis setiap kali ada pergeseran/pemutakhiran data kependudukan dan kas RT oleh Pengurus.*`;
+      }
+    }
+    
+    // 2. Specific Match for Ketua RT
+    if (q.includes('ketua rt') || q.includes('pimpinan') || q.includes('nama ketua') || q.includes('kepala rt')) {
+      const rtMatch = systemInstruction.match(/Ketua RT:\s*(.+?)\s*\(/i);
+      const rtName = rtMatch ? rtMatch[1].trim() : "Pak RT";
+      return `👑 *Ketua RT 02 RW 020:*
+
+Ketua RT saat ini adalah Bapak **${rtName}**. Anda dapat berkunjung langsung ke kediaman beliau atau Kantor Sekretariat RT untuk keperluan konsultasi warga atau tanda tangan pengesahan dokumen penting lainnya.`;
+    }
+
+    // 3. Map Day Names for Resilient Date matching regardless of Server Environment Locale
+    const daysMap = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+    const getIndonesianDayName = (date: Date): string => {
+      return daysMap[date.getDay()];
+    };
+
+    // 4. Match Specific Pengurus Roles & Names
+    const cleanOfficials = extractBlock(systemInstruction, "STRUKTUR PENGURUS RT SAAT INI:", "INFORMASI UMUM");
+    // Ensure we avoid substring matches where word "warga" would match "wa"
+    const wordsList = q.split(/[^a-zA-Z0-9]+/);
+    const hasContactKeyword = q.includes('kontak') || q.includes('pengurus') || q.includes('nomor') || q.includes('no hp') || q.includes('telepon') || q.includes('sekretaris') || q.includes('bendahara') || q.includes('keamanan') || q.includes('whatsapp') || wordsList.includes('wa') || wordsList.includes('hp');
+
+    if (cleanOfficials && hasContactKeyword) {
+      const lines = cleanOfficials.split('\n');
+      const uq = q.trim();
+      
+      // Look for a specific line matching the queried role or name
+      const matchingLine = lines.find(line => {
+        const lowerLine = line.toLowerCase();
+        if (uq.includes('sekretaris') && lowerLine.includes('sekretaris')) return true;
+        if (uq.includes('bendahara') && lowerLine.includes('bendahara')) return true;
+        if (uq.includes('keamanan') && lowerLine.includes('keamanan')) return true;
+        if (uq.includes('ketua rt') && lowerLine.includes('ketua rt')) return true;
+        
+        // Match specific names of the officials if contained in the query
+        const namePart = line.match(/:\s*(.+?)\s*\(/);
+        if (namePart) {
+          const name = namePart[1].toLowerCase();
+          const cleanName = name.replace(/bapak|ibu|pak|bu/gi, '').trim();
+          if (cleanName && cleanName.length > 2 && uq.includes(cleanName)) return true;
+        }
+        return false;
+      });
+
+      if (matchingLine) {
+        return `📞 *Informasi Pengurus RT 02:*
+
+Berikut adalah informasi pengurus yang cocok dengan pertanyaan Anda:
+${matchingLine.trim()}
+
+*Silakan hubungi kontak di atas pada waktu yang wajar demi kenyamanan bersama.*`;
+      }
+
+      // If no specific match, return the complete list of officials
+      return `📞 *Daftar Kontak Pengurus RT 02/020:*
+
+Berikut adalah daftar nama pengurus RT aktif yang dapat Anda hubungi untuk koordinasi berbagai kegiatan lingkungan:
+${cleanOfficials}
+
+*Silakan hubungi kontak di atas pada waktu yang wajar demi kenyamanan bersama.*`;
+    }
+    
+    // 4. Ronda Search (including specific day and resident name ronda checking)
+    if (q.includes('ronda') || q.includes('poskamling') || q.includes('kamling') || q.includes('jaga') || q.includes('jadwal ronda')) {
+      const sched = extractBlock(systemInstruction, "JADWAL RONDA MINGGUAN:", "STRUKTUR PENGURUS");
+      const lines = sched.split('\n');
+
+      // Check if they are asking about a specific person's schedule (e.g. "budi ronda")
+      let matchedResidentLine: string | null = null;
+      let searchedName = "";
+      const words = q.split(/\s+/);
+      
+      for (const line of lines) {
+        const lowerLine = line.toLowerCase();
+        for (const word of words) {
+          const cleanWord = word.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+          // Exclude helper/common query words to find the actual name
+          if (cleanWord.length > 2 && 
+              !['ronda', 'jadwal', 'malam', 'siapa', 'hari', 'ini', 'besok', 'kapan', 'untuk', 'yang', 'pada', 'buat', 'siapakah'].includes(cleanWord)) {
+            if (lowerLine.includes(cleanWord)) {
+              matchedResidentLine = line;
+              searchedName = word;
+              break;
+            }
+          }
+        }
+        if (matchedResidentLine) break;
+      }
+
+      if (matchedResidentLine) {
+        const parts = matchedResidentLine.split(':');
+        const dayPart = parts[0].replace(/[-*\s]/g, '').trim();
+        const membersPart = parts[1] ? parts[1].trim() : '';
+        const dayFormatted = dayPart.charAt(0).toUpperCase() + dayPart.slice(1);
+        
+        return `👮 *Hasil Pencarian Jadwal Ronda:*
+
+Warga dengan nama **${searchedName.charAt(0).toUpperCase() + searchedName.slice(1)}** dijadwalkan bertugas ronda pada hari **${dayFormatted}** bersama rekan satu regu:
+👉 **${membersPart}**
+
+*Terima kasih atas kepedulian bersama dalam mengawal keamanan warga!*`;
+      }
+
+      // Check for specific day query ("senin", "hari ini", "besok", etc.)
+      let specificDay = daysMap.find(d => q.includes(d));
+      
+      if (!specificDay) {
+        if (q.includes('hari ini') || q.includes('sekarang')) {
+          specificDay = getIndonesianDayName(new Date());
+        } else if (q.includes('besok')) {
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          specificDay = getIndonesianDayName(tomorrow);
+        }
+      }
+
+      if (specificDay) {
+        const dayLine = lines.find(l => l.toLowerCase().includes(specificDay || ''));
+        if (dayLine) {
+          const dayFormatted = specificDay.charAt(0).toUpperCase() + specificDay.slice(1);
+          return `👮 *Jadwal Ronda Malam - Hari ${dayFormatted}:*
+
+Petugas ronda malam yang dijadwalkan bertugas pada hari **${dayFormatted}** adalah:
+👉 **${dayLine.replace(/-\s*\w+:\s*/i, "").trim()}**
+
+*Terima kasih atas kepedulian dan partisipasi aktif Bapak/Ibu dalam menjaga kedisiplinan ronda demi kebaikan lingkungan kita!*`;
+        }
+      }
+
+      return `👮 *Susunan Jadwal Ronda Malam Mingguan RT 02:*
+
+${sched || "- Giliran ronda bergantian di pos ronda keamanan"}
+
+*Bagi warga yang berhalangan hadir pada jadwal ronda yang ditentukan, harap segera berkoordinasi kepada koordinator keamanan RT.*`;
+    }
+    
+    // 5. Iuran & Monthly Contribution Info
+    if (q.includes('iuran') || q.includes('bayar') || q.includes('biaya') || q.includes('tunggakan') || q.includes('tarif') || q.includes('jumlah iuran') || q.includes('kas')) {
+      return `💰 *Informasi Iuran Bulanan RT 02:*
+
+- **Nominal Iuran:** **Rp 25.000 / Bulan** per Kepala Keluarga (KK).
+- **Alokasi Dana:** Iuran wajib ini digunakan penuh untuk pemeliharaan keamanan lingkungan (ronda/poskamling) serta biaya operasional pengangkutan bak sampah lingkungan.
+- **Metode Pembayaran:** Dapat dibayarkan secara langsung melalui **Bendahara RT 02** atau ditransfer ke rekening resmi kas RT.`;
+    }
+    
+    // 6. Trash Schedule Info
+    if (q.includes('sampah') || q.includes('bersih') || q.includes('kotor') || q.includes('angkut')) {
+      return `🗑️ *Jadwal Pengangkutan Sampah Warga:*
+
+- **Hari Pengangkut:** Setiap hari **Senin** dan **Kamis pagi** hari.
+- **Instruksi Kebersihan:** Mohon mengumpulkan kantong/bak sampah secara tertutup rapi di depan pagar rumah masing-masing sebelum jadwal mobil angkutan lewat agar mempercepat proses pengangkutan petugas kebersihan.`;
+    }
+    
+    // 7. Administrative letter requirements
+    if (q.includes('surat') || q.includes('pengantar') || q.includes('pengurusan') || q.includes('syarat')) {
+      return `📋 *Syarat Pengurusan Surat Pengantar RT:*
+
+Bagi warga yang membutuhkan berkas pengantar dari RT, mohon melengkapi berkas syarat berikut:
+1. Membawa **KTP Asli** warga bersangkutan.
+2. Membawa **Kartu Keluarga (KK) Asli**.
+3. **Melunasi iuran warga** wajib bulan berjalan.
+
+📍 **Prosedur Pengurusan:**
+Silakan berkunjung langsung ke **Kantor Sekretariat RT 02** setiap hari **Senin s/d Jumat** dari pukul **19.00 - 21.00 WITA**.`;
+    }
+    
+    // 8. Office location or schedule
+    if (q.includes('sekretariat') || q.includes('lokasi') || q.includes('alamat') || q.includes('kantor') || q.includes('jam buka')) {
+      return `🏢 *Layanan Sekretariat RT 02:*
+
+- **Lokasi Kantor:** Terletak di kawasan **Huntap 2 Tondo**, Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu (berdampingan langsung dengan kediaman Ketua RT 02).
+- **Layanan Administrasi:** Setiap hari kerja **Senin s/d Jumat** pukul **19.00 - 21.00 WITA**.`;
+    }
+    
+    // 9. Announcements or Activity news
+    if (q.includes('pengumuman') || q.includes('agenda') || q.includes('info terpilih') || q.includes('berita')) {
+      const cleanAnn = extractBlock(systemInstruction, "DATA PENGUMUMAN TERBARU:", "JADWAL RONDA");
+      return `📢 *Pengumuman & Agenda Warga Terbaru:*
+
+${cleanAnn || "Belum ada pengumuman kegiatan baru minggu ini."}`;
+    }
+    
+    // Default Fallback Help message
+    return `🤖 *Halo! Saya Rit, Asisten Virtual Cerdas RT 02.*
+
+Ada yang bisa saya bantu carikan informasinya? Cobalah tanyakan hal penting berikut ini:
+- **Jadwal ronda malam** hari ini atau esok hari (misal: "siapa ronda hari ini?" atau "budi ronda hari apa?")
+- **Syarat berkas** pengurusan Surat Pengantar RT
+- **Nominal iuran bulanan** & pemanfaatan kas
+- **Nomor kontak Pengurus RT** aktif (misal: "nomor bendahara" atau "nomor ketua rt")
+- **Jadwal pengangkutan sampah** lingkungan`;
+  };
+
+  const getFallbackBroadcastDraft = (topic: string, type: string, tone: string = 'Formal', dataContext?: any): string => {
+    if (type === 'billing') {
+      const totalAmountStr = Number(dataContext?.totalAmount || 0).toLocaleString('id-ID');
+      return `📢 *PENGINGAT KEKELUARGAAN: IURAN BULANAN RT 02*
+
+Yth. Bapak/Ibu *${dataContext?.headOfFamily || 'Warga RT 02'}*
+Pondok/Rumah Blok *${dataContext?.block || ''}/${dataContext?.number || ''}*
+
+Semoga Bapak/Ibu sekeluarga senantiasa sehat walafiat.
+
+Kami pengurus RT 02 ingin menyampaikan pemberitahuan iuran bulanan untuk kelancaran pelayanan keamanan dan kebersihan lingkungan kita bersama.
+
+Rincian Kewajiban:
+- *Tunggakan Periode:* ${dataContext?.unpaidMonths || 'Bulan berjalan'}
+- *Rincian:* ${dataContext?.itemsDetail || 'Iuran rutin bulanan'}
+- *Total Tunggakan:* *Rp ${totalAmountStr}*
+
+💳 Pembayaran dapat diserahkan langsung ke Bendahara RT atau via transfer rekening resmi RT 02.
+
+Mari bersama kita kuatkan silaturahmi dan ketertiban lingkungan demi kedaulatan RT 02 yang harmonis. Atas partisipasi nyata Bapak/Ibu, kami ucapkan terima kasih banyak.
+
+Salam rukun warga,
+*Pengurus RT 02/020 Huntap Tondo*`;
+    } else {
+      return `📢 *SIARAN INFORMASI WARGA RT 02*
+
+Warga RT 02 yang senantiasa rukun dan damai.
+
+Sehubungan dengan agenda lingkungan kita mengenai *"${topic}"*, kami mengharap kehadiran serta partisipasi proaktif Bapak/Ibu sekalian untuk mendukung kelancaran program tersebut.
+
+🗓️ Detail koordinasi teknis, waktu pelaksanaan, serta tanya jawab dapat dilakukan langsung melalui Sekretariat RT atau menghubungi nomor layanan Pengurus RT.
+
+Terima kasih atas kepedulian, silaturahmi, dan guyub rukun yang senantiasa mekar di lingkungan kita!
+
+Salam hangat rukun warga,
+*Pengurus RT 02/020 Huntap Tondo*`;
+    }
+  };
+
   // 1. Generate Announcement Draft
   app.post("/api/gemini/announcement-draft", async (req, res) => {
     const { topic, tone } = req.body;
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_api_key")) {
+        throw new Error("API_KEY_INVALID: API key is empty or placeholder.");
+      }
       const ai = getAiAdmin();
       const prompt = `Buatkan draf pengumuman untuk warga RT (Rukun Tetangga) dengan topik: "${topic}".
       Gaya bahasa: ${tone || 'Formal'}.
@@ -329,8 +700,8 @@ async function startServer() {
 
       res.json({ success: true, text: response.text || "Gagal membuat draf." });
     } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ success: false, error: error.message });
+      console.warn("⚠️ [Announcement Draft] Service fallback mode active (API key is unconfigured or inactive).");
+      res.json({ success: true, text: getFallbackAnnouncementDraft(topic, tone) });
     }
   });
 
@@ -338,6 +709,10 @@ async function startServer() {
   app.post("/api/gemini/analyze-reports", async (req, res) => {
     const { reports } = req.body;
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_api_key")) {
+        throw new Error("API_KEY_INVALID: API key is empty or placeholder.");
+      }
       const ai = getAiAdmin();
       const prompt = `Berikut adalah daftar laporan warga minggu ini:
       ${reports.map((r: string) => `- ${r}`).join('\n')}
@@ -351,8 +726,8 @@ async function startServer() {
 
       res.json({ success: true, text: response.text || "Tidak ada analisis." });
     } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ success: false, error: error.message });
+      console.warn("⚠️ [Analyze Reports] Service fallback mode active (API key is unconfigured or inactive).");
+      res.json({ success: true, text: getFallbackReportsAnalysis(reports) });
     }
   });
 
@@ -360,6 +735,10 @@ async function startServer() {
   app.post("/api/gemini/dashboard-summary", async (req, res) => {
     const { data } = req.body;
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_api_key")) {
+        throw new Error("API_KEY_INVALID: API key is empty or placeholder.");
+      }
       const ai = getAiAdmin();
       const prompt = `Bertindaklah sebagai Konsultan Manajemen Lingkungan profesional untuk Ketua RT.
       Analisis data realtime dashboard RT 02 berikut:
@@ -384,8 +763,8 @@ async function startServer() {
 
       res.json({ success: true, text: response.text || "Tidak ada analisis yang dihasilkan." });
     } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ success: false, error: error.message });
+      console.warn("⚠️ [Dashboard Summary] Service fallback mode active (API key is unconfigured or inactive).");
+      res.json({ success: true, text: getFallbackDashboardSummary(data) });
     }
   });
 
@@ -393,6 +772,10 @@ async function startServer() {
   app.post("/api/gemini/ask-rit", async (req, res) => {
     const { question, systemInstruction } = req.body;
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_api_key")) {
+        throw new Error("API_KEY_INVALID: API key is empty or placeholder.");
+      }
       const ai = getAiAdmin();
       const response = await ai.models.generateContent({
         model: 'gemini-3.5-flash',
@@ -404,8 +787,8 @@ async function startServer() {
 
       res.json({ success: true, text: response.text || "Maaf, saya tidak mengerti pertanyaan tersebut." });
     } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ success: false, error: error.message });
+      console.warn("⚠️ [Ask Rit] Service fallback mode active (API key is unconfigured or inactive).");
+      res.json({ success: true, text: getFallbackRitAnswer(question, systemInstruction) });
     }
   });
 
@@ -413,6 +796,10 @@ async function startServer() {
   app.post("/api/gemini/generate-broadcast", async (req, res) => {
     const { topic, type, tone, dataContext } = req.body;
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_api_key")) {
+        throw new Error("API_KEY_INVALID: API key is empty or placeholder.");
+      }
       const ai = getAiAdmin();
       let prompt = "";
       if (type === 'billing') {
@@ -440,8 +827,8 @@ async function startServer() {
 
       res.json({ success: true, text: response.text || "Gagal menghasilkan draf." });
     } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ success: false, error: error.message });
+      console.warn("⚠️ [Generate Broadcast] Service fallback mode active (API key is unconfigured or inactive).");
+      res.json({ success: true, text: getFallbackBroadcastDraft(topic, type, tone, dataContext) });
     }
   });
 

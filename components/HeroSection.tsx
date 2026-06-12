@@ -51,7 +51,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="relative bg-slate-950 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden mb-12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.3)] group min-h-[320px] flex items-center border border-white/10"
+        className="relative bg-slate-950 rounded-3xl md:rounded-[3.5rem] overflow-hidden mb-6 md:mb-12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.3)] group min-h-0 md:min-h-[320px] flex items-center border border-white/10"
       >
         {/* Colorful Mesh Gradient Background */}
         <div className="absolute inset-0 overflow-hidden">
@@ -96,13 +96,13 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
             transition={{ type: "spring", damping: 40, stiffness: 120 }}
         />
 
-        <div className="relative w-full px-8 py-8 md:px-16 md:py-12 flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="text-center lg:text-left max-w-2xl z-10">
+        <div className="relative w-full px-5 py-6 md:px-16 md:py-12 flex flex-col lg:flex-row items-center justify-between gap-6 md:gap-8">
+          <div className="text-center lg:text-left max-w-2xl z-10 w-full">
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-2.5 px-5 py-2 bg-white/5 backdrop-blur-2xl rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-4 border border-white/10 text-blue-400 shadow-2xl"
+              className="inline-flex items-center gap-2 px-3 py-1 md:px-5 md:py-2 bg-white/5 backdrop-blur-2xl rounded-full text-[8.5px] md:text-[10px] font-bold uppercase tracking-[0.25em] md:tracking-[0.3em] mb-2.5 md:mb-4 border border-white/10 text-blue-400 shadow-2xl"
             >
               <div className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -115,7 +115,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 leading-[0.9] tracking-tighter text-white"
+              className="text-3xl md:text-6xl lg:text-7xl font-black mb-2 leading-none tracking-tighter text-white"
             >
               TERAS <br className="hidden md:block"/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-violet-400 to-emerald-400 drop-shadow-[0_8px_8px_rgba(0,0,0,0.3)]">
@@ -127,7 +127,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-lg mb-6"
+              className="text-slate-400 text-xs md:text-lg font-light leading-relaxed max-w-lg mb-4 md:mb-6"
             >
               Harmoni lingkungan dalam genggaman. Platform digital modern untuk mewujudkan <span className="text-white font-medium">RT 02 yang Sinergis, Aman, dan Transparan.</span>
             </motion.p>
@@ -136,23 +136,21 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-wrap justify-center lg:justify-start gap-4"
+              className="flex flex-row flex-wrap items-center justify-center lg:justify-start gap-2.5 md:gap-4 w-full"
             >
               <Button 
                 variant="primary" 
-                size="lg" 
                 onClick={onExplore}
-                className="gap-3"
+                className="gap-2 px-4 py-2.5 text-[10px] sm:px-6 sm:py-3.5 sm:text-[11px] md:px-8 md:py-4 md:text-xs min-h-0"
               >
                 Mulai Jelajahi
-                <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
               </Button>
               <Button 
                 variant="glass" 
-                size="lg" 
-                className="cursor-default gap-3"
+                className="cursor-default gap-2 px-4 py-2.5 text-[10px] sm:px-6 sm:py-3.5 sm:text-[11px] md:px-8 md:py-4 md:text-xs min-h-0"
               >
-                <ShieldCheck size={22} className="text-emerald-400" />
+                <ShieldCheck size={16} className="text-emerald-400" />
                 Smart Env
               </Button>
             </motion.div>
@@ -164,24 +162,24 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
             transition={{ delay: 0.7, duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="w-full lg:w-auto z-10"
           >
-            <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-6 md:p-8 text-white w-full lg:min-w-[340px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)] relative group/widget overflow-hidden hover:border-white/20 transition-all duration-700">
+            <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 text-white w-full lg:min-w-[340px] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)] relative group/widget overflow-hidden hover:border-white/20 transition-all duration-700">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-emerald-500/10 opacity-0 group-hover/widget:opacity-100 transition-opacity duration-1000" />
               
-              <div className="relative z-10 space-y-6">
+              <div className="relative z-10 space-y-4 md:space-y-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-4xl md:text-5xl font-black tracking-tighter mb-1 tabular-nums text-white drop-shadow-2xl">
+                    <p className="text-3xl md:text-5xl font-black tracking-tighter mb-1 tabular-nums text-white drop-shadow-2xl">
                       {date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                     </p>
-                    <p className="text-xs font-bold text-blue-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <p className="text-[10px] md:text-xs font-bold text-blue-400 uppercase tracking-[0.2em] flex items-center gap-1.5 md:gap-2">
                       <Sparkles size={12} />
                       {date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
                     </p>
                   </div>
-                  <div className="flex flex-col items-end gap-3">
+                  <div className="flex flex-col items-end gap-2 md:gap-3">
                     <motion.div 
                         whileHover={{ scale: 1.1, rotate: 10 }}
-                        className="p-4 bg-white/5 rounded-[1.5rem] border border-white/10 shadow-2xl backdrop-blur-xl"
+                        className="p-2.5 md:p-4 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl"
                     >
                       {getWeatherIcon(weather?.weatherCode)}
                     </motion.div>
@@ -196,44 +194,44 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
 
                 <div className="h-px bg-gradient-to-r from-white/20 via-white/5 to-transparent" />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="space-y-3 md:space-y-4">
                     <div className="flex items-center gap-3 group/item">
-                      <div className="p-2.5 bg-rose-500/20 rounded-xl text-rose-400 group-hover/item:scale-110 group-hover/item:bg-rose-500/30 transition-all duration-300">
-                        <Thermometer size={18} />
+                      <div className="p-2 md:p-2.5 bg-rose-500/20 rounded-xl text-rose-400 group-hover/item:scale-110 group-hover/item:bg-rose-500/30 transition-all duration-300">
+                        <Thermometer size={14} className="md:w-[18px] md:h-[18px]" />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Suhu</p>
-                        <p className="text-lg font-bold text-white leading-none mt-1">{weather ? `${weather.temp}°C` : '--'}</p>
+                        <p className="text-[8px] md:text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Suhu</p>
+                        <p className="text-sm md:text-lg font-bold text-white leading-none mt-0.5 md:mt-1">{weather ? `${weather.temp}°C` : '--'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 group/item">
-                      <div className="p-2.5 bg-blue-500/20 rounded-xl text-blue-400 group-hover/item:scale-110 group-hover/item:bg-blue-500/30 transition-all duration-300">
-                        <Droplets size={18} />
+                      <div className="p-2 md:p-2.5 bg-blue-500/20 rounded-xl text-blue-400 group-hover/item:scale-110 group-hover/item:bg-blue-500/30 transition-all duration-300">
+                        <Droplets size={14} className="md:w-[18px] md:h-[18px]" />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Lembab</p>
-                        <p className="text-lg font-bold text-white leading-none mt-1">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
+                        <p className="text-[8px] md:text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Lembab</p>
+                        <p className="text-sm md:text-lg font-bold text-white leading-none mt-0.5 md:mt-1">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     <div className="flex items-center gap-3 group/item">
-                      <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400 group-hover/item:scale-110 group-hover/item:bg-emerald-500/30 transition-all duration-300">
-                        <WindIcon size={18} />
+                      <div className="p-2 md:p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400 group-hover/item:scale-110 group-hover/item:bg-emerald-500/30 transition-all duration-300">
+                        <WindIcon size={14} className="md:w-[18px] md:h-[18px]" />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Angin</p>
-                        <p className="text-lg font-bold text-white leading-none mt-1">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
+                        <p className="text-[8px] md:text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Angin</p>
+                        <p className="text-sm md:text-lg font-bold text-white leading-none mt-0.5 md:mt-1">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 group/item">
-                      <div className="p-2.5 bg-slate-500/20 rounded-xl text-slate-400 group-hover/item:scale-110 group-hover/item:bg-slate-500/30 transition-all duration-300">
-                        <Cloud size={18} />
+                      <div className="p-2 md:p-2.5 bg-slate-500/20 rounded-xl text-slate-400 group-hover/item:scale-110 group-hover/item:bg-slate-500/30 transition-all duration-300">
+                        <Cloud size={14} className="md:w-[18px] md:h-[18px]" />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Kondisi</p>
-                        <p className="text-lg font-bold text-white leading-none mt-1 truncate max-w-[100px]">{weather ? weather.condition : '--'}</p>
+                        <p className="text-[8px] md:text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">Kondisi</p>
+                        <p className="text-sm md:text-lg font-bold text-white leading-none mt-0.5 md:mt-1 truncate max-w-[100px]">{weather ? weather.condition : '--'}</p>
                       </div>
                     </div>
                   </div>

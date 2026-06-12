@@ -496,6 +496,27 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             </button>
                           </div>
                        </div>
+
+                       {/* Option to generate mutation log (enabled only during edit of occupied house) */}
+                       {editingHouseId && formData.status === "Occupied" && (
+                         <div className="bg-amber-50/70 p-4 border border-amber-200/80 rounded-xl flex items-start gap-3">
+                           <input 
+                             type="checkbox"
+                             id="generateMutationLog"
+                             className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                             checked={formData.generateMutationLog || false}
+                             onChange={e => setFormData({...formData, generateMutationLog: e.target.checked})}
+                           />
+                           <div className="flex-1">
+                             <label htmlFor="generateMutationLog" className="block text-xs font-bold text-slate-800 cursor-pointer select-none">
+                               Catat Perubahan sebagai Mutasi Kependudukan Baru
+                             </label>
+                             <p className="text-[10px] text-slate-500 mt-1 leading-normal select-none">
+                               Centang jika ada warga baru masuk atau kelahiran. Kosongkan jika sekadar koreksi ejaan (typo) atau revisi administratif agar log laporan bulanan tetap bersih dari data tumpang tindih.
+                             </p>
+                           </div>
+                         </div>
+                       )}
                     </div>
                   </div>
                 </div>
@@ -549,10 +570,15 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           <option value="">Pilih Sektor...</option>
                           <option value="PNS">PNS / TNI / Polri</option>
                           <option value="Pegawai Swasta">Pegawai Swasta</option>
-                          <option value="Wiraswasta">Wiraswasta / Pengusaha</option>
+                          <option value="Wiraswasta">Wiraswasta / Pengusaha / UMKM</option>
                           <option value="Freelance">Pekerja Lepas / Freelance</option>
+                          <option value="Pelajar/Mahasiswa">Pelajar / Mahasiswa</option>
+                          <option value="Ibu Rumah Tangga">Ibu Rumah Tangga</option>
+                          <option value="Petani/Nelayan">Petani / Nelayan</option>
+                          <option value="Buruh">Buruh Harian / Pekerja Kasar</option>
                           <option value="Pensiunan">Pensiunan</option>
                           <option value="Tidak Bekerja">Tidak / Belum Bekerja</option>
+                          <option value="Lainnya">Lainnya</option>
                         </select>
                         <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
                       </div>

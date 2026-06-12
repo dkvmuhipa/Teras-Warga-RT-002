@@ -101,7 +101,7 @@ export const PublicVerification = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[3.5rem] shadow-2xl shadow-indigo-100/50 border border-slate-100 overflow-hidden"
+          className="bg-white rounded-[3.5rem] shadow-2xl shadow-indigo-100/50 border border-slate-100 overflow-hidden receipt-printable"
         >
           {/* Status Banner */}
           <div className={`p-8 md:p-12 text-center ${isApproved ? 'bg-emerald-50' : 'bg-amber-50'}`}>
@@ -190,7 +190,16 @@ export const PublicVerification = () => {
               <Button onClick={() => navigate('/')} variant="outline" className="flex-1 py-4 rounded-2xl border-slate-200 text-slate-600">
                 <ArrowLeft size={18} className="mr-2" /> Kembali ke Portal
               </Button>
-              <Button onClick={() => window.print()} className="flex-1 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-100">
+              <Button 
+                onClick={() => {
+                  document.body.classList.add('print-receipt-mode');
+                  window.print();
+                  setTimeout(() => {
+                    document.body.classList.remove('print-receipt-mode');
+                  }, 1000);
+                }} 
+                className="flex-1 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-100"
+              >
                 <Download size={18} className="mr-2" /> Cetak Bukti Verifikasi
               </Button>
             </div>

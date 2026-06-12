@@ -17,9 +17,16 @@ interface DemographicAnalyticsProps {
   cashFlow: CashFlow[];
   reports: Report[];
   pdfConfig: PdfConfig;
+  hideHeader?: boolean;
 }
 
-export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ houses = [], cashFlow = [], reports = [], pdfConfig }) => {
+export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ 
+  houses = [], 
+  cashFlow = [], 
+  reports = [], 
+  pdfConfig,
+  hideHeader = false
+}) => {
   const [activeTab, setActiveTab] = useState<'demographics' | 'advanced'>('demographics');
 
   // Early return if data is missing
@@ -79,7 +86,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
     houses.forEach(h => {
       if (h && h.status === 'Occupied') {
         totalVehicles += (h.vehicleCount || 0);
-        const occupantsCount = h.occupants || 1;
+        const occupantsCount = Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0));
         totalSoul += occupantsCount;
         
         // ... (vulnerable group increments) ...
@@ -366,40 +373,42 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({ hous
       className="space-y-10 pb-24"
     >
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-2 bg-indigo-600 rounded-lg">
-              <Sparkles size={16} className="text-white" />
+      {!hideHeader && (
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 bg-indigo-600 rounded-lg">
+                <Sparkles size={16} className="text-white" />
+              </div>
+              <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Intelligence Center</span>
             </div>
-            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Intelligence Center</span>
+            <h2 className="text-4xl font-black text-slate-900 tracking-tight">Analitik & Demografi</h2>
+            <p className="text-slate-500 font-medium mt-2 max-w-2xl">
+              Pusat data terpadu RT 02 untuk memantau demografi warga, tren keuangan, dan kualitas data secara real-time.
+            </p>
           </div>
-          <h2 className="text-4xl font-black text-slate-900 tracking-tight">Analitik & Demografi</h2>
-          <p className="text-slate-500 font-medium mt-2 max-w-2xl">
-            Pusat data terpadu RT 02 untuk memantau demografi warga, tren keuangan, dan kualitas data secara real-time.
-          </p>
+          
+          {/* Tabs */}
+          <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+            <button 
+              onClick={() => setActiveTab('demographics')}
+              className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'demographics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Demografi
+            </button>
+            <button 
+              onClick={() => setActiveTab('advanced')}
+              className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'advanced' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Operasional & Tren
+            </button>
+          </div>
         </div>
-        
-        {/* Tabs */}
-        <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-          <button 
-            onClick={() => setActiveTab('demographics')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'demographics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Demografi
-          </button>
-          <button 
-            onClick={() => setActiveTab('advanced')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'advanced' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Operasional & Tren
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Tab Content */}
       <div className="relative min-h-[500px]">
-        {activeTab === 'demographics' ? (
+        {(hideHeader || activeTab === 'demographics') ? (
           <div key="demographics" className="space-y-10">
             {/* Primary Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -105,8 +105,11 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
         kkNumber: reg.kkNumber || '',
         isPKH: reg.isPKH || false,
         isBLT: reg.isBLT || false,
+        isBPNT: reg.isBPNT || false,
         isBansosLain: reg.isBansosLain || false,
         bansosLainName: reg.bansosLainName || '',
+        isDisability: reg.isDisability || false,
+        isOrphan: reg.isOrphan || false,
         childCount: reg.childCount || 0,
       } as any);
       

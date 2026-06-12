@@ -232,6 +232,58 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         <p className="text-slate-500 font-medium mt-2">Selamat datang kembali di sistem informasi digital RT 02.</p>
       </div>
 
+      {/* Quick Actions - Layanan Warga Terpadu Grid from User Image */}
+      <motion.div 
+        variants={itemVariants}
+        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2.5rem] p-6 md:p-10 shadow-xl shadow-slate-200/30 relative z-10"
+      >
+        <div className="mb-8">
+          <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight">
+            Layanan <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
+          </h3>
+          <p className="text-slate-400 font-medium text-xs md:text-sm mt-1 max-w-xl">
+            Semua urusan warga dan administrasi kini serba praktis dalam satu ketukan.
+          </p>
+        </div>
+
+        {/* Grid layout matching Gojek/Grab/Citizen apps exactly: 4 columns on mobile, 8 columns on desktop */}
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-y-8 gap-x-2 md:gap-x-8 w-full max-w-5xl">
+          {quickActions.map((action, idx) => (
+            <motion.button
+              key={idx}
+              whileHover={{ y: -4, scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={action.action || (() => navigate(action.link!))}
+              className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
+            >
+              {/* Beautiful Badges directly layered on top of squircles */}
+              {action.badge && (
+                <span className={`absolute -top-1 md:-top-1.5 right-[5%] sm:right-[15%] md:right-[20%] z-20 text-[6px] md:text-[8px] font-black uppercase tracking-widest ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 md:px-2 py-[1px] md:py-0.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)] animate-pulse select-none scale-95`}>
+                  {action.badge}
+                </span>
+              )}
+
+              {/* Highly Polished Squircles with match drop-shadow */}
+              <div className={`
+                w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] md:rounded-[1.75rem]
+                ${action.color} text-white
+                flex items-center justify-center
+                shadow-lg ${action.shadow} group-hover:scale-105
+                transition-all duration-300 relative overflow-hidden
+              `}>
+                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <action.icon size={24} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.4} />
+              </div>
+
+              {/* Service Label */}
+              <span className="font-extrabold text-slate-700 text-[11px] md:text-sm tracking-tight leading-snug mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[85px] md:max-w-none">
+                {action.label}
+              </span>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
       <DigitalSummary />
 
       {/* Resident Dues Widget - NEW Bento Card */}
@@ -358,58 +410,6 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </motion.div>
 
       <ServiceStats houses={houses} reports={reports} letters={letters} />
-
-      {/* Quick Actions - Layanan Warga Terpadu Grid from User Image */}
-      <motion.div 
-        variants={itemVariants}
-        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2.5rem] p-6 md:p-10 shadow-xl shadow-slate-200/30 -mt-8 relative z-10"
-      >
-        <div className="mb-8">
-          <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight">
-            Layanan <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
-          </h3>
-          <p className="text-slate-400 font-medium text-xs md:text-sm mt-1 max-w-xl">
-            Semua urusan warga dan administrasi kini serba praktis dalam satu ketukan.
-          </p>
-        </div>
-
-        {/* Grid layout matching Gojek/Grab/Citizen apps exactly: 4 columns on mobile, 8 columns on desktop */}
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-y-8 gap-x-2 md:gap-x-8 w-full max-w-5xl">
-          {quickActions.map((action, idx) => (
-            <motion.button
-              key={idx}
-              whileHover={{ y: -4, scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={action.action || (() => navigate(action.link!))}
-              className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
-            >
-              {/* Beautiful Badges directly layered on top of squircles */}
-              {action.badge && (
-                <span className={`absolute -top-1 md:-top-1.5 right-[5%] sm:right-[15%] md:right-[20%] z-20 text-[6px] md:text-[8px] font-black uppercase tracking-widest ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 md:px-2 py-[1px] md:py-0.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)] animate-pulse select-none scale-95`}>
-                  {action.badge}
-                </span>
-              )}
-
-              {/* Highly Polished Squircles with match drop-shadow */}
-              <div className={`
-                w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] md:rounded-[1.75rem]
-                ${action.color} text-white
-                flex items-center justify-center
-                shadow-lg ${action.shadow} group-hover:scale-105
-                transition-all duration-300 relative overflow-hidden
-              `}>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                <action.icon size={24} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.4} />
-              </div>
-
-              {/* Service Label */}
-              <span className="font-extrabold text-slate-700 text-[11px] md:text-sm tracking-tight leading-snug mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[85px] md:max-w-none">
-                {action.label}
-              </span>
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
 
       {/* Quick Report Modal */}
       <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Aspirasi & Pengaduan Warga" maxWidth="max-w-xl">
@@ -650,7 +650,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         {/* Sidebar Widgets - Specialist Tool Style */}
         <motion.div variants={itemVariants} className="space-y-10">
           {/* Status Check Widget */}
-          <div className="bg-indigo-600 rounded-[3rem] p-10 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group">
+          <div className="hidden md:block bg-indigo-600 rounded-[3rem] p-10 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
               <CheckCircle2 size={160} />
             </div>

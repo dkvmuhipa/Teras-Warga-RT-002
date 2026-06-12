@@ -242,6 +242,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     isInitialData: false, 
     pbbStatus: 'Belum Diambil',
     pbbYear: new Date().getFullYear().toString(),
+    generateMutationLog: true,
     familyMembers: [] as { id?: string; name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     useManualDemographics: false,
     accessCode: ''
@@ -844,6 +845,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       isInitialData: false,
       pbbStatus: 'Belum Diambil',
       pbbYear: new Date().getFullYear().toString(),
+      generateMutationLog: true,
       familyMembers: [],
       useManualDemographics: false,
       accessCode: ''
@@ -1062,6 +1064,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       isInitialData: false,
       pbbStatus: house.pbbStatus || 'Belum Diambil',
       pbbYear: house.pbbYear || new Date().getFullYear().toString(),
+      generateMutationLog: false,
       familyMembers: (house.familyMembers || []).map(m => ({ ...m, id: m.id || Math.random().toString(36).substr(2, 9) })),
       useManualDemographics: house.useManualDemographics || false,
       accessCode: house.accessCode || ''
@@ -1202,7 +1205,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           const oldFamilyCount = oldHouse.familyMembers?.length || 0;
           const newFamilyCount = data.familyMembers?.length || 0;
           
-          if (newOccupants > oldOccupants || newFamilyCount > oldFamilyCount || data.headOfFamily !== oldHouse.headOfFamily) {
+          if (data.generateMutationLog && (newOccupants > oldOccupants || newFamilyCount > oldFamilyCount || data.headOfFamily !== oldHouse.headOfFamily)) {
             const isNewHead = data.headOfFamily !== oldHouse.headOfFamily;
             const diff = Math.max(newOccupants - oldOccupants, newFamilyCount - oldFamilyCount, 0);
             const oldBabyCount = oldHouse.babyCount || 0;
@@ -1300,7 +1303,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   });
 
   // Stats
-  const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0);
+  const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0)), 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const emptyHouses = houses.filter(h => h.status === 'Empty').length;
   const verifiedCount = houses.filter(h => h.isVerified).length;

@@ -2643,7 +2643,7 @@ export const generateDemographicAnalyticsReportPDF = async (
   });
 
   // Calculate totalSoul using the occupants field from houses to ensure consistency with the dashboard
-  const totalSoul = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + (h.occupants || 1), 0);
+  const totalSoul = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0)), 0);
   const totalRegistered = allResidents.length;
 
   // Header

@@ -323,8 +323,8 @@ export const App = () => {
         }
     });
 
-    // Ensure Mosque exists in Firestore
-    ensureMosqueExists();
+    // Ensure Mosque exists in Firestore if empty database, but avoid recreating if deleted by user.
+    // ensureMosqueExists();
 
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
@@ -482,7 +482,7 @@ export const App = () => {
                                 <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
                             </Routes>
                         </div>
-                        <ChatBot announcements={announcements} ronda={ronda} officials={officials} />
+                        <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} />
                         <PanicButton houses={houses} />
                         <PushNotificationManager userId={localStorage.getItem('resident_house_id') || 'guest_user'} />
                     </>

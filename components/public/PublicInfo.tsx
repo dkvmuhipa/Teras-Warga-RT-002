@@ -52,7 +52,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
     const currentBalance = totalIncome - totalExpense;
     
     // Statistics
-    const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + h.occupants, 0);
+    const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0)), 0);
     const totalHouseholds = houses.filter(h => h.status === 'Occupied').length;
     const occupancyRate = Math.round((totalHouseholds / houses.length) * 100);
 

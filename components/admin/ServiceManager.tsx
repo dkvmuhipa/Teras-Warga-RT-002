@@ -1879,8 +1879,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             onChange={e => setEditLetterData({...editLetterData, familyStatus: e.target.value as any})}
                           >
                             <option value="Kepala Keluarga">Kepala Keluarga</option>
+                            <option value="Suami">Suami</option>
                             <option value="Istri">Istri</option>
                             <option value="Anak">Anak</option>
+                            <option value="Menantu">Menantu</option>
+                            <option value="Cucu">Cucu</option>
+                            <option value="Orang Tua">Orang Tua</option>
+                            <option value="Mertua">Mertua</option>
+                            <option value="Saudara/Adik/Kakak">Saudara/Adik/Kakak</option>
+                            <option value="Famili Lain">Famili Lain</option>
+                            <option value="Pembantu">Pembantu</option>
                             <option value="Lainnya">Lainnya</option>
                           </select>
                         </div>
@@ -2443,7 +2451,18 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       value={adminForm.familyStatus || 'Kepala Keluarga'} 
                       onChange={e=>setAdminForm({...adminForm, familyStatus: e.target.value as any})}
                     >
-                      <option>Kepala Keluarga</option><option>Istri</option><option>Anak</option><option>Lainnya</option>
+                      <option>Kepala Keluarga</option>
+                      <option>Suami</option>
+                      <option>Istri</option>
+                      <option>Anak</option>
+                      <option>Menantu</option>
+                      <option>Cucu</option>
+                      <option>Orang Tua</option>
+                      <option>Mertua</option>
+                      <option>Saudara/Adik/Kakak</option>
+                      <option>Famili Lain</option>
+                      <option>Pembantu</option>
+                      <option>Lainnya</option>
                     </select>
                   </div>
                 </div>
