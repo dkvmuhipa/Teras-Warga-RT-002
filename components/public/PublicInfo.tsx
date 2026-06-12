@@ -151,6 +151,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
     const [checkOfficer, setCheckOfficer] = useState('');
     const [checkPin, setCheckPin] = useState('');
     const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
+    const [scanMode, setScanMode] = useState<'camera' | 'simulate'>('camera');
     // activePatrol is now a prop
 
     useEffect(() => {
@@ -1461,25 +1462,102 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 </div>
                                 <p className="text-xs text-indigo-800 mt-1">{activePatrol.visitedCheckpoints.length} / {checkpoints.length} Titik Tercapai</p>
                             </div>
-                            <div className="w-full aspect-square bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
-                                <QrReader
-                                    constraints={{ facingMode: 'environment' }}
-                                    onResult={(result, error) => {
-                                        if (result) {
-                                            const checkpoint = checkpoints.find(cp => cp.qrCode === result.getText());
-                                            if (checkpoint) {
-                                                visitCheckpoint(activePatrol.id, checkpoint.id);
-                                                toast.success("Titik tercapai!", {
-                                                    description: checkpoint.name
-                                                });
-                                            } else {
-                                                toast.error("QR tidak valid!");
-                                            }
-                                        }
-                                    }}
-                                    className="w-full h-full"
-                                />
+
+                            {/* Toggle between Camera and Simulator mode */}
+                            <div className="flex bg-slate-100 p-1 rounded-xl">
+                                <button 
+                                    type="button"
+                                    onClick={() => setScanMode('camera')}
+                                    className={`flex-1 py-1.5 text-xs font-black rounded-lg transition-all ${
+                                        scanMode === 'camera' 
+                                            ? 'bg-white text-indigo-700 shadow-sm' 
+                                            : 'text-slate-500 hover:text-slate-800'
+                                    }`}
+                                >
+                                    Kamera QR
+                                </button>
+                                <button 
+                                    type="button"
+                                    onClick={() => setScanMode('simulate')}
+                                    className={`flex-1 py-1.5 text-xs font-black rounded-lg transition-all ${
+                                        scanMode === 'simulate' 
+                                            ? 'bg-white text-indigo-700 shadow-sm' 
+                                            : 'text-slate-500 hover:text-slate-800'
+                                    }`}
+                                >
+                                    Simulasi Scan (Bypass)
+                                </button>
                             </div>
+
+                            {scanMode === 'camera' ? (
+                                <div className="w-full aspect-square bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+                                    <QrReader
+                                        constraints={{ facingMode: 'environment' }}
+                                        onResult={(result, error) => {
+                                            if (result) {
+                                                const checkpoint = checkpoints.find(cp => cp.qrCode === result.getText());
+                                                if (checkpoint) {
+                                                    visitCheckpoint(activePatrol.id, checkpoint.id);
+                                                    toast.success("Titik tercapai!", {
+                                                        description: checkpoint.name
+                                                    });
+                                                } else {
+                                                    toast.error("QR tidak valid!");
+                                                }
+                                            }
+                                        }}
+                                        className="w-full h-full"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Simulasi scan pos tanpa kamera</p>
+                                        <p className="text-[9px] text-slate-400">Klik tombol TAP QR di pos ronda yang ingin Anda capai.</p>
+                                    </div>
+                                    <div className="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
+                                        {checkpoints.map((cp, idx) => {
+                                            const isVisited = activePatrol.visitedCheckpoints.includes(cp.id);
+                                            return (
+                                                <div 
+                                                    key={cp.id} 
+                                                    className={`flex items-center justify-between p-2.5 rounded-xl border text-xs font-bold transition-all ${
+                                                        isVisited 
+                                                            ? 'bg-indigo-50 border-indigo-200 text-indigo-700' 
+                                                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <span className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-black shrink-0 ${isVisited ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                                            {idx + 1}
+                                                        </span>
+                                                        <span className="truncate text-[11px] font-semibold">{cp.name}</span>
+                                                    </div>
+                                                    {isVisited ? (
+                                                        <span className="text-[9px] text-emerald-600 font-extrabold flex items-center gap-0.5 uppercase tracking-widest leading-none shrink-0">
+                                                            <CheckCircle size={10} /> OK
+                                                        </span>
+                                                    ) : (
+                                                        <button 
+                                                            type="button"
+                                                            onClick={async () => {
+                                                                await visitCheckpoint(activePatrol.id, cp.id);
+                                                                toast.success("Simulasi Check-In Berhasil!", {
+                                                                    description: cp.name
+                                                                });
+                                                            }}
+                                                            className="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[9px] font-black uppercase tracking-wider transition-all hover:scale-105 active:scale-95 shrink-0"
+                                                        >
+                                                            Tap QR
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             <button onClick={handleFinishPatrol} className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20">
                                 Selesai Patroli
                             </button>

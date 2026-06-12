@@ -15,7 +15,11 @@ import {
   addRondaAttendance,
   updateRondaAttendance,
   updateHouseData,
-  addReportToDb
+  addReportToDb,
+  startPatrolSession,
+  finishPatrolSession,
+  updatePatrolLocation,
+  visitCheckpoint
 } from '../../services/databaseService';
 import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
@@ -61,11 +65,53 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'swaps' | 'checkpoints' | 'map' | 'info-points' | 'monitoring' | 'attendance' | 'leaderboard'>('monitoring');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'checkpoints' | 'monitoring' | 'attendance'>('monitoring');
+  const [scheduleSubTab, setScheduleSubTab] = useState<'calendar' | 'swaps' | 'leaderboard'>('calendar');
+  const [scheduleSearchQuery, setScheduleSearchQuery] = useState('');
+  const [selectedScheduleDay, setSelectedScheduleDay] = useState<string>('');
 
   // Shift Management State
   const [shifts, setShifts] = useState<{ id: string; time: string; members: string[] }[]>([]);
   const [residentSearch, setResidentSearch] = useState('');
+
+  // Siskamling Simulator State
+  const [simCheckOfficerName, setSimCheckOfficerName] = useState('');
+
+  const handleStartSimPatrol = async (officerName: string) => {
+    if (!officerName.trim()) {
+      toast.error("Format input salah: Isi Nama Petugas Patroli!");
+      return;
+    }
+    try {
+      await startPatrolSession(officerName);
+      toast.success(`Sesi Patroli Siskamling oleh ${officerName} berhasil diaktifkan!`);
+    } catch (err) {
+      toast.error("Gagal menjadwalkan patroli simulasi.");
+    }
+  };
+
+  const handleSimVisitCheckpoint = async (checkpoint: Checkpoint) => {
+    if (!activePatrol) return;
+    try {
+      await visitCheckpoint(activePatrol.id, checkpoint.id);
+      await updatePatrolLocation(activePatrol.id, checkpoint.x || 0, checkpoint.y || 0);
+      toast.success(`Check-In Siskamling berhasil di ${checkpoint.name}!`, {
+        description: `Koordinat: ${checkpoint.x || 0}%, ${checkpoint.y || 0}% telah disimpan.`
+      });
+    } catch (err) {
+      toast.error("Gagal check-in checkpoint.");
+    }
+  };
+
+  const handleFinishSimPatrol = async () => {
+    if (!activePatrol) return;
+    try {
+      await finishPatrolSession(activePatrol.id);
+      toast.success("Patroli siskamling telah diselesaikan. Log patroli tersimpan secara permanen.");
+    } catch (err) {
+      toast.error("Gagal menyelesaikan patroli.");
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = subscribeToCheckpoints((data) => {
@@ -492,15 +538,11 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       {/* Navigation Tabs */}
       <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 w-full lg:w-fit overflow-x-auto no-scrollbar">
         {[
-          { id: 'schedule', label: 'Jadwal', icon: Calendar },
-          { id: 'logs', label: 'Log', icon: Activity },
-          { id: 'monitoring', label: 'Monitoring', icon: Eye, count: activePanicAlerts.length },
-          { id: 'swaps', label: 'Tukar', icon: ArrowLeftRight, count: rondaSwapRequests.filter(r => r.status === 'Menunggu').length },
-          { id: 'attendance', label: 'Absensi', icon: UserCheck },
-          { id: 'leaderboard', label: 'Peringkat', icon: ShieldCheck },
-          { id: 'checkpoints', label: 'Titik', icon: MapPin },
-          { id: 'info-points', label: 'Info', icon: Info },
-          { id: 'map', label: 'Peta', icon: ShieldCheck }
+          { id: 'monitoring', label: 'Pusat Kontrol Siskamling', icon: Eye, count: activePanicAlerts.length },
+          { id: 'schedule', label: 'Jadwal & Keaktifan', icon: Calendar, count: rondaSwapRequests.filter(r => r.status === 'Menunggu').length },
+          { id: 'logs', label: 'Log Patroli', icon: Activity },
+          { id: 'attendance', label: 'Absensi Ronda', icon: UserCheck },
+          { id: 'checkpoints', label: 'Kelola Pos', icon: MapPin }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -615,202 +657,801 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 </motion.div>
               </div>
 
-              {/* Panic Alerts List */}
-              <div className="xl:col-span-1 space-y-4">
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest px-2">Alarm Darurat Aktif</h3>
-                {activePanicAlerts.length > 0 ? (
-                  activePanicAlerts.map((alert) => (
-                    <motion.div 
-                      key={alert.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className={`p-5 rounded-3xl border shadow-lg ${
-                        alert.status === 'Active' ? 'bg-rose-50 border-rose-200 shadow-rose-100' : 'bg-amber-50 border-amber-200 shadow-amber-100'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className={`p-2 rounded-xl ${alert.status === 'Active' ? 'bg-rose-600 text-white animate-bounce' : 'bg-amber-500 text-white'}`}>
-                          <AlertTriangle size={20} />
-                        </div>
-                        <div>
-                          <h4 className="font-black text-slate-900 text-sm">{alert.residentName}</h4>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Blok {alert.location}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 mb-5">
-                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                          <span className="text-slate-400">Status</span>
-                          <span className={alert.status === 'Active' ? 'text-rose-600' : 'text-amber-600'}>{alert.status}</span>
-                        </div>
-                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                          <span className="text-slate-400">Waktu</span>
-                          <span className="text-slate-700">{new Date(alert.timestamp).toLocaleTimeString('id-ID')}</span>
-                        </div>
-                        {alert.responderName && (
-                          <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                            <span className="text-slate-400">Merespon</span>
-                            <span className="text-slate-700">{alert.responderName}</span>
+              {/* Panic Alerts & Patrol Simulation Side Column */}
+              <div className="xl:col-span-1 space-y-6">
+                {/* Panic Alerts Card Stack */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                    Alarm Darurat Aktif
+                  </h3>
+                  {activePanicAlerts.length > 0 ? (
+                    activePanicAlerts.map((alert) => (
+                      <motion.div 
+                        key={alert.id}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`p-4 rounded-3xl border shadow-lg ${
+                          alert.status === 'Active' ? 'bg-rose-50 border-rose-200 shadow-rose-100' : 'bg-amber-50 border-amber-200 shadow-amber-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className={`p-2 rounded-xl ${alert.status === 'Active' ? 'bg-rose-600 text-white animate-bounce' : 'bg-amber-500 text-white'}`}>
+                            <AlertTriangle size={18} />
                           </div>
-                        )}
+                          <div>
+                            <h4 className="font-black text-slate-900 text-xs">{alert.residentName}</h4>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Blok {alert.location}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 mb-3 text-[10px] font-bold uppercase tracking-widest">
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Status</span>
+                            <span className={alert.status === 'Active' ? 'text-rose-600' : 'text-amber-600'}>{alert.status}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Waktu</span>
+                            <span className="text-slate-700">{new Date(alert.timestamp).toLocaleTimeString('id-ID')}</span>
+                          </div>
+                          {alert.responderName && (
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Merespon</span>
+                              <span className="text-slate-700">{alert.responderName}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2">
+                          {alert.status === 'Active' ? (
+                            <Button 
+                              onClick={() => handleRespondPanic(alert.id)}
+                              className="flex-1 bg-rose-600 hover:bg-rose-700 text-[10px] font-black uppercase py-2"
+                            >
+                              Respon
+                            </Button>
+                          ) : (
+                            <Button 
+                              onClick={() => handleResolvePanic(alert.id)}
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-[10px] font-black uppercase py-2"
+                            >
+                              Selesai
+                            </Button>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-5 text-center">
+                      <ShieldCheck size={24} className="text-slate-300 mx-auto mb-2" />
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Seluruh Wilayah Aman</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Siskamling Patrol Simulator Widget */}
+                <div className="bg-slate-900 text-white rounded-[2rem] p-5 shadow-xl border border-slate-800 space-y-4">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-indigo-600 rounded-lg text-white">
+                        <Activity size={14} className="animate-pulse" />
+                      </div>
+                      <div>
+                        <h3 className="text-[10px] font-black uppercase tracking-widest leading-none">Walkie-Talkie</h3>
+                        <p className="text-[9px] text-slate-400 font-bold mt-1">Status Siskamling Digital</p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 bg-indigo-950/50 rounded-full text-[8px] font-black text-indigo-400 uppercase tracking-widest border border-indigo-900/40">SIMULATOR</span>
+                  </div>
+
+                  {!activePatrol ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Pilih Petugas Ronda</label>
+                        <select 
+                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          value={simCheckOfficerName}
+                          onChange={(e) => setSimCheckOfficerName(e.target.value)}
+                        >
+                          <option value="">-- Pilih Anggota Terjadwal --</option>
+                          {(() => {
+                            const todayDay = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
+                            const sched = ronda.find(r => r.day === todayDay);
+                            return (sched?.members || []).map(m => (
+                              <option key={m} value={m}>{m} (Jadwal Hari Ini)</option>
+                            ));
+                          })()}
+                          <option value="Admin Keamanan">Admin Keamanan (Saya)</option>
+                          <option value="Bpk. RT">Bapak RT (Siaga)</option>
+                        </select>
                       </div>
 
-                      <div className="flex gap-2">
-                        {alert.status === 'Active' ? (
-                          <Button 
-                            onClick={() => handleRespondPanic(alert.id)}
-                            className="flex-1 bg-rose-600 hover:bg-rose-700 text-[10px] font-black uppercase py-2.5"
-                          >
-                            Respon
-                          </Button>
-                        ) : (
-                          <Button 
-                            onClick={() => handleResolvePanic(alert.id)}
-                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-[10px] font-black uppercase py-2.5"
-                          >
-                            Selesai
-                          </Button>
-                        )}
+                      <div className="flex items-center justify-center py-2 bg-slate-950/40 rounded-xl border border-slate-800">
+                        <div className="flex items-end gap-1 px-4 h-6">
+                          <div className="w-1 bg-indigo-500 animate-[bounce_1.2s_infinite]" style={{ height: '40%' }}></div>
+                          <div className="w-1 bg-indigo-500 animate-[bounce_1s_infinite_0.2s]" style={{ height: '80%' }}></div>
+                          <div className="w-1 bg-indigo-500 animate-[bounce_1.4s_infinite_0.4s]" style={{ height: '50%' }}></div>
+                          <div className="w-1 bg-indigo-500 animate-[bounce_0.8s_infinite_0.1s]" style={{ height: '90%' }}></div>
+                          <div className="w-1 bg-indigo-400 animate-[bounce_1.1s_infinite_0.3s]" style={{ height: '30%' }}></div>
+                        </div>
                       </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="bg-slate-50 border border-dashed border-slate-200 rounded-3xl p-8 text-center">
-                    <ShieldCheck size={32} className="text-slate-200 mx-auto mb-3" />
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tidak ada alarm aktif</p>
-                  </div>
-                )}
+
+                      <Button 
+                        onClick={() => handleStartSimPatrol(simCheckOfficerName || 'Petugas Ronda')}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white transition-all shadow-md shadow-indigo-950/30"
+                      >
+                        Mulai Patroli Mandiri
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+                        <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-wider text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+                            TX ACTIVE
+                          </span>
+                          <span className="text-indigo-400">STABLE SIGNAL</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-indigo-600/10 text-indigo-400 flex items-center justify-center text-xs font-black">
+                            {activePatrol.officerName.charAt(0)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-xs font-black truncate">{activePatrol.officerName}</h4>
+                            <p className="text-[8px] text-indigo-400 font-bold tracking-wide uppercase">Dinas Ronda Malam</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 text-[10px] font-black text-slate-400">
+                        <p className="text-[8px] tracking-widest uppercase mb-1">Checklist Pos Patroli</p>
+                        <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1">
+                          {checkpoints.map((cp, idx) => {
+                            const isVisited = activePatrol.visitedCheckpoints.includes(cp.id);
+                            return (
+                              <div 
+                                key={cp.id} 
+                                className={`flex items-center justify-between p-2 rounded-xl border transition-all ${
+                                  isVisited 
+                                    ? 'bg-indigo-600/10 border-indigo-600/30 text-indigo-300' 
+                                    : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800 hover:border-slate-700'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className={`w-4 h-4 rounded flex items-center justify-center text-[8px] font-bold shrink-0 ${isVisited ? 'bg-indigo-600 text-white' : 'bg-slate-750 text-slate-400'}`}>
+                                    {idx + 1}
+                                  </span>
+                                  <span className="truncate text-[10px] font-medium">{cp.name}</span>
+                                </div>
+
+                                {isVisited ? (
+                                  <span className="text-[8px] text-emerald-400 font-black uppercase tracking-widest flex items-center gap-0.5 shrink-0">
+                                    <Check size={10} /> TERVERIFIKASI
+                                  </span>
+                                ) : (
+                                  <button 
+                                    onClick={() => handleSimVisitCheckpoint(cp)}
+                                    type="button"
+                                    className="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[8px] font-black uppercase tracking-wider transition-all scale-95 hover:scale-100 shrink-0"
+                                  >
+                                    Scan
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <Button 
+                        onClick={handleFinishSimPatrol}
+                        className="w-full bg-rose-600 hover:bg-rose-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white transition-all shadow-md shadow-rose-950/20"
+                      >
+                        Selesaikan Siskamling
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {activeTab === 'map' && (
-          <div className="lg:col-span-3">
-            <motion.div variants={itemVariants} className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-5 md:p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-                <div>
-                  <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest text-xs md:text-sm"><ShieldCheck size={18} className="text-indigo-600"/> Visualisasi Keamanan</h3>
-                  <p className="text-[9px] md:text-[10px] text-slate-400 font-bold mt-1">Pantau sebaran titik patroli dan kondisi rumah warga.</p>
+        {activeTab === 'schedule' && (
+          <div className="lg:col-span-3 space-y-6 md:space-y-8">
+            {/* Professional metric overview cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {/* Metric 1 */}
+              <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-[1.5rem] md:rounded-3xl p-5 border border-indigo-500/10 shadow-lg shadow-indigo-100 relative overflow-hidden">
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  <span className="p-2 bg-white/10 rounded-xl w-fit text-white"><Calendar size={18} /></span>
+                  <div className="mt-4">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-indigo-200">Total Jadwal</p>
+                    <h4 className="text-xl md:text-2xl font-black mt-1">7 Hari Aktif</h4>
+                  </div>
+                </div>
+                <div className="absolute -right-4 -bottom-4 opacity-10 text-white select-none pointer-events-none">
+                  <Calendar size={120} />
                 </div>
               </div>
-              <div className="p-2 md:p-4">
-                <HouseMap 
-                  houses={houses} 
-                  isAdmin={true} 
-                  reports={reports} 
-                  officials={officials} 
-                  mapPoints={mapPoints}
-                  onReportHouse={handleReportHouse}
-                />
-              </div>
-            </motion.div>
-          </div>
-        )}
 
-        {activeTab === 'schedule' && (
-          <>
-            {/* Weekly Schedule */}
-            <motion.div variants={itemVariants} className="lg:col-span-1 space-y-4 md:space-y-6">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="text-lg md:text-xl font-black text-slate-900">Jadwal Mingguan</h3>
-                <Button variant="ghost" size="sm" className="text-indigo-600 font-bold hover:bg-indigo-50 text-[10px] md:text-xs">Lihat Kalender</Button>
+              {/* Metric 2 */}
+              <div className="bg-white rounded-[1.5rem] md:rounded-3xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  <span className="p-2 bg-amber-50 rounded-xl w-fit text-amber-600"><ArrowLeftRight size={18} /></span>
+                  <div className="mt-4">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Pertukaran Jadwal</p>
+                    <h4 className="text-xl md:text-2xl font-black text-slate-800 mt-1">
+                      {rondaSwapRequests.filter(r => r.status === 'Menunggu').length} Menunggu
+                    </h4>
+                  </div>
+                </div>
+                <div className="absolute -right-4 -bottom-4 opacity-5 text-indigo-600 select-none pointer-events-none">
+                  <ArrowLeftRight size={120} />
+                </div>
               </div>
-              <div className="space-y-3">
-                {ronda.map((r) => {
-                  const isToday = r.day === today;
-                  return (
-                    <div 
-                      key={r.id || r.day} 
-                      onClick={() => handleEditRonda(r)}
-                      className={`p-4 rounded-[1.5rem] md:rounded-3xl border transition-all cursor-pointer group ${
-                        isToday 
-                        ? 'bg-indigo-600 border-indigo-500 text-white shadow-xl shadow-indigo-100' 
-                        : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg'
-                      }`}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3 md:gap-4">
-                          <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-xs md:text-sm font-black shadow-sm ${
-                            isToday ? 'bg-white/20 text-white' : 'bg-slate-50 text-indigo-600'
-                          }`}>
-                            {r.day.substring(0, 3)}
-                          </div>
-                          <div>
-                            <h4 className="font-black text-sm md:text-base">{r.day}</h4>
-                            <p className={`text-[8px] md:text-[10px] font-bold uppercase tracking-wider ${isToday ? 'text-indigo-200' : 'text-slate-400'}`}>
-                              {r.shifts ? r.shifts.reduce((acc, s) => acc + s.members.length, 0) : r.members.length} Personil
-                            </p>
-                          </div>
-                        </div>
-                        <ChevronRight size={16} className={isToday ? 'text-white/50' : 'text-slate-300'} />
-                      </div>
-                      <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-white/10 space-y-2 md:space-y-3">
-                        {r.shifts ? r.shifts.map((s) => (
-                          <div key={s.id} className="space-y-1">
-                            <p className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isToday ? 'text-indigo-200' : 'text-slate-400'}`}>{s.time}</p>
-                            <div className="flex flex-wrap gap-1.5 md:gap-2">
-                              {s.members.map((m, idx) => (
-                                <span key={`${m}-${idx}`} className={`px-2 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] font-bold backdrop-blur-sm ${isToday ? 'bg-white/10' : 'bg-slate-50 text-slate-600'}`}>
-                                  {m}
-                                </span>
-                              ))}
+
+              {/* Metric 3 */}
+              <div className="bg-white rounded-[1.5rem] md:rounded-3xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  <span className="p-2 bg-emerald-50 rounded-xl w-fit text-emerald-600"><Users size={18} /></span>
+                  <div className="mt-4">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Ronda Malam ini</p>
+                    <h4 className="text-xl md:text-2xl font-black text-slate-800 mt-1">
+                      {ronda.find(r => r.day === today)?.shifts?.reduce((acc, s) => acc + s.members.length, 0) || ronda.find(r => r.day === today)?.members?.length || 0} Personil
+                    </h4>
+                  </div>
+                </div>
+                <div className="absolute -right-4 -bottom-4 opacity-5 text-indigo-600 select-none pointer-events-none">
+                  <Users size={120} />
+                </div>
+              </div>
+
+              {/* Metric 4 */}
+              <div className="bg-white rounded-[1.5rem] md:rounded-3xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  <span className="p-2 bg-indigo-50 rounded-xl w-fit text-indigo-600"><ShieldCheck size={18} /></span>
+                  <div className="mt-4">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Skor Tertinggi</p>
+                    <h4 className="text-lg md:text-xl font-black text-indigo-700 mt-1 truncate">
+                      {(() => {
+                        const occupied = houses.filter(h => h.status === 'Occupied');
+                        if (occupied.length === 0) return "-";
+                        const best = [...occupied].sort((a, b) => (b.rondaPoints || 0) - (a.rondaPoints || 0))[0];
+                        return best ? `${best.headOfFamily} (${best.rondaPoints || 0})` : "-";
+                      })()}
+                    </h4>
+                  </div>
+                </div>
+                <div className="absolute -right-4 -bottom-4 opacity-5 text-indigo-600 select-none pointer-events-none">
+                  <ShieldCheck size={120} />
+                </div>
+              </div>
+            </div>
+
+            {/* Custom styled dashboard level sub-tab controller */}
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-slate-100/80 p-2 rounded-2xl md:rounded-3xl border border-slate-200">
+              <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
+                <button
+                  onClick={() => { setScheduleSubTab('calendar'); setScheduleSearchQuery(''); }}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    scheduleSubTab === 'calendar'
+                      ? 'bg-white text-indigo-700 shadow-md shadow-indigo-100'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
+                  }`}
+                >
+                  <Calendar size={15} />
+                  <span>Jadwal Shift</span>
+                </button>
+                <button
+                  onClick={() => { setScheduleSubTab('swaps'); setScheduleSearchQuery(''); }}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all relative ${
+                    scheduleSubTab === 'swaps'
+                      ? 'bg-white text-indigo-700 shadow-md shadow-indigo-100'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
+                  }`}
+                >
+                  <ArrowLeftRight size={15} />
+                  <span>Tukar Jadwal</span>
+                  {rondaSwapRequests.filter(r => r.status === 'Menunggu').length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white">
+                      {rondaSwapRequests.filter(r => r.status === 'Menunggu').length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => { setScheduleSubTab('leaderboard'); setScheduleSearchQuery(''); }}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    scheduleSubTab === 'leaderboard'
+                      ? 'bg-white text-indigo-700 shadow-md shadow-indigo-100'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
+                  }`}
+                >
+                  <ShieldCheck size={15} />
+                  <span>Peringkat & Keaktifan</span>
+                </button>
+              </div>
+
+              {/* Sub-tab quick actions/filters */}
+              {scheduleSubTab === 'leaderboard' && (
+                <div className="relative w-full md:w-64">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                  <input
+                    type="text"
+                    placeholder="Cari kepala keluarga..."
+                    value={scheduleSearchQuery}
+                    onChange={(e) => setScheduleSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-white/10 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                  />
+                </div>
+              )}
+              {scheduleSubTab === 'swaps' && (
+                <div className="relative w-full md:w-64">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                  <input
+                    type="text"
+                    placeholder="Cari pemohon..."
+                    value={scheduleSearchQuery}
+                    onChange={(e) => setScheduleSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-white/10 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                  />
+                </div>
+              )}
+              {scheduleSubTab === 'calendar' && (
+                <div className="flex gap-2 w-full md:w-auto">
+                  <Button onClick={handleAutoRotate} variant="outline" className="flex-1 md:flex-none border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-[10px] md:text-xs py-1.5 h-auto font-black shadow-sm uppercase tracking-wider">
+                    <RefreshCw size={12} className="mr-1" /> Acak Ronda
+                  </Button>
+                  <Button onClick={handleSendTomorrowReminder} variant="outline" className="flex-1 md:flex-none border-green-200 text-green-600 hover:bg-green-50 text-[10px] md:text-xs py-1.5 h-auto font-black shadow-sm uppercase tracking-wider">
+                    <Bell size={12} className="mr-1" /> Notif Besok
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* TAB CONTENT 1: CALENDAR VIEW */}
+            {scheduleSubTab === 'calendar' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Day selector list */}
+                <div className="lg:col-span-1 space-y-3">
+                  <div className="flex items-center justify-between px-2">
+                    <p className="text-xs font-black uppercase text-slate-400 tracking-widest">Pilih Hari Patroli</p>
+                    <span className="text-[10px] font-bold text-slate-500">{ronda.length} Hari Terjadwal</span>
+                  </div>
+                  <div className="space-y-2.5">
+                    {ronda.map((r) => {
+                      const isToday = r.day === today;
+                      const isSelected = r.day === (selectedScheduleDay || today);
+                      const totalMembers = r.shifts ? r.shifts.reduce((acc, s) => acc + s.members.length, 0) : r.members.length;
+                      return (
+                        <div
+                          key={r.id || r.day}
+                          onClick={() => setSelectedScheduleDay(r.day)}
+                          className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between group ${
+                            isSelected
+                              ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/10'
+                              : isToday
+                                ? 'bg-indigo-50/50 border-indigo-200 text-indigo-900 hover:bg-indigo-50'
+                                : 'bg-white border-slate-100 hover:border-slate-300 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 relative z-10">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${
+                              isSelected
+                                ? 'bg-white/10 text-white'
+                                : isToday
+                                  ? 'bg-indigo-600 text-white'
+                                  : 'bg-slate-100 text-slate-700'
+                            }`}>
+                              {r.day.substring(0, 3)}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <h4 className="font-bold text-xs md:text-sm">{r.day}</h4>
+                                {isToday && (
+                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                )}
+                              </div>
+                              <p className={`text-[10px] font-semibold mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
+                                {totalMembers} Personil Ditugaskan
+                              </p>
                             </div>
                           </div>
-                        )) : (
-                          <div className="flex flex-wrap gap-1.5 md:gap-2">
-                            {r.members.map((m, idx) => (
-                              <span key={`${m}-${idx}`} className={`px-2 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] font-bold backdrop-blur-sm ${isToday ? 'bg-white/10' : 'bg-slate-50 text-slate-600'}`}>
-                                {m}
+
+                          <div className="flex items-center gap-2 relative z-10">
+                            {isToday && !isSelected && (
+                              <span className="px-1.5 py-0.5 bg-indigo-100 border border-indigo-200 rounded text-[8px] font-black text-indigo-700 uppercase tracking-wider">
+                                Hari Ini
                               </span>
-                            ))}
+                            )}
+                            <ChevronRight size={14} className={isSelected ? 'text-white' : 'text-slate-300'} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Day shifts detail panel */}
+                <div className="lg:col-span-2">
+                  {(() => {
+                    const selectedDayData = ronda.find(r => r.day === (selectedScheduleDay || today)) || ronda[0];
+                    if (!selectedDayData) return null;
+                    const shiftsData = selectedDayData.shifts || [
+                      { id: '1', time: '22:00 - 01:00', members: selectedDayData.members || [] },
+                      { id: '2', time: '01:00 - 04:00', members: [] }
+                    ];
+
+                    return (
+                      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
+                              <h3 className="text-base md:text-lg font-black text-slate-900">Pembagian Shift: {selectedDayData.day}</h3>
+                            </div>
+                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">Siskamling & Patroli Pos Ronda Malam</p>
+                          </div>
+                          
+                          <Button
+                            onClick={() => handleEditRonda(selectedDayData)}
+                            className="bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white text-[10px] md:text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-100"
+                          >
+                            📝 Susun Shift Petugas
+                          </Button>
+                        </div>
+
+                        {/* Shift cards display */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                          {shiftsData.map((shift, shiftIdx) => (
+                            <div key={shift.id} className="bg-slate-50/70 border border-slate-100 rounded-2xl p-5 relative overflow-hidden group">
+                              <div className="flex justify-between items-center mb-4">
+                                <span className="px-2.5 py-1 bg-white border border-slate-200/60 rounded-lg text-[9px] font-black uppercase tracking-widest text-indigo-600 shadow-sm">
+                                  Shift {shiftIdx + 1}
+                                </span>
+                                <span className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase">
+                                  <Clock size={11} className="text-slate-400" /> {shift.time}
+                                </span>
+                              </div>
+
+                              <div className="space-y-2 min-h-[120px] max-h-[220px] overflow-y-auto no-scrollbar">
+                                {shift.members.length > 0 ? (
+                                  shift.members.map((member, memIdx) => {
+                                    // Query house block to show block info if available
+                                    const residentHouse = houses.find(h => h.headOfFamily?.toLowerCase() === member.toLowerCase());
+                                    return (
+                                      <div key={`${member}-${memIdx}`} className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm hover:border-indigo-100 hover:shadow-md transition-all">
+                                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-black shrink-0">
+                                          {member.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                          <p className="text-xs font-black text-slate-700 truncate">{member}</p>
+                                          <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
+                                            {residentHouse ? `Blok ${residentHouse.block}-${residentHouse.number}` : 'Rumah Warga'}
+                                          </p>
+                                        </div>
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0"></div>
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="flex flex-col items-center justify-center py-6 text-center h-full">
+                                    <p className="text-[10px] text-slate-400 italic font-bold">Belum ada warga ditugaskan</p>
+                                    <p className="text-[9px] text-slate-400 mt-1 max-w-[150px]">Atur sekarang dengan mengklik Susun Shift Petugas</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Block Diversity and statistics info box */}
+                        <div className="bg-indigo-50/50 rounded-2xl p-4 border border-indigo-100 flex items-start gap-3.5">
+                          <Info size={16} className="text-indigo-600 shrink-0 mt-0.5" />
+                          <div className="text-xs text-indigo-800 leading-relaxed font-semibold">
+                            <span className="font-extrabold uppercase tracking-widest text-[10px] text-indigo-700 block mb-0.5">Bantuan Keragaman Blok</span>
+                            Sistem menyarankan pembagian petugas berasal dari blok rumah yang tersebar secara variatif demi memaksimalkan visual jangkauan siskamling yang adil dan efisien.
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT 2: SWAPS / TUKAR JADWAL */}
+            {scheduleSubTab === 'swaps' && (
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8 space-y-6">
+                <div>
+                  <h3 className="text-base md:text-lg font-black text-slate-900">Pergantian & Tukar Jadwal</h3>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Persetujuan & riwayat tukar tugas ronda antar warga</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {(() => {
+                    const filteredSwaps = rondaSwapRequests.filter(req => {
+                      if (!scheduleSearchQuery) return true;
+                      return req.requesterName.toLowerCase().includes(scheduleSearchQuery.toLowerCase());
+                    });
+
+                    if (filteredSwaps.length === 0) {
+                      return (
+                        <div className="col-span-full py-16 text-center">
+                          <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 mx-auto mb-4">
+                            <ArrowLeftRight size={28} />
+                          </div>
+                          <h4 className="font-bold text-slate-700 text-sm">Tidak Ada Permintaan</h4>
+                          <p className="text-xs text-slate-400 mt-1">Belum ada warga mengajukan permohonan tukar jadwal.</p>
+                        </div>
+                      );
+                    }
+
+                    return filteredSwaps.map((request) => (
+                      <div key={request.id} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between hover:bg-white hover:border-slate-200 hover:shadow-xl hover:shadow-slate-100/50 transition-all group">
+                        <div>
+                          {/* Top row */}
+                          <div className="flex justify-between items-start gap-4 mb-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-black text-indigo-600">
+                                {request.requesterName.charAt(0)}
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="font-black text-slate-800 text-xs md:text-sm truncate">{request.requesterName}</h4>
+                                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest mt-0.5">Rumah {request.requesterHouseId}</p>
+                              </div>
+                            </div>
+
+                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border leading-none shrink-0 ${
+                              request.status === 'Menunggu' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                              request.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                              'bg-rose-50 text-rose-600 border-rose-100'
+                            }`}>
+                              {request.status}
+                            </span>
+                          </div>
+
+                          {/* Swap details card */}
+                          <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 mb-4 shadow-sm">
+                            <div className="text-center flex-1 min-w-0">
+                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Semula</span>
+                              <span className="text-[11px] font-bold text-slate-700 truncate block">{request.fromDay}</span>
+                            </div>
+                            <div className="px-2 text-indigo-400 shrink-0">
+                              <ArrowLeftRight size={12} />
+                            </div>
+                            <div className="text-center flex-1 min-w-0">
+                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Menjadi</span>
+                              <span className="text-[11px] font-bold text-slate-700 truncate block">{request.toDay}</span>
+                            </div>
+                          </div>
+
+                          {request.reason && (
+                            <div className="bg-slate-100/60 rounded-xl p-3 border border-slate-200/40 text-[11px] text-slate-500 italic mb-4 leading-relaxed font-medium">
+                              "{request.reason}"
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action buttons if Menunggu */}
+                        {request.status === 'Menunggu' && (
+                          <div className="flex gap-2.5 pt-3 border-t border-slate-100">
+                            <Button
+                              onClick={() => handleUpdateSwapStatus(request.id, 'Disetujui')}
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-102 active:scale-98 h-8 rounded-lg text-[9px] font-black uppercase tracking-wider"
+                            >
+                              <Check size={11} className="mr-1" /> Setujui
+                            </Button>
+                            <Button
+                              onClick={() => handleUpdateSwapStatus(request.id, 'Ditolak')}
+                              variant="outline"
+                              className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50 hover:scale-102 active:scale-98 h-8 rounded-lg text-[9px] font-black uppercase tracking-wider"
+                            >
+                              <X size={11} className="mr-1" /> Tolak
+                            </Button>
                           </div>
                         )}
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-
-            {/* Shift Overview Card */}
-            <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[1.5rem] md:rounded-[3rem] border border-slate-100 shadow-sm p-5 md:p-8">
-              <div className="flex justify-between items-center mb-6 md:mb-8">
-                <div>
-                  <h3 className="text-lg md:text-xl font-black text-slate-900">Detail Shift Hari Ini</h3>
-                  <p className="text-[10px] md:text-xs font-medium text-slate-400 mt-1">Pembagian tugas siskamling malam ini</p>
-                </div>
-                <div className="p-2.5 md:p-3 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl">
-                  <Clock size={20} className="md:w-6 md:h-6" />
+                    ));
+                  })()}
                 </div>
               </div>
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                {(ronda.find(r => r.day === today)?.shifts || [
-                  { id: '1', time: '22:00 - 01:00', members: ronda.find(r => r.day === today)?.members || [] },
-                  { id: '2', time: '01:00 - 04:00', members: [] }
-                ]).map((shift, idx) => (
-                  <div key={shift.id} className="bg-slate-50 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-6 border border-slate-100">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="px-2.5 py-0.5 bg-white rounded-full text-[8px] md:text-[10px] font-black text-indigo-600 border border-slate-100 uppercase tracking-widest">Shift {idx + 1}</span>
-                      <span className="text-[10px] md:text-xs font-bold text-slate-400">{shift.time}</span>
+            {/* TAB CONTENT 3: LEADERBOARD & KEAKTIFAN */}
+            {scheduleSubTab === 'leaderboard' && (
+              <div className="space-y-6 md:space-y-8">
+                {/* Visual Top Podium Row (Podium Keaktifan) */}
+                <div className="bg-slate-900 rounded-[2.5rem] p-6 md:p-8 text-white relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                  <div className="absolute bottom-0 left-0 w-60 h-60 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/10 pb-6 mb-8 relative z-10">
+                    <div>
+                      <h3 className="text-lg md:text-xl font-black text-white tracking-tight flex items-center gap-2">
+                        🏆 Podium Warga Teladan RT 02
+                      </h3>
+                      <p className="text-slate-300 text-[11px] font-bold uppercase tracking-widest mt-1">Apresiasi keaktifan tugas ronda siskamling lingkungan</p>
                     </div>
-                    <div className="space-y-2 md:space-y-3">
-                      {shift.members.length > 0 ? shift.members.map((m, i) => (
-                        <div key={`${m}-${i}`} className="flex items-center gap-2 md:gap-3 bg-white p-2.5 md:p-3 rounded-xl md:rounded-2xl border border-slate-100 shadow-sm">
-                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] md:text-xs font-black">{m.charAt(0)}</div>
-                          <span className="text-xs md:text-sm font-bold text-slate-700">{m}</span>
-                          <div className="ml-auto w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-500"></div>
-                        </div>
-                      )) : (
-                        <p className="text-[10px] md:text-xs text-slate-400 italic text-center py-4">Belum ada personil</p>
-                      )}
+                    <span className="px-3 py-1 bg-white/10 rounded-lg text-[10px] font-black uppercase tracking-wider border border-white/10">
+                      Update Otomatis
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 relative z-10">
+                    {houses
+                      .filter(h => (h.rondaPoints || 0) > 0)
+                      .sort((a, b) => (b.rondaPoints || 0) - (a.rondaPoints || 0))
+                      .slice(0, 3)
+                      .map((h, i) => {
+                        const podiumStyles = [
+                          {
+                            bg: 'bg-gradient-to-tr from-yellow-600/20 to-yellow-600/40 border-yellow-500/50',
+                            badge: 'border-yellow-500/30 text-yellow-300 bg-yellow-500/10',
+                            medalColor: 'text-yellow-400',
+                            placeLabel: '🥇 Juara 1 Utuh',
+                            glow: 'shadow-lg shadow-yellow-600/10'
+                          },
+                          {
+                            bg: 'bg-white/5 border-white/10 hover:bg-white/10',
+                            badge: 'border-slate-400/30 text-slate-300 bg-white/10',
+                            medalColor: 'text-slate-300',
+                            placeLabel: '🥈 Juara 2 Sejati',
+                            glow: ''
+                          },
+                          {
+                            bg: 'bg-white/5 border-white/10 hover:bg-white/10',
+                            badge: 'border-amber-600/30 text-amber-300 bg-amber-600/10',
+                            medalColor: 'text-amber-500',
+                            placeLabel: '🥉 Juara 3 Siaga',
+                            glow: ''
+                          }
+                        ];
+
+                        const style = podiumStyles[i] || podiumStyles[1];
+
+                        return (
+                          <div
+                            key={h.id}
+                            className={`p-6 rounded-2xl border ${style.bg} ${style.glow} duration-300 relative overflow-hidden group flex flex-col justify-between`}
+                          >
+                            <div>
+                              <div className="flex justify-between items-start mb-4">
+                                <span className={`px-2.5 py-0.5 border rounded-full text-[9px] font-black tracking-wider uppercase ${style.badge}`}>
+                                  {style.placeLabel}
+                                </span>
+                                <ShieldCheck size={28} className={style.medalColor} />
+                              </div>
+
+                              <h4 className="text-base md:text-lg font-black truncate">{h.headOfFamily}</h4>
+                              <p className="text-xs text-slate-300 mt-1 font-semibold">Blok {h.block}-{h.number}</p>
+                            </div>
+
+                            <div className="mt-6 flex justify-between items-end border-t border-white/10 pt-4">
+                              <div>
+                                <span className="text-3xl font-black">{h.rondaPoints || 0}</span>
+                                <span className="text-[10px] font-black uppercase text-slate-300 tracking-wider ml-1">Poin</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[9px] font-extrabold text-slate-300 block uppercase">Terakhir Ronda</span>
+                                <span className="text-[10px] font-bold text-slate-100 block mt-0.5">
+                                  {h.rondaLastDuty ? new Date(h.rondaLastDuty).toLocaleDateString('id-ID') : 'Belum Pernah'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    {houses.filter(h => (h.rondaPoints || 0) > 0).length === 0 && (
+                      <div className="col-span-full py-8 text-center text-slate-400 font-bold text-xs italic">
+                        Belum ada akumulasi poin ronda warga bulan ini.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* List of all houses active records */}
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-base font-black text-slate-900 uppercase tracking-widest leading-none">Keaktifan Semua Warga</h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Laporan keaktifan, total siskamling, dan poin warga aktif</p>
+                    </div>
+
+                    {/* Simple search and count */}
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest font-mono shrink-0">
+                      Total: {houses.filter(h => h.status === 'Occupied').length} Rumah Terkualifikasi
+                    </p>
+                  </div>
+
+                  {/* Responsive Table for Warga records */}
+                  <div className="bg-slate-50 border border-slate-100 rounded-3xl overflow-hidden">
+                    <div className="overflow-x-auto no-scrollbar">
+                      <table className="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                          <tr className="border-b border-slate-200 bg-slate-100/40">
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Warga Terdaftar</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Nomor Rumah</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Tugas Dilaksanakan</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Point Dedikasi</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Status Keaktifan</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Terakhir Ronda</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(() => {
+                            const filteredResidents = houses
+                              .filter(h => h.status === 'Occupied')
+                              .filter(h => {
+                                if (!scheduleSearchQuery) return true;
+                                return (h.headOfFamily || '').toLowerCase().includes(scheduleSearchQuery.toLowerCase()) ||
+                                  h.block.toLowerCase().includes(scheduleSearchQuery.toLowerCase());
+                              })
+                              .sort((a, b) => (b.rondaPoints || 0) - (a.rondaPoints || 0));
+
+                            if (filteredResidents.length === 0) {
+                              return (
+                                <tr>
+                                  <td colSpan={6} className="px-6 py-12 text-center text-xs text-slate-400 font-bold italic">
+                                    Warga tidak ditemukan pencarian "{scheduleSearchQuery}"
+                                  </td>
+                                </tr>
+                              );
+                            }
+
+                            return filteredResidents.map((h) => {
+                              const pts = h.rondaPoints || 0;
+                              let statusLabel = "Pasif / Dispensasi";
+                              let statusColor = "bg-slate-100 text-slate-600 border-slate-200/50";
+                              if (h.rondaExempt) {
+                                statusLabel = "Dispensasi RT";
+                                statusColor = "bg-amber-50 text-amber-600 border-amber-200/60";
+                              } else if (pts >= 15) {
+                                statusLabel = "Sangat Aktif";
+                                statusColor = "bg-emerald-50 text-emerald-600 border-emerald-200/60";
+                              } else if (pts > 0) {
+                                statusLabel = "Aktif Ronda";
+                                statusColor = "bg-indigo-50 text-indigo-600 border-indigo-200/60";
+                              }
+
+                              return (
+                                <tr key={h.id} className="border-b border-slate-100 hover:bg-white transition-all group">
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black shrink-0">
+                                        {h.headOfFamily?.charAt(0) || 'W'}
+                                      </div>
+                                      <span className="text-xs font-bold text-slate-700">{h.headOfFamily || 'Resident'}</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 text-xs font-bold text-slate-500">Blok {h.block}-{h.number}</td>
+                                  <td className="px-6 py-4 text-xs font-black text-slate-700 text-center">{h.rondaDutyCount || 0} Sesi</td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className="px-2.5 py-1 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-lg text-[10px] font-black">
+                                      {pts} Poin
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className={`px-2.5 py-0.5 border rounded text-[9px] font-black uppercase tracking-wider ${statusColor}`}>
+                                      {statusLabel}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
+                                    {h.rondaLastDuty ? new Date(h.rondaLastDuty).toLocaleDateString('id-ID') : '-'}
+                                  </td>
+                                </tr>
+                              );
+                            });
+                          })()}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </motion.div>
-          </>
+            )}
+          </div>
         )}
 
         {activeTab === 'logs' && (
@@ -902,89 +1543,6 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   </div>
                   <h4 className="text-base md:text-lg font-bold text-slate-800">Tidak Ada Data</h4>
                   <p className="text-xs text-slate-400 max-w-xs mx-auto mt-1">Coba ubah filter atau kata kunci pencarian Anda.</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {activeTab === 'swaps' && (
-          <motion.div variants={itemVariants} className="lg:col-span-3 bg-white rounded-[1.5rem] md:rounded-[3rem] border border-slate-100 shadow-sm p-5 md:p-8">
-            <div className="flex justify-between items-center mb-6 md:mb-8">
-              <div>
-                <h3 className="text-lg md:text-xl font-black text-slate-900">Permintaan Tukar Jadwal</h3>
-                <p className="text-[10px] md:text-xs font-medium text-slate-400 mt-1">Kelola permohonan pergantian jadwal antar warga</p>
-              </div>
-              <div className="p-2.5 md:p-3 bg-amber-50 text-amber-600 rounded-xl md:rounded-2xl">
-                <ArrowLeftRight size={20} className="md:w-6 md:h-6" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              {rondaSwapRequests.length > 0 ? rondaSwapRequests.map((request) => (
-                <div key={request.id} className="bg-slate-50 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-6 border border-slate-100 relative overflow-hidden group">
-                  <div className="flex justify-between items-start mb-4 md:mb-6">
-                    <div className="flex items-center gap-2.5 md:gap-3">
-                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-xs md:text-sm font-black text-indigo-600 shadow-sm">
-                        {request.requesterName.charAt(0)}
-                      </div>
-                      <div>
-                        <h4 className="font-black text-slate-900 text-sm md:text-base">{request.requesterName}</h4>
-                        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rumah {request.requesterHouseId}</p>
-                      </div>
-                    </div>
-                    <span className={`px-2.5 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest border ${
-                      request.status === 'Menunggu' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                      request.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                      'bg-rose-50 text-rose-600 border-rose-100'
-                    }`}>
-                      {request.status}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 md:p-4 bg-white rounded-xl md:rounded-2xl border border-slate-100 mb-4 md:mb-6">
-                    <div className="text-center flex-1">
-                      <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Dari</p>
-                      <p className="text-xs md:text-sm font-black text-slate-700">{request.fromDay}</p>
-                    </div>
-                    <div className="px-3 md:px-4 text-indigo-400">
-                      <ArrowLeftRight size={14} className="md:w-4 md:h-4" />
-                    </div>
-                    <div className="text-center flex-1">
-                      <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Ke</p>
-                      <p className="text-xs md:text-sm font-black text-slate-700">{request.toDay}</p>
-                    </div>
-                  </div>
-
-                  {request.reason && (
-                    <p className="text-[10px] md:text-xs text-slate-500 italic mb-4 md:mb-6">"{request.reason}"</p>
-                  )}
-
-                  {request.status === 'Menunggu' && (
-                    <div className="flex gap-2 md:gap-3">
-                      <Button 
-                        onClick={() => handleUpdateSwapStatus(request.id, 'Disetujui')}
-                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-9 md:h-10 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black"
-                      >
-                        <Check size={12} className="md:w-3.5 md:h-3.5 mr-1.5 md:mr-2" /> Setujui
-                      </Button>
-                      <Button 
-                        onClick={() => handleUpdateSwapStatus(request.id, 'Ditolak')}
-                        variant="outline" 
-                        className="flex-1 border-rose-100 text-rose-600 hover:bg-rose-50 h-9 md:h-10 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black"
-                      >
-                        <X size={12} className="md:w-3.5 md:h-3.5 mr-1.5 md:mr-2" /> Tolak
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )) : (
-                <div className="col-span-full py-12 md:py-20 text-center">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 rounded-2xl md:rounded-3xl flex items-center justify-center text-slate-200 mx-auto mb-4">
-                    <Bell size={32} className="md:w-10 md:h-10" />
-                  </div>
-                  <h4 className="text-base md:text-lg font-bold text-slate-800">Tidak Ada Permintaan</h4>
-                  <p className="text-xs text-slate-400 mt-1">Belum ada warga yang mengajukan tukar jadwal.</p>
                 </div>
               )}
             </div>
@@ -1135,97 +1693,17 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           </motion.div>
         )}
 
-        {activeTab === 'leaderboard' && (
-          <motion.div variants={itemVariants} className="lg:col-span-3 space-y-8">
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden p-8">
-              <div className="flex justify-between items-center mb-10">
-                <div>
-                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">Peringkat Keaktifan Ronda</h3>
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Warga paling berdedikasi menjaga keamanan lingkungan.</p>
-                </div>
-                <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl">
-                  <ShieldCheck size={28} />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                {houses
-                  .filter(h => (h.rondaPoints || 0) > 0)
-                  .sort((a, b) => (b.rondaPoints || 0) - (a.rondaPoints || 0))
-                  .slice(0, 3)
-                  .map((h, i) => (
-                    <div key={h.id} className={`p-8 rounded-[2rem] border relative overflow-hidden ${i === 0 ? 'bg-indigo-600 text-white border-indigo-700 shadow-xl shadow-indigo-200' : 'bg-slate-50 border-slate-100'}`}>
-                      <div className="relative z-10">
-                        <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${i === 0 ? 'text-indigo-200' : 'text-slate-400'}`}>Juara {i + 1}</p>
-                        <h4 className="text-xl font-black mb-1">{h.headOfFamily}</h4>
-                        <p className={`text-xs font-bold ${i === 0 ? 'text-indigo-100' : 'text-slate-500'}`}>Blok {h.block}-{h.number}</p>
-                        <div className="mt-6 flex items-end gap-2">
-                          <span className="text-3xl font-black">{h.rondaPoints || 0}</span>
-                          <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${i === 0 ? 'text-indigo-200' : 'text-slate-400'}`}>Poin</span>
-                        </div>
-                      </div>
-                      <div className={`absolute -right-4 -bottom-4 opacity-10 ${i === 0 ? 'text-white' : 'text-indigo-600'}`}>
-                        <ShieldCheck size={120} />
-                      </div>
-                    </div>
-                  ))}
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest px-2">Daftar Keaktifan Seluruh Warga</h4>
-                <div className="bg-slate-50 rounded-[2rem] border border-slate-100 overflow-hidden">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-200">
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Warga</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Blok</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Tugas</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Poin</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Terakhir Ronda</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {houses
-                        .filter(h => h.status === 'Occupied')
-                        .sort((a, b) => (b.rondaPoints || 0) - (a.rondaPoints || 0))
-                        .map((h) => (
-                          <tr key={h.id} className="border-b border-slate-100 hover:bg-white transition-colors group">
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black uppercase">
-                                  {h.headOfFamily.charAt(0)}
-                                </div>
-                                <span className="text-xs font-bold text-slate-700">{h.headOfFamily}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-xs font-medium text-slate-500">Blok {h.block}-{h.number}</td>
-                            <td className="px-6 py-4 text-xs font-black text-slate-700 text-center">{h.rondaDutyCount || 0}x</td>
-                            <td className="px-6 py-4 text-center">
-                              <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black">{h.rondaPoints || 0}</span>
-                            </td>
-                            <td className="px-6 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                              {h.rondaLastDuty ? new Date(h.rondaLastDuty).toLocaleDateString('id-ID') : '-'}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {activeTab === 'checkpoints' && (
-          <motion.div variants={itemVariants} className="lg:col-span-3">
-            <CheckpointManager houses={houses} />
-          </motion.div>
-        )}
-
-        {activeTab === 'info-points' && (
-          <motion.div variants={itemVariants} className="lg:col-span-3">
-            <MapPointManager mapPoints={mapPoints} houses={houses} />
-          </motion.div>
+          <div className="lg:col-span-3 space-y-8">
+            <motion.div variants={itemVariants}>
+              <CheckpointManager houses={houses} />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <MapPointManager mapPoints={mapPoints} houses={houses} />
+            </motion.div>
+          </div>
         )}
       </div>
 
