@@ -630,16 +630,138 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {activeTab === 'monitoring' && (
           <div className="lg:col-span-3 space-y-6">
+            {/* Live Telemetry Overview Header Bar */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 md:p-6 bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-xl gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                  <h3 className="font-black text-xs md:text-sm uppercase tracking-widest text-slate-100">
+                    Pusat Kontrol Keamanan Siskamling (Main Console)
+                  </h3>
+                </div>
+                <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1">
+                  Terminal integrasi real-time RT 02. Status Jaringan: Aman dan Kondusif.
+                </p>
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                  onClick={() => {
+                    toast.success("Konektivitas Siskamling berhasil diperbarui!", {
+                      description: "Semua sensor, pos tag QR, dan sistem alarm online."
+                    });
+                  }}
+                  variant="outline" 
+                  className="flex-1 sm:flex-none border-slate-700 hover:bg-slate-800 text-slate-300 text-[10px] font-black uppercase py-2 tracking-wider h-auto bg-slate-800/40"
+                >
+                  <RefreshCw size={12} className="mr-1 animate-spin" /> Segarkan Link
+                </Button>
+                {activePanicAlerts.length > 0 && (
+                  <div className="px-3.5 py-2 bg-rose-600/25 border border-rose-500/35 text-rose-300 font-black text-[10px] rounded-xl flex items-center gap-1.5 animate-pulse uppercase tracking-wider">
+                    <AlertTriangle size={12} className="text-rose-400 animate-bounce" /> {activePanicAlerts.length} Bahaya
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Tactical Live KPI Stats Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {/* Stat 1: Emergency Status */}
+              <div className={`p-5 rounded-3xl border transition-all ${
+                activePanicAlerts.length > 0
+                  ? 'bg-gradient-to-br from-rose-500 to-rose-700 text-white border-rose-600 shadow-lg shadow-rose-200'
+                  : 'bg-white border-slate-100 shadow-sm'
+              }`}>
+                <div className="flex justify-between items-start">
+                  <span className={`p-2 rounded-xl text-[9px] font-bold leading-none uppercase ${
+                    activePanicAlerts.length > 0 ? 'bg-white/10 text-white' : 'bg-emerald-50 text-emerald-600'
+                  }`}>
+                    Status Lingkungan
+                  </span>
+                  <div className={`w-2 h-2 rounded-full ${activePanicAlerts.length > 0 ? 'bg-white animate-ping' : 'bg-emerald-500'}`} />
+                </div>
+                <div className="mt-4">
+                  <h4 className={`text-sm md:text-lg font-black ${activePanicAlerts.length > 0 ? 'text-white' : 'text-slate-800'}`}>
+                    {activePanicAlerts.length > 0 ? 'ZONA DARURAT' : 'KONDISI AMAN'}
+                  </h4>
+                  <p className={`text-[9px] font-bold uppercase tracking-wider mt-1 ${activePanicAlerts.length > 0 ? 'text-rose-100' : 'text-slate-400'}`}>
+                    {activePanicAlerts.length > 0 ? `${activePanicAlerts.length} alarm aktif` : 'RT 02 Kondusif'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stat 2: Active Patrol Officer */}
+              <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm">
+                <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                  Petugas Aktif
+                </span>
+                <div className="mt-4">
+                  <h4 className="text-xs md:text-sm font-black text-slate-800 truncate">
+                    {activePatrol ? activePatrol.officerName : 'Standby / Menunggu'}
+                  </h4>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                    {activePatrol ? 'Sedang Patroli' : 'Tiada Sesi Aktif'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stat 3: Checkpoint Progress Bar */}
+              <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-center">
+                    <span className="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                      Pencapaian Pos
+                    </span>
+                    <span className="text-[10px] font-black text-slate-600">
+                      {activePatrol ? `${activePatrol.visitedCheckpoints.length}/${checkpoints.length}` : `0/${checkpoints.length || 5}`}
+                    </span>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                    <div 
+                      className="bg-indigo-600 h-1.5 rounded-full transition-all duration-500" 
+                      style={{ 
+                        width: checkpoints.length > 0 && activePatrol
+                          ? `${(activePatrol.visitedCheckpoints.length / checkpoints.length) * 100}%` 
+                          : '0%' 
+                      }}
+                    />
+                  </div>
+                </div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                  {activePatrol ? 'Persentase Scan Pos' : 'Patroli Offline'}
+                </p>
+              </div>
+
+              {/* Stat 4: Reports Count Current Month */}
+              <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm">
+                <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                  Total Laporan
+                </span>
+                <div className="mt-4">
+                  <h4 className="text-sm md:text-lg font-black text-slate-800">
+                    {reports.length} Laporan
+                  </h4>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                    Insiden & Kamtibmas
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Workspace Areas */}
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Live Map */}
-              <div className="xl:col-span-3">
+              {/* Live Map wrapper */}
+              <div className="xl:col-span-3 space-y-6">
                 <motion.div variants={itemVariants} className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
                   <div className="p-5 md:p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
                     <div>
                       <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest text-xs md:text-sm">
-                        <Navigation size={18} className="text-indigo-600 animate-pulse"/> Live Tracking
+                        <Navigation size={18} className="text-indigo-600 animate-pulse"/> Tracking Real-Time Map
                       </h3>
-                      <p className="text-[9px] md:text-[10px] text-slate-400 font-bold mt-1">Pantau posisi petugas dan alarm darurat secara real-time.</p>
+                      <p className="text-[9px] md:text-[10px] text-slate-400 font-bold mt-1">Pantau posisi petugas ronda malam dan lokasi rumah warga secara instan.</p>
                     </div>
                   </div>
                   <div className="p-2 md:p-4">
@@ -655,11 +777,61 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     />
                   </div>
                 </motion.div>
+
+                {/* Live Activity Feed Log */}
+                <div className="bg-white rounded-[2rem] border border-slate-100 p-5 md:p-6 space-y-4">
+                  <div className="flex justify-between items-center border-b border-indigo-50/50 pb-3">
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Aktivitas Siskamling Terbaru</h4>
+                      <p className="text-[9px] text-slate-400 font-bold mt-0.5">Aliran logs siskamling lingkungan saat ini</p>
+                    </div>
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 max-h-[220px] overflow-y-auto no-scrollbar">
+                    {rondaLogs.slice(0, 5).map((log) => (
+                      <div key={log.id} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-slate-200 hover:shadow-sm transition-all text-xs">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold ${
+                            log.status === 'Aman' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                          }`}>
+                            {log.status === 'Aman' ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-black text-slate-800 truncate">
+                              {log.officerName} melakukan scan di <span className="text-indigo-600 font-extrabold">{log.location}</span>
+                            </p>
+                            <p className="text-[9.5px] font-bold text-slate-450 mt-0.5">
+                              {log.note || 'Kondisi Aman Terkendali.'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0 ml-3">
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                            log.status === 'Aman' ? 'bg-emerald-100 text-emerald-700 font-extrabold' : 'bg-rose-100 text-rose-700 font-extrabold'
+                          }`}>
+                            {log.status}
+                          </span>
+                          <span className="block text-[9px] font-semibold text-slate-400 mt-1">
+                            {new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    {rondaLogs.length === 0 && (
+                      <p className="text-[10px] text-slate-400 italic text-center py-4 font-bold">Belum ada aktivitas scan pos ronda terdaftar.</p>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* Panic Alerts & Patrol Simulation Side Column */}
+              {/* Side controls column */}
               <div className="xl:col-span-1 space-y-6">
-                {/* Panic Alerts Card Stack */}
+                {/* Panic Alerts Stack */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
@@ -669,68 +841,73 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     activePanicAlerts.map((alert) => (
                       <motion.div 
                         key={alert.id}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className={`p-4 rounded-3xl border shadow-lg ${
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className={`p-4 rounded-3xl border shadow-lg relative overflow-hidden transition-all ${
                           alert.status === 'Active' ? 'bg-rose-50 border-rose-200 shadow-rose-100' : 'bg-amber-50 border-amber-200 shadow-amber-100'
                         }`}
                       >
-                        <div className="flex items-center gap-3 mb-3">
+                        <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full blur-xl opacity-20 bg-rose-600" />
+                        
+                        <div className="flex items-center gap-3 mb-3 relative z-10">
                           <div className={`p-2 rounded-xl ${alert.status === 'Active' ? 'bg-rose-600 text-white animate-bounce' : 'bg-amber-500 text-white'}`}>
                             <AlertTriangle size={18} />
                           </div>
                           <div>
-                            <h4 className="font-black text-slate-900 text-xs">{alert.residentName}</h4>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Blok {alert.location}</p>
+                            <h4 className="font-extrabold text-slate-900 text-xs">{alert.residentName}</h4>
+                            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Blok {alert.location}</p>
                           </div>
                         </div>
 
-                        <div className="space-y-1.5 mb-3 text-[10px] font-bold uppercase tracking-widest">
+                        <div className="space-y-1.5 mb-3 text-[10px] bg-white/60 p-3 rounded-xl border border-slate-100/40 font-bold uppercase tracking-widest relative z-10">
                           <div className="flex justify-between">
                             <span className="text-slate-400">Status</span>
-                            <span className={alert.status === 'Active' ? 'text-rose-600' : 'text-amber-600'}>{alert.status}</span>
+                            <span className={alert.status === 'Active' ? 'text-rose-600 font-extrabold' : 'text-amber-600 font-extrabold'}>{alert.status}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-slate-400">Waktu</span>
-                            <span className="text-slate-700">{new Date(alert.timestamp).toLocaleTimeString('id-ID')}</span>
+                            <span className="text-slate-700 font-extrabold">{new Date(alert.timestamp).toLocaleTimeString('id-ID')}</span>
                           </div>
                           {alert.responderName && (
                             <div className="flex justify-between">
                               <span className="text-slate-400">Merespon</span>
-                              <span className="text-slate-700">{alert.responderName}</span>
+                              <span className="text-slate-700 font-extrabold">{alert.responderName}</span>
                             </div>
                           )}
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 relative z-10">
                           {alert.status === 'Active' ? (
                             <Button 
                               onClick={() => handleRespondPanic(alert.id)}
-                              className="flex-1 bg-rose-600 hover:bg-rose-700 text-[10px] font-black uppercase py-2"
+                              className="flex-1 bg-rose-600 hover:bg-rose-700 hover:scale-[1.02] active:scale-95 text-[10px] font-black uppercase py-2.5 rounded-xl transition-all shadow-md shadow-rose-200"
                             >
-                              Respon
+                              🚨 Respon
                             </Button>
                           ) : (
                             <Button 
                               onClick={() => handleResolvePanic(alert.id)}
-                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-[10px] font-black uppercase py-2"
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] active:scale-95 text-[10px] font-black uppercase py-2.5 rounded-xl transition-all shadow-md shadow-emerald-250"
                             >
-                              Selesai
+                              ✅ Selesai
                             </Button>
                           )}
                         </div>
                       </motion.div>
                     ))
                   ) : (
-                    <div className="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-5 text-center">
-                      <ShieldCheck size={24} className="text-slate-300 mx-auto mb-2" />
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Seluruh Wilayah Aman</p>
+                    <div className="bg-slate-50 border border-dashed border-slate-200 rounded-[2rem] p-5 text-center">
+                      <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+                        <ShieldCheck size={20} />
+                      </div>
+                      <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Seluruh Zona Kondusif</p>
+                      <p className="text-[9px] font-bold text-slate-450 mt-1 uppercase">Sistem Sensor Siskamling Aktif</p>
                     </div>
                   )}
                 </div>
 
                 {/* Siskamling Patrol Simulator Widget */}
-                <div className="bg-slate-900 text-white rounded-[2rem] p-5 shadow-xl border border-slate-800 space-y-4">
+                <div className="bg-slate-900 text-white rounded-[2rem] p-5 shadow-2xl border border-slate-800 space-y-4">
                   <div className="flex items-center justify-between border-b border-white/10 pb-3">
                     <div className="flex items-center gap-2">
                       <div className="p-1.5 bg-indigo-600 rounded-lg text-white">
@@ -738,7 +915,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       </div>
                       <div>
                         <h3 className="text-[10px] font-black uppercase tracking-widest leading-none">Walkie-Talkie</h3>
-                        <p className="text-[9px] text-slate-400 font-bold mt-1">Status Siskamling Digital</p>
+                        <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wider">Radio & GPS Simulator</p>
                       </div>
                     </div>
                     <span className="px-2 py-0.5 bg-indigo-950/50 rounded-full text-[8px] font-black text-indigo-400 uppercase tracking-widest border border-indigo-900/40">SIMULATOR</span>
@@ -749,7 +926,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       <div>
                         <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Pilih Petugas Ronda</label>
                         <select 
-                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                           value={simCheckOfficerName}
                           onChange={(e) => setSimCheckOfficerName(e.target.value)}
                         >
