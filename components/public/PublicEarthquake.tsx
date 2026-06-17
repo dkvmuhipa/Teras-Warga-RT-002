@@ -6,10 +6,9 @@ import {
   ShieldAlert, Sparkles, BookOpen, HeartHandshake, Eye
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-
 // Coordinates for Huntap Tondo 2, Palu, Sulawesi Tengah
-const TONDO_LAT = -0.8917;
-const TONDO_LON = 119.8707;
+const TONDO_LAT = -0.8511763897139419;
+const TONDO_LON = 119.904426820635;
 
 const deg2rad = (deg: number) => deg * (Math.PI / 180);
 
@@ -43,6 +42,9 @@ export const PublicEarthquake: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'m5' | 'felt'>('m5');
   const [copiedInfo, setCopiedInfo] = useState<string | null>(null);
   const [onlySulawesi, setOnlySulawesi] = useState(true);
+  const [visualizationMode, setVisualizationMode] = useState<'radar' | 'map'>('radar');
+  const [mapFocus, setMapFocus] = useState<'epicenter' | 'huntap' | 'mid'>('mid');
+  const [mapProvider, setMapProvider] = useState<'osm' | 'google-sat'>('osm');
 
   // Helper check if earthquake is in Sulawesi region
   const isSulawesi = (rule: EarthquakeInfo) => {
@@ -220,178 +222,500 @@ export const PublicEarthquake: React.FC = () => {
                     <p className="text-xs font-extrabold tracking-wider uppercase font-mono">Memetakan data BMKG terbaru...</p>
                   </div>
                 ) : latestGempa ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                     
-                    {/* Primary Figures */}
-                    <div className="space-y-6">
-                      <div className="flex items-start gap-4">
-                        <div className="text-center bg-slate-950/60 rounded-2xl p-4 min-w-[100px] border border-white/5 shadow-inner">
-                          <p className="text-xs font-black text-rose-400 uppercase tracking-widest font-mono">Magnitude</p>
-                          <p className="text-4xl md:text-5xl font-black text-white font-sans mt-1">
-                            {latestGempa.Magnitude}
-                          </p>
+                    {/* Left Column: Primary Figures, Details, and Warning Stats */}
+                    <div className="lg:col-span-5 space-y-6 flex flex-col justify-between">
+                      <div className="space-y-6">
+                        <div className="flex items-start gap-4">
+                          <div className="text-center bg-slate-950/60 rounded-2xl p-4 min-w-[102px] border border-white/5 shadow-inner flex-1">
+                            <p className="text-xs font-black text-rose-400 uppercase tracking-widest font-mono">Magnitude</p>
+                            <p className="text-4xl md:text-5xl font-black text-white font-sans mt-1">
+                              {latestGempa.Magnitude}
+                            </p>
+                          </div>
+                          <div className="text-center bg-slate-950/60 rounded-2xl p-4 min-w-[102px] border border-white/5 shadow-inner flex-1">
+                            <p className="text-xs font-black text-amber-300 uppercase tracking-widest font-mono">Kedalaman</p>
+                            <p className="text-4xl md:text-5xl font-black text-white font-sans mt-1">
+                              {latestGempa.Kedalaman.replace(/\D/g, '')}
+                              <span className="text-xs font-extrabold text-slate-400 ml-1">KM</span>
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-center bg-slate-950/60 rounded-2xl p-4 min-w-[100px] border border-white/5 shadow-inner">
-                          <p className="text-xs font-black text-amber-300 uppercase tracking-widest font-mono">Kedalaman</p>
-                          <p className="text-4xl md:text-5xl font-black text-white font-sans mt-1">
-                            {latestGempa.Kedalaman.replace(/\D/g, '')}
-                            <span className="text-xs font-extrabold text-slate-400 ml-1">KM</span>
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="space-y-2.5">
-                        <h3 className="text-lg md:text-xl font-bold font-serif text-slate-200">
-                          {latestGempa.Wilayah}
-                        </h3>
-                        
-                        <div className="flex flex-col gap-1.5 text-xs text-slate-300 font-medium font-sans">
-                          <div className="flex items-center gap-2">
-                            <Clock size={14} className="text-slate-400" />
-                            <span>Terjadi pada {latestGempa.Tanggal} • {latestGempa.Jam}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Compass size={14} className="text-slate-400" />
-                            <span>Koordinat {latestGempa.Lintang} - {latestGempa.Bujur} ({latestGempa.Coordinates})</span>
-                          </div>
-                          {latestGempa.Potensi && (
-                            <div className="flex items-center gap-2 font-bold text-emerald-400 mt-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl w-fit">
-                              <Waves size={14} />
-                              <span>{latestGempa.Potensi}</span>
+                        <div className="space-y-3 bg-slate-950/20 rounded-2xl p-5 border border-white/5 shadow-inner">
+                          <h3 className="text-lg md:text-xl font-bold font-serif text-slate-100 leading-snug">
+                            {latestGempa.Wilayah}
+                          </h3>
+                          
+                          <div className="flex flex-col gap-2.5 text-xs text-slate-300 font-medium font-sans">
+                            <div className="flex items-center gap-2.5">
+                              <Clock size={14} className="text-indigo-400" />
+                              <span>Terjadi pada {latestGempa.Tanggal} • {latestGempa.Jam}</span>
                             </div>
-                          )}
-                          {latestGempa.Dirasakan && (
-                            <div className="flex items-center gap-2 font-bold text-slate-300 mt-1 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-xl">
-                              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                              <span>Dirasakan MMI: {latestGempa.Dirasakan}</span>
+                            <div className="flex items-center gap-2.5">
+                              <Compass size={14} className="text-indigo-400" />
+                              <span className="font-mono text-slate-350">Koordinat {latestGempa.Lintang} - {latestGempa.Bujur} ({latestGempa.Coordinates})</span>
                             </div>
-                          )}
+                            {latestGempa.Potensi && (
+                              <div className="flex items-center gap-2.5 font-bold text-emerald-400 mt-2 bg-emerald-500/10 border border-emerald-500/15 px-3 py-1.5 rounded-xl w-fit">
+                                <Waves size={14} className="animate-bounce" />
+                                <span>{latestGempa.Potensi}</span>
+                              </div>
+                            )}
+                            {latestGempa.Dirasakan && (
+                              <div className="flex items-center gap-2.5 font-bold text-slate-300 mt-1 bg-slate-900 border border-white/5 px-3 py-2 rounded-xl">
+                                <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+                                <span>Dirasakan MMI: {latestGempa.Dirasakan}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
                       {/* Distance alert calculations */}
                       {latestDistance !== null && (
-                        <div className={`p-4 rounded-2xl border ${
+                        <div className={`p-5 rounded-2xl border ${
                           latestDistance < 100 
-                            ? 'bg-rose-950/40 border-rose-500/30 text-rose-200' 
+                            ? 'bg-rose-950/40 border-rose-500/30 text-rose-200 shadow-[0_0_15px_rgba(244,63,94,0.1)]' 
                             : latestDistance < 250 
                             ? 'bg-amber-950/45 border-amber-500/30 text-amber-200' 
                             : 'bg-emerald-950/40 border-emerald-500/30 text-emerald-200'
                         }`}>
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <ShieldAlert size={16} />
-                            <span className="text-[10px] uppercase font-black font-mono tracking-widest">PROKSIMITAS HUNTAP TONDO 2</span>
+                          <div className="flex items-center gap-2 mb-2">
+                            <ShieldAlert size={16} className={latestDistance < 100 ? 'text-rose-400 animate-pulse' : 'text-indigo-400'} />
+                            <span className="text-[10px] uppercase font-black font-mono tracking-widest">PROKSIMITAS HUNTAP TONDO II</span>
                           </div>
                           <p className="text-lg font-black tracking-tight font-sans">
                             ± {latestDistance.toFixed(1)} km
                             <span className="text-xs font-semibold ml-2 opacity-80">di arah {latestDirection}</span>
                           </p>
-                          <p className="text-[10px] mt-1 opacity-70 leading-relaxed">
+                          <p className="text-[10.5px] mt-1.5 opacity-80 leading-relaxed text-justify">
                             {latestDistance < 100 
-                              ? "⚠️ PERINGATAN: Episenter gempa tergolong SANGAT DEKAT. Segera periksa struktur bangunan dan ikuti protokol keselamatan bencana." 
+                              ? "⚠️ PERINGATAN DARURAT: Episenter gempa tergolong SANGAT DEKAT. Hubungi Pos Siaga Bencana TERAS RT 02, amankan barang berharga, dan periksa kondisi fisik Huntap." 
                               : latestDistance < 250 
-                              ? "⚠️ PERHATIAN: Jarak menengah terdeteksi. Getaran minor mungkin dirasakan di area Huntap Tondo 2."
-                              : "✅ Kondisi Aman: Episenter berada dalam radius aman dari kawasan perumahan Huntap Tondo 2."}
+                              ? "⚠️ PERHATIAN MITIGASI: Jarak menengah terdeteksi. Getaran minor mungkin dirasakan di area Huntap Tondo 2. Harap tetap siaga dan pantau jalur evakuasi." 
+                              : "✅ KONDISI AMAN: Episenter berada dalam radius aman yang relatif jauh dari kawasan perumahan Huntap Tondo 2."}
                           </p>
                         </div>
                       )}
 
-                      <div className="flex items-center gap-2 border-t border-white/5 pt-4">
+                      <div className="flex items-center gap-3 border-t border-white/5 pt-4">
                         <button
                           onClick={() => shareAlert(latestGempa, latestDistance)}
-                          className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-xs font-bold text-white cursor-pointer"
+                          className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 transition-all text-xs font-black text-white cursor-pointer w-full justify-center shadow-lg uppercase tracking-wider border border-white/5"
                         >
-                          <Share2 size={13} />
-                          {copiedInfo === latestGempa.DateTime ? 'BERHASIL DISALIN!' : 'BAGIKAN KE WARGA'}
+                          <Share2 size={14} />
+                          {copiedInfo === latestGempa.DateTime ? '✓ BERHASIL DISALIN!' : 'BAGIKAN ALARM KE WARGA'}
                         </button>
                       </div>
                     </div>
 
-                    {/* Proximity / Radar Graphics representation */}
-                    <div className="flex flex-col items-center justify-center p-4 bg-slate-950/40 rounded-3xl border border-white/5 aspect-square relative overflow-hidden">
+                    {/* Right Column: Interactive Radar & Seamless Multi-Mode Map */}
+                    <div className="lg:col-span-7 flex flex-col bg-slate-950/40 rounded-3xl border border-white/5 p-5 min-h-[520px] relative overflow-hidden justify-between">
                       
-                      {/* Grid Radar Visualizer */}
-                      <div className="relative w-full h-full max-w-[260px] flex items-center justify-center">
+                      {/* Integrated Tabs Switcher */}
+                      <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3 z-30">
+                        <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase font-mono">
+                          VISUALISASI LOKASI SIAGA
+                        </span>
                         
-                        {/* Radar outline circles */}
-                        <div className="absolute w-[100%] h-[100%] rounded-full border border-slate-800/60" />
-                        <div className="absolute w-[75%] h-[75%] rounded-full border border-slate-800/80" />
-                        <div className="absolute w-[50%] h-[50%] rounded-full border border-slate-700/60" />
-                        <div className="absolute w-[25%] h-[25%] rounded-full border border-indigo-500/20" />
-                        
-                        {/* Crosshairs */}
-                        <div className="absolute w-full h-px bg-slate-800/40" />
-                        <div className="absolute h-full w-px bg-slate-800/40" />
-
-                        {/* Directions label */}
-                        <span className="absolute top-1 text-[9px] font-black text-slate-500 font-mono">U (N)</span>
-                        <span className="absolute bottom-1 text-[9px] font-black text-slate-500 font-mono">S (S)</span>
-                        <span className="absolute right-1 text-[9px] font-black text-slate-500 font-mono">T (E)</span>
-                        <span className="absolute left-1 text-[9px] font-black text-slate-500 font-mono">B (W)</span>
-
-                        {/* Center Point of Huntap Tondo 2 */}
-                        <div className="absolute z-10 flex flex-col items-center justify-center">
-                          <span className="h-3.5 w-3.5 rounded-full bg-indigo-500 border border-slate-900 shadow flex items-center justify-center cursor-pointer">
-                            <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
-                          </span>
-                          <span className="text-[8px] bg-indigo-605 text-white font-extrabold px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap uppercase tracking-widest font-mono">
-                            HUNTAP 2
-                          </span>
-                        </div>
-
-                        {/* Episentrum Point */}
-                        {latestCoords && latestDistance && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ repeat: Infinity, duration: 2 }}
-                            className="absolute z-20 flex flex-col items-center"
-                            style={{
-                              // Vector coordinate mapping
-                              // Limit the distance representation maximum radius on radar
-                              left: (() => {
-                                const angleRad = deg2rad((() => {
-                                  let angle = Math.atan2(latestCoords.lon - TONDO_LON, latestCoords.lat - TONDO_LAT) * (180 / Math.PI);
-                                  if (angle < 0) angle += 360;
-                                  return angle - 90; // Align with Canvas mapping
-                                })());
-                                const maxRepresentDistance = 400; // km
-                                const distPercent = Math.min(1.0, latestDistance / maxRepresentDistance);
-                                const radius = 110 * distPercent;
-                                return `calc(50% + ${radius * Math.cos(angleRad)}px)`;
-                              })(),
-                              top: (() => {
-                                const angleRad = deg2rad((() => {
-                                  let angle = Math.atan2(latestCoords.lon - TONDO_LON, latestCoords.lat - TONDO_LAT) * (180 / Math.PI);
-                                  if (angle < 0) angle += 360;
-                                  return angle - 90;
-                                })());
-                                const maxRepresentDistance = 400; // km
-                                const distPercent = Math.min(1.0, latestDistance / maxRepresentDistance);
-                                const radius = 110 * distPercent;
-                                return `calc(50% + ${radius * Math.sin(angleRad)}px)`;
-                              })(),
-                              transform: 'translate(-50%, -50%)'
-                            }}
+                        <div className="flex p-0.5 bg-white/5 border border-white/10 rounded-xl" id="map-radar-toggle">
+                          <button
+                            onClick={() => setVisualizationMode('radar')}
+                            className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                              visualizationMode === 'radar'
+                                ? 'bg-indigo-600 text-white shadow-md'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
                           >
-                            <span className="h-4 w-4 bg-rose-600 rounded-full border border-white flex items-center justify-center relative cursor-help">
-                              <span className="absolute -inset-2 bg-rose-500/40 rounded-full animate-ping pointer-events-none" />
-                            </span>
-                            <span className="text-[8px] bg-rose-650 text-white font-extrabold px-1.5 py-0.5 rounded shadow-sm mt-1 whitespace-nowrap tracking-wide font-mono uppercase">
-                              EPISENTER M {latestGempa.Magnitude}
-                            </span>
-                          </motion.div>
-                        )}
-
-                        {/* Sweep Line animation */}
-                        <div className="absolute inset-0 border border-transparent rounded-full animate-[spin_4s_linear_infinite] origin-center pointer-events-none" style={{
-                          background: 'linear-gradient(45deg, rgba(99, 102, 241, 0.15) 0%, transparent 40%)'
-                        }} />
+                            RADAR SIAGA
+                          </button>
+                          <button
+                            onClick={() => setVisualizationMode('map')}
+                            className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                              visualizationMode === 'map'
+                                ? 'bg-indigo-600 text-white shadow-md'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            PETA INTERAKTIF
+                          </button>
+                        </div>
                       </div>
-                      
-                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono text-center mt-3">
-                        Radius Pemetaan: Max 400 KM
-                      </p>
+
+                      {/* Display content frame */}
+                      <div className="flex-1 w-full h-full relative flex flex-col" id="visualization-content-frame">
+                        {visualizationMode === 'radar' ? (
+                          <div className="flex flex-col items-center justify-center h-full w-full py-6 flex-1">
+                            {/* Grid Radar Visualizer */}
+                            <div className="relative w-full aspect-square max-w-[320px] flex items-center justify-center">
+                              {/* Radar outline circles */}
+                              <div className="absolute w-[100%] h-[100%] rounded-full border border-slate-800/60" />
+                              <div className="absolute w-[75%] h-[75%] rounded-full border border-slate-800/80" />
+                              <div className="absolute w-[50%] h-[50%] rounded-full border border-slate-700/60" />
+                              <div className="absolute w-[25%] h-[25%] rounded-full border border-indigo-500/20" />
+                              
+                              {/* Crosshairs */}
+                              <div className="absolute w-full h-px bg-slate-800/40" />
+                              <div className="absolute h-full w-px bg-slate-800/40" />
+
+                              {/* Directions label */}
+                              <span className="absolute top-2 text-[9px] font-black text-slate-500 font-mono">U (N)</span>
+                              <span className="absolute bottom-2 text-[9px] font-black text-slate-500 font-mono">S (S)</span>
+                              <span className="absolute right-2 text-[9px] font-black text-slate-500 font-mono">T (E)</span>
+                              <span className="absolute left-2 text-[9px] font-black text-slate-500 font-mono">B (W)</span>
+
+                              {/* Center Point of Huntap Tondo 2 */}
+                              <div className="absolute z-10 flex flex-col items-center justify-center">
+                                <span className="h-3.5 w-3.5 rounded-full bg-indigo-500 border border-slate-900 shadow flex items-center justify-center cursor-pointer">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                                </span>
+                                <span className="text-[8px] bg-indigo-605 text-white font-extrabold px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap uppercase tracking-widest font-mono">
+                                  HUNTAP 2
+                                </span>
+                              </div>
+
+                              {/* Episentrum Point */}
+                              {latestCoords && latestDistance && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: [1, 1.2, 1] }}
+                                  transition={{ repeat: Infinity, duration: 2 }}
+                                  className="absolute z-20 flex flex-col items-center"
+                                  style={{
+                                    left: (() => {
+                                      const angleRad = deg2rad((() => {
+                                        let angle = Math.atan2(latestCoords.lon - TONDO_LON, latestCoords.lat - TONDO_LAT) * (180 / Math.PI);
+                                        if (angle < 0) angle += 360;
+                                        return angle - 90; // Align with Canvas mapping
+                                      })());
+                                      const maxRepresentDistance = 400; // km
+                                      const distPercent = Math.min(1.0, latestDistance / maxRepresentDistance);
+                                      const radius = 135 * distPercent;
+                                      return `calc(50% + ${radius * Math.cos(angleRad)}px)`;
+                                    })(),
+                                    top: (() => {
+                                      const angleRad = deg2rad((() => {
+                                        let angle = Math.atan2(latestCoords.lon - TONDO_LON, latestCoords.lat - TONDO_LAT) * (180 / Math.PI);
+                                        if (angle < 0) angle += 360;
+                                        return angle - 90;
+                                      })());
+                                      const maxRepresentDistance = 400; // km
+                                      const distPercent = Math.min(1.0, latestDistance / maxRepresentDistance);
+                                      const radius = 135 * distPercent;
+                                      return `calc(50% + ${radius * Math.sin(angleRad)}px)`;
+                                    })(),
+                                    transform: 'translate(-50%, -50%)'
+                                  }}
+                                >
+                                  <span className="h-4 w-4 bg-rose-600 rounded-full border border-white flex items-center justify-center relative cursor-help">
+                                    <span className="absolute -inset-2 bg-rose-500/40 rounded-full animate-ping pointer-events-none" />
+                                  </span>
+                                  <span className="text-[8px] bg-rose-650 text-white font-extrabold px-1.5 py-0.5 rounded shadow-sm mt-1 whitespace-nowrap tracking-wide font-mono uppercase">
+                                    EPISENTER M {latestGempa.Magnitude}
+                                  </span>
+                                </motion.div>
+                              )}
+
+                              {/* Sweep Line animation */}
+                              <div className="absolute inset-0 border border-transparent rounded-full animate-[spin_4s_linear_infinite] origin-center pointer-events-none" style={{
+                                background: 'linear-gradient(45deg, rgba(99, 102, 241, 0.15) 0%, transparent 40%)'
+                              }} />
+                            </div>
+                            
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono text-center mt-3">
+                              Radius Pemetaan Siaga: Max 400 KM dari Huntap
+                            </p>
+                          </div>
+                        ) : (
+                          // Free Interactive Map Workspace (OpenStreetMap & Keyless Satelit)
+                          <div className="w-full h-full flex flex-col justify-between flex-1" id="free-interactive-map-frame">
+                            {/* Map Settings Controls */}
+                            <div className="flex flex-wrap items-center justify-between gap-1.5 mb-2.5 border-b border-white/5 pb-2">
+                              {/* Source Provider Toggle */}
+                              <div className="flex p-0.5 bg-white/5 border border-white/10 rounded-lg">
+                                <button
+                                  onClick={() => setMapProvider('osm')}
+                                  className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all tracking-wider cursor-pointer ${
+                                    mapProvider === 'osm'
+                                      ? 'bg-indigo-600 text-white'
+                                      : 'text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  OpenStreetMap
+                                </button>
+                                <button
+                                  onClick={() => setMapProvider('google-sat')}
+                                  className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all tracking-wider cursor-pointer ${
+                                    mapProvider === 'google-sat'
+                                      ? 'bg-indigo-600 text-white'
+                                      : 'text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  Peta Satelit
+                                </button>
+                              </div>
+
+                              {/* Focus Area Controls */}
+                              <div className="flex p-0.5 bg-white/5 border border-white/10 rounded-lg">
+                                <button
+                                  onClick={() => setMapFocus('mid')}
+                                  className={`px-1.5 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all cursor-pointer ${
+                                    mapFocus === 'mid'
+                                      ? 'bg-indigo-550 bg-indigo-505 bg-indigo-600 text-white'
+                                      : 'text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  Split Dua Titik
+                                </button>
+                                <button
+                                  onClick={() => setMapFocus('huntap')}
+                                  className={`px-1.5 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all cursor-pointer ${
+                                    mapFocus === 'huntap'
+                                      ? 'bg-indigo-550 bg-indigo-505 bg-indigo-600 text-white'
+                                      : 'text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  Huntap 2
+                                </button>
+                                {latestCoords && (
+                                  <button
+                                    onClick={() => setMapFocus('epicenter')}
+                                    className={`px-1.5 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all cursor-pointer ${
+                                      mapFocus === 'epicenter'
+                                        ? 'bg-indigo-550 bg-indigo-505 bg-indigo-600 text-white'
+                                        : 'text-slate-400 hover:text-white'
+                                    }`}
+                                  >
+                                    Episenter
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Iframe Render Section - Leaflet Premium Integration */}
+                            <div className="w-full flex-1 min-h-[300px] md:min-h-[380px] rounded-2xl overflow-hidden border border-white/15 relative bg-slate-950 shadow-inner">
+                              {(() => {
+                                const latH = TONDO_LAT;
+                                const lonH = TONDO_LON;
+                                const latE = latestCoords?.lat || TONDO_LAT;
+                                const lonE = latestCoords?.lon || TONDO_LON;
+                                const distVal = latestDistance || 0;
+                                const magnitudeVal = latestGempa?.Magnitude || '0';
+                                const placeVal = latestGempa?.Wilayah || 'BMKG';
+
+                                const tileUrl = mapProvider === 'osm' 
+                                  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                                  : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+                                
+                                const htmlDoc = `
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                  <meta charset="utf-8" />
+                                  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                                  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                                  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                                  <style>
+                                    html, body, #map {
+                                      margin: 0; padding: 0; width: 100%; height: 100%;
+                                      background: #020617;
+                                    }
+                                    .leaflet-bar { border: none !important; }
+                                    
+                                    /* Episentrum Hot Red Breathing Pulse Animation */
+                                    .pulse-epicenter-container {
+                                      position: relative;
+                                      display: flex;
+                                      align-items: center;
+                                      justify-content: center;
+                                    }
+                                    .epicenter-ring {
+                                      position: absolute;
+                                      width: 44px;
+                                      height: 44px;
+                                      background: transparent;
+                                      border: 3px solid rgba(239, 68, 68, 0.9);
+                                      border-radius: 50%;
+                                      animation: epicenter-ripple 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+                                      box-sizing: border-box;
+                                      box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+                                    }
+                                    .epicenter-ring-outer {
+                                      position: absolute;
+                                      width: 72px;
+                                      height: 72px;
+                                      background: transparent;
+                                      border: 1.5px solid rgba(239, 68, 68, 0.4);
+                                      border-radius: 50%;
+                                      animation: epicenter-ripple 2.4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+                                      box-sizing: border-box;
+                                    }
+                                    .epicenter-dot {
+                                      width: 14px;
+                                      height: 14px;
+                                      background: #ef4444;
+                                      border: 2px solid #ffffff;
+                                      border-radius: 50%;
+                                      box-shadow: 0 0 8px #ef4444;
+                                      z-index: 5;
+                                    }
+
+                                    /* Huntap Indigo Home Pulse */
+                                    .pulse-huntap-container {
+                                      position: relative;
+                                      display: flex;
+                                      align-items: center;
+                                      justify-content: center;
+                                    }
+                                    .huntap-ring {
+                                      position: absolute;
+                                      width: 32px;
+                                      height: 32px;
+                                      background: transparent;
+                                      border: 2.5px solid rgba(99, 102, 241, 0.85);
+                                      border-radius: 50%;
+                                      animation: epicenter-ripple 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+                                      box-sizing: border-box;
+                                      box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+                                    }
+                                    .huntap-dot {
+                                      width: 12px;
+                                      height: 12px;
+                                      background: #6366f1;
+                                      border: 2px solid #ffffff;
+                                      border-radius: 50%;
+                                      box-shadow: 0 0 6px #6366f1;
+                                      z-index: 5;
+                                    }
+
+                                    @keyframes epicenter-ripple {
+                                      0% { transform: scale(0.2); opacity: 1; }
+                                      80% { opacity: 0.5; }
+                                      100% { transform: scale(1.8); opacity: 0; }
+                                    }
+
+                                    /* Clean dark custom tooltips */
+                                    .leaflet-tooltip-dark {
+                                      background: rgba(15, 23, 42, 0.92) !important;
+                                      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                                      color: #ffffff !important;
+                                      font-weight: 850 !important;
+                                      font-size: 9.5px !important;
+                                      font-family: ui-sans-serif, system-ui, sans-serif !important;
+                                      border-radius: 8px !important;
+                                      padding: 5px 9px !important;
+                                      box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+                                      letter-spacing: 0.05em !important;
+                                    }
+                                    .leaflet-tooltip-dark::before {
+                                      border-top-color: rgba(15, 23, 42, 0.92) !important;
+                                      border-bottom-color: rgba(15, 23, 42, 0.92) !important;
+                                    }
+                                  </style>
+                                </head>
+                                <body>
+                                  <div id="map"></div>
+                                  <script>
+                                    const map = L.map('map', { 
+                                      zoomControl: true,
+                                      attributionControl: false
+                                    });
+                                    
+                                    // Custom map tiles base
+                                    L.tileLayer('${tileUrl}', {
+                                      maxZoom: 18,
+                                      minZoom: 4
+                                    }).addTo(map);
+
+                                    // Coordinates
+                                    const latH = ${latH};
+                                    const lonH = ${lonH};
+                                    const latE = ${latE};
+                                    const lonE = ${lonE};
+
+                                    // Icons
+                                    const huntapIcon = L.divIcon({
+                                      className: 'pulse-huntap-container',
+                                      html: '<div class="huntap-ring"></div><div class="huntap-dot"></div>',
+                                      iconSize: [40, 40],
+                                      iconAnchor: [20, 20]
+                                    });
+
+                                    const epicenterIcon = L.divIcon({
+                                      className: 'pulse-epicenter-container',
+                                      html: '<div class="epicenter-ring-outer"></div><div class="epicenter-ring"></div><div class="epicenter-dot"></div>',
+                                      iconSize: [60, 60],
+                                      iconAnchor: [30, 30]
+                                    });
+
+                                    // Draw markers
+                                    const markerH = L.marker([latH, lonH], { icon: huntapIcon }).addTo(map);
+                                    markerH.bindTooltip("🔑 HUNTAP TONDO II (AMU)", { 
+                                      permanent: true, 
+                                      className: "leaflet-tooltip-dark", 
+                                      direction: "top" 
+                                    });
+
+                                    const markerE = L.marker([latE, lonE], { icon: epicenterIcon }).addTo(map);
+                                    markerE.bindTooltip("🟥 EPISENTER M " + "${magnitudeVal}", { 
+                                      permanent: true, 
+                                      className: "leaflet-tooltip-dark", 
+                                      direction: "bottom" 
+                                    });
+
+                                    // Dash alert connector line with pulsing wave representation
+                                    const pathPoints = [[latH, lonH], [latE, lonE]];
+                                    const polyline = L.polyline(pathPoints, {
+                                      color: '#f43f5e',
+                                      weight: 2.5,
+                                      dashArray: '6, 8',
+                                      opacity: 0.8
+                                    }).addTo(map);
+
+                                    // Zoom adjustment strategy
+                                    const focusMode = "${mapFocus}";
+                                    if (focusMode === 'epicenter') {
+                                      map.setView([latE, lonE], 9);
+                                    } else if (focusMode === 'huntap') {
+                                      map.setView([latH, lonH], 12);
+                                    } else {
+                                      // Fit both showing lines
+                                      const group = new L.featureGroup([markerH, markerE]);
+                                      map.fitBounds(group.getBounds().pad(0.35));
+                                    }
+                                  </script>
+                                </body>
+                                </html>
+                                `;
+
+                                return (
+                                  <iframe
+                                    title="Peta Taktis Gempa"
+                                    width="100%"
+                                    height="100%"
+                                    srcDoc={htmlDoc}
+                                    className="w-full h-full opacity-90 transition-all duration-300 rounded-2xl"
+                                    style={{ border: 0 }}
+                                  />
+                                );
+                              })()}
+                            </div>
+
+                            {/* Info Footer */}
+                            <div className="mt-2 text-center bg-white/5 border border-white/5 rounded-xl py-1.5 px-3 flex items-center justify-between gap-2">
+                              <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide font-mono flex items-center gap-1.5">
+                                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                AKTIF & BEBAS BIAYA
+                              </span>
+                              <span className="text-[10px] text-slate-350 font-black uppercase font-mono">
+                                Jarak: ±{latestDistance ? latestDistance.toFixed(1) : '-'} KM ke Huntap
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                   </div>

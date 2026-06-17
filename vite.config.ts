@@ -56,6 +56,7 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env.API_KEY': JSON.stringify(env.API_KEY || process.env.API_KEY || ''),
+      'process.env.GOOGLE_MAPS_PLATFORM_KEY': JSON.stringify(env.GOOGLE_MAPS_PLATFORM_KEY || process.env.GOOGLE_MAPS_PLATFORM_KEY || ''),
       'process.env.NODE_ENV': JSON.stringify(mode),
       // Provide a stringified version of the entire env object to prevent ReferenceErrors
       'process.env': JSON.stringify(env)
