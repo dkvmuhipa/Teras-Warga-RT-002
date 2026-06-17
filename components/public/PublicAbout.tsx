@@ -99,8 +99,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
   // Bureaucracy & Reports Analytics
   const totalReports = reports.length;
-  const resolvedReports = reports.filter(r => r.status === 'Selesai' || r.status === 'Resolved').length;
-  const activeReports = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses' || r.status === 'Investigating' || r.status === 'Progress').length;
+  const resolvedReports = reports.filter(r => r.status === 'Selesai').length;
+  const activeReports = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
   const totalLetters = letters.length;
   const approvedLetters = letters.filter(l => l.status === 'Disetujui' || l.status === 'Approved').length;
 
@@ -291,11 +291,11 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                     <Archive size={18} />
                   </div>
                 </div>
-                <p className="text-3xl sm:text-4xl font-black text-rose-950 font-mono tracking-tight">{totalInventoryAssets || 48}</p>
+                <p className="text-3xl sm:text-4xl font-black text-rose-950 font-mono tracking-tight">{totalInventoryAssets}</p>
                 <p className="text-xs font-black text-slate-800 mt-2 uppercase tracking-wide">Peralatan RT / Inventaris</p>
               </div>
               <p className="text-[10px] text-rose-600 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
-                {availableInventoryAssets || 45} Aset Siap Pinjam/Gunakan
+                {availableInventoryAssets} Aset Siap Pinjam/Gunakan
               </p>
             </motion.div>
 
@@ -512,40 +512,40 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   </div>
                 )}
 
-                {activeGeoTab === 'ekonomi' && (
+                 {activeGeoTab === 'ekonomi' && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Kategori Pra-Sejahtera</span>
-                      <span className="text-xs font-black text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{praSejahteraCount || 4} KK</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Kategori Sejahtera &amp; Mampu</span>
-                      <span className="text-xs font-black text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{sejahteraCount || (totalKK > 0 ? totalKK - 4 : 0)} KK</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Penerima Manfaat Bansos RT</span>
-                      <span className="text-xs font-black text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{bansosCount || 12} KK</span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
-                      *Kelayakan bansos PKH/BLT dipetakan langsung ke database demi menjamin keseimbangan keadilan distributif.
-                    </p>
-                  </div>
-                )}
-
-                {activeGeoTab === 'kerentanan' && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Balita &amp; Bayi Usia Dini</span>
-                      <span className="text-xs font-black text-pink-700 font-mono bg-pink-50 px-2 py-0.5 rounded-lg">{babyToddlerCount || 16} Anak</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Lanjut Usia (Lansia)</span>
-                      <span className="text-xs font-black text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{elderlyCount || 8} Jiwa</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Ibu Hamil &amp; Menyusui</span>
-                      <span className="text-xs font-black text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{pregnantCount || 2} Jiwa</span>
-                    </div>
+                       <span className="text-xs font-semibold text-slate-600">Kategori Pra-Sejahtera</span>
+                       <span className="text-xs font-black text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{praSejahteraCount} KK</span>
+                     </div>
+                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                       <span className="text-xs font-semibold text-slate-600">Kategori Sejahtera &amp; Mampu</span>
+                       <span className="text-xs font-black text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{sejahteraCount} KK</span>
+                     </div>
+                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                       <span className="text-xs font-semibold text-slate-600">Penerima Manfaat Bansos RT</span>
+                       <span className="text-xs font-black text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{bansosCount} KK</span>
+                     </div>
+                     <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
+                       *Kelayakan bansos PKH/BLT dipetakan langsung ke database demi menjamin keseimbangan keadilan distributif.
+                     </p>
+                   </div>
+                 )}
+ 
+                 {activeGeoTab === 'kerentanan' && (
+                   <div className="space-y-3">
+                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                       <span className="text-xs font-semibold text-slate-600">Balita &amp; Bayi Usia Dini</span>
+                       <span className="text-xs font-black text-pink-700 font-mono bg-pink-50 px-2 py-0.5 rounded-lg">{babyToddlerCount} Anak</span>
+                     </div>
+                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                       <span className="text-xs font-semibold text-slate-600">Lanjut Usia (Lansia)</span>
+                       <span className="text-xs font-black text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{elderlyCount} Jiwa</span>
+                     </div>
+                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                       <span className="text-xs font-semibold text-slate-600">Ibu Hamil &amp; Menyusui</span>
+                       <span className="text-xs font-black text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{pregnantCount} Jiwa</span>
+                     </div>
                     <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
                       *Kelompok rentan di atas didaftarkan dalam prioritas evakuasi jalur khusus mitigasi bahaya sesar Palu-Koro.
                     </p>
@@ -584,43 +584,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           </motion.div>
         </div>
 
-        {/* PRINSIP 5 LANGKAH TERAS */}
-        <section className="mb-16">
-          <div className="mb-8">
-            <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-1 block font-mono">PILAR PRINSIP SIKAP</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Prinsip 5 Langkah <span className="font-serif italic text-indigo-600">TERAS RT 02</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 font-semibold">Lima nilai luhur dasar kemasyarakatan dan tata kelola rukun tetangga di Huntap Tondo 2.</p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            {terasValues.map((value, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className={`p-3 rounded-2xl bg-gradient-to-br ${value.color} w-fit shadow-md mb-4`}>
-                    {value.icon}
-                  </div>
-                  <div className="flex items-baseline gap-1 mb-3">
-                    <span className="text-3xl font-black text-slate-800 font-mono tracking-tight">{value.letter}</span>
-                    <span className="text-slate-400 font-black">.</span>
-                    <h3 className="text-sm font-black text-slate-950 tracking-tight">{value.title}</h3>
-                  </div>
-                  <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                    {value.desc}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
 
         {/* FINANCIAL TRANSPARENCY: MINI CASHFLOW & TRANS DETAILED REKAP */}
         {cashFlow.length > 0 && (
@@ -680,12 +644,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-3 font-mono">REKAPITULASI TRANSAKSI TERBARU DARI DATABASE</p>
                   <div className="space-y-2.5">
                     {cashFlow.slice(-4).reverse().map((flow, idx) => (
-                      <div key={idx} className="p-4 bg-slate-55 bg-slate-50 rounded-2xl border border-slate-102 border-slate-100 flex items-center justify-between text-xs font-semibold">
+                      <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs font-semibold">
                         <div className="flex items-center gap-3.5">
                           <span className={`h-3 w-3 rounded-full flex-shrink-0 shadow-sm ${flow.type === 'Income' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                           <div>
                             <p className="text-slate-900 font-extrabold line-clamp-1">{flow.description}</p>
-                            <p className="text-[10px] text-slate-400 mt-0.5 font-mono">{flow.date} • Kategori: {flow.category} • Pencatat: {flow.refNo || 'Pengurus Swadaya'}</p>
+                            <p className="text-[10px] text-slate-400 mt-0.5 font-mono">{flow.date} • Kategori: {flow.category} • Pencatat: {flow.referenceNumber || 'Pengurus Swadaya'}</p>
                           </div>
                         </div>
                         <span className={`font-mono font-black text-sm whitespace-nowrap pl-4 ${flow.type === 'Income' ? 'text-emerald-700' : 'text-rose-700'}`}>
@@ -1055,140 +1019,69 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           </div>
         </section>
 
-        {/* PENJELASAN MENDALAM: LATAR BELAKANG, VISI, MISI, & TUJUAN LUHUR PLATFORM */}
+        {/* PENJELASAN MENDALAM: TANTANGAN RIIL YANG KAMI SELESAIKAN */}
         <section className="mb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-sm">
+            <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-2 block font-mono">LATAR BELAKANG &AMP; URGENSI SOLUSI</span>
+            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight mb-8 leading-tight">
+              Tantangan Riil Kemasyarakatan yang <span className="font-serif italic text-indigo-600">Kami Selesaikan</span>
+            </h3>
             
-            {/* Sisi Kiri: Latar Belakang Masalah (Pain Points Solved) */}
-            <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-2 block font-mono">LATAR BELAKANG &AMP; URGENSI SOLUSI</span>
-                <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight mb-6 leading-tight">
-                  Tantangan Riil Kemasyarakatan yang <span className="font-serif italic text-indigo-600">Kami Selesaikan</span>
-                </h3>
-                
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="h-10 w-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100">
-                      <FileText size={18} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-black text-slate-900 uppercase tracking-wide">1. Birokrasi Fisik yang Lamban &amp; Berbelit</h4>
-                      <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                        Secara konvensional, warga Huntap yang membutuhkan surat pengantar RT harus mencari keberadaan ketua RT secara fisik ke rumahnya, menulis draf manual, dan menunggu berhari-hari karena ketidakcocokan waktu luang. TERAS RT 02 meremajakan birokrasi ini menjadi serba digital: ajukan lewat HP, disetujui dalam hitungan menit, tanpa kertas.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 border border-amber-100">
-                      <Database size={18} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-black text-slate-900 uppercase tracking-wide">2. Krisis Kepercayaan &amp; Ketidakjelasan Kas Swadaya</h4>
-                      <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                        Kecurigaan penyalahgunaan keuangan rukun tetangga sering kali memicu keretakan rukun bertetangga. Dengan modul Transparansi Kas Terpadu, setiap uang masuk dari iuran warga dan pemakaian untuk kepentingan umum (seperti perbaikan gorong-gorong atau sumbangan kedukaan) terarsip akurat di database cloud dan dapat dipantau oleh siapa saja kapan saja.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100">
-                      <Map size={18} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-black text-slate-900 uppercase tracking-wide">3. Ambiguitas Akurasi Pendistribusian Bantuan Sosial (Bansos)</h4>
-                      <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                        Program bantuan darurat pemerintah rawan salah sasaran akibat tumpang tindih status ekonomi keluarga yang tidak tervalidasi secara objektif. Melalui peta hunian digital berdasar status sosial, pengurus memiliki draf peta demografi yang transparan demi memastikan warga kakek-nenek, yatim, atau dhuafa yang layak memperoleh haknya terlebih dahulu.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="h-10 w-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100">
-                      <BadgeAlert size={18} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-black text-slate-900 uppercase tracking-wide">4. Kekosongan Sistem Peringatan Kebencanaan Lokal</h4>
-                      <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                        Berdiri di atas pemukiman pasca-bencana tsunami Palu, ketidaksiapan mitigasi mandiri warga dapat berakibat fatal saat sesar Palu-Koro kembali bergeliat. Aplikasi ini mengintegrasikan rujukan mandiri siaga lindu, titik kaku evakuasi luar ruang, laporan aduan bahaya lingkungan, hingga integrasi kontak respons cepat dalam satu genggaman.
-                      </p>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex gap-4">
+                <div className="h-10 w-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100">
+                  <FileText size={18} />
                 </div>
-              </div>
-
-              <div className="bg-slate-55 bg-slate-50 rounded-2xl p-5 border border-slate-100 flex items-center gap-3.5 mt-8">
-                <CheckCircle2 size={22} className="text-indigo-600 flex-shrink-0" />
-                <p className="text-[11px] font-extrabold text-slate-700 leading-normal">
-                  Sinergi modernitas teknologi cloud berpadu kearifan gotong-royong demi mewujudkan RT Percontohan Tangguh Bencana pertama di Kota Palu.
-                </p>
-              </div>
-            </div>
-
-            {/* Sisi Kanan: Visi, Misi & Tujuan Luhur Pembuatan Platform (Tujuan Aplikasi) */}
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              
-              {/* Card Visi */}
-              <div className="bg-gradient-to-br from-indigo-650 to-indigo-800 bg-indigo-900 text-white rounded-3xl p-6 sm:p-8 shadow-md border border-indigo-950 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-white/10 rounded-xl text-white">
-                      <Globe size={18} />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-200 font-mono">VISI LUHUR TERAS RT 02</span>
-                  </div>
-                  <h4 className="text-lg sm:text-xl font-black text-white mb-3 tracking-tight leading-normal">
-                    "Mewujudkan Harmoni Huntap Tondo 2 Sebagai <span className="font-serif italic text-indigo-200 bg-clip-text">Pemukiman Digital Mandiri</span> yang Unggul, Transparan, Solider, Akuntabel, dan Siaga Bencana di Sulawesi Tengah"
-                  </h4>
-                  <p className="text-xs text-indigo-150 text-indigo-200/80 font-medium leading-relaxed leading-normal text-justify">
-                    Kami meyakini bahwa persatuan yang dilandasi oleh kecanggihan digitalisasi dan transparansi kas mutlak akan membentuk ketahanan sosial yang kuat dengan semangat <strong className="text-white">TERAS RT 02: Teknologi • Ekraf • Rukun • Aman • Sinergi</strong>, sehingga warga mampu bangkit mandiri, berkolaborasi secara setara, serta sejahtera bersama.
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">1. Birokrasi Fisik yang Lamban &amp; Berbelit</h4>
+                  <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
+                    Secara konvensional, warga Huntap yang membutuhkan surat pengantar RT harus mencari keberadaan ketua RT secara fisik ke rumahnya, menulis draf manual, dan menunggu berhari-hari karena ketidakcocokan waktu luang. TERAS RT 02 meremajakan birokrasi ini menjadi serba digital: ajukan lewat HP, disetujui dalam hitungan menit, tanpa kertas.
                   </p>
                 </div>
               </div>
 
-              {/* Card Misi & Nilai Dasar */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex-1 flex flex-col justify-between">
-                <div>
-                  <span className="text-[10px] uppercase font-black tracking-widest text-rose-600 mb-3 block font-mono">MISI UTAMA PEMBANGUNAN</span>
-                  <h4 className="text-lg font-black text-slate-900 tracking-tight mb-4">Langkah Strategis <span className="font-serif italic text-indigo-605 text-indigo-600">Berkelanjutan</span></h4>
-                  
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2.5">
-                      <span className="h-5 w-5 bg-indigo-50 text-indigo-600 rounded-md flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">I</span>
-                      <p className="text-xs text-slate-655 text-slate-600 font-semibold leading-relaxed">
-                        <strong>Digitalisasi Birokrasi Pelayanan</strong>: Mewadahi administrasi kependudukan satu pintu agar menghemat waktu pengurus maupun warga.
-                      </p>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="h-5 w-5 bg-indigo-50 text-indigo-600 rounded-md flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">II</span>
-                      <p className="text-xs text-slate-655 text-slate-600 font-semibold leading-relaxed">
-                        <strong>Transparansi Finansial Kas Mutlak</strong>: Menjamin akuntabilitas pencatatan keuangan rukun tetangga untuk mengikis prasangka sosial.
-                      </p>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="h-5 w-5 bg-indigo-50 text-indigo-600 rounded-md flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">III</span>
-                      <p className="text-xs text-slate-655 text-slate-600 font-semibold leading-relaxed">
-                        <strong>Pilar Ekonomi Kreatif Berdaya</strong>: Membuka wadah promosi pasar UMKM digital warga guna menguatkan sendi ekonomi akar rumput.
-                      </p>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="h-5 w-5 bg-indigo-50 text-indigo-600 rounded-md flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">IV</span>
-                      <p className="text-xs text-slate-655 text-slate-600 font-semibold leading-relaxed">
-                        <strong>Kesiapsiagaan Kebencanaan Sesar</strong>: Memelihara literasi penanggulangan keadaan darurat yang tersambung dengan asisten AI pintar.
-                      </p>
-                    </li>
-                  </ul>
+              <div className="flex gap-4">
+                <div className="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 border border-amber-100">
+                  <Database size={18} />
                 </div>
-
-                <div className="border-t border-slate-100 pt-5 mt-6 flex items-center gap-2">
-                  <Star size={14} className="text-amber-500 flex-shrink-0" />
-                  <span className="text-[10px] font-black text-slate-400 tracking-wider font-mono">
-                    DIPANDU OLEH SEMANGAT BHINNEKA TUNGGAL IKA
-                  </span>
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">2. Krisis Kepercayaan &amp; Ketidakjelasan Kas Swadaya</h4>
+                  <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
+                    Kecurigaan penyalahgunaan keuangan rukun tetangga sering kali memicu keretakan rukun bertetangga. Dengan modul Transparansi Kas Terpadu, setiap uang masuk dari iuran warga dan pemakaian untuk kepentingan umum (seperti perbaikan gorong-gorong atau sumbangan kedukaan) terarsip akurat di database cloud dan dapat dipantau oleh siapa saja kapan saja.
+                  </p>
                 </div>
               </div>
 
+              <div className="flex gap-4">
+                <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100">
+                  <Map size={18} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">3. Ambiguitas Akurasi Pendistribusian Bantuan Sosial (Bansos)</h4>
+                  <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
+                    Program bantuan darurat pemerintah rawan salah sasaran akibat tumpang tindih status ekonomi keluarga yang tidak tervalidasi secara objektif. Melalui peta hunian digital berdasar status sosial, pengurus memiliki draf peta demografi yang transparan demi memastikan warga kakek-nenek, yatim, atau dhuafa yang layak memperoleh haknya terlebih dahulu.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="h-10 w-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100">
+                  <BadgeAlert size={18} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">4. Kekosongan Sistem Peringatan Kebencanaan Lokal</h4>
+                  <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
+                    Berdiri di atas pemukiman pasca-bencana tsunami Palu, ketidaksiapan mitigasi mandiri warga dapat berakibat fatal saat sesar Palu-Koro kembali bergeliat. Aplikasi ini mengintegrasikan rujukan mandiri siaga lindu, titik kaku evakuasi luar ruang, laporan aduan bahaya lingkungan, hingga integrasi kontak respons cepat dalam satu genggaman.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex items-center gap-3.5 mt-8">
+              <CheckCircle2 size={22} className="text-indigo-600 flex-shrink-0" />
+              <p className="text-[11px] font-extrabold text-slate-700 leading-normal">
+                Sinergi modernitas teknologi cloud berpadu kearifan gotong-royong demi mewujudkan RT Percontohan Tangguh Bencana pertama di Kota Palu.
+              </p>
             </div>
           </div>
         </section>
