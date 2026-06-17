@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { User, ChevronDown, LayoutGrid, Wallet, Users, Info, Download, X, Smartphone, Sparkles, HelpCircle } from 'lucide-react';
+import { 
+  User, ChevronDown, LayoutGrid, Wallet, Users, Info, Download, X, Smartphone, Sparkles, HelpCircle,
+  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar
+} from 'lucide-react';
 import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
 import { NotificationCenter } from './NotificationCenter';
@@ -51,44 +54,54 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
     setShowInstallBanner(false);
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path.includes('?')) {
+      return location.pathname + location.search === path;
+    }
+    return location.pathname === path;
+  };
 
-  
   const navGroups = [
     {
       id: 'layanan',
       label: 'Layanan',
       icon: LayoutGrid,
+      columns: 2,
+      width: 'w-[480px] sm:w-[540px]',
       items: [
-        { path: '/services?tab=surat', label: 'Persuratan' },
-        { path: '/services?tab=lapor', label: 'Lapor Masalah' },
-        { path: '/services?tab=mutasi', label: 'Mutasi Warga' },
-        { path: '/services?tab=tamu', label: 'Lapor Tamu' },
-        { path: '/dokumen', label: 'Arsip Dokumen' },
-        { path: '/voting', label: 'E-Voting' },
+        { path: '/services?tab=surat', label: 'Persuratan', desc: 'Pengisian form surat pengantar RT kilat', icon: FileText, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
+        { path: '/services?tab=lapor', label: 'Lapor Masalah', desc: 'Aduan fasilitas & kendala lingkungan', icon: AlertTriangle, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
+        { path: '/services?tab=mutasi', label: 'Mutasi Warga', desc: 'Pencatatan data warga baru & pindah huni', icon: Users, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
+        { path: '/services?tab=tamu', label: 'Lapor Tamu', desc: 'Wajib lapor kunjungan menginap 24 jam', icon: Home, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
+        { path: '/dokumen', label: 'Arsip Dokumen', desc: 'Berita acara, regulasi, & draf surat kosong', icon: Download, color: 'text-blue-600 bg-blue-50/70 border-blue-150' },
+        { path: '/voting', label: 'E-Voting', desc: 'Salurkan hak suara mufakat bersama', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/70 border-violet-150' },
       ]
     },
     {
       id: 'ekonomi',
       label: 'Ekonomi',
       icon: Wallet,
+      columns: 1,
+      width: 'w-[280px]',
       items: [
-        { path: '/market', label: 'Pasar Warga' },
-        { path: '/sampah', label: 'Bank Sampah' },
-        { path: '/umkm', label: 'Direktori UMKM' },
+        { path: '/market', label: 'Pasar Warga', desc: 'Beli hasil dagangan & jasa warga lokal', icon: ShoppingBag, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
+        { path: '/sampah', label: 'Bank Sampah', desc: 'Setor sampah anorganik jadi saldo digital', icon: Trash2, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
+        { path: '/umkm', label: 'Direktori UMKM', desc: 'Katalog usaha kreatif binaan kepengurusan', icon: Store, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
       ]
     },
     {
       id: 'info',
       label: 'Informasi',
       icon: Info,
+      columns: 2,
+      width: 'w-[480px] sm:w-[540px]',
       items: [
-        { path: '/info', label: 'Info RT & Kas' },
-        { path: '/about', label: 'Tentang Kami' },
-        { path: '/rules', label: 'Peraturan RT 02' },
-        { path: '/gempa', label: 'Monitor Gempa BMKG' },
-        { path: '/faq', label: 'Pertanyaan Umum (FAQ)' },
-        { path: '/kegiatan', label: 'Jadwal Kegiatan' },
+        { path: '/info', label: 'Info RT & Kas', desc: 'Metrik keuangan transparan terdistribusi', icon: LineChart, color: 'text-sky-600 bg-sky-50/70 border-sky-150' },
+        { path: '/about', label: 'Tentang Kami', desc: 'Sejarah, visi kepengurusan & biografi', icon: Info, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
+        { path: '/rules', label: 'Peraturan RT 02', desc: 'Tata tertib resmi warga Huntap Tondo 2', icon: Scale, color: 'text-slate-700 bg-slate-50/70 border-slate-150' },
+        { path: '/gempa', label: 'Monitor Gempa', desc: 'Siaga seismik regional & integrasi BMKG', icon: Activity, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
+        { path: '/faq', label: 'E-FAQ RT', desc: 'Solusi mandiri kebingungan harian warga', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/70 border-violet-150' },
+        { path: '/kegiatan', label: 'Jadwal Agenda', desc: 'Jadwal kerja bakti, ronda & posyandu', icon: Calendar, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
       ]
     }
   ];
@@ -102,32 +115,32 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 text-white overflow-hidden relative z-50 shadow-md"
+            className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white overflow-hidden relative z-50 shadow-md border-b border-indigo-900/35"
           >
             <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left select-none">
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-white/10 rounded-lg hidden sm:block">
+                <div className="p-1.5 bg-indigo-500/10 rounded-lg hidden sm:block border border-indigo-500/20">
                   <Sparkles size={16} className="text-amber-300 animate-pulse" />
                 </div>
                 <div>
                   <p className="text-xs font-bold leading-tight flex items-center gap-1.5 justify-center sm:justify-start">
                     Pasang Aplikasi TERAS RT 02 
-                    <span className="text-[9px] font-black bg-emerald-500 text-white px-1.5 py-0.5 rounded-full uppercase tracking-widest">PWA</span>
+                    <span className="text-[9px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded-md uppercase tracking-wider font-mono">PWA</span>
                   </p>
-                  <p className="text-[10px] text-indigo-100 font-medium mt-0.5">Akses super cepat serba instan langsung dari layar utama ponsel Anda.</p>
+                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Akses super cepat serba instan langsung dari layar utama ponsel Anda.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
                 <button
                   onClick={handleInstallClick}
-                  className="bg-white text-indigo-700 hover:bg-indigo-50 active:scale-95 transition-all text-[11px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-[11px] font-black uppercase tracking-wider px-4 py-2 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer text-white"
                 >
                   <Download size={13} strokeWidth={2.5} />
                   Pasang Sekarang
                 </button>
                 <button
                   onClick={dismissBanner}
-                  className="p-1.5 text-indigo-200 hover:text-white transition-colors hover:bg-white/10 rounded-lg cursor-pointer animate-none"
+                  className="p-1.5 text-slate-400 hover:text-white transition-colors hover:bg-white/5 rounded-lg cursor-pointer"
                   title="Tutup banner"
                 >
                   <X size={15} />
@@ -138,18 +151,18 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
         )}
       </AnimatePresence>
 
-      <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 transition-all">
+      <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex justify-between h-18">
+            <div className="flex items-center cursor-pointer py-1" onClick={() => navigate('/')}>
               <Logo showText={true} imageSize="h-8 md:h-10" />
             </div>
             
             <div className="flex items-center gap-2">
-                <div className="hidden lg:flex items-center space-x-1 mr-4">
+                <div className="hidden lg:flex items-center space-x-1.5 mr-4">
                   <button 
                     onClick={() => navigate('/')} 
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${isActive('/') ? "text-blue-600 bg-blue-50" : "text-slate-600 hover:bg-slate-50"}`}
+                    className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${isActive('/') ? "text-indigo-600 bg-indigo-50/70" : "text-slate-600 hover:bg-slate-50"}`}
                   >
                     Beranda
                   </button>
@@ -162,9 +175,9 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                       onMouseLeave={() => setActiveDropdown(null)}
                     >
                       <button 
-                        className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
                           group.items.some(item => isActive(item.path)) 
-                          ? "text-blue-600 bg-blue-50" 
+                          ? "text-indigo-600 bg-indigo-50/70" 
                           : "text-slate-600 hover:bg-slate-50"
                         }`}
                       >
@@ -175,27 +188,45 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                       <AnimatePresence>
                         {activeDropdown === group.id && (
                           <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            initial={{ opacity: 0, y: 12, scale: 0.98 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute top-full left-0 mt-1 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl p-2 z-50 overflow-hidden"
+                            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
+                            className={`absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white/95 backdrop-blur-xl border border-slate-200/60 rounded-[1.75rem] shadow-xl p-4 z-50 overflow-hidden ${group.width}`}
                           >
-                            {group.items.map((item) => (
-                              <button
-                                key={item.path}
-                                onClick={() => {
-                                  navigate(item.path);
-                                  setActiveDropdown(null);
-                                }}
-                                className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                                  isActive(item.path)
-                                  ? "bg-blue-50 text-blue-600"
-                                  : "text-slate-600 hover:bg-slate-50"
-                                }`}
-                              >
-                                {item.label}
-                              </button>
-                            ))}
+                            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-500" />
+                            <div className={group.columns === 2 ? 'grid grid-cols-2 gap-3' : 'space-y-2'}>
+                              {group.items.map((item) => {
+                                const ItemIcon = item.icon;
+                                const isItemActive = isActive(item.path);
+                                return (
+                                  <button
+                                    key={item.path}
+                                    onClick={() => {
+                                      navigate(item.path);
+                                      setActiveDropdown(null);
+                                    }}
+                                    className={`group flex items-start gap-3 p-2.5 rounded-2xl w-full text-left transition-all ${
+                                      isItemActive
+                                      ? "bg-indigo-50/80 text-indigo-700 border border-indigo-100/40"
+                                      : "hover:bg-slate-50/80 text-slate-700 hover:text-slate-900 border border-transparent"
+                                    }`}
+                                  >
+                                    <div className={`p-2 rounded-xl transition-transform group-hover:scale-105 shrink-0 ${item.color}`}>
+                                      <ItemIcon size={16} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-black tracking-tight text-slate-800 group-hover:text-indigo-600 transition-colors">
+                                        {item.label}
+                                      </p>
+                                      <p className="text-[10px] text-slate-400 font-semibold leading-normal mt-0.5 max-w-[200px] truncate">
+                                        {item.desc}
+                                      </p>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -211,33 +242,33 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                 />
 
                 <div className="hidden md:block h-6 w-px bg-slate-200 mx-2"></div>
-                <Button 
+                <button 
                   onClick={() => navigate('/admin')} 
-                  variant="secondary" 
-                  className="hidden md:flex ml-2 text-xs h-9 font-bold rounded-xl px-4"
+                  className="hidden md:flex items-center gap-1.5 ml-2 text-xs font-black uppercase tracking-wider h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-850 text-white shadow-sm active:scale-95 transition-all cursor-pointer font-sans"
                 >
+                  <User size={13} />
                   Panel Admin
-                </Button>
+                </button>
             </div>
-            <div className="flex items-center lg:hidden gap-1.5">
+            <div className="flex items-center lg:hidden gap-2">
                {/* Mobile PWA Install Button */}
                {!isStandalone && (isInstallable || isIOS) && (
-                 <Button 
+                 <button 
                    onClick={handleInstallClick}
-                   variant="ghost" 
-                   className="p-2 text-indigo-600 bg-indigo-50/70 hover:bg-indigo-50 rounded-xl"
+                   className="flex items-center gap-1 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-xl transition-all"
                    title="Pasang Aplikasi PWA"
                  >
-                   <Download size={18} className="animate-bounce" />
-                 </Button>
+                   <Download size={12} className="animate-bounce" />
+                   <span>Pasang</span>
+                 </button>
                )}
-               <Button 
+               <button 
                  onClick={() => navigate('/admin')} 
-                 variant="ghost" 
-                 className="p-2 text-slate-400 hover:text-blue-600"
+                 className="p-2 text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-slate-100/80 rounded-xl transition-all border border-slate-100 focus:outline-none"
+                 title="Panel Admin"
                >
-                 <User size={20}/>
-               </Button>
+                 <User size={18}/>
+               </button>
             </div>
           </div>
         </div>

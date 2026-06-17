@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X } from 'lucide-react';
+import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const PublicRules: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedRules, setExpandedRules] = useState<Record<string, boolean>>({});
+  const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
   
   const categories = [
     { id: 'all', label: 'Semua Peraturan', desc: 'Seluruh tata tertib dan peraturan lingkungan RT 02 Huntap Tondo 2' },
@@ -220,6 +222,49 @@ export const PublicRules: React.FC = () => {
     }));
   };
 
+  React.useEffect(() => {
+    let ruleNo = searchParams.get('no');
+    let ruleTitle = searchParams.get('rule');
+
+    // Robust Fallback: check manually within window.location.hash
+    if (!ruleNo && !ruleTitle) {
+      const hashStr = window.location.hash || '';
+      const queryIdx = hashStr.indexOf('?');
+      if (queryIdx !== -1) {
+        const hashQueryParams = new URLSearchParams(hashStr.substring(queryIdx));
+        ruleNo = hashQueryParams.get('no');
+        ruleTitle = hashQueryParams.get('rule');
+      }
+    }
+
+    // Secondary Fallback: check standard window.location.search
+    if (!ruleNo && !ruleTitle) {
+      const standardParams = new URLSearchParams(window.location.search);
+      ruleNo = standardParams.get('no');
+      ruleTitle = standardParams.get('rule');
+    }
+
+    if (ruleNo) {
+      const idx = parseInt(ruleNo, 10) - 1;
+      if (idx >= 0 && idx < rules.length) {
+        setExpandedRules({ [rules[idx].title]: true });
+        setTimeout(() => {
+          const el = document.getElementById(`rule-card-${rules[idx].title}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
+    } else if (ruleTitle) {
+      const found = rules.find(r => r.title.toLowerCase().includes(ruleTitle.toLowerCase()) || r.nomorSurat.toLowerCase().includes(ruleTitle.toLowerCase()));
+      if (found) {
+        setExpandedRules({ [found.title]: true });
+        setTimeout(() => {
+          const el = document.getElementById(`rule-card-${found.title}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
+    }
+  }, [searchParams]);
+
   const expandAll = () => {
     const allExpanded: Record<string, boolean> = {};
     rules.forEach(r => {
@@ -415,6 +460,7 @@ export const PublicRules: React.FC = () => {
                   return (
                     <motion.div 
                       key={rule.title}
+                      id={`rule-card-${rule.title}`}
                       layout="position"
                       variants={itemVariants}
                       transition={{ type: "spring", stiffness: 350, damping: 25 }}
@@ -514,6 +560,95 @@ export const PublicRules: React.FC = () => {
                               transition={{ duration: 0.3, ease: "easeInOut" }}
                               className="overflow-hidden border-t border-slate-100 pt-8 text-left"
                             >
+                              {/* Share Box precisely modeled after target UI */}
+                              <div className="max-w-2xl mx-auto mb-6 bg-[#fbf9f4] rounded-2xl p-5 border border-amber-800/10 shadow-sm space-y-3 font-sans">
+                                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 font-mono">
+                                  <span>DAFTAR PERATURAN</span>
+                                  <span>/</span>
+                                  <span className="text-amber-800 font-extrabold">{rule.nomorSurat.toUpperCase()}</span>
+                                </div>
+                                
+                                <div className="p-4 bg-white/95 rounded-xl border border-slate-200/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                  <div className="space-y-1 my-1 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 text-slate-800 font-extrabold text-sm font-serif">
+                                      <Share2 size={15} className="text-amber-700 shrink-0" />
+                                      <span>Bagikan peraturan ini</span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 font-mono break-all font-medium select-all">
+                                      {window.location.origin}/#/rules?no={pasalNumber}
+                                    </p>
+                                  </div>
+                                  
+                                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const shareUrl = `${window.location.origin}/#/rules?no=${pasalNumber}`;
+                                        navigator.clipboard.writeText(shareUrl);
+                                        setCopiedStates(prev => ({ ...prev, [rule.title]: true }));
+                                        setTimeout(() => {
+                                          setCopiedStates(prev => ({ ...prev, [rule.title]: false }));
+                                        }, 2000);
+                                      }}
+                                      className="flex items-center gap-2 px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 shadow-sm transition-all duration-150 focus:outline-none"
+                                    >
+                                      {copiedStates[rule.title] ? (
+                                        <>
+                                          <Check size={14} className="text-emerald-600 animate-bounce" />
+                                          <span className="text-emerald-700 font-semibold">Tersalin</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Copy size={14} className="text-slate-400" />
+                                          <span>Salin tautan</span>
+                                        </>
+                                      )}
+                                    </button>
+                                    
+                                    <a
+                                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🚨 *Peraturan Resmi RT 02 Huntap Tondo 2*\n\nNaskah Ketentuan: *Peraturan ${rule.nomorSurat} tentang ${rule.title}*\n\nSilakan baca selengkapnya pada platform Teras Warga RT 02:\n${window.location.origin}/%23/rules?no=${pasalNumber}`)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba59] active:bg-[#1ca34d] text-white font-bold text-xs rounded-xl shadow-sm transition-all duration-150 focus:outline-none"
+                                    >
+                                      <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
+                                        <path d="M12.004 2c-5.523 0-10 4.477-10 10a9.96 9.96 0 0 0 1.516 5.253L2 22l4.915-1.285A9.957 9.957 0 0 0 12.004 22c5.523 0 10-4.477 10-10s-4.477-10-10-10zm5.666 14.195c-.244.688-1.22 1.254-1.688 1.309-.465.056-.913.256-2.936-.554-2.576-1.03-4.218-3.66-4.346-3.832-.128-.172-1.042-1.39-1.042-2.651s.66-1.879.894-2.128c.234-.25.511-.312.682-.312s.34.004.489.012c.153.008.358-.058.553.414.2.484.682 1.671.741 1.792.059.12.098.261.018.421-.08.159-.12.261-.24.402-.12.14-.251.312-.358.421-.12.12-.244.25-.104.489.14.238.623 1.027 1.336 1.66.918.812 1.691 1.062 1.933 1.183.243.12.386.101.527-.062.141-.164.6-1.004.75-.141s.3.238.64.406c.343.17.683.342.853.421.17.08.283.12.441-.141z"/>
+                                      </svg>
+                                      <span>Bagikan via WhatsApp</span>
+                                    </a>
+                                    
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const shareUrl = `${window.location.origin}/#/rules?no=${pasalNumber}`;
+                                        if (navigator.share) {
+                                          navigator.share({
+                                            title: `Peraturan RT 02 - ${rule.nomorSurat}`,
+                                            text: `Silakan baca dokumen keputusan resmi: Peraturan Ketua RT 02 Huntap Tondo 2 ${rule.nomorSurat} tentang ${rule.title}.`,
+                                            url: shareUrl,
+                                          }).catch(err => console.log(err));
+                                        } else {
+                                          const subject = encodeURIComponent(`Bagi Peraturan RT 02: ${rule.nomorSurat}`);
+                                          const body = encodeURIComponent(`Silakan periksa dokumen keputusan resmi Peraturan Ketua RT 02 Huntap Tondo 2 ${rule.nomorSurat} tentang ${rule.title} di tautan berikut:\n\n${shareUrl}`);
+                                          window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                                        }
+                                      }}
+                                      className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 shadow-sm transition-all duration-150 focus:outline-none"
+                                    >
+                                      <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-2 shrink-0" viewBox="0 0 24 24">
+                                        <circle cx="18" cy="5" r="3" />
+                                        <circle cx="6" cy="12" r="3" />
+                                        <circle cx="18" cy="19" r="3" />
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                      </svg>
+                                      <span>Bagikan...</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
                               {/* Parchment/Legal Document Wrapper */}
                               <div className="bg-slate-50/50 rounded-[2rem] border border-slate-200/80 p-4 md:p-8 space-y-6 shadow-inner relative overflow-hidden">
                                 
