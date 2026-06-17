@@ -7,6 +7,7 @@ import {
 import { House, Bill, PdfConfig } from '../../types';
 import { toast } from 'sonner';
 import { sendWhatsAppViaGateway, broadcastWhatsApp, getWhatsAppGroups, sendWhatsAppMessage } from '../../services/whatsappService';
+import { safeJsonStringify } from '../../services/databaseService';
 
 interface WhatsAppBroadcastManagerProps {
   houses: House[];
@@ -214,7 +215,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: safeJsonStringify(payload),
       });
 
       const result = await response.json();

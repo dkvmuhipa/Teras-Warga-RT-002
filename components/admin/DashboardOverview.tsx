@@ -13,6 +13,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
 import { generateDashboardSummary } from '../../services/geminiService';
+import { safeJsonStringify } from '../../services/databaseService';
 import { Button } from '../ui/Button';
 import { toast } from 'sonner';
 
@@ -62,7 +63,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
         timestamp: Date.now()
       };
       
-      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+      const blob = new Blob([safeJsonStringify(exportPayload, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

@@ -597,7 +597,9 @@ export const safeJsonStringify = (data: any, space?: number): string => {
     return JSON.stringify(deepSanitize(data), null, space);
   } catch (e) {
     console.error("Safe JSON stringify failed:", e);
-    return '{"error": "Circular structure or complex object detected", "message": "' + (e instanceof Error ? e.message : String(e)) + '"}';
+    const errMsg = e instanceof Error ? e.message : String(e);
+    const sanitizedErrMsg = errMsg.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    return `{"error": "Circular structure or complex object detected", "message": "${sanitizedErrMsg}"}`;
   }
 };
 
@@ -606,6 +608,24 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
   if (depth > 20) return "[Depth Limit]";
   
   if (data === null || data === undefined) return data;
+
+  // Handle Firestore Timestamps beautifully by checking typical Timestamp members
+  if (typeof data === 'object') {
+    if (typeof data.toDate === 'function') {
+      try {
+        return data.toDate().toISOString();
+      } catch (err) {
+        // Fallback
+      }
+    }
+    if (data.seconds !== undefined && data.nanoseconds !== undefined && typeof data.seconds === 'number' && typeof data.nanoseconds === 'number') {
+      try {
+        return new Date(data.seconds * 1000 + data.nanoseconds / 1000000).toISOString();
+      } catch (err) {
+        // Fallback
+      }
+    }
+  }
   
   // Handle non-objects
   if (typeof data !== 'object') return data;

@@ -1193,6 +1193,429 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           </div>
         </section>
 
+        {/* TATA NILAI & KERANGKA STRATEGIS PORTAL TERAS RT 02 */}
+        <section className="mb-20" id="core-values-section">
+          <div className="mb-12 text-center max-w-2xl mx-auto">
+            <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-1 block font-mono">PONDASI UTAMA &amp; VISI JANGKA PANJANG</span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Pondasi &amp; <span className="font-serif italic text-indigo-600">Arah Gerak RT 02</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-2">Struktur tata luhur nilai, cita-cita bersama, sasaran strategis, serta rencana jangka panjang kepengurusan rukun tetangga Huntap Tondo 2.</p>
+          </div>
+
+          <div className="space-y-20">
+            {/* A. NILAI-NILAI UTAMA */}
+            <div className="border-t border-slate-100 pt-10" id="section-nilai-utama">
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian A</span>
+                  <span className="text-xs text-slate-400 font-black font-mono">• TATA NILAI UTAMA</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Nilai-Nilai Utama <span className="font-serif italic text-indigo-600">Portal Teras RT 02</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Lima tata nilai luhur dasar kemasyarakatan dan tata kelola pelayanan warga Huntap Tondo 2.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6" id="strategic-content-nilai">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 w-fit mb-4">
+                      <Lock size={20} />
+                    </div>
+                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Transparansi Mutlak</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Keterbukaan penuh pada seluruh aliran iuran kas rukun tetangga, dokumen kebijakan, serta penyaluran bantuan sosial secara real-time demi rasa saling percaya.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 rounded-2xl bg-amber-50 text-amber-600 w-fit mb-4">
+                      <Award size={20} />
+                    </div>
+                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Integritas Amanah</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Sikap jujur, adil, dan integritas tinggi pengurus RT dalam menjalankan roda organisasi pelayanan kependudukan warga Huntap dengan pengorganisasian amanah.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600 w-fit mb-4">
+                      <HeartHandshake size={20} />
+                    </div>
+                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Gotong Royong</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Menjaga tradisi luhur tolong-menolong, solidaritas sosial tinggi, gotong-royong swadaya, serta bahu-membahu dalam menghadapi musibah suka maupun duka.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 w-fit mb-4">
+                      <Users size={20} />
+                    </div>
+                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Inklusivitas Adil</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Memberikan pelayanan dan perhatian adil merata bagi seluruh keluarga tanpa diskriminasi latar belakang suku, ras, gender, keyakinan, maupun taraf ekonomi keluarga.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 rounded-2xl bg-rose-50 text-rose-600 w-fit mb-4">
+                      <Shield size={20} />
+                    </div>
+                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Ketangguhan Siaga</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Kesiapsiagaan penuh, tanggap darurat bencana, pengamanan pencegahan aktif, serta ketahanan mitigasi wilayah mandiri rukun tetangga di atas jalur sesar.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* B. VISI & MISI */}
+            <div className="border-t border-slate-100 pt-10" id="section-visi-misi">
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian B</span>
+                  <span className="text-xs text-slate-400 font-black font-mono">• VISI &amp; MISI</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Visi &amp; Misi <span className="font-serif italic text-indigo-600">Rukun Tetangga 02</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Cita-cita luhur dan panduan langkah operasional kepengurusan jangka panjang.</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8" id="strategic-content-visi-misi">
+                <div className="lg:col-span-5 bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-indigo-900 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-white/10 rounded-xl">
+                        <Globe size={18} />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-200 font-mono">VISI UTAMA</span>
+                    </div>
+                    <h4 className="text-lg sm:text-2xl font-black text-white mb-4 tracking-tight leading-normal">
+                      "Mewujudkan Harmoni Huntap Tondo 2 Sebagai <span className="font-serif italic text-indigo-200">Pemukiman Digital Mandiri</span> yang Unggul, Transparan, Solider, Akuntabel, dan Siaga Bencana"
+                    </h4>
+                    <p className="text-xs text-indigo-200/90 font-medium leading-relaxed text-justify">
+                      Visi luhur yang memandu langkah kita dalam mendirikan lingkungan hunian berbasis teknologi tinggi, kreatif sosiologis, dan bersahabat erat dalam gotong-royong harmonis di Sulawesi Tengah.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+                  <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-4 block font-mono">MISI STRATEGIS</span>
+                  <h4 className="text-lg font-black text-slate-900 tracking-tight mb-4">Langkah Utama yang <span className="font-serif italic text-indigo-600">Terbimbing Nyata</span></h4>
+
+                  <div className="space-y-4">
+                    <div className="flex gap-4">
+                      <span className="h-6 w-6 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">PM 1</span>
+                      <div>
+                        <h5 className="text-xs font-black text-slate-900 uppercase">Pelayanan Birokrasi Cepat</h5>
+                        <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
+                          Mengotomatisasi surat menyurat satu pintu dan rekapitulasi domisili warga secara mandiri guna menghemat waktu warga.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <span className="h-6 w-6 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">PM 2</span>
+                      <div>
+                        <h5 className="text-xs font-black text-slate-900 uppercase">Akuntabilitas &amp; Transparansi Kas</h5>
+                        <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
+                          Mencatat dan mengumumkan mutasi kas rukun tetangga seketika (real-time) melalui aplikasi demi membangun integritas.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <span className="h-6 w-6 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">PM 3</span>
+                      <div>
+                        <h5 className="text-xs font-black text-slate-900 uppercase">Pemberdayaan Ekonomi Kreatif Warga</h5>
+                        <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
+                          Mempromosikan UMKM lokal warga, bank sampah digital ekonomis, serta pasar swadaya sebagai pondasi finansial keluarga huni.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <span className="h-6 w-6 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">PM 4</span>
+                      <div>
+                        <h5 className="text-xs font-black text-slate-900 uppercase">Sinergi Mitigasi Bencana &amp; Keamanan</h5>
+                        <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
+                          Memelihara pemetaan hunian, koordinasi pos ronda malam, pos tanggap darurat gempa, serta asisten AI pintar siaga bencana.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* C. TUJUAN STRATEGIS */}
+            <div className="border-t border-slate-100 pt-10" id="section-tujuan">
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian C</span>
+                  <span className="text-xs text-slate-400 font-black font-mono">• TARGET CAPAIAN</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Tujuan Strategis <span className="font-serif italic text-indigo-600">RT 02</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Garis arah bagi program-program sosial, ketahanan bencana, dan pemberdayaan ekonomi.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="strategic-content-tujuan">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4">
+                  <div className="p-3.5 rounded-2xl bg-indigo-50 text-indigo-600 h-fit">
+                    <FileText size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-2">1. Mewujudkan Birokrasi Adaptif &amp; Modern</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Menyajikan mekanisme administrasi kesuratan rukun tetangga yang ringkas, efektif, terbebas dari kesalahan manual, tumpukan kertas fisik, ataupun pungutan liar.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4">
+                  <div className="p-3.5 rounded-2xl bg-amber-50 text-amber-600 h-fit">
+                    <Users size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-2">2. Menumbuhkan Rasa Saling Percaya</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Membangun ikatan sosial yang sehat dan harmoni melalui keterbukaan pelaporan kas publik tanpa celah manipulasi demi kedamaian lingkungan bersama.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4">
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 text-emerald-600 h-fit">
+                    <ShoppingBag size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-2">3. Mengakselerasi Kesejahteraan Finansial</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Memicu keaktifan roda pasar swadaya mikro warga Huntap, memperluas jangkauan niaga UMKM, dan mendatangkan nilai ekonomis dari pemilahan bank sampah secara teratur.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4">
+                  <div className="p-3.5 rounded-2xl bg-rose-50 text-rose-600 h-fit">
+                    <Shield size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-2">4. Meminimalkan Dampak Kebencanaan</h4>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
+                      Meningkatkan kesiapsiagaan darurat lindu secara mandiri, mengarahkan peta titik kumpul secara cepat, koordinasi komunikasi darurat, dan menjaga keselamatan pengamanan warga.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* D. SASARAN 5 TAHUN KEDEPAN */}
+            <div className="border-t border-slate-100 pt-10" id="section-sasaran">
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian D</span>
+                  <span className="text-xs text-slate-400 font-black font-mono">• METRIK INDIKATOR</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Sasaran 5 Tahun Kedepan <span className="font-serif italic text-indigo-600">(Strategic Targets)</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Key Performance Indicators (KPI) kebersamaan yang ingin dicapai pengurus RT 02 dalam jangka menengah.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6" id="strategic-content-sasaran">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[36px] font-black text-indigo-600/20 font-mono tracking-tight">S-1</span>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">100% Pelayanan Digital</h4>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                      Layanan administrasi, rekapitulasi KK, dan usulan korespondensi beralih penuh seutuhnya ke Teras RT 02.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[36px] font-black text-amber-600/20 font-mono tracking-tight">S-2</span>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">Nol Masalah Rekonsiliasi</h4>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                      Sistem penarikan iuran, laporan pengeluaran, dan audit saldo kas tercapai 100% transparan dengan akurasi mutlak.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[36px] font-black text-emerald-600/20 font-mono tracking-tight">S-3</span>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">UMKM Naik Kelas</h4>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                      Minimal 90% pelaku niaga warga Huntap Tondo 2 terdaftar, memiliki lapak digital, dan mendapatkan pembeli konstan.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[36px] font-black text-rose-600/20 font-mono tracking-tight">S-4</span>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">Desa Siaga Bencana</h4>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                      Mewujudkan percontohan kerukunan rukun tetangga dengan mitigasi lindu berstandar tangguh bencana tingkat nasional.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[36px] font-black text-blue-600/20 font-mono tracking-tight">S-5</span>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">Mandiri Finansial</h4>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                      Terciptanya ketahanan kas mandiri operasional rukun tetangga yang diperoleh secara ekologis via bank sampah terpadu warga.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* E. MOTTO & SLOGAN JUANG */}
+            <div className="border-t border-slate-100 pt-10" id="section-motto">
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian E</span>
+                  <span className="text-xs text-slate-400 font-black font-mono">• SLOGAN JUANG</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Motto &amp; Slogan <span className="font-serif italic text-indigo-600">RT 02</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Singkatan luhur dan esensi identitas keguyuban rukun tetangga di Huntap Tondo 2.</p>
+              </div>
+
+              <div className="bg-indigo-950 text-white rounded-3xl p-6 sm:p-10 shadow-lg border border-indigo-900" id="strategic-content-motto">
+                <div className="text-center mb-8">
+                  <span className="text-[10px] text-indigo-400 font-black tracking-widest font-mono uppercase">MOTTO &amp; SLOGAN JUANG KITA</span>
+                  <h3 className="text-2xl sm:text-4xl font-extrabold text-white mt-2 mb-3 tracking-tight font-sans">
+                    "TERAS RT 02"
+                  </h3>
+                  <div className="h-1 w-20 bg-indigo-500 mx-auto rounded-full mb-4" />
+                  <p className="text-sm font-extrabold text-indigo-300 tracking-wider uppercase">
+                    Teknologi • Ekraf • Rukun • Aman • Sinergi
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mt-8">
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+                    <span className="text-xl font-black text-indigo-400 font-mono">T</span>
+                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">TEKNOLOGI</h4>
+                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
+                      Inovasi platform digital sebagai tiang penopang utama pelayanan administrasi satu pintu yang efektif.
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+                    <span className="text-xl font-black text-amber-400 font-mono">E</span>
+                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">EKRAF</h4>
+                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
+                      Ekonomi kreatif mandiri melalui swadaya UMKM dan pemilahan bank sampah digital bernilai tinggi.
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+                    <span className="text-xl font-black text-emerald-400 font-mono">R</span>
+                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">RUKUN</h4>
+                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
+                      Interaksi kemasyarakatan yang tulus, damai, pemaaf, saling asih, serta menjunjung tinggi tenggang rasa.
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+                    <span className="text-xl font-black text-rose-400 font-mono">A</span>
+                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">AMAN</h4>
+                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
+                      Keamanan pemukiman yang terjaga, tanggap ronda bersama, serta siaga mitigasi gempa sesar aktif.
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+                    <span className="text-xl font-black text-blue-400 font-mono">S</span>
+                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">SINERGI</h4>
+                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
+                      Kolaborasi erat nan selaras antara para pengurus, seluruh KK warga huni, akademisi, dan pemerintah.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* F. RENCANA JANGKA PANJANG */}
+            <div className="border-t border-slate-100 pt-10" id="section-rencana">
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian F</span>
+                  <span className="text-xs text-slate-400 font-black font-mono">• LINIMASA ROADMAP</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Rencana Jangka Panjang <span className="font-serif italic text-indigo-600">(10-Year Roadmap)</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Linimasa tiga tahap utama pelaksanaan visi jangka panjang digitalisasi, kemandirian ekonomi, dan ketangguhan lingkungan Huntap Tondo 2 dalam kurun waktu 10 tahun.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6" id="strategic-content-rencana">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-indigo-50 text-indigo-600 text-[9px] font-black font-mono rounded-bl-2xl uppercase">Tahap 1</div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 mt-2">Fondasi &amp; Digitalisasi</h4>
+                    <div className="text-[10px] text-indigo-600 font-black tracking-widest font-mono mb-3 uppercase">Tahun 1 - 3 (2026 - 2028)</div>
+                    <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
+                      <li>Migrasi data kependudukan terenkripsi dan integrasi penuh blok hunian.</li>
+                      <li>Pembiasaan iuran kas terjadwal transparan berbasis web secara periodik.</li>
+                      <li>Aktivasi asisten konsultasi AI Siaga Bencana dan pemetaan risiko darurat.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-amber-50 text-amber-600 text-[9px] font-black font-mono rounded-bl-2xl uppercase">Tahap 2</div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 mt-2">Pemberdayaan &amp; Ekonomi Mandiri</h4>
+                    <div className="text-[10px] text-amber-600 font-black tracking-widest font-mono mb-3 uppercase">Tahun 4 - 6 (2029 - 2031)</div>
+                    <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
+                      <li>Inisiasi Bank Sampah digital terintegrasi iuran kas sosial warga.</li>
+                      <li>Inkubasi bisnis swadaya, standarisasi, dan digitalisasi UMKM Huntap.</li>
+                      <li>Pembangunan infrastruktur bersama ramah lingkungan &amp; energi mandiri.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-rose-50 text-rose-600 text-[9px] font-black font-mono rounded-bl-2xl uppercase">Tahap 3</div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 mt-2">Ketangguhan &amp; Kepemimpinan Regional</h4>
+                    <div className="text-[10px] text-rose-600 font-black tracking-widest font-mono mb-3 uppercase">Tahun 7 - 10 (2032 - 2035)</div>
+                    <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
+                      <li>Penyediaan hidran mandiri, jalur evakuasi pintar, dan kelengkapan darurat tangguh.</li>
+                      <li>Replikasi model tata kelola Smart RT berskala kota/nasional secara open-source.</li>
+                      <li>Penciptaan ekosistem belajar digital jangka panjang berkelanjutan bagi anak-anak Huntap.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* MITIGASI GEMPA & SIAGA BENCHMARK AREA */}
         <section className="mb-16 bg-gradient-to-br from-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
