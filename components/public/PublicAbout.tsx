@@ -324,6 +324,92 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           </div>
         </section>
 
+        {/* PLATFORM OVERVIEW SECTION */}
+        <motion.section 
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-16 bg-white rounded-[2.5rem] p-8 sm:p-12 border border-slate-200/80 shadow-xl shadow-slate-100/40 relative overflow-hidden"
+        >
+          {/* Subtle decorative background elements */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/40 rounded-full blur-3xl -mr-20 -mt-20 -z-10" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-rose-50/30 rounded-full blur-3xl -ml-20 -mb-20 -z-10" />
+
+          <div className="max-w-4xl mx-auto text-center mb-10">
+            <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full font-mono">
+              SISTEM INFORMASI TERPADU &amp; DIGITALISASI WARGA
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mt-4 leading-tight">
+              Mengenal Portal <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-indigo-600 font-serif italic">TERAS RT 02 Huntap Tondo 2</span> Lebih Dekat
+            </h2>
+            <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-3 max-w-2xl mx-auto leading-relaxed">
+              Sebuah gagasan inovatif kemitraan warga yang melampaui sekadar sarana hunian biasa. Portal ini dirancang khusus untuk menyatukan seluruh elemen kehidupan kemasyarakatan di kawasan Hunian Tetap Tondo 2, Palu, Sulawesi Tengah.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Visual description column */}
+            <div className="space-y-6">
+              <h3 className="text-lg sm:text-xl font-black text-slate-800 flex items-center gap-2.5">
+                <HeartHandshake className="text-rose-500 animate-pulse" size={22} />
+                Solusi Kolaboratif dari &amp; Untuk Warga
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed text-justify">
+                TERAS RT 02 Huntap Tondo 2 lahir dari kesadaran bersama akan pentingnya integrasi pasca-bencana. Sebagai pemukiman yang dibangun untuk penyintas bencana dahsyat 2018 di Kota Palu, kami memerlukan jembatan komunikasi modern yang tidak dibatasi oleh sekat-sekat fisik atau misinformasi konvensional. 
+              </p>
+              <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed text-justify">
+                Platform ini merayakan nilai gotong-royong dengan cara menyatukan pangkalan data kependudukan fungsional, kemudahan pelayanan surat digital satu pintu, pemantauan saldo iuran kas RT riil-time, serta promosi swadaya UMKM lokal yang terus berputar aktif. Kami meyakini, melalui digitalisasi terstruktur yang akuntabel dan berorientasi sosial, ketahanan wilayah kita akan tumbuh harmonis, bersolidaritas penuh, kokoh menghadapi mara bahaya, serta mandiri secara finansial.
+              </p>
+              <div className="border-l-4 border-rose-500 pl-4 py-1.5 italic text-xs font-bold text-slate-500 leading-normal">
+                "Kami tidak sekadar berupaya membangun tempat tinggal fisik, melainkan menganyam peradaban masa depan yang memberdayakan kebersamaan warga secara setara, tangkas, transparan, dan siaga kebencanaan."
+              </div>
+            </div>
+
+            {/* Structured feature bento cards column */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-indigo-200 transition-colors">
+                <div className="h-8 w-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                  <Smartphone size={16} />
+                </div>
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Aksesibilitas Satu Sentuhan</h4>
+                <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
+                  Warga dapat mengajukan layanan administrasi pengantar secara kilat, memeriksa status bantuan sosial, dan memonitor data kependudukan langsung dari smartphone.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-emerald-200 transition-colors">
+                <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+                  <TrendingUp size={16} />
+                </div>
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Ekonomi Sirkular UMKM</h4>
+                <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
+                  Mendukung tumbuh kembang warung warga, kuliner rumahan, jasa swadaya, maupun bank sampah terpadu guna mempercepat arus finansial kas keluarga.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-rose-200 transition-colors">
+                <div className="h-8 w-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+                  <Shield size={16} />
+                </div>
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Mitigasi &amp; Lingkungan Aman</h4>
+                <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
+                  Pos siskamling modern berpeta digital rute, sistem proteksi siaga gempa bumi lintasan sesar Palu-Koro, serta deteksi siaga jaminan prioritas golongan rentan.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-amber-200 transition-colors">
+                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
+                  <Database size={16} />
+                </div>
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Transparansi Finansial Rill</h4>
+                <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
+                  Laporan pembukuan donasi, iuran kematian, pembagian kas darurat sosial, hingga pemeliharaan perlengkapan sarana diumumkan terbuka bebas manipulasi.
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
         {/* TWO COLUMN GRID: HISTORY STORY & DETAILED DEMOGRAPHIC ENGINE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
           
@@ -1056,7 +1142,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                     "Mewujudkan Harmoni Huntap Tondo 2 Sebagai <span className="font-serif italic text-indigo-200 bg-clip-text">Pemukiman Digital Mandiri</span> yang Unggul, Transparan, Solider, Akuntabel, dan Siaga Bencana di Sulawesi Tengah"
                   </h4>
                   <p className="text-xs text-indigo-150 text-indigo-200/80 font-medium leading-relaxed leading-normal text-justify">
-                    Kami meyakini bahwa persatuan yang dilandasi oleh kecanggihan digitalisasi dan transparansi kas mutlak akan membentuk ketahanan sosial yang kuat, sehingga warga mampu bangkit mandiri, berkolaborasi secara setara, serta sejahtera bersama.
+                    Kami meyakini bahwa persatuan yang dilandasi oleh kecanggihan digitalisasi dan transparansi kas mutlak akan membentuk ketahanan sosial yang kuat dengan semangat <strong className="text-white">TERAS RT 02: Teknologi • Ekraf • Rukun • Aman • Sinergi</strong>, sehingga warga mampu bangkit mandiri, berkolaborasi secara setara, serta sejahtera bersama.
                   </p>
                 </div>
               </div>

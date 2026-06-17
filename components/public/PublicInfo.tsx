@@ -830,57 +830,6 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                 </div>
             </motion.div>
 
-            {/* Vision & Mission */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
-                        <Target size={180} />
-                    </div>
-                    <div className="relative z-10">
-                        <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6">
-                            <Target size={24} />
-                        </div>
-                        <h2 className="text-2xl font-black text-slate-800 mb-4">Visi Kami</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            "Menjadikan RT 02 sebagai lingkungan hunian yang mandiri, aman, dan guyub rukun berbasis teknologi informasi serta gotong royong dengan semangat <strong>TERAS RT 02 : Teknologi • Ekraf • Rukun • Aman • Sinergi</strong>."
-                        </p>
-                    </div>
-                </div>
-                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
-                        <Lightbulb size={180} />
-                    </div>
-                    <div className="relative z-10">
-                        <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 mb-6">
-                            <Lightbulb size={24} />
-                        </div>
-                        <h2 className="text-2xl font-black text-slate-800 mb-4">Misi Utama</h2>
-                        <ul className="space-y-3 text-slate-600">
-                            <li className="flex items-start gap-3">
-                                <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                                <span><strong>Teknologi:</strong> Digitalisasi pelayanan administrasi warga.</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                                <span><strong>Ekraf:</strong> Pengembangan Ekonomi Kreatif warga.</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                                <span><strong>Rukun:</strong> Mempererat tali silaturahmi dan gotong royong.</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                                <span><strong>Aman:</strong> Peningkatan keamanan lingkungan terpadu (Siskamling).</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <CheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
-                                <span><strong>Sinergi:</strong> Transparansi pengelolaan dana sosial dan pembangunan.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </motion.div>
-
             {/* Key Statistics & Status Check */}
             <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <div className="lg:col-span-3">
