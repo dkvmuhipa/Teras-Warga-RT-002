@@ -36,6 +36,7 @@ export const MobileBottomNav: React.FC = () => {
       label: 'Informasi RT',
       items: [
         { path: '/info', icon: Shield, label: 'Info RT & Kas' },
+        { path: '/about', icon: Info, label: 'Tentang Kami' },
         { path: '/rules', icon: Scale, label: 'Peraturan RT' },
         { path: '/gempa', icon: Activity, label: 'Siaga Gempa' },
         { path: '/faq', icon: HelpCircle, label: 'FAQ' },

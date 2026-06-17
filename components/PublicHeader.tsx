@@ -84,6 +84,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       icon: Info,
       items: [
         { path: '/info', label: 'Info RT & Kas' },
+        { path: '/about', label: 'Tentang Kami' },
         { path: '/rules', label: 'Peraturan RT 02' },
         { path: '/gempa', label: 'Monitor Gempa BMKG' },
         { path: '/faq', label: 'Pertanyaan Umum (FAQ)' },

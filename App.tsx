@@ -70,6 +70,7 @@ import PublicDonations from './components/public/PublicDonations';
 import { PublicFAQ } from './components/public/PublicFAQ';
 import { PublicRules } from './components/public/PublicRules';
 import { PublicEarthquake } from './components/public/PublicEarthquake';
+import { PublicAbout } from './components/public/PublicAbout';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -486,6 +487,20 @@ export const App = () => {
                                 <Route path="/faq" element={<PublicFAQ faqItems={faqItems} />} />
                                 <Route path="/rules" element={<PublicRules />} />
                                 <Route path="/gempa" element={<PublicEarthquake />} />
+                                <Route path="/about" element={
+                                    <PublicAbout 
+                                        officials={officials} 
+                                        houses={houses} 
+                                        umkm={umkm} 
+                                        ronda={ronda} 
+                                        cashFlow={cashFlow} 
+                                        reports={reports}
+                                        letters={letters}
+                                        inventory={inventory}
+                                        events={events}
+                                        donationCampaigns={donationCampaigns}
+                                    />
+                                } />
                             </Routes>
                         </div>
                         <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} />
