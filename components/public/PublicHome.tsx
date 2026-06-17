@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
-  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare
+  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare, Scale, HelpCircle
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint } from '../../types';
@@ -285,6 +285,96 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </motion.div>
 
       <DigitalSummary />
+
+      {/* Peraturan RT 02 - RT2LAW & Buku Saku Section */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* RT2LAW Card */}
+        <div 
+          onClick={() => navigate('/rules')}
+          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-[#0c3127] to-[#041410] rounded-[3rem] p-8 md:p-10 border border-emerald-950/60 shadow-xl hover:shadow-emerald-900/10 transition-all duration-500 relative overflow-hidden group flex flex-col justify-between min-h-[320px]"
+        >
+          {/* Subtle Pinstripe Pattern */}
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.015)_0px,rgba(255,255,255,0.015)_1px,transparent_1px,transparent_12px)] pointer-events-none" />
+          {/* Accent Glow */}
+          <div className="absolute top-[-50%] right-[-10%] w-[60%] h-[100%] bg-emerald-500/5 rounded-full blur-[100px] group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
+          
+          <div className="relative z-10 space-y-6">
+            {/* Top header */}
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-[#dfb975] to-[#b38a43] text-[#0c3127] rounded-2xl shadow-md group-hover:scale-105 transition-transform">
+                <Scale size={24} strokeWidth={2.2} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#dfb975] leading-none mb-1">PERATURAN</p>
+                <p className="text-sm font-black text-white/90 leading-none">RT 02 Huntap Tondo 2</p>
+              </div>
+            </div>
+
+            {/* Middle Big Title */}
+            <div className="space-y-1 pt-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#dfb975]/85">PERATURAN WARGA</p>
+              <h2 className="text-4xl md:text-5xl font-black text-white tracking-[0.02em]">
+                RT2<span className="text-[#dfb975]">LAW</span>
+              </h2>
+              <p className="text-white/70 text-xs md:text-sm font-semibold pt-1">
+                Peraturan resmi lingkungan RT — baca daftar & teks lengkap
+              </p>
+            </div>
+          </div>
+
+          {/* Separator and Footer */}
+          <div className="relative z-10 pt-4 mt-6">
+            <div className="border-t border-[#dfb975]/10 w-full mb-5" />
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="text-white/40 tracking-[0.2em] uppercase font-black text-[10px]">KEL. TONDO, PALU</span>
+              <span className="flex items-center gap-2 text-[#dfb975] font-black group-hover:text-amber-300 transition-colors">
+                Baca Selengkapnya
+                <ChevronRight size={16} className="transform group-hover:translate-x-1.5 transition-transform" strokeWidth={3} />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Companion Card: Buku Saku RT 02 */}
+        <div 
+          onClick={() => navigate('/faq')}
+          className="lg:col-span-1 cursor-pointer bg-slate-900 rounded-[3rem] p-8 border border-slate-800 shadow-xl hover:shadow-indigo-950/20 transition-all duration-500 relative overflow-hidden group flex flex-col justify-between min-h-[320px]"
+        >
+          {/* Accent light ray */}
+          <div className="absolute bottom-[-20%] left-[-20%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[60px]" />
+          
+          <div className="relative z-10 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl border border-indigo-500/20">
+                <HelpCircle size={24} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 leading-none mb-1">TANYA JAWAB</p>
+                <p className="text-sm font-black text-white/90 leading-none">Bantuan Warga</p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-400/80">FAQ CENTER</p>
+              <h3 className="text-2xl font-black text-white leading-tight">Buku Saku <br/><span className="text-indigo-400 italic font-serif">Digital</span></h3>
+              <p className="text-xs text-slate-400 leading-relaxed font-semibold">
+                Panduan administratif, tata cara surat pengantar, lapor tamu, & penanganan masalah darurat.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative z-10 pt-4 mt-6">
+            <div className="border-t border-slate-800 w-full mb-5" />
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="text-slate-500 tracking-widest uppercase font-black text-[9px]">SISTEM TERAS RT</span>
+              <span className="flex items-center gap-2 text-indigo-400 font-extrabold group-hover:text-indigo-300 transition-colors">
+                Buka FAQ
+                <ChevronRight size={16} className="transform group-hover:translate-x-1.5 transition-transform" strokeWidth={3} />
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Resident Dues Widget - NEW Bento Card */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">

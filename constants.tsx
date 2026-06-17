@@ -234,43 +234,99 @@ export const MOCK_GALLERY: GalleryItem[] = [
 export const MOCK_FAQ: FAQItem[] = [
   { 
     id: '1', 
-    question: 'Bagaimana cara mengurus surat pengantar RT?', 
-    answer: 'Warga dapat mengajukan secara online melalui menu "Layanan Digital". Pilih jenis surat, isi formulir, dan tunggu verifikasi Admin. Surat yang sudah jadi dapat diunduh atau diambil di rumah Ketua RT.' 
+    category: 'layanan',
+    question: 'Bagaimana cara mengurus surat pengantar RT secara online?', 
+    answer: 'Warga dapat mengajukan surat pengantar secara online melalui menu "Layanan Digital" di aplikasi ini. Caranya sangat praktis: Pilih kategori layanan "Persuratan", tentukan jenis surat yang dibutuhkan (misalnya Surat Pengantar KTP, Kartu Keluarga, Keterangan Domisili, atau Keterangan Kematian), lalu isi data formulir yang diperlukan secara lengkap. Setelah dikirim, Admin RT atau Sekretaris akan memverifikasi dan menandatangani dokumen secara digital menggunakan tanda tangan elektronik resmi RT 02. Dokumen yang telah disetujui akan meluncur langsung ke galeri dokumen warga Anda dan dapat diunduh (format PDF) atau dicetak secara mandiri tanpa perlu bertamu langsung ke rumah Ketua RT.' 
   },
   { 
     id: '2', 
-    question: 'Kapan jadwal pengambilan sampah rutin?', 
-    answer: 'Pengambilan sampah rumah tangga dilakukan setiap hari Senin dan Kamis pagi oleh petugas kebersihan lingkungan.' 
+    category: 'lingkungan',
+    question: 'Kapan jadwal pembuangan dan pengambilan sampah rutin dilakukan?', 
+    answer: 'Pengambilan sampah domestik rumah tangga non-B3 (sampah dapur/basah) dilakukan rutin setiap hari Senin, Rabu, dan Jumat pagi mulai jam 07:00 hingga 10:00 oleh petugas kebersihan dinas lingkungan hidup. Warga diimbau untuk membungkus sampah dengan rapat di dalam kantong plastik hitam tebal sebelum menaruhnya di tong sampah depan rumah masing-masing demi mencegah bau menyengat dan gangguan hewan liar.' 
   },
   { 
     id: '3', 
-    question: 'Apa itu Bank Sampah dan bagaimana cara menabung?', 
-    answer: 'Bank Sampah adalah program menabung sampah anorganik (plastik, kertas, logam) yang bernilai ekonomi. Warga bisa menyetorkan sampah yang sudah dipilah ke Pos Ronda setiap Sabtu pagi jam 08.00 - 10.00.' 
+    category: 'lingkungan',
+    question: 'Apa itu program Bank Sampah RT 02 dan bagaimana saya bisa berpartisipasi?', 
+    answer: 'Bank Sampah adalah program kepedulian lingkungan bernilai ekonomi tinggi di RT 02. Warga dapat menyetorkan sampah kering yang telah dipilah dari rumah (seperti botol plastik, kertas karton bekas, kaleng logam, koran, dan minyak jelantah) ke Pos Bank Sampah setiap hari Sabtu pagi mulai pukul 08:00 hingga 11:30. Sampah yang Anda setorkan akan ditimbang, dihargai sesuai daftar harga pasar yang update di aplikasi, dan nominalnya langsung masuk ke saldo tabungan digital Bank Sampah Anda di aplikasi ini. Tabungan tersebut dapat ditarik tunai atau digunakan untuk potongan iuran bulanan RT!' 
   },
   { 
     id: '4', 
-    question: 'Bagaimana cara membayar iuran bulanan (Air & Sampah)?', 
-    answer: 'Iuran dapat dibayarkan secara tunai melalui Pengurus RT. Status pembayaran dan transparansi penggunaan dana dapat dipantau secara real-time di menu "Transparansi Keuangan".' 
+    category: 'iuran',
+    question: 'Bagaimana rincian pembayaran iuran bulanan dan pengelolaannya?', 
+    answer: 'Iuran rutin warga RT 02 terdiri dari tiga pos utama: Iuran Sampah (Rp 25.000/bulan untuk operasional truk kebersihan), Iuran Keamanan/Ronda (Rp 15.000/bulan untuk perawatan alat pos kamling dan kegiatan ronda), serta Iuran Kas RT (Rp 10.000/bulan untuk dana sosial, santunan duka, dan perawatan fasilitas umum). Total tagihan bulanan adalah Rp 50.000. Untuk kenyamanan warga, rincian pembayaran masing-masing rumah, status tunggakan, serta pembukuan keluar-masuk kas RT dapat dipantau sepenuhnya secara transparan melalui menu "Transparansi Keuangan".' 
   },
   { 
     id: '5', 
-    question: 'Bagaimana jika ada tamu yang menginap?', 
-    answer: 'Sesuai aturan lingkungan, tamu yang menginap lebih dari 1x24 jam wajib dilaporkan ke Ketua RT atau petugas keamanan melalui menu "Lapor Tamu" di aplikasi ini.' 
+    category: 'keamanan',
+    question: 'Apakah tamu yang menginap wajib dilaporkan ke Ketua RT?', 
+    answer: 'Ya, betul sekali. Demi menjaga ketertiban dan keamanan lingkungan bersama, tamu luar kota yang menginap di rumah warga lebih dari 1x24 jam wajib dilaporkan. Pelaporan kini sangat mudah, Anda tidak perlu lagi menemui Ketua RT secara fisik di malam hari; cukup isi formulir digital singkat pada menu "Lapor Tamu" dengan memasukkan nama tamu, hubungan keluarga, nomor kontak, foto identitas/KTP tamu, serta estimasi lama menginap. Informasi ini otomatis akan tersinkronisasi ke sistem pengurus serta regu ronda malam yang bertugas.' 
   },
   { 
     id: '6', 
-    question: 'Di mana saya bisa melihat jadwal Ronda malam?', 
-    answer: 'Jadwal ronda malam dapat dilihat pada menu "Keamanan & Ronda". Warga juga bisa memantau aktivitas patroli petugas melalui log patroli digital.' 
+    category: 'keamanan',
+    question: 'Di mana saya bisa melihat jadwal Ronda malam dan aktivitas patroli?', 
+    answer: 'Jadwal ronda malam dapat dilihat pada menu "Keamanan & Ronda" di aplikasi. Jadwal ini diupdate secara berkala oleh Koordinator Lapangan Keamanan. Warga juga bisa memantau jalannya ronda dan aktivitas patroli petugas secara real-time melalui log patroli digital yang terintegrasi dengan pemindaian barcode pos pos keamanan.' 
   },
   { 
     id: '7', 
-    question: 'Bagaimana cara mendaftarkan usaha UMKM saya?', 
-    answer: 'Warga yang memiliki usaha dapat mendaftarkannya ke Admin RT untuk ditampilkan di menu "Bursa UMKM". Ini bertujuan untuk mempromosikan produk lokal antar warga.' 
+    category: 'sosial',
+    question: 'Bagaimana syarat mendaftarkan usaha lokal saya ke bursa UMKM RT 02?', 
+    answer: 'Bursa UMKM adalah etalase digital gratis khusus bagi warga RT 02 yang memiliki usaha kuliner, jasa, fesyen, jualan kelontong, atau kerajinan tangan. Anda dapat mendaftarkan usaha secara mandiri di menu "UMKM RT 02". Masukkan nama toko, nama pemilik, unggah foto produk unggulan, harga estimasi, deskripsi singkat usaha, serta nomor WhatsApp pemesanan Anda. Admin RT akan memverifikasi dalam 1x24 jam untuk meluncurkan produk Anda ke dalam katalog umum yang dapat diakses oleh seluruh warga tetangga demi meningkatkan pertumbuhan ekonomi lokal.' 
   },
   { 
     id: '8', 
-    question: 'Apa fungsi Tombol Darurat di aplikasi?', 
-    answer: 'Tombol Darurat digunakan untuk mengirimkan sinyal bantuan cepat kepada seluruh pengurus RT dan warga jika terjadi situasi mendesak seperti kebakaran, pencurian, atau masalah medis.' 
+    category: 'keamanan',
+    question: 'Bagaimana cara kerja "Tombol Panic" (Darurat) di aplikasi?', 
+    answer: 'Tombol Darurat (Panic Button) adalah fitur prioritas keselamatan di aplikasi TERAS RT 02. Jika Anda menemui keadaan darurat (seperti kebakaran, kemalingan, ancaman keamanan fisik, atau serangan medis akut), silakan tekan tombol ini selama 3 detik. Aplikasi akan langsung memicu sirine darurat di HP seluruh pengurus RT serta menyebarkan notifikasi push instan yang memuat nama Anda, nomor rumah, dan jenis kedaruratan. Petugas ronda terdekat dan pengurus RT akan segera meluncur ke lokasi Anda untuk memberikan pertolongan pertama.' 
+  },
+  { 
+    id: '9', 
+    category: 'layanan',
+    question: 'Apa saja berkas yang harus saya unggah untuk verifikasi data warga resmi?', 
+    answer: 'Untuk melakukan verifikasi keanggotaan warga resmi RT 02, Anda dapat mengunjungi profil akun Anda di aplikasi ini lalu mengunggah foto Kartu Tanda Penduduk (KTP) dan Kartu Keluarga (KK). Foto dokumen harus terlihat jelas, tidak buram, dan teks terbaca dengan baik. Data yang diunggah hanya digunakan untuk keperluan pencatatan demografi kependudukan internal oleh Sekretaris RT dan dijamin kerahasiaannya dengan standar keamanan data pribadi.' 
+  },
+  { 
+    id: '10', 
+    category: 'layanan',
+    question: 'Bagaimana jika saya warga baru yang baru pindah ke lingkungan RT 02?', 
+    answer: 'Warga baru yang tinggal atau menyewa rumah di lingkungan RT 02 wajib melapor dalam waktu maksimal 3x24 jam. Anda dapat mendaftarkan diri secara digital melalui fitur "Registrasi Resident" di halaman utama. Isi data diri lengkap keluarga Anda, lampirkan surat pindah dari domisili asal, salinan KTP, serta KK. Setelah itu, Ketua RT atau pengurus akan menjadwalkan kunjungan silaturahmi singkat untuk memvalidasi pendaftaran Anda serta menambahkan rumah Anda ke peta digital warga.' 
+  },
+  { 
+    id: '11', 
+    category: 'iuran',
+    question: 'Apakah pembayaran iuran RT 02 bisa ditransfer secara non-tunai?', 
+    answer: 'Tentu saja! Demi mendukung digitalisasi keuangan, warga dapat melakukan transfer iuran bulanan ke rekening resmi Bank Mandiri/BSI RT 02 yang tercantum pada menu Keuangan, lalu mengunggah bukti transfer melalui fitur "Lapor Bayar Iuran" di aplikasi. Pembayaran otomatis akan diverifikasi oleh Bendahara RT dalam waktu 1x24 jam dan status rumah Anda akan langsung berubah menjadi "Lunas" berwarna hijau di beranda.' 
+  },
+  { 
+    id: '12', 
+    category: 'iuran',
+    question: 'Bagaimana jika sebuah rumah mengalami keterlambatan atau menunggak iuran?', 
+    answer: 'Sistem aplikasi ini akan melacak sejarah pembayaran secara berkala. Jika ada rumah yang berstatus "Menunggak" lebih dari 3 bulan, Bendahara RT akan mengirimkan notifikasi pengingat ramah secara otomatis via WhatsApp Blast. Bila keterlambatan berlanjut tanpa konfirmasi alasan khusus, pengurus RT akan melakukan dialog kekeluargaan untuk mencari solusi terbaik atau memberikan keringanan jika warga yang bersangkutan sedang tertimpa musibah berat.' 
+  },
+  { 
+    id: '13', 
+    category: 'keamanan',
+    question: 'Bagaimana aturan dan konsekuensi jika warga berhalangan ikut ronda malam?', 
+    answer: 'Setiap warga laki-laki yang telah dewasa wajib mengikuti ronda malam sesuai jadwal bergilir yang ditentukan di menu "Keamanan & Ronda". Jika Anda berhalangan hadir karena urusan dinas ke luar kota, sakit, atau alasan krusial lainnya, Anda wajib mengajukan pertukaran jadwal (Swap Ronda) kepada warga lain melalui fitur "Tukar Jadwal" di aplikasi ini minimal 1 hari sebelumnya, atau membayar kontribusi pengganti sebesar Rp 25.000 ke kas ronda melalui Bendahara untuk mendukung dana konsumsi tim ronda malam.' 
+  },
+  { 
+    id: '14', 
+    category: 'lingkungan',
+    question: 'Bagaimana cara melaporkan masalah fasilitas umum seperti lampu jalan mati atau selokan mampet?', 
+    answer: 'Jika Anda menemukan fasilitas umum yang rusak atau selokan yang mampet sehingga berisiko banjir, Anda dapat menggunakan menu "Laporan Warga" atau "Formulir Pengaduan". Ambil foto fasilitas yang bermasalah, tulis deskripsi lokasinya, lalu kirimkan laporan Anda. Laporan akan masuk ke dasbor pengurus RT dengan status "Baru", lalu beranjak ke "Diproses" saat tim kerja bakti ditugaskan, hingga statusnya "Selesai" begitu selesai diperbaiki. Seluruh warga dapat memantau progres perbaikan tersebut secara real-time.' 
+  },
+  { 
+    id: '15', 
+    category: 'sosial',
+    question: 'Bagaimana jadwal pelaksanaan Posyandu Balita serta Posbindu Lansia?', 
+    answer: 'Kegiatan Posyandu Terpadu untuk pemantauan tumbuh kembang Balita (timbang badan, imunisasi, PMT balon) serta Posbindu Lansia (cek tensi darah, gula darah, kolesterol, konsultasi kesehatan) diadakan secara serempak setiap bulan di hari Sabtu pekan kedua, bertempat di Gedung Balai Pertemuan RT 02 mulai pukul 08:30 - 13:00 WIB. Informasi pengingat secara berkala mengenai hal ini akan otomatis dikomunikasikan melalui notifikasi pengumuman dari aplikasi H-2 pelaksanaan.' 
+  },
+  { 
+    id: '16', 
+    category: 'sosial',
+    question: 'Bagaimana prosedur pengajuan bantuan sosial (Bansos) pemerintah di lingkungan RT?', 
+    answer: 'Semua pengajuan bansos dari pemerintah pusat seperti PKH, BPNT, atau BLT dikurasi secara ketat berdasarkan data kemiskinan nasional (DTKS). Pengurus RT 02 bertugas mengusulkan warga prasejahtera di lingkungan kami yang datanya terekam valid di dalam aplikasi dasbor kependudukan RT. Warga yang merasa berhak dan belum terdaftar dapat berkonsultasi langsung dengan menyerahkan Surat Keterangan Tidak Mampu (SKTM) dari Kelurahan dan berkas KK ke Ketua RT untuk diverifikasi profil ekonominya secara objektif.' 
   }
 ];
 

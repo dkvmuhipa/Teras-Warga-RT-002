@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote, Info } from 'lucide-react';
+import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote, Info, ChevronDown, ChevronUp, Minus, Search } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { 
@@ -12,7 +12,6 @@ import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, 
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
-import { PublicRules } from './PublicRules';
 import { motion } from 'motion/react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useFinancial } from '../../context/FinancialContext';
@@ -182,6 +181,11 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
     const [swapToDay, setSwapToDay] = useState('');
     const [swapReason, setSwapReason] = useState('');
     const [isSubmittingSwap, setIsSubmittingSwap] = useState(false);
+
+    // FAQ Public Advanced filtering & interactive states
+    const [faqSearch, setFaqSearch] = useState('');
+    const [faqCategory, setFaqCategory] = useState('all');
+    const [openFaqId, setOpenFaqId] = useState<string | null>(null);
 
     // useEffect for activePatrol removed as it is now passed as prop
 
@@ -568,10 +572,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                 </motion.div>
             </div>
 
-            {/* Rules Section */}
-            <motion.div variants={itemVariants}>
-                <PublicRules />
-            </motion.div>
+
 
             {/* Digital Services Section */}
             <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -824,22 +825,6 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
                                 <p className="text-white font-bold text-sm">{g.title}</p>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </motion.div>
-
-            {/* FAQ */}
-            <motion.div id="faq" variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm scroll-mt-20">
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><HelpCircle size={24}/></div>
-                    <h2 className="text-2xl font-black text-slate-800">Pertanyaan Umum (FAQ)</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {faqItems.map(f => (
-                        <div key={f.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                            <h4 className="font-black text-slate-800 text-sm mb-2">{f.question}</h4>
-                            <p className="text-xs text-slate-600 leading-relaxed">{f.answer}</p>
                         </div>
                     ))}
                 </div>

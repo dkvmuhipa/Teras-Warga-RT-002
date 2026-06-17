@@ -130,7 +130,7 @@ export const askRit = async (question: string, contextData: {
     ${officialsContext}
 
     INFORMASI UMUM RT 02/020:
-    - Alamat: Huntap 2 Tondo, Kel. Tondo, Kec. Mantikulore, Kota Palu.
+    - Alamat: Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu.
     - Iuran: Rp 25.000/bulan (Keamanan + Sampah).
     - Jadwal Angkut Sampah: Senin dan Kamis pagi.
     - Syarat Surat Pengantar: Bawa KTP & KK Asli, Bukti lunas iuran bulan berjalan.

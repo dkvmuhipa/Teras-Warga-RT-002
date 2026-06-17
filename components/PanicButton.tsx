@@ -39,98 +39,94 @@ class DynamicEmergencySiren {
   private ctx: AudioContext | null = null;
   private osc1: OscillatorNode | null = null;
   private osc2: OscillatorNode | null = null;
+  private lfo: OscillatorNode | null = null;
+  private lfoGain: GainNode | null = null;
   private gainNode: GainNode | null = null;
   private isPlaying: boolean = false;
-  private intervalId: any = null;
 
   start(type: string = 'Keamanan') {
     if (this.isPlaying) return;
     try {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       this.ctx = new AudioContextClass();
-      this.gainNode = this.ctx.createGain();
       
-      // Keep safety volume level
-      this.gainNode.gain.setValueAtTime(0.25, this.ctx.currentTime);
+      // Significantly increased base volume to make it sound realistic, powerful, and audible
+      this.gainNode = this.ctx.createGain();
+      this.gainNode.gain.setValueAtTime(0.85, this.ctx.currentTime);
       this.gainNode.connect(this.ctx.destination);
 
       this.osc1 = this.ctx.createOscillator();
       this.osc2 = this.ctx.createOscillator();
+      this.lfo = this.ctx.createOscillator();
+      this.lfoGain = this.ctx.createGain();
+
+      // Connect LFO modulator directly to oscillator frequencies for authentic sweeps
+      this.lfo.connect(this.lfoGain);
+      this.lfoGain.connect(this.osc1.frequency);
+      this.lfoGain.connect(this.osc2.frequency);
 
       this.osc1.connect(this.gainNode);
       this.osc2.connect(this.gainNode);
 
+      // Dedicated synthesis parameters for unmatched alarm fidelity
+      if (type === 'Keamanan') {
+        // High Urgency Fast Yelp Siren (Police Patrol style)
+        this.osc1.type = 'sawtooth';
+        this.osc2.type = 'sawtooth';
+        this.osc1.frequency.setValueAtTime(650, this.ctx.currentTime);
+        this.osc2.frequency.setValueAtTime(655, this.ctx.currentTime); // detuned for thick chorus effect
+
+        this.lfo.type = 'sine';
+        this.lfo.frequency.setValueAtTime(4.0, this.ctx.currentTime); // very fast 4.0 Hz sweeps
+        this.lfoGain.gain.setValueAtTime(320, this.ctx.currentTime); // sweep bounds: +/- 320 Hz
+      } else if (type === 'Kebakaran') {
+        // Heavy, sweeping Air Horn Siren
+        this.osc1.type = 'sawtooth';
+        this.osc2.type = 'triangle';
+        this.osc1.frequency.setValueAtTime(420, this.ctx.currentTime);
+        this.osc2.frequency.setValueAtTime(425, this.ctx.currentTime);
+
+        this.lfo.type = 'sine';
+        this.lfo.frequency.setValueAtTime(0.8, this.ctx.currentTime); // slow sweeping wail
+        this.lfoGain.gain.setValueAtTime(220, this.ctx.currentTime); 
+      } else if (type === 'Medis') {
+        // Classic Hi-Lo Ambulance Siren (Square modulations)
+        this.osc1.type = 'sawtooth';
+        this.osc2.type = 'triangle';
+        this.osc1.frequency.setValueAtTime(750, this.ctx.currentTime);
+        this.osc2.frequency.setValueAtTime(755, this.ctx.currentTime);
+
+        this.lfo.type = 'square'; // sharp toggling between frequencies
+        this.lfo.frequency.setValueAtTime(1.8, this.ctx.currentTime); // 1.8 Hz toggle rate
+        this.lfoGain.gain.setValueAtTime(180, this.ctx.currentTime); // alternating +/- 180 Hz
+      } else if (type === 'Bencana') {
+        // Low and terrifying pulsing Air Raid warning drone
+        this.osc1.type = 'sawtooth';
+        this.osc2.type = 'sawtooth';
+        this.osc1.frequency.setValueAtTime(280, this.ctx.currentTime);
+        this.osc2.frequency.setValueAtTime(140, this.ctx.currentTime); // heavy octaves
+
+        this.lfo.type = 'sine';
+        this.lfo.frequency.setValueAtTime(0.5, this.ctx.currentTime); // deep slow pulse
+        this.lfoGain.gain.setValueAtTime(110, this.ctx.currentTime);
+      } else {
+        // High pitched test warning chime
+        this.osc1.type = 'sine';
+        this.osc2.type = 'sine';
+        this.osc1.frequency.setValueAtTime(880, this.ctx.currentTime);
+        this.osc2.frequency.setValueAtTime(440, this.ctx.currentTime);
+
+        this.lfo.type = 'sine';
+        this.lfo.frequency.setValueAtTime(7.0, this.ctx.currentTime); // light vibrato
+        this.lfoGain.gain.setValueAtTime(35, this.ctx.currentTime);
+      }
+
+      this.lfo.start();
       this.osc1.start();
       this.osc2.start();
       this.isPlaying = true;
-
-      let phase = 0;
-      
-      // Custom sound synthesis loops depending on crisis category
-      if (type === 'Keamanan') {
-        // High Urgency Fast Yelp Siren
-        this.osc1.type = 'sawtooth';
-        this.osc2.type = 'sine';
-        this.intervalId = setInterval(() => {
-          if (!this.ctx || !this.osc1 || !this.osc2) return;
-          const now = this.ctx.currentTime;
-          phase += 0.25;
-          const sweepFrequency = 700 + Math.sin(phase) * 350;
-          this.osc1.frequency.setValueAtTime(sweepFrequency, now);
-          this.osc2.frequency.setValueAtTime(sweepFrequency * 0.9, now);
-        }, 35);
-      } else if (type === 'Kebakaran') {
-        // Low Frequency Sweeping Slow Horn Siren
-        this.osc1.type = 'triangle';
-        this.osc2.type = 'sawtooth';
-        this.intervalId = setInterval(() => {
-          if (!this.ctx || !this.osc1 || !this.osc2) return;
-          const now = this.ctx.currentTime;
-          phase += 0.08;
-          const sweepFrequency = 350 + Math.sin(phase) * 150;
-          this.osc1.frequency.setValueAtTime(sweepFrequency, now);
-          this.osc2.frequency.setValueAtTime(sweepFrequency * 1.5, now);
-        }, 80);
-      } else if (type === 'Medis') {
-        // Classic Hi-Lo Ambulance Siren
-        this.osc1.type = 'sine';
-        this.osc2.type = 'triangle';
-        let isHi = true;
-        this.intervalId = setInterval(() => {
-          if (!this.ctx || !this.osc1 || !this.osc2) return;
-          const now = this.ctx.currentTime;
-          const freq = isHi ? 900 : 650;
-          this.osc1.frequency.setValueAtTime(freq, now);
-          this.osc2.frequency.setValueAtTime(freq * 1.1, now);
-          isHi = !isHi;
-        }, 500);
-      } else if (type === 'Bencana') {
-        // Continuous Deep Alert Pulse
-        this.osc1.type = 'sawtooth';
-        this.osc2.type = 'sine';
-        this.intervalId = setInterval(() => {
-          if (!this.ctx || !this.osc1 || !this.osc2) return;
-          const now = this.ctx.currentTime;
-          phase += 0.1;
-          const sweepFrequency = 200 + Math.abs(Math.sin(phase)) * 400;
-          this.osc1.frequency.setValueAtTime(sweepFrequency, now);
-          this.osc2.frequency.setValueAtTime(100, now);
-        }, 60);
-      } else {
-        // Neutral Test Chime Ring
-        this.osc1.type = 'sine';
-        this.osc2.type = 'sine';
-        this.intervalId = setInterval(() => {
-          if (!this.ctx || !this.osc1 || !this.osc2) return;
-          const now = this.ctx.currentTime;
-          phase += 0.05;
-          const sweepFrequency = 880 + Math.sin(phase) * 50;
-          this.osc1.frequency.setValueAtTime(sweepFrequency, now);
-          this.osc2.frequency.setValueAtTime(440, now);
-        }, 150);
-      }
     } catch (e) {
-      console.warn("Web Audio API not supported or blocked by user guest policy:", e);
+      console.warn("Web Audio API warning or muted gesture policy:", e);
     }
   }
 
@@ -142,27 +138,27 @@ class DynamicEmergencySiren {
       const clickGain = tCtx.createGain();
       
       osc.type = 'sine';
-      // Pitch goes up as user holds down the hardware trigger icon
-      const targetFreq = 400 + (progress * 5);
+      const targetFreq = 400 + (progress * 6);
       osc.frequency.setValueAtTime(targetFreq, tCtx.currentTime);
       
-      clickGain.gain.setValueAtTime(0.12, tCtx.currentTime);
-      clickGain.gain.exponentialRampToValueAtTime(0.01, tCtx.currentTime + 0.07);
+      // Increased progress feedback volume from 0.12 to 0.35 to sound solid and mechanical
+      clickGain.gain.setValueAtTime(0.35, tCtx.currentTime);
+      clickGain.gain.exponentialRampToValueAtTime(0.01, tCtx.currentTime + 0.1);
       
       osc.connect(clickGain);
       clickGain.connect(tCtx.destination);
       osc.start();
-      osc.stop(tCtx.currentTime + 0.1);
+      osc.stop(tCtx.currentTime + 0.12);
     } catch (e) {}
   }
 
   stop() {
     this.isPlaying = false;
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
     try {
+      if (this.lfo) {
+        this.lfo.stop();
+        this.lfo = null;
+      }
       if (this.osc1) {
         this.osc1.stop();
         this.osc1 = null;

@@ -1,201 +1,690 @@
 import React, { useState } from 'react';
-import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car } from 'lucide-react';
+import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 
 export const PublicRules: React.FC = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [expandedRules, setExpandedRules] = useState<Record<string, boolean>>({});
   
+  const categories = [
+    { id: 'all', label: 'Semua Peraturan', desc: 'Seluruh tata tertib dan peraturan lingkungan RT 02 Huntap Tondo 2' },
+    { id: 'umum', label: 'Umum & Data', desc: 'Administrasi kependudukan, aturan huni, dan digital/privasi' },
+    { id: 'ketertiban', label: 'Ketertiban & Sosial', desc: 'Etika keramaian, warga, tamu, hewan peliharaan, dan kerja bakti' },
+    { id: 'keamanan', label: 'Keamanan & Parkir', desc: 'Sistem pertahanan sipil, ronda malam, parkir jalan, dan panic button' },
+    { id: 'lingkungan', label: 'Lingkungan', desc: 'Pengelolaan bank sampah, sanitasi selokan, dan tanaman pekarangan' },
+    { id: 'sanksi', label: 'Sanksi', desc: 'Konsekuensi dan prosedur tindak lanjut pelanggaran' }
+  ];
+
   const rules = [
     {
       title: "Administrasi Kependudukan",
+      category: "umum",
+      nomorBerkas: "RT2-REG-ADM-01",
+      nomorSurat: "Nomor 01 Tahun 2026",
+      tentang: "Tertib Administrasi Kependudukan dan Pendataan Warga Huntap Tondo 2",
+      menimbang: "bahwa untuk menjamin keakuratan data warga serta kemudahan pelayanan administrasi kependudukan di wilayah RT 02, perlu ditetapkan pedoman tertib administrasi demi kenyamanan bersama seluruh warga.",
       icon: <FileText className="text-indigo-500" size={24} />,
       items: [
-        "Warga baru (pemilik rumah, penyewa, mahasiswa, atau keluarga pendatang) wajib melapor ke Ketua RT maksimal 1×24 jam setelah tinggal.",
-        "Menyerahkan fotokopi KTP dan KK (untuk warga tetap) atau KTP, KTM, dan surat kontrakan (untuk mahasiswa).",
-        "Menuliskan nomor WhatsApp aktif di bagian belakang dokumen KK/KTP.",
-        "Mengisi Formulir Data Warga yang disediakan pengurus RT.",
-        "Wajib melapor jika terjadi perpindahan keluar, perubahan status keluarga (pernikahan, meninggal dunia), atau tamu menginap lebih dari 1 malam."
+        "Setiap warga baru (pemilik rumah, penyewa, mahasiswa, kontributor ekraf, atau keluarga pendatang) wajib melapor kepada Ketua RT 02 atau pengurus bidang administrasi dalam jangka waktu maksimal 1×24 jam terhitung sejak menetap di lingkungan RT 02 Huntap Tondo 2.",
+        "Warga wajib menyerahkan fotokopi dokumen pendukung fisik berupa Kartu Tanda Penduduk (KTP-el) dan Kartu Keluarga (KK) yang sah untuk diregistrasikan ke dalam pangkalan data kependudukan RT 02.",
+        "Bagi warga musiman, mahasiswa, atau penghuni kamar kost, diwajibkan menyerahkan fotokopi identitas pengenal aktif (KTP/KTM), surat perjanjian sewa/kontrak rumah, serta nomor kontak darurat wali atau orang tua kandung.",
+        "Setiap kepala keluarga wajib mencantumkan nomor WhatsApp aktif di lembar berkas kependudukan guna pendaftaran akun pada Aplikasi Teras Warga RT 02 untuk menerima log notifikasi resmi dan rilis iuran berkala.",
+        "Warga wajib melengkapi pengisian Formulir Profil Data Warga Mandiri secara daring melalui modul kependudukan Aplikasi Teras Warga paling lambat 7 hari kerja sejak pelaporan pertama dilakukan.",
+        "Segala bentuk mutasi data kependudukan (meliputi kelahiran anak, pernikahan anggota keluarga, perceraian, duka/kematian, serta kepindahan domisili keluar dari lingkungan RT 02) wajib dilaporkan secara resmi maksimal 14 hari kerja setelah peristiwa terjadi.",
+        "Layanan administrasi fisik dan penerbitan Surat Pengantar RT dilayani setiap hari kerja (Senin s/d Jumat) pukul 19.00 - 21.00 WITA di Sekretariat RT atau melalui ajuan daring pada Menu Pelayanan Publik aplikasi."
       ]
     },
     {
       title: "Aturan bagi Warga & Penghuni Kontrakan",
+      category: "umum",
+      nomorBerkas: "RT2-REG-HNI-02",
+      nomorSurat: "Nomor 02 Tahun 2026",
+      tentang: "Ketentuan Tinggal dan Penghunian Rumah Sewa/Kontrakan",
+      menimbang: "bahwa demi memelihara kerukunan antar tetangga serta ketertiban lingkungan hunian bersama, perlu diatur etika sosial serta prosedur lapor huni bagi penghuni rumah kontrakan.",
       icon: <Users className="text-emerald-500" size={24} />,
       items: [
-        "Wajib lapor diri dalam 1×24 jam setelah menempati rumah kontrakan.",
-        "Wajib menjaga sopan santun dan etika sosial terhadap warga sekitar.",
-        "Diharapkan aktif dalam ronda malam (khusus laki-laki), gotong royong, dan kegiatan kebersamaan.",
-        "Penghuni kontrakan dilarang mengadakan pesta/acara musik melewati pukul 23.59 WITA.",
-        "Tanggung jawab pribadi atas keamanan rumah, perilaku tamu, dan tertib berkendara (tidak ugal-ugalan/knalpot bising)."
+        "Penyewa atau penghuni rumah kontrakan wajib melaksanakan koordinasi lapor diri langsung kepada Pengurus RT setempat dengan membawa Surat Pengantar dari Pemilik Rumah Kontrakan dalam durasi maksimal 1×24 jam.",
+        "Dilarang keras menyewakan kembali (sub-kontrak) sebagian atau seluruh area hunian sewa kepada pihak ketiga atau orang lain tanpa persetujuan tertulis dari pemilik rumah dan sepengetahuan resmi Ketua RT 02.",
+        "Setiap penghuni kontrakan berkewajiban menjunjung tinggi nilai-nilai kesopanan, etika bersosialisasi, toleransi antar-umat beragama, serta menghormati adat istiadat dan norma kearifan lokal yang berlaku di lingkungan warga.",
+        "Jumlah kapasitas maksimal penghuni untuk tiap-tiap unit rumah sewa wajib disesuaikan dengan kelayakan fisik hunian demi menjaga sterilisasi sanitasi, ketenangan lingkungan, dan mencegah terjadinya kepadatan hunian berlebih.",
+        "Seluruh penghuni kontrakan/kos diimbau berpartisipasi aktif dalam setiap kegiatan kemasyarakatan, kerja bakti sosial, ronda malam terjadwal (khusus pria dewasa), serta menghadiri forum berkala warga RT 02.",
+        "Warga non-residen (pemilik kontrakan yang bertempat tinggal di luar RT 02) berkewajiban menyerahkan data kontak darurat (emergency call) yang aktif dan ikut bertanggung jawab moral atas ketertiban umum penyewa propertinya."
       ]
     },
     {
       title: "Ketentuan Keramaian & Tamu",
+      category: "ketertiban",
+      nomorBerkas: "RT2-REG-TTR-03",
+      nomorSurat: "Nomor 03 Tahun 2026",
+      tentang: "Batas Pelaksanaan Kegiatan Keramaian dan Penerimaan Tamu",
+      menimbang: "bahwa guna menjamin istirahat malam warga serta mencegah kebisingan yang berlebih, perlu ditetapkan batasan jam malam serta alur perizinan kegiatan keramaian.",
       icon: <Calendar className="text-amber-500" size={24} />,
       items: [
-        "Kegiatan hiburan/keramaian diizinkan selama berakhir maksimal pukul 23.59 WITA.",
-        "Jika mengadakan keramaian, wajib izin dan memberitahu Ketua RT minimal H-3.",
-        "Tamu wajib menjaga ketertiban dan tidak parkir sembarangan yang menghalangi jalan umum.",
-        "Bila melanggar, Pengurus RT berhak memberikan teguran langsung atau berkoordinasi dengan pihak keamanan."
+        "Segala aktivitas hiburan, peringatan hari besar, hajatan keluarga, maupun pesta yang mendatangkan keramaian diizinkan berlangsung dengan durasi batas maksimal berakhir hingga pukul 23.59 WITA.",
+        "Bagi warga yang hendak menyelenggarakan kegiatan keramaian berskala besar (undangan di atas 50 orang) wajib mengajukan surat izin pemberitahuan tertulis kepada Ketua RT 02 minimal pada H-3 sebelum pelaksanaan kegiatan.",
+        "Tingkat kebisingan dari instalasi sistem suara (sound system) selama perayaan dibatasi maksimal 80 desibel (dB) dengan penataan arah speaker yang diatur menghadap ke dalam area acara agar meminimalisir gema polusi suara ke pemukiman tetangga.",
+        "Tamu kunjungan umum dilarang parkir di jalur lintasan utama sirkulasi warga dan dilarang keras menghalangi akses gerbang atau halaman keluar-masuk kediaman tetangga tanpa persetujuan eksplisit.",
+        "Tamu yang berniat menginap lebih dari 2×24 jam (2 hari) wajib dilaporkan secara daring melalui aplikasi atau dilaporkan manual oleh kepala keluarga tuan rumah beserta lampiran foto identitas tamu.",
+        "Penyenang atau penyelenggara acara bertanggung jawab penuh atas pembersihan sisa-sisa dekorasi, sampah plastik, serta pemulihan kebersihan area jalan publik di sekitar lokasi hajatan paling lambat 6 jam pasca-acara selesai."
       ]
     },
     {
       title: "Keamanan, Ketertiban & Parkir",
+      category: "keamanan",
+      nomorBerkas: "RT2-REG-KMN-04",
+      nomorSurat: "Nomor 04 Tahun 2026",
+      tentang: "Penyelenggaraan Sistem Keamanan Siskamling dan Ketertiban Parkir",
+      menimbang: "bahwa untuk meminimalisir potensi gangguan keamanan lingkungan serta menjaga kelancaran jalur lalu lintas darurat di jalan umum, perlu diatur sistem ronda malam dan tata cara parkir kendaraan.",
       icon: <Shield className="text-rose-500" size={24} />,
       items: [
-        "Warga diimbau menutup pagar rumah pada malam hari dan melaporkan kegiatan mencurigakan.",
-        "Dilarang keras memarkir kendaraan di bahu jalan yang dapat menghambat akses darurat (Pemadam/Ambulans).",
-        "Warga wajib mengarahkan tamu agar parkir tidak menutupi akses pagar rumah tetangga.",
-        "Pengaturan jadwal ronda malam dikelola secara digital melalui sistem RT.",
-        "Gunakan fitur Panic Button di aplikasi hanya untuk keadaan darurat yang sebenarnya."
+        "Warga berkewajiban memastikan pintu pagar, pintu utama rumah, serta jendela terkunci rapat pada malam hari, dan segera membunyikan alarm / panic button jika mengamati tanda-tanda mencurigakan di sekitar pemukiman.",
+        "Dilarang keras memarkirkan armada kendaraan roda empat/dua secara paralel ataupun sembarangan di badan jalan utama yang dapat mempersempit ruang lintasan armada darurat seperti mobil Ambulans dan Pemadam Kebakaran.",
+        "Setiap pemilik kendaraan roda empat (mobil) wajib memiliki tempat parkir/garasi pribadi yang memadai di dalam batas pekarangan rumah dan dilarang keras membangun kanopi parkir liar permanen di luar batas rumija (ruang milik jalan).",
+        "Warga yang dijadwalkan dalam giliran ronda siskamling malam wajib hadir tepat waktu, atau jika berhalangan dapat mengirimkan pengganti yang dewasa atau berkontribusi denda siskamling tunai sebesar Rp 50.000 via kas RT untuk operasional satgas.",
+        "Batas laju kecepatan mengemudikan kendaraan bermotor (mobil/motor) di dalam lingkungan RT 02 Huntap Tondo 2 adalah maksimal 15 km/jam demi mengutamakan keselamatan anak-anak dan pejalan kaki.",
+        "Setiap penyalahgunaan fitur Panic Button pada Aplikasi Teras tanpa murni adanya kejadian keadaan darurat (seperti kebakaran, kemalingan, bencana alam) akan dikenai tindakan pembekuan akun digital."
       ]
     },
     {
       title: "Kebersihan & Bank Sampah",
+      category: "lingkungan",
+      nomorBerkas: "RT2-REG-KLG-05",
+      nomorSurat: "Nomor 05 Tahun 2026",
+      tentang: "Etika Kebersihan Lingkungan dan Pengelolaan Sampah Mandiri",
+      menimbang: "bahwa dalam rangka menciptakan lingkungan yang sehat, asri, bebas banjir, serta memaksimalkan pemanfaatan program Bank Sampah RT, perlu ditetapkan kewajiban memilah sampah dan merawat kebersihan saluran air.",
       icon: <Trash2 className="text-teal-500" size={24} />,
       items: [
-        "Warga diwajibkan memilah sampah organik and anorganik dari rumah.",
-        "Aktif menyetorkan sampah anorganik ke Bank Sampah RT 02 melalui aplikasi untuk saldo digital.",
-        "Setiap rumah bertanggung jawab atas kebersihan halaman and saluran air sekitarnya.",
-        "Dilarang keras membuang sampah di saluran air, lahan kosong, atau bahu jalan.",
-        "Dukung pengelolaan TPS3R untuk lingkungan yang lebih sehat."
+        "Warga diimbau memisahkan sampah rumah tangga secara mandiri sejak dari dapur, memilah antara sampah organik (sisa makanan basah) dan sampah anorganik ekonomis (botol plastik, kardus, kaleng logam).",
+        "Penyetoran sampah anorganik yang telah terpilah dapat dilakukan secara berkala melalui sistem Bank Sampah RT 02 Teras Warga guna ditimbang dan dikonversi menjadi saldo rekening kas digital milik masing-masing warga.",
+        "Tanggung jawab kebersihan jalan, pemotongan rumput liar, serta pembuangan sedimen pasir/lumpur dari dalam selokan air di depan unit rumah berada pada pemilik atau penghuni rumah yang bersangkutan.",
+        "Dilarang keras membuang puntung rokok, bungkus plastik, popok bayi, minyak goreng bekas, sisa renovasi beton, atau limbah berbahaya lainnya ke dalam saluran drainase/selokan lingkungan RT 02.",
+        "Warga wajib menampung sampah domestik basah harian di dalam tong sampah tertutup rapat di area halaman rumah, dan hanya mengeluarkannya ke depan pagar pada pagi hari jadwal pengangkutan armada sampah (setiap Senin dan Kamis).",
+        "Tindakan membuang sampah sembarangan atau membakar sampah plastik di pekarangan luar yang menyebabkan kepulan asap beracun bagi tetangga akan diberikan sanksi administrasi sosial."
       ]
     },
     {
       title: "Sosial & Kemasyarakatan",
+      category: "ketertiban",
+      nomorBerkas: "RT2-REG-SOC-06",
+      nomorSurat: "Nomor 06 Tahun 2026",
+      tentang: "Partisipasi Kegiatan Gotong Royong dan Solidaritas Sosial",
+      menimbang: "bahwa demi mempererat silaturahmi, gotong royong, dan rasa kekeluargaan antar warga, perlu diatur peran aktif warga dalam kegiatan kemasyarakatan dan iuran kebersamaan.",
       icon: <Home className="text-blue-500" size={24} />,
       items: [
-        "Warga diwajibkan mengikuti kegiatan sosial: pengajian, arisan RT, posyandu, dan kerja bakti.",
-        "Memberikan kabar jika berhalangan hadir dalam kegiatan warga.",
-        "Membayar iuran bulanan RT sesuai kesepakatan musyawarah.",
-        "Bersedia menyumbang sukarela untuk bantuan duka, bencana, atau musibah warga."
+        "Setiap Kepala Keluarga (KK) wajib mengirimkan minimal 1 (satu) perwakilan anggota keluarga yang telah dewasa dalam agenda gotong royong kerja bakti kebersihan massal di lingkungan RT 02.",
+        "Warga yang berhalangan hadir pada kegiatan gotong royong wajib menyampaikan pemakluman secara tertulis/lisan kepada Pengurus RT paling lambat H-1, atau berkontribusi denda kompensasi absen kerja bakti sebesar Rp 25.000 yang dialokasikan ke kas sosial.",
+        "Setiap warga berkewajiban membayar Iuran Wajib Bulanan RT sebesar Rp 25.000 secara disiplin sebelum tanggal 10 tiap bulannya, yang pengumpulan dan pelaporannya disajikan secara terbuka lewat fitur kas digital aplikasi.",
+        "Dana Kas Duka dan Santunan Sosial dikelola secara amanah oleh bendahara RT untuk disalurkan langsung kepada warga yang tertimpa kemalangan, bencana, duka, atau rawat inap rumah sakit.",
+        "Warga diharapkan menyempatkan hadir dalam Musyawarah Warga RT 02 yang dihelat berkala per triwulan guna mendiskusikan laporan keuangan RT, evaluasi keamanan, aspirasi sarana fisik, serta penyelerasan kebijakan sosial."
       ]
     },
     {
       title: "Hewan Peliharaan",
+      category: "ketertiban",
+      nomorBerkas: "RT2-REG-PET-07",
+      nomorSurat: "Nomor 07 Tahun 2026",
+      tentang: "Ketentuan Pemeliharaan Hewan Ternak dan Peliharaan",
+      menimbang: "bahwa agar keberadaan hewan peliharaan tidak menimbulkan pencemaran lingkungan atau ketidaknyamanan bagi tetangga, perlu ditetapkan aturan kepemilikan dan kewajiban pemilik hewan.",
       icon: <Heart className="text-pink-500" size={24} />,
       items: [
-        "Pemilik hewan wajib memastikan peliharaannya tidak mengganggu ketenangan (suara) and keamanan warga.",
-        "Wajib segera membersihkan kotoran hewan peliharaan jika berada di area publik atau jalan umum.",
-        "Memastikan hewan peliharaan dalam kondisi sehat and tidak membahayakan lingkungan."
+        "Setiap pemilik hewan peliharaan (anjing, kucing, burung, kelinci) wajib melatih dan merawat hewannya agar tidak menyebabkan polusi suara yang konstan atau tindakan agresif menyerang warga sekitar.",
+        "Pemilik hewan bertanggung jawab penuh untuk mengawasi dan wajib segera membersihkan kotoran hewannya bila mengotori area jalan publik, taman bersama, atau pekarangan rumah tetangga.",
+        "Hewan peliharaan atau ternak dilarang dibiarkan berkeliaran bebas di luar batas pekarangan rumah pemilik tanpa pengawasan langsung atau pengikat/tali penuntun.",
+        "Tempat atau kandang harus diposisikan di dalam area pribadi dan dibersihkan secara steril setiap hari guna menghindari timbulnya aroma tajam (bau kotoran) yang dapat menyebar mengganggu ventilasi udara rumah tetangga.",
+        "Apabila hewan peliharaan menimbulkan kerugian material (merusak tanaman tetangga) atau melukai fisik warga lain, pemilik hewan wajib memikul tanggung jawab atas seluruh biaya ganti rugi medis atau renovasi properti diderita korban."
       ]
     },
     {
       title: "Etika Digital & Privasi",
+      category: "umum",
+      nomorBerkas: "RT2-REG-DIG-08",
+      nomorSurat: "Nomor 08 Tahun 2026",
+      tentang: "Etika Pemanfaatan Media Komunikasi Digital dan Keamanan Data",
+      menimbang: "bahwa untuk menciptakan ruang komunikasi digital yang harmonis, santun, bebas hoaks, serta melindungi privasi data pribadi warga, perlu disepakati etika dalam grup digital warga.",
       icon: <Smartphone className="text-violet-500" size={24} />,
       items: [
-        "Dilarang menyebarkan berita hoaks atau informasi yang belum terverifikasi di grup komunikasi warga.",
-        "Dilarang menyebarkan data pribadi warga lain (No HP, Foto KTP, dll) tanpa izin yang bersangkutan.",
-        "Sampaikan aspirasi, ide, and laporan melalui fitur Musyawarah Digital di aplikasi.",
-        "Menjaga kesantunan dalam berkomunikasi di ruang digital warga."
+        "Grup komunikasi resmi (WhatsApp) RT 02 diperuntukkan murni bagi pertukaran informasi tata kelola lingkungan, keguyuban, pemberitahuan pengurus, dan dilarang keras mengirimkan konten berbau Hoaks, Ujaran Kebencian, Isu SARA, Kampanye Politik praktis, atau Iklan Spam.",
+        "Dilarang keras menyebarluaskan dokumen identitas pribadi warga lain (seperti KTP, KK, nomor telepon, data transaksi keuangan, status iuran menunggak, aduan privat) ke platform publik luar tanpa persetujuan eksplisit pemilik data.",
+        "Penggunaan kamera pengawas (CCTV) mandiri oleh warga wajib diatur posisinya agar sorotan lensa kamera tidak menembus sirkulasi area privat bagian dalam rumah milik tetangga sekitarnya tanpa izin.",
+        "Segala bentuk permasalahan ketetangga atau sengketa batas pekarangan diprioritaskan untuk diredam dan dimediasi melalui fitur Laporan Terpadu di Aplikasi Teras Warga secara kekeluargaan sebelum melaporkan ke instansi hukum pidana.",
+        "Saat berinteraksi di ruang komentar berita atau forum aplikasi, seluruh warga wajib mengedepankan kalimat yang santun, bebas caci maki, dan menunjukkan rasa saling menghormati."
       ]
     },
     {
       title: "Penghijauan & Estetika",
+      category: "lingkungan",
+      nomorBerkas: "RT2-REG-EST-09",
+      nomorSurat: "Nomor 09 Tahun 2026",
+      tentang: "Peningkatan Penghijauan Pekarangan dan Keindahan Fasad Hunian",
+      menimbang: "bahwa untuk mendukung kehangatan dan keasrian visual lingkungan pemukiman Huntap Tondo 2, warga diimbau berpartisipasi menata pekarangan luar dan menjaga keindahan depan rumah.",
       icon: <Leaf className="text-emerald-500" size={24} />,
       items: [
-        "Setiap rumah diimbau memiliki minimal satu tanaman hijau di area depan rumah untuk keasrian lingkungan.",
-        "Menjaga keindahan and kerapian fasad rumah agar lingkungan tetap harmonis.",
-        "Dilarang menumpuk material bangunan atau barang bekas di bahu jalan dalam waktu lama."
+        "Setiap unit hunian rumah sangat diimbau mengondisikan minimal 2 (dua) pot tanaman vegetasi hijau atau tanaman hias berbunga di pekarangan depan guna mewujudkan konsep Huntap Tondo 2 yang asri, sejuk, dan teduh.",
+        "Warga pemilik pekarangan yang memiliki dahan pohon menjulur keluar pagar batas hingga menutupi instalasi kabel listrik PLN, menghalangi tiang lampu penerangan jalan, atau mengganggu lintasan kendaraan wajib memangkas dahan pohonnya secara berkala.",
+        "Dizinkan beraktivitas menanam aneka apotek hidup, sayur-mayur, atau tanaman pelindung di batas fasilitas umum lingkungan sepanjang telah mendapatkan persetujuan koordinasi dari kaur lingkungan hidup RT 02.",
+        "Dilarang meletakkan sisa material renovasi berat (pecahan semen, pasir, tumpukan batu bata, rangka kayu) atau membiarkan barang bekas menumpuk di sisi bahu jalan yang dapat mempersempit estetika visual kawasan di atas batas waktu 14 hari berturut-turut.",
+        "Warga diharapkan merawat kondisi cat eksterior pagar dan eksterior tampak depan rumah serta membersihkan lumut tebal agar tidak memicu pemandangan kumuh atau terbengkalai."
       ]
     },
     {
       title: "Usaha & UMKM",
+      category: "umum",
+      nomorBerkas: "RT2-REG-ECO-10",
+      nomorSurat: "Nomor 10 Tahun 2026",
+      tentang: "Legalitas dan Tata Cara Penyelenggaraan Usaha Rumahan",
+      menimbang: "bahwa untuk mendukung roda ekonomi mikro warga tanpa mengabaikan ketenteraman tetangga sekitar, dipasang pedoman izin usaha rumahan yang ramah lingkungan.",
       icon: <Briefcase className="text-orange-500" size={24} />,
       items: [
-        "Usaha rumahan diperbolehkan selama tidak mengganggu tetangga (asap, bau, suara) and menjaga kebersihan.",
-        "Wajib melaporkan jenis usahanya ke pengurus RT untuk pendataan and promosi di fitur UMKM aplikasi."
+        "Segala aktivitas usaha niaga mandiri skala mikro (seperti warung kelontong, kuliner penganan, laundry, penjahit pakaian, konsultan ekraf, agensi digital, studio desain) diperbolehkan beroperasi dengan syarat tidak mengeluarkan limbah suara mesin bising, asap pekat, bau menyengat, atau polusi zat kimia.",
+        "Pemilik usaha wajib mendaftarkan identitas profil usahanya ke pengurus RT Bidang UMKM untuk dimasukkan ke Direktori UMKM Digital pada Aplikasi Teras guna memperluas promosi dan akses bantuan ekonomi.",
+        "Para pelaku usaha kuliner atau toko yang dikunjungi banyak pembeli fisik wajib menyediakan zonasi parkir yang tertib dan bertanggung jawab mengaturnya agar kendaraan konsumen tidak menyumbat bahu jalan utama.",
+        "Batas operasional waktu transaksi pelayanan tatap muka langsung bagi jenis usaha fisik diatur maksimal hingga pukul 22.00 WITA pada hari kerja biasa dan berakhir pukul 23.00 WITA pada akhir pekan guna menjaga ketenangan jam istirahat malam warga."
       ]
     },
     {
-      title: "Sanksi",
+      title: "Sanksi Pelanggaran",
+      category: "sanksi",
+      nomorBerkas: "RT2-REG-SNC-11",
+      nomorSurat: "Nomor 11 Tahun 2026",
+      tentang: "Mekanisme Penegakan Disiplin dan Sanksi Pelanggaran",
+      menimbang: "bahwa untuk menjaga tegaknya kewibawaan aturan bersama serta memberi kepastian hukum atas pelanggaran tata tertib, dipandang perlu menetapkan tingkatan sanksi bagi pelanggar.",
       icon: <Scale className="text-slate-500" size={24} />,
       items: [
-        "Warga yang melanggar aturan akan dikenakan teguran lisan atau tertulis.",
-        "Pelanggaran berulang dapat mengakibatkan pencabutan akses grup komunikasi RT.",
-        "Dalam kasus berat, pelanggaran akan dilaporkan ke pemilik kontrakan atau pihak berwajib.",
-        "Aturan ini berlaku untuk seluruh warga dan penghuni RT 02 tanpa terkecuali."
+        "Tahap 1 (Teguran Lisan): Warga yang melanggar ketentuan tata tertib akan dijatuhi teguran atau nasihat lisan persuasif awal secara kekeluargaan oleh Kepala Seksi Ketertiban dan Keamanan RT 02.",
+        "Tahap 2 (Surat Peringatan Kesatu & Kedua): Apabila teguran lisan diabaikan dalam waktu 7 hari, Pengurus RT 02 berwenang melayangkan Surat Peringatan (SP) tertulis kesatu dan disusul kedua secara resmi yang ditandatangani Ketua RT.",
+        "Tahap 3 (Denda Administratif & Tindakan Fisik): Pelanggaran parkir jalan darurat atau limbah selokan yang tidak diindahkan pasca-SP 2 akan ditindak melalui penggembokan ban kendaraan secara aman atau penertiban material bangunan yang memakan biaya pemindahan yang sepenuhnya dibebankan kepada pihak pelanggar.",
+        "Tahap 4 (Penangguhan Layanan Administrasi & Digital): Bagi pelanggar berulang atau menolak sanksi tanpa iktikad baik, Pengurus RT berhak menonaktifkan hak akses kelola digital warga pada aplikasi, serta menangguhkan sementara penerbitan surat pengantar administrasi RT hingga kewajiban dipenuhi.",
+        "Tahap 5 (Rujukan ke Pihak Pemerintah & Kepolisian): Jika pelanggaran termasuk kategori tindak pidana, kriminal, atau asusila berat, kasus akan dialihkan dengan koordinasi aktif ke Bhabinkamtibmas, Babinsa, dan jajaran Kelurahan Tondo."
       ]
     }
   ];
-;
+
+  const getBadgeDetails = (cat: string) => {
+    switch (cat) {
+      case 'umum': return { label: 'Umum & Data', color: 'bg-indigo-50 text-indigo-750 border-indigo-150' };
+      case 'ketertiban': return { label: 'Ketertiban', color: 'bg-amber-50 text-amber-750 border-amber-150' };
+      case 'keamanan': return { label: 'Keamanan', color: 'bg-rose-50 text-rose-750 border-rose-150' };
+      case 'lingkungan': return { label: 'Lingkungan', color: 'bg-teal-50 text-teal-750 border-teal-150' };
+      case 'sanksi': return { label: 'Sanksi', color: 'bg-slate-100 text-slate-755 border-slate-250' };
+      default: return { label: 'Umum', color: 'bg-slate-50 text-slate-650 border-slate-150' };
+    }
+  };
+
+  const toggleRule = (title: string) => {
+    setExpandedRules(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
+
+  const expandAll = () => {
+    const allExpanded: Record<string, boolean> = {};
+    rules.forEach(r => {
+      allExpanded[r.title] = true;
+    });
+    setExpandedRules(allExpanded);
+  };
+
+  const collapseAll = () => {
+    setExpandedRules({});
+  };
+
+  const isRuleExpanded = (ruleTitle: string) => {
+    if (searchTerm.trim() !== '') return true;
+    return !!expandedRules[ruleTitle];
+  };
+
+  const filteredRules = rules.filter(f => {
+    const matchesSearch = f.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          f.items.some(item => item.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                          f.tentang.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || f.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const activeCategoryDesc = categories.find(c => c.id === selectedCategory)?.desc || '';
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, scale: 0.98, y: 8 },
+    visible: { opacity: 1, scale: 1, y: 0 }
+  };
 
   return (
-    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm mt-12">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4">
-          Peraturan Umum <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500">TERAS RT 02</span>
-        </h2>
-        <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-          Teknologi | Ekraf | Rukun | Aman | Sinergi
-        </p>
-      </div>
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-7xl mx-auto px-4 py-8 mb-24 font-sans"
+    >
+      {/* Back Button */}
+      <motion.button 
+        onClick={() => navigate('/')}
+        className="mb-8 flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs font-black uppercase tracking-wider transition-all bg-slate-50 hover:bg-slate-100/80 px-4 py-2.5 rounded-xl border border-slate-100 cursor-pointer"
+      >
+        <ArrowLeft size={16} strokeWidth={2.5} /> Kembali ke Beranda
+      </motion.button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-        <AnimatePresence initial={false}>
-          {rules.slice(0, isExpanded ? rules.length : 4).map((rule, index) => (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-              className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/5 transition-all group"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:scale-110 transition-transform">
-                  {rule.icon}
-                </div>
-                <h3 className="text-lg font-black text-slate-800 leading-tight">{rule.title}</h3>
-              </div>
-              <ul className="space-y-3">
-                {rule.items.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0"></div>
-                    <span className="leading-relaxed">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {!isExpanded && (
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white via-white/80 to-transparent z-10 flex items-end justify-center pb-4">
+      <div id="rules" className="bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-slate-100/40">
+        {/* Header section with rich design */}
+        <div className="text-center mb-12 relative">
+          <div className="absolute inset-0 -top-12 -z-10 bg-gradient-to-b from-emerald-50/20 to-transparent rounded-full blur-3xl w-72 h-72 mx-auto" />
+          <div className="inline-flex justify-center items-center p-3.5 bg-emerald-50 text-emerald-600 rounded-3xl border border-emerald-100 mb-4 shadow-sm">
+            <Scale size={32} strokeWidth={2} />
           </div>
-        )}
-      </div>
-
-      <div className="mt-8 flex justify-center">
-        <button 
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95"
-        >
-          {isExpanded ? (
-            <>
-              Tampilkan Lebih Sedikit <ChevronUp size={18} />
-            </>
-          ) : (
-            <>
-              Baca Selengkapnya <ChevronDown size={18} />
-            </>
-          )}
-        </button>
-      </div>
-
-      <div className="mt-12 p-8 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
-        <div className="relative z-10">
-          <p className="text-indigo-200 font-medium mb-6 max-w-3xl mx-auto leading-relaxed">
-            Dengan semangat TERAS RT 02 — Teknologi, Ekraf, Rukun, Aman, Sinergi, mari kita bangun lingkungan Huntap 2 Tondo RT 02 sebagai tempat tinggal yang nyaman, tertib, aman, dan penuh kekeluargaan.
+          <h2 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tight mb-4">
+            Peraturan Umum <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-indigo-600 font-serif">TERAS RT 02</span>
+          </h2>
+          <p className="text-slate-400 font-bold tracking-wider text-xs md:text-sm uppercase mb-4">
+            Teknologi | Ekraf | Rukun | Aman | Sinergi
           </p>
-          <div className="inline-block text-left bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-            <p className="text-white font-black text-lg mb-1">Ketua RT 02: Irfan</p>
-            <p className="text-indigo-200 text-sm mb-1">Alamat: Blok C10 No. 08</p>
-            <p className="text-indigo-200 text-sm">WhatsApp: +62 859-6119-4621</p>
+          <p className="text-slate-500 font-medium max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+            Demi menjaga keharmonisan, ketertiban, keamanan, dan kebersihan lingkungan Huntap Tondo 2, berikut adalah ketetapan bersama warga RT 02 Huntap Tondo 2 yang diatur secara resmi.
+          </p>
+        </div>
+
+        {/* Search & Tabs Layout */}
+        <div className="space-y-4 mb-8">
+          {/* Search Field */}
+          <div className="relative">
+            <Search size={20} className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-12 py-4 bg-slate-50 hover:bg-slate-50/80 focus:bg-white border border-slate-200/60 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 rounded-2xl text-sm outline-none transition-all placeholder:text-slate-400 font-bold text-slate-800 shadow-sm"
+              placeholder="Cari kata kunci peraturan... (misal: tamu wajib lapor, jam malam, parkir bising, pilah sampah)"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200/50 transition-all cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Categories & Action Bar */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
+            {/* Category tabs */}
+            <div className="flex flex-wrap gap-2 items-center">
+              {categories.map((cat) => {
+                const count = rules.filter(f => cat.id === 'all' || f.category === cat.id).length;
+                const isActive = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                        setSelectedCategory(cat.id);
+                    }}
+                    className={`px-4 py-2.5 rounded-2xl text-xs font-black border transition-all flex items-center gap-2 cursor-pointer ${
+                      isActive
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  >
+                    <span>{cat.label}</span>
+                    <span className={`px-1.5 py-0.5 rounded-lg text-[10px] font-bold ${
+                      isActive ? 'bg-slate-800 text-emerald-100' : 'bg-slate-100 text-slate-500'
+                    }`}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Quick Collapse/Expand Actions */}
+            {searchTerm.trim() === '' && (
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={expandAll}
+                  className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-700 hover:text-emerald-800 rounded-xl text-xs font-bold border border-emerald-100 transition-all cursor-pointer"
+                >
+                  Buka Semua Pasal
+                </button>
+                <button
+                  onClick={collapseAll}
+                  className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-700 rounded-xl text-xs font-bold border border-slate-200/60 transition-all cursor-pointer"
+                >
+                  Tutup Semua
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Active Category Description */}
+          <p className="text-xs text-slate-400 font-medium italic transition-all px-1.5">
+            * {activeCategoryDesc}
+          </p>
+        </div>        {/* Categories Listing Rows (Custom Table Layout) */}
+        <div className="space-y-6 relative mt-10">
+          
+          {/* Header of the Rules Table as in reference screenshot */}
+          <div className="flex items-end justify-between border-b-2 border-slate-200/80 pb-3 px-1.5 font-serif mb-6">
+            <h3 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight leading-none text-left">
+              Peraturan berlaku
+            </h3>
+            <span className="text-[11px] md:text-xs text-slate-400 font-extrabold tracking-widest uppercase">
+              {filteredRules.length} DOKUMEN
+            </span>
+          </div>
+
+          {/* Table Header Row - Desktop Only */}
+          <div className="hidden md:grid md:grid-cols-12 gap-6 px-8 py-3.5 bg-slate-900 text-slate-200 rounded-2xl text-[10px] md:text-xs font-black tracking-widest uppercase mb-4 shadow bg-[#0d1527] items-center text-left">
+            <div className="col-span-2 font-serif tracking-[0.15em]">NO. PERATURAN</div>
+            <div className="col-span-6 font-serif tracking-[0.15em]">JUDUL</div>
+            <div className="col-span-2 text-center font-serif tracking-[0.15em]">KATEGORI</div>
+            <div className="col-span-2 text-right font-serif tracking-[0.15em]">BERLAKU</div>
+          </div>
+
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-4"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredRules.length === 0 ? (
+                <motion.div 
+                  key="empty-state"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="py-16 text-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 text-slate-500 flex flex-col items-center justify-center p-6"
+                >
+                  <AlertTriangle size={44} className="text-slate-300 mb-3" />
+                  <h4 className="font-bold text-slate-800 text-base mb-1">Peraturan Tidak Ditemukan</h4>
+                  <p className="text-xs text-slate-500 max-w-md leading-relaxed font-semibold">
+                    Coba gunakan kata kunci pencarian yang lain atau pilih kategori peraturan lainnya.
+                  </p>
+                </motion.div>
+              ) : (
+                filteredRules.map((rule) => {
+                  const badge = getBadgeDetails(rule.category);
+                  const isOpen = isRuleExpanded(rule.title);
+                  const originalIndex = rules.findIndex(r => r.title === rule.title);
+                  const pasalNumber = originalIndex + 1;
+                  const shortRegistry = `0${pasalNumber}/2026`;
+                  
+                  return (
+                    <motion.div 
+                      key={rule.title}
+                      layout="position"
+                      variants={itemVariants}
+                      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                      className={`rounded-3xl border transition-all duration-300 flex flex-col justify-between h-fit group overflow-hidden ${
+                        isOpen 
+                          ? 'bg-white border-indigo-200 shadow-xl shadow-indigo-950/5' 
+                          : 'bg-slate-50/60 border-slate-100 hover:bg-white hover:border-slate-200 hover:shadow shadow-sm'
+                      }`}
+                    >
+                      {/* Interactive Row Container (Fully click-toggleable) */}
+                      <div 
+                        onClick={() => toggleRule(rule.title)}
+                        className="p-5 md:p-6 lg:px-8 cursor-pointer select-none"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 items-center">
+                          
+                          {/* No. Peraturan / Kode */}
+                          <div className="col-span-1 md:col-span-2 flex md:flex-col items-center md:items-start justify-between md:justify-center border-b md:border-b-0 border-slate-150 pb-2 md:pb-0 mb-1 md:mb-0">
+                            <span className="md:hidden text-[9px] font-black text-slate-450 uppercase font-serif tracking-wider">No. Peraturan</span>
+                            <div className="text-left font-serif">
+                              <p className="text-slate-800 font-extrabold text-sm md:text-base leading-none tracking-tight font-serif">
+                                {shortRegistry}
+                              </p>
+                              <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wide hidden md:block font-mono">
+                                {rule.nomorBerkas}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Judul & Detail */}
+                          <div className="col-span-1 md:col-span-6 flex flex-col gap-1 items-start text-left">
+                            <div className="flex items-center gap-2.5">
+                              <div className={`p-1.5 md:p-2 rounded-xl border transition-all duration-300 shrink-0 ${
+                                isOpen 
+                                  ? 'bg-indigo-50 border-indigo-100 text-indigo-600 scale-105' 
+                                  : 'bg-white border-slate-150 text-slate-500 group-hover:scale-105'
+                              }`}>
+                                {rule.icon}
+                              </div>
+                              <h3 className={`text-sm md:text-base font-medium leading-snug transition-colors duration-300 font-serif ${
+                                isOpen ? 'text-indigo-900 font-bold' : 'text-slate-800 group-hover:text-indigo-650'
+                              }`}>
+                                Peraturan Ketua RT 02 Huntap Tondo 2 {rule.nomorSurat} tentang {rule.title}
+                              </h3>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 mt-1.5 px-1">
+                              <span className="text-[10px] text-slate-450 font-bold uppercase tracking-wider font-sans">
+                                Versi 1.0 (Berlaku)
+                              </span>
+                              <span className="text-slate-300 text-xs font-bold leading-none select-none">•</span>
+                              <span className="text-[10px] text-slate-450 font-bold bg-slate-100 px-1.5 py-0.5 rounded font-sans">
+                                1 Pasal / {rule.items.length} Ayat
+                              </span>
+                              {searchTerm.trim() !== '' && (
+                                <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded text-[9px] font-bold border border-emerald-100 uppercase font-sans">Cocok</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Kategori Badge */}
+                          <div className="col-span-1 md:col-span-2 flex md:justify-center items-center justify-between py-1 md:py-0">
+                            <span className="md:hidden text-[9px] font-black text-slate-450 uppercase font-serif tracking-wider">Kategori</span>
+                            <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest text-center font-sans">
+                              {badge.label}
+                            </span>
+                          </div>
+
+                          {/* Berlaku Sejak & Action */}
+                          <div className="col-span-1 md:col-span-2 flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-150">
+                            <span className="md:hidden text-[9px] font-black text-slate-450 uppercase font-serif tracking-wider">Diberlakukan</span>
+                            <div className="flex items-center gap-3">
+                              <div className="text-right font-serif hidden md:block">
+                                <p className="text-slate-700 font-medium text-xs md:text-sm">
+                                  1 Juni 2026
+                                </p>
+                                <p className="text-[8px] text-emerald-600 font-black tracking-widest uppercase mt-0.5">
+                                  SAH & BERLAKU
+                                </p>
+                              </div>
+                              <span className={`p-1.5 rounded-xl border transition-all duration-300 ${
+                                isOpen ? 'bg-indigo-50 border-indigo-200 text-indigo-600 rotate-180' : 'bg-white border-slate-200 text-slate-450'
+                              }`}>
+                                <ChevronDown size={14} strokeWidth={2.5} />
+                              </span>
+                            </div>
+                          </div>
+
+                        </div>
+
+                        {/* Expanded Panel (Official Decree Document Presentation) */}
+                        <AnimatePresence initial={false}>
+                          {isOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                              animate={{ height: "auto", opacity: 1, marginTop: 24 }}
+                              exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              className="overflow-hidden border-t border-slate-100 pt-8 text-left"
+                            >
+                              {/* Parchment/Legal Document Wrapper */}
+                              <div className="bg-slate-50/50 rounded-[2rem] border border-slate-200/80 p-4 md:p-8 space-y-6 shadow-inner relative overflow-hidden">
+                                
+                                {/* Background watermark effect */}
+                                <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.02),transparent)] pointer-events-none" />
+
+                                {/* Document header */}
+                                <div className="text-center font-serif space-y-2">
+                                  <p className="text-[10px] md:text-xs tracking-[0.25em] text-slate-400 uppercase font-bold">
+                                    DALAM HAL {rule.category.toUpperCase()} LINGKUNGAN
+                                  </p>
+                                  <p className="text-sm md:text-base tracking-[0.15em] text-indigo-950 font-black uppercase">
+                                    RUKUN TETANGGA 02 HUNTAP TONDO 2 KELURAHAN TONDO
+                                  </p>
+                                  <p className="text-[9px] md:text-xs tracking-[0.1em] text-slate-400 font-bold uppercase">
+                                    KECAMATAN MANTIKULORE · KOTA PALU
+                                  </p>
+                                  
+                                  <div className="py-4 justify-center flex">
+                                    <div className="border border-slate-800 px-6 py-1 bg-white text-[11px] md:text-xs tracking-[0.25em] uppercase font-semibold text-slate-800 shadow-sm">
+                                      PERATURAN RESMI
+                                    </div>
+                                  </div>
+                                  
+                                  <h4 className="text-base md:text-xl font-bold font-serif text-slate-900 leading-normal max-w-3xl mx-auto">
+                                    Peraturan Ketua RT 02 Huntap Tondo 2 {rule.nomorSurat} <br />
+                                    <span className="text-slate-500 font-semibold italic text-sm md:text-base block mt-2">tentang {rule.tentang}</span>
+                                  </h4>
+                                </div>
+
+                                {/* Metadata list table */}
+                                <div className="max-w-xl mx-auto my-6 grid grid-cols-2 gap-y-2.5 gap-x-4 text-left font-serif text-xs border-y border-dashed border-slate-300 py-4 px-3 bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm">
+                                  <div className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">PENOMERAN</div>
+                                  <div className="text-slate-800 font-bold">{rule.nomorSurat}</div>
+                                  
+                                  <div className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">NOMOR BERKAS</div>
+                                  <div className="text-slate-850 font-mono font-bold text-[11px] text-indigo-700">{rule.nomorBerkas}</div>
+                                  
+                                  <div className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">KLASIFIKASI</div>
+                                  <div className="text-slate-800 font-bold flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    {badge.label}
+                                  </div>
+                                  
+                                  <div className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">SIFAT REVISI</div>
+                                  <div className="text-slate-800 font-bold">Naskah Asli (Belum Direvisi)</div>
+                                  
+                                  <div className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">BERLAKU SEJAK</div>
+                                  <div className="text-slate-800 font-bold">1 Juni 2026</div>
+                                </div>
+
+                                {/* Elegant Divider */}
+                                <div className="h-0.5 bg-slate-850 w-full" />
+
+                                {/* Command declaration */}
+                                <div className="text-center font-serif py-3 px-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                                  <p className="text-[10px] md:text-xs font-bold tracking-wider text-slate-500 uppercase leading-relaxed">
+                                    BERIKUT ADALAH PASAL TATA TERTIB YANG TELAH DI SEPAKATI DALAM MUSYAWARAH WARGA RT 02 HUNTAP TONDO 2 KELURAHAN TONDO.
+                                  </p>
+                                </div>
+
+                                {/* "Menimbang" Section */}
+                                <div className="text-left font-serif space-y-3 my-6">
+                                  <h5 className="font-extrabold text-slate-800 text-sm md:text-base italic">Menimbang:</h5>
+                                  <div className="border-l-4 border-indigo-400/80 pl-4 space-y-2.5">
+                                    <p className="text-xs md:text-sm text-slate-650 leading-relaxed italic text-justify">
+                                      <strong className="text-slate-800 not-italic uppercase tracking-wide text-[10px] bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">Mengingat</strong> bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS; dan
+                                    </p>
+                                    <p className="text-xs md:text-sm text-slate-650 leading-relaxed italic text-justify">
+                                      <strong className="text-slate-800 not-italic uppercase tracking-wide text-[10px] bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">Menimbang</strong> {rule.menimbang}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* "Pasal" (Single Pasal 1 container containing all sub-clauses in the document) */}
+                                <div className="space-y-4 font-serif text-left pt-2">
+                                  <div className="bg-white/95 rounded-2xl border border-slate-200/95 p-5 md:p-6 space-y-5 shadow-sm">
+                                    <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+                                      <h6 className="font-extrabold text-indigo-950 text-xs md:text-sm uppercase tracking-[0.2em] font-serif">PASAL 1 — {rule.title.toUpperCase()}</h6>
+                                      <span className="text-[9px] md:text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-150 uppercase tracking-widest leading-none">Salinan Dokumen</span>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                      {rule.items.map((item, idx) => (
+                                        <div key={idx} className="flex gap-4 items-start p-3 hover:bg-slate-50/50 rounded-xl transition-colors duration-150">
+                                          <div className="text-xs md:text-sm font-bold text-indigo-700 w-6 shrink-0 text-right font-serif">
+                                            {idx + 1}.
+                                          </div>
+                                          <div className="text-xs md:text-sm text-slate-700 leading-relaxed text-justify space-y-1 flex-1 font-serif">
+                                            <p className="font-semibold text-slate-700">
+                                              {idx === 0 && <span className="font-extrabold text-slate-900 tracking-wider mr-2 uppercase">MEMUTUSKAN:</span>}
+                                              {item}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Signature, Disclaimer & Back action section from reference */}
+                                <div className="pt-8 pb-3 flex flex-col items-center justify-center space-y-6 font-serif max-w-2xl mx-auto border-t border-dashed border-slate-350">
+                                  <p className="text-[11px] md:text-xs text-slate-500 text-justify md:text-center leading-relaxed italic px-2">
+                                    Dokumen ini merupakan peraturan resmi RT 02 Huntap Tondo 2 sebagaimana disahkan pengurus RT.
+                                    Pelanggaran dapat ditindaklanjuti melalui musyawarah lingkungan dan koordinasi dengan pihak terkait sesuai ketentuan yang berlaku.
+                                  </p>
+                                  
+                                  <div className="pt-2 flex flex-col items-center space-y-2">
+                                    <div className="w-56 h-[1.5px] bg-slate-450" />
+                                    <p className="text-[10px] md:text-xs font-bold tracking-[0.25em] text-slate-750 uppercase pt-1 text-center">
+                                      KETUA RT 02 HUNTAP TONDO 2
+                                    </p>
+                                  </div>
+
+                                  <div className="pt-4 text-center">
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleRule(rule.title);
+                                      }}
+                                      className="text-xs md:text-sm font-semibold text-indigo-700 hover:text-indigo-950 transition-all duration-250 focus:outline-none flex items-center justify-center gap-1.5 mx-auto font-serif border-b border-dashed border-indigo-700/40 hover:border-indigo-950 pb-0.5"
+                                    >
+                                      ← Kembali ke daftar peraturan
+                                    </button>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Footer Toggle Accordion Trigger bar */}
+                      <div 
+                        onClick={() => toggleRule(rule.title)}
+                        className={`px-6 py-2.5 border-t text-[10px] md:text-xs font-black flex items-center justify-between cursor-pointer transition-colors duration-300 ${
+                          isOpen 
+                            ? 'bg-indigo-50/20 border-indigo-105 text-indigo-700 hover:bg-indigo-50' 
+                            : 'bg-slate-50/30 border-slate-100/60 text-slate-500 hover:text-indigo-600 hover:bg-white'
+                        }`}
+                      >
+                        <span className="font-serif italic tracking-wide">{isOpen ? "Tutup kembali lembar keputusan peraturan" : "Lihat salinan resmi & isi naskah keputusan"}</span>
+                        <ChevronDown size={14} strokeWidth={2.5} className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-indigo-600' : 'text-slate-400'}`} />
+                      </div>
+                    </motion.div>
+                  );
+                })
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+
+        {/* Footer info banner */}
+        <div className="mt-12 p-8 bg-gradient-to-br from-indigo-900 via-slate-900 to-[#041410] rounded-[2.5rem] text-center relative overflow-hidden shadow-lg shadow-indigo-950/25">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
+          <div className="relative z-10 space-y-6">
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-black text-[10px] uppercase tracking-widest px-3.5 py-1.5 rounded-full">
+              Keluarga Besar RT 02
+            </span>
+            <p className="text-indigo-100 font-medium max-w-3xl mx-auto leading-relaxed text-sm md:text-base">
+              Dengan semangat TERAS RT 02 — Teknologi, Ekraf, Rukun, Aman, Sinergi, mari kita bangun lingkungan Huntap Tondo 2 RT 02 sebagai tempat tinggal yang nyaman, tertib, aman, dan penuh kekeluargaan.
+            </p>
+            <div className="inline-block text-left bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-md">
+              <p className="text-white font-black text-lg mb-1">Ketua RT 02: Irfan</p>
+              <p className="text-indigo-200 text-sm mb-1">Alamat: Blok C10 No. 08</p>
+              <p className="text-indigo-200 text-sm">WhatsApp: +62 859-6119-4621</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

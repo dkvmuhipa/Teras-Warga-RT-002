@@ -67,6 +67,9 @@ import { PublicActivity } from './components/public/PublicActivity';
 import { PublicWasteBank } from './components/public/PublicWasteBank';
 import { PublicHealth } from './components/public/PublicHealth';
 import PublicDonations from './components/public/PublicDonations';
+import { PublicFAQ } from './components/public/PublicFAQ';
+import { PublicRules } from './components/public/PublicRules';
+import { PublicEarthquake } from './components/public/PublicEarthquake';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -480,6 +483,9 @@ export const App = () => {
                                 <Route path="/kesehatan" element={<PublicHealth />} />
                                 <Route path="/donasi" element={<PublicDonations campaigns={donationCampaigns} houses={houses} />} />
                                 <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
+                                <Route path="/faq" element={<PublicFAQ faqItems={faqItems} />} />
+                                <Route path="/rules" element={<PublicRules />} />
+                                <Route path="/gempa" element={<PublicEarthquake />} />
                             </Routes>
                         </div>
                         <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} />

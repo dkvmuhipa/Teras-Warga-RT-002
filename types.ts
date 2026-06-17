@@ -564,6 +564,7 @@ export interface FAQItem {
   id: string;
   question: string;
   answer: string;
+  category?: 'layanan' | 'iuran' | 'keamanan' | 'lingkungan' | 'sosial';
 }
 
 export interface Document {
