@@ -136,6 +136,42 @@
         "status": { "type": "string", "enum": ["Pending", "Confirmed", "Menunggu", "Disetujui", "Ditolak"] }
       },
       "required": ["houseId", "residentName", "type", "weight", "totalValue", "status"]
+    },
+    "Book": {
+      "title": "Book",
+      "description": "Buku di taman bacaan / perpustakaan warga",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "category": { "type": "string" },
+        "synopsis": { "type": "string" },
+        "status": { "type": "string", "enum": ["Tersedia", "Dipinjam", "Digital Only"] },
+        "ownerName": { "type": "string" },
+        "ownerHouseId": { "type": "string" },
+        "digitalUrl": { "type": "string" },
+        "coverUrl": { "type": "string" },
+        "rating": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "author", "category", "status", "ownerName"]
+    },
+    "BookExchangeRequest": {
+      "title": "BookExchangeRequest",
+      "description": "Permintaan peminjaman buku fisik atau donasi buku",
+      "type": "object",
+      "properties": {
+        "bookId": { "type": "string" },
+        "bookTitle": { "type": "string" },
+        "requesterName": { "type": "string" },
+        "requesterHouseId": { "type": "string" },
+        "requesterPhone": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Disetujui", "Ditolak", "Selesai"] },
+        "requestType": { "type": "string", "enum": ["Pinjam Fisik", "Donasi Buku"] },
+        "requestDate": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["bookId", "bookTitle", "requesterName", "requesterHouseId", "status", "requestType", "requestDate"]
     }
   },
   "firestore": {
@@ -156,6 +192,8 @@
     "/marketItems/{id}": { "schema": "object", "description": "Bursa warga" },
     "/residentRegistrations/{id}": { "schema": "object", "description": "Pendaftaran warga" },
     "/guestReports/{id}": { "schema": "object", "description": "Laporan tamu" },
-    "/updateRequests/{id}": { "schema": "object", "description": "Update data warga" }
+    "/updateRequests/{id}": { "schema": "object", "description": "Update data warga" },
+    "/books/{id}": { "schema": "Book", "description": "Buku digital & fisik" },
+    "/bookExchangeRequests/{id}": { "schema": "BookExchangeRequest", "description": "Permintaan pertukaran/pinjam buku" }
   }
 }

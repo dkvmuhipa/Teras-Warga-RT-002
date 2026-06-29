@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Vote, Calendar, Clock, Lock, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Vote, Calendar, Clock, Lock, CheckCircle2, CalendarDays } from 'lucide-react';
 import { Poll } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -229,53 +229,89 @@ export const PollManagement: React.FC<PollManagementProps> = ({ polls }) => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Buat Voting Baru">
-        <form onSubmit={handleCreatePoll} className="space-y-5">
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Judul Voting</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={pollTitle} onChange={e=>setPollTitle(e.target.value)} placeholder="Contoh: Pemilihan Ketua Panitia 17an" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Deskripsi & Tujuan</label>
-            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[100px]" rows={3} value={pollDesc} onChange={e=>setPollDesc(e.target.value)} placeholder="Jelaskan tujuan voting ini..." />
-          </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Batas Waktu (Deadline)</label>
-            <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={pollDeadline} onChange={e=>setPollDeadline(e.target.value)} />
+        <form onSubmit={handleCreatePoll} className="space-y-6">
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Judul Voting</label>
+            <input 
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+              value={pollTitle} 
+              onChange={e=>setPollTitle(e.target.value)} 
+              placeholder="Contoh: Pemilihan Ketua Panitia 17an..." 
+              required
+            />
           </div>
           
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Opsi Jawaban</label>
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Deskripsi & Tujuan</label>
+            <textarea 
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[100px] resize-none" 
+              rows={3} 
+              value={pollDesc} 
+              onChange={e=>setPollDesc(e.target.value)} 
+              placeholder="Jelaskan tujuan voting, kriteria pemilihan, dan informasi relevan lainnya..." 
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Batas Waktu (Deadline)</label>
+            <div className="relative group/date">
+              <input 
+                type="date" 
+                className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer" 
+                value={pollDeadline} 
+                onChange={e=>setPollDeadline(e.target.value)} 
+                required
+              />
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 group-focus-within/date:text-indigo-500 transition-colors">
+                 <CalendarDays size={18} />
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-3 bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
+            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Opsi Jawaban / Kandidat</label>
             <div className="space-y-3">
               {pollOptions.map((opt, idx) => (
-                <div key={opt.id} className="flex gap-2">
+                <div key={opt.id} className="flex items-center gap-3 group/option">
+                  <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xs font-black text-slate-400 shadow-sm shrink-0 group-focus-within/option:border-indigo-500 group-focus-within/option:text-indigo-600 group-focus-within/option:bg-indigo-50 transition-all">
+                    {idx + 1}
+                  </div>
                   <input 
-                    className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" 
+                    className="flex-1 p-3.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm" 
                     value={opt.text} 
                     onChange={e => updateOption(idx, e.target.value)} 
-                    placeholder={`Opsi ${idx + 1}`} 
+                    placeholder={`Masukkan opsi jawaban ${idx + 1}...`} 
+                    required
                   />
-                  {pollOptions.length > 2 && (
+                  {pollOptions.length > 2 ? (
                     <button 
                       type="button" 
                       onClick={() => removeOption(idx)}
-                      className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                      className="p-3.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all shrink-0"
                     >
                       <Trash2 size={18} />
                     </button>
+                  ) : (
+                    <div className="w-[50px] shrink-0 pointer-events-none" />
                   )}
                 </div>
               ))}
-              <button 
-                type="button" 
-                onClick={addOption}
-                className="text-xs font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1 mt-2"
-              >
-                <Plus size={14} /> Tambah Opsi Lain
-              </button>
             </div>
+            <button 
+              type="button" 
+              onClick={addOption}
+              className="mt-4 w-full py-3 border-2 border-dashed border-indigo-200 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center gap-2"
+            >
+              <Plus size={16} /> Tambah Opsi Lain
+            </button>
           </div>
 
-          <Button type="submit" className="w-full py-3.5 text-sm shadow-xl shadow-indigo-200 mt-2">Terbitkan Voting</Button>
+          <div className="pt-4 border-t border-slate-100">
+            <Button type="submit" className="w-full py-4 text-sm font-black uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-500/20 flex justify-center items-center gap-2 group/submit">
+              Terbitkan Voting <CheckCircle2 size={18} className="group-hover/submit:scale-110 transition-transform" />
+            </Button>
+          </div>
         </form>
       </Modal>
     </motion.div>

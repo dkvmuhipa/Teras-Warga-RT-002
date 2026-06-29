@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Vote, ShoppingCart, FileText, Shield, Package, Calendar, Menu, X, LayoutGrid, Wallet, Info, HelpCircle, Scale, Activity } from 'lucide-react';
+import { Home, Vote, ShoppingCart, FileText, Shield, Package, Calendar, Menu, X, LayoutGrid, Wallet, Info, HelpCircle, Scale, Activity, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const MobileBottomNav: React.FC = () => {
@@ -30,6 +30,7 @@ export const MobileBottomNav: React.FC = () => {
         { path: '/market', icon: ShoppingCart, label: 'Pasar Warga' },
         { path: '/sampah', icon: Package, label: 'Bank Sampah' },
         { path: '/umkm', icon: LayoutGrid, label: 'Direktori UMKM' },
+        { path: '/literasi', icon: BookOpen, label: 'Taman Bacaan' },
       ]
     },
     {

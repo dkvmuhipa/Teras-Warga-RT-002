@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, User, MessageCircle, Store, Tag, MapPin, Phone, Upload, ShoppingBag, Clock, CheckCircle2, XCircle, Package } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, User, MessageCircle, Store, Tag, MapPin, Phone, Upload, ShoppingBag, Clock, CheckCircle2, XCircle, Package, Instagram, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { UMKM, UMKMOrder } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -426,97 +426,202 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingUmkmId ? "Edit UMKM" : "Tambah UMKM Baru"}>
-        <form onSubmit={handleSaveUMKM} className="space-y-5">
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nama Usaha</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.name} onChange={e=>setUmkmForm({...umkmForm, name: e.target.value})} placeholder="Contoh: Warung Makan Bu Siti" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Pemilik</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.owner} onChange={e=>setUmkmForm({...umkmForm, owner: e.target.value})} placeholder="Nama Pemilik" />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingUmkmId ? "Edit Profil UMKM" : "Registrasi UMKM Baru"}>
+        <form onSubmit={handleSaveUMKM} className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Nama Usaha / Brand</label>
+              <input 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                value={umkmForm.name} 
+                onChange={e=>setUmkmForm({...umkmForm, name: e.target.value})} 
+                placeholder="Contoh: Kedai Makanan Bu Siti..." 
+                required
+              />
             </div>
-            <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kategori</label>
-              <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.category} onChange={e=>setUmkmForm({...umkmForm, category: e.target.value})}>
-                <option>Kuliner</option>
-                <option>Jasa</option>
-                <option>Retail</option>
-                <option>Fashion</option>
-                <option>Kerajinan</option>
-                <option>Lainnya</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Deskripsi Usaha</label>
-            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[80px]" rows={3} value={umkmForm.description} onChange={e=>setUmkmForm({...umkmForm, description: e.target.value})} placeholder="Jelaskan produk atau jasa yang ditawarkan..." />
-          </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kontak (WhatsApp)</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.contact} onChange={e=>setUmkmForm({...umkmForm, contact: e.target.value})} placeholder="08..." />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Blok Rumah</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.houseId} onChange={e=>setUmkmForm({...umkmForm, houseId: e.target.value})} placeholder="Contoh: A-12"/>
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Jam Operasional</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.operatingHours} onChange={e=>setUmkmForm({...umkmForm, operatingHours: e.target.value})} placeholder="Contoh: 08:00 - 21:00"/>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Instagram URL</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={igUrl} onChange={e=>setIgUrl(e.target.value)} placeholder="https://instagram.com/..."/>
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">TikTok URL</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={ttUrl} onChange={e=>setTtUrl(e.target.value)} placeholder="https://tiktok.com/..."/>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Galeri Foto (Link, pisahkan dengan koma)</label>
-            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[60px]" rows={2} value={galleryInput} onChange={e=>setGalleryInput(e.target.value)} placeholder="https://link1.com, https://link2.com..."/>
-          </div>
-          
-          <div className="flex items-center justify-between p-1 bg-slate-100 rounded-xl">
-            <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
-            <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
-          </div>
-
-          {imageType === 'upload' ? (
-            <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">Pilih Foto</label>
-                <div className="relative">
-                    <input 
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        id="umkm-file-upload"
-                        onChange={e => setImageFile(e.target.files?.[0] || null)}
-                    />
-                    <label htmlFor="umkm-file-upload" className="flex items-center gap-3 w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold cursor-pointer hover:bg-slate-100 transition-colors">
-                        <Upload size={18} className="text-slate-400" />
-                        <span className="text-slate-600">{imageFile ? imageFile.name : 'Pilih file foto...'}</span>
-                    </label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Pemilik Usaha</label>
+                <div className="relative group/input">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+                    <User size={16} />
+                  </div>
+                  <input 
+                    className="w-full pl-12 pr-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={umkmForm.owner} 
+                    onChange={e=>setUmkmForm({...umkmForm, owner: e.target.value})} 
+                    placeholder="Nama lengkap..." 
+                    required
+                  />
                 </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Kategori Bisnis</label>
+                <div className="relative">
+                  <select 
+                    className="w-full p-4 pl-4 pr-10 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer" 
+                    value={umkmForm.category} 
+                    onChange={e=>setUmkmForm({...umkmForm, category: e.target.value})}
+                  >
+                    <option value="Kuliner">🍲 Kuliner</option>
+                    <option value="Jasa">🛠️ Jasa & Layanan</option>
+                    <option value="Retail">🏪 Retail / Toko</option>
+                    <option value="Fashion">👕 Fashion</option>
+                    <option value="Kerajinan">🎨 Kerajinan</option>
+                    <option value="Lainnya">📌 Lainnya</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                    <svg width="12" height="8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">URL Foto Produk/Usaha</label>
-                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={umkmForm.image} onChange={e=>setUmkmForm({...umkmForm, image: e.target.value})} placeholder="https://..."/>
+
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Deskripsi Layanan / Produk</label>
+              <textarea 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[100px] resize-none" 
+                rows={3} 
+                value={umkmForm.description} 
+                onChange={e=>setUmkmForm({...umkmForm, description: e.target.value})} 
+                placeholder="Ceritakan detail produk atau jasa yang ditawarkan kepada warga..." 
+                required
+              />
             </div>
-          )}
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">WhatsApp Bisnis</label>
+                <div className="relative group/input">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-emerald-500">
+                    <MessageCircle size={16} />
+                  </div>
+                  <input 
+                    className="w-full pl-12 pr-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={umkmForm.contact} 
+                    onChange={e=>setUmkmForm({...umkmForm, contact: e.target.value})} 
+                    placeholder="08123456789" 
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Jam Operasional</label>
+                <div className="relative group/input">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-amber-500">
+                    <Clock size={16} />
+                  </div>
+                  <input 
+                    className="w-full pl-12 pr-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={umkmForm.operatingHours} 
+                    onChange={e=>setUmkmForm({...umkmForm, operatingHours: e.target.value})} 
+                    placeholder="Contoh: 08:00 - 21:00"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Media Sosial</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative group/input">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-rose-500">
+                    <Instagram size={16} />
+                  </div>
+                  <input 
+                    className="w-full pl-12 pr-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={igUrl} 
+                    onChange={e=>setIgUrl(e.target.value)} 
+                    placeholder="Username Instagram..."
+                  />
+                </div>
+                <div className="relative group/input">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-800">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2-1.74 2.89 2.89 0 012.9-2.88h.02v-3.46h-.02a6.36 6.36 0 106.36 6.36v-6.3a8.31 8.31 0 004.16 1.45V5.53a4.7 4.7 0 01-1 .16z"/></svg>
+                  </div>
+                  <input 
+                    className="w-full pl-12 pr-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={ttUrl} 
+                    onChange={e=>setTtUrl(e.target.value)} 
+                    placeholder="Username TikTok..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Identitas Lokasi (Opsional)</label>
+              <div className="relative group/input">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+                  <MapPin size={16} />
+                </div>
+                <input 
+                  className="w-full pl-12 pr-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                  value={umkmForm.houseId} 
+                  onChange={e=>setUmkmForm({...umkmForm, houseId: e.target.value})} 
+                  placeholder="ID Blok Rumah (Contoh: A-12)"
+                />
+              </div>
+              <p className="text-[10px] font-medium text-slate-400 px-1">Isi jika bisnis berlokasi di rumah warga RT 02.</p>
+            </div>
+
+            <div className="space-y-3 bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
+              <div className="flex items-center justify-between">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Unggah Banner / Foto Bisnis</label>
+                <div className="flex bg-slate-200/50 p-1 rounded-xl">
+                  <button type="button" onClick={() => setImageType('upload')} className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${imageType === 'upload' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Upload</button>
+                  <button type="button" onClick={() => setImageType('link')} className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>URL</button>
+                </div>
+              </div>
+
+              {imageType === 'upload' ? (
+                <div className="relative group">
+                  <input 
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      id="umkm-file-upload"
+                      onChange={e => setImageFile(e.target.files?.[0] || null)}
+                  />
+                  <label htmlFor="umkm-file-upload" className="flex flex-col items-center justify-center gap-3 w-full p-8 bg-white border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 hover:border-indigo-300 transition-all">
+                      <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500 group-hover:scale-110 group-hover:bg-indigo-100 transition-all">
+                        <Upload size={20} />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-bold text-slate-700 mb-1">{imageFile ? imageFile.name : 'Pilih File Gambar'}</p>
+                        <p className="text-[10px] text-slate-400">JPG, PNG atau WEBP (Max. 2MB)</p>
+                      </div>
+                  </label>
+                </div>
+              ) : (
+                <div className="relative group/input">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+                    <LinkIcon size={16} />
+                  </div>
+                  <input 
+                    className="w-full pl-12 pr-4 p-4 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm" 
+                    value={umkmForm.image} 
+                    onChange={e=>setUmkmForm({...umkmForm, image: e.target.value})} 
+                    placeholder="https://contoh.com/gambar.jpg"
+                  />
+                </div>
+              )}
+            </div>
+
+          </div>
           
-          <Button type="submit" className="w-full py-3.5 text-sm shadow-xl shadow-indigo-200 mt-2" disabled={isUploading}>
-            {isUploading ? 'Sedang Mengunggah...' : (editingUmkmId ? 'Simpan Perubahan' : 'Simpan Data UMKM')}
-          </Button>
+          <div className="pt-4 border-t border-slate-100">
+            <Button type="submit" className="w-full py-4 text-sm font-black uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-500/20 flex justify-center items-center gap-2 group/submit" disabled={isUploading}>
+              {isUploading ? (
+                <><Loader2 size={18} className="animate-spin" /> Sedang Mengunggah...</>
+              ) : editingUmkmId ? (
+                <>Simpan Perubahan <CheckCircle2 size={18} className="group-hover/submit:scale-110 transition-transform" /></>
+              ) : (
+                <>Registrasi UMKM <CheckCircle2 size={18} className="group-hover/submit:scale-110 transition-transform" /></>
+              )}
+            </Button>
+          </div>
         </form>
       </Modal>
     </motion.div>

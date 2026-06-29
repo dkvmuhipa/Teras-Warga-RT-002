@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, BookOpen, Calendar, Edit2, MessageCircle, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calendar, Edit2, MessageCircle, Sparkles, Image as ImageIcon, Loader2, CheckCircle2, Megaphone } from 'lucide-react';
 import { News } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -231,44 +231,102 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Berita" : "Buat Berita Baru"}>
-        <form onSubmit={handleSaveNews} className="space-y-5">
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Judul Berita</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Contoh: Suksesnya Acara Kerja Bakti" />
+        <form onSubmit={handleSaveNews} className="space-y-6">
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Judul Berita</label>
+            <input 
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+              value={title} 
+              onChange={e=>setTitle(e.target.value)} 
+              placeholder="Contoh: Gebyar Kemerdekaan 17 Agustus..." 
+              required
+            />
           </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Kategori</label>
-            <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={category} onChange={e=>setCategory(e.target.value as any)}>
-              <option value="Kegiatan">Kegiatan</option>
-              <option value="Pengumuman">Pengumuman</option>
-              <option value="Warga">Warga</option>
-              <option value="Lainnya">Lainnya</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Gambar Berita</label>
-            <div className="relative h-40 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-400 transition-all">
-              {image ? (
-                <img src={image} className="h-full w-full object-cover" />
-              ) : (
-                <div className="text-slate-400 flex flex-col items-center">
-                  <ImageIcon size={24} />
-                  <span className="text-xs font-bold mt-2">Pilih Gambar</span>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Kategori Berita</label>
+              <div className="relative">
+                <select 
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer" 
+                  value={category} 
+                  onChange={e=>setCategory(e.target.value as any)}
+                >
+                  <option value="Kegiatan">🗓️ Kegiatan Warga</option>
+                  <option value="Pengumuman">📢 Pengumuman</option>
+                  <option value="Warga">👤 Info Warga</option>
+                  <option value="Lainnya">📌 Lainnya</option>
+                </select>
+                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
-              )}
-              <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+              </div>
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Tanggal Publish</label>
+              <div className="w-full p-4 bg-slate-100/50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-500 cursor-not-allowed">
+                {new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
+              </div>
             </div>
           </div>
-          <div>
-            <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Isi Berita</label>
-            <Button type="button" onClick={handleGenerateWithAi} className="mb-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 shadow-none text-xs py-2 px-3">
-              <Sparkles size={14} className="mr-2" /> {isAiLoading ? 'Memproses...' : 'Buat dengan AI'}
-            </Button>
-            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[120px]" rows={4} value={content} onChange={e=>setContent(e.target.value)} placeholder="Tulis isi berita di sini..." />
+          
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Sampul/Thumbnail Berita</label>
+            <div className="relative h-48 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-400 hover:bg-slate-100/80 transition-all group">
+              {image ? (
+                <>
+                  <img src={image} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="bg-white text-slate-800 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg">
+                      <ImageIcon size={14} /> Ganti Gambar
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-slate-400 flex flex-col items-center justify-center p-6 text-center">
+                  <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm border border-slate-100 text-indigo-500 group-hover:scale-110 transition-transform">
+                    <ImageIcon size={24} />
+                  </div>
+                  <span className="text-sm font-bold text-slate-700 mb-1">Pilih Gambar Sampul</span>
+                  <span className="text-[10px] text-slate-400">Format: JPG, PNG, WEBP (Max 2MB)</span>
+                </div>
+              )}
+              <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+            </div>
           </div>
-          <Button type="submit" className="w-full py-3.5 text-sm shadow-xl shadow-indigo-200 mt-2">
-            {editingId ? 'Simpan Perubahan' : 'Terbitkan Berita'}
-          </Button>
+          
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Isi & Konten Berita</label>
+              <Button type="button" onClick={handleGenerateWithAi} className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 shadow-none text-[10px] py-1.5 px-3 rounded-full">
+                {isAiLoading ? (
+                  <Loader2 size={12} className="mr-1.5 animate-spin" />
+                ) : (
+                  <Sparkles size={12} className="mr-1.5" />
+                )}
+                {isAiLoading ? 'Menyusun Draft...' : 'Bantu Tulis dengan AI'}
+              </Button>
+            </div>
+            <textarea 
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[160px] resize-none" 
+              rows={6} 
+              value={content} 
+              onChange={e=>setContent(e.target.value)} 
+              placeholder="Tuliskan isi berita secara lengkap di sini..." 
+              required
+            />
+          </div>
+          
+          <div className="pt-4 border-t border-slate-100">
+            <Button type="submit" className="w-full py-4 text-sm font-black uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-500/20 flex justify-center items-center gap-2 group/submit">
+              {editingId ? (
+                <>Simpan Perubahan <CheckCircle2 size={18} className="group-hover/submit:scale-110 transition-transform" /></>
+              ) : (
+                <>Terbitkan Berita <Megaphone size={18} className="group-hover/submit:scale-110 transition-transform" /></>
+              )}
+            </Button>
+          </div>
         </form>
       </Modal>
     </motion.div>

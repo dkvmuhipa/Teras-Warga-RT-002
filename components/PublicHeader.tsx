@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, ChevronDown, LayoutGrid, Wallet, Users, Info, Download, X, Smartphone, Sparkles, HelpCircle,
-  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar
+  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen
 } from 'lucide-react';
 import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
@@ -79,14 +79,15 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
     },
     {
       id: 'ekonomi',
-      label: 'Ekonomi',
+      label: 'Ekonomi & Sosial',
       icon: Wallet,
-      columns: 1,
-      width: 'w-[280px]',
+      columns: 2,
+      width: 'w-[480px] sm:w-[540px]',
       items: [
         { path: '/market', label: 'Pasar Warga', desc: 'Beli hasil dagangan & jasa warga lokal', icon: ShoppingBag, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
         { path: '/sampah', label: 'Bank Sampah', desc: 'Setor sampah anorganik jadi saldo digital', icon: Trash2, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
         { path: '/umkm', label: 'Direktori UMKM', desc: 'Katalog usaha kreatif binaan kepengurusan', icon: Store, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
+        { path: '/literasi', label: 'Taman Bacaan', desc: 'Tukar & baca buku digital warga', icon: BookOpen, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
       ]
     },
     {

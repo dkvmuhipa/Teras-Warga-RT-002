@@ -235,6 +235,7 @@ export interface AppEvent {
   title: string;
   description: string;
   date: string;
+  time?: string;
   location: string;
   attendees: string[]; // House IDs or Names
 }
@@ -862,3 +863,38 @@ export interface UpdateRequest {
   createdAt: string;
   updatedAt?: string;
 }
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  category: string;
+  synopsis: string;
+  status: 'Tersedia' | 'Dipinjam' | 'Digital Only';
+  ownerName: string;
+  ownerHouseId?: string;
+  digitalUrl?: string; // If present, it can be read digitally
+  coverUrl?: string; // Optional cover image URL
+  rating?: number;
+  reviews?: {
+    reviewerName: string;
+    rating: number;
+    comment: string;
+    date: string;
+  }[];
+  createdAt: string;
+}
+
+export interface BookExchangeRequest {
+  id: string;
+  bookId: string;
+  bookTitle: string;
+  requesterName: string;
+  requesterHouseId: string;
+  requesterPhone: string;
+  status: 'Pending' | 'Disetujui' | 'Ditolak' | 'Selesai';
+  requestType: 'Pinjam Fisik' | 'Donasi Buku';
+  requestDate: string;
+  notes?: string;
+}
+

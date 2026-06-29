@@ -71,6 +71,7 @@ import { PublicFAQ } from './components/public/PublicFAQ';
 import { PublicRules } from './components/public/PublicRules';
 import { PublicEarthquake } from './components/public/PublicEarthquake';
 import { PublicAbout } from './components/public/PublicAbout';
+import { PublicLibrary } from './components/public/PublicLibrary';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -487,6 +488,7 @@ export const App = () => {
                                 <Route path="/faq" element={<PublicFAQ faqItems={faqItems} />} />
                                 <Route path="/rules" element={<PublicRules />} />
                                 <Route path="/gempa" element={<PublicEarthquake />} />
+                                <Route path="/literasi" element={<PublicLibrary />} />
                                 <Route path="/about" element={
                                     <PublicAbout 
                                         officials={officials} 

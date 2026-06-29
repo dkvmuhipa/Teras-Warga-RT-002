@@ -1188,7 +1188,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-100">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl">
                     <FileText size={24} />
@@ -1198,34 +1198,60 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <p className="text-sm font-medium text-slate-500">Atur jenis surat dan saran pengisian untuk warga.</p>
                   </div>
                 </div>
-                <Button 
-                  onClick={() => {
-                    const newTemplates = [...(pdfConfig.letterTemplates || []), { type: 'Jenis Surat Baru', suggestion: 'Isi saran pengisian di sini...' }];
-                    const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
-                    setPdfConfig(newConfig);
-                    localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                  }}
-                  className="bg-indigo-600 hover:bg-indigo-700"
-                >
-                  <Plus size={18} className="mr-2" /> Tambah Jenis Surat
-                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      const defaultTemplates = [
+                        { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
+                        { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
+                        { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
+                        { type: 'Surat Keterangan Domisili', suggestion: 'Bahwa yang bersangkutan benar-benar merupakan warga / penduduk yang berdomisili menetap di wilayah RT kami. Surat keterangan ini digunakan untuk persyaratan [cth: melamar pekerjaan / pembukaan rekening bank / pendaftaran sekolah].' },
+                        { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Bahwa yang bersangkutan adalah benar warga RT kami dan berdasarkan keadaan yang sebenarnya, yang bersangkutan termasuk dalam keluarga prasejahtera / Kurang Mampu. Surat Keterangan ini digunakan untuk keperluan persyaratan [cth: pengajuan beasiswa / keringanan biaya rumah sakit / bantuan sosial].' },
+                        { type: 'Surat Izin Keramaian', suggestion: 'Surat ini sebagai pengantar / rekomendasi izin penyelenggaraan acara keramaian berupa [Nama/Jenis Acara, cth: Resepsi Pernikahan] yang akan diselenggarakan pada hari/tanggal [Tanggal Acara] bertempat di [Lokasi Acara].' },
+                        { type: 'Surat Keterangan Usaha', suggestion: 'Bahwa yang bersangkutan benar merupakan warga kami dan memiliki usaha / bisnis di bidang [Jenis Usaha, cth: Perdagangan/Kuliner] dengan nama usaha [Nama Usaha] yang berlokasi di wilayah RT kami. Surat ini dibuat untuk keperluan [cth: pengajuan kredit UMKM / pembuatan NPWP badan].' },
+                        { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Bahwa yang bersangkutan adalah warga kami yang senantiasa berkelakuan baik, belum pernah tersangkut tindak pidana, dan tidak pernah mengganggu ketertiban lingkungan. Surat ini sebagai pengantar untuk pembuatan SKCK di kepolisian untuk keperluan [cth: pendaftaran TNI/Polri / melamar pekerjaan].' },
+                        { type: 'Surat Keterangan Kematian', suggestion: 'Menerangkan dengan sebenarnya bahwa warga kami yang bernama [Nama Almarhum/Almarhumah] telah meninggal dunia pada [Hari, Tanggal, Jam] dikarenakan [Sakit/Usia/dll]. Surat keterangan ini digunakan untuk persyaratan administrasi kepengurusan Akta Kematian di Kelurahan.' },
+                        { type: 'Surat Keterangan Kelahiran', suggestion: 'Menerangkan bahwa telah lahir seorang anak [Laki-laki / Perempuan] bernama [Nama Anak] pada tanggal [Tanggal Lahir] dari pasangan suami istri [Nama Ayah] dan [Nama Ibu]. Surat pengantar ini digunakan untuk keperluan pembuatan Akta Kelahiran.' },
+                        { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Surat keterangan ini menerangkan susunan ahli waris yang sah dari almarhum/almarhumah [Nama Almarhum] untuk digunakan sebagai persyaratan administrasi kepengurusan turun waris / pembagian harta warisan keluarga.' },
+                        { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Bahwa yang bersangkutan bermaksud untuk mengurus administrasi pindah alamat dari RT kami menuju [Alamat Tujuan Pindah] / melapor kedatangan sebagai warga baru yang pindah dari [Alamat Asal].' },
+                        { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Menerangkan bahwa yang bersangkutan bermaksud untuk melangsungkan pernikahan. Surat pengantar ini dibuat sebagai persyaratan pengurusan berkas administrasi pernikahan (N1, N2, N3, N4) di tingkat Kelurahan.' },
+                      ];
+                      const newConfig = { ...pdfConfig, letterTemplates: defaultTemplates };
+                      setPdfConfig(newConfig);
+                      // Make sure to sync with Firebase if that's configured! Assuming auto-sync is on
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all"
+                  >
+                    <RefreshCw size={16} /> Reset Default
+                  </button>
+                  <Button 
+                    onClick={() => {
+                      const newTemplates = [...(pdfConfig.letterTemplates || []), { type: 'Jenis Surat Baru', suggestion: 'Isi saran pengisian di sini...' }];
+                      const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
+                      setPdfConfig(newConfig);
+                    }}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    <Plus size={18} className="mr-2" /> Tambah Jenis Surat
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-6">
-                {(pdfConfig.letterTemplates || [
-                  { type: 'Surat Pengantar', suggestion: 'Surat pengantar umum untuk berbagai keperluan administratif.' },
-                  { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
-                  { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
-                  { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
-                  { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Persyaratan pengajuan bantuan sosial / beasiswa pendidikan / keringanan biaya medis.' },
-                  { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
-                  { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
-                  { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
-                  { type: 'Surat Keterangan Kematian', suggestion: 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan.' },
-                  { type: 'Surat Keterangan Kelahiran', suggestion: 'Persyaratan pembuatan akta kelahiran anak baru / pendaftaran ke dalam Kartu Keluarga.' },
-                  { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Persyaratan administrasi pengurusan hak waris / pembagian harta waris keluarga.' },
-                  { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Persyaratan pengurusan surat pindah domisili keluar daerah atau pelaporan kedatangan warga baru.' },
-                  { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Persyaratan rekomendasi pernikahan untuk pengurusan berkas administrasi N1 - N4 di Kantor Kelurahan.' },
+                {(pdfConfig.letterTemplates && pdfConfig.letterTemplates.length > 0 ? pdfConfig.letterTemplates : [
+                  { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
+                  { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
+                  { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
+                  { type: 'Surat Keterangan Domisili', suggestion: 'Bahwa yang bersangkutan benar-benar merupakan warga / penduduk yang berdomisili menetap di wilayah RT kami. Surat keterangan ini digunakan untuk persyaratan [cth: melamar pekerjaan / pembukaan rekening bank / pendaftaran sekolah].' },
+                  { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Bahwa yang bersangkutan adalah benar warga RT kami dan berdasarkan keadaan yang sebenarnya, yang bersangkutan termasuk dalam keluarga prasejahtera / Kurang Mampu. Surat Keterangan ini digunakan untuk keperluan persyaratan [cth: pengajuan beasiswa / keringanan biaya rumah sakit / bantuan sosial].' },
+                  { type: 'Surat Izin Keramaian', suggestion: 'Surat ini sebagai pengantar / rekomendasi izin penyelenggaraan acara keramaian berupa [Nama/Jenis Acara, cth: Resepsi Pernikahan] yang akan diselenggarakan pada hari/tanggal [Tanggal Acara] bertempat di [Lokasi Acara].' },
+                  { type: 'Surat Keterangan Usaha', suggestion: 'Bahwa yang bersangkutan benar merupakan warga kami dan memiliki usaha / bisnis di bidang [Jenis Usaha, cth: Perdagangan/Kuliner] dengan nama usaha [Nama Usaha] yang berlokasi di wilayah RT kami. Surat ini dibuat untuk keperluan [cth: pengajuan kredit UMKM / pembuatan NPWP badan].' },
+                  { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Bahwa yang bersangkutan adalah warga kami yang senantiasa berkelakuan baik, belum pernah tersangkut tindak pidana, dan tidak pernah mengganggu ketertiban lingkungan. Surat ini sebagai pengantar untuk pembuatan SKCK di kepolisian untuk keperluan [cth: pendaftaran TNI/Polri / melamar pekerjaan].' },
+                  { type: 'Surat Keterangan Kematian', suggestion: 'Menerangkan dengan sebenarnya bahwa warga kami yang bernama [Nama Almarhum/Almarhumah] telah meninggal dunia pada [Hari, Tanggal, Jam] dikarenakan [Sakit/Usia/dll]. Surat keterangan ini digunakan untuk persyaratan administrasi kepengurusan Akta Kematian di Kelurahan.' },
+                  { type: 'Surat Keterangan Kelahiran', suggestion: 'Menerangkan bahwa telah lahir seorang anak [Laki-laki / Perempuan] bernama [Nama Anak] pada tanggal [Tanggal Lahir] dari pasangan suami istri [Nama Ayah] dan [Nama Ibu]. Surat pengantar ini digunakan untuk keperluan pembuatan Akta Kelahiran.' },
+                  { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Surat keterangan ini menerangkan susunan ahli waris yang sah dari almarhum/almarhumah [Nama Almarhum] untuk digunakan sebagai persyaratan administrasi kepengurusan turun waris / pembagian harta warisan keluarga.' },
+                  { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Bahwa yang bersangkutan bermaksud untuk mengurus administrasi pindah alamat dari RT kami menuju [Alamat Tujuan Pindah] / melapor kedatangan sebagai warga baru yang pindah dari [Alamat Asal].' },
+                  { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Menerangkan bahwa yang bersangkutan bermaksud untuk melangsungkan pernikahan. Surat pengantar ini dibuat sebagai persyaratan pengurusan berkas administrasi pernikahan (N1, N2, N3, N4) di tingkat Kelurahan.' },
                 ]).map((template, idx) => (
                   <div key={idx} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 relative group">
                     <button 
@@ -2122,9 +2148,37 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                        <ClipboardList size={10} className="text-indigo-500" /> Detail Keperluan & Maksud Pembuatan Surat
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <ClipboardList size={10} className="text-indigo-500" /> Detail Keperluan & Maksud Pembuatan Surat
+                        </label>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const defaultTemplates = [
+                              { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
+                              { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
+                              { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
+                              { type: 'Surat Keterangan Domisili', suggestion: 'Bahwa yang bersangkutan benar-benar merupakan warga / penduduk yang berdomisili menetap di wilayah RT kami. Surat keterangan ini digunakan untuk persyaratan [cth: melamar pekerjaan / pembukaan rekening bank / pendaftaran sekolah].' },
+                              { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Bahwa yang bersangkutan adalah benar warga RT kami dan berdasarkan keadaan yang sebenarnya, yang bersangkutan termasuk dalam keluarga prasejahtera / Kurang Mampu. Surat Keterangan ini digunakan untuk keperluan persyaratan [cth: pengajuan beasiswa / keringanan biaya rumah sakit / bantuan sosial].' },
+                              { type: 'Surat Izin Keramaian', suggestion: 'Surat ini sebagai pengantar / rekomendasi izin penyelenggaraan acara keramaian berupa [Nama/Jenis Acara, cth: Resepsi Pernikahan] yang akan diselenggarakan pada hari/tanggal [Tanggal Acara] bertempat di [Lokasi Acara].' },
+                              { type: 'Surat Keterangan Usaha', suggestion: 'Bahwa yang bersangkutan benar merupakan warga kami dan memiliki usaha / bisnis di bidang [Jenis Usaha, cth: Perdagangan/Kuliner] dengan nama usaha [Nama Usaha] yang berlokasi di wilayah RT kami. Surat ini dibuat untuk keperluan [cth: pengajuan kredit UMKM / pembuatan NPWP badan].' },
+                              { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Bahwa yang bersangkutan adalah warga kami yang senantiasa berkelakuan baik, belum pernah tersangkut tindak pidana, dan tidak pernah mengganggu ketertiban lingkungan. Surat ini sebagai pengantar untuk pembuatan SKCK di kepolisian untuk keperluan [cth: pendaftaran TNI/Polri / melamar pekerjaan].' },
+                              { type: 'Surat Keterangan Kematian', suggestion: 'Menerangkan dengan sebenarnya bahwa warga kami yang bernama [Nama Almarhum/Almarhumah] telah meninggal dunia pada [Hari, Tanggal, Jam] dikarenakan [Sakit/Usia/dll]. Surat keterangan ini digunakan untuk persyaratan administrasi kepengurusan Akta Kematian di Kelurahan.' },
+                              { type: 'Surat Keterangan Kelahiran', suggestion: 'Menerangkan bahwa telah lahir seorang anak [Laki-laki / Perempuan] bernama [Nama Anak] pada tanggal [Tanggal Lahir] dari pasangan suami istri [Nama Ayah] dan [Nama Ibu]. Surat pengantar ini digunakan untuk keperluan pembuatan Akta Kelahiran.' },
+                              { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Surat keterangan ini menerangkan susunan ahli waris yang sah dari almarhum/almarhumah [Nama Almarhum] untuk digunakan sebagai persyaratan administrasi kepengurusan turun waris / pembagian harta warisan keluarga.' },
+                              { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Bahwa yang bersangkutan bermaksud untuk mengurus administrasi pindah alamat dari RT kami menuju [Alamat Tujuan Pindah] / melapor kedatangan sebagai warga baru yang pindah dari [Alamat Asal].' },
+                              { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Menerangkan bahwa yang bersangkutan bermaksud untuk melangsungkan pernikahan. Surat pengantar ini dibuat sebagai persyaratan pengurusan berkas administrasi pernikahan (N1, N2, N3, N4) di tingkat Kelurahan.' }
+                            ];
+                            const templates = (pdfConfig.letterTemplates && pdfConfig.letterTemplates.length > 0) ? pdfConfig.letterTemplates : defaultTemplates;
+                            const template = templates.find(t => t.type === editLetterData.type)?.suggestion;
+                            if (template) setEditLetterData({...editLetterData, purposeDetail: template});
+                          }}
+                          className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                        >
+                          <Sparkles size={10} /> Isi Otomatis
+                        </button>
+                      </div>
                       <textarea 
                         className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 sm:h-24 resize-none"
                         value={editLetterData.purposeDetail || ''}
@@ -2210,7 +2264,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
 
                     {/* Letter Number Input Group WITH SYNC BUTTON - Extremely User Friendly & Professional */}
-                    <div className="bg-slate-50/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-4.5 border border-slate-150 space-y-3">
+                    <div className="bg-slate-50/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-4.5 border border-slate-150 space-y-4">
                       <div>
                         <label className="block text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">
                           Nomor Surat Resmi (Format Terbuka untuk Diedit)
@@ -2245,7 +2299,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       <div className="p-2.5 sm:p-3 bg-white/70 border border-slate-100 rounded-xl flex items-start gap-2.5">
                         <Info size={13} className="text-slate-400 shrink-0 mt-0.5" />
                         <p className="text-[10px] sm:text-[10.5px] text-slate-500 leading-relaxed">
-                          Tombol <span className="font-extrabold text-amber-700">Sinkronkan Nomor</span> akan otomatis scanning database terhadap surat warga dan surat dinas lain, serta mengusulkan nomor urut selanjutnya agar urutan penomoran tidak melompat.
+                          Tombol <span className="font-extrabold text-amber-700">Sinkronkan Nomor</span> akan otomatis scanning database terhadap surat warga dan surat dinas lain, serta mengusulkan nomor urut selanjutnya agar urutan penomoran tidak melompat. Nama penanda tangan akan diambil secara otomatis dari tab Pengaturan.
                         </p>
                       </div>
                     </div>
@@ -2533,7 +2587,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     placeholder="Contoh: SPK/001/RT02/III/2026"
                   />
                 </div>
-
+                
                 <div className="group">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Surat</label>
                   <div className="relative">
@@ -2584,7 +2638,23 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <button 
                       type="button"
                       onClick={() => {
-                        const template = (pdfConfig.letterTemplates || []).find(t => t.type === adminForm.type)?.suggestion;
+                        const defaultTemplates = [
+                          { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
+                          { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
+                          { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
+                          { type: 'Surat Keterangan Domisili', suggestion: 'Bahwa yang bersangkutan benar-benar merupakan warga / penduduk yang berdomisili menetap di wilayah RT kami. Surat keterangan ini digunakan untuk persyaratan [cth: melamar pekerjaan / pembukaan rekening bank / pendaftaran sekolah].' },
+                          { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Bahwa yang bersangkutan adalah benar warga RT kami dan berdasarkan keadaan yang sebenarnya, yang bersangkutan termasuk dalam keluarga prasejahtera / Kurang Mampu. Surat Keterangan ini digunakan untuk keperluan persyaratan [cth: pengajuan beasiswa / keringanan biaya rumah sakit / bantuan sosial].' },
+                          { type: 'Surat Izin Keramaian', suggestion: 'Surat ini sebagai pengantar / rekomendasi izin penyelenggaraan acara keramaian berupa [Nama/Jenis Acara, cth: Resepsi Pernikahan] yang akan diselenggarakan pada hari/tanggal [Tanggal Acara] bertempat di [Lokasi Acara].' },
+                          { type: 'Surat Keterangan Usaha', suggestion: 'Bahwa yang bersangkutan benar merupakan warga kami dan memiliki usaha / bisnis di bidang [Jenis Usaha, cth: Perdagangan/Kuliner] dengan nama usaha [Nama Usaha] yang berlokasi di wilayah RT kami. Surat ini dibuat untuk keperluan [cth: pengajuan kredit UMKM / pembuatan NPWP badan].' },
+                          { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Bahwa yang bersangkutan adalah warga kami yang senantiasa berkelakuan baik, belum pernah tersangkut tindak pidana, dan tidak pernah mengganggu ketertiban lingkungan. Surat ini sebagai pengantar untuk pembuatan SKCK di kepolisian untuk keperluan [cth: pendaftaran TNI/Polri / melamar pekerjaan].' },
+                          { type: 'Surat Keterangan Kematian', suggestion: 'Menerangkan dengan sebenarnya bahwa warga kami yang bernama [Nama Almarhum/Almarhumah] telah meninggal dunia pada [Hari, Tanggal, Jam] dikarenakan [Sakit/Usia/dll]. Surat keterangan ini digunakan untuk persyaratan administrasi kepengurusan Akta Kematian di Kelurahan.' },
+                          { type: 'Surat Keterangan Kelahiran', suggestion: 'Menerangkan bahwa telah lahir seorang anak [Laki-laki / Perempuan] bernama [Nama Anak] pada tanggal [Tanggal Lahir] dari pasangan suami istri [Nama Ayah] dan [Nama Ibu]. Surat pengantar ini digunakan untuk keperluan pembuatan Akta Kelahiran.' },
+                          { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Surat keterangan ini menerangkan susunan ahli waris yang sah dari almarhum/almarhumah [Nama Almarhum] untuk digunakan sebagai persyaratan administrasi kepengurusan turun waris / pembagian harta warisan keluarga.' },
+                          { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Bahwa yang bersangkutan bermaksud untuk mengurus administrasi pindah alamat dari RT kami menuju [Alamat Tujuan Pindah] / melapor kedatangan sebagai warga baru yang pindah dari [Alamat Asal].' },
+                          { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Menerangkan bahwa yang bersangkutan bermaksud untuk melangsungkan pernikahan. Surat pengantar ini dibuat sebagai persyaratan pengurusan berkas administrasi pernikahan (N1, N2, N3, N4) di tingkat Kelurahan.' }
+                        ];
+                        const templates = (pdfConfig.letterTemplates && pdfConfig.letterTemplates.length > 0) ? pdfConfig.letterTemplates : defaultTemplates;
+                        const template = templates.find(t => t.type === adminForm.type)?.suggestion;
                         if (template) setAdminForm({...adminForm, purposeDetail: template});
                       }}
                       className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
