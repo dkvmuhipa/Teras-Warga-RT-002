@@ -52,8 +52,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(cwd, './'),
-        'react': path.resolve(cwd, './node_modules/react'),
-        'react-dom': path.resolve(cwd, './node_modules/react-dom'),
       },
     },
     define: {
