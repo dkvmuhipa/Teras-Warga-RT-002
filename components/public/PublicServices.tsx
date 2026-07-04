@@ -368,7 +368,6 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [education, setEducation] = useState('SMA/Sederajat');
   const [familyStatus, setFamilyStatus] = useState<LetterRequest['familyStatus']>('Kepala Keluarga');
   const [bloodType, setBloodType] = useState<LetterRequest['bloodType']>('-');
-  const [isSubmittingLetter, setIsSubmittingLetter] = useState(false);
 
   useEffect(() => { 
     try { 
@@ -459,64 +458,47 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     setLetterStep(3);
   };
 
-  const handleSubmitSurat = async (e: React.FormEvent) => { 
-    e.preventDefault(); 
-    if (isSubmittingLetter) return;
-    setIsSubmittingLetter(true);
-    const toastId = toast.loading("Memverifikasi data dan memproses pengajuan surat...");
+  const handleSubmitSurat = async (e?: React.FormEvent | React.MouseEvent) => { 
+    if (e) e.preventDefault(); 
     try {
       // Re-validate All Steps
       if (!applicantName.trim() || !nik.trim() || !/^\d{16}$/.test(nik.trim()) || !familyHeadName.trim() || !birthPlace.trim() || !birthDate || !nationality.trim() || !job.trim() || !addressKtp.trim() || (!isSameAddress && !currentAddress.trim())) {
-        toast.dismiss(toastId);
         toast.error("Validasi Gagal", { description: "Tolong lengkapi semua data identitas diri di Step 1 dengan benar." });
         setLetterStep(1);
-        setIsSubmittingLetter(false);
         return;
       }
       const cleanPhone = phone.trim().replace(/[^0-9+]/g, '');
       if (!cleanPhone || !/^(0|62|\+62)/.test(cleanPhone) || cleanPhone.replace(/\D/g, '').length < 9 || cleanPhone.replace(/\D/g, '').length > 15) {
-        toast.dismiss(toastId);
         toast.error("Validasi Gagal", { description: "Nomor HP / WhatsApp wajib diisi dengan format yang benar." });
         setLetterStep(2);
-        setIsSubmittingLetter(false);
         return;
       }
       if (requestType === 'Lainnya' && !customRequestType.trim()) {
-        toast.dismiss(toastId);
         toast.error("Validasi Gagal", { description: "Silakan sebutkan jenis surat lainnya di Step 2." });
         setLetterStep(2);
-        setIsSubmittingLetter(false);
         return;
       }
       if (!purposeDetail.trim()) {
-        toast.dismiss(toastId);
         toast.error("Validasi Gagal", { description: "Tujuan / Keperluan Surat wajib diisi pada Step 2." });
         setLetterStep(2);
-        setIsSubmittingLetter(false);
         return;
       }
       if (!houseId.trim()) {
-        toast.dismiss(toastId);
         toast.error("Validasi Gagal", { description: "Blok Rumah wajib diisi pada Step 3." });
         setLetterStep(3);
-        setIsSubmittingLetter(false);
         return;
       }
       if (!accessCode.trim()) {
-        toast.dismiss(toastId);
         toast.error("Validasi Gagal", { description: "PIN Akses wajib diisi pada Step 3." });
         setLetterStep(3);
-        setIsSubmittingLetter(false);
         return;
       }
 
       const isValid = await validateResidentAccess(houseId, accessCode);
       if (!isValid) {
-        toast.dismiss(toastId);
         toast.error("Verifikasi Gagal!", {
           description: "Kode Akses Rumah tidak valid. Silakan hubungi Ketua RT jika lupa kode."
         });
-        setIsSubmittingLetter(false);
         return;
       }
 
@@ -526,12 +508,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       const retribution = await checkWasteRetribution(formattedHouseId);
       if (!retribution.paid) {
         if (retribution.isMandatory) {
-          toast.dismiss(toastId);
           toast.warning("PENGURUSAN DITANGGUHKAN", {
             description: `Pembayaran Retribusi Sampah & Air untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan, iuran wajib dilunasi paling lambat tanggal 20 setiap bulannya. Silakan hubungi petugas atau Ketua RT.`,
             duration: 10000
           });
-          setIsSubmittingLetter(false);
           return;
         } else {
           // Information only, not blocking
@@ -575,7 +555,6 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       const historyItem = {...letterData, category: 'Surat', title: `Surat ${finalRequestType}`};
       saveToHistory(historyItem); 
       
-      toast.dismiss(toastId);
       toast.success("Surat Berhasil Diajukan!", {
         description: `ID: #${letterData.id.slice(-8)} | Estimasi: ${letterData.estimatedTime}`,
         action: {
@@ -590,16 +569,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       setNationality('Indonesia'); setMaritalStatus('Kawin'); setPhone(''); setEmail(''); setCustomRequestType('');
       setLetterStep(1); // Reset step
     } catch (error) {
-      toast.dismiss(toastId);
       handleFirestoreError(error, OperationType.CREATE, "letters");
       toast.error("Gagal mengajukan surat.");
-    } finally {
-      setIsSubmittingLetter(false);
     }
   };
 
-  const handleSubmitLapor = async (e: React.FormEvent) => { 
-    e.preventDefault(); 
+  const handleSubmitLapor = async (e?: React.FormEvent | React.MouseEvent) => { 
+    if (e) e.preventDefault(); 
     try {
       const isValid = await validateResidentAccess(reporterHouseId, accessCode);
       if (!isValid) {
@@ -648,10 +624,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     }
   };
 
-  const handleSubmitMutasi = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate PIN for all mutation types (Newcomer, MovedOut, Birth, Death)
+  const handleSubmitMutasi = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
+    try {
     // As per guidance, Mutasi is for active houses which must have a PIN.
     const isValid = await validateResidentAccess(mutationHouseId, accessCode);
     if (!isValid) {
@@ -742,6 +717,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     setFamilyMembers([]);
     setMutationVulnerability([]);
     setMutationResidenceType('Tetap');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, "mutation");
+      toast.error("Gagal mengirim laporan mutasi.");
+    }
   };
 
   const containerVariants = {
@@ -1501,8 +1480,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <Button 
                         type="submit" 
                         size="lg" 
-                        isLoading={isSubmittingLetter}
-                        disabled={isSubmittingLetter}
+                        onClick={handleSubmitSurat}
                         className="w-full sm:w-auto px-12 py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl shadow-indigo-600/35 hover:shadow-indigo-600/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center"
                       >
                         <Send size={15} strokeWidth={2.5} className="mr-2" /> Kirim Pengajuan Surat
@@ -1783,6 +1761,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   type="submit" 
                   variant="danger" 
                   size="lg" 
+                  onClick={handleSubmitLapor}
                   className="w-full sm:w-auto px-7 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer text-white"
                 >
                   <Send size={13} className="mr-2" /> Kirim Laporan Resmi
@@ -2383,6 +2362,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </button>
                     <Button 
                       type="submit" 
+                      onClick={handleSubmitMutasi}
                       className="flex-[2] py-4 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:-translate-y-0.5 transition-all duration-300 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Send size={14} /> Kirim Form Mutasi RT 02

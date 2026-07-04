@@ -1027,7 +1027,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 <h3 className="text-xl font-black text-slate-800">Status Pengajuan Surat</h3>
                 <p className="text-sm text-slate-500 font-medium">Pantau status surat pengantar yang Anda ajukan melalui menu Layanan.</p>
               </div>
-              <Button onClick={() => window.location.hash = `#/services?tab=surat&houseId=${selectedHouseId}`} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
+              <Button onClick={() => window.location.hash = '#/services'} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
                 <Plus size={18} className="mr-2" /> Buat Pengajuan
               </Button>
             </div>
