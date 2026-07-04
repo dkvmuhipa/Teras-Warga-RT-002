@@ -3,6 +3,7 @@ import { FileText, Plus, Search, Filter, Edit2, Trash2, Printer, Send, Eye, X, S
 import { OfficialLetter, PdfConfig, LetterRequest } from '../../types';
 import { subscribeToOfficialLetters, addOfficialLetterToDb, updateOfficialLetterInDb, deleteOfficialLetterFromDb, uploadFile, updatePdfConfig } from '../../services/databaseService';
 import { generateOfficialLetterPDF } from '../../services/pdfService';
+import { generateOfficialLettersExcel } from '../../services/excelService';
 import { sendWhatsAppMessage } from '../../services/whatsappService';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -329,6 +330,9 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                <option value="Lainnya">Lainnya</option>
              </select>
           </div>
+          <Button onClick={() => generateOfficialLettersExcel(filteredLetters)} variant="secondary">
+            <Download size={18} className="mr-2" /> Ekspor Excel
+          </Button>
           <Button onClick={() => handleOpenModal()} className="bg-indigo-600 hover:bg-indigo-700">
             <Plus size={18} className="mr-2" /> Buat Surat Resmi
           </Button>

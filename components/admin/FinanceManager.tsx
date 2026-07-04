@@ -18,6 +18,7 @@ import {
 } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { generateCashFlowReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
+import { generateCashFlowExcel } from '../../services/excelService';
 import { useConfirm } from '../../context/ConfirmContext';
 import { useFinancial } from '../../context/FinancialContext';
 
@@ -334,6 +335,12 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-xs transition-all shadow-sm"
           >
             <Download size={16} /> <span className="hidden sm:inline">Laporan PDF</span><span className="sm:hidden">PDF</span>
+          </button>
+          <button 
+            onClick={() => generateCashFlowExcel(cashFlow, selectedMonth)}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-xs transition-all shadow-sm"
+          >
+            <Download size={16} /> <span className="hidden sm:inline">Laporan Excel</span><span className="sm:hidden">Excel</span>
           </button>
           <button onClick={() => { resetForm(); setIsModalOpen(true); }} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all">
             <Plus size={16} /> <span className="hidden sm:inline">Catat Transaksi</span><span className="sm:hidden">Catat</span>

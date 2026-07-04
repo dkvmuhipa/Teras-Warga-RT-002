@@ -366,6 +366,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         residentRegistrations={residentRegistrations}
         guestReports={guestReports}
         updateRequests={updateRequests}
+        rondaSwapRequests={rondaSwapRequests}
+        letters={letters}
+        reports={reports}
       />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

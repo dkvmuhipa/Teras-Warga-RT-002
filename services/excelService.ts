@@ -1060,3 +1060,167 @@ export const generatePopulationReportExcel = async (reports: any[], logs: any[])
   saveAs(blob, `Laporan_Mutasi_Kependudukan_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
+export const generateOfficialLettersExcel = async (letters: any[]) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Arsip Surat Resmi');
+  
+  worksheet.views = [{ showGridLines: true }];
+  
+  worksheet.columns = [
+    { header: 'NOMOR SURAT', key: 'letterNumber', width: 25 },
+    { header: 'PERIHAL', key: 'subject', width: 35 },
+    { header: 'TANGGAL', key: 'date', width: 15 },
+    { header: 'PENERIMA', key: 'recipient', width: 25 },
+    { header: 'JENIS SURAT', key: 'type', width: 15 },
+    { header: 'STATUS', key: 'status', width: 15 },
+    { header: 'TANGGAL DIBUAT', key: 'createdAt', width: 25 },
+    { header: 'SUMBER', key: 'source', width: 15 },
+    { header: 'URL LAMPIRAN', key: 'attachmentUrl', width: 40 }
+  ];
+
+  const headerRow = worksheet.getRow(1);
+  headerRow.height = 28;
+  headerRow.eachCell(cell => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } }; // Indigo-600
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+
+  letters.forEach((l, i) => {
+    const row = worksheet.addRow({
+      letterNumber: l.letterNumber || '-',
+      subject: l.subject || '-',
+      date: l.date || '-',
+      recipient: l.recipient || '-',
+      type: l.type || '-',
+      status: l.status || '-',
+      createdAt: l.createdAt ? new Date(l.createdAt).toLocaleString('id-ID') : '-',
+      source: l.source || 'Internal',
+      attachmentUrl: l.attachmentUrl || '-'
+    });
+    row.height = 22;
+    row.eachCell(cell => {
+      cell.alignment = { vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+      };
+    });
+    if (i % 2 !== 0) {
+      row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+    }
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Arsip_Surat_Resmi_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+
+export const generateCashFlowExcel = async (cashFlow: any[], selectedMonth?: string) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Arus Kas');
+  
+  worksheet.views = [{ showGridLines: true }];
+  
+  worksheet.columns = [
+    { header: 'TANGGAL', key: 'date', width: 15 },
+    { header: 'KETERANGAN', key: 'description', width: 35 },
+    { header: 'PIHAK KEDUA', key: 'payerReceiver', width: 25 },
+    { header: 'KATEGORI', key: 'category', width: 15 },
+    { header: 'METODE', key: 'method', width: 12 },
+    { header: 'TIPE', key: 'type', width: 15 },
+    { header: 'NOMINAL', key: 'amount', width: 18 }
+  ];
+
+  const headerRow = worksheet.getRow(1);
+  headerRow.height = 28;
+  headerRow.eachCell(cell => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } }; // Emerald-600
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+
+  let filtered = [...cashFlow];
+  if (selectedMonth) {
+    const monthsId = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    filtered = cashFlow.filter(cf => {
+      const d = new Date(cf.date);
+      const mName = monthsId[d.getMonth()];
+      const yName = d.getFullYear().toString();
+      return `${mName} ${yName}` === selectedMonth;
+    });
+  }
+
+  filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  let currentBalance = 0;
+  filtered.forEach((cf, i) => {
+    if (cf.type === 'Income') {
+      currentBalance += cf.amount;
+    } else {
+      currentBalance -= cf.amount;
+    }
+
+    const row = worksheet.addRow({
+      date: cf.date || '-',
+      description: cf.description || '-',
+      payerReceiver: cf.payerReceiver || '-',
+      category: cf.category || '-',
+      method: cf.method || 'Tunai',
+      type: cf.type === 'Income' ? 'Pemasukan' : 'Pengeluaran',
+      amount: cf.amount
+    });
+    row.height = 22;
+    row.eachCell((cell, colNum) => {
+      cell.alignment = { vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+      };
+      if (colNum === 7) {
+        cell.numFmt = '#,##0';
+        cell.font = { bold: true, color: { argb: cf.type === 'Income' ? 'FF10B981' : 'FFF43F5E' } };
+      }
+    });
+    if (i % 2 !== 0) {
+      row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+    }
+  });
+
+  const totalIncome = filtered.filter(cf => cf.type === 'Income').reduce((acc, cf) => acc + cf.amount, 0);
+  const totalExpense = filtered.filter(cf => cf.type === 'Expense').reduce((acc, cf) => acc + cf.amount, 0);
+  
+  const sumIncomeRow = worksheet.addRow({
+    date: 'TOTAL',
+    description: 'Total Pemasukan',
+    amount: totalIncome
+  });
+  sumIncomeRow.getCell(7).numFmt = '#,##0';
+  sumIncomeRow.getCell(7).font = { bold: true, color: { argb: 'FF10B981' } };
+
+  const sumExpenseRow = worksheet.addRow({
+    date: '',
+    description: 'Total Pengeluaran',
+    amount: totalExpense
+  });
+  sumExpenseRow.getCell(7).numFmt = '#,##0';
+  sumExpenseRow.getCell(7).font = { bold: true, color: { argb: 'FFF43F5E' } };
+
+  const balRow = worksheet.addRow({
+    date: '',
+    description: 'Saldo Akhir Periode',
+    amount: currentBalance
+  });
+  balRow.getCell(7).numFmt = '#,##0';
+  balRow.getCell(7).font = { bold: true, color: { argb: 'FF4F46E5' } };
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const filenameSuffix = selectedMonth ? `_${selectedMonth.replace(/\s+/g, '_')}` : '';
+  saveAs(blob, `Arus_Kas_RT02${filenameSuffix}.xlsx`);
+};
+

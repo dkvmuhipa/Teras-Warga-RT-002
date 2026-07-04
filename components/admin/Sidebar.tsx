@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, Users, DollarSign, FileText, 
   Megaphone, ShoppingBag, Settings, LogOut, 
@@ -20,22 +20,85 @@ interface SidebarProps {
   residentRegistrations?: any[];
   guestReports?: any[];
   updateRequests?: any[];
+  rondaSwapRequests?: any[];
+  letters?: any[];
+  reports?: any[];
 }
 
 export const AdminSidebar: React.FC<SidebarProps> = ({ 
   role,
-  activeTab, setActiveTab, isOpen, setIsOpen, onLogout, residentRegistrations = [], guestReports = [], updateRequests = []
+  activeTab, 
+  setActiveTab, 
+  isOpen, 
+  setIsOpen, 
+  onLogout, 
+  residentRegistrations = [], 
+  guestReports = [], 
+  updateRequests = [],
+  rondaSwapRequests = [],
+  letters = [],
+  reports = []
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Persistent collapse state
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('rt02_admin_sidebar_collapsed');
+      return saved ? JSON.parse(saved) : false;
+    } catch {
+      return false;
+    }
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(["Pusat Kendali", "Kependudukan", "Layanan & Keuangan", "Operasional & Media", "Sistem"]);
+  // Persistent expanded groups state
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('rt02_admin_expanded_groups');
+      return saved ? JSON.parse(saved) : ["Pusat Kendali", "Kependudukan", "Layanan & Keuangan", "Operasional & Media", "Sistem"];
+    } catch {
+      return ["Pusat Kendali", "Kependudukan", "Layanan & Keuangan", "Operasional & Media", "Sistem"];
+    }
+  });
 
+  // Save expanded groups to localStorage on change
   const toggleGroup = (title: string) => {
-    setExpandedGroups(prev => 
-      prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]
-    );
+    setExpandedGroups(prev => {
+      const next = prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title];
+      try {
+        localStorage.setItem('rt02_admin_expanded_groups', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
   };
+
+  const toggleCollapse = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('rt02_admin_sidebar_collapsed', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  // Keyboard shortcut for search (Ctrl+K or /)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === '/' && document.activeElement !== searchInputRef.current) {
+        if (!(document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement)) {
+          e.preventDefault();
+          searchInputRef.current?.focus();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const navGroups = [
     { 
@@ -125,6 +188,45 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
   const roleInfo = getRoleBadge();
 
+  // Highlight matches in searched text
+  const renderHighlightedLabel = (text: string) => {
+    if (!searchTerm) return <span>{text}</span>;
+    const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
+    return (
+      <span>
+        {parts.map((part, i) => 
+          part.toLowerCase() === searchTerm.toLowerCase() ? (
+            <mark key={i} className="bg-amber-100 text-amber-950 rounded px-0.5 font-black">
+              {part}
+            </mark>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  };
+
+  // Helper to get pending count for an item
+  const getItemPendingCount = (itemId: string): number => {
+    switch (itemId) {
+      case 'residents':
+        const pendingReg = residentRegistrations.filter(r => r.approvalStatus === 'Pending').length;
+        const pendingUpd = updateRequests.filter(r => r.status === 'Pending').length;
+        return pendingReg + pendingUpd;
+      case 'guests':
+        return guestReports.filter(g => g.status === 'Active' || g.status === 'Pending').length;
+      case 'services':
+        const pendingL = letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length;
+        const pendingR = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
+        return pendingL + pendingR;
+      case 'facilities':
+        return rondaSwapRequests.filter(s => s.status === 'Menunggu' || s.status === 'Pending').length;
+      default:
+        return 0;
+    }
+  };
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -152,19 +254,19 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
           md:static flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)]
         `}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* Header */}
-            <div className={`p-6 border-b border-slate-100 flex items-center ${isCollapsed ? 'justify-center' : 'gap-4'}`}>
-              <Logo showText={!isCollapsed} imageSize={isCollapsed ? "h-8" : "h-9"} />
-              {!isCollapsed && (
-                <button 
-                  onClick={() => setIsOpen(false)} 
-                  className="ml-auto md:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-50 transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              )}
-            </div>
+          <div className={`p-6 border-b border-slate-100 flex items-center ${isCollapsed ? 'justify-center' : 'gap-4'}`}>
+            <Logo showText={!isCollapsed} imageSize={isCollapsed ? "h-8" : "h-9"} />
+            {!isCollapsed && (
+              <button 
+                onClick={() => setIsOpen(false)} 
+                className="ml-auto md:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-50 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
 
           {/* Quick Search (Only when not collapsed) */}
           {!isCollapsed && (
@@ -172,19 +274,24 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
               <div className="relative group/search">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/search:text-indigo-600 transition-colors" size={16} />
                 <input 
+                  ref={searchInputRef}
                   type="text" 
-                  placeholder="Cari menu admin..." 
+                  placeholder="Cari menu admin... (/)" 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl py-2.5 pl-10 pr-8 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-400 text-slate-700"
                 />
-                {searchTerm && (
+                {searchTerm ? (
                   <button 
                     onClick={() => setSearchTerm('')} 
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1 rounded-full transition-colors"
                   >
                     <X size={12} className="stroke-[3px]" />
                   </button>
+                ) : (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400 bg-slate-200/60 px-1.5 py-0.5 rounded border border-slate-300 select-none hidden group-focus-within/search:hidden sm:block">
+                    /
+                  </span>
                 )}
               </div>
             </div>
@@ -213,8 +320,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                 
                 <AnimatePresence initial={false}>
                   {(isCollapsed || expandedGroups.includes(group.title)) && (
-                     <motion.div 
-                       initial={isCollapsed ? false : { height: 0, opacity: 0 }}
+                    <motion.div 
+                      initial={isCollapsed ? false : { height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden space-y-1.5"
@@ -222,6 +329,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                       {group.items.map(item => {
                         const isMainDashboard = item.id === 'overview';
                         const isActive = isMainDashboard ? activeTab === 'overview' : activeTab === item.id;
+                        const pendingCount = getItemPendingCount(item.id);
+                        
                         return (
                           <button
                             key={item.id}
@@ -229,7 +338,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                               setActiveTab(item.id);
                               if (window.innerWidth < 768) setIsOpen(false);
                             }}
-                            title={isCollapsed ? item.label : ''}
+                            title={isCollapsed ? `${item.label}${pendingCount > 0 ? ` (${pendingCount} tertunda)` : ''}` : ''}
                             className={`
                               w-full flex items-center gap-3 rounded-2xl transition-all duration-200 font-bold text-xs group relative overflow-hidden
                               ${isCollapsed ? 'justify-center p-3.5' : 'px-4 py-3'}
@@ -239,20 +348,32 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                               }
                             `}
                           >
-                            <item.icon size={18} className={`shrink-0 transition-transform duration-300 ${isActive ? 'text-indigo-600 scale-110' : 'text-slate-400 group-hover:scale-110 group-hover:text-indigo-500'}`} />
+                            <div className="relative shrink-0 flex items-center justify-center">
+                              <item.icon size={18} className={`transition-transform duration-300 ${isActive ? 'text-indigo-600 scale-110' : 'text-slate-400 group-hover:scale-110 group-hover:text-indigo-500'}`} />
+                              
+                              {/* Pulsing notification dot for collapsed mode */}
+                              {isCollapsed && pendingCount > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                                </span>
+                              )}
+                            </div>
+
                             {!isCollapsed && (
-                              <span className="truncate">{item.label}</span>
+                              <span className="truncate text-left flex-1">{renderHighlightedLabel(item.label)}</span>
                             )}
                             
-                            {/* Badges */}
-                            {!isCollapsed && item.id === 'residents' && residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 && (
-                              <span className="ml-auto bg-indigo-100 text-indigo-700 border border-indigo-200 text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
-                                {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length}
-                              </span>
-                            )}
-                            {!isCollapsed && item.id === 'guests' && guestReports.filter(g => g.status === 'Active').length > 0 && (
-                              <span className="ml-auto bg-rose-100 text-rose-700 border border-rose-200 text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
-                                {guestReports.filter(g => g.status === 'Active').length}
+                            {/* Detailed dynamic badge for expanded mode */}
+                            {!isCollapsed && pendingCount > 0 && (
+                              <span className={`
+                                ml-auto text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm border
+                                ${item.id === 'guests' || item.id === 'facilities'
+                                  ? 'bg-rose-100 text-rose-700 border-rose-200' 
+                                  : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                                }
+                              `}>
+                                {pendingCount}
                               </span>
                             )}
 
@@ -276,7 +397,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
           {/* Collapse Toggle (Desktop Only) */}
           <div className="hidden md:block px-4 py-2 border-t border-slate-100 bg-slate-50/50">
             <button 
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={toggleCollapse}
               className="w-full flex items-center justify-center py-3 rounded-2xl bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-all border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow active:scale-[0.98]"
             >
               {isCollapsed ? <ChevronRight size={18} /> : <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"><ChevronLeft size={16} /> Sembunyikan</div>}

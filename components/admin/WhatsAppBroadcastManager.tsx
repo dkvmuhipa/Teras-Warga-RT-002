@@ -15,6 +15,57 @@ interface WhatsAppBroadcastManagerProps {
   pdfConfig: PdfConfig;
 }
 
+const quickTemplates = [
+  {
+    id: 'kerja-bakti',
+    title: '🧹 Kerja Bakti Lingkungan',
+    category: 'announcement',
+    description: 'Pembersihan selokan & gotong royong warga RT.',
+    topic: 'Kerja Bakti Gotong Royong RT 02 bulanan',
+    text: `*UNDANGAN KERJA BAKTI WARGA RT 02* 🧹🏡\n\nKepada Yth.\n*Segenap Warga RT 02*\n\nHalo bapak/ibu warga RT 02, semoga sehat selalu. Mari luangkan waktu sejenak demi kenyamanan lingkungan tempat tinggal kita bersama.\n\nKami mengundang seluruh perwakilan KK untuk berpartisipasi dalam kegiatan *Kerja Bakti Gotong Royong*:\n\n📅 *Hari/Tanggal:* [SABTU/MINGGU, TANGGAL]\n⏰ *Waktu:* 07.30 WITA s.d Selesai\n📍 *Titik Kumpul:* Pos Ronda RT 02 / Depan Blok Masing-masing\n🔧 *Agenda:* Pembersihan selokan antispasi demam berdarah, pemotongan dahan pohon liar, dan kebersihan umum.\n\n_Diharapkan membawa peralatan kebersihan pribadi secukupnya (cangkul, sapu lidi, atau sabit)._\n\nKebersihan lingkungan adalah tanggung jawab kita bersama. Atas kehadiran dan kebersamaannya, kami ucapkan banyak terima kasih. 🙏✨\n\n_Hormat Kami,\n*Pengurus RT 02*_\n_Teras Warga Modern_`
+  },
+  {
+    id: 'rapat-rt',
+    title: '🤝 Rapat Musyawarah RT',
+    category: 'announcement',
+    description: 'Musyawarah bulanan & pembahasan kas keuangan RT.',
+    topic: 'Rapat Koordinasi Bulanan Warga RT 02',
+    text: `*UNDANGAN RAPAT BULANAN WARGA RT 02* 🗣️🗳️\n\nKepada Yth.\n*Bapak/Ibu Segenap Warga RT 02*\n\nSalam silaturahmi,\nMenindaklanjuti beberapa agenda lingkungan, kas keuangan RT, serta pembahasan aspirasi warga offline, kami mengundang Bapak/Ibu/Sdr untuk dapat hadir pada:\n\n📅 *Hari/Tanggal:* [HARI, TANGGAL]\n⏰ *Waktu:* 20.00 WITA (Ba'da Isya)\n📍 *Tempat:* Balai Pertemuan RT 02 / Pos Ronda\n📝 *Agenda:* \n1. Laporan pertanggungjawaban kas keuangan bulanan RT.\n2. Pembahasan keamanan lingkungan dan program pengelolaan sampah.\n3. Diskusi bebas / tanya-jawab warga.\n\nKehadiran Bapak/Ibu sangat menentukan arah pembangunan lingkungan RT kita agar lebih rukun dan modern. \n\nMohon kehadirannya tepat waktu. Atas perhatiannya diucapkan terima kasih. 🙏\n\n_Hormat kami,\n*Pengurus RT 02*_\n_Rukun & Transparan_`
+  },
+  {
+    id: 'iuran-keamanan',
+    title: '🛡️ Iuran & Kas Bulanan',
+    category: 'announcement',
+    description: 'Himbauan umum pembayaran iuran satpam & kebersihan.',
+    topic: 'Sosialisasi dan himbauan iuran kas RT bulanan',
+    text: `*HIMBAUAN & REMINDER IURAN BULANAN RT 02* 💳🚨\n\nKepada Yth.\n*Seluruh Warga RT 02*\n\nSalam sehat untuk kita semua,\nKami ingin menyampaikan apresiasi yang setinggi-tingginya kepada seluruh warga yang selalu disiplin memenuhi kewajiban iuran bulanan RT.\n\nKembali kami ingatkan bagi warga yang belum menyempatkan waktu, mohon kerja samanya untuk melakukan pembayaran iuran kas bulanan (Keamanan & Kebersihan) periode ini:\n\n💵 *Nominal:* Sesuai tipe hunian (Blok/No)\n🗓️ *Jatuh Tempo:* Tanggal 20 Setiap Bulannya\n🏦 *Metode:* Transfer ke rekening resmi RT / Bayar langsung ke Bendahara RT\n\nKelancaran pembayaran iuran sangat krusial bagi operasional petugas keamanan (Satpam 24 Jam) dan kebersihan angkut sampah harian di lingkungan kita.\n\nBila ada pertanyaan atau konfirmasi pembayaran, silakan hubungi langsung Bendahara RT 02. Terima kasih atas partisipasi aktif Bapak/Ibu sekalian. 🙏✨\n\n_Hormat kami,\n*Bendahara & Pengurus RT 02*_`
+  },
+  {
+    id: 'fogging-dbd',
+    title: '🦟 Fogging Pencegahan DBD',
+    category: 'announcement',
+    description: 'Pemberitahuan fogging area pemukiman warga.',
+    topic: 'Fogging Nyamuk Pencegahan DBD RT 02',
+    text: `*PEMBERITAHUAN KEGIATAN FOGGING NYAMUK DBD* 🦟💨\n\nKepada Yth.\n*Seluruh Warga RT 02*\n\nMenyikapi musim hujan dan upaya pencegahan penyebaran penyakit Demam Berdarah Dengue (DBD), pengurus RT 02 bekerja sama dengan Puskesmas akan melaksanakan pengasapan (*Fogging*) massal pada:\n\n📅 *Hari/Tanggal:* [HARI, TANGGAL]\n⏰ *Waktu:* 08.00 WITA s.d Selesai\n📍 *Area:* Seluruh lingkungan dan hunian RT 02\n\n*Himbauan Penting untuk Warga selama Proses Fogging:* \n1. Mohon menutup rapat pintu dan jendela rumah saat pengasapan berlangsung.\n2. Tutup makanan, air minum, dan amankan hewan peliharaan di dalam ruangan yang aman.\n3. Balita, ibu hamil, serta lansia disarankan berada di dalam rumah atau menjauhi asap sementara waktu.\n4. Mari juga terapkan gerakan 3M (Menguras, Menutup, Mendaur ulang) genangan air di halaman masing-masing.\n\nMari jaga kesehatan keluarga dan lingkungan kita. Terima kasih atas kerja samanya. 📢🛡️\n\n_Salam Sehat,\n*Pengurus RT 02*_`
+  },
+  {
+    id: 'ronda-malam',
+    title: '🚨 Keamanan & Ronda Malam',
+    category: 'announcement',
+    description: 'Himbauan meningkatkan kewaspadaan siskamling.',
+    topic: 'Himbauan Siskamling Ronda Malam RT 02',
+    text: `*PENEGAKAN KEAMANAN & SISKAMLING RT 02* 🚨⚔️\n\nYth. Segenap Warga RT 02,\n\nMenjaga kondusivitas, ketertiban, dan keamanan lingkungan adalah tanggung jawab seluruh warga secara kolektif. Menghadapi beberapa laporan keamanan, kami menghimbau:\n\n1. 🏠 *Kunci Pintu & Pagar:* Pastikan rumah terkunci dengan baik apabila bepergian atau menjelang tidur malam.\n2. 👥 *Tamu Wajib Lapor:* Bagi warga yang menerima tamu menginap >24 jam harap melapor ke ketua RT / satpam setempat.\n3. 🗓️ *Jadwal Siskamling:* Mari aktifkan kembali jadwal ronda malam mandiri sesuai regu yang telah disepakati.\n\nMari kita saling menjaga dan waspada terhadap hal-hal mencurigakan di sekitar tempat tinggal kita. Jika menemui kendala darurat, segera hubungi Pos Satpam utama atau pengurus RT.\n\nTerima kasih atas kepedulian Anda terhadap ketenteraman bersama. 🛡️🤝\n\n_Salam Guyub Rukun,\n*Seksi Keamanan RT 02*_`
+  },
+  {
+    id: 'posyandu-kesehatan',
+    title: '👶 Posyandu Balita & Lansia',
+    category: 'announcement',
+    description: 'Jadwal pelayanan posyandu dan pemeriksaan rutin.',
+    topic: 'Pelayanan Kegiatan Posyandu RT 02',
+    text: `*JADWAL PELAYANAN POSYANDU RT 02* 👶🩺👵\n\nKepada Yth.\n*Bapak/Ibu Warga RT 02 yang memiliki Balita & Lansia*\n\nKami menginformasikan bahwa pelayanan kesehatan bulanan melalui Posyandu RT 02 akan kembali diselenggarakan pada:\n\n📅 *Hari/Tanggal:* [HARI, TANGGAL]\n⏰ *Waktu:* 09.00 - 12.00 WITA\n📍 *Tempat:* Balai RT 02 (Pos Sebelah Taman)\n\n*Jenis Pelayanan:* \n• Penimbangan berat badan & pengukuran tinggi anak.\n• Imunisasi rutin & pemberian vitamin A / PMT.\n• Cek tensi darah, gula darah, dan konsultasi kesehatan Lansia.\n\nMohon membawa buku KIA/Posyandu anak masing-masing. Mari pastikan tumbuh kembang anak-anak kita terpantau dengan optimal dan kesehatan lansia terjaga.\n\nAtas partisipasinya, kami ucapkan terima kasih. Stay healthy! ❤️🌟\n\n_Salam Hangat,\n*Kader Posyandu & Pengurus RT 02*_`
+  }
+];
+
 export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> = ({
   houses = [],
   bills = [],
@@ -41,6 +92,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
   const [selectedGroupId, setSelectedGroupId] = useState('');
   const [isLoadingGroups, setIsLoadingGroups] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
   
   // Fetch WhatsApp groups on mount
   useEffect(() => {
@@ -312,6 +364,73 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Configuration Column */}
       <div className="lg:col-span-5 space-y-6">
+        {/* Template Cepat Sekali Klik */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl">
+                <Sparkles size={20} className="animate-pulse" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-800 text-sm leading-tight">Template Siaran Sekali Klik</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Draf instan tanpa ketik manual</p>
+              </div>
+            </div>
+            {activeTemplateId && (
+              <button
+                onClick={() => {
+                  setActiveTemplateId(null);
+                  setDraft('');
+                  setAnnouncementTopic('');
+                }}
+                className="text-[10px] font-extrabold text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded-lg transition-all"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-2.5 max-h-[290px] overflow-y-auto pr-1">
+            {quickTemplates.map((tmpl) => {
+              const isActive = activeTemplateId === tmpl.id;
+              return (
+                <button
+                  key={tmpl.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTemplateId(tmpl.id);
+                    setBroadcastType('announcement');
+                    setAnnouncementTopic(tmpl.topic);
+                    setDraft(tmpl.text);
+                    toast.success(`Template "${tmpl.title}" dimuat! 🚀 Silakan sesuaikan detail tanggal/waktu di kolom kanan.`);
+                  }}
+                  className={`w-full text-left p-3 rounded-2xl border transition-all flex items-start gap-3 ${
+                    isActive
+                      ? 'bg-emerald-50/70 border-emerald-300 shadow-xs'
+                      : 'bg-slate-50/50 border-slate-100 hover:border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-slate-800 text-xs truncate">
+                        {tmpl.title}
+                      </span>
+                      {isActive && (
+                        <span className="bg-emerald-500 text-white p-0.5 rounded-full">
+                          <Check size={8} className="stroke-[4]" />
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-medium leading-normal mt-0.5">
+                      {tmpl.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-6">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
             <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl">

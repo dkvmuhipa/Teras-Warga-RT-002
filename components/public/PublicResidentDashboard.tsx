@@ -38,7 +38,8 @@ import {
   Wrench,
   Eye,
   EyeOff,
-  Download
+  Download,
+  Check
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
@@ -54,8 +55,10 @@ import {
   subscribeToHouseLetters,
   addReportToDb,
   handleFirestoreError,
-  OperationType
+  OperationType,
+  subscribeToPdfConfig
 } from '../../services/databaseService';
+import { generateSuratPengantar } from '../../services/pdfService';
 import { NotificationToggle } from '../PushNotificationManager';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -77,6 +80,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [letters, setLetters] = useState<LetterRequest[]>([]);
+  const [pdfConfig, setPdfConfig] = useState<any>(null);
   
   const { getPaymentStatus, settings } = useFinancial();
   const currentHouse = houses.find(h => h.id === selectedHouseId);
@@ -91,6 +95,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const airFee = settings?.airFee || 10000;
   const sampahFee = settings?.sampahFee || 5000;
   const totalFee = airFee + sampahFee;
+
+  useEffect(() => {
+    const unsubPdfConfig = subscribeToPdfConfig(setPdfConfig);
+    return () => {
+      unsubPdfConfig();
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectedHouseId) return;
@@ -1016,7 +1027,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 <h3 className="text-xl font-black text-slate-800">Status Pengajuan Surat</h3>
                 <p className="text-sm text-slate-500 font-medium">Pantau status surat pengantar yang Anda ajukan melalui menu Layanan.</p>
               </div>
-              <Button onClick={() => window.location.hash = '#/services'} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
+              <Button onClick={() => window.location.hash = `#/services?tab=surat&houseId=${selectedHouseId}`} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
                 <Plus size={18} className="mr-2" /> Buat Pengajuan
               </Button>
             </div>
@@ -1043,48 +1054,160 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   const hasTime = letter.date && (letter.date.includes('T') || letter.date.includes(':'));
                   const formattedTime = hasTime && !isNaN(dateObj.getTime()) ? dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Makassar' }) + ' WITA' : '';
                   
-                  return (
-                    <Card key={letter.id} className="bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50/50 transition-all">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                            <FileText size={20} />
+                  return (() => {
+                    const isApproved = letter.status === 'Disetujui' || letter.status === 'Approved';
+                    const isRejected = letter.status === 'Ditolak' || letter.status === 'Rejected';
+                    const isPending = !isApproved && !isRejected;
+
+                    const timelineSteps = [
+                      {
+                        title: 'Pengajuan Dikirim',
+                        description: 'Permohonan surat pengantar berhasil dikirim oleh warga.',
+                        status: 'completed',
+                        date: formattedDate,
+                        time: formattedTime,
+                      },
+                      {
+                        title: 'Verifikasi Administrasi',
+                        description: isPending 
+                          ? 'Ketua RT sedang meninjau kelengkapan berkas dan NIK Pemohon.' 
+                          : 'Berkas dan keaslian NIK warga telah dikonfirmasi oleh Ketua RT.',
+                        status: isPending ? 'active' : 'completed',
+                      },
+                      {
+                        title: 'Penomoran & Tanda Tangan',
+                        description: isApproved 
+                          ? `Ketua RT telah menandatangani surat dengan No: ${letter.letterNumber || '-'}.` 
+                          : isRejected 
+                          ? 'Proses penomoran dibatalkan karena pengajuan ditolak.' 
+                          : 'Sedang menunggu antrean penomoran surat resmi.',
+                        status: isApproved ? 'completed' : isRejected ? 'failed' : 'pending',
+                      },
+                      {
+                        title: isRejected ? 'Pengajuan Ditolak' : 'Surat Selesai',
+                        description: isApproved 
+                          ? 'Surat pengantar selesai diproses dan siap untuk diunduh / dicetak.' 
+                          : isRejected 
+                          ? `Maaf, permohonan ditolak. Alasan: ${letter.estimatedTime || 'Dokumen kurang lengkap atau tidak sesuai.'}`
+                          : 'Surat akan otomatis terbit setelah disetujui.',
+                        status: isApproved ? 'completed' : isRejected ? 'failed' : 'pending',
+                      }
+                    ];
+
+                    return (
+                      <Card key={letter.id} className="bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50/50 transition-all flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                                <FileText size={20} />
+                              </div>
+                              <div>
+                                <h4 className="font-black text-slate-800">{letter.type}</h4>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex flex-col mt-0.5">
+                                  <span>Diajukan: {formattedDate}</span>
+                                  {formattedTime && <span className="text-indigo-600 font-extrabold mt-0.5">{formattedTime}</span>}
+                                </div>
+                              </div>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                              isApproved ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                              isRejected ? 'bg-rose-50 text-rose-600 border-rose-200' :
+                              'bg-amber-50 text-amber-600 border-amber-200'
+                            }`}>
+                              {letter.status === 'Approved' ? 'Disetujui' : letter.status === 'Rejected' ? 'Ditolak' : letter.status === 'Pending' ? 'Menunggu' : letter.status}
+                            </span>
                           </div>
-                          <div>
-                            <h4 className="font-black text-slate-800">{letter.type}</h4>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex flex-col mt-0.5">
-                              <span>Diajukan: {formattedDate}</span>
-                              {formattedTime && <span className="text-indigo-600 font-extrabold mt-0.5">{formattedTime}</span>}
+                          <div className="space-y-3">
+                            <div className="p-3 bg-slate-50 rounded-xl">
+                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
+                              <p className="text-xs font-semibold text-slate-700 leading-relaxed">{letter.purposeDetail}</p>
+                            </div>
+                            {letter.nik && (
+                              <p className="text-[11px] font-bold text-slate-500">
+                                NIK Pemohon: <span className="text-slate-700">{letter.nik}</span>
+                              </p>
+                            )}
+                            {letter.letterNumber && (
+                              <div className="p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl text-xs">
+                                <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">Nomor Surat Resmi</p>
+                                <p className="font-black text-indigo-700">{letter.letterNumber}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Timeline Status Pelacakan */}
+                          <div className="mt-5 pt-4 border-t border-slate-100">
+                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-1.5 font-sans">
+                              <Clock size={12} className="text-indigo-500" /> ALUR PELACAKAN STATUS SURAT
+                            </p>
+                            <div className="space-y-4 relative pl-3.5 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                              {timelineSteps.map((step, idx) => {
+                                let iconBg = 'bg-slate-100 text-slate-400';
+                                let titleColor = 'text-slate-400 font-bold';
+                                let iconElement = <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />;
+                                
+                                if (step.status === 'completed') {
+                                  iconBg = 'bg-emerald-500 text-white';
+                                  titleColor = 'text-slate-800 font-extrabold';
+                                  iconElement = <Check size={10} className="stroke-[3]" />;
+                                } else if (step.status === 'active') {
+                                  iconBg = 'bg-indigo-600 text-white animate-pulse';
+                                  titleColor = 'text-indigo-700 font-extrabold';
+                                  iconElement = <Clock size={10} className="stroke-[3]" />;
+                                } else if (step.status === 'failed') {
+                                  iconBg = 'bg-rose-500 text-white';
+                                  titleColor = 'text-rose-600 font-extrabold';
+                                  iconElement = <X size={10} className="stroke-[3]" />;
+                                }
+
+                                return (
+                                  <div key={idx} className="relative flex gap-3 text-xs">
+                                    <div className={`absolute -left-[23px] top-0.5 w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs z-10 ${iconBg}`}>
+                                      {iconElement}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex justify-between items-center gap-2">
+                                        <span className={titleColor}>{step.title}</span>
+                                        {step.date && (
+                                          <span className="text-[9px] font-bold text-slate-400 font-mono whitespace-nowrap">
+                                            {step.date} {step.time ? `• ${step.time}` : ''}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-0.5">
+                                        {step.description}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                          letter.status === 'Disetujui' || letter.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
-                          letter.status === 'Ditolak' || letter.status === 'Rejected' ? 'bg-rose-50 text-rose-600 border-rose-200' :
-                          'bg-amber-50 text-amber-600 border-amber-200'
-                        }`}>
-                          {letter.status === 'Approved' ? 'Disetujui' : letter.status === 'Rejected' ? 'Ditolak' : letter.status === 'Pending' ? 'Menunggu' : letter.status}
-                        </span>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="p-3 bg-slate-50 rounded-xl">
-                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
-                          <p className="text-xs font-semibold text-slate-700 leading-relaxed">{letter.purposeDetail}</p>
-                        </div>
-                        {letter.nik && (
-                          <p className="text-[11px] font-bold text-slate-500">
-                            NIK Pemohon: <span className="text-slate-700">{letter.nik}</span>
-                          </p>
-                        )}
-                        {letter.letterNumber && (
-                          <div className="p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl text-xs">
-                            <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">Nomor Surat Resmi</p>
-                            <p className="font-black text-indigo-700">{letter.letterNumber}</p>
+
+                        {/* Download PDF Section */}
+                        {isApproved && (
+                          <div className="mt-5 pt-4 border-t border-slate-100">
+                            <Button 
+                              onClick={async () => {
+                                try {
+                                  await generateSuratPengantar(letter, pdfConfig, false);
+                                  toast.success('Surat Pengantar berhasil diunduh!');
+                                } catch (error) {
+                                  console.error(error);
+                                  toast.error('Gagal mengunduh Surat Pengantar PDF.');
+                                }
+                              }}
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/15 animate-bounce-short"
+                            >
+                              <Download size={14} /> Unduh Surat Pengantar Resmi (PDF)
+                            </Button>
                           </div>
                         )}
-                      </div>
-                    </Card>
-                  );
+                      </Card>
+                    );
+                  })();
                 })
               )}
             </div>

@@ -43,6 +43,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   const [activeTab, setActiveTab] = useState<'overview' | 'reports' | 'logs'>('overview');
   const [logSearchTerm, setLogSearchTerm] = useState('');
   const [logTypeFilter, setLogTypeFilter] = useState<'All' | 'Newcomer' | 'MovedOut' | 'Birth' | 'Death'>('All');
+  const [logStatusFilter, setLogStatusFilter] = useState<'All' | 'Unprocessed' | 'Processed'>('All');
   const [autoUpdateHouse, setAutoUpdateHouse] = useState(true);
   const [formData, setFormData] = useState<Omit<PopulationReport, 'id' | 'createdAt'>>({
     month: new Date().toISOString().slice(0, 7),
@@ -644,14 +645,30 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     })).slice(-6);
   }, [reports]);
 
+  const unprocessedCount = useMemo(() => {
+    return populationLogs.filter(l => !l.isGenerated).length;
+  }, [populationLogs]);
+
+  const processedCount = useMemo(() => {
+    return populationLogs.filter(l => l.isGenerated).length;
+  }, [populationLogs]);
+
   const filteredLogs = useMemo(() => {
     return populationLogs.filter(log => {
       const matchesSearch = (log.name || '').toLowerCase().includes(logSearchTerm.toLowerCase()) || 
                            (log.houseId || '').toLowerCase().includes(logSearchTerm.toLowerCase());
       const matchesFilter = logTypeFilter === 'All' || log.type === logTypeFilter;
-      return matchesSearch && matchesFilter;
+      
+      let matchesStatus = true;
+      if (logStatusFilter === 'Unprocessed') {
+        matchesStatus = !log.isGenerated;
+      } else if (logStatusFilter === 'Processed') {
+        matchesStatus = !!log.isGenerated;
+      }
+      
+      return matchesSearch && matchesFilter && matchesStatus;
     }).sort((a, b) => b.date.localeCompare(a.date));
-  }, [populationLogs, logSearchTerm, logTypeFilter]);
+  }, [populationLogs, logSearchTerm, logTypeFilter, logStatusFilter]);
 
   // LIVE STATS (from houses) to match Dashboard/ResidentManager
   const liveStats = useMemo(() => {
@@ -1322,6 +1339,44 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     <option value="Birth">Kelahiran</option>
                     <option value="Death">Kematian</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Status Filter Tabs (Processed vs Unprocessed) */}
+              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/20 flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-3">
+                <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/50">
+                  {[
+                    { id: 'All', label: 'Semua Status', count: populationLogs.length },
+                    { id: 'Unprocessed', label: 'Belum Dilaporkan', count: unprocessedCount, color: 'text-amber-600 bg-amber-50 border-amber-100' },
+                    { id: 'Processed', label: 'Sudah Dilaporkan', count: processedCount, color: 'text-slate-500 bg-slate-150' }
+                  ].map(statusTab => {
+                    const isActive = logStatusFilter === statusTab.id;
+                    return (
+                      <button
+                        key={statusTab.id}
+                        type="button"
+                        onClick={() => setLogStatusFilter(statusTab.id as any)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
+                          isActive 
+                            ? 'bg-white text-indigo-700 shadow-xs border border-indigo-100/50' 
+                            : 'text-slate-500 hover:text-slate-850'
+                        }`}
+                      >
+                        {statusTab.label}
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                          isActive 
+                            ? 'bg-indigo-50 text-indigo-700' 
+                            : statusTab.color || 'bg-slate-200/70 text-slate-600'
+                        }`}>
+                          {statusTab.count}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+                
+                <div className="text-[10px] text-slate-400 font-bold italic">
+                  * Catatan kependudukan yang "Belum Dilaporkan" akan otomatis dihitung saat Anda membuat laporan bulanan baru.
                 </div>
               </div>
 
