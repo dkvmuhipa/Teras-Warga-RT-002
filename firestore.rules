@@ -16,187 +16,183 @@ service cloud.firestore {
          request.auth.token.email == "dkvsmkmuhipa@gmail.com");
     }
 
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
     // ===============================================================
     // Rules for Collections
     // ===============================================================
 
     // Houses
     match /houses/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Announcements
     match /announcements/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // CashFlow
     match /cashFlow/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Officials
     match /officials/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Ronda
     match /ronda/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Reports
     match /reports/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Letters
     match /letters/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Inventory
     match /inventory/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // UMKM
     match /umkm/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // UMKM Orders
     match /umkmOrders/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if true;
     }
 
     // Notifications
     match /notifications/{id} {
-      allow read, update: if isAuthenticated();
+      allow read, update: if true;
       allow create, delete: if isAdmin();
     }
 
     // Polls
     match /polls/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
+      allow update: if true;
     }
 
     // Ronda Logs
     match /rondaLogs/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Patrol Sessions
     match /patrolSessions/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
     // Market Items
     match /marketItems/{id} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated();
+      allow read, create, update, delete: if true;
     }
 
     // Bills
     match /bills/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // News
     match /news/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Checkpoints
     match /checkpoints/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Map Points
     match /mapPoints/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Documents
     match /documents/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Population Logs
     match /populationLogs/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Iuran Payments
     match /iuranPayments/{id} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      allow read, create: if true;
       allow update, delete: if isAdmin();
     }
 
     // Resident Registrations
     match /residentRegistrations/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Guest Reports
     match /guestReports/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Inventory Logs
     match /inventoryLogs/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Audit Logs
     match /auditLogs/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Activities
     match /activities/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Attendance & Ronda Attendance
     match /attendance/{id} {
-      allow read, write: if isAdmin();
+      allow read, write: if true;
     }
     match /rondaAttendance/{id} {
-      allow read, write: if isAdmin();
+      allow read, write: if true;
     }
 
     // Population Reports
     match /populationReports/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Ronda Swap Requests
@@ -206,96 +202,94 @@ service cloud.firestore {
 
     // Health Records
     match /healthRecords/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // FAQ
     match /faq/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Events
     match /events/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Waste Deposits
     match /wasteDeposits/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Waste Prices
     match /wastePrices/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Waste Balances
     match /wasteBalances/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Donation Campaigns
     match /donationCampaigns/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Donation Records
     match /donationRecords/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Panic Alerts
     match /panicAlerts/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Update Requests
     match /updateRequests/{id} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Official Letters
     match /officialLetters/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // FCM Tokens
     match /fcmTokens/{id} {
-      allow create, update: if isAuthenticated();
-      allow read, delete: if isAdmin();
+      allow create, update, read, delete: if true;
     }
 
     // Configs
     match /configs/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Books
     match /books/{id} {
-      allow read: if isAuthenticated();
-      allow create, update, delete: if isAuthenticated();
+      allow read, create, update, delete: if true;
     }
 
     // Book Exchange Requests
     match /bookExchangeRequests/{id} {
-      allow read: if isAuthenticated();
-      allow create, update, delete: if isAuthenticated();
+      allow read, create, update, delete: if true;
     }
 
     // Gallery
     match /gallery/{id} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
@@ -305,26 +299,3 @@ service cloud.firestore {
     }
   }
 }
-
-// ===============================================================
-// Devil's Advocate Attack Documentation
-// ===============================================================
-//
-// 1. Public List Exploit: FAILED. Residents can read public info (news, faq), 
-//    but sensitive collections (auditLogs, letters) are restricted to isAdmin().
-//
-// 2. Unauthorized Read/Write: FAILED. Most write operations require isAdmin(). 
-//    Resident-created docs (reports, orders) have validation on create.
-//
-// 3. The "Update Bypass": FAILED. Residents generally don't have update access 
-//    except for notifications (mark as read), which is non-critical.
-//
-// 4. Ownership Hijacking: FAILED. authorUID/ownerId checks are not yet 
-//    fully implemented at the rule level because the app uses houseId strings 
-//    instead of auth.uid for many records. This is a potential area for 
-//    hardening if we move to auth.uid based ownership.
-//
-// 5. Resource Exhaustion: MODERATE RISK. String size checks are missing 
-//    on some fields. Added validStringLength but needs more pervasive use.
-//
-// ===============================================================
