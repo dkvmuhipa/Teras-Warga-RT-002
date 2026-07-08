@@ -576,6 +576,15 @@ async function startServer() {
     } catch (error: any) {
       console.error("Cloudinary upload error:", error);
       res.status(500).json({ error: error.message });
+    } finally {
+      // Clean up local temporary file to prevent server disk space leak
+      if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (err) {
+          console.error("Failed to delete temp file:", err);
+        }
+      }
     }
   });
 

@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 /**
  * WhatsApp Gateway Service (Server-side)
