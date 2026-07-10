@@ -712,13 +712,20 @@ export const PublicRules: React.FC = () => {
 
                                 {/* "Menimbang" Section */}
                                 <div className="text-left font-serif space-y-3 my-6">
-                                  <h5 className="font-extrabold text-slate-800 text-sm md:text-base italic">Menimbang:</h5>
-                                  <div className="border-l-4 border-indigo-400/80 pl-4 space-y-2.5">
-                                    <p className="text-xs md:text-sm text-slate-650 leading-relaxed italic text-justify">
-                                      <strong className="text-slate-800 not-italic uppercase tracking-wide text-[10px] bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">Mengingat</strong> bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS; dan
+                                  <h5 className="font-extrabold text-slate-850 text-[11px] md:text-xs tracking-[0.2em] text-slate-400 uppercase font-mono border-b border-slate-200 pb-1.5">Menimbang:</h5>
+                                  <div className="border-l-4 border-amber-500/80 pl-4">
+                                    <p className="text-xs md:text-sm text-slate-700 leading-relaxed italic text-justify">
+                                      {rule.menimbang}
                                     </p>
-                                    <p className="text-xs md:text-sm text-slate-650 leading-relaxed italic text-justify">
-                                      <strong className="text-slate-800 not-italic uppercase tracking-wide text-[10px] bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">Menimbang</strong> {rule.menimbang}
+                                  </div>
+                                </div>
+
+                                {/* "Mengingat" Section */}
+                                <div className="text-left font-serif space-y-3 my-6">
+                                  <h5 className="font-extrabold text-slate-850 text-[11px] md:text-xs tracking-[0.2em] text-slate-400 uppercase font-mono border-b border-slate-200 pb-1.5">Mengingat:</h5>
+                                  <div className="border-l-4 border-indigo-500/80 pl-4">
+                                    <p className="text-xs md:text-sm text-slate-700 leading-relaxed italic text-justify">
+                                      bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS (Teknologi, Ekraf, Rukun, Aman, Sinergi) serta keasrian hunian warga.
                                     </p>
                                   </div>
                                 </div>
