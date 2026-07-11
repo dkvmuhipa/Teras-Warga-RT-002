@@ -132,11 +132,15 @@ export const PublicRules: React.FC = () => {
       menimbang: "bahwa untuk menghindari pencemaran sanitasi jalan umum, kebisingan suara hewan, serta menjaga keselamatan fisik warga sekitar, perlu diatur batas kepemilikan dan pemeliharaan hewan peliharaan.",
       icon: <Heart className="text-pink-500" size={24} />,
       items: [
-        "Setiap pemilik hewan peliharaan (anjing, kucing, kelinci, burung) berkewajiban melatih dan mengawasi hewannya agar tidak menimbulkan polusi suara bising yang konstan atau bertindak agresif kepada tetangga.",
-        "Pemilik hewan bertanggung jawab mutlak untuk segera membersihkan kotoran hewannya apabila mengotori jalan umum, taman bermain bersama, saluran air drainase, atau pekarangan rumah warga lain.",
-        "Hewan peliharaan dilarang dibiarkan berkeliaran bebas tanpa tali pengikat atau tanpa pengawasan langsung pemilik di luar batas pekarangan rumah pribadi.",
-        "Kandang atau tempat penangkaran hewan wajib ditempatkan di dalam batas pekarangan sendiri dan dibersihkan secara rutin setiap hari untuk mencegah aroma menyengat yang mengganggu kenyamanan tetangga.",
-        "Jika hewan peliharaan terbukti merusak tanaman tetangga atau melukai fisik warga lain, pemilik hewan wajib menanggung seluruh biaya ganti rugi perbaikan properti atau biaya pengobatan medis korban."
+        "Setiap pemilik hewan peliharaan (anjing, kucing, kelinci, burung) berkewajiban melatih dan mengawasi hewannya secara ketat agar tidak menimbulkan polusi suara bising yang konstan (seperti gonggongan berulang) atau bertindak agresif menyerang warga sekitar.",
+        "Pemilik hewan peliharaan bertanggung jawab mutlak secara hukum dan moral untuk segera menyiram, membersihkan, dan membuang kotoran hewannya apabila mengotori jalan umum, saluran air drainase, taman bermain bersama, maupun pekarangan rumah tetangga.",
+        "Hewan peliharaan dilarang keras dibiarkan berkeliaran bebas di luar batas pekarangan rumah pribadi tanpa menggunakan tali penuntun (leash/harness) serta tanpa pengawasan langsung dari pemilik.",
+        "Kandang atau tempat penangkaran hewan wajib ditempatkan di dalam batas pekarangan sendiri dengan jarak yang wajar dari jendela/ventilasi rumah tetangga, serta dibersihkan secara steril setiap hari guna mencegah aroma menyengat.",
+        "Pemilik hewan peliharaan (terutama anjing dan kucing) wajib melakukan vaksinasi berkala secara rutin (termasuk vaksin anti-rabies) serta menjaga kebersihan medis hewan guna menghindari penyebaran penyakit menular (zoonosis).",
+        "Dilarang memelihara hewan berbahaya atau ras agresif yang tidak dilengkapi sertifikat pelatihan penjinakan di dalam wilayah pemukiman padat RT 02 Huntap Tondo 2 demi keselamatan pejalan kaki dan anak-anak.",
+        "Dilarang keras memelihara hewan ternak berskala besar (seperti kambing, sapi, babi) di dalam lingkungan pemukiman padat Huntap karena melanggar fungsi tata ruang tata huni pemukiman. Pemeliharaan unggas (seperti ayam hias/aduan) dibatasi maksimal 5 (lima) ekor per unit kavling dengan kandang yang steril dan kedap bau.",
+        "Apabila terjadi perselisihan akibat aduan warga mengenai kebisingan atau aroma tidak sedap dari hewan, pemilik wajib melakukan tindakan korektif (seperti memindahkan posisi kandang atau merawat kebersihan ekstra) dalam waktu maksimal 1×24 jam sejak aduan diterima.",
+        "Jika hewan peliharaan terbukti merusak tanaman tetangga, merusak fasilitas publik, atau melukai fisik warga lain, pemilik hewan wajib memikul tanggung jawab perdata penuh atas seluruh biaya ganti rugi perbaikan properti atau biaya pengobatan medis korban hingga sembuh total."
       ]
     },
     {
