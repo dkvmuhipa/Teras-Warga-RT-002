@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check } from 'lucide-react';
+import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { jsPDF } from 'jspdf';
 
 export const PublicRules: React.FC = () => {
   const navigate = useNavigate();
@@ -208,6 +210,233 @@ export const PublicRules: React.FC = () => {
     }
   ];
 
+  const downloadSingleRulePDF = (rule: any, index: number) => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    // --- Header (Kop Surat) ---
+    doc.setFont("times", "normal");
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text("PEMERINTAH KOTA PALU", centerX, 16, { align: "center" });
+    doc.text("KECAMATAN MANTIKULORE", centerX, 22, { align: "center" });
+    doc.text("KELURAHAN TONDO", centerX, 28, { align: "center" });
+    doc.setFont("times", "bold");
+    doc.text("PENGURUS RUKUN TETANGGA 02 RW 020", centerX, 34, { align: "center" });
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    doc.text("Alamat Sekretariat: Huntap Tondo 2 Blok C10 No. 08, Palu", centerX, 40, { align: "center" });
+
+    // Double divider lines
+    doc.setLineWidth(1.0);
+    doc.line(margin, 44, pageWidth - margin, 44);
+    doc.setLineWidth(0.3);
+    doc.line(margin, 45, pageWidth - margin, 45);
+
+    // --- Title of the Decree ---
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text("SURAT KEPUTUSAN KETUA RT 02 HUNTAP TONDO 2", centerX, 54, { align: "center" });
+    doc.text(rule.nomorSurat.toUpperCase(), centerX, 60, { align: "center" });
+    doc.text("TENTANG", centerX, 66, { align: "center" });
+    doc.text(rule.tentang.toUpperCase(), centerX, 72, { align: "center" });
+
+    // --- Menimbang & Mengingat Section ---
+    let y = 82;
+    doc.setFont("times", "bold");
+    doc.setFontSize(10);
+    doc.text("MENIMBANG :", margin, y);
+    doc.setFont("times", "italic");
+    const menimbangText = rule.menimbang;
+    const splitMenimbang = doc.splitTextToSize(menimbangText, contentWidth - 25);
+    doc.text(splitMenimbang, margin + 25, y);
+    y += (splitMenimbang.length * 5) + 3;
+
+    doc.setFont("times", "bold");
+    doc.text("MENGINGAT :", margin, y);
+    doc.setFont("times", "italic");
+    const mengingatText = "bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS (Teknologi, Ekraf, Rukun, Aman, Sinergi) serta keasrian hunian warga.";
+    const splitMengingat = doc.splitTextToSize(mengingatText, contentWidth - 25);
+    doc.text(splitMengingat, margin + 25, y);
+    y += (splitMengingat.length * 5) + 8;
+
+    // --- Decides (MEMUTUSKAN) ---
+    doc.setFont("times", "bold");
+    doc.text("MEMUTUSKAN", centerX, y, { align: "center" });
+    y += 6;
+    doc.text(`PASAL 1 : ${rule.title.toUpperCase()}`, margin, y);
+    y += 6;
+
+    // --- Clauses (Ayat) ---
+    doc.setFont("times", "normal");
+    rule.items.forEach((item: string, idx: number) => {
+      const bullet = `${idx + 1}. `;
+      const itemText = item;
+      const splitItem = doc.splitTextToSize(itemText, contentWidth - 10);
+      
+      // Auto-wrap page check
+      if (y + (splitItem.length * 5) > pageHeight - 25) {
+        doc.addPage();
+        y = 20; // reset y on new page
+      }
+      
+      doc.text(bullet, margin, y);
+      doc.text(splitItem, margin + 6, y);
+      y += (splitItem.length * 5) + 2;
+    });
+
+    y += 10;
+    // --- Signature block ---
+    if (y > pageHeight - 50) {
+      doc.addPage();
+      y = 20;
+    }
+    
+    doc.setFont("times", "normal");
+    doc.text("Ditetapkan di : Palu", pageWidth - 80, y);
+    y += 5;
+    doc.text("Pada tanggal  : 1 Juni 2026", pageWidth - 80, y);
+    y += 7;
+    doc.setFont("times", "bold");
+    doc.text("KETUA RT 02 HUNTAP TONDO 2", pageWidth - 80, y);
+    y += 22;
+    doc.line(pageWidth - 80, y, pageWidth - 25, y);
+    y += 4;
+    doc.text("IRFAN", pageWidth - 80, y);
+
+    // Save document
+    const filename = `SK_RT02_${rule.nomorBerkas.replace(/-/g, '_')}.pdf`;
+    doc.save(filename);
+    toast.success(`Berhasil mengunduh dokumen ${rule.nomorBerkas}`);
+  };
+
+  const downloadAllRulesPDF = () => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    rules.forEach((rule: any, ruleIdx: number) => {
+      if (ruleIdx > 0) {
+        doc.addPage();
+      }
+
+      // --- Header (Kop Surat) ---
+      doc.setFont("times", "normal");
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text("PEMERINTAH KOTA PALU", centerX, 16, { align: "center" });
+      doc.text("KECAMATAN MANTIKULORE", centerX, 22, { align: "center" });
+      doc.text("KELURAHAN TONDO", centerX, 28, { align: "center" });
+      doc.setFont("times", "bold");
+      doc.text("PENGURUS RUKUN TETANGGA 02 RW 020", centerX, 34, { align: "center" });
+
+      doc.setFont("times", "normal");
+      doc.setFontSize(10);
+      doc.text("Alamat Sekretariat: Huntap Tondo 2 Blok C10 No. 08, Palu", centerX, 40, { align: "center" });
+
+      // Double divider lines
+      doc.setLineWidth(1.0);
+      doc.line(margin, 44, pageWidth - margin, 44);
+      doc.setLineWidth(0.3);
+      doc.line(margin, 45, pageWidth - margin, 45);
+
+      // --- Title of the Decree ---
+      doc.setFont("times", "bold");
+      doc.setFontSize(12);
+      doc.text("SURAT KEPUTUSAN KETUA RT 02 HUNTAP TONDO 2", centerX, 54, { align: "center" });
+      doc.text(rule.nomorSurat.toUpperCase(), centerX, 60, { align: "center" });
+      doc.text("TENTANG", centerX, 66, { align: "center" });
+      doc.text(rule.tentang.toUpperCase(), centerX, 72, { align: "center" });
+
+      // --- Menimbang & Mengingat Section ---
+      let y = 82;
+      doc.setFont("times", "bold");
+      doc.setFontSize(10);
+      doc.text("MENIMBANG :", margin, y);
+      doc.setFont("times", "italic");
+      const menimbangText = rule.menimbang;
+      const splitMenimbang = doc.splitTextToSize(menimbangText, contentWidth - 25);
+      doc.text(splitMenimbang, margin + 25, y);
+      y += (splitMenimbang.length * 5) + 3;
+
+      doc.setFont("times", "bold");
+      doc.text("MENGINGAT :", margin, y);
+      doc.setFont("times", "italic");
+      const mengingatText = "bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS (Teknologi, Ekraf, Rukun, Aman, Sinergi) serta keasrian hunian warga.";
+      const splitMengingat = doc.splitTextToSize(mengingatText, contentWidth - 25);
+      doc.text(splitMengingat, margin + 25, y);
+      y += (splitMengingat.length * 5) + 8;
+
+      // --- Decides (MEMUTUSKAN) ---
+      doc.setFont("times", "bold");
+      doc.text("MEMUTUSKAN", centerX, y, { align: "center" });
+      y += 6;
+      doc.text(`PASAL 1 : ${rule.title.toUpperCase()}`, margin, y);
+      y += 6;
+
+      // --- Clauses (Ayat) ---
+      doc.setFont("times", "normal");
+      rule.items.forEach((item: string, idx: number) => {
+        const bullet = `${idx + 1}. `;
+        const itemText = item;
+        const splitItem = doc.splitTextToSize(itemText, contentWidth - 10);
+        
+        // Auto-wrap page check
+        if (y + (splitItem.length * 5) > pageHeight - 25) {
+          doc.addPage();
+          y = 20; // reset y on new page
+        }
+        
+        doc.text(bullet, margin, y);
+        doc.text(splitItem, margin + 6, y);
+        y += (splitItem.length * 5) + 2;
+      });
+
+      y += 10;
+      // --- Signature block ---
+      if (y > pageHeight - 50) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      doc.setFont("times", "normal");
+      doc.text("Ditetapkan di : Palu", pageWidth - 80, y);
+      y += 5;
+      doc.text("Pada tanggal  : 1 Juni 2026", pageWidth - 80, y);
+      y += 7;
+      doc.setFont("times", "bold");
+      doc.text("KETUA RT 02 HUNTAP TONDO 2", pageWidth - 80, y);
+      y += 22;
+      doc.line(pageWidth - 80, y, pageWidth - 25, y);
+      y += 4;
+      doc.text("IRFAN", pageWidth - 80, y);
+    });
+
+    // Save document
+    doc.save("Ketetapan_Tata_Tertib_Resmi_RT02_Huntap_Tondo_2.pdf");
+    toast.success("Berhasil mengunduh salinan lengkap tata tertib RT 02 (PDF)");
+  };
+
   const getBadgeDetails = (cat: string) => {
     switch (cat) {
       case 'umum': return { label: 'Umum & Data', color: 'bg-indigo-50 text-indigo-750 border-indigo-150' };
@@ -402,6 +631,12 @@ export const PublicRules: React.FC = () => {
                   className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-700 rounded-xl text-xs font-bold border border-slate-200/60 transition-all cursor-pointer"
                 >
                   Tutup Semua
+                </button>
+                <button
+                  onClick={downloadAllRulesPDF}
+                  className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 hover:text-indigo-800 rounded-xl text-xs font-bold border border-indigo-100 transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <Download size={13} /> Unduh Semua (PDF)
                 </button>
               </div>
             )}
@@ -622,6 +857,17 @@ export const PublicRules: React.FC = () => {
                                       <span>Bagikan via WhatsApp</span>
                                     </a>
                                     
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        downloadSingleRulePDF(rule, pasalNumber);
+                                      }}
+                                      className="flex items-center gap-2 px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100/80 text-rose-700 font-bold text-xs rounded-xl border border-rose-150 shadow-sm transition-all duration-150 focus:outline-none cursor-pointer"
+                                    >
+                                      <Download size={14} className="text-rose-500" />
+                                      <span>Unduh PDF</span>
+                                    </button>
+
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
