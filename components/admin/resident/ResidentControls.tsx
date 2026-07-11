@@ -4,6 +4,7 @@ import { generateMonthOptions } from '../../../src/utils/dateUtils';
 import { ResidentRegistration } from '../../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { SidebarNavigation } from '../SidebarNavigation';
 
 interface ResidentControlsProps {
   searchTerm: string;

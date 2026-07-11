@@ -5,9 +5,9 @@ import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
-import DarkModeToggle from '../admin/DarkModeToggle';
-import MapCanvas from '../admin/MapCanvas';
-import TabBar from '../admin/TabBar';
+import DarkModeToggle from './admin/DarkModeToggle';
+import MapCanvas from './admin/MapCanvas';
+import TabBar from './admin/TabBar';
 import { useFinancial } from '../context/FinancialContext';
 
 interface HouseMapProps {
