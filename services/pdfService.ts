@@ -240,10 +240,10 @@ export const convertToDirectLink = (url: string): string => {
 };
 
 // URL untuk thumbnail/preview (lebih ringan dan cepat untuk UI)
-export const getDriveThumbnail = (url: string): string => {
+export const getDriveThumbnail = (url: string, width: number = 800): string => {
   const id = getDriveId(url);
   if (id) {
-    return `https://drive.google.com/thumbnail?id=${id}&sz=w800`;
+    return `https://drive.google.com/thumbnail?id=${id}&sz=w${width}`;
   }
   return url;
 };

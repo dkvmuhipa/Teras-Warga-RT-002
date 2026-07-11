@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, FileText, Megaphone, AlertTriangle, User, Users, Menu, X, 
   LayoutDashboard, Send, Bot, Trash2, Clock, CheckCircle, XCircle, Search, Edit2, Plus,
@@ -10,7 +11,8 @@ import {
   ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, Map as MapIcon,
   Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
   RefreshCw, Calendar, DollarSign, Settings, Filter, Heart, Baby, Smile, GraduationCap, Accessibility, Key, MessageCircle, ImageIcon, AlertCircle, Wrench, ChevronRight,
-  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, PieChart, LocateFixed, ShoppingCart, Wand2
+  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, PieChart, LocateFixed, ShoppingCart, Wand2,
+  Wifi, WifiOff
 } from 'lucide-react';
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from 'recharts';
 
@@ -36,6 +38,7 @@ const ScrollToTop = () => {
 };
 
 // Components & Services
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
 import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
 import { HouseMap } from './components/HouseMap';
@@ -44,8 +47,7 @@ import { generateAnnouncementDraft, generateDashboardSummary } from './services/
 import { generateSuratPengantar, generateResidentReportPDF } from './services/pdfService';
 import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from './services/whatsappService';
 import { AdminRouteWrapper } from './components/AdminComponents';
-import { AdminDashboard } from './components/admin/AdminDashboard'; 
-import { DocumentManager } from './components/admin/DocumentManager';
+const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 import { FinancialProvider } from './context/FinancialContext';
 import { useConfirm } from './context/ConfirmContext';
 import { ResidentRegistrationForm } from './components/ResidentRegistrationForm';
@@ -72,6 +74,7 @@ import { PublicRules } from './components/public/PublicRules';
 import { PublicEarthquake } from './components/public/PublicEarthquake';
 import { PublicAbout } from './components/public/PublicAbout';
 import { PublicLibrary } from './components/public/PublicLibrary';
+import { PublicForum } from './components/public/PublicForum';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -245,6 +248,35 @@ export const App = () => {
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
+  const [isOnline, setIsOnline] = useState(() => typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success("Koneksi Internet Pulih! Data RT disinkronkan otomatis.", {
+        description: "Semua perubahan lokal yang tertunda telah diunggah.",
+        duration: 5000
+      });
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.error("Mode Offline RT Aktif", {
+        description: "Koneksi terputus. Data disimpan di perangkat & disinkronkan saat online.",
+        duration: 5000
+      });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const unsub = subscribeToSettings((data) => {
@@ -282,13 +314,21 @@ export const App = () => {
     const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data));
     const unsubAnnouncements = subscribeToCollection('announcements', (data) => setAnnouncements(data));
     const unsubNews = subscribeToNews((data) => setNews(data));
+    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
     const unsubOfficials = subscribeToCollection('officials', (data) => setOfficials(data));
     const unsubReports = subscribeToCollection('reports', (data) => setReports(data));
+    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
     const unsubRonda = subscribeToCollection('ronda', (data) => setRonda(data));
     const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data));
     const unsubUmkm = subscribeToCollection('umkm', (data) => setUmkm(data));
     const unsubPolls = subscribeToCollection('polls', (data) => setPolls(data));
+    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
+    const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
     const unsubIuranPayments = subscribeToCollection('iuranPayments', (data) => setIuranPayments(data));
+    const unsubResidentRegistrations = subscribeToResidentRegistrations((data) => setResidentRegistrations(data));
+    const unsubGuestReports = subscribeToGuestReports((data) => setGuestReports(data));
+    const unsubInventoryLogs = subscribeToCollection('inventoryLogs', (data) => setInventoryLogs(data));
+    const unsubPopulationLogs = subscribeToPopulationLogs((data) => setPopulationLogs(data));
     const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
     const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
     const unsubDocuments = subscribeToDocuments((data) => setDocuments(data));
@@ -311,6 +351,7 @@ export const App = () => {
     const unsubEvents = subscribeToEvents((data) => setEvents(data));
     const unsubWasteDeposits = subscribeToWasteDeposits((data) => setWasteDeposits(data));
     const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
+    const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
     const unsubPdfConfig = subscribeToPdfConfig((data) => {
         if (data) {
             setPdfConfigState(data);
@@ -318,48 +359,16 @@ export const App = () => {
         }
     });
 
+    // Ensure Mosque exists in Firestore if empty database, but avoid recreating if deleted by user.
+    // ensureMosqueExists();
+
     return () => {
-      unsubHouses(); unsubAnnouncements(); unsubNews(); unsubOfficials(); 
-      unsubReports(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
-      unsubUmkm(); unsubPolls(); unsubIuranPayments(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubPdfConfig(); unsubWasteDeposits();
+      unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
+      unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
+      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
+      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubUpdateRequests(); unsubPdfConfig(); unsubWasteDeposits();
     };
   }, []);
-
-  useEffect(() => {
-    if (!isAdmin) {
-      // Clear sensitive states when not logged in as admin to prevent info leakage
-      setLetters([]);
-      setResidentRegistrations([]);
-      setGuestReports([]);
-      setAuditLogs([]);
-      setPopulationLogs([]);
-      setUpdateRequests([]);
-      setCashFlow([]);
-      setBills([]);
-      setInventoryLogs([]);
-      setPopulationReports([]);
-      return;
-    }
-    
-    // Admin-only subscriptions
-    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
-    const unsubResidentRegistrations = subscribeToResidentRegistrations((data) => setResidentRegistrations(data));
-    const unsubGuestReports = subscribeToGuestReports((data) => setGuestReports(data));
-    const unsubAuditLogs = subscribeToAuditLogs((data) => setAuditLogs(data));
-    const unsubPopulationLogs = subscribeToPopulationLogs((data) => setPopulationLogs(data));
-    const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
-    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
-    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
-    const unsubInventoryLogs = subscribeToCollection('inventoryLogs', (data) => setInventoryLogs(data));
-    const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
-
-    return () => {
-      unsubLetters(); unsubResidentRegistrations(); unsubGuestReports(); unsubAuditLogs(); 
-      unsubPopulationLogs(); unsubUpdateRequests(); unsubCash(); unsubBills(); 
-      unsubInventoryLogs(); unsubPopulationReports();
-    };
-  }, [isAdmin]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -402,46 +411,59 @@ export const App = () => {
             <Routes>
                 <Route path="/admin" element={
                     <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                        <AdminDashboard 
-                            role={adminRole || Role.ADMIN}
-                            houses={houses} 
-                            announcements={announcements} 
-                            news={news} 
-                            cashFlow={cashFlow} 
-                            officials={officials} 
-                            reports={reports} 
-                            letters={letters} 
-                            ronda={ronda} 
-                            rondaAttendance={rondaAttendance}
-                            inventory={inventory} 
-                            umkm={umkm} 
-                            polls={polls} 
-                            bills={bills}
-                            rondaLogs={rondaLogs} 
-                            rondaSwapRequests={rondaSwapRequests} 
-                            gallery={gallery} 
-                            pdfConfig={pdfConfig} 
-                            setPdfConfig={setPdfConfig} 
-                            notifications={notifications} 
-                            documents={documents} 
-                            populationReports={populationReports} 
-                            setPopulationReports={setPopulationReports} 
-                            populationLogs={populationLogs} 
-                            setPopulationLogs={setPopulationLogs} 
-                            events={events} 
-                            updateRequests={updateRequests}
-                            mapPoints={mapPoints} 
-                            activePatrol={activePatrol} 
-                            iuranPayments={iuranPayments} 
-                            residentRegistrations={residentRegistrations} 
-                            guestReports={guestReports} 
-                            inventoryLogs={inventoryLogs} 
-                            auditLogs={auditLogs} 
-                            marketItems={marketItems}
-                            faqItems={faqItems} 
-                            settings={settings}
-                            onUpdateSettings={handleUpdateSettings}
-                        />
+                        <ErrorBoundary>
+                            <React.Suspense fallback={
+                                <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-8 font-sans">
+                                    <div className="relative flex items-center justify-center mb-4">
+                                        <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                                        <Loader2 className="absolute text-indigo-600 animate-pulse" size={24} />
+                                    </div>
+                                    <h3 className="text-slate-800 font-black text-sm tracking-wide uppercase">Memuat Dasbor Admin</h3>
+                                    <p className="text-slate-400 text-xs mt-1">Mengoptimalkan bundle aplikasi...</p>
+                                </div>
+                            }>
+                                <AdminDashboard 
+                                    role={adminRole || Role.ADMIN}
+                                    houses={houses} 
+                                    announcements={announcements} 
+                                    news={news} 
+                                    cashFlow={cashFlow} 
+                                    officials={officials} 
+                                    reports={reports} 
+                                    letters={letters} 
+                                    ronda={ronda} 
+                                    rondaAttendance={rondaAttendance}
+                                    inventory={inventory} 
+                                    umkm={umkm} 
+                                    polls={polls} 
+                                    bills={bills} 
+                                    rondaLogs={rondaLogs} 
+                                    rondaSwapRequests={rondaSwapRequests} 
+                                    gallery={gallery} 
+                                    pdfConfig={pdfConfig} 
+                                    setPdfConfig={setPdfConfig} 
+                                    notifications={notifications} 
+                                    documents={documents} 
+                                    populationReports={populationReports} 
+                                    setPopulationReports={setPopulationReports} 
+                                    populationLogs={populationLogs} 
+                                    setPopulationLogs={setPopulationLogs} 
+                                    events={events} 
+                                    updateRequests={updateRequests}
+                                    mapPoints={mapPoints} 
+                                    activePatrol={activePatrol} 
+                                    iuranPayments={iuranPayments} 
+                                    residentRegistrations={residentRegistrations} 
+                                    guestReports={guestReports} 
+                                    inventoryLogs={inventoryLogs} 
+                                    auditLogs={auditLogs} 
+                                    marketItems={marketItems}
+                                    faqItems={faqItems} 
+                                    settings={settings}
+                                    onUpdateSettings={handleUpdateSettings}
+                                />
+                            </React.Suspense>
+                        </ErrorBoundary>
                     </AdminRouteWrapper>
                 }/>
                 <Route path="*" element={
@@ -511,6 +533,7 @@ export const App = () => {
                                 <Route path="/rules" element={<PublicRules />} />
                                 <Route path="/gempa" element={<PublicEarthquake />} />
                                 <Route path="/literasi" element={<PublicLibrary />} />
+                                <Route path="/forum" element={<PublicForum houses={houses} isAdmin={isAdmin} />} />
                                 <Route path="/about" element={
                                     <PublicAbout 
                                         officials={officials} 
@@ -534,6 +557,25 @@ export const App = () => {
                 } />
             </Routes>
         </FinancialProvider>
+        <AnimatePresence>
+          {!isOnline && (
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="fixed bottom-6 left-6 z-[9999] flex items-center gap-3 bg-rose-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-rose-950/20 border border-rose-500/30 max-w-sm font-sans"
+            >
+              <div className="p-2 bg-rose-500 rounded-xl">
+                <WifiOff className="w-5 h-5 text-white animate-pulse" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold tracking-wide uppercase">Mode Offline RT02</h4>
+                <p className="text-[10px] text-rose-100 mt-0.5 leading-relaxed font-medium">Sistem bekerja secara lokal. Semua perubahan akan disinkronkan otomatis saat online.</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
     </HashRouter>
   );
 };

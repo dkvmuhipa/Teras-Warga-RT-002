@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { SmartImage } from '../SmartImage';
 import { Official, House, UMKM, RondaSchedule, CashFlow, Report, LetterRequest, InventoryItem, AppEvent, DonationCampaign } from '../../types';
 
 interface PublicAboutProps {
@@ -681,11 +682,11 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 <div key={sidx} className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
                   <div className="relative">
                     {shop.image ? (
-                      <img 
+                      <SmartImage 
                         src={shop.image} 
                         alt={shop.name}
-                        referrerPolicy="no-referrer"
-                        className="h-36 w-full object-cover" 
+                        className="h-36 w-full object-cover animate-none" 
+                        width={400}
                       />
                     ) : (
                       <div className="h-36 bg-slate-100 flex items-center justify-center text-slate-400 font-extrabold uppercase text-xs font-mono border-b border-slate-100">
@@ -800,11 +801,11 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   .map((off, oidx) => (
                     <div key={oidx} className="flex items-center gap-3.5 p-4 bg-white rounded-2xl border border-slate-105 border-slate-200/60 shadow-sm hover:border-slate-350 transition-all">
                       {off.photo ? (
-                        <img 
+                        <SmartImage 
                           src={off.photo} 
                           alt={off.name} 
-                          referrerPolicy="no-referrer"
-                          className="h-10 w-10 rounded-full object-cover border border-slate-200" 
+                          className="h-10 w-10 rounded-full object-cover border border-slate-200 overflow-hidden shrink-0 animate-none" 
+                          width={100}
                         />
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs uppercase border border-indigo-100">

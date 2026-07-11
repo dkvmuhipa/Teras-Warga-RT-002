@@ -8,7 +8,6 @@ import { House, Bill, PdfConfig } from '../../types';
 import { toast } from 'sonner';
 import { sendWhatsAppViaGateway, broadcastWhatsApp, getWhatsAppGroups, sendWhatsAppMessage } from '../../services/whatsappService';
 import { safeJsonStringify } from '../../services/databaseService';
-import { auth } from '../../services/firebaseConfig';
 
 interface WhatsAppBroadcastManagerProps {
   houses: House[];
@@ -262,18 +261,12 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
         };
       }
 
-      const token = await auth.currentUser?.getIdToken();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
       // Hit our newly integrated server-side Gemini API route
       const response = await fetch('/api/gemini/generate-broadcast', {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: safeJsonStringify(payload),
       });
 

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getMessaging, isSupported } from "firebase/messaging";
 import firebaseAppletConfig from "../firebase-applet-config.json";
@@ -25,6 +25,23 @@ try {
   // Using modular imports directly via namespace to avoid export errors
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  
+  // Enable offline persistence for RT offline support
+  if (typeof window !== 'undefined') {
+    enableMultiTabIndexedDbPersistence(db)
+      .catch((err) => {
+        if (err.code === 'failed-precondition') {
+          // Multiple tabs open, persistence can only be enabled in one tab at a time.
+          console.warn("Firestore persistence failed-precondition (multiple tabs).");
+        } else if (err.code === 'unimplemented') {
+          // The current browser does not support all of the features required to enable persistence
+          enableIndexedDbPersistence(db).catch(innerErr => {
+            console.warn("Firestore persistence single-tab fell back and failed:", innerErr);
+          });
+        }
+      });
+  }
+
   auth = getAuth(app);
   
   // Messaging only works in browser and if supported

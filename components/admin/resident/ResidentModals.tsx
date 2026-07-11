@@ -625,6 +625,115 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         onChange={(v: any) => setFormData({...formData, vehicleCount: parseInt(v) || 0})} 
                       />
                     </div>
+
+                    <div className="md:col-span-4">
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Perkawinan</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer" 
+                          value={formData.maritalStatus ?? 'Belum Kawin'} 
+                          onChange={e => setFormData({...formData, maritalStatus: e.target.value as any})}
+                        >
+                          <option value="Belum Kawin">Belum Kawin</option>
+                          <option value="Kawin">Kawin</option>
+                          <option value="Cerai Hidup">Cerai Hidup</option>
+                          <option value="Cerai Mati">Cerai Mati</option>
+                        </select>
+                        <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-4">
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Golongan Darah</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer" 
+                          value={formData.bloodType ?? '-'} 
+                          onChange={e => setFormData({...formData, bloodType: e.target.value as any})}
+                        >
+                          <option value="-">Tidak Tahu / -</option>
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                          <option value="AB">AB</option>
+                          <option value="O">O</option>
+                        </select>
+                        <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-4">
+                      <FormField 
+                        label="Kewarganegaraan" 
+                        placeholder="Contoh: WNI"
+                        value={formData.nationality} 
+                        onChange={(v: any) => setFormData({...formData, nationality: v})} 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section Ronda Siskamling & Catatan Khusus */}
+                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
+                  <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-slate-100">
+                    <div className="w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-705">
+                      <Shield size={16} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-800">Keamanan & Ronda Siskamling</h3>
+                      <p className="text-[10px] text-slate-400">Pengaturan kewajiban ronda malam dan catatan khusus hunian</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div className="md:col-span-6 flex items-center gap-3 bg-slate-50/50 p-4 border border-slate-200 rounded-xl">
+                      <input 
+                        type="checkbox"
+                        id="rondaExempt"
+                        className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        checked={formData.rondaExempt || false}
+                        onChange={e => setFormData({...formData, rondaExempt: e.target.checked})}
+                      />
+                      <div className="flex-1">
+                        <label htmlFor="rondaExempt" className="block text-xs font-bold text-slate-800 cursor-pointer select-none">
+                          Bebas Tugas Siskamling (Dispensasi)
+                        </label>
+                        <p className="text-[10px] text-slate-500 mt-0.5 leading-tight select-none">
+                          Penghuni dibebaskan dari kewajiban ronda malam (Lansia, Sakit, atau Jabatan Khusus).
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-3">
+                      <FormField 
+                        label="Poin Keaktifan Ronda" 
+                        type="number"
+                        placeholder="0"
+                        disabled={formData.rondaExempt}
+                        value={formData.rondaPoints ?? 0} 
+                        onChange={(v: any) => setFormData({...formData, rondaPoints: parseInt(v) || 0})} 
+                      />
+                    </div>
+
+                    <div className="md:col-span-3">
+                      <FormField 
+                        label="Tugas Ronda Bulan Ini" 
+                        type="number"
+                        placeholder="0"
+                        disabled={formData.rondaExempt}
+                        value={formData.rondaDutyCount ?? 0} 
+                        onChange={(v: any) => setFormData({...formData, rondaDutyCount: parseInt(v) || 0})} 
+                      />
+                    </div>
+
+                    <div className="md:col-span-12">
+                      <FormField 
+                        label="Catatan Khusus Hunian" 
+                        placeholder="Tulis catatan khusus jika ada (misal: Lansia tinggal sendiri, peliharaan hewan penjaga, sakit kronis, dll)..."
+                        multiline
+                        value={formData.specialNotes} 
+                        onChange={(v: any) => setFormData({...formData, specialNotes: v})} 
+                      />
+                    </div>
                   </div>
 
                   <div className="mt-6 pt-5 border-t border-slate-100">

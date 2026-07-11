@@ -39,7 +39,8 @@ import {
   Eye,
   EyeOff,
   Download,
-  Check
+  Check,
+  ShieldCheck
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
@@ -56,7 +57,8 @@ import {
   addReportToDb,
   handleFirestoreError,
   OperationType,
-  subscribeToPdfConfig
+  subscribeToPdfConfig,
+  validateResidentAccess
 } from '../../services/databaseService';
 import { generateSuratPengantar } from '../../services/pdfService';
 import { NotificationToggle } from '../PushNotificationManager';
@@ -81,6 +83,25 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [reports, setReports] = useState<Report[]>([]);
   const [letters, setLetters] = useState<LetterRequest[]>([]);
   const [pdfConfig, setPdfConfig] = useState<any>(null);
+  
+  // Data Privacy & Security Toggles
+  const [showFullNiks, setShowFullNiks] = useState<Record<string, boolean>>({});
+  
+  const toggleNikVisibility = (id: string) => {
+    setShowFullNiks(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const formatSensitiveNik = (nik: string, isVisible: boolean) => {
+    if (!nik) return '-';
+    if (isVisible) return nik;
+    if (nik.length === 16) {
+      return `${nik.slice(0, 4)}********${nik.slice(-4)}`;
+    }
+    return nik.length > 4 ? `${nik.slice(0, 2)}******${nik.slice(-2)}` : '******';
+  };
   
   const { getPaymentStatus, settings } = useFinancial();
   const currentHouse = houses.find(h => h.id === selectedHouseId);
@@ -119,14 +140,15 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     };
   }, [selectedHouseId]);
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const house = houses.find(h => h.id === tempHouseId);
-    if (house && house.accessCode === pinInput) {
+    const isValid = await validateResidentAccess(tempHouseId, pinInput);
+    if (isValid) {
+      const house = houses.find(h => h.id === tempHouseId);
       setSelectedHouseId(tempHouseId);
       localStorage.setItem('resident_house_id', tempHouseId);
-      localStorage.setItem('resident_name', house.headOfFamily);
-      localStorage.setItem('resident_location', `Blok ${house.block}-${house.number}`);
+      localStorage.setItem('resident_name', house ? house.headOfFamily : 'Warga');
+      localStorage.setItem('resident_location', house ? `Blok ${house.block}-${house.number}` : `Blok ${tempHouseId}`);
       setIsPinModalOpen(false);
       setPinInput('');
       setPinError(false);
@@ -180,6 +202,8 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     familyMembers: [] as any[],
     reason: ''
   });
+
+  const [formStep, setFormStep] = useState<'profile' | 'kependudukan' | 'ekonomi' | 'anggota'>('profile');
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isIuranModalOpen, setIsIuranModalOpen] = useState(false);
@@ -316,41 +340,42 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       });
 
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8 md:py-16">
+      <div className="max-w-5xl mx-auto px-4 py-8 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl p-6 md:p-12 relative overflow-hidden">
           {/* Atmospheric Background glow */}
-          <div className="absolute top-[-20%] left-[-20%] w-[50%] h-[50%] bg-indigo-100/40 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-indigo-100/40 blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-[-20%] right-[-20%] w-[50%] h-[50%] bg-emerald-50/30 blur-[100px] rounded-full pointer-events-none" />
           
           {/* Left illustration/info column */}
           <div className="md:col-span-7 space-y-6 md:pr-6 relative z-10 text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 shadow-sm">
               <Shield size={14} className="animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Warga Hub Gateway</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Warga Hub Portal Mandiri</span>
             </div>
             
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-              Akses Gateway Mandiri <br/>
-              <span className="text-indigo-600">Terpercaya & Aman</span>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+              Akses Portal Mandiri <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-800">Warga RT 02</span>
             </h2>
             
-            <p className="text-slate-500 font-medium text-sm leading-relaxed">
-              Masuk ke dashboard personal Anda untuk memantau status iuran kependudukan, memeriksa riwayat administrasi surat, melaporkan log kunjungan tamu, serta memperbarui data Kartu Keluarga secara praktis.
+            <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-lg">
+              Selamat datang di sistem siber layanan mandiri warga. Gunakan kode PIN unik hunian Anda untuk memantau iuran bulanan, mengurus surat pengantar resmi kelurahan secara instan, mencetak E-ID, serta menyampaikan laporan masalah lingkungan secara langsung.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
               {[
-                { title: "E-ID Card Digital", desc: "Verifikasi barcode identitas RT secara instan", icon: QrCode, color: "text-indigo-600 bg-indigo-50" },
-                { title: "Update KK Mandiri", desc: "Ubah data penghuni & keluarga kapan saja", icon: FileEdit, color: "text-emerald-600 bg-emerald-50" },
-                { title: "Log Tamu Keamanan", desc: "Pantau & atur kedatangan tamu bermalam", icon: History, color: "text-amber-600 bg-amber-50" },
-                { title: "Laporan & Aduan", desc: "Sampaikan keluhan fasilitas secara digital", icon: AlertTriangle, color: "text-rose-600 bg-rose-50" }
+                { title: "E-ID Card Digital", desc: "Verifikasi barcode identitas RT secara instan", icon: QrCode, color: "text-indigo-600 bg-indigo-50 border-indigo-100/50" },
+                { title: "Update KK Mandiri", desc: "Ubah data penghuni & keluarga kapan saja", icon: FileEdit, color: "text-emerald-600 bg-emerald-50 border-emerald-100/50" },
+                { title: "Log Tamu Keamanan", desc: "Pantau & atur kedatangan tamu bermalam", icon: History, color: "text-amber-600 bg-amber-50 border-amber-100/50" },
+                { title: "Laporan & Aduan", desc: "Sampaikan keluhan fasilitas secara digital", icon: AlertTriangle, color: "text-rose-600 bg-rose-50 border-rose-100/50" }
               ].map((feat, idx) => (
-                <div key={idx} className="flex gap-3 text-left">
-                  <div className={`p-2.5 rounded-xl shrink-0 h-10 w-10 flex items-center justify-center ${feat.color}`}>
+                <div key={idx} className="flex gap-3 text-left p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100">
+                  <div className={`p-2.5 rounded-xl shrink-0 h-10 w-10 flex items-center justify-center border ${feat.color}`}>
                     <feat.icon size={16} />
                   </div>
                   <div>
                     <h5 className="text-xs font-black text-slate-800">{feat.title}</h5>
-                    <p className="text-[11px] text-slate-400 font-medium mt-0.5">{feat.desc}</p>
+                    <p className="text-[11px] text-slate-400 font-semibold mt-0.5 leading-snug">{feat.desc}</p>
                   </div>
                 </div>
               ))}
@@ -359,16 +384,16 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
           {/* Right Login form column */}
           <div className="md:col-span-5 bg-slate-50/60 p-6 md:p-8 rounded-3xl border border-slate-100 flex flex-col justify-center relative z-10">
-            <div className="w-16 h-16 bg-white text-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100/50 mb-6">
+            <div className="w-16 h-16 bg-white text-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-100/80 mb-6">
               <User size={32} />
             </div>
             
             <h3 className="text-xl font-black text-slate-800 mb-1 text-left">Pilih Rumah Anda</h3>
-            <p className="text-xs text-slate-400 font-medium mb-6 text-left">Silakan tentukan identitas hunian aktif Anda di bawah ini:</p>
+            <p className="text-xs text-slate-400 font-semibold mb-6 text-left">Silakan tentukan identitas hunian aktif Anda di bawah ini:</p>
 
             <div className="space-y-4">
               <select 
-                className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm cursor-pointer hover:border-slate-350"
+                className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm cursor-pointer hover:border-indigo-200"
                 value={tempHouseId}
                 onChange={(e) => {
                   setTempHouseId(e.target.value);
@@ -405,26 +430,60 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               </p>
             </div>
 
-            <div className="relative">
-              <input 
-                type={showPin ? "text" : "password"}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                required
-                autoFocus
-                className={`w-full px-6 py-4 bg-slate-50 border ${pinError ? 'border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'} rounded-2xl text-center text-3xl font-black tracking-[0.5em] outline-none transition-all`}
-                value={pinInput}
-                onChange={e => setPinInput(e.target.value.replace(/\D/g, ''))}
-                placeholder="••••••"
-              />
+            {/* Hidden Input for Keyboard Typing */}
+            <input 
+              type="password"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              required
+              autoFocus
+              className="sr-only"
+              id="pin-hidden-input"
+              value={pinInput}
+              onChange={e => setPinInput(e.target.value.replace(/\D/g, ''))}
+            />
+
+            {/* Premium PIN Slot Visual Indicators */}
+            <div 
+              onClick={() => document.getElementById('pin-hidden-input')?.focus()}
+              className="flex justify-center gap-3 my-4 cursor-pointer"
+              title="Klik untuk mengetik"
+            >
+              {[0, 1, 2, 3, 4, 5].map((idx) => {
+                const hasValue = pinInput.length > idx;
+                return (
+                  <div 
+                    key={idx} 
+                    className={`w-11 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-black transition-all ${
+                      pinError 
+                        ? 'border-rose-500 bg-rose-50 text-rose-600 animate-pulse' 
+                        : hasValue 
+                          ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 shadow-md shadow-indigo-100/50 scale-105' 
+                          : 'border-slate-200 bg-white text-slate-300'
+                    }`}
+                  >
+                    {hasValue ? (showPin ? pinInput[idx] : '•') : ''}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-between items-center px-4">
               <button 
                 type="button" 
                 onClick={() => setShowPin(!showPin)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 transition-colors"
-                title={showPin ? "Sembunyikan" : "Tampilkan"}
+                className="text-xs font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest flex items-center gap-1 cursor-pointer transition-colors"
               >
-                {showPin ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPin ? <EyeOff size={14} /> : <Eye size={14} />}
+                <span>{showPin ? "Sembunyikan PIN" : "Tampilkan PIN"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPinInput('')}
+                className="text-xs font-black text-rose-500 hover:text-rose-700 uppercase tracking-widest cursor-pointer transition-colors"
+              >
+                Hapus Semua
               </button>
             </div>
 
@@ -432,7 +491,47 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               <p className="text-xs text-rose-500 font-bold text-center animate-bounce">PIN Salah! Periksa sandi unik hunian Anda kembali.</p>
             )}
 
-            <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 cursor-pointer font-black text-xs uppercase tracking-widest">
+            {/* Interactive Tactile Keypad */}
+            <div className="grid grid-cols-3 gap-3 max-w-[280px] mx-auto pt-2">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => {
+                    if (pinInput.length < 6) setPinInput(prev => prev + num);
+                  }}
+                  className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-black text-slate-800 rounded-2xl flex items-center justify-center transition-all cursor-pointer border border-slate-100 hover:border-slate-200"
+                >
+                  {num}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="w-16 h-16 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-2xl flex items-center justify-center"
+                disabled
+              >
+                {/* Blank Spacer */}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (pinInput.length < 6) setPinInput(prev => prev + '0');
+                }}
+                className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-black text-slate-800 rounded-2xl flex items-center justify-center transition-all cursor-pointer border border-slate-100 hover:border-slate-200"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                onClick={() => setPinInput(prev => prev.slice(0, -1))}
+                className="w-16 h-16 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center transition-all cursor-pointer border border-slate-100 hover:border-slate-200 hover:text-rose-500 hover:bg-rose-50"
+                title="Hapus satu angka"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            </div>
+
+            <Button type="submit" className="w-full py-4.5 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 cursor-pointer font-black text-xs uppercase tracking-widest">
               Verifikasi & Masuk <ChevronRight size={16} />
             </Button>
           </form>
@@ -442,16 +541,17 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 mb-24">
+    <div className="max-w-6xl mx-auto px-4 py-8 mb-24 text-left">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white border border-slate-100/80 p-6 md:p-8 rounded-[2rem] shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white border border-slate-100/80 p-6 md:p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-2 h-full bg-indigo-600" />
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <User size={24} />
+          <div className="w-14 h-14 rounded-2xl bg-indigo-50/50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+            <User size={26} />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-0.5">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Dashboard Warga</h2>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Dashboard Portal Warga</h2>
               <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-indigo-100">
                 Blok {currentHouse?.block}-{currentHouse?.number}
               </span>
@@ -461,7 +561,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         </div>
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-2 px-5 py-3 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-slate-200/60 hover:bg-rose-5 text-rose-600 hover:border-rose-100 hover:shadow-sm transition-all cursor-pointer"
+          className="flex items-center gap-2 px-5 py-3 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-slate-200/60 hover:bg-rose-50 text-slate-600 hover:text-rose-600 hover:border-rose-100 hover:shadow-sm transition-all cursor-pointer"
         >
           <LogOut size={14} /> Keluar Sesi
         </button>
@@ -475,21 +575,25 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           { id: 'update', label: 'Update Data', shortLabel: 'Update', icon: FileEdit },
           { id: 'guests', label: 'Log Tamu', shortLabel: 'Tamu', icon: History },
           { id: 'reports', label: 'Laporan', shortLabel: 'Aduan', icon: AlertTriangle }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-5 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === tab.id 
-              ? 'bg-white text-indigo-600 shadow-sm' 
-              : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            <tab.icon size={15} />
-            <span className="hidden md:inline">{tab.label}</span>
-            <span className="inline md:hidden">{tab.shortLabel}</span>
-          </button>
-        ))}
+        ].map((tab) => {
+          const isSelected = activeTab === tab.id;
+          return (
+            <motion.button
+              key={tab.id}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-5 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer ${
+                isSelected 
+                ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/30 font-black' 
+                : 'text-slate-400 hover:text-slate-600 font-semibold'
+              }`}
+            >
+              <tab.icon size={15} className={isSelected ? 'text-indigo-600' : 'text-slate-400'} />
+              <span className="hidden md:inline">{tab.label}</span>
+              <span className="inline md:hidden">{tab.shortLabel}</span>
+            </motion.button>
+          );
+        })}
       </div>
 
       <AnimatePresence mode="wait">
@@ -501,12 +605,104 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             exit={{ opacity: 0, y: -20 }}
             className="space-y-8"
           >
+            {/* Bento Grid Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+              {/* Card 1: Iuran */}
+              <motion.div 
+                whileHover={{ y: -3 }}
+                onClick={() => setIsIuranModalOpen(true)}
+                className={`p-6 rounded-[2rem] border cursor-pointer transition-all ${
+                  isAllPaid 
+                    ? 'bg-emerald-50/45 border-emerald-100/75 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/20' 
+                    : (isMandatory ? 'bg-rose-50/45 border-rose-100/75 hover:border-rose-200 hover:shadow-lg hover:shadow-rose-100/20' : 'bg-amber-50/45 border-amber-100/75 hover:border-amber-200 hover:shadow-lg hover:shadow-amber-100/20')
+                }`}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`p-3 rounded-2xl ${
+                    isAllPaid ? 'bg-emerald-500/10 text-emerald-600' : (isMandatory ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600')
+                  }`}>
+                    <CreditCard size={20} />
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+                    isAllPaid 
+                      ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' 
+                      : (isMandatory ? 'bg-rose-500/20 text-rose-700 border-rose-500/30' : 'bg-amber-500/20 text-amber-700 border-amber-500/30')
+                  }`}>
+                    {isAllPaid ? 'Lunas' : (isMandatory ? 'Wajib Bayar' : 'Tagihan Baru')}
+                  </span>
+                </div>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Status Keuangan ({currentMonth})</h4>
+                <p className="text-xl font-black text-slate-800">
+                  {isAllPaid ? 'Iuran Lunas' : `Rp ${totalFee.toLocaleString('id-ID')}`}
+                </p>
+                <p className="text-[11px] text-slate-450 font-semibold mt-1 flex items-center gap-1">
+                  Klik untuk rincian iuran bulanan →
+                </p>
+              </motion.div>
+
+              {/* Card 2: Pengajuan Aktif */}
+              <motion.div 
+                whileHover={{ y: -3 }}
+                onClick={() => {
+                  const pendingLetters = letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length;
+                  if (pendingLetters > 0) setActiveTab('letters');
+                  else setActiveTab('reports');
+                }}
+                className="p-6 rounded-[2rem] bg-white border border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50/30 cursor-pointer transition-all"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                    <FileText size={20} />
+                  </div>
+                  {letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length + reports.filter(r => r.status !== 'Selesai').length > 0 ? (
+                    <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-widest border border-indigo-200">
+                      Ada Aktivitas
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-xl text-[9px] font-black uppercase tracking-widest border border-slate-200">
+                      Kondusif
+                    </span>
+                  )}
+                </div>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Administrasi & Aduan</h4>
+                <p className="text-xl font-black text-slate-800">
+                  {letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length} Surat • {reports.filter(r => r.status !== 'Selesai').length} Aduan
+                </p>
+                <p className="text-[11px] text-slate-450 font-semibold mt-1">
+                  Klik untuk lacak perkembangan berkas →
+                </p>
+              </motion.div>
+
+              {/* Card 3: Profil Demografi */}
+              <motion.div 
+                whileHover={{ y: -3 }}
+                onClick={() => setActiveTab('update')}
+                className="p-6 rounded-[2rem] bg-white border border-slate-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-50/30 cursor-pointer transition-all"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                    <Users size={20} />
+                  </div>
+                  <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-[9px] font-black uppercase tracking-widest border border-emerald-100">
+                    Mandiri
+                  </span>
+                </div>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Anggota & Kendaraan</h4>
+                <p className="text-xl font-black text-slate-800">
+                  {currentHouse?.occupants || 0} Jiwa • {currentHouse?.vehicleCount || 0} Kendaraan
+                </p>
+                <p className="text-[11px] text-slate-450 font-semibold mt-1">
+                  Klik untuk pembaruan profil KK →
+                </p>
+              </motion.div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               {/* E-ID Card */}
               <div className="lg:col-span-2">
                 <motion.div 
                   whileHover={{ y: -4, scale: 1.005 }}
-                  className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 text-white border-none shadow-2xl rounded-[2.5rem] p-0 min-h-[350px] transition-all id-card-printable"
+                  className="relative group overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 text-white border border-indigo-500/30 hover:border-indigo-400/50 shadow-[0_20px_50px_rgba(79,70,229,0.15)] hover:shadow-[0_20px_50px_rgba(79,70,229,0.3)] rounded-[2.5rem] p-0 min-h-[350px] transition-all id-card-printable"
                 >
                   {/* Decorative elements */}
                   <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
@@ -835,6 +1031,121 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               </div>
             </div>
 
+            {/* C. DETAIL PROFIL KEPALA KELUARGA (Full Profile of Head of Family) */}
+            <div className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 md:p-8 text-left mt-8">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-50">
+                <div>
+                  <h3 className="text-lg font-black text-slate-800">Detail Profil Kepala Keluarga</h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">Rincian data identitas kependudukan, status sosial, dan fasilitas hunian Anda.</p>
+                </div>
+                <button 
+                  onClick={() => setActiveTab('update')}
+                  className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                >
+                  Ajukan Perubahan Data →
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Shield size={11} className="text-slate-450"/> NIK Kepala Keluarga</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-mono font-black text-slate-800">
+                      {formatSensitiveNik(currentHouse?.nik || '', !!showFullNiks['nik'])}
+                    </p>
+                    {currentHouse?.nik && (
+                      <button 
+                        onClick={() => toggleNikVisibility('nik')}
+                        className="p-0.5 hover:bg-slate-200/50 rounded text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center justify-center cursor-pointer"
+                        title={showFullNiks['nik'] ? "Sembunyikan NIK" : "Tampilkan NIK"}
+                      >
+                        {showFullNiks['nik'] ? <EyeOff size={12} /> : <Eye size={12} />}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Users size={11} className="text-slate-450"/> Nomor Kartu Keluarga</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-mono font-black text-slate-800">
+                      {formatSensitiveNik(currentHouse?.kkNumber || '', !!showFullNiks['kkNumber'])}
+                    </p>
+                    {currentHouse?.kkNumber && (
+                      <button 
+                        onClick={() => toggleNikVisibility('kkNumber')}
+                        className="p-0.5 hover:bg-slate-200/50 rounded text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center justify-center cursor-pointer"
+                        title={showFullNiks['kkNumber'] ? "Sembunyikan No. KK" : "Tampilkan No. KK"}
+                      >
+                        {showFullNiks['kkNumber'] ? <EyeOff size={12} /> : <Eye size={12} />}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><User size={11} className="text-slate-450"/> Jenis Kelamin</p>
+                  <p className="text-xs font-black text-slate-800">{currentHouse?.gender || '-'}</p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Calendar size={11} className="text-slate-450"/> Kelahiran</p>
+                  <p className="text-xs font-black text-slate-800 truncate">
+                    {currentHouse?.birthPlace || '-'}{currentHouse?.birthDate ? `, ${currentHouse?.birthDate}` : ''}
+                  </p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Briefcase size={11} className="text-slate-450"/> Pekerjaan</p>
+                  <p className="text-xs font-black text-slate-800 truncate">{currentHouse?.job || currentHouse?.jobCategory || '-'}</p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><GraduationCap size={11} className="text-slate-450"/> Pendidikan</p>
+                  <p className="text-xs font-black text-slate-800 truncate">{currentHouse?.education || '-'}</p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Heart size={11} className="text-slate-450"/> Golongan Darah</p>
+                  <p className="text-xs font-black text-slate-800">{currentHouse?.bloodType || '-'}</p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Globe size={11} className="text-slate-450"/> Kewarganegaraan</p>
+                  <p className="text-xs font-black text-slate-800">{currentHouse?.nationality || 'WNI'}</p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Activity size={11} className="text-slate-450"/> Status BPJS</p>
+                  <p className="text-xs font-black text-slate-800">{currentHouse?.bpjsStatus || 'Tidak Ada'}</p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><ShieldCheck size={11} className="text-slate-450"/> Status Vaksinasi</p>
+                  <p className="text-xs font-black text-slate-800">{currentHouse?.vaccinationStatus || 'Tidak Ada Data'}</p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><DollarSign size={11} className="text-slate-450"/> Status Ekonomi</p>
+                  <p className="text-xs font-black text-slate-800">{currentHouse?.economicStatus || 'Sejahtera'}</p>
+                </div>
+
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Shield size={11} className="text-slate-450"/> Kewajiban Ronda</p>
+                  <p className="text-xs font-black text-slate-800">
+                    {currentHouse?.rondaExempt ? 'Bebas Tugas Siskamling' : 'Wajib Ronda Aktif'}
+                  </p>
+                </div>
+
+                {currentHouse?.addressKtp && (
+                  <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85 col-span-2 md:col-span-4">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><MapPin size={11} className="text-slate-450"/> Alamat Sesuai KTP</p>
+                    <p className="text-xs font-bold text-slate-700 leading-relaxed">{currentHouse.addressKtp}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* A. DAFTAR ANGGOTA KELUARGA (Family Members Section) */}
             <div className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 md:p-8 text-left mt-8">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-50">
@@ -862,7 +1173,21 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         <div className="flex-1 space-y-1 overflow-hidden">
                           <h4 className="font-extrabold text-slate-800 text-sm truncate">{member.name || '-' }</h4>
                           <p className="text-[10px] bg-slate-200/60 text-slate-500 font-black px-2 py-0.5 rounded w-fit uppercase tracking-wider">{member.relation || 'Anggota'}</p>
-                          <p className="text-[11px] text-slate-400 font-semibold truncate">NIK: <span className="font-mono text-slate-500">{member.nik || '-' }</span></p>
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-semibold">
+                            <span>NIK:</span>
+                            <span className="font-mono text-slate-500">
+                              {formatSensitiveNik(member.nik, !!showFullNiks[`member-${index}`])}
+                            </span>
+                            {member.nik && (
+                              <button 
+                                onClick={() => toggleNikVisibility(`member-${index}`)}
+                                className="p-0.5 hover:bg-slate-200/50 rounded text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center justify-center cursor-pointer"
+                                title={showFullNiks[`member-${index}`] ? "Sembunyikan NIK" : "Tampilkan NIK"}
+                              >
+                                {showFullNiks[`member-${index}`] ? <EyeOff size={12} /> : <Eye size={12} />}
+                              </button>
+                            )}
+                          </div>
                           {member.birthDate && (
                             <p className="text-[10px] text-slate-400 font-medium font-mono">{member.birthDate}</p>
                           )}
@@ -1124,8 +1449,15 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                               <p className="text-xs font-semibold text-slate-700 leading-relaxed">{letter.purposeDetail}</p>
                             </div>
                             {letter.nik && (
-                              <p className="text-[11px] font-bold text-slate-500">
-                                NIK Pemohon: <span className="text-slate-700">{letter.nik}</span>
+                              <p className="text-[11px] font-bold text-slate-500 inline-flex items-center gap-1.5">
+                                NIK Pemohon: <span className="text-slate-700 font-mono">{formatSensitiveNik(letter.nik, !!showFullNiks[`letter-${letter.id}`])}</span>
+                                <button 
+                                  onClick={() => toggleNikVisibility(`letter-${letter.id}`)}
+                                  className="p-0.5 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                                  title={showFullNiks[`letter-${letter.id}`] ? "Sembunyikan NIK" : "Tampilkan NIK"}
+                                >
+                                  {showFullNiks[`letter-${letter.id}`] ? <EyeOff size={11} /> : <Eye size={11} />}
+                                </button>
                               </p>
                             )}
                             {letter.letterNumber && (
@@ -1745,11 +2077,31 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                       <div className="grid grid-cols-2 gap-4">
                         <div className="p-2 bg-white rounded-lg border border-slate-100">
                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">NIK</p>
-                          <p className="text-xs font-black text-slate-800">{selectedRequest.nik || '-'}</p>
+                          <p className="text-xs font-black text-slate-800 font-mono flex items-center justify-between">
+                            <span>{formatSensitiveNik(selectedRequest.nik || '', !!showFullNiks[`req-${selectedRequest.id}`])}</span>
+                            {selectedRequest.nik && (
+                              <button 
+                                onClick={() => toggleNikVisibility(`req-${selectedRequest.id}`)}
+                                className="p-0.5 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                              >
+                                {showFullNiks[`req-${selectedRequest.id}`] ? <EyeOff size={12} /> : <Eye size={12} />}
+                              </button>
+                            )}
+                          </p>
                         </div>
                         <div className="p-2 bg-white rounded-lg border border-slate-100">
                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">No. KK</p>
-                          <p className="text-xs font-black text-slate-800">{selectedRequest.kkNumber || '-'}</p>
+                          <p className="text-xs font-black text-slate-800 font-mono flex items-center justify-between">
+                            <span>{formatSensitiveNik(selectedRequest.kkNumber || '', !!showFullNiks[`kk-${selectedRequest.id}`])}</span>
+                            {selectedRequest.kkNumber && (
+                              <button 
+                                onClick={() => toggleNikVisibility(`kk-${selectedRequest.id}`)}
+                                className="p-0.5 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                              >
+                                {showFullNiks[`kk-${selectedRequest.id}`] ? <EyeOff size={12} /> : <Eye size={12} />}
+                              </button>
+                            )}
+                          </p>
                         </div>
                         <div className="p-2 bg-white rounded-lg border border-slate-100">
                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Agama</p>
@@ -1811,7 +2163,17 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                               <div className="flex gap-3 mt-1">
                                 <p className="text-[9px] font-bold text-slate-400">{member.job || '-'}</p>
                                 <p className="text-[9px] font-bold text-slate-400">{member.gender}</p>
-                                {member.nik && <p className="text-[9px] font-bold text-slate-400">NIK: {member.nik}</p>}
+                                {member.nik && (
+                                  <div className="flex items-center gap-1">
+                                    <p className="text-[9px] font-bold text-slate-400 font-mono">NIK: {formatSensitiveNik(member.nik, !!showFullNiks[`req-member-${idx}`])}</p>
+                                    <button 
+                                      onClick={() => toggleNikVisibility(`req-member-${idx}`)}
+                                      className="p-0.5 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                                    >
+                                      {showFullNiks[`req-member-${idx}`] ? <EyeOff size={10} /> : <Eye size={10} />}
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))}

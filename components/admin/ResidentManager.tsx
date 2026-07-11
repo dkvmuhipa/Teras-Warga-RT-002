@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   getIndonesianMonthYear, 
   generateMonthOptions, 
@@ -114,6 +114,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     }
   }, [initialViewMode]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
   const [selectedHouseForBills, setSelectedHouseForBills] = useState<House | null>(null);
   const [filterStatus, setFilterStatus] = useState<any>('all');
   const [filterResidenceType, setFilterResidenceType] = useState<string>('all');
@@ -1257,50 +1265,52 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   };
 
   // Filter Logic
-  const filteredHouses = houses.filter(h => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
-      h.headOfFamily.toLowerCase().includes(searchLower) || 
-      h.block.toLowerCase().includes(searchLower) ||
-      h.number.toLowerCase().includes(searchLower) ||
-      (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) ||
-      (h.phone && h.phone.toLowerCase().includes(searchLower)) ||
-      (h.familyMembers && h.familyMembers.some(m => m.name.toLowerCase().includes(searchLower)));
-    
-    const statusSampah = getPaymentStatus(h, 'Sampah');
-    const statusAir = getPaymentStatus(h, 'Air');
-    const isDuesPaid = statusSampah === PaymentStatus.PAID && statusAir === PaymentStatus.PAID;
+  const filteredHouses = useMemo(() => {
+    return houses.filter(h => {
+      const searchLower = debouncedSearchTerm.toLowerCase();
+      const matchesSearch = 
+        h.headOfFamily.toLowerCase().includes(searchLower) || 
+        h.block.toLowerCase().includes(searchLower) ||
+        h.number.toLowerCase().includes(searchLower) ||
+        (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) ||
+        (h.phone && h.phone.toLowerCase().includes(searchLower)) ||
+        (h.familyMembers && h.familyMembers.some(m => m.name.toLowerCase().includes(searchLower)));
+      
+      const statusSampah = getPaymentStatus(h, 'Sampah');
+      const statusAir = getPaymentStatus(h, 'Air');
+      const isDuesPaid = statusSampah === PaymentStatus.PAID && statusAir === PaymentStatus.PAID;
 
-    let matchesStatus = true;
-    if (filterStatus === 'paid') matchesStatus = isDuesPaid;
-    else if (filterStatus === 'unpaid') matchesStatus = !isDuesPaid;
-    else if (filterStatus === 'occupied') matchesStatus = h.status?.toLowerCase() === 'occupied';
-    else if (filterStatus === 'empty') matchesStatus = h.status?.toLowerCase() === 'empty';
-    else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business';
-    else if (filterStatus === 'visiting') matchesStatus = h.status?.toLowerCase() === 'visiting';
-    else if (filterStatus === 'verified') matchesStatus = h.isVerified === true;
-    else if (filterStatus === 'unverified') matchesStatus = !h.isVerified;
-    else if (filterStatus === 'arrears') matchesStatus = (h.status === 'Occupied' || h.status === 'Visiting') && getArrearsForHouse(h).length > 0;
-    else if (filterStatus === 'pbb_taken') matchesStatus = h.pbbStatus === 'Sudah Diambil';
-    else if (filterStatus === 'pbb_not_taken') matchesStatus = h.pbbStatus !== 'Sudah Diambil' && h.pbbStatus !== undefined && (h.status === 'Occupied' || h.status === 'Visiting');
+      let matchesStatus = true;
+      if (filterStatus === 'paid') matchesStatus = isDuesPaid;
+      else if (filterStatus === 'unpaid') matchesStatus = !isDuesPaid;
+      else if (filterStatus === 'occupied') matchesStatus = h.status?.toLowerCase() === 'occupied';
+      else if (filterStatus === 'empty') matchesStatus = h.status?.toLowerCase() === 'empty';
+      else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business';
+      else if (filterStatus === 'visiting') matchesStatus = h.status?.toLowerCase() === 'visiting';
+      else if (filterStatus === 'verified') matchesStatus = h.isVerified === true;
+      else if (filterStatus === 'unverified') matchesStatus = !h.isVerified;
+      else if (filterStatus === 'arrears') matchesStatus = (h.status === 'Occupied' || h.status === 'Visiting') && getArrearsForHouse(h).length > 0;
+      else if (filterStatus === 'pbb_taken') matchesStatus = h.pbbStatus === 'Sudah Diambil';
+      else if (filterStatus === 'pbb_not_taken') matchesStatus = h.pbbStatus !== 'Sudah Diambil' && h.pbbStatus !== undefined && (h.status === 'Occupied' || h.status === 'Visiting');
 
-    let matchesResidenceType = true;
-    if (filterResidenceType !== 'all') {
-      matchesResidenceType = (h.residenceType || 'Tetap') === filterResidenceType;
-    }
+      let matchesResidenceType = true;
+      if (filterResidenceType !== 'all') {
+        matchesResidenceType = (h.residenceType || 'Tetap') === filterResidenceType;
+      }
 
-    let matchesBlock = true;
-    if (filterBlock !== 'all') {
-      matchesBlock = h.block === filterBlock;
-    }
+      let matchesBlock = true;
+      if (filterBlock !== 'all') {
+        matchesBlock = h.block === filterBlock;
+      }
 
-    return matchesSearch && matchesStatus && matchesResidenceType && matchesBlock;
-  }).sort((a, b) => {
-    if (sortBy === 'name') return a.headOfFamily.localeCompare(b.headOfFamily);
-    const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
-    if (blockCompare !== 0) return blockCompare;
-    return a.number.localeCompare(b.number, undefined, { numeric: true });
-  });
+      return matchesSearch && matchesStatus && matchesResidenceType && matchesBlock;
+    }).sort((a, b) => {
+      if (sortBy === 'name') return a.headOfFamily.localeCompare(b.headOfFamily);
+      const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
+      if (blockCompare !== 0) return blockCompare;
+      return a.number.localeCompare(b.number, undefined, { numeric: true });
+    });
+  }, [houses, debouncedSearchTerm, filterStatus, filterResidenceType, filterBlock, sortBy, selectedMonth, getPaymentStatus, getArrearsForHouse]);
 
   // Stats
   const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0)), 0);

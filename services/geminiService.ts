@@ -1,19 +1,11 @@
 import { Announcement, RondaSchedule, Official, House, CashFlow, Report } from "../types";
-import { auth } from "./firebaseConfig";
-
-const getAuthHeaders = async (): Promise<Record<string, string>> => {
-  const token = await auth.currentUser?.getIdToken();
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
-};
 
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
   try {
-    const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/gemini/announcement-draft', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ topic, tone })
     });
@@ -27,12 +19,10 @@ export const generateAnnouncementDraft = async (topic: string, tone: string = 'F
 
 export const analyzeReports = async (reports: string[]): Promise<string> => {
    try {
-     const authHeaders = await getAuthHeaders();
      const response = await fetch('/api/gemini/analyze-reports', {
        method: 'POST',
        headers: {
-         'Content-Type': 'application/json',
-         ...authHeaders
+         'Content-Type': 'application/json'
        },
        body: JSON.stringify({ reports })
      });
@@ -56,12 +46,10 @@ export const generateDashboardSummary = async (data: {
   widowCount?: number
 }): Promise<string> => {
    try {
-     const authHeaders = await getAuthHeaders();
      const response = await fetch('/api/gemini/dashboard-summary', {
        method: 'POST',
        headers: {
-         'Content-Type': 'application/json',
-         ...authHeaders
+         'Content-Type': 'application/json'
        },
        body: JSON.stringify({ data })
      });

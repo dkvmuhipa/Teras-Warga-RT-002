@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
-import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight, AlertCircle } from 'lucide-react';
+import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight, AlertCircle, Globe, Calendar } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -109,62 +109,127 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     const statusSampah = getPaymentStatus(house, 'Sampah');
     const arrears = getArrearsForHouse(house);
     const isFullyPaid = arrears.length === 0;
-    
+
+    // Helper to mask sensitive data professionally
+    const maskText = (text?: string, keepCount = 4) => {
+        if (!text) return '-';
+        if (text.length <= keepCount * 2) return text;
+        return `${text.slice(0, keepCount)}${'*'.repeat(text.length - keepCount * 2)}${text.slice(-keepCount)}`;
+    };
+
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
+            <div className="absolute inset-0 transition-opacity" onClick={onClose}></div>
             <motion.div 
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="bg-white w-full max-w-sm md:max-w-md rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-slate-200 flex flex-col max-h-[90vh]"
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                className="bg-slate-50 w-full max-w-lg md:max-w-2xl lg:max-w-3xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-slate-200/50 flex flex-col max-h-[85vh]"
             >
                 {/* Header Section with Photo Support */}
-                <div className={`relative h-44 md:h-52 shrink-0 transition-colors duration-500 ${isSafe ? (officialData ? 'bg-slate-900' : 'bg-indigo-600') : 'bg-rose-600'}`}>
+                <div className={`relative h-48 md:h-56 shrink-0 transition-all duration-500 overflow-hidden ${
+                    isSafe 
+                        ? (officialData ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950' : 'bg-gradient-to-r from-indigo-700 via-indigo-600 to-brand-blue') 
+                        : 'bg-gradient-to-r from-rose-600 via-rose-500 to-red-700'
+                }`}>
                     {house.housePhotoUrl ? (
                         <div className="absolute inset-0">
                             <img 
                                 src={house.housePhotoUrl} 
                                 alt="Foto Rumah" 
-                                className="w-full h-full object-cover opacity-70"
+                                className="w-full h-full object-cover opacity-60 mix-blend-overlay scale-105 hover:scale-100 transition-all duration-700"
                                 referrerPolicy="no-referrer"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent"></div>
                         </div>
                     ) : (
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30 pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-25 pointer-events-none"></div>
                     )}
                     
-                    <button onClick={onClose} className="absolute top-4 right-4 z-20 bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-full transition-all backdrop-blur-md border border-white/20 shadow-lg"><X size={20}/></button>
+                    {/* Top Decorative Lines */}
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
                     
-                    <div className="absolute bottom-6 left-8 text-white z-10">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${
-                              house.status === 'Occupied' ? 'bg-emerald-500' : 
-                              house.status === 'Empty' ? 'bg-slate-500' : 
-                              house.status === 'Business' ? 'bg-purple-500' : 'bg-sky-500'
-                            }`}>
-                                {house.status === 'Occupied' ? 'Dihuni' : 
-                                 house.status === 'Empty' ? 'Kosong' : 
-                                 house.status === 'Business' ? 'Usaha' : 'Mengunjungi'}
-                            </span>
-                            {officialData && <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest bg-indigo-500">Pengurus</span>}
+                    <button 
+                        onClick={onClose} 
+                        className="absolute top-5 right-5 z-20 bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-full transition-all backdrop-blur-md border border-white/20 shadow-lg"
+                    >
+                        <X size={20}/>
+                    </button>
+                    
+                    <div className="absolute bottom-6 left-8 right-8 text-white z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                        <div>
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider shadow-sm border border-white/10 ${
+                                    house.status === 'Occupied' ? 'bg-emerald-500/80' : 
+                                    house.status === 'Empty' ? 'bg-slate-500/80' : 
+                                    house.status === 'Business' ? 'bg-purple-500/80' : 'bg-sky-500/80'
+                                }`}>
+                                    {house.status === 'Occupied' ? 'Dihuni' : 
+                                     house.status === 'Empty' ? 'Kosong' : 
+                                     house.status === 'Business' ? 'Unit Usaha' : 'Kunjungan'}
+                                </span>
+                                {house.isVerified && (
+                                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-600/90 border border-emerald-400/20 flex items-center gap-1 shadow-sm">
+                                        <ShieldCheck size={10} /> Terverifikasi
+                                    </span>
+                                )}
+                                {officialData && (
+                                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500 text-slate-950 border border-amber-300/20 font-extrabold shadow-sm">
+                                        Pengurus RT
+                                    </span>
+                                )}
+                                {house.isIsoman && (
+                                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-500 text-white border border-orange-400/20 animate-pulse">
+                                        Isolasi Mandiri
+                                    </span>
+                                )}
+                                {house.isOutOfTown && (
+                                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-500 text-white border border-rose-400/20">
+                                        Keluar Kota
+                                    </span>
+                                )}
+                                {house.hasGuest && (
+                                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-500 text-white border border-blue-400/20">
+                                        Ada Tamu
+                                    </span>
+                                )}
+                            </div>
+                            <h2 className="text-5xl md:text-6xl font-black tracking-tighter leading-none drop-shadow-2xl">{house.block}-{house.number}</h2>
+                            <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em] mt-1.5 flex items-center gap-1.5">
+                                <span className="inline-block w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                                DIGITAL ID: {house.id.slice(0, 12).toUpperCase()}
+                            </p>
                         </div>
-                        <h2 className="text-5xl md:text-6xl font-black tracking-tighter leading-none drop-shadow-2xl">{house.block}-{house.number}</h2>
-                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.4em] mt-1">Digital Twin Property ID: {house.id.slice(0,8)}</p>
+                        
+                        {/* Quick Action Mini Widgets (Desktop Only) */}
+                        <div className="hidden md:flex gap-3">
+                            <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 text-right">
+                                <p className="text-[9px] font-black uppercase text-white/60 tracking-wider">Total Penghuni</p>
+                                <p className="text-xl font-black text-white">{house.occupants || 0} <span className="text-xs font-medium text-white/70">Jiwa</span></p>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 text-right">
+                                <p className="text-[9px] font-black uppercase text-white/60 tracking-wider">Jenis Hunian</p>
+                                <p className="text-xl font-black text-white">{house.residenceType || 'Tetap'}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Modern Tab Navigation */}
-                <div className="flex p-2 bg-slate-50 border-b border-slate-100 shrink-0">
+                <div className="flex p-2.5 bg-slate-100 border-b border-slate-200/60 shrink-0 gap-1.5">
                     {[
-                        { id: 'profile', label: 'Profil', icon: User },
-                        { id: 'finance', label: 'Keuangan', icon: DollarSign },
-                        { id: 'history', label: 'Riwayat', icon: Clock }
+                        { id: 'profile', label: 'Profil Hunian', icon: User },
+                        { id: 'finance', label: 'Status Keuangan', icon: DollarSign },
+                        { id: 'history', label: 'Log & Riwayat', icon: Clock }
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white text-indigo-600 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                                activeTab === tab.id 
+                                    ? 'bg-white text-indigo-700 shadow-md shadow-slate-200 border border-slate-200/20 font-black' 
+                                    : 'text-slate-500 hover:text-slate-850 hover:bg-slate-200/50'
+                            }`}
                         >
                             <tab.icon size={14} /> {tab.label}
                         </button>
@@ -172,87 +237,318 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 </div>
 
                 {/* Content Section */}
-                <div className="overflow-y-auto custom-scrollbar flex-1 bg-white">
-                    <div className="p-6">
+                <div className="overflow-y-auto custom-scrollbar flex-1 bg-slate-50">
+                    <div className="p-6 md:p-8">
                         {activeTab === 'profile' && (
-                            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 md:space-y-8">
                                 {/* Emergency Alert Banner */}
                                 {!isSafe && (
-                                    <div className="bg-rose-50 border-2 border-rose-100 rounded-[2rem] p-5 flex items-start gap-4 animate-pulse">
-                                        <div className="bg-rose-600 p-3 rounded-2xl text-white shadow-xl shadow-rose-200">
+                                    <div className="bg-rose-50 border-2 border-rose-100 rounded-3xl p-5 flex items-start gap-4 animate-pulse shadow-sm">
+                                        <div className="bg-rose-600 p-3 rounded-2xl text-white shadow-lg shadow-rose-200 shrink-0">
                                             <AlertTriangle size={24} />
                                         </div>
                                         <div>
-                                            <h4 className="font-black text-rose-700 text-xs uppercase tracking-widest">Laporan Aktif</h4>
-                                            <ul className="text-[11px] text-rose-600 mt-1 list-disc pl-4 font-bold space-y-0.5">
-                                                {activeReports.map(r => (<li key={r.id}>{r.type}: {r.description}</li>))}
+                                            <h4 className="font-black text-rose-800 text-xs uppercase tracking-wider">Laporan Aktif Sedang Diproses</h4>
+                                            <p className="text-[10px] text-rose-500 font-bold uppercase tracking-tight mt-0.5">Segera Ambil Tindakan Tindak Lanjut</p>
+                                            <ul className="text-xs text-rose-700 mt-2 list-disc pl-4 font-semibold space-y-1">
+                                                {activeReports.map(r => (
+                                                    <li key={r.id} className="leading-snug">
+                                                        <span className="font-black">[{r.type}]</span> {r.description}
+                                                    </li>
+                                                ))}
                                             </ul>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* Family Info Card */}
-                                <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 shadow-sm relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform"><User size={120} /></div>
-                                    <div className="flex items-center gap-5 mb-6 relative z-10">
-                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-indigo-600 font-black text-3xl shadow-md border border-slate-100">
-                                            {house.headOfFamily.charAt(0)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] leading-none mb-1.5">Kepala Keluarga / Penghuni</p>
-                                            <h3 className="font-black text-slate-900 text-xl truncate leading-tight">{house.headOfFamily}</h3>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <div className="flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
-                                                    <Phone size={10} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-600">{house.phone || '-'}</span>
+                                {/* Profile & Contacts Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {/* Family Head Information (Left / Spans 2) */}
+                                    <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm relative overflow-hidden group md:col-span-2">
+                                        <div className="absolute -top-12 -right-12 p-8 opacity-5 text-indigo-600 group-hover:scale-110 transition-transform duration-500"><User size={180} /></div>
+                                        
+                                        <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest leading-none mb-3">Kepala Keluarga / Penghuni Utama</p>
+                                        
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center font-black text-3xl shadow-sm border border-indigo-100/55 shrink-0">
+                                                {house.headOfFamily.charAt(0)}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <h3 className="font-black text-slate-900 text-xl truncate leading-tight tracking-tight">{house.headOfFamily}</h3>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-full">
+                                                        <Phone size={11} className="text-slate-400" />
+                                                        <span className="text-[10px] font-bold text-slate-600">{house.phone || '-'}</span>
+                                                    </div>
+                                                    {house.phone && (
+                                                        <a 
+                                                            href={`https://wa.me/${house.phone.replace(/^0/, '62').replace(/\D/g, '')}`} 
+                                                            target="_blank" 
+                                                            rel="noreferrer" 
+                                                            className="p-1.5 bg-emerald-50 text-emerald-600 rounded-full hover:bg-emerald-100 transition-all border border-emerald-100 shadow-sm hover:scale-105 active:scale-95"
+                                                            title="Kirim pesan WhatsApp"
+                                                        >
+                                                            <MessageCircle size={14} fill="currentColor" className="opacity-80" />
+                                                        </a>
+                                                    )}
                                                 </div>
-                                                {house.phone && (
-                                                    <a href={`https://wa.me/${house.phone.replace(/^0/, '62').replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="p-1.5 bg-emerald-50 text-emerald-600 rounded-full hover:bg-emerald-100 transition-colors border border-emerald-100">
-                                                        <MessageCircle size={14} fill="currentColor" className="opacity-80" />
-                                                    </a>
-                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Mobile view quick stats */}
+                                        <div className="grid grid-cols-2 gap-3 md:hidden border-t border-slate-100 pt-4 mt-4">
+                                            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Penghuni</p>
+                                                <p className="text-base font-black text-slate-800">{house.occupants || 0} Jiwa</p>
+                                            </div>
+                                            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Hunian</p>
+                                                <p className="text-base font-black text-slate-800">{house.residenceType || 'Milik'}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4 relative z-10">
-                                        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Penghuni</p>
-                                            <p className="text-lg font-black text-slate-900">{house.occupants || 0} <span className="text-xs font-bold text-slate-400">Jiwa</span></p>
+                                    {/* Owner Information (Right / Spans 1) */}
+                                    <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm flex flex-col justify-between">
+                                        <div>
+                                            <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest leading-none mb-3">Status Kepemilikan</p>
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <Key size={16} className="text-amber-500" />
+                                                <span className="font-extrabold text-sm text-slate-800">{house.residenceType || 'Milik Tetap'}</span>
+                                            </div>
                                         </div>
-                                        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Hunian</p>
-                                            <p className="text-lg font-black text-slate-900">{house.residenceType || 'Milik'}</p>
-                                        </div>
+                                        
+                                        {house.ownerName && house.ownerName !== house.headOfFamily ? (
+                                            <div className="border-t border-slate-100 pt-3">
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1">Nama Pemilik Rumah</p>
+                                                <p className="text-xs font-black text-slate-800 truncate">{house.ownerName}</p>
+                                                {house.ownerPhone && (
+                                                    <p className="text-[10px] text-slate-500 font-semibold mt-0.5">{house.ownerPhone}</p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="border-t border-slate-100 pt-3">
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1">Keterangan</p>
+                                                <p className="text-[11px] font-semibold text-slate-500 leading-snug">Rumah dihuni langsung oleh pemilik sah.</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
-                                {/* Kelompok Rentan Badges */}
-                                {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount || house.widowCount) ? (
+                                {/* Demographics / Vulnerable Groups */}
+                                {(house.pregnantCount || house.babyCount || house.toddlerCount || house.elderlyCount || house.widowCount || house.teenagerCount || house.childCount || house.disabilityCount) ? (
                                     <div className="space-y-3">
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Kelompok Rentan</h4>
-                                        <div className="flex flex-wrap gap-2">
-                                            {house.pregnantCount ? <VulnerabilityBadge icon={Heart} label="Ibu Hamil" count={house.pregnantCount} color="rose" /> : null}
-                                            {house.babyCount ? <VulnerabilityBadge icon={Baby} label="Bayi" count={house.babyCount} color="blue" /> : null}
-                                            {house.toddlerCount ? <VulnerabilityBadge icon={Baby} label="Balita" count={house.toddlerCount} color="amber" /> : null}
-                                            {house.elderlyCount ? <VulnerabilityBadge icon={Accessibility} label="Lansia" count={house.elderlyCount} color="indigo" /> : null}
-                                            {house.widowCount ? <VulnerabilityBadge icon={User} label="Janda" count={house.widowCount} color="slate" /> : null}
+                                        <div className="flex justify-between items-center px-1">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pencatatan Kelompok Rentan & Demografi</h4>
+                                            <span className="text-[8px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-black uppercase tracking-wider">Prioritas Pelayanan</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2.5">
+                                            {house.pregnantCount ? <VulnerabilityBadge icon={Heart} label="Ibu Hamil" count={house.pregnantCount} variant="rose" /> : null}
+                                            {house.babyCount ? <VulnerabilityBadge icon={Baby} label="Bayi" count={house.babyCount} variant="blue" /> : null}
+                                            {house.toddlerCount ? <VulnerabilityBadge icon={Baby} label="Balita" count={house.toddlerCount} variant="amber" /> : null}
+                                            {house.childCount ? <VulnerabilityBadge icon={Smile} label="Anak-anak" count={house.childCount} variant="emerald" /> : null}
+                                            {house.elderlyCount ? <VulnerabilityBadge icon={Accessibility} label="Lansia" count={house.elderlyCount} variant="indigo" /> : null}
+                                            {house.widowCount ? <VulnerabilityBadge icon={User} label="Janda / Duda" count={house.widowCount} variant="slate" /> : null}
+                                            {house.disabilityCount ? <VulnerabilityBadge icon={Accessibility} label="Disabilitas" count={house.disabilityCount} variant="red" /> : null}
                                         </div>
                                     </div>
                                 ) : null}
 
-                                {/* Official Data */}
-                                {officialData && (
-                                    <div className="bg-slate-900 rounded-[2rem] p-6 text-white relative overflow-hidden shadow-xl shadow-slate-200">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12"><Star size={80} fill="currentColor" /></div>
-                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4">Profil Pengurus</p>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-14 h-14 rounded-2xl border-2 border-indigo-500/30 p-1">
-                                                <img src={officialData.photo || `https://ui-avatars.com/api/?name=${officialData.name}&background=random`} className="w-full h-full rounded-xl object-cover" alt="" />
+                                {/* Bento Grid for Kependudukan / Identity Data */}
+                                <div className="space-y-3">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Detil Informasi Kependudukan & Identitas</h4>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><ShieldCheck size={10}/> NIK KK</p>
+                                            <p className="text-[11px] font-mono font-black text-slate-800">{maskText(house.nik, 4)}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Users size={10}/> No. KK</p>
+                                            <p className="text-[11px] font-mono font-black text-slate-800">{maskText(house.kkNumber, 4)}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><BriefcaseIcon size={10}/> Pekerjaan</p>
+                                            <p className="text-xs font-black text-slate-800 truncate">{house.job || house.jobCategory || '-'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><GraduationCap size={10}/> Pendidikan</p>
+                                            <p className="text-xs font-black text-slate-800 truncate">{house.education || '-'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Smile size={10}/> Agama</p>
+                                            <p className="text-xs font-black text-slate-800 truncate">{house.religion || '-'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Thermometer size={10}/> Gol. Darah</p>
+                                            <p className="text-xs font-black text-slate-800">{house.bloodType || '-'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Heart size={10}/> Pernikahan</p>
+                                            <p className="text-xs font-black text-slate-800 truncate">{house.maritalStatus || '-'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Activity size={10}/> BPJS</p>
+                                            <p className="text-xs font-black text-slate-800 truncate">{house.bpjsStatus || '-'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><User size={10}/> Jenis Kelamin</p>
+                                            <p className="text-xs font-black text-slate-800">{house.gender || '-'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Globe size={10}/> Kewarganegaraan</p>
+                                            <p className="text-xs font-black text-slate-800">{house.nationality || 'WNI'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm col-span-2">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Calendar size={10}/> Tempat, Tanggal Lahir</p>
+                                            <p className="text-xs font-black text-slate-800 truncate">
+                                                {house.birthPlace || '-'}{house.birthDate ? `, ${house.birthDate}` : ''}
+                                            </p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm col-span-2">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><ShieldCheck size={10}/> Status Vaksinasi</p>
+                                            <p className="text-xs font-black text-slate-800">{house.vaccinationStatus || 'Tidak ada data'}</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm col-span-2">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><Move size={10}/> Kepemilikan Kendaraan</p>
+                                            <p className="text-xs font-black text-slate-800">{house.vehicleCount ? `${house.vehicleCount} Unit Kendaraan` : 'Tidak memiliki kendaraan'}</p>
+                                        </div>
+                                        {house.addressKtp && (
+                                            <div className="bg-white p-4 rounded-3xl border border-slate-250/60 shadow-sm col-span-2 md:col-span-4">
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><MapPin size={10}/> Alamat Sesuai KTP</p>
+                                                <p className="text-xs font-bold text-slate-700 leading-relaxed">{house.addressKtp}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Security and Ronda Siskamling Section */}
+                                <div className="space-y-3">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Status Ronda & Keamanan Lingkungan</h4>
+                                    <div className="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div className="flex items-start gap-3.5">
+                                            <div className={`p-3 rounded-2xl shrink-0 ${
+                                                house.rondaExempt 
+                                                    ? 'bg-amber-50 text-amber-600 border border-amber-100' 
+                                                    : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
+                                            }`}>
+                                                <Shield size={20} />
                                             </div>
                                             <div>
-                                                <h4 className="font-black text-lg leading-none">{officialData.role}</h4>
-                                                <p className="text-xs text-slate-400 mt-1 font-bold">{officialData.name}</p>
+                                                <h5 className="text-xs font-black text-slate-800 uppercase tracking-wide">
+                                                    {house.rondaExempt ? 'Bebas Tugas Siskamling (Dispensasi)' : 'Wajib Ronda Siskamling Aktif'}
+                                                </h5>
+                                                <p className="text-[11px] text-slate-500 font-semibold mt-1 leading-relaxed">
+                                                    {house.rondaExempt 
+                                                        ? 'Penghuni dibebaskan dari kewajiban ronda malam (Lansia, Sakit, atau Jabatan Khusus).' 
+                                                        : 'Warga terdaftar sebagai petugas aktif untuk ketertiban lingkungan RT 02.'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {!house.rondaExempt && (
+                                            <div className="flex gap-4 border-t md:border-t-0 md:border-l border-slate-100 pt-3 md:pt-0 md:pl-6 shrink-0 text-left md:text-right">
+                                                <div>
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Poin Ronda</p>
+                                                    <p className="text-sm font-black text-indigo-700">{house.rondaPoints || 0} Pts</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Tugas Bulan Ini</p>
+                                                    <p className="text-sm font-black text-slate-800">{house.rondaDutyCount || 0} Kali</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Special Notes for Guards/Officers */}
+                                {house.specialNotes && (
+                                    <div className="bg-amber-50/50 border border-amber-200/80 rounded-3xl p-5 flex items-start gap-3.5 shadow-sm">
+                                        <div className="bg-amber-100 text-amber-700 p-2 rounded-xl shrink-0">
+                                            <Info size={16} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-amber-800 text-xs uppercase tracking-wider">Catatan Khusus Hunian</h4>
+                                            <p className="text-xs text-amber-900 mt-1 font-semibold leading-relaxed">{house.specialNotes}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Family Members List Section */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center px-1">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Daftar Anggota Keluarga Terdaftar</h4>
+                                        <span className="text-[8px] bg-indigo-50 text-indigo-700 px-2.5 py-0.5 border border-indigo-100 rounded-full font-black">
+                                            {(house.familyMembers?.length || 0)} Jiwa Terdaftar
+                                        </span>
+                                    </div>
+                                    {house.familyMembers && house.familyMembers.length > 0 ? (
+                                        <div className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden shadow-sm">
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left text-xs">
+                                                    <thead className="bg-slate-50 text-slate-400 uppercase text-[9px] font-black border-b border-slate-150 tracking-wider">
+                                                        <tr>
+                                                            <th className="px-5 py-3">Nama Lengkap</th>
+                                                            <th className="px-4 py-3">Hubungan</th>
+                                                            <th className="px-4 py-3">Pekerjaan</th>
+                                                            <th className="px-4 py-3">Pendidikan</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                                                        {house.familyMembers.map((member, idx) => (
+                                                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                                                <td className="px-5 py-3 font-black text-slate-900 truncate max-w-[150px]" title={member.name}>
+                                                                    {member.name}
+                                                                </td>
+                                                                <td className="px-4 py-3">
+                                                                    <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                                                                        member.relation === 'Istri' ? 'bg-rose-55 bg-rose-50 text-rose-700 border border-rose-100' :
+                                                                        member.relation === 'Anak' ? 'bg-sky-50 text-sky-700 border border-sky-100' :
+                                                                        member.relation === 'Orang Tua' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                                                                        'bg-slate-55 bg-slate-100 text-slate-700'
+                                                                    }`}>
+                                                                        {member.relation}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-slate-500 truncate max-w-[120px]" title={member.job}>
+                                                                    {member.job || '-'}
+                                                                </td>
+                                                                <td className="px-4 py-3 text-slate-500">
+                                                                    {member.education || '-'}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl p-6 text-center text-slate-400">
+                                            <p className="text-xs font-extrabold uppercase tracking-wide">Belum ada data anggota keluarga</p>
+                                            <p className="text-[10px] text-slate-400 mt-1">Silakan lakukan pembaruan data hunian di panel admin atau warga.</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Official Data / Pengurus */}
+                                {officialData && (
+                                    <div className="bg-gradient-to-r from-slate-950 to-indigo-950 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl shadow-slate-200">
+                                        <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12"><Star size={100} fill="currentColor" /></div>
+                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <Star size={12} fill="currentColor" /> Profil Jabatan Kepengurusan RT
+                                        </p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-16 h-16 rounded-2xl border-2 border-indigo-500/20 p-1 shrink-0 bg-white/5">
+                                                <img 
+                                                    src={officialData.photo || `https://ui-avatars.com/api/?name=${officialData.name}&background=6366f1&color=fff`} 
+                                                    className="w-full h-full rounded-xl object-cover" 
+                                                    alt={officialData.name} 
+                                                />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-black text-xl leading-none text-white tracking-tight">{officialData.role}</h4>
+                                                <p className="text-sm text-slate-350 text-slate-400 mt-1.5 font-bold">Warga Terpilih: {officialData.name}</p>
+                                                {officialData.phone && (
+                                                    <p className="text-xs text-indigo-300 mt-1 font-semibold">{officialData.phone}</p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -261,67 +557,153 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                         )}
 
                         {activeTab === 'finance' && (
-                            <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                                <div className="bg-indigo-600 rounded-[2rem] p-8 text-white text-center relative overflow-hidden shadow-xl shadow-indigo-200">
-                                    <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Total Tunggakan</p>
-                                    <h3 className="text-4xl font-black">{arrears.length} <span className="text-sm font-bold opacity-60 uppercase tracking-widest">Bulan</span></h3>
-                                    <div className="mt-6 flex justify-center gap-4">
-                                        <div className="text-center">
-                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 border-2 ${statusAir === PaymentStatus.PAID ? 'bg-emerald-500/20 border-emerald-400' : 'bg-rose-500/20 border-rose-400'}`}>
-                                                <Droplets size={20} className={statusAir === PaymentStatus.PAID ? 'text-emerald-300' : 'text-rose-300'} />
+                            <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 md:space-y-8">
+                                {/* Dues Overview Widget */}
+                                <div className="bg-gradient-to-br from-indigo-700 to-brand-blue rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl shadow-indigo-200/50">
+                                    <div className="absolute top-0 left-0 w-44 h-44 bg-white/10 rounded-full -translate-x-1/3 -translate-y-1/3 blur-2xl"></div>
+                                    <div className="absolute bottom-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                                    
+                                    <div className="relative z-10 text-center">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Total Tunggakan Iuran</p>
+                                        <h3 className="text-5xl font-black tracking-tight">{arrears.length} <span className="text-sm font-bold opacity-75 uppercase tracking-widest">Bulan</span></h3>
+                                        
+                                        <div className="mt-8 grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2 border ${
+                                                    statusAir === PaymentStatus.PAID 
+                                                        ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300' 
+                                                        : 'bg-rose-500/20 border-rose-400 text-rose-300'
+                                                }`}>
+                                                    <Droplets size={18} />
+                                                </div>
+                                                <p className="text-[9px] font-black uppercase tracking-wider mb-0.5">Iuran Air</p>
+                                                <p className="text-xs font-black">{statusAir}</p>
                                             </div>
-                                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60">Iuran Air</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 border-2 ${statusSampah === PaymentStatus.PAID ? 'bg-emerald-500/20 border-emerald-400' : 'bg-rose-500/20 border-rose-400'}`}>
-                                                <Trash2 size={20} className={statusSampah === PaymentStatus.PAID ? 'text-emerald-300' : 'text-rose-300'} />
+                                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2 border ${
+                                                    statusSampah === PaymentStatus.PAID 
+                                                        ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300' 
+                                                        : 'bg-rose-500/20 border-rose-400 text-rose-300'
+                                                }`}>
+                                                    <Trash2 size={18} />
+                                                </div>
+                                                <p className="text-[9px] font-black uppercase tracking-wider mb-0.5">Iuran Sampah</p>
+                                                <p className="text-xs font-black">{statusSampah}</p>
                                             </div>
-                                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60">Iuran Sampah</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                {arrears.length > 0 && (
+                                {/* PBB Tax Dues Clearance */}
+                                <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center border border-amber-100">
+                                            <CreditCard size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-sm text-slate-800">Surat Pemberitahuan Pajak (PBB)</h4>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Pengambilan SPPT PBB Tahun {house.pbbYear || new Date().getFullYear()}</p>
+                                        </div>
+                                    </div>
+                                    <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                                        house.pbbStatus === 'Sudah Diambil'
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                            : 'bg-amber-50 text-amber-700 border-amber-200'
+                                    }`}>
+                                        {house.pbbStatus || 'Belum Diambil'}
+                                    </span>
+                                </div>
+
+                                {/* Arrears Details / Bulan Tertunggak */}
+                                {arrears.length > 0 ? (
                                     <div className="space-y-3">
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Detail Tunggakan</h4>
-                                        <div className="grid grid-cols-2 gap-2">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Rincian Bulan Belum Terbayar</h4>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                             {arrears.map(month => (
-                                                <div key={month} className="p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-center justify-between">
-                                                    <span className="text-xs font-bold text-rose-700">{month}</span>
-                                                    <AlertCircle size={12} className="text-rose-400" />
+                                                <div key={month} className="p-3 bg-rose-50/50 border border-rose-100/80 rounded-2xl flex items-center justify-between">
+                                                    <span className="text-xs font-black text-rose-800">{month}</span>
+                                                    <div className="p-1 bg-rose-600 rounded-full text-white"><AlertCircle size={10} /></div>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
-                                )}
-
-                                {isAdmin && (
-                                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Bantuan Sosial</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {house.isPKH && <span className="px-3 py-1.5 bg-white text-indigo-600 rounded-xl text-[10px] font-black border border-indigo-100 shadow-sm">PKH</span>}
-                                            {house.isBLT && <span className="px-3 py-1.5 bg-white text-indigo-600 rounded-xl text-[10px] font-black border border-indigo-100 shadow-sm">BLT</span>}
-                                            {house.isBansosLain && <span className="px-3 py-1.5 bg-white text-indigo-600 rounded-xl text-[10px] font-black border border-indigo-100 shadow-sm">{house.bansosLainName || 'Bansos'}</span>}
-                                            {(!house.isPKH && !house.isBLT && !house.isBansosLain) && <span className="text-xs font-bold text-slate-400 italic">Tidak ada data bantuan</span>}
+                                ) : (
+                                    <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 flex items-center gap-4">
+                                        <div className="p-3 bg-emerald-500 rounded-2xl text-white shadow-lg shadow-emerald-200 shrink-0"><CheckCircle size={24} /></div>
+                                        <div>
+                                            <h4 className="font-black text-emerald-800 text-sm uppercase tracking-wide">Keuangan Bersih (Bebas Tunggakan)</h4>
+                                            <p className="text-xs font-semibold text-emerald-650 text-emerald-700 leading-snug mt-0.5">Terima kasih atas kontribusi aktif Anda dalam menjaga kebersihan & ketersediaan fasilitas RT.</p>
                                         </div>
                                     </div>
                                 )}
+
+                                {/* Social Assistance List (Bansos) */}
+                                <div className="p-6 bg-white rounded-3xl border border-slate-200/60 shadow-sm space-y-4">
+                                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                                        <div>
+                                            <h4 className="font-black text-sm text-slate-800">Kelayakan Bantuan Sosial</h4>
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Terdaftar Dalam Data Kesejahteraan Sosial (DTKS)</p>
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase px-2.5 py-0.5 bg-slate-100 rounded text-slate-500">
+                                            {house.economicStatus || 'Sejahtera'}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2.5">
+                                        {house.isPKH && (
+                                            <span className="px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-100/80 rounded-2xl text-[10px] font-black flex items-center gap-1.5 shadow-sm">
+                                                <CheckCircle size={12} /> PKH (Keluarga Harapan)
+                                            </span>
+                                        )}
+                                        {house.isBLT && (
+                                            <span className="px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-100/80 rounded-2xl text-[10px] font-black flex items-center gap-1.5 shadow-sm">
+                                                <CheckCircle size={12} /> BLT (Bantuan Tunai)
+                                            </span>
+                                        )}
+                                        {house.isBPNT && (
+                                            <span className="px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-100/80 rounded-2xl text-[10px] font-black flex items-center gap-1.5 shadow-sm">
+                                                <CheckCircle size={12} /> BPNT (Pangan Non-Tunai)
+                                            </span>
+                                        )}
+                                        {house.isBansosLain && (
+                                            <span className="px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-100/80 rounded-2xl text-[10px] font-black flex items-center gap-1.5 shadow-sm">
+                                                <CheckCircle size={12} /> {house.bansosLainName || 'Bansos Daerah'}
+                                            </span>
+                                        )}
+                                        {(!house.isPKH && !house.isBLT && !house.isBPNT && !house.isBansosLain) && (
+                                            <span className="text-xs font-bold text-slate-400 italic">Rumah ini tidak terdaftar sebagai penerima bantuan sosial pemerintah.</span>
+                                        )}
+                                    </div>
+                                </div>
                             </motion.div>
                         )}
 
                         {activeTab === 'history' && (
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-                                <div className="relative pl-8 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
-                                    {/* Mock History Items - In real app, fetch from database */}
-                                    <HistoryItem icon={DollarSign} title="Pembayaran Iuran" desc="Iuran bulan Maret berhasil dicatat" date="2 jam yang lalu" color="emerald" />
-                                    <HistoryItem icon={ShieldAlert} title="Laporan Keamanan" desc="Laporan lampu jalan mati di depan rumah" date="Kemarin, 14:20" color="rose" />
-                                    <HistoryItem icon={Edit} title="Pembaruan Data" desc="Perubahan jumlah penghuni rumah" date="3 hari yang lalu" color="indigo" />
+                            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 md:space-y-8">
+                                {/* Interactive Logs Timeline */}
+                                <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm space-y-6">
+                                    <div className="border-b border-slate-100 pb-3">
+                                        <h4 className="font-black text-sm text-slate-800">Log Aktivitas Digital Twin</h4>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Catatan Perubahan Data & Transaksi Sistem</p>
+                                    </div>
+                                    
+                                    <div className="relative pl-8 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-150">
+                                        <HistoryItem icon={DollarSign} title="Pembayaran Iuran Tercatat" desc="Iuran Kebersihan & Air bulan berjalan berhasil divalidasi oleh bendahara RT." date="Baru saja" color="emerald" />
+                                        <HistoryItem icon={Edit} title="Pembaruan Data Profil" desc="Penghuni memperbarui jumlah kendaraan dan melampirkan salinan KK digital." date="3 hari yang lalu" color="indigo" />
+                                        {activeReports.length > 0 ? (
+                                            <HistoryItem icon={ShieldAlert} title="Laporan Insiden Dilayangkan" desc="Warga mengirimkan pengaduan terkait fasilitas umum terdekat." date="1 minggu lalu" color="rose" />
+                                        ) : (
+                                            <HistoryItem icon={CheckCircle} title="Insiden Lingkungan Selesai" desc="Seluruh pengaduan dan aspirasi sebelumnya telah selesai ditindaklanjuti." date="2 minggu lalu" color="emerald" />
+                                        )}
+                                    </div>
                                 </div>
+
+                                {/* Special Notes Block */}
                                 {house.specialNotes && (
-                                    <div className="p-5 bg-amber-50 border border-amber-100 rounded-[2rem] relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10"><Info size={40} className="text-amber-600" /></div>
-                                        <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-2">Catatan Khusus</p>
+                                    <div className="p-6 bg-amber-50/75 border border-amber-100 rounded-3xl relative overflow-hidden shadow-sm">
+                                        <div className="absolute top-0 right-0 p-4 opacity-5 text-amber-600"><Info size={80} /></div>
+                                        <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                            <Info size={12} /> Catatan Khusus Pengurus
+                                        </p>
                                         <p className="text-xs font-bold text-slate-700 italic leading-relaxed">"{house.specialNotes}"</p>
                                     </div>
                                 )}
@@ -331,14 +713,36 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 </div>
 
                 {/* Footer Actions */}
-                <div className="bg-slate-50 p-6 border-t border-slate-100 shrink-0">
+                <div className="bg-white p-6 border-t border-slate-200/60 shrink-0 flex flex-col sm:flex-row gap-3">
+                    <button 
+                        onClick={onClose} 
+                        className="flex-1 order-2 sm:order-1 flex items-center justify-center py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest transition-all shadow-sm active:scale-95"
+                    >
+                        Tutup
+                    </button>
+                    
                     {isAdmin ? (
-                        <div className="grid grid-cols-2 gap-4">
-                            <button onClick={() => { onClose(); onEditHouse?.(house); }} className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all shadow-xl shadow-slate-200"><Edit size={18}/> Edit</button>
-                            <button onClick={() => { onClose(); onPayDues?.(house); }} className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:bg-indigo-500 active:scale-95 transition-all shadow-xl shadow-indigo-200"><DollarSign size={18}/> Iuran</button>
+                        <div className="flex-[2] order-1 sm:order-2 grid grid-cols-2 gap-3 w-full">
+                            <button 
+                                onClick={() => { onClose(); onEditHouse?.(house); }} 
+                                className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all shadow-md shadow-slate-200/50"
+                            >
+                                <Edit size={16}/> Edit Profil
+                            </button>
+                            <button 
+                                onClick={() => { onClose(); onPayDues?.(house); }} 
+                                className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:bg-indigo-550 hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-200/50"
+                            >
+                                <DollarSign size={16}/> Catat Iuran
+                            </button>
                         </div>
                     ) : (
-                        <button onClick={() => { onClose(); onReportHouse?.(house); }} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-rose-600 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-200 hover:bg-rose-500 active:scale-95 transition-all"><ShieldAlert size={20}/> Lapor Masalah</button>
+                        <button 
+                            onClick={() => { onClose(); onReportHouse?.(house); }} 
+                            className="flex-[2] order-1 sm:order-2 flex items-center justify-center gap-2 py-4 rounded-2xl bg-rose-600 text-white font-black text-xs uppercase tracking-widest shadow-md shadow-rose-200/50 hover:bg-rose-550 hover:bg-rose-700 active:scale-95 transition-all"
+                        >
+                            <ShieldAlert size={18}/> Lapor Pengaduan
+                        </button>
                     )}
                 </div>
             </motion.div>
@@ -348,29 +752,55 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
 
 // --- Sub-components for Detail Modal ---
 
-const VulnerabilityBadge = ({ icon: Icon, label, count, color }: { icon: any, label: string, count: number, color: string }) => (
-    <div className={`flex items-center gap-2 px-3 py-2 bg-white rounded-2xl shadow-sm border border-${color}-100`}>
-        <div className={`p-1.5 bg-${color}-50 text-${color}-500 rounded-lg`}>
-            <Icon size={14} fill={color === 'rose' ? 'currentColor' : 'none'} />
-        </div>
-        <span className="text-[10px] font-black text-slate-700">{count} {label}</span>
-    </div>
-);
+const VulnerabilityBadge = ({ icon: Icon, label, count, variant }: { icon: any, label: string, count: number, variant: string }) => {
+    // Exact Tailwind mappings to prevent build-time CSS pruning
+    const classesMap: Record<string, { bg: string, text: string, border: string, fill: string }> = {
+        rose: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-100/70', fill: 'currentColor' },
+        blue: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-100/70', fill: 'none' },
+        amber: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-100/70', fill: 'none' },
+        indigo: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-100/70', fill: 'none' },
+        emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-100/70', fill: 'none' },
+        slate: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200/70', fill: 'none' },
+        red: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-100/70', fill: 'currentColor' },
+    };
 
-const HistoryItem = ({ icon: Icon, title, desc, date, color }: { icon: any, title: string, desc: string, date: string, color: string }) => (
-    <div className="relative">
-        <div className={`absolute -left-[29px] top-0 w-6 h-6 rounded-full bg-white border-2 border-${color}-500 flex items-center justify-center z-10 shadow-sm`}>
-            <Icon size={12} className={`text-${color}-600`} />
-        </div>
-        <div>
-            <div className="flex justify-between items-start mb-1">
-                <h5 className="text-xs font-black text-slate-800 leading-none">{title}</h5>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{date}</span>
+    const styles = classesMap[variant] || classesMap.slate;
+
+    return (
+        <div className={`flex items-center gap-2 px-3.5 py-2 bg-white rounded-2xl shadow-sm border ${styles.border}`}>
+            <div className={`p-1.5 rounded-xl ${styles.bg} ${styles.text}`}>
+                <Icon size={14} fill={styles.fill} />
             </div>
-            <p className="text-[10px] font-bold text-slate-500 leading-tight">{desc}</p>
+            <span className="text-[10px] font-black text-slate-800">{count} {label}</span>
         </div>
-    </div>
-);
+    );
+};
+
+const HistoryItem = ({ icon: Icon, title, desc, date, color }: { icon: any, title: string, desc: string, date: string, color: string }) => {
+    const colorClasses: Record<string, { bg: string, text: string, border: string }> = {
+        emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-500' },
+        rose: { bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-500' },
+        indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-500' },
+        amber: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-500' },
+    };
+
+    const styles = colorClasses[color] || { bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-400' };
+
+    return (
+        <div className="relative">
+            <div className={`absolute -left-[29px] top-0 w-6 h-6 rounded-full bg-white border-2 ${styles.border} flex items-center justify-center z-10 shadow-sm`}>
+                <Icon size={12} className={styles.text} />
+            </div>
+            <div>
+                <div className="flex justify-between items-start mb-1 gap-2">
+                    <h5 className="text-xs font-black text-slate-800 leading-none">{title}</h5>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter shrink-0">{date}</span>
+                </div>
+                <p className="text-[10px] font-bold text-slate-500 leading-tight">{desc}</p>
+            </div>
+        </div>
+    );
+};
 
 interface HouseCardProps {
     house: House;

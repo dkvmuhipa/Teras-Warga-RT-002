@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check, Download } from 'lucide-react';
+import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
-import { jsPDF } from 'jspdf';
 
 export const PublicRules: React.FC = () => {
   const navigate = useNavigate();
@@ -28,414 +26,183 @@ export const PublicRules: React.FC = () => {
       category: "umum",
       nomorBerkas: "RT2-REG-ADM-01",
       nomorSurat: "Nomor 01 Tahun 2026",
-      tentang: "Tata Tertib Administrasi Kependudukan dan Sistem Pendataan Warga Mandiri",
-      menimbang: "bahwa untuk menjamin keakuratan basis data kependudukan tingkat rukun tetangga, mempermudah verifikasi layanan administrasi surat pengantar, serta menyelaraskan pendataan berbasis digital di Huntap Tondo 2, diperlukan pedoman pelaporan kependudukan yang sistematis dan terintegrasi.",
+      tentang: "Tertib Administrasi Kependudukan dan Pendataan Warga Huntap Tondo 2",
+      menimbang: "bahwa untuk menjamin keakuratan data warga serta kemudahan pelayanan administrasi kependudukan di wilayah RT 02, perlu ditetapkan pedoman tertib administrasi demi kenyamanan bersama seluruh warga.",
       icon: <FileText className="text-indigo-500" size={24} />,
       items: [
-        "Setiap warga baru (pemilik kavling, penyewa kontrakan, penghuni rumah keluarga, mahasiswa, maupun pekerja musiman) berkewajiban melakukan pelaporan diri kepada Ketua RT 02 atau pengurus bidang administrasi kependudukan dalam kurun waktu maksimal 1×24 jam terhitung sejak menetap.",
-        "Prosedur lapor diri wajib disertai penyerahan salinan identitas diri yang sah, meliputi Kartu Tanda Penduduk Elektronik (KTP-el) dan Kartu Keluarga (KK) guna keperluan registrasi data kependudukan RT 02.",
-        "Bagi warga dengan status sewa/kontrak, kos, atau musiman, diwajibkan menyertakan Surat Perjanjian Sewa/Kontrak Rumah, fotokopi identitas pengenal aktif, serta nomor kontak darurat pihak keluarga/wali kandung.",
-        "Setiap Kepala Keluarga (KK) wajib mendaftarkan nomor WhatsApp aktif yang digunakan sebagai sarana komunikasi kedinasan resmi dan saluran pengiriman log notifikasi iuran digital pada Aplikasi Teras Warga RT 02.",
-        "Warga yang telah terdaftar wajib melengkapi pengisian Formulir Profil Data Warga Mandiri secara daring melalui modul kependudukan Aplikasi Teras Warga paling lambat 7 (tujuh) hari kerja setelah laporan pertama.",
-        "Setiap bentuk perubahan status kependudukan (meliputi peristiwa kelahiran anak, pernikahan anggota keluarga, perceraian, kematian, serta kepindahan domisili keluar wilayah RT 02) wajib dilaporkan kepada pengurus RT maksimal 14 (empat belas) hari kerja setelah peristiwa terjadi.",
-        "Pelayanan administrasi publik secara tatap muka (fisik) dan penerbitan Surat Pengantar RT dilayani pada hari kerja (Senin s/d Jumat) pukul 19.00 - 21.00 WITA di Sekretariat RT atau diajukan secara daring melalui menu Layanan Publik pada Aplikasi."
+        "Setiap warga baru (pemilik rumah, penyewa, mahasiswa, kontributor ekraf, atau keluarga pendatang) wajib melapor kepada Ketua RT 02 atau pengurus bidang administrasi dalam jangka waktu maksimal 1×24 jam terhitung sejak menetap di lingkungan RT 02 Huntap Tondo 2.",
+        "Warga wajib menyerahkan fotokopi dokumen pendukung fisik berupa Kartu Tanda Penduduk (KTP-el) dan Kartu Keluarga (KK) yang sah untuk diregistrasikan ke dalam pangkalan data kependudukan RT 02.",
+        "Bagi warga musiman, mahasiswa, atau penghuni kamar kost, diwajibkan menyerahkan fotokopi identitas pengenal aktif (KTP/KTM), surat perjanjian sewa/kontrak rumah, serta nomor kontak darurat wali atau orang tua kandung.",
+        "Setiap kepala keluarga wajib mencantumkan nomor WhatsApp aktif di lembar berkas kependudukan guna pendaftaran akun pada Aplikasi Teras Warga RT 02 untuk menerima log notifikasi resmi dan rilis iuran berkala.",
+        "Warga wajib melengkapi pengisian Formulir Profil Data Warga Mandiri secara daring melalui modul kependudukan Aplikasi Teras Warga paling lambat 7 hari kerja sejak pelaporan pertama dilakukan.",
+        "Segala bentuk mutasi data kependudukan (meliputi kelahiran anak, pernikahan anggota keluarga, perceraian, duka/kematian, serta kepindahan domisili keluar dari lingkungan RT 02) wajib dilaporkan secara resmi maksimal 14 hari kerja setelah peristiwa terjadi.",
+        "Layanan administrasi fisik dan penerbitan Surat Pengantar RT dilayani setiap hari kerja (Senin s/d Jumat) pukul 19.00 - 21.00 WITA di Sekretariat RT atau melalui ajuan daring pada Menu Pelayanan Publik aplikasi."
       ]
     },
     {
-      title: "Ketentuan Tinggal bagi Penyewa Kontrakan",
+      title: "Aturan bagi Warga & Penghuni Kontrakan",
       category: "umum",
       nomorBerkas: "RT2-REG-HNI-02",
       nomorSurat: "Nomor 02 Tahun 2026",
-      tentang: "Ketentuan Hunian dan Prosedur Tinggal bagi Penghuni Sewa/Kontrakan",
-      menimbang: "bahwa demi memelihara ketenteraman sosial, mencegah potensi kerawanan keamanan lingkungan, serta mewujudkan kebersamaan yang berkeadilan di lingkungan hunian bersama, perlu diatur tata tertib bagi warga penyewa rumah kontrakan.",
+      tentang: "Ketentuan Tinggal dan Penghunian Rumah Sewa/Kontrakan",
+      menimbang: "bahwa demi memelihara kerukunan antar tetangga serta ketertiban lingkungan hunian bersama, perlu diatur etika sosial serta prosedur lapor huni bagi penghuni rumah kontrakan.",
       icon: <Users className="text-emerald-500" size={24} />,
       items: [
-        "Warga penyewa rumah/kontrakan wajib menyerahkan Surat Keterangan Huni dari pemilik properti/kavling yang sah pada saat melakukan koordinasi pelaporan diri pertama kepada pengurus RT 02.",
-        "Dilarang keras menyewakan kembali (sub-kontrak) sebagian atau seluruh area hunian sewa kepada pihak ketiga tanpa persetujuan tertulis dari pemilik properti dan tanpa sepengetahuan serta izin resmi dari pengurus RT 02.",
-        "Setiap penghuni rumah sewa berkewajiban menjunjung tinggi norma hukum, adat istiadat setempat, etika bersosialisasi, toleransi beragama, serta menghormati kenyamanan lingkungan warga sekitar.",
-        "Kapasitas hunian untuk masing-masing unit sewa wajib disesuaikan dengan kelayakan fisik bangunan demi menjaga kesehatan lingkungan, kelayakan sanitasi, serta mencegah kepadatan penduduk yang berlebih di satu kavling.",
-        "Penyewa atau penghuni kos diwajibkan berpartisipasi aktif dalam kegiatan sosial kemasyarakatan, agenda gotong royong kebersihan, musyawarah RT, serta kegiatan ronda malam siskamling terjadwal (khusus pria dewasa).",
-        "Pemilik rumah kontrakan yang berdomisili di luar wilayah RT 02 tetap bertanggung jawab moral atas perilaku penyewa propertinya dan wajib menyerahkan kontak darurat yang aktif kepada pengurus RT untuk koordinasi insidental."
+        "Penyewa atau penghuni rumah kontrakan wajib melaksanakan koordinasi lapor diri langsung kepada Pengurus RT setempat dengan membawa Surat Pengantar dari Pemilik Rumah Kontrakan dalam durasi maksimal 1×24 jam.",
+        "Dilarang keras menyewakan kembali (sub-kontrak) sebagian atau seluruh area hunian sewa kepada pihak ketiga atau orang lain tanpa persetujuan tertulis dari pemilik rumah dan sepengetahuan resmi Ketua RT 02.",
+        "Setiap penghuni kontrakan berkewajiban menjunjung tinggi nilai-nilai kesopanan, etika bersosialisasi, toleransi antar-umat beragama, serta menghormati adat istiadat dan norma kearifan lokal yang berlaku di lingkungan warga.",
+        "Jumlah kapasitas maksimal penghuni untuk tiap-tiap unit rumah sewa wajib disesuaikan dengan kelayakan fisik hunian demi menjaga sterilisasi sanitasi, ketenangan lingkungan, dan mencegah terjadinya kepadatan hunian berlebih.",
+        "Seluruh penghuni kontrakan/kos diimbau berpartisipasi aktif dalam setiap kegiatan kemasyarakatan, kerja bakti sosial, ronda malam terjadwal (khusus pria dewasa), serta menghadiri forum berkala warga RT 02.",
+        "Warga non-residen (pemilik kontrakan yang bertempat tinggal di luar RT 02) berkewajiban menyerahkan data kontak darurat (emergency call) yang aktif dan ikut bertanggung jawab moral atas ketertiban umum penyewa propertinya."
       ]
     },
     {
-      title: "Ketentuan Keramaian & Tamu Malam",
+      title: "Ketentuan Keramaian & Tamu",
       category: "ketertiban",
       nomorBerkas: "RT2-REG-TTR-03",
       nomorSurat: "Nomor 03 Tahun 2026",
-      tentang: "Batas Kegiatan Keramaian Lingkungan dan Tata Cara Penerimaan Tamu Malam",
-      menimbang: "bahwa untuk melindungi hak istirahat malam warga, mencegah gangguan polusi suara, serta menjaga ketertiban sirkulasi kendaraan warga, perlu ditetapkan ketentuan penyelenggaraan acara keramaian dan jam malam.",
+      tentang: "Batas Pelaksanaan Kegiatan Keramaian dan Penerimaan Tamu",
+      menimbang: "bahwa guna menjamin istirahat malam warga serta mencegah kebisingan yang berlebih, perlu ditetapkan batasan jam malam serta alur perizinan kegiatan keramaian.",
       icon: <Calendar className="text-amber-500" size={24} />,
       items: [
-        "Setiap aktivitas hajatan, peringatan hari besar, pertemuan sosial, atau pesta keluarga yang mendatangkan keramaian diizinkan berlangsung dengan batas toleransi waktu maksimal berakhir hingga pukul 23.59 WITA.",
-        "Penyelenggaraan kegiatan kemasyarakatan atau acara keluarga berskala besar (undangan melebihi 50 orang) wajib mengajukan surat pemberitahuan resmi tertulis kepada Ketua RT 02 sekurang-kurangnya H-3 sebelum pelaksanaan.",
-        "Tingkat kebisingan dari instalasi pengeras suara (sound system) selama acara dibatasi maksimal 80 desibel (dB) dengan posisi speaker diatur menghadap ke dalam area acara guna meminimalkan pantulan gema polusi suara ke rumah tetangga.",
-        "Tamu kunjungan dilarang memarkirkan kendaraan di jalur lalu lintas utama warga dan dilarang keras menghalangi akses gerbang/halaman keluar-masuk kediaman tetangga tanpa persetujuan terlebih dahulu.",
-        "Tamu luar yang bermaksud menginap melebihi durasi 2×24 jam (2 hari) wajib dilaporkan secara daring melalui aplikasi atau dilaporkan manual kepada pengurus RT oleh kepala keluarga penerima tamu dengan melampirkan identitas tamu.",
-        "Pihak penyelenggara acara bertanggung jawab penuh atas pembersihan sisa sampah, pemulihan kebersihan jalan publik, serta ketertiban parkir di sekitar lokasi acara paling lambat 6 (enam) jam setelah acara selesai."
+        "Segala aktivitas hiburan, peringatan hari besar, hajatan keluarga, maupun pesta yang mendatangkan keramaian diizinkan berlangsung dengan durasi batas maksimal berakhir hingga pukul 23.59 WITA.",
+        "Bagi warga yang hendak menyelenggarakan kegiatan keramaian berskala besar (undangan di atas 50 orang) wajib mengajukan surat izin pemberitahuan tertulis kepada Ketua RT 02 minimal pada H-3 sebelum pelaksanaan kegiatan.",
+        "Tingkat kebisingan dari instalasi sistem suara (sound system) selama perayaan dibatasi maksimal 80 desibel (dB) dengan penataan arah speaker yang diatur menghadap ke dalam area acara agar meminimalisir gema polusi suara ke pemukiman tetangga.",
+        "Tamu kunjungan umum dilarang parkir di jalur lintasan utama sirkulasi warga dan dilarang keras menghalangi akses gerbang atau halaman keluar-masuk kediaman tetangga tanpa persetujuan eksplisit.",
+        "Tamu yang berniat menginap lebih dari 2×24 jam (2 hari) wajib dilaporkan secara daring melalui aplikasi atau dilaporkan manual oleh kepala keluarga tuan rumah beserta lampiran foto identitas tamu.",
+        "Penyenang atau penyelenggara acara bertanggung jawab penuh atas pembersihan sisa-sisa dekorasi, sampah plastik, serta pemulihan kebersihan area jalan publik di sekitar lokasi hajatan paling lambat 6 jam pasca-acara selesai."
       ]
     },
     {
-      title: "Siskamling, Ronda & Tertib Parkir",
+      title: "Keamanan, Ketertiban & Parkir",
       category: "keamanan",
       nomorBerkas: "RT2-REG-KMN-04",
       nomorSurat: "Nomor 04 Tahun 2026",
-      tentang: "Penyelenggaraan Sistem Keamanan Ronda Malam dan Ketertiban Parkir Kendaraan",
-      menimbang: "bahwa demi meminimalisir ancaman kriminalitas lingkungan, menjaga kelancaran akses evakuasi darurat, serta memastikan keselamatan pejalan kaki di jalan umum, perlu diatur tata cara siskamling dan disiplin parkir.",
+      tentang: "Penyelenggaraan Sistem Keamanan Siskamling dan Ketertiban Parkir",
+      menimbang: "bahwa untuk meminimalisir potensi gangguan keamanan lingkungan serta menjaga kelancaran jalur lalu lintas darurat di jalan umum, perlu diatur sistem ronda malam dan tata cara parkir kendaraan.",
       icon: <Shield className="text-rose-500" size={24} />,
       items: [
-        "Warga wajib memastikan gerbang pekarangan, pintu utama, serta jendela rumah terkunci rapat pada malam hari, dan segera membunyikan alarm/panic button jika menemukan gerak-gerik mencurigakan di lingkungan.",
-        "Dilarang keras memarkirkan kendaraan bermotor roda empat secara paralel di badan jalan utama yang dapat mempersempit ruang gerak armada darurat seperti mobil Ambulans dan Pemadam Kebakaran.",
-        "Setiap pemilik kendaraan roda empat (mobil) wajib menyediakan area garasi pribadi yang memadai di dalam batas pekarangan rumah dan dilarang membangun kanopi parkir liar permanen di luar batas bahu jalan.",
-        "Warga yang masuk dalam daftar dinas ronda malam wajib hadir tepat waktu di Pos Ronda, atau jika berhalangan dapat mengirimkan pengganti dewasa atau membayar kompensasi ronda sebesar Rp 50.000 via kas RT untuk biaya operasional siskamling.",
-        "Batas kecepatan maksimum mengemudikan kendaraan bermotor di area pemukiman RT 02 Huntap Tondo 2 adalah 15 km/jam demi mengutamakan keselamatan anak-anak dan pejalan kaki.",
-        "Setiap penyalahgunaan fitur Panic Button pada Aplikasi Teras Warga tanpa adanya kondisi darurat aktual (kemalingan, kebakaran, medis, bencana) akan dikenakan sanksi penangguhan/pembekuan akun digital."
+        "Warga berkewajiban memastikan pintu pagar, pintu utama rumah, serta jendela terkunci rapat pada malam hari, dan segera membunyikan alarm / panic button jika mengamati tanda-tanda mencurigakan di sekitar pemukiman.",
+        "Dilarang keras memarkirkan armada kendaraan roda empat/dua secara paralel ataupun sembarangan di badan jalan utama yang dapat mempersempit ruang lintasan armada darurat seperti mobil Ambulans dan Pemadam Kebakaran.",
+        "Setiap pemilik kendaraan roda empat (mobil) wajib memiliki tempat parkir/garasi pribadi yang memadai di dalam batas pekarangan rumah dan dilarang keras membangun kanopi parkir liar permanen di luar batas rumija (ruang milik jalan).",
+        "Warga yang dijadwalkan dalam giliran ronda siskamling malam wajib hadir tepat waktu, atau jika berhalangan dapat mengirimkan pengganti yang dewasa atau berkontribusi denda siskamling tunai sebesar Rp 50.000 via kas RT untuk operasional satgas.",
+        "Batas laju kecepatan mengemudikan kendaraan bermotor (mobil/motor) di dalam lingkungan RT 02 Huntap Tondo 2 adalah maksimal 15 km/jam demi mengutamakan keselamatan anak-anak dan pejalan kaki.",
+        "Setiap penyalahgunaan fitur Panic Button pada Aplikasi Teras tanpa murni adanya kejadian keadaan darurat (seperti kebakaran, kemalingan, bencana alam) akan dikenai tindakan pembekuan akun digital."
       ]
     },
     {
-      title: "Kebersihan & Bank Sampah RT",
+      title: "Kebersihan & Bank Sampah",
       category: "lingkungan",
       nomorBerkas: "RT2-REG-KLG-05",
       nomorSurat: "Nomor 05 Tahun 2026",
-      tentang: "Tata Kelola Kebersihan Drainase dan Pengelolaan Sampah Rumah Tangga Terpadu",
-      menimbang: "bahwa untuk mewujudkan lingkungan pemukiman yang higienis, bebas banjir, asri, serta mengedukasi warga dalam pemanfaatan program Bank Sampah RT, perlu diatur tata cara pembuangan sampah domestik.",
+      tentang: "Etika Kebersihan Lingkungan dan Pengelolaan Sampah Mandiri",
+      menimbang: "bahwa dalam rangka menciptakan lingkungan yang sehat, asri, bebas banjir, serta memaksimalkan pemanfaatan program Bank Sampah RT, perlu ditetapkan kewajiban memilah sampah dan merawat kebersihan saluran air.",
       icon: <Trash2 className="text-teal-500" size={24} />,
       items: [
-        "Setiap rumah tangga diimbau memisahkan sampah secara mandiri sejak dari dapur, memilah antara sampah organik (sisa makanan basah) dan sampah anorganik ekonomis (botol plastik, kardus, kaleng logam).",
-        "Penyetoran sampah anorganik bernilai ekonomis dilakukan secara terjadwal melalui Bank Sampah RT 02 Teras Warga untuk ditimbang dan dikonversi menjadi saldo keuangan digital milik masing-masing warga.",
-        "Tanggung jawab kebersihan jalan depan, pemotongan rumput liar pekarangan luar, serta pembersihan sedimen lumpur/pasir di saluran selokan depan rumah berada pada penghuni rumah yang bersangkutan.",
-        "Dilarang keras membuang sampah plastik, popok bayi, minyak goreng bekas, sisa renovasi beton, atau bahan berbahaya lainnya ke dalam saluran drainase/selokan RT 02.",
-        "Sampah rumah tangga harian wajib ditampung di tempat sampah tertutup rapat di dalam pagar pekarangan, dan hanya diletakkan di luar pagar pada pagi hari jadwal pengangkutan armada (Senin dan Kamis).",
-        "Tindakan membuang sampah sembarangan atau membakar sampah plastik di halaman terbuka yang menimbulkan asap beracun bagi tetangga akan dikenakan teguran dan sanksi administrasi sosial."
+        "Warga diimbau memisahkan sampah rumah tangga secara mandiri sejak dari dapur, memilah antara sampah organik (sisa makanan basah) dan sampah anorganik ekonomis (botol plastik, kardus, kaleng logam).",
+        "Penyetoran sampah anorganik yang telah terpilah dapat dilakukan secara berkala melalui sistem Bank Sampah RT 02 Teras Warga guna ditimbang dan dikonversi menjadi saldo rekening kas digital milik masing-masing warga.",
+        "Tanggung jawab kebersihan jalan, pemotongan rumput liar, serta pembuangan sedimen pasir/lumpur dari dalam selokan air di depan unit rumah berada pada pemilik atau penghuni rumah yang bersangkutan.",
+        "Dilarang keras membuang puntung rokok, bungkus plastik, popok bayi, minyak goreng bekas, sisa renovasi beton, atau limbah berbahaya lainnya ke dalam saluran drainase/selokan lingkungan RT 02.",
+        "Warga wajib menampung sampah domestik basah harian di dalam tong sampah tertutup rapat di area halaman rumah, dan hanya mengeluarkannya ke depan pagar pada pagi hari jadwal pengangkutan armada sampah (setiap Senin dan Kamis).",
+        "Tindakan membuang sampah sembarangan atau membakar sampah plastik di pekarangan luar yang menyebabkan kepulan asap beracun bagi tetangga akan diberikan sanksi administrasi sosial."
       ]
     },
     {
-      title: "Kegiatan Sosial & Iuran RT",
+      title: "Sosial & Kemasyarakatan",
       category: "ketertiban",
       nomorBerkas: "RT2-REG-SOC-06",
       nomorSurat: "Nomor 06 Tahun 2026",
-      tentang: "Partisipasi Agenda Gotong Royong Warga dan Kedisiplinan Kas RT",
-      menimbang: "bahwa untuk merawat gotong royong, mempererat persaudaraan antar-warga, serta menjamin ketersediaan dana darurat sosial kemanusiaan, perlu diatur kontribusi wajib kerja bakti dan iuran kas RT.",
+      tentang: "Partisipasi Kegiatan Gotong Royong dan Solidaritas Sosial",
+      menimbang: "bahwa demi mempererat silaturahmi, gotong royong, dan rasa kekeluargaan antar warga, perlu diatur peran aktif warga dalam kegiatan kemasyarakatan dan iuran kebersamaan.",
       icon: <Home className="text-blue-500" size={24} />,
       items: [
-        "Setiap Kepala Keluarga (KK) wajib mengirimkan sekurang-kurangnya 1 (satu) perwakilan anggota keluarga dewasa dalam agenda kerja bakti gotong royong massal yang diumumkan pengurus RT.",
-        "Warga yang berhalangan hadir pada agenda gotong royong wajib memberikan konfirmasi tertulis/lisan kepada pengurus H-1, atau berkontribusi denda kompensasi kerja bakti sebesar Rp 25.000 yang dimasukkan ke kas sosial RT.",
-        "Setiap warga wajib melakukan pembayaran Iuran Bulanan RT sebesar Rp 25.000 secara disiplin paling lambat tanggal 10 setiap bulannya melalui kas digital Aplikasi Teras Warga.",
-        "Dana Kas Sosial dan Duka dikelola secara transparan oleh bendahara RT untuk disalurkan sebagai santunan bagi warga yang mengalami kedukaan, musibah bencana, atau menjalani rawat inap di rumah sakit.",
-        "Warga diimbau menghadiri forum Musyawarah Warga RT 02 triwulan guna mendiskusikan laporan keuangan kas RT, evaluasi keamanan siskamling, serta penyelarasan program pembangunan sarana fisik lingkungan."
+        "Setiap Kepala Keluarga (KK) wajib mengirimkan minimal 1 (satu) perwakilan anggota keluarga yang telah dewasa dalam agenda gotong royong kerja bakti kebersihan massal di lingkungan RT 02.",
+        "Warga yang berhalangan hadir pada kegiatan gotong royong wajib menyampaikan pemakluman secara tertulis/lisan kepada Pengurus RT paling lambat H-1, atau berkontribusi denda kompensasi absen kerja bakti sebesar Rp 25.000 yang dialokasikan ke kas sosial.",
+        "Setiap warga berkewajiban membayar Iuran Wajib Bulanan RT sebesar Rp 25.000 secara disiplin sebelum tanggal 10 tiap bulannya, yang pengumpulan dan pelaporannya disajikan secara terbuka lewat fitur kas digital aplikasi.",
+        "Dana Kas Duka dan Santunan Sosial dikelola secara amanah oleh bendahara RT untuk disalurkan langsung kepada warga yang tertimpa kemalangan, bencana, duka, atau rawat inap rumah sakit.",
+        "Warga diharapkan menyempatkan hadir dalam Musyawarah Warga RT 02 yang dihelat berkala per triwulan guna mendiskusikan laporan keuangan RT, evaluasi keamanan, aspirasi sarana fisik, serta penyelerasan kebijakan sosial."
       ]
     },
     {
-      title: "Ketentuan Pemeliharaan Hewan",
+      title: "Hewan Peliharaan",
       category: "ketertiban",
       nomorBerkas: "RT2-REG-PET-07",
       nomorSurat: "Nomor 07 Tahun 2026",
-      tentang: "Tata Cara Pemeliharaan Hewan Ternak dan Pengawasan Hewan Peliharaan",
-      menimbang: "bahwa untuk menghindari pencemaran sanitasi jalan umum, kebisingan suara hewan, serta menjaga keselamatan fisik warga sekitar, perlu diatur batas kepemilikan dan pemeliharaan hewan peliharaan.",
+      tentang: "Ketentuan Pemeliharaan Hewan Ternak dan Peliharaan",
+      menimbang: "bahwa agar keberadaan hewan peliharaan tidak menimbulkan pencemaran lingkungan atau ketidaknyamanan bagi tetangga, perlu ditetapkan aturan kepemilikan dan kewajiban pemilik hewan.",
       icon: <Heart className="text-pink-500" size={24} />,
       items: [
-        "Setiap pemilik hewan peliharaan (anjing, kucing, kelinci, burung) berkewajiban melatih dan mengawasi hewannya secara ketat agar tidak menimbulkan polusi suara bising yang konstan (seperti gonggongan berulang) atau bertindak agresif menyerang warga sekitar.",
-        "Pemilik hewan peliharaan bertanggung jawab mutlak secara hukum dan moral untuk segera menyiram, membersihkan, dan membuang kotoran hewannya apabila mengotori jalan umum, saluran air drainase, taman bermain bersama, maupun pekarangan rumah tetangga.",
-        "Hewan peliharaan dilarang keras dibiarkan berkeliaran bebas di luar batas pekarangan rumah pribadi tanpa menggunakan tali penuntun (leash/harness) serta tanpa pengawasan langsung dari pemilik.",
-        "Kandang atau tempat penangkaran hewan wajib ditempatkan di dalam batas pekarangan sendiri dengan jarak yang wajar dari jendela/ventilasi rumah tetangga, serta dibersihkan secara steril setiap hari guna mencegah aroma menyengat.",
-        "Pemilik hewan peliharaan (terutama anjing dan kucing) wajib melakukan vaksinasi berkala secara rutin (termasuk vaksin anti-rabies) serta menjaga kebersihan medis hewan guna menghindari penyebaran penyakit menular (zoonosis).",
-        "Dilarang memelihara hewan berbahaya atau ras agresif yang tidak dilengkapi sertifikat pelatihan penjinakan di dalam wilayah pemukiman padat RT 02 Huntap Tondo 2 demi keselamatan pejalan kaki dan anak-anak.",
-        "Dilarang keras memelihara dan menternakkan hewan besar (seperti kambing, sapi, babi) di kawasan pemukiman warga; penempatan kandang hewan peliharaan apa pun wajib dibuat terpisah dari bangunan utama rumah hunian. Pemeliharaan unggas (seperti ayam) dibatasi maksimal 2 (dua) ekor per unit kavling dengan kondisi kandang yang steril serta kedap bau.",
-        "Apabila terjadi perselisihan akibat aduan warga mengenai kebisingan atau aroma tidak sedap dari hewan, pemilik wajib melakukan tindakan korektif (seperti memindahkan posisi kandang atau merawat kebersihan ekstra) dalam waktu maksimal 1×24 jam sejak aduan diterima.",
-        "Jika hewan peliharaan terbukti merusak tanaman tetangga, merusak fasilitas publik, atau melukai fisik warga lain, pemilik hewan wajib memikul tanggung jawab perdata penuh atas seluruh biaya ganti rugi perbaikan properti atau biaya pengobatan medis korban hingga sembuh total."
+        "Setiap pemilik hewan peliharaan (anjing, kucing, burung, kelinci) wajib melatih dan merawat hewannya agar tidak menyebabkan polusi suara yang konstan atau tindakan agresif menyerang warga sekitar.",
+        "Pemilik hewan bertanggung jawab penuh untuk mengawasi dan wajib segera membersihkan kotoran hewannya bila mengotori area jalan publik, taman bersama, atau pekarangan rumah tetangga.",
+        "Hewan peliharaan atau ternak dilarang dibiarkan berkeliaran bebas di luar batas pekarangan rumah pemilik tanpa pengawasan langsung atau pengikat/tali penuntun.",
+        "Tempat atau kandang harus diposisikan di dalam area pribadi dan dibersihkan secara steril setiap hari guna menghindari timbulnya aroma tajam (bau kotoran) yang dapat menyebar mengganggu ventilasi udara rumah tetangga.",
+        "Apabila hewan peliharaan menimbulkan kerugian material (merusak tanaman tetangga) atau melukai fisik warga lain, pemilik hewan wajib memikul tanggung jawab atas seluruh biaya ganti rugi medis atau renovasi properti diderita korban."
       ]
     },
     {
-      title: "Etika Digital & Penggunaan CCTV",
+      title: "Etika Digital & Privasi",
       category: "umum",
       nomorBerkas: "RT2-REG-DIG-08",
       nomorSurat: "Nomor 08 Tahun 2026",
-      tentang: "Etika Komunikasi Media Grup Warga, Keamanan Data, dan Pengawasan CCTV Mandiri",
-      menimbang: "bahwa untuk mewujudkan ruang interaksi digital warga yang santun, bebas hoaks, serta melindungi privasi data pribadi dan area privat keluarga, perlu disepakati batas etika digital.",
+      tentang: "Etika Pemanfaatan Media Komunikasi Digital dan Keamanan Data",
+      menimbang: "bahwa untuk menciptakan ruang komunikasi digital yang harmonis, santun, bebas hoaks, serta melindungi privasi data pribadi warga, perlu disepakati etika dalam grup digital warga.",
       icon: <Smartphone className="text-violet-500" size={24} />,
       items: [
-        "Grup komunikasi resmi (WhatsApp) RT 02 diperuntukkan bagi penyebaran info penting lingkungan, info kedinasan, dan dilarang mengirimkan materi bernada SARA, hoaks, kampanye politik, atau pesan spam komersial.",
-        "Dilarang keras menyebarluaskan dokumen identitas pribadi warga lain (seperti KTP, KK, data tunggakan iuran, riwayat surat, aduan pribadi) ke media sosial luar tanpa persetujuan eksplisit pemilik data.",
-        "Pemasangan kamera pengawas (CCTV) mandiri di rumah wajib diatur sudut sorotnya agar tidak menembus batas area privat (interior rumah/jendela kamar tidur) milik tetangga tanpa izin tertulis dari tetangga terkait.",
-        "Setiap perselisihan sengketa pekarangan atau kesalahpahaman antar-tetangga diutamakan diselesaikan secara damai dan kekeluargaan dengan mengajukan laporan terpadu pada Aplikasi Teras Warga.",
-        "Pengguna aplikasi diwajibkan menulis opini, komentar, dan tanggapan di forum digital dengan bahasa yang sopan, santun, konstruktif, serta menghargai perbedaan pendapat."
+        "Grup komunikasi resmi (WhatsApp) RT 02 diperuntukkan murni bagi pertukaran informasi tata kelola lingkungan, keguyuban, pemberitahuan pengurus, dan dilarang keras mengirimkan konten berbau Hoaks, Ujaran Kebencian, Isu SARA, Kampanye Politik praktis, atau Iklan Spam.",
+        "Dilarang keras menyebarluaskan dokumen identitas pribadi warga lain (seperti KTP, KK, nomor telepon, data transaksi keuangan, status iuran menunggak, aduan privat) ke platform publik luar tanpa persetujuan eksplisit pemilik data.",
+        "Penggunaan kamera pengawas (CCTV) mandiri oleh warga wajib diatur posisinya agar sorotan lensa kamera tidak menembus sirkulasi area privat bagian dalam rumah milik tetangga sekitarnya tanpa izin.",
+        "Segala bentuk permasalahan ketetangga atau sengketa batas pekarangan diprioritaskan untuk diredam dan dimediasi melalui fitur Laporan Terpadu di Aplikasi Teras Warga secara kekeluargaan sebelum melaporkan ke instansi hukum pidana.",
+        "Saat berinteraksi di ruang komentar berita atau forum aplikasi, seluruh warga wajib mengedepankan kalimat yang santun, bebas caci maki, dan menunjukkan rasa saling menghormati."
       ]
     },
     {
-      title: "Estetika Fasad & Penghijauan Pekarangan",
+      title: "Penghijauan & Estetika",
       category: "lingkungan",
       nomorBerkas: "RT2-REG-EST-09",
       nomorSurat: "Nomor 09 Tahun 2026",
-      tentang: "Tata Estetika Fasad Rumah Hunian, Penghijauan, dan Batas Penyimpanan Material",
-      menimbang: "bahwa demi merawat keindahan visual lingkungan Huntap Tondo 2, mencegah sumbatan tiang utilitas umum, serta memelihara kerapian fasad, perlu diatur keasrian pekarangan warga.",
+      tentang: "Peningkatan Penghijauan Pekarangan dan Keindahan Fasad Hunian",
+      menimbang: "bahwa untuk mendukung kehangatan dan keasrian visual lingkungan pemukiman Huntap Tondo 2, warga diimbau berpartisipasi menata pekarangan luar dan menjaga keindahan depan rumah.",
       icon: <Leaf className="text-emerald-500" size={24} />,
       items: [
-        "Setiap rumah dihimbau menata minimal 2 (dua) pot tanaman hijau atau bunga hidup di halaman depan guna mewujudkan konsep kawasan Huntap yang teduh, sejuk, asri, dan hijau.",
-        "Warga yang menanam pohon rindang wajib memotong dahan/ranting pohonnya secara berkala jika telah menjulur keluar pagar menghalangi penerangan jalan umum, tiang listrik PLN, atau mengganggu lalu lintas.",
-        "Penanaman tanaman obat (apotek hidup) di area fasilitas umum diperbolehkan setelah berkoordinasi dan mendapat izin dari kaur pembangunan/lingkungan hidup pengurus RT 02.",
-        "Dilarang meletakkan sisa material renovasi berat (pasir, kerikil, semen, besi beton) di bahu jalan umum melebihi batas waktu 14 (empat belas) hari berturut-turut karena mempersempit jalan dan merusak estetika.",
-        "Warga berkewajiban merawat kebersihan dinding depan, pagar pekarangan, serta membersihkan lumut tebal pada fasad rumah agar tidak terkesan kumuh atau terbengkalai."
+        "Setiap unit hunian rumah sangat diimbau mengondisikan minimal 2 (dua) pot tanaman vegetasi hijau atau tanaman hias berbunga di pekarangan depan guna mewujudkan konsep Huntap Tondo 2 yang asri, sejuk, dan teduh.",
+        "Warga pemilik pekarangan yang memiliki dahan pohon menjulur keluar pagar batas hingga menutupi instalasi kabel listrik PLN, menghalangi tiang lampu penerangan jalan, atau mengganggu lintasan kendaraan wajib memangkas dahan pohonnya secara berkala.",
+        "Dizinkan beraktivitas menanam aneka apotek hidup, sayur-mayur, atau tanaman pelindung di batas fasilitas umum lingkungan sepanjang telah mendapatkan persetujuan koordinasi dari kaur lingkungan hidup RT 02.",
+        "Dilarang meletakkan sisa material renovasi berat (pecahan semen, pasir, tumpukan batu bata, rangka kayu) atau membiarkan barang bekas menumpuk di sisi bahu jalan yang dapat mempersempit estetika visual kawasan di atas batas waktu 14 hari berturut-turut.",
+        "Warga diharapkan merawat kondisi cat eksterior pagar dan eksterior tampak depan rumah serta membersihkan lumut tebal agar tidak memicu pemandangan kumuh atau terbengkalai."
       ]
     },
     {
-      title: "Penyelenggaraan Usaha Rumahan",
+      title: "Usaha & UMKM",
       category: "umum",
       nomorBerkas: "RT2-REG-ECO-10",
       nomorSurat: "Nomor 10 Tahun 2026",
-      tentang: "Tata Kelola Penyelenggaraan Usaha Mikro Rumahan dan Ketertiban Konsumen",
-      menimbang: "bahwa untuk mendukung pemulihan ekonomi mandiri warga melalui sektor UMKM rumahan tanpa merugikan ketenangan, kenyamanan istirahat, serta kelancaran lalu lintas tetangga sekitar.",
+      tentang: "Legalitas dan Tata Cara Penyelenggaraan Usaha Rumahan",
+      menimbang: "bahwa untuk mendukung roda ekonomi mikro warga tanpa mengabaikan ketenteraman tetangga sekitar, dipasang pedoman izin usaha rumahan yang ramah lingkungan.",
       icon: <Briefcase className="text-orange-500" size={24} />,
       items: [
-        "Aktivitas usaha mikro rumahan (warung kelontong, kuliner, laundry, studio desain, agensi kreatif) diperbolehkan beroperasi dengan syarat bebas polusi suara bising mesin, asap pekat, atau limbah berbahaya.",
-        "Pemilik usaha wajib mendaftarkan identitas profil usahanya kepada pengurus RT Bidang Ekraf/UMKM untuk dimasukkan ke Direktori UMKM Digital pada Aplikasi Teras guna perluasan pemasaran.",
-        "Pelaku usaha fisik yang melayani pembeli langsung wajib menyediakan area parkir tertib dan mengatur konsumennya agar tidak menimbulkan kemacetan atau menyumbat akses jalan umum.",
-        "Batas waktu pelayanan transaksi fisik tatap muka di tempat usaha dibatasi maksimal hingga pukul 22.00 WITA (hari biasa) dan pukul 23.00 WITA (akhir pekan) guna menghargai ketenangan istirahat malam tetangga."
+        "Segala aktivitas usaha niaga mandiri skala mikro (seperti warung kelontong, kuliner penganan, laundry, penjahit pakaian, konsultan ekraf, agensi digital, studio desain) diperbolehkan beroperasi dengan syarat tidak mengeluarkan limbah suara mesin bising, asap pekat, bau menyengat, atau polusi zat kimia.",
+        "Pemilik usaha wajib mendaftarkan identitas profil usahanya ke pengurus RT Bidang UMKM untuk dimasukkan ke Direktori UMKM Digital pada Aplikasi Teras guna memperluas promosi dan akses bantuan ekonomi.",
+        "Para pelaku usaha kuliner atau toko yang dikunjungi banyak pembeli fisik wajib menyediakan zonasi parkir yang tertib dan bertanggung jawab mengaturnya agar kendaraan konsumen tidak menyumbat bahu jalan utama.",
+        "Batas operasional waktu transaksi pelayanan tatap muka langsung bagi jenis usaha fisik diatur maksimal hingga pukul 22.00 WITA pada hari kerja biasa dan berakhir pukul 23.00 WITA pada akhir pekan guna menjaga ketenangan jam istirahat malam warga."
       ]
     },
     {
-      title: "Penegakan Sanksi Pelanggaran",
+      title: "Sanksi Pelanggaran",
       category: "sanksi",
       nomorBerkas: "RT2-REG-SNC-11",
       nomorSurat: "Nomor 11 Tahun 2026",
-      tentang: "Mekanisme Pembinaan Disiplin, Eskalasi SP, Denda Administrasi, dan Penangguhan Layanan",
-      menimbang: "bahwa untuk menjamin tegaknya kepatuhan terhadap aturan bersama, memberikan kepastian hukum lingkungan, serta menyelesaikan perselisihan secara adil dan berjenjang.",
+      tentang: "Mekanisme Penegakan Disiplin dan Sanksi Pelanggaran",
+      menimbang: "bahwa untuk menjaga tegaknya kewibawaan aturan bersama serta memberi kepastian hukum atas pelanggaran tata tertib, dipandang perlu menetapkan tingkatan sanksi bagi pelanggar.",
       icon: <Scale className="text-slate-500" size={24} />,
       items: [
-        "Tahap 1 (Teguran Lisan): Warga yang terbukti melanggar tata tertib akan diberikan pembinaan atau teguran lisan persuasif secara kekeluargaan oleh Kepala Seksi Keamanan dan Ketertiban RT 02.",
-        "Tahap 2 (Surat Peringatan Kesatu & Kedua): Jika pelanggaran diabaikan dalam waktu 7 hari sejak teguran lisan, Pengurus RT 02 akan melayangkan Surat Peringatan (SP) tertulis kesatu disusul kedua secara resmi.",
-        "Tahap 3 (Denda Administratif & Tindakan Fisik): Pelanggaran parkir jalan darurat atau limbah selokan pasca-SP 2 akan ditindak melalui denda administratif atau pembersihan paksa yang seluruh biayanya dibebankan kepada pelanggar.",
+        "Tahap 1 (Teguran Lisan): Warga yang melanggar ketentuan tata tertib akan dijatuhi teguran atau nasihat lisan persuasif awal secara kekeluargaan oleh Kepala Seksi Ketertiban dan Keamanan RT 02.",
+        "Tahap 2 (Surat Peringatan Kesatu & Kedua): Apabila teguran lisan diabaikan dalam waktu 7 hari, Pengurus RT 02 berwenang melayangkan Surat Peringatan (SP) tertulis kesatu dan disusul kedua secara resmi yang ditandatangani Ketua RT.",
+        "Tahap 3 (Denda Administratif & Tindakan Fisik): Pelanggaran parkir jalan darurat atau limbah selokan yang tidak diindahkan pasca-SP 2 akan ditindak melalui penggembokan ban kendaraan secara aman atau penertiban material bangunan yang memakan biaya pemindahan yang sepenuhnya dibebankan kepada pihak pelanggar.",
         "Tahap 4 (Penangguhan Layanan Administrasi & Digital): Bagi pelanggar berulang atau menolak sanksi tanpa iktikad baik, Pengurus RT berhak menonaktifkan hak akses kelola digital warga pada aplikasi, serta menangguhkan sementara penerbitan surat pengantar administrasi RT hingga kewajiban dipenuhi.",
         "Tahap 5 (Rujukan ke Pihak Pemerintah & Kepolisian): Jika pelanggaran termasuk kategori tindak pidana, kriminal, atau asusila berat, kasus akan dialihkan dengan koordinasi aktif ke Bhabinkamtibmas, Babinsa, dan jajaran Kelurahan Tondo."
       ]
     }
   ];
-
-  const downloadSingleRulePDF = (rule: any, index: number) => {
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-      compress: true
-    });
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-    const contentWidth = pageWidth - (margin * 2);
-    const centerX = pageWidth / 2;
-
-    // --- Header (Kop Surat) ---
-    doc.setFont("times", "normal");
-    doc.setFontSize(14);
-    doc.setTextColor(0, 0, 0);
-    doc.text("PEMERINTAH KOTA PALU", centerX, 16, { align: "center" });
-    doc.text("KECAMATAN MANTIKULORE", centerX, 22, { align: "center" });
-    doc.text("KELURAHAN TONDO", centerX, 28, { align: "center" });
-    doc.setFont("times", "bold");
-    doc.text("PENGURUS RUKUN TETANGGA 02 RW 020", centerX, 34, { align: "center" });
-
-    doc.setFont("times", "normal");
-    doc.setFontSize(10);
-    doc.text("Alamat Sekretariat: Huntap Tondo 2 Blok C10 No. 08, Palu", centerX, 40, { align: "center" });
-
-    // Double divider lines
-    doc.setLineWidth(1.0);
-    doc.line(margin, 44, pageWidth - margin, 44);
-    doc.setLineWidth(0.3);
-    doc.line(margin, 45, pageWidth - margin, 45);
-
-    // --- Title of the Decree ---
-    doc.setFont("times", "bold");
-    doc.setFontSize(12);
-    doc.text("SURAT KEPUTUSAN KETUA RT 02 HUNTAP TONDO 2", centerX, 54, { align: "center" });
-    doc.text(rule.nomorSurat.toUpperCase(), centerX, 60, { align: "center" });
-    doc.text("TENTANG", centerX, 66, { align: "center" });
-    doc.text(rule.tentang.toUpperCase(), centerX, 72, { align: "center" });
-
-    // --- Menimbang & Mengingat Section ---
-    let y = 82;
-    doc.setFont("times", "bold");
-    doc.setFontSize(10);
-    doc.text("MENIMBANG :", margin, y);
-    doc.setFont("times", "italic");
-    const menimbangText = rule.menimbang;
-    const splitMenimbang = doc.splitTextToSize(menimbangText, contentWidth - 25);
-    doc.text(splitMenimbang, margin + 25, y);
-    y += (splitMenimbang.length * 5) + 3;
-
-    doc.setFont("times", "bold");
-    doc.text("MENGINGAT :", margin, y);
-    doc.setFont("times", "italic");
-    const mengingatText = "bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS (Teknologi, Ekraf, Rukun, Aman, Sinergi) serta keasrian hunian warga.";
-    const splitMengingat = doc.splitTextToSize(mengingatText, contentWidth - 25);
-    doc.text(splitMengingat, margin + 25, y);
-    y += (splitMengingat.length * 5) + 8;
-
-    // --- Decides (MEMUTUSKAN) ---
-    doc.setFont("times", "bold");
-    doc.text("MEMUTUSKAN", centerX, y, { align: "center" });
-    y += 6;
-    doc.text(`PASAL 1 : ${rule.title.toUpperCase()}`, margin, y);
-    y += 6;
-
-    // --- Clauses (Ayat) ---
-    doc.setFont("times", "normal");
-    rule.items.forEach((item: string, idx: number) => {
-      const bullet = `${idx + 1}. `;
-      const itemText = item;
-      const splitItem = doc.splitTextToSize(itemText, contentWidth - 10);
-      
-      // Auto-wrap page check
-      if (y + (splitItem.length * 5) > pageHeight - 25) {
-        doc.addPage();
-        y = 20; // reset y on new page
-      }
-      
-      doc.text(bullet, margin, y);
-      doc.text(splitItem, margin + 6, y);
-      y += (splitItem.length * 5) + 2;
-    });
-
-    y += 10;
-    // --- Signature block ---
-    if (y > pageHeight - 50) {
-      doc.addPage();
-      y = 20;
-    }
-    
-    doc.setFont("times", "normal");
-    doc.text("Ditetapkan di : Palu", pageWidth - 80, y);
-    y += 5;
-    doc.text("Pada tanggal  : 1 Juni 2026", pageWidth - 80, y);
-    y += 7;
-    doc.setFont("times", "bold");
-    doc.text("KETUA RT 02 HUNTAP TONDO 2", pageWidth - 80, y);
-    y += 22;
-    doc.line(pageWidth - 80, y, pageWidth - 25, y);
-    y += 4;
-    doc.text("IRFAN", pageWidth - 80, y);
-
-    // Save document
-    const filename = `SK_RT02_${rule.nomorBerkas.replace(/-/g, '_')}.pdf`;
-    doc.save(filename);
-    toast.success(`Berhasil mengunduh dokumen ${rule.nomorBerkas}`);
-  };
-
-  const downloadAllRulesPDF = () => {
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-      compress: true
-    });
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-    const contentWidth = pageWidth - (margin * 2);
-    const centerX = pageWidth / 2;
-
-    rules.forEach((rule: any, ruleIdx: number) => {
-      if (ruleIdx > 0) {
-        doc.addPage();
-      }
-
-      // --- Header (Kop Surat) ---
-      doc.setFont("times", "normal");
-      doc.setFontSize(14);
-      doc.setTextColor(0, 0, 0);
-      doc.text("PEMERINTAH KOTA PALU", centerX, 16, { align: "center" });
-      doc.text("KECAMATAN MANTIKULORE", centerX, 22, { align: "center" });
-      doc.text("KELURAHAN TONDO", centerX, 28, { align: "center" });
-      doc.setFont("times", "bold");
-      doc.text("PENGURUS RUKUN TETANGGA 02 RW 020", centerX, 34, { align: "center" });
-
-      doc.setFont("times", "normal");
-      doc.setFontSize(10);
-      doc.text("Alamat Sekretariat: Huntap Tondo 2 Blok C10 No. 08, Palu", centerX, 40, { align: "center" });
-
-      // Double divider lines
-      doc.setLineWidth(1.0);
-      doc.line(margin, 44, pageWidth - margin, 44);
-      doc.setLineWidth(0.3);
-      doc.line(margin, 45, pageWidth - margin, 45);
-
-      // --- Title of the Decree ---
-      doc.setFont("times", "bold");
-      doc.setFontSize(12);
-      doc.text("SURAT KEPUTUSAN KETUA RT 02 HUNTAP TONDO 2", centerX, 54, { align: "center" });
-      doc.text(rule.nomorSurat.toUpperCase(), centerX, 60, { align: "center" });
-      doc.text("TENTANG", centerX, 66, { align: "center" });
-      doc.text(rule.tentang.toUpperCase(), centerX, 72, { align: "center" });
-
-      // --- Menimbang & Mengingat Section ---
-      let y = 82;
-      doc.setFont("times", "bold");
-      doc.setFontSize(10);
-      doc.text("MENIMBANG :", margin, y);
-      doc.setFont("times", "italic");
-      const menimbangText = rule.menimbang;
-      const splitMenimbang = doc.splitTextToSize(menimbangText, contentWidth - 25);
-      doc.text(splitMenimbang, margin + 25, y);
-      y += (splitMenimbang.length * 5) + 3;
-
-      doc.setFont("times", "bold");
-      doc.text("MENGINGAT :", margin, y);
-      doc.setFont("times", "italic");
-      const mengingatText = "bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS (Teknologi, Ekraf, Rukun, Aman, Sinergi) serta keasrian hunian warga.";
-      const splitMengingat = doc.splitTextToSize(mengingatText, contentWidth - 25);
-      doc.text(splitMengingat, margin + 25, y);
-      y += (splitMengingat.length * 5) + 8;
-
-      // --- Decides (MEMUTUSKAN) ---
-      doc.setFont("times", "bold");
-      doc.text("MEMUTUSKAN", centerX, y, { align: "center" });
-      y += 6;
-      doc.text(`PASAL 1 : ${rule.title.toUpperCase()}`, margin, y);
-      y += 6;
-
-      // --- Clauses (Ayat) ---
-      doc.setFont("times", "normal");
-      rule.items.forEach((item: string, idx: number) => {
-        const bullet = `${idx + 1}. `;
-        const itemText = item;
-        const splitItem = doc.splitTextToSize(itemText, contentWidth - 10);
-        
-        // Auto-wrap page check
-        if (y + (splitItem.length * 5) > pageHeight - 25) {
-          doc.addPage();
-          y = 20; // reset y on new page
-        }
-        
-        doc.text(bullet, margin, y);
-        doc.text(splitItem, margin + 6, y);
-        y += (splitItem.length * 5) + 2;
-      });
-
-      y += 10;
-      // --- Signature block ---
-      if (y > pageHeight - 50) {
-        doc.addPage();
-        y = 20;
-      }
-      
-      doc.setFont("times", "normal");
-      doc.text("Ditetapkan di : Palu", pageWidth - 80, y);
-      y += 5;
-      doc.text("Pada tanggal  : 1 Juni 2026", pageWidth - 80, y);
-      y += 7;
-      doc.setFont("times", "bold");
-      doc.text("KETUA RT 02 HUNTAP TONDO 2", pageWidth - 80, y);
-      y += 22;
-      doc.line(pageWidth - 80, y, pageWidth - 25, y);
-      y += 4;
-      doc.text("IRFAN", pageWidth - 80, y);
-    });
-
-    // Save document
-    doc.save("Ketetapan_Tata_Tertib_Resmi_RT02_Huntap_Tondo_2.pdf");
-    toast.success("Berhasil mengunduh salinan lengkap tata tertib RT 02 (PDF)");
-  };
 
   const getBadgeDetails = (cat: string) => {
     switch (cat) {
@@ -631,12 +398,6 @@ export const PublicRules: React.FC = () => {
                   className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-700 rounded-xl text-xs font-bold border border-slate-200/60 transition-all cursor-pointer"
                 >
                   Tutup Semua
-                </button>
-                <button
-                  onClick={downloadAllRulesPDF}
-                  className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 hover:text-indigo-800 rounded-xl text-xs font-bold border border-indigo-100 transition-all cursor-pointer flex items-center gap-1.5"
-                >
-                  <Download size={13} /> Unduh Semua (PDF)
                 </button>
               </div>
             )}
@@ -860,17 +621,6 @@ export const PublicRules: React.FC = () => {
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        downloadSingleRulePDF(rule, pasalNumber);
-                                      }}
-                                      className="flex items-center gap-2 px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100/80 text-rose-700 font-bold text-xs rounded-xl border border-rose-150 shadow-sm transition-all duration-150 focus:outline-none cursor-pointer"
-                                    >
-                                      <Download size={14} className="text-rose-500" />
-                                      <span>Unduh PDF</span>
-                                    </button>
-
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
                                         const shareUrl = `${window.location.origin}/#/rules?no=${pasalNumber}`;
                                         if (navigator.share) {
                                           navigator.share({
@@ -962,20 +712,13 @@ export const PublicRules: React.FC = () => {
 
                                 {/* "Menimbang" Section */}
                                 <div className="text-left font-serif space-y-3 my-6">
-                                  <h5 className="font-extrabold text-slate-850 text-[11px] md:text-xs tracking-[0.2em] text-slate-400 uppercase font-mono border-b border-slate-200 pb-1.5">Menimbang:</h5>
-                                  <div className="border-l-4 border-amber-500/80 pl-4">
-                                    <p className="text-xs md:text-sm text-slate-700 leading-relaxed italic text-justify">
-                                      {rule.menimbang}
+                                  <h5 className="font-extrabold text-slate-800 text-sm md:text-base italic">Menimbang:</h5>
+                                  <div className="border-l-4 border-indigo-400/80 pl-4 space-y-2.5">
+                                    <p className="text-xs md:text-sm text-slate-650 leading-relaxed italic text-justify">
+                                      <strong className="text-slate-800 not-italic uppercase tracking-wide text-[10px] bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">Mengingat</strong> bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS; dan
                                     </p>
-                                  </div>
-                                </div>
-
-                                {/* "Mengingat" Section */}
-                                <div className="text-left font-serif space-y-3 my-6">
-                                  <h5 className="font-extrabold text-slate-850 text-[11px] md:text-xs tracking-[0.2em] text-slate-400 uppercase font-mono border-b border-slate-200 pb-1.5">Mengingat:</h5>
-                                  <div className="border-l-4 border-indigo-500/80 pl-4">
-                                    <p className="text-xs md:text-sm text-slate-700 leading-relaxed italic text-justify">
-                                      bahwa Rukun Tetangga (RT) 02 Huntap Tondo 2 Kelurahan Tondo berwenang mengatur ketertiban, kebersihan, dan kerukunan bersama di tingkat lingkungan demi mewujudkan asas TERAS (Teknologi, Ekraf, Rukun, Aman, Sinergi) serta keasrian hunian warga.
+                                    <p className="text-xs md:text-sm text-slate-650 leading-relaxed italic text-justify">
+                                      <strong className="text-slate-800 not-italic uppercase tracking-wide text-[10px] bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">Menimbang</strong> {rule.menimbang}
                                     </p>
                                   </div>
                                 </div>

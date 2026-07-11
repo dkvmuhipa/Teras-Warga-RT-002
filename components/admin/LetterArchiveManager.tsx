@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FileText, Plus, Search, Filter, Edit2, Trash2, Send, Eye, X, Save, Calendar, User, Upload, Download, File as FileIcon } from 'lucide-react';
 import { OfficialLetter, PdfConfig } from '../../types';
 import { subscribeToOfficialLetters, addOfficialLetterToDb, updateOfficialLetterInDb, deleteOfficialLetterFromDb, uploadFile } from '../../services/databaseService';
@@ -17,7 +17,21 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
   const confirm = useConfirm();
   const [letters, setLetters] = useState<OfficialLetter[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  const [visibleCount, setVisibleCount] = useState(12);
   const [filterType, setFilterType] = useState('All');
+
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [debouncedSearchTerm, filterType]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLetter, setEditingLetter] = useState<OfficialLetter | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -144,13 +158,17 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
     toast.success('Membuka WhatsApp...');
   };
 
-  const filteredLetters = letters.filter(l => {
-    const matchSearch = l.subject.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                        l.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        l.letterNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchType = filterType === 'All' || l.type === filterType;
-    return matchSearch && matchType;
-  });
+  const filteredLetters = useMemo(() => {
+    return letters.filter(l => {
+      const matchSearch = l.subject.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
+                          l.recipient.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                          l.letterNumber.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      const matchType = filterType === 'All' || l.type === filterType;
+      return matchSearch && matchType;
+    });
+  }, [letters, debouncedSearchTerm, filterType]);
+
+  const paginatedLetters = filteredLetters.slice(0, visibleCount);
 
   return (
     <div className="space-y-6">
@@ -190,7 +208,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
       {/* Letters List */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <AnimatePresence mode="popLayout">
-          {filteredLetters.map((letter) => (
+          {paginatedLetters.map((letter) => (
             <motion.div
               key={letter.id}
               layout
@@ -263,6 +281,17 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
           ))}
         </AnimatePresence>
       </div>
+
+      {visibleCount < filteredLetters.length && (
+        <div className="flex justify-center pt-2">
+          <Button 
+            onClick={() => setVisibleCount(prev => prev + 12)}
+            className="bg-indigo-600 hover:bg-indigo-700 font-bold uppercase tracking-widest text-xs px-6 py-3 rounded-2xl shadow-sm hover:shadow"
+          >
+            Muat Lebih Banyak
+          </Button>
+        </div>
+      )}
 
       {filteredLetters.length === 0 && (
         <div className="bg-white p-12 rounded-[3rem] border border-slate-100 shadow-sm text-center">

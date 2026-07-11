@@ -8,7 +8,7 @@ import {
   isMonthMatch 
 } from '../../src/utils/dateUtils';
 import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, DonationCampaign, News } from '../../types';
-import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType, checkWasteRetribution } from '../../services/databaseService';
+import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType, checkWasteRetribution, validateOfficerAccessByName } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
@@ -16,6 +16,7 @@ import { motion } from 'motion/react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useFinancial } from '../../context/FinancialContext';
 import { toast } from 'sonner';
+import { SmartImage } from '../SmartImage';
 
 interface PublicInfoProps {
   officials: Official[];
@@ -199,17 +200,11 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
             return; 
         }
         
-        // Find house/resident by name to verify PIN
-        // In a real app, this would be a secure backend check
-        const resident = houses.find(h => h.headOfFamily.toLowerCase() === checkOfficer.toLowerCase());
+        // Secure server/db-side validation that does not require exposing access codes to client-side memory
+        const isValid = await validateOfficerAccessByName(checkOfficer, checkPin);
         
-        if (!resident) {
-            toast.error("Nama petugas tidak ditemukan dalam data warga.");
-            return;
-        }
-
-        if (resident.accessCode !== checkPin) {
-            toast.error("PIN salah! Silakan coba lagi.");
+        if (!isValid) {
+            toast.error("Nama petugas tidak ditemukan atau PIN salah! Silakan coba lagi.");
             return;
         }
 
@@ -464,7 +459,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                         {featuredUMKM.map(item => (
                             <div key={item.id} className="group cursor-pointer">
                                 <div className="aspect-square rounded-3xl overflow-hidden mb-3 border border-slate-100 shadow-sm group-hover:shadow-md transition-all">
-                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                                    <SmartImage src={item.image} alt={item.name} className="w-full h-full object-cover" width={400} />
                                 </div>
                                 <h4 className="font-black text-slate-800 text-sm truncate group-hover:text-indigo-600 transition-colors">{item.name}</h4>
                             </div>
@@ -821,8 +816,8 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {galleryItems.map(g => (
                         <div key={g.id} className="group relative aspect-square rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-                            <img src={g.image} alt={g.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                            <SmartImage src={g.image} alt={g.title} className="w-full h-full object-cover" width={400} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 pointer-events-none">
                                 <p className="text-white font-bold text-sm">{g.title}</p>
                             </div>
                         </div>
@@ -1268,8 +1263,8 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                             </div>
                             <div className="px-6 pb-6 text-center -mt-12 relative">
-                                <div className="inline-block p-1.5 bg-white rounded-full shadow-lg">
-                                    <img src={o.photo||`https://ui-avatars.com/api/?name=${o.name}&background=random&size=128`} className="w-24 h-24 rounded-full object-cover border-4 border-slate-50 bg-slate-100" alt={o.name}/>
+                                <div className="inline-block p-1.5 bg-white rounded-full shadow-lg overflow-hidden w-28 h-28 mx-auto">
+                                    <SmartImage src={o.photo||`https://ui-avatars.com/api/?name=${o.name}&background=random&size=128`} className="w-full h-full rounded-full object-cover border-4 border-slate-50 bg-slate-100" alt={o.name} width={200} />
                                 </div>
                                 <h3 className="font-bold text-slate-800 text-lg mt-3">{o.name}</h3>
                                 <div className="mt-1 mb-4">
@@ -1300,10 +1295,11 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                 {selectedOfficial && (
                     <div className="space-y-6">
                         <div className="flex flex-col sm:flex-row items-center gap-5 p-4 bg-slate-50 rounded-3xl border border-slate-100">
-                            <img 
+                            <SmartImage 
                                 src={selectedOfficial.photo || `https://ui-avatars.com/api/?name=${selectedOfficial.name}&background=random&size=128`} 
                                 className="w-20 h-20 rounded-2xl object-cover shadow-md border-2 border-white shrink-0" 
                                 alt={selectedOfficial.name}
+                                width={200}
                             />
                             <div className="text-center sm:text-left">
                                 <h3 className="text-xl font-black text-slate-800">{selectedOfficial.name}</h3>

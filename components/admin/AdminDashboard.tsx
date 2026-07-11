@@ -19,21 +19,22 @@ import {
   RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance, Role
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
-import { DashboardOverview } from './DashboardOverview';
 import { useConfirm } from '../../context/ConfirmContext';
-import { ResidentManager } from './ResidentManager';
-import { FinanceManager } from './FinanceManager';
-import { ContentManager } from './ContentManager';
-import { FacilityManager } from './FacilityManager';
-import { ServiceManager } from './ServiceManager';
-import { AdminSettings } from './AdminSettings';
-import { DocumentManager } from './DocumentManager';
-import { EventManager } from './EventManager';
-import { AssetManager } from './AssetManager';
-import { ActivityManagement } from './ActivityManagement';
-import { AuditLogManager } from './AuditLogManager';
-import { NotificationCombined } from './NotificationCombined';
-import { AdminAnalytics } from './AdminAnalytics';
+
+const DashboardOverview = React.lazy(() => import('./DashboardOverview').then(m => ({ default: m.DashboardOverview })));
+const ResidentManager = React.lazy(() => import('./ResidentManager').then(m => ({ default: m.ResidentManager })));
+const FinanceManager = React.lazy(() => import('./FinanceManager').then(m => ({ default: m.FinanceManager })));
+const ContentManager = React.lazy(() => import('./ContentManager').then(m => ({ default: m.ContentManager })));
+const FacilityManager = React.lazy(() => import('./FacilityManager').then(m => ({ default: m.FacilityManager })));
+const ServiceManager = React.lazy(() => import('./ServiceManager').then(m => ({ default: m.ServiceManager })));
+const AdminSettings = React.lazy(() => import('./AdminSettings').then(m => ({ default: m.AdminSettings })));
+const DocumentManager = React.lazy(() => import('./DocumentManager').then(m => ({ default: m.DocumentManager })));
+const AssetManager = React.lazy(() => import('./AssetManager').then(m => ({ default: m.AssetManager })));
+const ActivityManagement = React.lazy(() => import('./ActivityManagement').then(m => ({ default: m.ActivityManagement })));
+const AuditLogManager = React.lazy(() => import('./AuditLogManager').then(m => ({ default: m.AuditLogManager })));
+const NotificationCombined = React.lazy(() => import('./NotificationCombined').then(m => ({ default: m.NotificationCombined })));
+const AdminAnalytics = React.lazy(() => import('./AdminAnalytics').then(m => ({ default: m.AdminAnalytics })));
+
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle,
@@ -483,7 +484,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
               >
-                {renderContent()}
+                <React.Suspense fallback={
+                  <div className="min-h-[400px] flex flex-col items-center justify-center bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 font-sans">
+                    <div className="relative flex items-center justify-center mb-4">
+                      <div className="w-16 h-16 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                      <div className="absolute text-indigo-600 animate-pulse text-[10px] font-black">RT02</div>
+                    </div>
+                    <h3 className="text-slate-800 font-black text-xs tracking-widest uppercase">Memuat Modul</h3>
+                    <p className="text-slate-400 text-[10px] mt-1 font-bold">Mengoptimalkan performa halaman...</p>
+                  </div>
+                }>
+                  {renderContent()}
+                </React.Suspense>
               </motion.div>
             </AnimatePresence>
           </div>

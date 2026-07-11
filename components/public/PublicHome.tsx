@@ -17,6 +17,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { useFinancial } from '../../context/FinancialContext';
 import { addReportToDb, validateResidentAccess, formatHouseId } from '../../services/databaseService';
+import { SmartImage } from '../SmartImage';
 
 interface PublicHomeProps {
   houses: House[];
@@ -135,7 +136,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     visible: { opacity: 1, y: 0 }
   };
 
-  const quickActions = [
+  const quickActions = React.useMemo(() => [
     { 
       label: 'Profil Warga', 
       icon: User, 
@@ -198,7 +199,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       shadow: 'shadow-[#ff3b30]/30', 
       action: () => setIsReportModalOpen(true) 
     }
-  ];
+  ], []);
 
   const [filterType, setFilterType] = React.useState<'All' | 'General' | 'Urgent' | 'Event'>('All');
 
@@ -882,13 +883,13 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                     whileHover={{ scale: 1.05, rotate: i % 2 === 0 ? 2 : -2 }}
                     className="relative aspect-[4/5] rounded-[2rem] overflow-hidden group/img cursor-pointer shadow-md"
                   >
-                    <img 
+                    <SmartImage 
                       src={item.image} 
                       alt={item.title} 
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-1000" 
+                      className="w-full h-full object-cover animate-none" 
+                      width={400}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-end p-5">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover/img:opacity-100 transition-all duration-500 flex items-end p-5 pointer-events-none">
                       <p className="text-[10px] text-white font-black uppercase tracking-widest leading-tight">
                         {item.title}
                       </p>

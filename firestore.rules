@@ -13,8 +13,7 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() &&
         (request.auth.token.email == "admin@teras.id" ||
-         request.auth.token.email == "dkvsmkmuhipa@gmail.com" ||
-         exists(/databases/$(database)/documents/admins/$(request.auth.token.email)));
+         request.auth.token.email == "dkvsmkmuhipa@gmail.com");
     }
 
     // ===============================================================
@@ -35,7 +34,8 @@ service cloud.firestore {
 
     // CashFlow
     match /cashFlow/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Officials
@@ -58,8 +58,7 @@ service cloud.firestore {
 
     // Letters
     match /letters/{id} {
-      allow create: if true;
-      allow read: if isAdmin() || (resource != null && resource.data.houseId != null);
+      allow create, read: if true;
       allow update, delete: if isAdmin();
     }
 
@@ -77,8 +76,8 @@ service cloud.firestore {
 
     // UMKM Orders
     match /umkmOrders/{id} {
-      allow create, read, update: if true;
-      allow delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if true;
     }
 
     // Notifications
@@ -102,19 +101,18 @@ service cloud.firestore {
 
     // Patrol Sessions
     match /patrolSessions/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
     // Market Items
     match /marketItems/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if true;
     }
 
     // Bills
     match /bills/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // News
@@ -143,7 +141,8 @@ service cloud.firestore {
 
     // Population Logs
     match /populationLogs/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Iuran Payments
@@ -154,8 +153,8 @@ service cloud.firestore {
 
     // Resident Registrations
     match /residentRegistrations/{id} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Guest Reports
@@ -172,8 +171,8 @@ service cloud.firestore {
 
     // Audit Logs
     match /auditLogs/{id} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Activities
@@ -184,12 +183,10 @@ service cloud.firestore {
 
     // Attendance & Ronda Attendance
     match /attendance/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
     match /rondaAttendance/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
     // Population Reports
@@ -200,13 +197,12 @@ service cloud.firestore {
 
     // Ronda Swap Requests
     match /rondaSwapRequests/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
     // Health Records
     match /healthRecords/{id} {
-      allow read: if isAdmin();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
@@ -260,8 +256,7 @@ service cloud.firestore {
 
     // Update Requests
     match /updateRequests/{id} {
-      allow create: if true;
-      allow read: if isAdmin() || (resource != null && resource.data.houseId != null);
+      allow create, read: if true;
       allow update, delete: if isAdmin();
     }
 
@@ -273,9 +268,7 @@ service cloud.firestore {
 
     // FCM Tokens
     match /fcmTokens/{id} {
-      allow create, update: if true;
-      allow read: if isAdmin();
-      allow delete: if isAdmin();
+      allow create, update, read, delete: if true;
     }
 
     // Configs
@@ -286,14 +279,12 @@ service cloud.firestore {
 
     // Books
     match /books/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if true;
     }
 
     // Book Exchange Requests
     match /bookExchangeRequests/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if true;
     }
 
     // Gallery

@@ -1,10 +1,4 @@
 import { RondaSchedule } from '../types';
-import { auth } from './firebaseConfig';
-
-const getAuthHeaders = async (): Promise<Record<string, string>> => {
-  const token = await auth.currentUser?.getIdToken();
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
-};
 
 export const sendWhatsAppMessage = (phone: string, message: string) => {
   let formattedPhone = phone.replace(/[^0-9]/g, '');
@@ -24,12 +18,10 @@ export const sendWhatsAppMessage = (phone: string, message: string) => {
  */
 export const sendWhatsAppViaGateway = async (target: string, message: string) => {
   try {
-    const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/whatsapp/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...authHeaders
       },
       body: JSON.stringify({ target, message }),
     });
@@ -64,12 +56,10 @@ export const broadcastWhatsApp = async (phones: string[], message: string) => {
  */
 export const getWhatsAppGroups = async () => {
   try {
-    const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/whatsapp/groups', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...authHeaders
       },
     });
     

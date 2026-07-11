@@ -898,3 +898,28 @@ export interface BookExchangeRequest {
   notes?: string;
 }
 
+export interface ForumComment {
+  id: string;
+  authorName: string;
+  authorHouseId: string;
+  content: string;
+  date: string;
+}
+
+export interface ForumIdea {
+  id: string;
+  title: string;
+  description: string;
+  category: 'Fasilitas' | 'Kegiatan' | 'Keamanan' | 'Sosial' | 'Ide Kreatif' | 'Lainnya';
+  authorName: string;
+  authorHouseId: string;
+  date: string;
+  upvotes: string[]; // List of house IDs (or voter identifiers)
+  downvotes: string[]; // List of house IDs
+  status: 'Aspirasi' | 'Ditinjau' | 'Disetujui' | 'Direalisasikan' | 'Ditolak';
+  comments: ForumComment[];
+  adminNotes?: string;
+  createdAt?: string;
+}
+
+

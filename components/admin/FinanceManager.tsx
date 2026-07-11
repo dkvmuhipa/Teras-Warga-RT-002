@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { DollarSign, Box, Plus, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Filter, Search, Download, PieChart, Wallet, User, CreditCard, Upload, X, Eye, FileText, CheckCircle2, AlertCircle, Trash2, RefreshCw } from 'lucide-react';
 import { WasteBankManager } from './WasteBankManager';
 import { ResidentIuranManager } from './resident/ResidentIuranManager';
@@ -44,7 +44,21 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
   }, [initialSubTab]);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  const [visibleCount, setVisibleCount] = useState(15);
   const [filterType, setFilterType] = useState<'All' | 'Income' | 'Expense'>('All');
+
+  useEffect(() => {
+    setVisibleCount(15);
+  }, [debouncedSearchTerm, filterType]);
   const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -104,12 +118,16 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
   }, [cashFlow]);
 
   // Filtered Data
-  const filteredCashFlow = cashFlow.filter(cf => {
-    const matchSearch = cf.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                        cf.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchType = filterType === 'All' || cf.type === filterType;
-    return matchSearch && matchType;
-  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const filteredCashFlow = useMemo(() => {
+    return cashFlow.filter(cf => {
+      const matchSearch = cf.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
+                          cf.category.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      const matchType = filterType === 'All' || cf.type === filterType;
+      return matchSearch && matchType;
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [cashFlow, debouncedSearchTerm, filterType]);
+
+  const paginatedCashFlow = filteredCashFlow.slice(0, visibleCount);
 
   const resetForm = () => {
     setDesc(''); 
@@ -450,7 +468,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredCashFlow.map((cf) => (
+                {paginatedCashFlow.map((cf) => (
                   <motion.tr 
                     key={cf.id} 
                     layout
@@ -526,6 +544,17 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
               </tbody>
             </table>
           </div>
+          {visibleCount < filteredCashFlow.length && (
+            <div className="p-6 border-t border-slate-50 bg-slate-50/30 flex justify-center">
+              <button
+                onClick={() => setVisibleCount(prev => prev + 15)}
+                className="px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-widest rounded-2xl transition-all shadow-sm hover:shadow flex items-center gap-2 cursor-pointer"
+              >
+                Muat Lebih Banyak
+                <Plus size={14} />
+              </button>
+            </div>
+          )}
           {filteredCashFlow.length === 0 && (
             <div className="p-20 text-center">
               <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200 mx-auto mb-4">

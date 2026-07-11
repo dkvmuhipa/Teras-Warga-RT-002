@@ -26,14 +26,16 @@ import {
   where,
   increment,
   startAt,
-  endAt
+  endAt,
+  startAfter
 } from "firebase/firestore";
 import { 
   signInWithEmailAndPassword, 
   signOut, 
   updatePassword
 } from "firebase/auth";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, Book, BookExchangeRequest } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, Book, BookExchangeRequest, ForumIdea, ForumComment } from "../types";
+import { toast } from "sonner";
 
 export { OperationType, isFirebaseConfigured };
 
@@ -554,10 +556,123 @@ export const getPlaceholderImage = (keyword: string = 'community', width: number
   return `https://picsum.photos/seed/${keyword}/${width}/${height}`;
 };
 
+/**
+ * Automatically compresses an image file before upload if it exceeds a certain size (e.g., 200KB).
+ * Resizes the image to a maximum dimension of 1200px while maintaining the aspect ratio,
+ * and recompresses it with 0.8 quality as JPEG or keeps PNG formatting depending on needs.
+ */
+export const compressImageIfPossible = async (file: File, maxDimension: number = 1200, quality: number = 0.8): Promise<File> => {
+  // Check if browser environment
+  if (typeof window === 'undefined' || typeof FileReader === 'undefined') {
+    return file;
+  }
+
+  // Only compress images
+  if (!file.type.startsWith('image/')) {
+    return file;
+  }
+
+  // Only compress files larger than 200KB (200 * 1024 bytes)
+  const MIN_SIZE_TO_COMPRESS = 200 * 1024;
+  if (file.size <= MIN_SIZE_TO_COMPRESS) {
+    return file;
+  }
+
+  // Skip formats that shouldn't be compressed or don't support simple canvas manipulation (e.g., svg, gif)
+  if (file.type.includes('svg') || file.type.includes('gif')) {
+    return file;
+  }
+
+  try {
+    return new Promise<File>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          // Only scale down if one of the dimensions exceeds maxDimension
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+
+          // If converting PNG to JPEG, draw a white background first to handle transparency nicely
+          const targetType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          if (targetType === 'image/jpeg') {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                // If the compressed blob is actually larger than the original, use original file
+                if (blob.size >= file.size) {
+                  resolve(file);
+                } else {
+                  // Keep original filename or append proper extension if converted
+                  let name = file.name;
+                  if (targetType === 'image/jpeg' && !name.toLowerCase().endsWith('.jpg') && !name.toLowerCase().endsWith('.jpeg')) {
+                    name = name.replace(/\.[^/.]+$/, "") + ".jpg";
+                  }
+                  
+                  const compressedFile = new File([blob], name, {
+                    type: targetType,
+                    lastModified: Date.now(),
+                  });
+                  
+                  const savedPercent = (((file.size - compressedFile.size) / file.size) * 100).toFixed(0);
+                  toast.success(`Gambar Dioptimasi! Menghemat ${savedPercent}% kapasitas penyimpanan.`, {
+                    description: `Ukuran berkas berkurang dari ${(file.size / 1024).toFixed(0)}KB menjadi ${(compressedFile.size / 1024).toFixed(0)}KB.`,
+                    duration: 4000
+                  });
+                  
+                  resolve(compressedFile);
+                }
+              } else {
+                resolve(file);
+              }
+            },
+            targetType,
+            quality
+          );
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    });
+  } catch (error) {
+    console.warn("Image compression failed, uploading original file:", error);
+    return file;
+  }
+};
+
 export const uploadImageToStorage = async (file: File, path: string) => {
   try {
+    const processedFile = await compressImageIfPossible(file);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", processedFile);
     
     const response = await fetch("/api/upload", {
       method: "POST",
@@ -813,8 +928,9 @@ export const markNotificationAsRead = async (id: string) => {
 // --- FILE STORAGE ---
 export const uploadFile = async (file: File, path: string): Promise<string> => {
   try {
+    const processedFile = await compressImageIfPossible(file);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", processedFile);
     
     const response = await fetch("/api/upload", {
       method: "POST",
@@ -906,26 +1022,30 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
             status: 'Baru'
         });
 
-        // Trigger Push Notifications (Tokens handled server-side for security)
+        // Trigger Push Notifications
         try {
-            fetch('/api/push/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    notification: {
-                        title: "🚨 DARURAT (PANIC BUTTON)",
-                        body: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`
-                    },
-                    data: {
-                        type: 'PanicAlert',
-                        houseId,
-                        location
-                    }
-                })
-            }).catch(err => {
-                // Non-critical error, just log
-                console.warn("Push API fetch error:", err);
-            });
+            const tokens = await getFCMTokens();
+            if (tokens && tokens.length > 0) {
+                fetch('/api/push/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tokens,
+                        notification: {
+                            title: "🚨 DARURAT (PANIC BUTTON)",
+                            body: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`
+                        },
+                        data: {
+                            type: 'PanicAlert',
+                            houseId,
+                            location
+                        }
+                    })
+                }).catch(err => {
+                    // Non-critical error, just log
+                    console.warn("Push API fetch error:", err);
+                });
+            }
         } catch (error) {
             // Non-critical error, just log
             console.warn("Error triggering push notifications:", error);
@@ -1235,6 +1355,44 @@ export const validateResidentAccess = async (houseId: string, code: string): Pro
             console.log(`House document not found for ${formattedHouseId}`);
         }
         return false;
+    } catch (error) {
+        handleFirestoreError(error, OperationType.GET, HOUSES_COL);
+        return false;
+    }
+};
+
+export const validateOfficerAccessByName = async (name: string, code: string): Promise<boolean> => {
+    try {
+        if (!name || !code) return false;
+        
+        // Query house document where headOfFamily matches (case-insensitive done via clean match or simple equal)
+        const q = query(collection(db, HOUSES_COL), where("headOfFamily", "==", name));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            // Try matching with case-insensitive search if direct exact match fails
+            const allSnap = await getDocs(collection(db, HOUSES_COL));
+            const foundDoc = allSnap.docs.find(d => {
+                const data = d.data();
+                return String(data.headOfFamily || '').trim().toLowerCase() === name.trim().toLowerCase();
+            });
+            
+            if (foundDoc) {
+                const data = foundDoc.data();
+                if (!data.accessCode) return false;
+                const dbCodeClean = String(data.accessCode).toUpperCase().replace(/[\s-]+/g, '');
+                const inputCodeClean = String(code).toUpperCase().replace(/[\s-]+/g, '');
+                return dbCodeClean === inputCodeClean;
+            }
+            return false;
+        }
+        
+        const data = querySnapshot.docs[0].data();
+        if (!data.accessCode) return false;
+        
+        const dbCodeClean = String(data.accessCode).toUpperCase().replace(/[\s-]+/g, '');
+        const inputCodeClean = String(code).toUpperCase().replace(/[\s-]+/g, '');
+        return dbCodeClean === inputCodeClean;
     } catch (error) {
         handleFirestoreError(error, OperationType.GET, HOUSES_COL);
         return false;
@@ -3076,4 +3234,121 @@ export const updateBookRequest = async (id: string, updates: Partial<BookExchang
     } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `${BOOK_REQUESTS_COL}/${id}`);
     }
+};
+
+// --- PAGINATED AND SCALABLE FIRESTORE QUERIES ---
+
+export const getPaginatedAuditLogs = async (pageSize: number = 15, lastVisibleDoc: any = null) => {
+    try {
+        if (!isFirebaseConfigured || !db) return { logs: [], lastDoc: null, hasMore: false };
+        
+        let q = query(
+            collection(db, AUDIT_LOGS_COL), 
+            orderBy("timestamp", "desc"), 
+            limit(pageSize)
+        );
+        
+        if (lastVisibleDoc) {
+            q = query(
+                collection(db, AUDIT_LOGS_COL), 
+                orderBy("timestamp", "desc"), 
+                startAfter(lastVisibleDoc),
+                limit(pageSize)
+            );
+        }
+        
+        const snapshot = await getDocs(q);
+        const logs = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        const lastDoc = snapshot.docs[snapshot.docs.length - 1] || null;
+        const hasMore = snapshot.docs.length === pageSize;
+        
+        return { logs, lastDoc, hasMore };
+    } catch (error) {
+        handleFirestoreError(error, OperationType.LIST, AUDIT_LOGS_COL);
+        return { logs: [], lastDoc: null, hasMore: false };
+    }
+};
+
+export const getPaginatedCashFlow = async (pageSize: number = 15, lastVisibleDoc: any = null, filterType: 'All' | 'Income' | 'Expense' = 'All') => {
+    try {
+        if (!isFirebaseConfigured || !db) return { transactions: [], lastDoc: null, hasMore: false };
+        
+        let constraints: any[] = [];
+        
+        if (filterType !== 'All') {
+            constraints.push(where("type", "==", filterType));
+        }
+        
+        constraints.push(orderBy("date", "desc"));
+        constraints.push(limit(pageSize));
+        
+        let q = query(collection(db, CASHFLOW_COL), ...constraints);
+        
+        if (lastVisibleDoc) {
+            // Need to insert startAfter before limit
+            const constraintsWithPage = [...constraints.slice(0, -1), startAfter(lastVisibleDoc), limit(pageSize)];
+            q = query(collection(db, CASHFLOW_COL), ...constraintsWithPage);
+        }
+        
+        const snapshot = await getDocs(q);
+        const transactions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        const lastDoc = snapshot.docs[snapshot.docs.length - 1] || null;
+        const hasMore = snapshot.docs.length === pageSize;
+        
+        return { transactions, lastDoc, hasMore };
+    } catch (error) {
+        handleFirestoreError(error, OperationType.LIST, CASHFLOW_COL);
+        return { transactions: [], lastDoc: null, hasMore: false };
+    }
+};
+
+// --- FORUM / MUSYAWARAH DIGITAL OPERATIONS ---
+const FORUM_IDEAS_COL = "forumIdeas";
+
+export const addForumIdea = async (idea: Omit<ForumIdea, 'id'>) => {
+    try {
+        const data = {
+            ...idea,
+            createdAt: new Date().toISOString()
+        };
+        await addDoc(collection(db, FORUM_IDEAS_COL), data);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, FORUM_IDEAS_COL);
+    }
+};
+
+export const updateForumIdea = async (id: string, updates: Partial<ForumIdea>) => {
+    try {
+        const docRef = doc(db, FORUM_IDEAS_COL, id);
+        await updateDoc(docRef, updates);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `${FORUM_IDEAS_COL}/${id}`);
+    }
+};
+
+export const deleteForumIdea = async (id: string) => {
+    try {
+        const docRef = doc(db, FORUM_IDEAS_COL, id);
+        await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `${FORUM_IDEAS_COL}/${id}`);
+    }
+};
+
+export const subscribeToForumIdeas = (callback: (data: ForumIdea[]) => void) => {
+    if (!isFirebaseConfigured || !db) {
+        console.warn(`Firebase not configured, skipping subscription to ${FORUM_IDEAS_COL}`);
+        return () => {};
+    }
+    // Order by date descending by default
+    const q = query(collection(db, FORUM_IDEAS_COL), orderBy("date", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const ideas = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+        })) as ForumIdea[];
+        callback(ideas);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, FORUM_IDEAS_COL);
+    });
 };

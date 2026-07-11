@@ -10,7 +10,8 @@ import {
   subscribeToWasteBalance,
   addWasteDepositToDb,
   handleFirestoreError,
-  OperationType
+  OperationType,
+  validateResidentAccess
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -53,10 +54,10 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
     weight: 0
   });
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const house = houses.find(h => h.id === tempHouseId);
-    if (house && house.accessCode === pinInput) {
+    const isValid = await validateResidentAccess(tempHouseId, pinInput);
+    if (isValid) {
       handleSetHouse(tempHouseId);
       setIsPinModalOpen(false);
       setPinInput('');

@@ -211,6 +211,9 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <DetailItem label="Pekerjaan" value={selectedResident.jobCategory || '-'} />
                   <DetailItem label="Pendidikan Terakhir" value={selectedResident.education || '-'} />
                   <DetailItem label="Agama" value={selectedResident.religion || '-'} />
+                  <DetailItem label="Status Perkawinan" value={selectedResident.maritalStatus || 'Belum Kawin'} />
+                  <DetailItem label="Golongan Darah" value={selectedResident.bloodType || '-'} />
+                  <DetailItem label="Kewarganegaraan" value={selectedResident.nationality || 'WNI'} />
                 </div>
 
                 {/* Family Members Section */}
@@ -241,6 +244,42 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <p className="text-[11px] font-medium text-slate-400 italic text-center py-2 bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
                       Tinggal mandiri (Kepala Keluarga tunggal)
                     </p>
+                  )}
+                </div>
+              </section>
+
+              {/* Group: Ronda & Catatan Khusus */}
+              <section className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1 h-4 bg-indigo-600 rounded-full"></div>
+                  <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Keamanan & Siskamling</h4>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-lg">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status Tugas Ronda</p>
+                      <p className="text-xs font-bold text-slate-800 mt-0.5">
+                        {selectedResident.rondaExempt ? 'Bebas Tugas (Dispensasi)' : 'Wajib Ronda Siskamling Aktif'}
+                      </p>
+                    </div>
+                    {!selectedResident.rondaExempt && (
+                      <div className="flex gap-4 border-l border-slate-200 pl-4 shrink-0 text-right">
+                        <div>
+                          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Poin</p>
+                          <p className="text-xs font-bold text-indigo-700">{selectedResident.rondaPoints || 0} Pts</p>
+                        </div>
+                        <div>
+                          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Tugas Bulan Ini</p>
+                          <p className="text-xs font-bold text-slate-800">{selectedResident.rondaDutyCount || 0} Kali</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {selectedResident.specialNotes && (
+                    <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg">
+                      <p className="text-[9px] font-bold text-amber-800 uppercase tracking-wider mb-1">Catatan Khusus Hunian</p>
+                      <p className="text-xs font-semibold text-amber-900 leading-relaxed">{selectedResident.specialNotes}</p>
+                    </div>
                   )}
                 </div>
               </section>

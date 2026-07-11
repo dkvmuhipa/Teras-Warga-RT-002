@@ -46,41 +46,11 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
   const handleApprove = async (req: UpdateRequest) => {
     setIsProcessing(true);
     try {
+      // 1. Update the house data first
       await updateHouseData(req.houseId, {
         headOfFamily: req.headOfFamily,
-        gender: req.gender,
-        birthPlace: req.birthPlace,
-        birthDate: req.birthDate,
         phone: req.phone,
-        occupants: req.occupants,
-        residenceType: req.residenceType,
-        nik: req.nik,
-        kkNumber: req.kkNumber,
-        maritalStatus: req.maritalStatus,
-        religion: req.religion,
-        education: req.education,
-        job: req.job,
-        jobCategory: req.jobCategory,
-        bloodType: req.bloodType,
-        nationality: req.nationality,
-        addressKtp: req.addressKtp,
-        bpjsStatus: req.bpjsStatus,
-        vehicleCount: req.vehicleCount,
-        isPKH: req.isPKH,
-        isBLT: req.isBLT,
-        isBPNT: req.isBPNT,
-        isBansosLain: req.isBansosLain,
-        bansosLainName: req.bansosLainName,
-        economicStatus: req.economicStatus,
-        pregnantCount: req.pregnantCount,
-        babyCount: req.babyCount,
-        toddlerCount: req.toddlerCount,
-        teenagerCount: req.teenagerCount,
-        adultCount: req.adultCount,
-        elderlyCount: req.elderlyCount,
-        widowCount: req.widowCount,
-        childCount: req.childCount,
-        familyMembers: req.familyMembers || []
+        occupants: req.occupants
       });
 
       // 2. Update the request status
