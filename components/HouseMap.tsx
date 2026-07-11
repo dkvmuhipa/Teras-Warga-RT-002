@@ -5,6 +5,9 @@ import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
+import DarkModeToggle from '../admin/DarkModeToggle';
+import MapCanvas from '../admin/MapCanvas';
+import TabBar from '../admin/TabBar';
 import { useFinancial } from '../context/FinancialContext';
 
 interface HouseMapProps {
@@ -124,7 +127,8 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                className="bg-slate-50 w-full max-w-lg md:max-w-2xl lg:max-w-3xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-slate-200/50 flex flex-col max-h-[85vh]"
+                className="bg-[var(--color-card)] w-full max-w-lg md:max-w-2xl lg:max-w-3xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-slate-200/50 flex flex-col max-h-[85vh]"
+                role="dialog" aria-modal="true" aria-labelledby="house-modal-title"
             >
                 {/* Header Section with Photo Support */}
                 <div className={`relative h-48 md:h-56 shrink-0 transition-all duration-500 overflow-hidden ${
@@ -216,25 +220,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 </div>
 
                 {/* Modern Tab Navigation */}
-                <div className="flex p-2.5 bg-slate-100 border-b border-slate-200/60 shrink-0 gap-1.5">
-                    {[
-                        { id: 'profile', label: 'Profil Hunian', icon: User },
-                        { id: 'finance', label: 'Status Keuangan', icon: DollarSign },
-                        { id: 'history', label: 'Log & Riwayat', icon: Clock }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all ${
-                                activeTab === tab.id 
-                                    ? 'bg-white text-indigo-700 shadow-md shadow-slate-200 border border-slate-200/20 font-black' 
-                                    : 'text-slate-500 hover:text-slate-850 hover:bg-slate-200/50'
-                            }`}
-                        >
-                            <tab.icon size={14} /> {tab.label}
-                        </button>
-                    ))}
-                </div>
+                <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
 
                 {/* Content Section */}
                 <div className="overflow-y-auto custom-scrollbar flex-1 bg-slate-50">
