@@ -13,9 +13,11 @@
   "dependencies": {
     "@google/genai": "*",
     "@tailwindcss/vite": "^4.2.1",
+    "@types/classnames": "^2.3.0",
     "@types/qrcode": "^1.5.6",
     "@types/react-signature-canvas": "^1.0.7",
     "@vis.gl/react-google-maps": "^1.8.3",
+    "classnames": "^2.5.1",
     "cloudinary": "^2.9.0",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",

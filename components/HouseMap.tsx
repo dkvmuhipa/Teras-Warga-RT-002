@@ -160,6 +160,8 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                         <X size={20}/>
                     </button>
                     
+                    <DarkModeToggle className="absolute top-5 right-14 z-20" />
+                    
                     <div className="absolute bottom-6 left-8 right-8 text-white z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                         <div>
                             <div className="flex flex-wrap items-center gap-2 mb-2">
