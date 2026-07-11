@@ -206,7 +206,7 @@ service cloud.firestore {
 
     // Health Records
     match /healthRecords/{id} {
-      allow read: if true;
+      allow read: if isAdmin();
       allow write: if isAdmin();
     }
 
@@ -273,7 +273,8 @@ service cloud.firestore {
 
     // FCM Tokens
     match /fcmTokens/{id} {
-      allow create, update, read: if true;
+      allow create, update: if true;
+      allow read: if isAdmin();
       allow delete: if isAdmin();
     }
 

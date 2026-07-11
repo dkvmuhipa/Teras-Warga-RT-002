@@ -83,6 +83,22 @@ if (!admin.apps.length) {
   }
 }
 
+const authenticateAdmin = async (req: any, res: any, next: any) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized: No token provided" });
+  }
+
+  const idToken = authHeader.split("Bearer ")[1];
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    req.user = decodedToken;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Unauthorized: Invalid token" });
+  }
+};
+
 async function startServer() {
   const app = express();
   app.use(cors()); // Add CORS middleware
@@ -98,8 +114,18 @@ async function startServer() {
 
   // Push Notification Endpoint
   app.post("/api/push/send", async (req, res) => {
-    const { tokens, notification, data } = req.body;
+    let { tokens, notification, data } = req.body;
     
+    // Server-side retrieval of FCM tokens for security fallback (e.g. public panic button)
+    if (!tokens || !tokens.length) {
+      try {
+        const tokensSnapshot = await admin.firestore().collection("fcmTokens").get();
+        tokens = tokensSnapshot.docs.map(doc => doc.data().token).filter(Boolean);
+      } catch (err) {
+        console.error("Gagal mengambil tokens di server:", err);
+      }
+    }
+
     if (!tokens || !tokens.length) {
       return res.status(400).json({ error: "No tokens provided" });
     }
@@ -589,7 +615,7 @@ async function startServer() {
   });
 
   // WhatsApp Gateway Endpoint (Sidobe)
-  app.post("/api/whatsapp/send", async (req, res) => {
+  app.post("/api/whatsapp/send", authenticateAdmin, async (req, res) => {
     const { target, message } = req.body;
     const apiKey = process.env.WHATSAPP_GATEWAY_TOKEN;
 
@@ -632,7 +658,7 @@ async function startServer() {
   });
   
   // WhatsApp Groups Endpoint (Sidobe)
-  app.get("/api/whatsapp/groups", async (req, res) => {
+  app.get("/api/whatsapp/groups", authenticateAdmin, async (req, res) => {
     const apiKey = process.env.WHATSAPP_GATEWAY_TOKEN;
 
     if (!apiKey) {
@@ -1043,7 +1069,7 @@ Salam hangat rukun warga,
   };
 
   // 1. Generate Announcement Draft
-  app.post("/api/gemini/announcement-draft", async (req, res) => {
+  app.post("/api/gemini/announcement-draft", authenticateAdmin, async (req, res) => {
     const { topic, tone } = req.body;
     try {
       const apiKey = process.env.GEMINI_API_KEY;
@@ -1069,7 +1095,7 @@ Salam hangat rukun warga,
   });
 
   // 2. Analyze Reports
-  app.post("/api/gemini/analyze-reports", async (req, res) => {
+  app.post("/api/gemini/analyze-reports", authenticateAdmin, async (req, res) => {
     const { reports } = req.body;
     try {
       const apiKey = process.env.GEMINI_API_KEY;
@@ -1095,7 +1121,7 @@ Salam hangat rukun warga,
   });
 
   // 3. Generate Dashboard Summary
-  app.post("/api/gemini/dashboard-summary", async (req, res) => {
+  app.post("/api/gemini/dashboard-summary", authenticateAdmin, async (req, res) => {
     const { data } = req.body;
     try {
       const apiKey = process.env.GEMINI_API_KEY;
@@ -1156,7 +1182,7 @@ Salam hangat rukun warga,
   });
 
   // 5. Generate Broadcast Draft (For WhatsApp Broadcast Manager)
-  app.post("/api/gemini/generate-broadcast", async (req, res) => {
+  app.post("/api/gemini/generate-broadcast", authenticateAdmin, async (req, res) => {
     const { topic, type, tone, dataContext } = req.body;
     try {
       const apiKey = process.env.GEMINI_API_KEY;

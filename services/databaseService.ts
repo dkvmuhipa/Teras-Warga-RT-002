@@ -906,30 +906,26 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
             status: 'Baru'
         });
 
-        // Trigger Push Notifications
+        // Trigger Push Notifications (Tokens handled server-side for security)
         try {
-            const tokens = await getFCMTokens();
-            if (tokens && tokens.length > 0) {
-                fetch('/api/push/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tokens,
-                        notification: {
-                            title: "🚨 DARURAT (PANIC BUTTON)",
-                            body: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`
-                        },
-                        data: {
-                            type: 'PanicAlert',
-                            houseId,
-                            location
-                        }
-                    })
-                }).catch(err => {
-                    // Non-critical error, just log
-                    console.warn("Push API fetch error:", err);
-                });
-            }
+            fetch('/api/push/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    notification: {
+                        title: "🚨 DARURAT (PANIC BUTTON)",
+                        body: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`
+                    },
+                    data: {
+                        type: 'PanicAlert',
+                        houseId,
+                        location
+                    }
+                })
+            }).catch(err => {
+                // Non-critical error, just log
+                console.warn("Push API fetch error:", err);
+            });
         } catch (error) {
             // Non-critical error, just log
             console.warn("Error triggering push notifications:", error);
