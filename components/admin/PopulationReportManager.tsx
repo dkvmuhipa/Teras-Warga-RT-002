@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useConfirm } from '../../context/ConfirmContext';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, BarChart, Bar, Cell, Legend 
+  ResponsiveContainer 
 } from 'recharts';
 
 interface PopulationReportManagerProps {
@@ -128,7 +128,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             name: house.headOfFamily,
             phone: house.phone,
             houseId: house.id,
-            date: house.joiningDate.split('T')[0],
+            date: house.joiningDate ? house.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0],
             description: 'Warga baru ditambahkan melalui Data Warga (Manual Sync)',
             isGenerated: true, // Mark legacy data as generated to exclude from mutation reports
             details: {
@@ -235,7 +235,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               name: house.headOfFamily,
               phone: house.phone,
               houseId: house.id,
-              date: house.joiningDate.split('T')[0],
+              date: house.joiningDate ? house.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0],
               description: 'Warga baru ditambahkan melalui Data Warga (Auto-Sync)',
               isGenerated: false, // For current month newcomers, we want them included in reports
               details: {
