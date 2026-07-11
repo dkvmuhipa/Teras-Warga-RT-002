@@ -126,7 +126,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
           houseId: formatHouseId(`${reg.block}-${reg.number}`),
           date: new Date().toISOString().split('T')[0],
           description: 'Registrasi Warga Baru (Online)',
-          isGenerated: true,
+          isGenerated: false,
           details: {
             previousAddress: '-',
             reasonForMoving: 'Registrasi Online',

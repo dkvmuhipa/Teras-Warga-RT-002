@@ -602,8 +602,11 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
   worksheet.eachRow((row, rowNumber) => {
     // Skip header row and detect format
     if (rowNumber === 1) {
-      if (row.getCell(1).text?.toString().trim().toUpperCase() === 'NO') {
+      const firstCell = row.getCell(1).text?.toString().trim().toUpperCase() || '';
+      if (firstCell === 'NO') {
         isOldFormat = true;
+      } else if (firstCell !== 'BLOK' && firstCell !== 'BLOK RUMAH') {
+        throw new Error('Format kolom Excel tidak sesuai dengan template data warga resmi Teras RT.');
       }
       return;
     }
