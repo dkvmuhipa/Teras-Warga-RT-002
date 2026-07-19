@@ -310,25 +310,21 @@ export const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminRole, setAdminRole] = useState<Role | null>(null);
 
+  // Public Subscriptions
   useEffect(() => {
     const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data));
     const unsubAnnouncements = subscribeToCollection('announcements', (data) => setAnnouncements(data));
     const unsubNews = subscribeToNews((data) => setNews(data));
-    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
     const unsubOfficials = subscribeToCollection('officials', (data) => setOfficials(data));
     const unsubReports = subscribeToCollection('reports', (data) => setReports(data));
-    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
     const unsubRonda = subscribeToCollection('ronda', (data) => setRonda(data));
     const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data));
     const unsubUmkm = subscribeToCollection('umkm', (data) => setUmkm(data));
     const unsubPolls = subscribeToCollection('polls', (data) => setPolls(data));
-    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
     const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
     const unsubIuranPayments = subscribeToCollection('iuranPayments', (data) => setIuranPayments(data));
-    const unsubResidentRegistrations = subscribeToResidentRegistrations((data) => setResidentRegistrations(data));
     const unsubGuestReports = subscribeToGuestReports((data) => setGuestReports(data));
     const unsubInventoryLogs = subscribeToCollection('inventoryLogs', (data) => setInventoryLogs(data));
-    const unsubPopulationLogs = subscribeToPopulationLogs((data) => setPopulationLogs(data));
     const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
     const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
     const unsubDocuments = subscribeToDocuments((data) => setDocuments(data));
@@ -351,7 +347,6 @@ export const App = () => {
     const unsubEvents = subscribeToEvents((data) => setEvents(data));
     const unsubWasteDeposits = subscribeToWasteDeposits((data) => setWasteDeposits(data));
     const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
-    const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
     const unsubPdfConfig = subscribeToPdfConfig((data) => {
         if (data) {
             setPdfConfigState(data);
@@ -359,16 +354,42 @@ export const App = () => {
         }
     });
 
-    // Ensure Mosque exists in Firestore if empty database, but avoid recreating if deleted by user.
-    // ensureMosqueExists();
-
     return () => {
-      unsubHouses(); unsubAnnouncements(); unsubNews(); unsubCash(); unsubOfficials(); 
-      unsubReports(); unsubLetters(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
-      unsubUmkm(); unsubPolls(); unsubBills(); unsubPopulationReports(); unsubIuranPayments(); unsubResidentRegistrations(); unsubGuestReports(); unsubInventoryLogs(); unsubPopulationLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubUpdateRequests(); unsubPdfConfig(); unsubWasteDeposits();
+      unsubHouses(); unsubAnnouncements(); unsubNews(); unsubOfficials(); 
+      unsubReports(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
+      unsubUmkm(); unsubPolls(); unsubPopulationReports(); unsubIuranPayments(); unsubGuestReports(); unsubInventoryLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
+      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubPdfConfig(); unsubWasteDeposits();
     };
   }, []);
+
+  // Admin-Only/Restricted Subscriptions
+  useEffect(() => {
+    if (!isAdmin) {
+      setCashFlow([]);
+      setLetters([]);
+      setBills([]);
+      setResidentRegistrations([]);
+      setPopulationLogs([]);
+      setUpdateRequests([]);
+      return;
+    }
+
+    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
+    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
+    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
+    const unsubResidentRegistrations = subscribeToResidentRegistrations((data) => setResidentRegistrations(data));
+    const unsubPopulationLogs = subscribeToPopulationLogs((data) => setPopulationLogs(data));
+    const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
+
+    return () => {
+      unsubCash();
+      unsubLetters();
+      unsubBills();
+      unsubResidentRegistrations();
+      unsubPopulationLogs();
+      unsubUpdateRequests();
+    };
+  }, [isAdmin]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {

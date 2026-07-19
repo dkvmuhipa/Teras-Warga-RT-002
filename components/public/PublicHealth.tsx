@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Heart, Search, ArrowLeft, Calendar, User, Scale, Ruler, Activity, Thermometer, Info, ShieldCheck, TrendingUp, Droplets, Zap, Beaker } from 'lucide-react';
 import { HealthRecord } from '../../types';
 import { subscribeToHealthRecords } from '../../services/databaseService';
+import { auth } from '../../services/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -12,11 +14,23 @@ export const PublicHealth: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [foundRecords, setFoundRecords] = useState<HealthRecord[]>([]);
   const [activeCategory, setActiveCategory] = useState<HealthRecord['category'] | 'All'>('All');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = subscribeToHealthRecords(setRecords);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAdmin(!!user);
+    });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      setRecords([]);
+      return;
+    }
+    const unsubscribe = subscribeToHealthRecords(setRecords);
+    return () => unsubscribe();
+  }, [isAdmin]);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();

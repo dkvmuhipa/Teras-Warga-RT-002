@@ -1,6 +1,5 @@
 import React from 'react';
 import { Home, Users, Settings, BarChart2 } from 'lucide-react';
-import classNames from 'classnames';
 
 interface NavItem {
   id: string;
@@ -24,23 +23,22 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ viewMode, 
   return (
     <nav className="sidebar-navigation bg-bg-primary p-4 h-full">
       <ul className="space-y-2">
-        {items.map((item) => (
-          <li
-            key={item.id}
-            className={classNames(
-              'flex items-center gap-2 p-2 rounded cursor-pointer transition-colors duration-200',
-              {
-                'bg-accent text-white': viewMode === item.id,
-                'text-gray-700 hover:bg-gray-100': viewMode !== item.id,
-              }
-            )}
-            onClick={() => setViewMode(item.id)}
-            aria-label={item.label}
-          >
-            {item.icon}
-            <span className="font-medium">{item.label}</span>
-          </li>
-        ))}
+        {items.map((item) => {
+          const isActive = viewMode === item.id;
+          return (
+            <li
+              key={item.id}
+              className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors duration-200 ${
+                isActive ? 'bg-accent text-white' : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setViewMode(item.id)}
+              aria-label={item.label}
+            >
+              {item.icon}
+              <span className="font-medium">{item.label}</span>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
