@@ -5,14 +5,6 @@
   --font-serif: "Lora", Georgia, Cambria, "Times New Roman", Times, serif;
   --font-display: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
   
-  /* Light, vibrant palette */
-  --color-primary-light: #f5f7fa;   /* subtle light gray */
-  --color-card: #ffffff;           /* pure white cards */
-  --color-accent: #ff6b6b;         /* vibrant coral accent */
-  --color-accent-hover: #ff8787;   /* lighter on hover */
-  --color-text: #1f2937;           /* dark slate for text */
-
-  /* Retain original brand colors for compatibility if needed */
   --color-brand-blue: #0EA5E9;
   --color-brand-green: #10B981;
   --color-brand-dark: #0F172A;
@@ -51,15 +43,8 @@
 
 @layer base {
   body {
-    @apply bg-white text-slate-900;
-    background-color: var(--color-primary-light);
-    color: var(--color-text);
-    font-family: var(--font-sans);
-  }
-  /* Dark mode support (manual toggle) */
-  .dark body {
-    background-color: #1f2937; /* dark slate */
-    color: #f9fafb; /* near white */
+    @apply bg-slate-50 text-slate-900;
+    background-color: #F8FAFC;
   }
 }
 
@@ -74,14 +59,6 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-  /* Accent utility classes */
-  .bg-accent {
-    background-color: var(--color-accent);
-    color: white;
-  }
-  .bg-accent-hover:hover {
-    background-color: var(--color-accent-hover);
   }
   
   .mask-gradient-right {

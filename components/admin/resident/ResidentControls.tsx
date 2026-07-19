@@ -4,7 +4,6 @@ import { generateMonthOptions } from '../../../src/utils/dateUtils';
 import { ResidentRegistration } from '../../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { SidebarNavigation } from '../SidebarNavigation';
 
 interface ResidentControlsProps {
   searchTerm: string;
@@ -126,8 +125,39 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           </button>
         </div>
 
-        {/* Sidebar Navigation for view mode switching */}
-        <SidebarNavigation viewMode={viewMode} setViewMode={setViewMode} />
+        {/* View Mode Switching - Polished iOS-style horizontal controller */}
+        <div className="relative">
+          <div className="flex items-center gap-1 bg-slate-50/70 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-100 shadow-[inset_0_1px_3px_rgba(241,245,249,0.8)] scroll-smooth snap-x">
+            {navModes.map((mode) => {
+              const Icon = mode.icon;
+              const isActive = viewMode === mode.id;
+              
+              return (
+                <button 
+                  key={mode.id}
+                  onClick={() => setViewMode(mode.id)} 
+                  className={`snap-center flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 whitespace-nowrap active:scale-95 shrink-0 select-none ${
+                    isActive 
+                      ? 'bg-indigo-600 text-white font-black text-xs shadow-[0_4px_12px_rgba(99,102,241,0.25)] border border-indigo-500/10' 
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 bg-transparent font-extrabold text-xs'
+                  }`}
+                >
+                  <Icon size={14} className={isActive ? 'text-white stroke-[2.5px]' : 'text-slate-400 stroke-[2px]'} />
+                  <span className="text-[10px] uppercase tracking-wider">{mode.label}</span>
+                  {mode.badge ? (
+                    <span className={`flex h-4 min-w-4 items-center justify-center rounded-full text-[9px] font-bold px-1 ${
+                      isActive ? 'bg-white text-indigo-600' : 'bg-rose-500 text-white'
+                    }`}>
+                      {mode.badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+          {/* Subtle horizontal scroll fading indicators */}
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none rounded-r-2xl hidden md:block" />
+        </div>
       </div>
 
       {/* 2. Responsive Filters Block */}
