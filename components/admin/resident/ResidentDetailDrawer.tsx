@@ -199,11 +199,25 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 </div>
               </section>
 
-              {/* Group: Demografi */}
+              {/* Group: Smart Tags */}
+              {selectedResident.tags && selectedResident.tags.length > 0 && (
+                <section className="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100 shadow-xs">
+                  <h4 className="text-[10px] font-bold text-indigo-900 uppercase tracking-wider mb-2">Smart Tags Warga</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedResident.tags.map((tag, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-white text-indigo-700 border border-indigo-200 rounded-md text-xs font-bold shadow-2xs">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Group: Demografi & Silsilah Keluarga */}
               <section className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1 h-4 bg-emerald-600 rounded-full"></div>
-                  <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Profil Demografi</h4>
+                  <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Profil Demografi & Silsilah Keluarga</h4>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 mb-5">
@@ -216,24 +230,42 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <DetailItem label="Kewarganegaraan" value={selectedResident.nationality || 'WNI'} />
                 </div>
 
-                {/* Family Members Section */}
-                <div className="space-y-3 pt-3 border-t border-slate-100">
+                {/* Family Tree Visualizer */}
+                <div className="space-y-3 pt-4 border-t border-slate-100">
                   <div className="flex justify-between items-center">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Anggota Keluarga Terkait</p>
-                    <span className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 text-[#475569] rounded-[4px] text-[9px] font-bold">{selectedResident.familyMembers?.length || 0} Jiwa</span>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pohon Silsilah Keluarga</p>
+                    <span className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 text-[#475569] rounded-[4px] text-[9px] font-bold">
+                      {(selectedResident.familyMembers?.length || 0) + 1} Jiwa
+                    </span>
                   </div>
                   
+                  {/* Root: Head of Family */}
+                  <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 bg-indigo-600 text-white rounded flex items-center justify-center text-xs font-bold">
+                        {selectedResident.headOfFamily.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-indigo-950 leading-tight">{selectedResident.headOfFamily}</p>
+                        <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-wide mt-0.5">Kepala Keluarga (Utama)</p>
+                      </div>
+                    </div>
+                    <span className="px-1.5 py-0.2 bg-indigo-100 text-indigo-700 rounded text-[8px] font-bold uppercase">{selectedResident.gender || 'Laki-laki'}</span>
+                  </div>
+
+                  {/* Nodes: Family Members */}
                   {selectedResident.familyMembers && selectedResident.familyMembers.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="pl-4 border-l-2 border-indigo-100 space-y-2 ml-4">
                       {selectedResident.familyMembers.map((member, idx) => (
-                        <div key={member.name || idx} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 hover:bg-white rounded-lg transition-colors">
-                          <div className="flex items-center gap-2.5">
-                             <div className="w-8 h-8 bg-white border border-slate-200 rounded flex items-center justify-center text-slate-700 text-xs font-bold">
+                        <div key={member.name || idx} className="relative flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 hover:bg-white rounded-lg transition-colors">
+                          <div className="absolute -left-4 top-1/2 w-4 h-0.5 bg-indigo-100"></div>
+                          <div className="flex items-center gap-2">
+                             <div className="w-7 h-7 bg-white border border-slate-200 rounded flex items-center justify-center text-slate-700 text-xs font-bold shrink-0">
                                {member.name.charAt(0).toUpperCase()}
                              </div>
                              <div>
                                 <p className="text-xs font-bold text-slate-800 leading-tight">{member.name}</p>
-                                <p className="text-[9px] font-semibold text-slate-405 uppercase tracking-wide mt-0.5">{member.relation} • {member.job || 'N/A'}</p>
+                                <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wide mt-0.5">{member.relation} • {member.job || 'N/A'}</p>
                              </div>
                           </div>
                           <span className="px-1.5 py-0.2 bg-white rounded border border-slate-150 text-[8px] font-bold text-slate-500 uppercase">{member.gender === 'Laki-laki' ? 'Pria' : 'Wanita'}</span>
@@ -244,6 +276,55 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <p className="text-[11px] font-medium text-slate-400 italic text-center py-2 bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
                       Tinggal mandiri (Kepala Keluarga tunggal)
                     </p>
+                  )}
+                </div>
+              </section>
+
+              {/* Group: Riwayat Kepenghunian Kavling */}
+              <section className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1 h-4 bg-amber-500 rounded-full"></div>
+                  <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Riwayat Kepenghunian Kavling</h4>
+                </div>
+
+                <div className="relative pl-4 border-l-2 border-amber-100 space-y-4">
+                  {/* Current Active Resident */}
+                  <div className="relative">
+                    <div className="absolute -left-[21px] top-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white ring-2 ring-emerald-100"></div>
+                    <div className="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="px-1.5 py-0.2 bg-emerald-500 text-white rounded text-[8px] font-bold uppercase tracking-wider">Penghuni Aktif</span>
+                          <p className="text-xs font-bold text-slate-800 mt-1">{selectedResident.headOfFamily}</p>
+                        </div>
+                        <span className="text-[9px] font-bold text-slate-400">{selectedResident.joiningDate ? selectedResident.joiningDate.split('T')[0] : 'Aktif'} - Sekarang</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1 font-medium">Status: {selectedResident.residenceType || 'Tetap'} • {selectedResident.occupants || 1} Jiwa</p>
+                    </div>
+                  </div>
+
+                  {/* Historical Records */}
+                  {selectedResident.occupancyHistory && selectedResident.occupancyHistory.length > 0 ? (
+                    selectedResident.occupancyHistory.map((history) => (
+                      <div key={history.id} className="relative">
+                        <div className="absolute -left-[21px] top-1 w-3.5 h-3.5 bg-slate-300 rounded-full border-2 border-white"></div>
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-150">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-xs font-bold text-slate-700">{history.headOfFamily}</p>
+                              <p className="text-[9px] font-semibold text-slate-400 uppercase mt-0.5">{history.residenceType} • {history.movedReason || 'Pindah'}</p>
+                            </div>
+                            <span className="text-[9px] font-bold text-slate-400">{history.startDate} s/d {history.endDate || '-'}</span>
+                          </div>
+                          {history.notes && <p className="text-[10px] text-slate-500 italic mt-1">{history.notes}</p>}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="relative">
+                      <div className="absolute -left-[21px] top-1 w-3.5 h-3.5 bg-slate-200 rounded-full border-2 border-white"></div>
+                      <p className="text-[10px] text-slate-400 italic pl-1">Belum ada catatan kepenghunian terdahulu.</p>
+                    </div>
                   )}
                 </div>
               </section>

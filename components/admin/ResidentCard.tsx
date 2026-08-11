@@ -88,6 +88,15 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                 </span>
               )}
             </div>
+            {house.tags && house.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {house.tags.map((tag, idx) => (
+                  <span key={idx} className="px-1.5 py-0.5 bg-indigo-50/80 text-indigo-700 border border-indigo-100 rounded text-[9px] font-medium">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

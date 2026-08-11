@@ -39,6 +39,17 @@ export enum PaymentStatus {
   UNPAID = 'Menunggak'
 }
 
+export interface OccupancyHistoryRecord {
+  id: string;
+  startDate: string;
+  endDate?: string;
+  headOfFamily: string;
+  residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
+  occupantsCount: number;
+  notes?: string;
+  movedReason?: 'Pindah Keluar' | 'Beli Rumah Baru' | 'Sewa Selesai' | 'Lainnya';
+}
+
 export interface House {
   id: string;
   block: string;
@@ -64,6 +75,10 @@ export interface House {
   vaccinationStatus?: 'Belum' | 'Dosis 1' | 'Dosis 2' | 'Booster 1' | 'Booster 2'; // NEW: Status Vaksinasi
   specialNotes?: string; // NEW: Catatan Khusus
   housePhotoUrl?: string; // NEW: Foto Rumah
+  
+  // Smart Tagging & Occupancy History
+  tags?: string[];
+  occupancyHistory?: OccupancyHistoryRecord[];
   
   // New Fields for Professional Data Management
   isVerified?: boolean;

@@ -466,6 +466,64 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             value={formData.phone} 
                             onChange={(v: any) => setFormData({...formData, phone: v})} 
                           />
+
+                          {/* Smart Tagging Input */}
+                          <div className="mt-4 pt-4 border-t border-slate-100">
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Smart Tagging / Label Warga</label>
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                              {(formData.tags || []).map((t: string, idx: number) => (
+                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-xs font-semibold">
+                                  #{t}
+                                  <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, tags: formData.tags.filter((_: any, i: number) => i !== idx) })}
+                                    className="text-indigo-400 hover:text-rose-600 ml-0.5"
+                                  >
+                                    <X size={11} />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex gap-1.5">
+                              <input
+                                type="text"
+                                id="customTagInput"
+                                placeholder="Tambah tag (mis: Pemuda, Dokter)..."
+                                className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const val = (e.currentTarget as HTMLInputElement).value.trim();
+                                    if (val) {
+                                      const current = formData.tags || [];
+                                      if (!current.includes(val)) {
+                                        setFormData({ ...formData, tags: [...current, val] });
+                                      }
+                                      (e.currentTarget as HTMLInputElement).value = '';
+                                    }
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              <span className="text-[9px] text-slate-400 font-medium mr-1">Rekomendasi:</span>
+                              {['Pemuda', 'Dokter', 'Donatur', 'Keamanan', 'VaksinBooster', 'VaksinLengkap'].map((rec) => (
+                                <button
+                                  key={rec}
+                                  type="button"
+                                  onClick={() => {
+                                    const current = formData.tags || [];
+                                    if (!current.includes(rec)) {
+                                      setFormData({ ...formData, tags: [...current, rec] });
+                                    }
+                                  }}
+                                  className="text-[9px] px-1.5 py-0.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-500 rounded border border-slate-200/60 font-medium transition-colors"
+                                >
+                                  +{rec}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                        </div>
 
                        {/* Portal Access PIN code block */}
