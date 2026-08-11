@@ -535,6 +535,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
 
         {/* Master Panic Launcher Button */}
         <button
+          id="panic-button-trigger"
           onClick={() => {
             if (!isIdentified) {
               setShowIdentifyPrompt(true);
@@ -543,7 +544,6 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
             }
           }}
           className="relative group transition-transform active:scale-95 duration-200"
-          id="btn-sos-floating"
         >
           {/* Pulsating emergency locator rings */}
           <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-15"></div>

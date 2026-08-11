@@ -1,5 +1,4 @@
-import React from 'react';
-import { Home, MapPin, Bell, FileText, UserCheck } from 'lucide-react';
+import { Home, Wrench, Bell, FileText, UserCheck } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface MobileBottomNavProps {
@@ -17,7 +16,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 }) => {
   const navItems = [
     { id: 'info', label: 'Beranda', icon: Home },
-    { id: 'map', label: 'Peta', icon: MapPin },
+    { id: 'services', label: 'Layanan', icon: Wrench },
     { id: 'panic', label: 'Darurat', icon: Bell, isAction: true },
     { id: 'rules', label: 'Peraturan', icon: FileText },
     { id: 'admin', label: isAdmin ? 'Admin' : 'Login', icon: UserCheck },

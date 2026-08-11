@@ -585,8 +585,8 @@ export const App = () => {
                             onTabChange={(tab) => {
                               if (tab === 'admin') {
                                 window.location.hash = '#/admin';
-                              } else if (tab === 'map') {
-                                window.location.hash = '#/peta';
+                              } else if (tab === 'services') {
+                                window.location.hash = '#/services';
                               } else if (tab === 'rules') {
                                 window.location.hash = '#/rules';
                               } else {
@@ -595,7 +595,12 @@ export const App = () => {
                             }}
                             onOpenPanicModal={() => {
                               const panicBtn = document.getElementById('panic-button-trigger');
-                              if (panicBtn) panicBtn.click();
+                              if (panicBtn) {
+                                panicBtn.click();
+                              } else {
+                                const sosBtn = document.getElementById('btn-sos-floating');
+                                if (sosBtn) sosBtn.click();
+                              }
                             }}
                             isAdmin={isAdmin}
                         />
