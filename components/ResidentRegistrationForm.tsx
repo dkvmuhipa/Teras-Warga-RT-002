@@ -240,48 +240,39 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         </div>
       </div>
 
-      {/* Multi-step Progressive Indicator */}
-      <div className="mb-8 p-1 bg-slate-50 border border-slate-100 rounded-[2rem] hidden md:block">
-        <div className="grid grid-cols-4 gap-1">
-          {STEPS.map((step, idx) => {
-            const isActive = currentStep === idx;
-            const isCompleted = currentStep > idx;
-            return (
-              <div 
-                key={idx}
-                className={`flex items-center gap-3 px-5 py-3 rounded-3xl transition-all duration-300 ${
-                  isActive ? 'bg-white shadow-sm border border-slate-200/50' : ''
-                }`}
-              >
-                <div className={`w-6 h-6 rounded-xl flex items-center justify-center text-[10px] font-black transition-all ${
-                  isCompleted ? 'bg-emerald-500 text-white' : 
-                  isActive ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10' : 'bg-slate-200 text-slate-400'
-                }`}>
-                  {isCompleted ? <Check size={12} className="stroke-[3]" /> : idx + 1}
-                </div>
-                <div>
-                  <p className={`text-[10px] font-black uppercase tracking-wider leading-none ${isActive ? 'text-indigo-600' : isCompleted ? 'text-slate-700' : 'text-slate-400'}`}>
-                    {step.label}
-                  </p>
-                  <p className="text-[8px] font-bold text-slate-400 mt-1">{step.desc}</p>
-                </div>
-              </div>
-            );
-          })}
+      {/* Multi-step Progressive Indicator (Wizard Header) */}
+      <div className="mb-8 p-3 bg-slate-900 rounded-[2rem] text-white shadow-lg shadow-slate-900/20">
+        <div className="flex justify-between items-center px-4 mb-2">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
+            Langkah {currentStep + 1} dari {STEPS.length}
+          </span>
+          <span className="text-xs font-black text-white">
+            {STEPS[currentStep].label} • <span className="text-slate-400 font-semibold">{STEPS[currentStep].desc}</span>
+          </span>
         </div>
-      </div>
-
-      {/* Compact Indicator for Mobile Devices */}
-      <div className="md:hidden mb-6 p-4 bg-slate-50 border border-slate-100 rounded-3xl">
-        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wider text-slate-400">
-          <span>Langkah {currentStep + 1} s.d {STEPS.length}</span>
-          <span className="text-indigo-600 font-extrabold">{STEPS[currentStep].label}</span>
+        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden p-0.5 border border-white/5">
+          <motion.div 
+            className="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full"
+            initial={{ width: '0%' }}
+            animate={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+          />
         </div>
-        <div className="w-full bg-slate-200 h-1.5 rounded-full mt-2.5 overflow-hidden">
-          <div 
-            className="bg-indigo-600 h-full transition-all duration-500 rounded-full"
-            style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
-          ></div>
+        <div className="grid grid-cols-4 gap-2 mt-3 text-center">
+          {STEPS.map((step, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                if (idx < currentStep) setCurrentStep(idx);
+              }}
+              className={`text-[9px] font-black uppercase tracking-wider transition-colors ${
+                currentStep === idx ? 'text-white' : idx < currentStep ? 'text-emerald-400' : 'text-slate-600'
+              }`}
+            >
+              {idx + 1}. {step.label}
+            </button>
+          ))}
         </div>
       </div>
 
