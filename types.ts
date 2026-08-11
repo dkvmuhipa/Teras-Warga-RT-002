@@ -158,7 +158,7 @@ export interface House {
     name: string;
     nik?: string;
     gender?: 'Laki-laki' | 'Perempuan';
-    relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
+    relation: 'Suami' | 'Istri' | 'Anak' | 'Menantu' | 'Cucu' | 'Orang Tua' | 'Mertua' | 'Saudara' | 'Keponakan' | 'Kakek/Nenek' | 'Pembantu' | 'Famili Lain';
     education?: string;
     birthDate?: string;
     job?: string;
@@ -205,7 +205,7 @@ export interface ResidentRegistration {
     name: string;
     nik?: string;
     gender: 'Laki-laki' | 'Perempuan';
-    relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
+    relation: 'Suami' | 'Istri' | 'Anak' | 'Menantu' | 'Cucu' | 'Orang Tua' | 'Mertua' | 'Saudara' | 'Keponakan' | 'Kakek/Nenek' | 'Pembantu' | 'Famili Lain';
     education?: string;
     birthDate?: string;
     job?: string;
@@ -868,7 +868,7 @@ export interface UpdateRequest {
     name: string;
     nik?: string;
     gender?: 'Laki-laki' | 'Perempuan';
-    relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain';
+    relation: 'Suami' | 'Istri' | 'Anak' | 'Menantu' | 'Cucu' | 'Orang Tua' | 'Mertua' | 'Saudara' | 'Keponakan' | 'Kakek/Nenek' | 'Pembantu' | 'Famili Lain';
     birthDate?: string;
     job?: string;
   }[];

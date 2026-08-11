@@ -251,7 +251,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     pbbStatus: 'Belum Diambil',
     pbbYear: new Date().getFullYear().toString(),
     generateMutationLog: true,
-    familyMembers: [] as { id?: string; name: string; relation: 'Istri' | 'Anak' | 'Orang Tua' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
+    familyMembers: [] as { id?: string; name: string; relation: 'Suami' | 'Istri' | 'Anak' | 'Menantu' | 'Cucu' | 'Orang Tua' | 'Mertua' | 'Saudara' | 'Keponakan' | 'Kakek/Nenek' | 'Pembantu' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     useManualDemographics: false,
     accessCode: ''
   });

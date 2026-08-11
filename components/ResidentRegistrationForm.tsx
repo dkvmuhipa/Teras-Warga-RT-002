@@ -748,8 +748,16 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                               onChange={e => updateFamilyMember(idx, 'relation', e.target.value)}
                             >
                               <option value="Istri">Istri</option>
+                              <option value="Suami">Suami</option>
                               <option value="Anak">Anak</option>
+                              <option value="Menantu">Menantu</option>
+                              <option value="Cucu">Cucu</option>
                               <option value="Orang Tua">Orang Tua</option>
+                              <option value="Mertua">Ibu/Ayah Mertua</option>
+                              <option value="Saudara">Saudara / Adik / Kakak</option>
+                              <option value="Keponakan">Keponakan</option>
+                              <option value="Kakek/Nenek">Kakek / Nenek</option>
+                              <option value="Pembantu">Pembantu / PRT</option>
                               <option value="Famili Lain">Famili Lain</option>
                             </select>
                           </div>
