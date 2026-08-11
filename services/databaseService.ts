@@ -95,6 +95,8 @@ const HEALTH_RECORDS_COL = "healthRecords";
 const FAQ_COL = "faq";
 const EVENTS_COL = "events";
 const WASTE_DEPOSITS_COL = "wasteDeposits";
+export const INCOMING_MAILS_COL = "incomingMails";
+export const PENDING_DEPOSITS_COL = "pendingDeposits";
 const WASTE_PRICES_COL = "wastePrices";
 const WASTE_BALANCES_COL = "wasteBalances";
 const DONATION_CAMPAIGNS_COL = "donationCampaigns";
@@ -204,6 +206,49 @@ export const subscribeToDonationCampaigns = (callback: (data: any[]) => void) =>
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, DONATION_CAMPAIGNS_COL);
     });
+};
+
+export const subscribeToIncomingMails = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) return () => {};
+    const q = query(collection(db, INCOMING_MAILS_COL), orderBy("receivedDate", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, INCOMING_MAILS_COL);
+    });
+};
+
+export const addIncomingMailToDb = async (data: any) => {
+    try {
+        return await addDoc(collection(db, INCOMING_MAILS_COL), {
+            ...data,
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, INCOMING_MAILS_COL);
+    }
+};
+
+export const updateIncomingMailInDb = async (id: string, data: any) => {
+    try {
+        const docRef = doc(db, INCOMING_MAILS_COL, id);
+        return await updateDoc(docRef, {
+            ...data,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${INCOMING_MAILS_COL}/${id}`);
+    }
+};
+
+export const deleteIncomingMailFromDb = async (id: string) => {
+    try {
+        const docRef = doc(db, INCOMING_MAILS_COL, id);
+        return await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${INCOMING_MAILS_COL}/${id}`);
+    }
 };
 
 export const subscribeToDonationRecords = (campaignId: string, callback: (data: any[]) => void) => {

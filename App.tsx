@@ -102,6 +102,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToMarketItems,
   subscribeToPdfConfig,
   updatePdfConfig,
+  subscribeToIncomingMails,
   subscribeToSettings,
   updateSettings,
   deepSanitize,
@@ -247,6 +248,7 @@ export const App = () => {
   const [wasteDeposits, setWasteDeposits] = useState<any[]>([]);
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
+  const [incomingMails, setIncomingMails] = useState<any[]>([]);
   const [settings, setSettings] = useState({ airFee: 10000, sampahFee: 5000 });
   const [isOnline, setIsOnline] = useState(() => typeof navigator !== 'undefined' ? navigator.onLine : true);
 
@@ -371,6 +373,7 @@ export const App = () => {
       setResidentRegistrations([]);
       setPopulationLogs([]);
       setUpdateRequests([]);
+      setIncomingMails([]);
       return;
     }
 
@@ -380,6 +383,7 @@ export const App = () => {
     const unsubResidentRegistrations = subscribeToResidentRegistrations((data) => setResidentRegistrations(data));
     const unsubPopulationLogs = subscribeToPopulationLogs((data) => setPopulationLogs(data));
     const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
+    const unsubIncomingMails = subscribeToIncomingMails(setIncomingMails);
 
     return () => {
       unsubCash();
@@ -388,6 +392,7 @@ export const App = () => {
       unsubResidentRegistrations();
       unsubPopulationLogs();
       unsubUpdateRequests();
+      unsubIncomingMails();
     };
   }, [isAdmin]);
 
@@ -471,6 +476,7 @@ export const App = () => {
                                     setPopulationLogs={setPopulationLogs} 
                                     events={events} 
                                     updateRequests={updateRequests}
+                                    incomingMails={incomingMails}
                                     mapPoints={mapPoints} 
                                     activePatrol={activePatrol} 
                                     iuranPayments={iuranPayments} 

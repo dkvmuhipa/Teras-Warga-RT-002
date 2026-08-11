@@ -937,4 +937,21 @@ export interface ForumIdea {
   createdAt?: string;
 }
 
+export interface IncomingMail {
+  id: string;
+  mailNumber: string;         // Nomor Surat Asli Pihak Luar
+  agendaNumber: string;       // Nomor Agenda Internal RT
+  sender: string;             // Pengirim (misal: Kelurahan Tondo, PLN, Polsek)
+  subject: string;            // Perihal Surat
+  receivedDate: string;       // Tanggal Diterima (YYYY-MM-DD)
+  letterDate: string;         // Tanggal Surat Diterbitkan (YYYY-MM-DD)
+  category: 'Undangan' | 'Edaran' | 'Pemberitahuan' | 'Himbauan' | 'Tagihan/Instansi' | 'Lainnya';
+  dispositionNotes?: string;  // Catatan Disposisi Ketua RT
+  fileUrl?: string;           // URL Lampiran PDF / Foto Surat
+  fileType?: 'pdf' | 'image';
+  status: 'Menunggu Disposisi' | 'Sudah Ditindaklanjuti' | 'Diarsipkan';
+  createdAt: string;
+  updatedAt?: string;
+}
+
 

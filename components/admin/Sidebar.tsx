@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert,
-  PieChart, Activity, FileEdit, MessageSquare, FileClock
+  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
@@ -121,6 +121,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan' },
         { id: 'services', icon: FileText, label: 'Surat & Laporan' },
+        { id: 'incoming_mails', icon: Inbox, label: 'Surat Masuk' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
       ] 
     },
@@ -156,7 +157,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       } else if (role === Role.SECRETARY) {
         isAllowed = [
           'overview', 'analytics', 'residents', 
-          'health', 'guests', 'officials', 'services', 'documents', 'activities', 
+          'health', 'guests', 'officials', 'services', 'incoming_mails', 'documents', 'activities', 
           'assets', 'content', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       }

@@ -34,6 +34,7 @@ const ActivityManagement = React.lazy(() => import('./ActivityManagement').then(
 const AuditLogManager = React.lazy(() => import('./AuditLogManager').then(m => ({ default: m.AuditLogManager })));
 const NotificationCombined = React.lazy(() => import('./NotificationCombined').then(m => ({ default: m.NotificationCombined })));
 const AdminAnalytics = React.lazy(() => import('./AdminAnalytics').then(m => ({ default: m.AdminAnalytics })));
+const IncomingMailManager = React.lazy(() => import('./IncomingMailManager').then(m => ({ default: m.IncomingMailManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -80,6 +81,7 @@ interface AdminDashboardProps {
   marketItems: MarketItem[];
   faqItems: FAQItem[];
   updateRequests: UpdateRequest[];
+  incomingMails?: any[];
   settings: any;
   onUpdateSettings: (settings: any) => void;
 }
@@ -87,7 +89,7 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   role,
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, settings, onUpdateSettings
+  ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, incomingMails = [], settings, onUpdateSettings
 }) => {
   const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState('overview');
@@ -322,6 +324,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             notifications={notifications}
             settings={settings}
             onUpdateSettings={onUpdateSettings}
+          />
+        );
+      case 'incoming_mails':
+        return (
+          <IncomingMailManager 
+            incomingMails={incomingMails}
           />
         );
       case 'analytics':

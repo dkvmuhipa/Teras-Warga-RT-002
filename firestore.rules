@@ -302,6 +302,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Incoming Mails (Surat Masuk Pihak Luar)
+    match /incomingMails/{id} {
+      allow read, write: if isAdmin();
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;
