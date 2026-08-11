@@ -270,11 +270,11 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                >
                  <User size={18}/>
                </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-      <MobileBottomNav />
+             </div>
+           </div>
+         </div>
+       </nav>
+       {/* Mobile bottom nav is controlled globally in App.tsx */}
 
       {/* iOS Safari PWA Installation Guideline Modal */}
       <AnimatePresence>

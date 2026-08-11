@@ -574,6 +574,25 @@ export const App = () => {
                         <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} />
                         <PanicButton houses={houses} />
                         <PushNotificationManager userId={localStorage.getItem('resident_house_id') || 'guest_user'} />
+                        <MobileBottomNav 
+                            currentTab={window.location.hash.replace('#/', '') || 'info'}
+                            onTabChange={(tab) => {
+                              if (tab === 'admin') {
+                                window.location.hash = '#/admin';
+                              } else if (tab === 'map') {
+                                window.location.hash = '#/peta';
+                              } else if (tab === 'rules') {
+                                window.location.hash = '#/rules';
+                              } else {
+                                window.location.hash = '#/';
+                              }
+                            }}
+                            onOpenPanicModal={() => {
+                              const panicBtn = document.getElementById('panic-button-trigger');
+                              if (panicBtn) panicBtn.click();
+                            }}
+                            isAdmin={isAdmin}
+                        />
                     </>
                 } />
             </Routes>

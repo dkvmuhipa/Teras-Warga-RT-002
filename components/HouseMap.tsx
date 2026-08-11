@@ -420,9 +420,17 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
             id={`house-${house.id}`}
             onClick={onClick} 
             className={`relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-300 min-h-[60px] w-full hover:shadow-md hover:-translate-y-0.5 ${getHouseColor()} ${
+                activePanicAlert ? 'animate-pulsating-glow ring-2 ring-rose-500 z-30' : ''
+            } ${
                 isHighlighted ? 'ring-4 ring-indigo-500 ring-offset-2 z-30 scale-105 shadow-xl' : ''
             }`}
         >
+            {activePanicAlert && (
+                <span className="absolute -top-2 -right-2 flex h-4 w-4 z-40">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-600 text-[8px] font-black text-white items-center justify-center">🚨</span>
+                </span>
+            )}
             {isHighlighted && (
                 <div className="absolute -inset-1 bg-indigo-500/20 rounded-xl animate-pulse -z-10"></div>
             )}
