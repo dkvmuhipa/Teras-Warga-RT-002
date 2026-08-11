@@ -24,8 +24,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   ];
 
   return (
-    <div className="md:hidden fixed bottom-3 left-3 right-3 z-[90] pointer-events-auto no-print">
-      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[2rem] p-1.5 shadow-[0_15px_35px_rgba(15,23,42,0.4)] flex items-center justify-around relative">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[90] pointer-events-auto no-print bg-slate-900 border-t border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.3)] safe-area-pb">
+      <div className="flex items-center justify-around py-2 px-1 relative">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;
@@ -35,12 +35,12 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               <button
                 key={item.id}
                 onClick={onOpenPanicModal}
-                className="relative -top-5 flex flex-col items-center justify-center focus:outline-none group"
+                className="flex flex-col items-center justify-center focus:outline-none active:scale-95 transition-transform"
               >
-                <div className="w-14 h-14 bg-gradient-to-tr from-rose-600 via-rose-500 to-amber-500 rounded-full flex items-center justify-center text-white shadow-[0_8px_20px_rgba(244,63,94,0.5)] border-4 border-slate-900 active:scale-95 transition-all animate-pulse">
-                  <Icon size={22} className="stroke-[2.5]" />
+                <div className="w-10 h-10 bg-gradient-to-tr from-rose-600 to-rose-500 rounded-full flex items-center justify-center text-white shadow-md shadow-rose-600/40 border border-rose-400/30 animate-pulse">
+                  <Icon size={18} className="stroke-[2.5]" />
                 </div>
-                <span className="text-[9px] font-black text-rose-400 tracking-wider uppercase -mt-0.5">
+                <span className="text-[9px] font-bold text-rose-400 tracking-wider uppercase mt-0.5">
                   {item.label}
                 </span>
               </button>
@@ -51,14 +51,14 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 active:scale-95 ${
-                isActive ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'
+              className={`relative flex flex-col items-center justify-center py-1 px-3.5 rounded-xl transition-all duration-200 active:scale-95 ${
+                isActive ? 'text-white font-bold' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="mobileNavIndicator"
-                  className="absolute inset-0 bg-white/10 rounded-2xl border border-white/10"
+                  className="absolute inset-0 bg-white/10 rounded-xl border border-white/10"
                   transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                 />
               )}
