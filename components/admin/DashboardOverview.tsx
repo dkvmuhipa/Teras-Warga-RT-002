@@ -346,121 +346,111 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
         {/* Warga Card */}
-        <motion.div variants={itemVariants} className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
-          <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
+          <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3 md:mb-6">
-              <div className="p-2.5 md:p-4 bg-blue-50 text-blue-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform">
-                <Users size={18} className="md:w-6 md:h-6" />
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <div className="p-3 md:p-3.5 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+                <Users size={20} className="md:w-6 md:h-6" />
               </div>
-              <span className="hidden xs:block text-[8px] md:text-[10px] font-black text-blue-600 bg-blue-50 px-2 md:px-2.5 py-1 rounded-full uppercase tracking-wider">Kependudukan</span>
+              <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Demografi</span>
             </div>
             <div className="space-y-1">
               <div className="flex items-baseline gap-1 md:gap-2">
                 <h3 className="text-2xl md:text-4xl font-black text-slate-900">{totalResidents}</h3>
-                <span className="text-[10px] md:text-sm font-bold text-slate-400">Jiwa</span>
+                <span className="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase">Jiwa</span>
               </div>
               <div className="flex items-baseline gap-1 md:gap-2">
-                <h3 className="text-xl md:text-2xl font-black text-indigo-600">{occupiedHouses}</h3>
-                <span className="text-[10px] md:text-xs font-bold text-slate-400"><span className="sm:hidden">KK</span><span className="hidden sm:inline">KK (Kepala Keluarga)</span></span>
+                <h3 className="text-lg md:text-xl font-extrabold text-indigo-600">{occupiedHouses}</h3>
+                <span className="text-[10px] md:text-xs font-bold text-slate-400">KK Terdaftar</span>
               </div>
             </div>
-            <div className="mt-2 md:mt-4 flex items-center gap-1.5 md:gap-2 text-[9px] md:text-xs font-bold text-slate-500">
-              <div className="hidden sm:flex -space-x-1.5 md:-space-x-2">
-                {[1,2,3].map(i => (
-                  <div key={i} className="w-4 h-4 md:w-6 md:h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[6px] md:text-[8px]">
-                    <User size={10} />
-                  </div>
-                ))}
-              </div>
-              <span className="truncate">Data Terverifikasi</span>
+            <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-500">
+              <span className="text-emerald-600 font-extrabold flex items-center gap-1"><CheckCircle2 size={12} /> Terverifikasi</span>
+              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-indigo-600 transition-all" />
             </div>
           </div>
         </motion.div>
 
         {/* Keuangan Card */}
-        <motion.div variants={itemVariants} className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
           <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3 md:mb-6">
-              <div className="p-2.5 md:p-4 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform">
-                <DollarSign size={18} className="md:w-6 md:h-6" />
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <div className="p-3 md:p-3.5 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+                <DollarSign size={20} className="md:w-6 md:h-6" />
               </div>
-              <span className="hidden xs:block text-[8px] md:text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 md:px-2.5 py-1 rounded-full uppercase tracking-wider">Saldo Kas</span>
+              <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Saldo Kas</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
               <h3 className="text-2xl md:text-4xl font-black text-slate-900">Rp{(balance / 1000000).toFixed(1)}jt</h3>
             </div>
-            <div className="mt-2 md:mt-4 flex flex-wrap gap-1.5 md:gap-2">
-              <div className="flex items-center gap-0.5 md:gap-1 text-[8px] md:text-[10px] font-black text-emerald-600 bg-emerald-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg">
-                <TrendingUp size={8} className="md:w-2.5 md:h-2.5" /> +{(income / 1000000).toFixed(1)}jt
-              </div>
-              <div className="flex items-center gap-0.5 md:gap-1 text-[8px] md:text-[10px] font-black text-rose-600 bg-rose-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg">
-                <TrendingDown size={8} className="md:w-2.5 md:h-2.5" /> -{(expense / 1000000).toFixed(1)}jt
-              </div>
+            <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px]">
+              <span className="text-emerald-600 font-extrabold flex items-center gap-0.5"><TrendingUp size={12} /> +{(income / 1000000).toFixed(1)}jt</span>
+              <span className="text-rose-500 font-bold flex items-center gap-0.5"><TrendingDown size={12} /> -{(expense / 1000000).toFixed(1)}jt</span>
             </div>
           </div>
         </motion.div>
 
         {/* Laporan Card */}
-        <motion.div variants={itemVariants} className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-rose-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('services')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-rose-500/10 hover:border-rose-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('services')}>
           <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-colors"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3 md:mb-6">
-              <div className="p-2.5 md:p-4 bg-rose-50 text-rose-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform">
-                <AlertTriangle size={18} className="md:w-6 md:h-6" />
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <div className="p-3 md:p-3.5 bg-rose-50 text-rose-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+                <AlertTriangle size={20} className="md:w-6 md:h-6" />
               </div>
-              <span className="hidden xs:block text-[8px] md:text-[10px] font-black text-rose-600 bg-rose-50 px-2 md:px-2.5 py-1 rounded-full uppercase tracking-wider">Laporan</span>
+              <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-rose-700 bg-rose-50 border border-rose-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Aduan Warga</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
               <h3 className="text-2xl md:text-4xl font-black text-slate-900">{newReports}</h3>
-              <span className="text-[10px] md:text-sm font-bold text-slate-400">Baru</span>
+              <span className="text-[10px] md:text-xs font-extrabold text-rose-600 uppercase">Perlu Tindakan</span>
             </div>
-            <div className="mt-2 md:mt-4 flex items-center gap-1.5 md:gap-2 text-[9px] md:text-xs font-bold text-rose-500">
-              <Activity size={12} className="animate-pulse" />
-              <span>Tindak lanjut</span>
+            <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-rose-500">
+              <span className="flex items-center gap-1"><Activity size={12} className="animate-pulse" /> Tindak Lanjut</span>
+              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-rose-600 transition-all" />
             </div>
           </div>
         </motion.div>
 
         {/* Tamu Card */}
-        <motion.div variants={itemVariants} className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-amber-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('guests')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('guests')}>
           <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3 md:mb-6">
-              <div className="p-2.5 md:p-4 bg-amber-50 text-amber-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform">
-                <ShieldAlert size={18} className="md:w-6 md:h-6" />
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <div className="p-3 md:p-3.5 bg-amber-50 text-amber-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+                <ShieldAlert size={20} className="md:w-6 md:h-6" />
               </div>
-              <span className="hidden xs:block text-[8px] md:text-[10px] font-black text-amber-600 bg-amber-50 px-2 md:px-2.5 py-1 rounded-full uppercase tracking-wider">Tamu</span>
+              <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Log Tamu</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
               <h3 className="text-2xl md:text-4xl font-black text-slate-900">{activeGuests}</h3>
-              <span className="text-[10px] md:text-sm font-bold text-slate-400">Aktif</span>
+              <span className="text-[10px] md:text-xs font-extrabold text-amber-600 uppercase">Tamu Aktif</span>
             </div>
-            <div className="mt-2 md:mt-4 flex items-center gap-1.5 md:gap-2 text-[9px] md:text-xs font-bold text-amber-500">
-              <Clock size={12} />
-              <span>1x24 Jam</span>
+            <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-amber-600">
+              <span className="flex items-center gap-1"><Clock size={12} /> Wajib 1x24 Jam</span>
+              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-amber-600 transition-all" />
             </div>
           </div>
         </motion.div>
 
         {/* Retribusi Sampah Card */}
-        <motion.div variants={itemVariants} className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
-          <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors"></div>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
+          <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-sky-500/5 rounded-full blur-2xl group-hover:bg-sky-500/10 transition-colors"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3 md:mb-6">
-              <div className="p-2.5 md:p-4 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform">
-                <Trash2 size={18} className="md:w-6 md:h-6" />
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <div className="p-3 md:p-3.5 bg-sky-50 text-sky-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+                <Trash2 size={20} className="md:w-6 md:h-6" />
               </div>
-              <span className="hidden xs:block text-[8px] md:text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 md:px-2.5 py-1 rounded-full uppercase tracking-wider">Sampah</span>
+              <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-sky-700 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Iuran Retribusi</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
               <h3 className="text-2xl md:text-4xl font-black text-slate-900">{wastePaymentPercentage}%</h3>
-              <span className="text-[10px] md:text-sm font-bold text-slate-400">Lunas</span>
+              <span className="text-[10px] md:text-xs font-extrabold text-sky-600 uppercase">Tercapai</span>
             </div>
-            <div className="mt-2 md:mt-4 flex items-center gap-1.5 md:gap-2 text-[9px] md:text-xs font-bold text-indigo-500">
-              <CheckCircle2 size={12} />
-              <span className="truncate">{paidWasteCount}/{totalOccupiedHouses}</span>
+            <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-sky-600">
+              <span>{paidWasteCount} dari {totalOccupiedHouses} Rumah</span>
+              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-sky-600 transition-all" />
             </div>
           </div>
         </motion.div>
@@ -470,70 +460,73 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Chart Section */}
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6 md:space-y-8">
-          <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/80 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight">Arus Kas Mingguan</h3>
-              <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100/30 px-2.5 py-1 rounded-lg uppercase tracking-wider">Aktual</span>
+              <div>
+                <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight">Arus Kas RT</h3>
+                <p className="text-slate-400 text-xs font-semibold mt-0.5">Tren arus transaksi masuk & keluar minggu ini</p>
+              </div>
+              <span className="text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-xl uppercase tracking-wider">Aktual Data</span>
             </div>
             <div className="h-[200px] sm:h-[250px] md:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorCashDoc" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#94a3b8', fontWeight: 600}} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#94a3b8', fontWeight: 600}} tickFormatter={(v) => `Rp${v/1000}k`} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 700}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 700}} tickFormatter={(v) => `Rp${v/1000}k`} />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.05)' }}
-                    labelStyle={{ fontWeight: 800, color: '#1e293b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                    contentStyle={{ borderRadius: '16px', border: '1px solid #cbd5e1', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.08)' }}
+                    labelStyle={{ fontWeight: 800, color: '#0f172a', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
                   />
-                  <Area type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={3} fill="url(#colorCashDoc)" />
+                  <Area type="monotone" dataKey="amount" stroke="#4f46e5" strokeWidth={3} fill="url(#colorCashDoc)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-            <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm">
-              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-6">Demografi Warga</h3>
-              <div className="h-[180px] sm:h-[200px] md:h-[250px] w-full">
+            <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/80 shadow-sm">
+              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-4">Demografi Terdata</h3>
+              <div className="h-[180px] sm:h-[200px] md:h-[220px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={demographicData}>
                     <defs>
                       <linearGradient id="colorDemographic" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1}/>
-                        <stop offset="100%" stopColor="#c084fc" stopOpacity={0.8}/>
+                        <stop offset="0%" stopColor="#6366f1" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#818cf8" stopOpacity={0.8}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8', fontWeight: 600}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8', fontWeight: 600}} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.05)' }} />
-                    <Bar dataKey="value" fill="url(#colorDemographic)" radius={[6, 6, 0, 0]} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#64748b', fontWeight: 700}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#64748b', fontWeight: 700}} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                    <Bar dataKey="value" fill="url(#colorDemographic)" radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
-            <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm">
-              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-6">Status Laporan</h3>
-              <div className="h-[180px] sm:h-[200px] md:h-[250px] w-full">
+            <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/80 shadow-sm">
+              <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight mb-4">Status Layanan Warga</h3>
+              <div className="h-[180px] sm:h-[200px] md:h-[220px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={reportStatusData}>
                     <defs>
                       <linearGradient id="colorReportStatus" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#f43f5e" stopOpacity={1}/>
-                        <stop offset="100%" stopColor="#fda4af" stopOpacity={0.8}/>
+                        <stop offset="0%" stopColor="#e11d48" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#fb7185" stopOpacity={0.8}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8', fontWeight: 600}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 8, fill: '#94a3b8', fontWeight: 600}} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.05)' }} />
-                    <Bar dataKey="value" fill="url(#colorReportStatus)" radius={[6, 6, 0, 0]} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#64748b', fontWeight: 700}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 9, fill: '#64748b', fontWeight: 700}} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                    <Bar dataKey="value" fill="url(#colorReportStatus)" radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -544,33 +537,35 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
         {/* Side Panel: Quick Actions & Activity */}
         <div className="space-y-6 md:space-y-8">
           {/* Quick Actions */}
-          <motion.div variants={itemVariants} className="bg-slate-900 text-white p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-2xl shadow-slate-900/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 md:w-40 h-32 md:h-40 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-            <h3 className="text-sm md:text-lg font-black mb-6 relative z-10">Aksi Cepat</h3>
+          <motion.div variants={itemVariants} className="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-sm relative overflow-hidden">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-base md:text-lg font-black text-slate-900">Aksi Pintar Admin</h3>
+              <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Pintasan</span>
+            </div>
             <div className="grid grid-cols-2 gap-3 md:gap-4 relative z-10">
-              <button onClick={() => onTabChange('services')} className="flex flex-col items-center gap-2 md:gap-3 p-3 md:p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl md:rounded-2xl transition-all group">
-                <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg group-hover:scale-110 transition-transform">
-                  <FileText size={18} />
+              <button onClick={() => onTabChange('services')} className="flex flex-col items-center gap-2.5 p-4 bg-slate-50 hover:bg-indigo-50/70 border border-slate-200/80 hover:border-indigo-200 rounded-2xl transition-all group cursor-pointer text-center">
+                <div className="p-3 bg-indigo-100 text-indigo-700 rounded-xl group-hover:scale-110 transition-transform shadow-sm">
+                  <FileText size={20} />
                 </div>
-                <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-wider">Buat Surat</span>
+                <span className="text-[11px] font-black text-slate-700 group-hover:text-indigo-700">Buat Surat</span>
               </button>
-              <button onClick={() => onTabChange('finance')} className="flex flex-col items-center gap-2 md:gap-3 p-3 md:p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl md:rounded-2xl transition-all group">
-                <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg group-hover:scale-110 transition-transform">
-                  <DollarSign size={18} />
+              <button onClick={() => onTabChange('finance')} className="flex flex-col items-center gap-2.5 p-4 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-200 rounded-2xl transition-all group cursor-pointer text-center">
+                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-xl group-hover:scale-110 transition-transform shadow-sm">
+                  <DollarSign size={20} />
                 </div>
-                <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-wider">Input Kas</span>
+                <span className="text-[11px] font-black text-slate-700 group-hover:text-emerald-700">Input Kas</span>
               </button>
-              <button onClick={() => onTabChange('content')} className="flex flex-col items-center gap-2 md:gap-3 p-3 md:p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl md:rounded-2xl transition-all group">
-                <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg group-hover:scale-110 transition-transform">
-                  <Megaphone size={18} />
+              <button onClick={() => onTabChange('content')} className="flex flex-col items-center gap-2.5 p-4 bg-slate-50 hover:bg-amber-50/70 border border-slate-200/80 hover:border-amber-200 rounded-2xl transition-all group cursor-pointer text-center">
+                <div className="p-3 bg-amber-100 text-amber-700 rounded-xl group-hover:scale-110 transition-transform shadow-sm">
+                  <Megaphone size={20} />
                 </div>
-                <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-wider">Siaran</span>
+                <span className="text-[11px] font-black text-slate-700 group-hover:text-amber-700">Broadcast Info</span>
               </button>
-              <button onClick={() => onTabChange('residents')} className="flex flex-col items-center gap-2 md:gap-3 p-3 md:p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl md:rounded-2xl transition-all group">
-                <div className="p-2 bg-rose-500/20 text-rose-400 rounded-lg group-hover:scale-110 transition-transform">
-                  <Users size={18} />
+              <button onClick={() => onTabChange('residents')} className="flex flex-col items-center gap-2.5 p-4 bg-slate-50 hover:bg-rose-50/70 border border-slate-200/80 hover:border-rose-200 rounded-2xl transition-all group cursor-pointer text-center">
+                <div className="p-3 bg-rose-100 text-rose-700 rounded-xl group-hover:scale-110 transition-transform shadow-sm">
+                  <Users size={20} />
                 </div>
-                <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-wider">Warga Baru</span>
+                <span className="text-[11px] font-black text-slate-700 group-hover:text-rose-700">Warga Baru</span>
               </button>
             </div>
           </motion.div>
