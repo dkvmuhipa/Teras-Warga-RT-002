@@ -709,63 +709,115 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
           <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">Pusat pengelolaan surat pengantar dan laporan warga secara transparan dan responsif.</p>
         </div>
         
-        <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200/50 shadow-inner overflow-x-auto no-scrollbar w-full md:w-auto">
-          <div className="flex min-w-max w-full">
-            <button 
-              onClick={() => setActiveTab('letters')} 
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === 'letters' 
-                  ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          {activeTab === 'letters' && (
+            <button
+              onClick={() => {
+                toast.promise(
+                  (async () => {
+                    const { jsPDF } = await import('jspdf');
+                    const autoTable = (await import('jspdf-autotable')).default;
+                    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                    
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(14);
+                    doc.text(`REKAPITULASI PENGAJUAN SURAT PENGANTAR RT 02`, 105, 15, { align: 'center' });
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 105, 21, { align: 'center' });
+
+                    const tableData = letters.map((l, i) => [
+                      (i + 1).toString(),
+                      l.letterNumber || '-',
+                      l.applicantName || '-',
+                      l.type || 'Pengantar',
+                      new Date(l.date || Date.now()).toLocaleDateString('id-ID'),
+                      l.status || '-'
+                    ]);
+
+                    autoTable(doc, {
+                      startY: 28,
+                      head: [['No', 'No. Surat', 'Pemohon', 'Jenis Surat', 'Tanggal', 'Status']],
+                      body: tableData,
+                      theme: 'striped',
+                      headStyles: { fillColor: [79, 70, 229] },
+                      styles: { fontSize: 9 }
+                    });
+
+                    doc.save(`Rekap_Surat_Pengantar_${new Date().toISOString().split('T')[0]}.pdf`);
+                  })(),
+                  {
+                    loading: 'Menyusun Rekap Surat PDF...',
+                    success: 'Rekap Surat PDF berhasil diunduh!',
+                    error: 'Gagal mengunduh Rekap Surat.'
+                  }
+                );
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-indigo-600/20 border border-indigo-500/30"
             >
-              <FileText size={14} className="sm:w-4 sm:h-4" />
-              <span>Surat ({letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length})</span>
+              <Printer size={15} />
+              <span>Cetak Rekap Surat</span>
             </button>
-            <button 
-              onClick={() => setActiveTab('reports')} 
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === 'reports' 
-                  ? 'bg-white text-rose-600 shadow-md ring-1 ring-black/5' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            >
-              <AlertTriangle size={14} className="sm:w-4 sm:h-4" />
-              <span>Aspirasi & Pengaduan ({reports.filter(r => r.status === 'Baru').length})</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab('official-letters')} 
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === 'official-letters' 
-                  ? 'bg-white text-amber-600 shadow-md ring-1 ring-black/5' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            >
-              <FileText size={14} className="sm:w-4 sm:h-4" />
-              <span>Surat Resmi</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab('letter-archive')} 
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === 'letter-archive' 
-                  ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            >
-              <Archive size={14} className="sm:w-4 sm:h-4" />
-              <span>Arsip Surat</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab('settings')} 
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === 'settings' 
-                  ? 'bg-white text-slate-800 shadow-md ring-1 ring-black/5' 
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            >
-              <Settings size={14} className="sm:w-4 sm:h-4" />
-              <span>Pengaturan</span>
-            </button>
+          )}
+
+          <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200/50 shadow-inner overflow-x-auto no-scrollbar w-full md:w-auto">
+            <div className="flex min-w-max w-full">
+              <button 
+                onClick={() => setActiveTab('letters')} 
+                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  activeTab === 'letters' 
+                    ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                }`}
+              >
+                <FileText size={14} className="sm:w-4 sm:h-4" />
+                <span>Surat ({letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length})</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('reports')} 
+                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  activeTab === 'reports' 
+                    ? 'bg-white text-rose-600 shadow-md ring-1 ring-black/5' 
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                }`}
+              >
+                <AlertTriangle size={14} className="sm:w-4 sm:h-4" />
+                <span>Aspirasi & Pengaduan ({reports.filter(r => r.status === 'Baru').length})</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('official-letters')} 
+                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  activeTab === 'official-letters' 
+                    ? 'bg-white text-amber-600 shadow-md ring-1 ring-black/5' 
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                }`}
+              >
+                <FileText size={14} className="sm:w-4 sm:h-4" />
+                <span>Surat Resmi</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('letter-archive')} 
+                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  activeTab === 'letter-archive' 
+                    ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                }`}
+              >
+                <Archive size={14} className="sm:w-4 sm:h-4" />
+                <span>Arsip Surat</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('settings')} 
+                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  activeTab === 'settings' 
+                    ? 'bg-white text-slate-800 shadow-md ring-1 ring-black/5' 
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                }`}
+              >
+                <Settings size={14} className="sm:w-4 sm:h-4" />
+                <span>Pengaturan</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

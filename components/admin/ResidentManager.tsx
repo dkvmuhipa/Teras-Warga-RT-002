@@ -1292,6 +1292,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       else if (filterStatus === 'arrears') matchesStatus = (h.status === 'Occupied' || h.status === 'Visiting') && getArrearsForHouse(h).length > 0;
       else if (filterStatus === 'pbb_taken') matchesStatus = h.pbbStatus === 'Sudah Diambil';
       else if (filterStatus === 'pbb_not_taken') matchesStatus = h.pbbStatus !== 'Sudah Diambil' && h.pbbStatus !== undefined && (h.status === 'Occupied' || h.status === 'Visiting');
+      else if (filterStatus === 'bansos') matchesStatus = !!(h.isPKH || h.isBLT || h.isBPNT || h.isBansosLain);
+      else if (filterStatus === 'disability') matchesStatus = !!(h.isDisability || h.isOrphan);
 
       let matchesResidenceType = true;
       if (filterResidenceType !== 'all') {
@@ -1429,20 +1431,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       className="space-y-6 relative"
     >
       {/* Header & Actions */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 md:gap-8 mb-4">
-        <motion.div variants={itemVariants} className="w-full lg:w-auto">
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+        <motion.div variants={itemVariants} className="w-full md:w-auto">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
             Data Warga
             <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse hidden md:block"></div>
           </h2>
-          <p className="text-xs md:text-sm text-slate-500 font-semibold mt-1 tracking-wide">
-            Administrasi kependudukan & sistem pemantauan hunian RT 02
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Administrasi kependudukan &amp; sistem pemantauan hunian RT 02
           </p>
         </motion.div>
-
-        <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+        <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           {selectedIds.size > 0 && (
-            <div className="flex items-center gap-2 pr-4 border-r border-slate-200">
+            <div className="flex items-center gap-2 pr-3 border-r border-slate-200">
               <button 
                 onClick={handleBulkVerify}
                 className="group flex items-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
@@ -1466,7 +1467,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       e.target.value = ""; // Reset value
                     }
                   }}
-                  className="px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-650 hover:text-white transition-all border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
+                  className="px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
                   defaultValue=""
                 >
                   <option value="" disabled>🏠 Status Kepenghunian</option>
@@ -1484,7 +1485,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       e.target.value = ""; // Reset value
                     }
                   }}
-                  className="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-650 hover:text-white transition-all border border-emerald-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
+                  className="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
                   defaultValue=""
                 >
                   <option value="" disabled>🧹 Status Hunian</option>
@@ -1498,26 +1499,47 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           )}
           
           <button 
+            onClick={handleOpenAdd}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs transition-all shadow-md shadow-indigo-600/20 active:scale-95 border border-indigo-500/30 shrink-0"
+          >
+            <UserPlus size={15} />
+            <span>Tambah Warga</span>
+          </button>
+
+          <button 
             onClick={() => {
-              setExportTarget('all');
+              setExportFormat('pdf');
+              setExportTarget('filtered');
               setIsExportModalOpen(true);
             }}
-            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 text-emerald-700 hover:text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 rounded-2xl font-bold text-xs transition-all shadow-sm active:scale-95 shrink-0 whitespace-nowrap"
           >
-            <Download size={14} />
-            <span>Ekspor / Cetak</span>
+            <Printer size={15} className="text-indigo-600 shrink-0" />
+            <span className="whitespace-nowrap">Cetak PDF</span>
+          </button>
+
+          <button 
+            onClick={() => {
+              setExportFormat('excel');
+              setExportTarget('filtered');
+              setIsExportModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 rounded-2xl font-bold text-xs transition-all shadow-sm active:scale-95 shrink-0"
+          >
+            <Download size={15} className="text-emerald-600" />
+            <span>Ekspor Excel</span>
           </button>
           
-          <div className="relative">
+          <div className="relative shrink-0">
             <button 
               onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              className={`flex items-center gap-2 px-5 py-2.5 bg-white border rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm active:scale-95 ${
+              className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-2xl font-bold text-xs transition-all shadow-sm active:scale-95 ${
                 isActionMenuOpen 
                   ? 'border-indigo-500 text-indigo-600 ring-4 ring-indigo-500/5' 
-                  : 'border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                  : 'border-slate-200/80 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
               }`}
             >
-              <Settings size={14} className={isActionMenuOpen ? 'animate-spin-slow' : 'text-slate-400'} />
+              <Settings size={15} className={isActionMenuOpen ? 'animate-spin-slow text-indigo-600' : 'text-slate-400'} />
               <span>Manajemen Data</span>
               <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isActionMenuOpen ? 'rotate-180 text-indigo-500' : ''}`} />
             </button>
@@ -1692,15 +1714,6 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               </>
             )}
           </div>
-
-          <button 
-            onClick={handleOpenAdd}
-            className="group relative flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl hover:bg-indigo-600 transition-all font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-slate-900/10 active:scale-95"
-          >
-            <UserPlus size={16} className="group-hover:scale-110 transition-transform" />
-            <span>Tambah Warga Baru</span>
-            <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          </button>
           
           <input 
             type="file" 

@@ -62,7 +62,6 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
     { id: 'grid', icon: Users, label: 'Grid' },
     { id: 'table', icon: LayoutList, label: 'Tabel' },
     { id: 'map', icon: MapPin, label: 'Peta' },
-    { id: 'analytics', icon: Activity, label: 'Statistik' },
     { id: 'mutations', icon: FileClock, label: 'Mutasi' },
     { id: 'requests', icon: FileEdit, label: 'Update' },
     { id: 'health', icon: Activity, label: 'Posyandu' },
@@ -81,26 +80,26 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
       <div className="flex flex-col gap-3.5 bg-white p-3.5 md:p-5 rounded-[2rem] border border-slate-100 shadow-[0_10px_30px_rgba(241,245,249,0.5)]">
         
         {/* Search Input Row with Filter Toggle */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           {/* Search Input */}
           <div className="relative flex-1 group">
-            <div className="relative flex items-center bg-slate-50 border border-slate-100 rounded-2xl focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100/50 transition-all duration-300 overflow-hidden px-2.5 py-0.5">
-              <div className="w-9 h-9 flex items-center justify-center text-slate-400 group-focus-within:text-indigo-505 transition-colors">
-                <Search size={16} strokeWidth={2.5} />
+            <div className="relative flex items-center bg-slate-50/80 border border-slate-200/80 rounded-2xl focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all duration-300 overflow-hidden px-3.5 py-1">
+              <div className="w-8 h-8 flex items-center justify-center text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                <Search size={16} strokeWidth={2} />
               </div>
               <input 
                 type="text" 
-                placeholder="Cari warga, blok, status..." 
-                className="flex-1 bg-transparent px-2.5 py-2 text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none"
+                placeholder="Cari nama warga, nomor rumah, blok, atau no HP..." 
+                className="flex-1 bg-transparent px-2.5 py-2 text-xs font-semibold text-slate-800 placeholder:text-slate-400 outline-none"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
               {searchTerm && (
                 <button 
                   onClick={() => setSearchTerm('')}
-                  className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-lg"
+                  className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all rounded-lg"
                 >
-                  <X size={13} strokeWidth={2.5} />
+                  <X size={13} strokeWidth={2} />
                 </button>
               )}
             </div>
@@ -109,25 +108,25 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           {/* Collapsible Selector Toggle for Mobile Filters */}
           <button
             onClick={() => setShowFiltersMobile(!showFiltersMobile)}
-            className={`lg:hidden flex items-center gap-1.5 px-4 py-3 rounded-2xl border transition-all active:scale-95 shrink-0 ${
+            className={`lg:hidden flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all active:scale-95 shrink-0 ${
               showFiltersMobile || activeFiltersCount > 0
-                ? 'bg-indigo-50 border-indigo-200/60 text-indigo-700 font-extrabold shadow-sm'
-                : 'bg-slate-50 border-slate-100 text-slate-650 font-bold hover:bg-slate-100'
+                ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-extrabold shadow-sm'
+                : 'bg-white border-slate-200 text-slate-600 font-bold hover:bg-slate-50'
             }`}
           >
-            <SlidersHorizontal size={14} className={showFiltersMobile ? 'text-indigo-650 animate-pulse' : 'text-slate-550'} />
-            <span className="text-[11px] font-black uppercase tracking-wider hidden sm:inline">Filter</span>
+            <SlidersHorizontal size={14} className={showFiltersMobile ? 'text-indigo-600 animate-pulse' : 'text-slate-500'} />
+            <span className="text-xs font-bold hidden sm:inline">Filter</span>
             {activeFiltersCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-black text-white shadow-sm leading-none">
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[9px] font-black text-white shadow-sm leading-none">
                 {activeFiltersCount}
               </span>
             )}
           </button>
         </div>
 
-        {/* View Mode Switching - Polished iOS-style horizontal controller */}
-        <div className="relative">
-          <div className="flex items-center gap-1 bg-slate-50/70 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-100 shadow-[inset_0_1px_3px_rgba(241,245,249,0.8)] scroll-smooth snap-x">
+        {/* View Mode Switching - Responsive Mobile/Desktop Unified Segment */}
+        <div className="pt-1 border-t border-slate-100/80">
+          <div className="flex items-center gap-1 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar scroll-smooth snap-x max-w-full">
             {navModes.map((mode) => {
               const Icon = mode.icon;
               const isActive = viewMode === mode.id;
@@ -136,17 +135,17 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
                 <button 
                   key={mode.id}
                   onClick={() => setViewMode(mode.id)} 
-                  className={`snap-center flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 whitespace-nowrap active:scale-95 shrink-0 select-none ${
+                  className={`snap-center flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap active:scale-95 shrink-0 select-none ${
                     isActive 
-                      ? 'bg-indigo-600 text-white font-black text-xs shadow-[0_4px_12px_rgba(99,102,241,0.25)] border border-indigo-500/10' 
-                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 bg-transparent font-extrabold text-xs'
+                      ? 'bg-white text-indigo-600 font-extrabold text-xs shadow-sm ring-1 ring-slate-200/50' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/50 font-bold text-xs'
                   }`}
                 >
-                  <Icon size={14} className={isActive ? 'text-white stroke-[2.5px]' : 'text-slate-400 stroke-[2px]'} />
-                  <span className="text-[10px] uppercase tracking-wider">{mode.label}</span>
+                  <Icon size={14} className={isActive ? 'text-indigo-600 stroke-[2.5px]' : 'text-slate-400 stroke-[2px]'} />
+                  <span className="text-[11px] font-bold">{mode.label}</span>
                   {mode.badge ? (
-                    <span className={`flex h-4 min-w-4 items-center justify-center rounded-full text-[9px] font-bold px-1 ${
-                      isActive ? 'bg-white text-indigo-600' : 'bg-rose-500 text-white'
+                    <span className={`flex h-4 min-w-4 items-center justify-center rounded-full text-[9px] font-black px-1 ${
+                      isActive ? 'bg-indigo-600 text-white' : 'bg-rose-500 text-white'
                     }`}>
                       {mode.badge}
                     </span>
@@ -155,8 +154,6 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
               );
             })}
           </div>
-          {/* Subtle horizontal scroll fading indicators */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none rounded-r-2xl hidden md:block" />
         </div>
       </div>
 
@@ -218,6 +215,8 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
                     <option value="arrears">⚠️ Ada Tunggakan</option>
                     <option value="pbb_taken">📄 PBB Diambil</option>
                     <option value="pbb_not_taken">📄 PBB Belum Diambil</option>
+                    <option value="bansos">🎁 Penerima Bansos (PKH/BLT)</option>
+                    <option value="disability">♿ Kelompok Rentan (Disabilitas/Yatim)</option>
                   </select>
                 </FilterGroup>
 

@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
+import { generateResidentCardPDF } from '../../../services/pdfService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
@@ -199,64 +200,64 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
             </div>
 
             {/* 1. DESKTOP VIEW - Elegant structured heavy-duty table */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[1100px]">
+            <div className="hidden md:block overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse min-w-full">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/20 text-[10px] font-black text-slate-405 uppercase tracking-widest">
-                    <th className="px-5 py-3.5 w-12 text-center">
+                  <tr className="border-b border-slate-100 bg-slate-50/20 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                    <th className="px-3 py-3.5 w-10 text-center">
                       <input 
                         type="checkbox" 
-                        className="w-4 h-4 rounded-lg border-slate-350 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer"
+                        className="w-4 h-4 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer"
                         onChange={handleSelectAll} 
                         checked={selectedIds.size === filteredHouses.length && filteredHouses.length > 0} 
                       />
                     </th>
-                    <th className="px-5 py-3.5 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('headOfFamily')}>
+                    <th className="px-3 py-3.5 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('headOfFamily')}>
                       <div className="flex items-center gap-1">
                         <span>Nama Kepala Keluarga / Pemilik</span>
                         {renderSortIcon('headOfFamily')}
                       </div>
                     </th>
-                    <th className="px-5 py-3.5 w-28 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('number')}>
+                    <th className="px-3 py-3.5 w-24 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('number')}>
                       <div className="flex items-center gap-1">
                         <span>No. Rumah</span>
                         {renderSortIcon('number')}
                       </div>
                     </th>
-                    <th className="px-5 py-3.5">Kontak WhatsApp</th>
-                    <th className="px-5 py-3.5 w-20 text-center cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('occupants')}>
+                    <th className="px-3 py-3.5">Kontak WhatsApp</th>
+                    <th className="px-3 py-3.5 w-16 text-center cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('occupants')}>
                       <div className="flex items-center justify-center gap-1">
                         <span>Jiwa</span>
                         {renderSortIcon('occupants')}
                       </div>
                     </th>
-                    <th className="px-5 py-3.5 w-36 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('pbbStatus')}>
+                    <th className="px-3 py-3.5 w-28 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('pbbStatus')}>
                       <div className="flex items-center gap-1">
                         <span>SPPT PBB</span>
                         {renderSortIcon('pbbStatus')}
                       </div>
                     </th>
-                    <th className="px-5 py-3.5 w-36 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('residenceType')}>
+                    <th className="px-3 py-3.5 w-32 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('residenceType')}>
                       <div className="flex items-center gap-1">
                         <span>Jenis Hak</span>
                         {renderSortIcon('residenceType')}
                       </div>
                     </th>
-                    <th className="px-5 py-3.5 w-28 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('status')}>
+                    <th className="px-3 py-3.5 w-24 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('status')}>
                       <div className="flex items-center gap-1">
                         <span>Status</span>
                         {renderSortIcon('status')}
                       </div>
                     </th>
-                    <th className="px-5 py-3.5 w-28 text-center font-black">S. Sampah</th>
-                    <th className="px-5 py-3.5 w-28 text-center font-black">S. Air</th>
-                    <th className="px-5 py-3.5 w-28 text-center group cursor-pointer hover:bg-slate-50/50 transition-colors font-black" onClick={() => handleSort('arrears')}>
+                    <th className="px-3 py-3.5 w-24 text-center font-black">S. Sampah</th>
+                    <th className="px-3 py-3.5 w-24 text-center font-black">S. Air</th>
+                    <th className="px-3 py-3.5 w-24 text-center group cursor-pointer hover:bg-slate-50/50 transition-colors font-black" onClick={() => handleSort('arrears')}>
                       <div className="flex items-center justify-center gap-1">
                         <span>Tunggakan</span>
                         {renderSortIcon('arrears')}
                       </div>
                     </th>
-                    <th className="px-5 py-3.5 w-36 text-right font-black">Aksi Panel</th>
+                    <th className="px-3 py-3.5 w-28 text-right font-black">Aksi Panel</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs font-bold text-slate-600">
@@ -454,6 +455,13 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         {/* Administrative Actions Panel */}
                         <td className="px-5 py-4.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button 
+                              onClick={() => generateResidentCardPDF(house)} 
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition-all rounded-lg shadow-3xs"
+                              title="Cetak Kartu Warga Digital RT 02 (PDF)"
+                            >
+                              <FileText size={14} className="stroke-[2.5] text-emerald-600" />
+                            </button>
                             <button 
                               onClick={() => openDetail(house)} 
                               className="p-1.5 text-slate-400 hover:text-indigo-650 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-150 transition-all rounded-lg shadow-3xs"

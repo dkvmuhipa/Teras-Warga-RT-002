@@ -218,7 +218,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       case 'guests':
         return guestReports.filter(g => g.status === 'Active' || g.status === 'Pending').length;
       case 'services':
-        const pendingL = letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length;
+        const pendingL = letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length;
         const pendingR = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
         return pendingL + pendingR;
       case 'facilities':

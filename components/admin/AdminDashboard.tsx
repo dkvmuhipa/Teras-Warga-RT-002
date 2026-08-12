@@ -185,6 +185,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             announcements={announcements} 
             guestReports={guestReports} 
             iuranPayments={iuranPayments} 
+            residentRegistrations={residentRegistrations}
+            letters={letters}
+            updateRequests={updateRequests}
             onTabChange={(tab, subTab) => {
               setActiveTab(tab);
               if (subTab) {
@@ -352,6 +355,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             announcements={announcements} 
             guestReports={guestReports} 
             iuranPayments={iuranPayments} 
+            residentRegistrations={residentRegistrations}
+            letters={letters}
+            updateRequests={updateRequests}
             onTabChange={(tab, subTab) => {
               setActiveTab(tab);
               if (subTab) {

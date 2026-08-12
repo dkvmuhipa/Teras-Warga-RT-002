@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
-import { generatePopulationReportPDF } from '../../services/pdfService';
+import { generatePopulationReportPDF, generateMutationReportPDF } from '../../services/pdfService';
 import { generatePopulationReportExcel } from '../../services/excelService';
 import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction, markAllLogsBeforeDateAsGenerated, unmarkAllLogsBeforeDateAsGenerated } from '../../services/databaseService';
+import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { toast } from 'sonner';
 import { 
   Plus, FileText, Trash2, TrendingUp, TrendingDown, 
   Users, Baby, Accessibility, Heart, User, 
   Calendar, ArrowRight, Activity, Clock, Filter, Search, MapPin as MapIcon,
   BarChart3, PieChart as PieChartIcon, List, LayoutGrid, Download, Edit2,
-  RefreshCw, Filter as FilterIcon
+  RefreshCw, Filter as FilterIcon, MessageCircle
 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { motion, AnimatePresence } from 'motion/react';
@@ -1170,9 +1171,16 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                               <button 
                                 onClick={() => generatePopulationReportPDF(r)}
                                 className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                title="Download PDF"
+                                title="Download Rekapitulasi Demografi PDF"
                               >
                                 <Download size={16} />
+                              </button>
+                              <button 
+                                onClick={() => generateMutationReportPDF(r, populationLogs)}
+                                className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                title="Cetak Laporan Mutasi Bulanan Resmi PDF (Format Kelurahan)"
+                              >
+                                <FileText size={16} className="text-emerald-600" />
                               </button>
                               <button 
                                 onClick={async () => {
@@ -1471,7 +1479,26 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                           </div>
                         </td>
                         <td className="p-5 text-center">
-                          <div className="flex items-center justify-center gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-center gap-1">
+                            {log.phone && log.phone !== '-' && (
+                              <button 
+                                onClick={async () => {
+                                  const msg = log.type === 'Newcomer' 
+                                    ? `Halo ${log.name}, Selamat Datang di Lingkungan RT 02! Kami mengonfirmasi pencatatan domisili warga baru Anda. Jika ada pertanyaan seputar iuran, siskamling, atau administrasi surat, silakan hubungi Pengurus RT.` 
+                                    : log.type === 'MovedOut'
+                                    ? `Halo ${log.name}, Terima kasih telah menjadi bagian dari keluarga warga RT 02. Catatan kepindahan Anda telah terdaftar secara resmi.`
+                                    : `Halo ${log.name}, Pengurus RT 02 mengirimkan salam pesan mengenai data mutasi kependudukan Anda.`;
+                                  
+                                  const res = await sendWhatsAppViaGateway(log.phone, msg);
+                                  if (res?.success) toast.success(`Pesan WhatsApp berhasil dikirim ke ${log.name}`);
+                                  else toast.error(`Gagal mengirim WhatsApp: ${res?.error || 'Error'}`);
+                                }}
+                                className="p-1.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50 rounded-lg transition-all"
+                                title="Kirim Pesan WhatsApp Otomatis ke Warga"
+                              >
+                                <MessageCircle size={14} />
+                              </button>
+                            )}
                             <button 
                               onClick={() => handleEditLog(log)}
                               className="p-1.5 text-slate-450 hover:text-indigo-650 hover:bg-slate-100 rounded-lg transition-all"

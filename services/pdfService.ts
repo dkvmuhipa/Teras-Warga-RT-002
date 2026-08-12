@@ -2773,6 +2773,7 @@ export const generateDemographicAnalyticsReportPDF = async (
     margin: { left: margin },
     tableWidth: contentWidth / 2 - 5
   });
+  const finalYOcc = (doc as any).lastAutoTable.finalY;
 
   autoTable(doc, {
     startY: y,
@@ -2783,8 +2784,9 @@ export const generateDemographicAnalyticsReportPDF = async (
     margin: { left: centerX + 5 },
     tableWidth: contentWidth / 2 - 5
   });
+  const finalYEdu = (doc as any).lastAutoTable.finalY;
 
-  y = Math.max((doc as any).lastAutoTable.finalY, y + 50) + 15;
+  y = Math.max(finalYOcc, finalYEdu) + 15;
 
   // IV. Ringkasan Keuangan (Garis Besar)
   if (y > 200) { doc.addPage(); y = 30; }
@@ -2867,4 +2869,274 @@ export const generateDemographicAnalyticsReportPDF = async (
   }
 
   doc.save(`Laporan_Analitik_RT02_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
+export const generateResidentCardPDF = async (house: House, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ 
+        orientation: "landscape", 
+        unit: "mm", 
+        format: [85.6, 53.98], // Standard ID-1 Card Size
+        compress: true 
+    });
+
+    const cardWidth = 85.6;
+    const cardHeight = 53.98;
+
+    // Background Gradient / Styling
+    doc.setFillColor(248, 250, 252);
+    doc.rect(0, 0, cardWidth, cardHeight, "F");
+
+    // Header Stripe
+    doc.setFillColor(79, 70, 229); // Indigo 600
+    doc.rect(0, 0, cardWidth, 12, "F");
+
+    // Header Text
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`KARTU DOMISILI WARGA RT 02`, 6, 6);
+    
+    doc.setFontSize(6);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(224, 231, 255);
+    doc.text(`${config.kelurahan || 'Kelurahan Tondo'} - ${config.kota || 'Palu'}`, 6, 9.5);
+
+    // House Block Badge
+    doc.setFillColor(238, 242, 255);
+    doc.roundedRect( cardWidth - 24, 3, 20, 6, 1.5, 1.5, "F" );
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    doc.setTextColor(67, 56, 202);
+    doc.text(`BLOK ${house.block}-${house.number}`, cardWidth - 14, 7, { align: "center" });
+
+    // Citizen Info Body
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "bold");
+    doc.text(house.headOfFamily || 'Penghuni RT 02', 6, 18);
+
+    doc.setFontSize(6);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text(`NIK: ${house.nik || '-'}`, 6, 22);
+    doc.text(`No. KK: ${house.kkNumber || '-'}`, 6, 25.5);
+    doc.text(`Status Kepenghunian: ${house.residenceType || 'Tetap'} (${house.status === 'Occupied' ? 'Dihuni' : 'Kosong'})`, 6, 29);
+    doc.text(`Alamat KTP: ${house.addressKtp ? house.addressKtp.substring(0, 32) : 'RT 02 RW 01'}`, 6, 32.5);
+
+    // QR Code Generation for Verification
+    try {
+        const verifyData = `VERIFIED-RT02:${house.block}-${house.number}:${house.headOfFamily}:${house.nik || 'VALID'}`;
+        const qrDataUrl = await QRCode.toDataURL(verifyData, { margin: 1, width: 80 });
+        doc.addImage(qrDataUrl, 'PNG', cardWidth - 22, 17, 18, 18);
+        doc.setFontSize(4.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text("Scan Validasi RT", cardWidth - 13, 37, { align: "center" });
+    } catch (e) {
+        console.error("QR Code Error:", e);
+    }
+
+    // Footer Stamp & Verification Note
+    doc.setDrawColor(226, 232, 240);
+    doc.line(6, 41, cardWidth - 6, 41);
+
+    doc.setFontSize(5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(16, 185, 129);
+    doc.text("● TERVERIFIKASI RESMI PENGURUS RT 02", 6, 45);
+
+    doc.setFontSize(4.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Dicetak: ${new Date().toLocaleDateString('id-ID')} | Dokumen Sah Digital RT 02`, 6, 48.5);
+
+    doc.save(`Kartu_Warga_RT02_${house.block}-${house.number}_${(house.headOfFamily || 'Warga').replace(/\s+/g, '_')}.pdf`);
+    toast.success(`Kartu Warga (PDF) berhasil diunduh untuk Blok ${house.block}-${house.number}`);
+};
+
+export const generateMutationReportPDF = async (report: PopulationReport, logs: PopulationChangeLog[], customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
+    
+    const margin = 15;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let currentY = 15;
+
+    // Header Kop Surat RT 02
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
+    const centerX = pageWidth / 2;
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', 15, 10, 20, 25);
+    }
+
+    doc.setFont("helvetica", "bold"); 
+    doc.setFontSize(13);
+    doc.setTextColor(30, 41, 59);
+    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'} - KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 19.5, { align: "center" });
+    doc.text(`PENGURUS RUKUN TETANGGA 02`, centerX, 25, { align: "center" });
+
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Alamat: ${config.rtAddress || 'Jl. Tondo Utama RT 02 Palu'}`, centerX, 30, { align: "center" });
+
+    doc.setLineWidth(0.8);
+    doc.setDrawColor(30, 41, 59);
+    doc.line(15, 33, pageWidth - 15, 33);
+    doc.setLineWidth(0.2);
+    doc.line(15, 34, pageWidth - 15, 34);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(30, 41, 59);
+    doc.text("LAPORAN REKAPITULASI MUTASI & DINAMIKA WARGA", centerX, 41, { align: "center" });
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text(`PERIODE: BULAN ${report.month.toUpperCase()} ${report.year}`, centerX, 46, { align: "center" });
+
+    currentY = 52;
+
+    // Metric Summary Box
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 24, 3, 3, "F");
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 24, 3, 3, "D");
+
+    const colW = (pageWidth - (margin * 2)) / 5;
+    const stats = [
+        { label: "Warga Awal", val: report.initialPopulation },
+        { label: "Warga Masuk", val: `+${report.newcomerCount}` },
+        { label: "Pindah Out", val: `-${report.movedOutCount}` },
+        { label: "Kelahiran", val: `+${report.birthCount}` },
+        { label: "Kematian", val: `-${report.deathCount}` }
+    ];
+
+    stats.forEach((s, idx) => {
+        const x = margin + (idx * colW) + (colW / 2);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text(s.label.toUpperCase(), x, currentY + 7, { align: "center" });
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(30, 41, 59);
+        doc.text(String(s.val), x, currentY + 16, { align: "center" });
+    });
+
+    currentY += 32;
+
+    // Section 1: Detailed Mutation Logs Table
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    doc.text("A. RINCIAN CATATAN MUTASI WARGA", margin, currentY);
+    currentY += 5;
+
+    const filteredLogs = logs.filter(l => l.date.startsWith(report.month));
+
+    const colWidths = [10, 25, 28, 45, 30, 42];
+    const headers = ['NO', 'TANGGAL', 'JENIS MUTASI', 'NAMA WARGA', 'KONTAK', 'KETERANGAN'];
+
+    // Table Header
+    doc.setFillColor(79, 70, 229);
+    doc.rect(margin, currentY, pageWidth - (margin * 2), 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(255, 255, 255);
+
+    let curX = margin;
+    headers.forEach((h, i) => {
+        const align = (i === 0 || i === 1) ? "center" : "left";
+        const xPos = align === "center" ? curX + (colWidths[i] / 2) : curX + 2;
+        doc.text(h, xPos, currentY + 5.5, { align });
+        curX += colWidths[i];
+    });
+
+    currentY += 8;
+
+    // Table Rows
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(30, 41, 59);
+
+    if (filteredLogs.length === 0) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, currentY, pageWidth - (margin * 2), 10, 'F');
+        doc.setTextColor(148, 163, 184);
+        doc.text("Tidak ada catatan mutasi warga pada periode bulan ini", pageWidth / 2, currentY + 6.5, { align: "center" });
+        currentY += 10;
+    } else {
+        filteredLogs.forEach((log, i) => {
+            if (currentY > 260) {
+                doc.addPage();
+                currentY = 20;
+            }
+
+            if (i % 2 === 1) {
+                doc.setFillColor(248, 250, 252);
+                doc.rect(margin, currentY, pageWidth - (margin * 2), 8, 'F');
+            }
+
+            let cX = margin;
+            doc.text((i + 1).toString(), cX + (colWidths[0] / 2), currentY + 5.5, { align: "center" });
+            cX += colWidths[0];
+
+            doc.text(log.date, cX + (colWidths[1] / 2), currentY + 5.5, { align: "center" });
+            cX += colWidths[1];
+
+            const typeLabel = log.type === 'Newcomer' ? 'Warga Masuk' : log.type === 'MovedOut' ? 'Pindah Out' : log.type === 'Birth' ? 'Kelahiran' : 'Kematian';
+            doc.setFont("helvetica", "bold");
+            doc.text(typeLabel, cX + 2, currentY + 5.5);
+            doc.setFont("helvetica", "normal");
+            cX += colWidths[2];
+
+            const name = log.name.length > 22 ? log.name.substring(0, 20) + '..' : log.name;
+            doc.text(name, cX + 2, currentY + 5.5);
+            cX += colWidths[3];
+
+            doc.text(log.phone || '-', cX + 2, currentY + 5.5);
+            cX += colWidths[4];
+
+            const desc = (log.description || '-').length > 22 ? (log.description || '-').substring(0, 20) + '..' : (log.description || '-');
+            doc.text(desc, cX + 2, currentY + 5.5);
+
+            currentY += 8;
+        });
+    }
+
+    currentY += 15;
+
+    // Signatures Section
+    if (currentY > 230) {
+        doc.addPage();
+        currentY = 20;
+    }
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Dokumen disahkan pada: Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, margin, currentY);
+    currentY += 10;
+
+    const sigW = (pageWidth - (margin * 2)) / 2;
+    
+    // Left Sig: Sekretaris RT
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 41, 59);
+    doc.text("Sekretaris RT 02", margin + (sigW / 2), currentY, { align: "center" });
+    doc.text("( ..................................... )", margin + (sigW / 2), currentY + 25, { align: "center" });
+
+    // Right Sig: Ketua RT
+    doc.text("Ketua RT 02", margin + sigW + (sigW / 2), currentY, { align: "center" });
+    doc.text(config.ketuaRtName || "( ..................................... )", margin + sigW + (sigW / 2), currentY + 25, { align: "center" });
+
+    doc.save(`Laporan_Mutasi_Warga_RT02_${report.month}.pdf`);
+    toast.success(`Laporan Mutasi (PDF) Periode ${report.month} berhasil diunduh!`);
 };

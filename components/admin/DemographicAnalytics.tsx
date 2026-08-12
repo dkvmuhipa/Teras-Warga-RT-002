@@ -55,6 +55,14 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
     return age;
   };
 
+  const [selectedBlock, setSelectedBlock] = useState<string>('ALL');
+
+  // Filter houses by selectedBlock
+  const filteredHouses = useMemo(() => {
+    if (selectedBlock === 'ALL') return houses;
+    return houses.filter(h => h.block === selectedBlock || h.number?.startsWith(selectedBlock));
+  }, [houses, selectedBlock]);
+
   // Aggregate all residents (Head of Family + Family Members)
   const stats = useMemo(() => {
     const allResidents: any[] = [];
@@ -219,7 +227,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
       totalBansosLain,
       totalOccupied
     };
-  }, [houses]);
+  }, [filteredHouses]);
 
   const { 
     allResidents, religions, educations, jobs, 
@@ -388,20 +396,37 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
             </p>
           </div>
           
-          {/* Tabs */}
-          <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-            <button 
-              onClick={() => setActiveTab('demographics')}
-              className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'demographics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Demografi
-            </button>
-            <button 
-              onClick={() => setActiveTab('advanced')}
-              className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'advanced' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Operasional & Tren
-            </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Block Filter Dropdown */}
+            <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+              <MapPin size={14} className="text-slate-400 ml-2" />
+              <select
+                value={selectedBlock}
+                onChange={(e) => setSelectedBlock(e.target.value)}
+                className="bg-transparent text-xs font-black text-slate-700 outline-none pr-2 cursor-pointer"
+              >
+                <option value="ALL">Semua Blok</option>
+                {Array.from(new Set(houses.map(h => h.block || h.number?.charAt(0)).filter(Boolean))).sort().map(b => (
+                  <option key={b} value={b}>Blok {b}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+              <button 
+                onClick={() => setActiveTab('demographics')}
+                className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'demographics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Demografi
+              </button>
+              <button 
+                onClick={() => setActiveTab('advanced')}
+                className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'advanced' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Operasional & Tren
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -411,11 +436,18 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
         {(hideHeader || activeTab === 'demographics') ? (
           <div key="demographics" className="space-y-10">
             {/* Primary Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
               {[
                 { icon: Users, label: 'Total Jiwa', value: totalSoul, sub: 'Penduduk Terdaftar', color: 'blue' },
                 { icon: Baby, label: 'Balita & Anak', value: totalToddlers + totalChildren, sub: 'Generasi Penerus', color: 'emerald' },
                 { icon: Heart, label: 'Lansia', value: totalElderly, sub: 'Warga Senior', color: 'amber' },
+                { 
+                  icon: Activity, 
+                  label: 'Dependency Ratio', 
+                  value: totalAdults > 0 ? `${Math.round(((totalToddlers + totalChildren + totalBabies + totalElderly) / totalAdults) * 100)}%` : '0%', 
+                  sub: 'Tanggungan Posyandu', 
+                  color: 'rose' 
+                },
                 { icon: Car, label: 'Total Kendaraan', value: totalVehicles, sub: 'Mobilitas Warga', color: 'indigo' }
               ].map((stat, i) => (
                 <motion.div 
@@ -423,17 +455,17 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all relative overflow-hidden"
+                  className="group bg-white p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all relative overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 w-24 h-24 bg-slate-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
-                  <div className="flex items-center gap-5 relative z-10">
-                    <div className="p-4 bg-slate-50 text-slate-600 rounded-2xl group-hover:rotate-6 transition-transform">
-                      <stat.icon size={24} />
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="p-3.5 bg-slate-50 text-slate-600 rounded-2xl group-hover:rotate-6 transition-transform shrink-0">
+                      <stat.icon size={22} />
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                      <h3 className="text-3xl font-black text-slate-900 leading-none mb-1">{stat.value}</h3>
-                      <p className="text-[10px] font-bold text-slate-400">{stat.sub}</p>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate">{stat.label}</p>
+                      <h3 className="text-2xl md:text-3xl font-black text-slate-900 leading-none mb-1">{stat.value}</h3>
+                      <p className="text-[10px] font-bold text-slate-400 truncate">{stat.sub}</p>
                     </div>
                   </div>
                 </motion.div>
