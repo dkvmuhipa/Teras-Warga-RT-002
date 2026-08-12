@@ -212,11 +212,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ houses, ca
       </div>
 
       {aiSummary && (
-        <div className="bg-slate-900 text-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] shadow-xl">
+        <div className="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] shadow-xl border border-indigo-800/40 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
           <h4 className="font-bold text-sm md:text-base lg:text-lg mb-3 md:mb-4 text-indigo-300 flex items-center gap-2">
-            <Sparkles size={16} /> Ringkasan AI:
+            <Sparkles size={18} className="text-amber-400 animate-pulse" /> Ringkasan Kecerdasan AI:
           </h4>
-          <div className="prose prose-invert max-w-none text-[10px] md:text-xs lg:text-sm leading-relaxed whitespace-pre-wrap opacity-90">
+          <div className="prose prose-invert max-w-none text-[10px] md:text-xs lg:text-sm leading-relaxed whitespace-pre-wrap opacity-95">
             {aiSummary}
           </div>
         </div>

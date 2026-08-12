@@ -382,7 +382,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Modern Top Bar */}
-        <header className="h-16 md:h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
+        <header className="h-16 md:h-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-3 md:gap-6">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
@@ -401,15 +401,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 return (
                   <>
                     <div className="hidden sm:flex items-center gap-2.5 text-xs md:text-sm font-extrabold text-slate-400">
-                      <span>Panel Admin</span>
+                      <span className="text-slate-500 font-bold">Panel Admin</span>
                       <span className="text-slate-300 font-normal">/</span>
-                      <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-250/30 px-3 py-1 rounded-xl text-xs font-black text-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                      <div className="flex items-center gap-1.5 bg-slate-100/80 border border-slate-200/80 px-3 py-1 rounded-xl text-xs font-black text-slate-800 shadow-sm">
                         <CurrentIcon size={13} className="text-indigo-600 stroke-[2.5px] shrink-0" />
                         <span>{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
                       </div>
                     </div>
                     
-                    <div className="sm:hidden flex items-center gap-1.5 bg-slate-50 border border-slate-200/50 px-2.5 py-1 rounded-xl text-[11px] font-black text-slate-800 shadow-sm truncate max-w-[140px]">
+                    <div className="sm:hidden flex items-center gap-1.5 bg-slate-100/80 border border-slate-200/80 px-2.5 py-1 rounded-xl text-[11px] font-black text-slate-800 shadow-sm truncate max-w-[140px]">
                       <CurrentIcon size={12} className="text-indigo-600 stroke-[2.5px] shrink-0" />
                       <span className="truncate">{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
                     </div>
