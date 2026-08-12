@@ -533,7 +533,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
           )}
         </AnimatePresence>
 
-        {/* Master Panic Launcher Button */}
+        {/* Master Panic Launcher Button (Hidden visually, triggered programmatically via BottomNav) */}
         <button
           id="panic-button-trigger"
           onClick={() => {
@@ -543,28 +543,8 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
               setIsOpenControlCenter(true);
             }
           }}
-          className="relative group transition-transform active:scale-95 duration-200"
+          className="hidden"
         >
-          {/* Pulsating emergency locator rings */}
-          <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-15"></div>
-          <div className="absolute -inset-2.5 rounded-full border border-red-600/30 animate-pulse"></div>
-
-          <div className={`
-            relative w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center border-4 border-slate-900/40 shadow-2xl transition-all duration-300
-            ${isIdentified 
-              ? 'bg-gradient-to-br from-red-500 via-red-600 to-rose-700 shadow-red-500/20 cursor-pointer' 
-              : 'bg-slate-800 grayscale cursor-not-allowed border-slate-700'}
-          `}>
-            {isIdentified ? (
-              <ShieldAlert size={28} className="text-white relative animate-pulse" />
-            ) : (
-              <Lock size={22} className="text-slate-400" />
-            )}
-          </div>
-
-          <span className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl border border-white/5">
-            {isIdentified ? "SOS Darurat Warga" : "SOS Terkunci"}
-          </span>
         </button>
       </div>
 
