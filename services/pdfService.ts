@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
 import { naturalSortBlockAndNumber } from "./excelService";
@@ -3114,7 +3114,8 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
             doc.setFont("times", "normal");
             cX += colWidths[2];
 
-            const name = log.name.length > 22 ? log.name.substring(0, 20) + '..' : log.name;
+            const rawName = log.name || '-';
+            const name = rawName.length > 22 ? rawName.substring(0, 20) + '..' : rawName;
             doc.text(name, cX + 2, currentY + 5.5);
             cX += colWidths[3];
 

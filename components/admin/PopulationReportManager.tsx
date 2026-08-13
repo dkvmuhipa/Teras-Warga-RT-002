@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { PopulationReport, PopulationChangeLog, House } from '../../types';
+import { PopulationReport, PopulationChangeLog, House, PdfConfig } from '../../types';
 import { generatePopulationReportPDF, generateMutationReportPDF, generateSingleMutationCertificatePDF } from '../../services/pdfService';
 import { generatePopulationReportExcel } from '../../services/excelService';
 import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction, markAllLogsBeforeDateAsGenerated, unmarkAllLogsBeforeDateAsGenerated, deletePopulationReportFromDb, addPopulationReportToDb } from '../../services/databaseService';
@@ -1016,6 +1016,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       houseId: '',
       date: new Date().toISOString().split('T')[0],
       description: '',
+      documentUrl: '',
+      verificationStatus: 'Approved',
+      approvalNotes: '',
       details: {
         previousAddress: '',
         reasonForMoving: '',
@@ -1298,6 +1301,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                       houseId: '',
                       date: new Date().toISOString().split('T')[0],
                       description: '',
+                      documentUrl: '',
+                      verificationStatus: 'Approved',
+                      approvalNotes: '',
                       details: {
                         previousAddress: '',
                         reasonForMoving: '',
@@ -2310,7 +2316,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                                       ? `Halo ${log.name}, Terima kasih telah menjadi bagian dari keluarga warga RT 02. Catatan kepindahan Anda telah terdaftar secara resmi.`
                                       : `Halo ${log.name}, Pengurus RT 02 mengirimkan salam pesan mengenai data mutasi kependudukan Anda.`;
                                     
-                                    const res = await sendWhatsAppViaGateway(log.phone, msg);
+                                    const res = await sendWhatsAppViaGateway(log.phone || '', msg);
                                     if (res?.success) toast.success(`Pesan WhatsApp berhasil dikirim ke ${log.name}`);
                                     else toast.error(`Gagal mengirim WhatsApp: ${res?.error || 'Error'}`);
                                   }}

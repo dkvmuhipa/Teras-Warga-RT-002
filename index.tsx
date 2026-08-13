@@ -5,7 +5,7 @@ import { ConfirmProvider } from "./context/ConfirmContext";
 import "./index.css";
 
 // Register PWA Service Worker (Only in Production mode to prevent Vite HMR dev conflicts)
-if (typeof window !== "undefined" && "serviceWorker" in navigator && import.meta.env.PROD) {
+if (typeof window !== "undefined" && "serviceWorker" in navigator && (import.meta as any).env?.PROD) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/sw.js")

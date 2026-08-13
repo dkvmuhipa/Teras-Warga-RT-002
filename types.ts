@@ -219,6 +219,8 @@ export interface GuestReport {
   id: string;
   residentName: string;
   residentHouseId: string;
+  hostHouseNumber?: string;
+  hostBlock?: string;
   guestName: string;
   guestNik?: string; // NEW: NIK Tamu
   guestJob?: string; // NEW: Pekerjaan Tamu

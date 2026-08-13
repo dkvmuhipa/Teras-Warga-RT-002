@@ -681,7 +681,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <span className="text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-xl uppercase tracking-wider">
                 {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + 
                  letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length + 
-                 guestReports.filter(g => g.status === 'Active' || g.status === 'Pending').length} Butuh Aksi
+                 guestReports.filter(g => g.status === 'Active' || (g.status as any) === 'Pending').length} Butuh Aksi
               </span>
             </div>
 
@@ -736,7 +736,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
               {/* Item 3: Wajib Lapor Tamu 24 Jam */}
               {(() => {
-                const pendingGuests = guestReports.filter(g => g.status === 'Active' || g.status === 'Pending').length;
+                const pendingGuests = guestReports.filter(g => g.status === 'Active' || (g.status as any) === 'Pending').length;
                 return (
                   <div 
                     onClick={() => onTabChange('guests')}
