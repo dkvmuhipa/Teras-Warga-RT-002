@@ -2047,18 +2047,34 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
           {/* Periode Section */}
           <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
-            <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
-              <Calendar size={14} /> Periode Laporan
-            </h4>
+            <div className="flex justify-between items-center">
+              <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                <Calendar size={14} /> Periode Laporan
+              </h4>
+              <button
+                type="button"
+                onClick={handleGenerateFromLog}
+                disabled={isGeneratingLogs}
+                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                title="Hitung otomatis seluruh data demografi & mutasi untuk bulan ini"
+              >
+                <RefreshCw size={12} className={isGeneratingLogs ? "animate-spin" : ""} />
+                Auto-Kalkulasi Bulan Ini
+              </button>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Bulan (YYYY-MM)</label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Pilih Bulan & Tahun (YYYY-MM)</label>
                 <div className="relative">
                   <input 
                     type="month" 
                     value={formData.month} 
-                    onChange={e => setFormData({...formData, month: e.target.value})} 
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" 
+                    onChange={e => {
+                      const newMonth = e.target.value;
+                      const year = newMonth ? parseInt(newMonth.split('-')[0]) : new Date().getFullYear();
+                      setFormData(prev => ({ ...prev, month: newMonth, year }));
+                    }} 
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all cursor-pointer" 
                   />
                 </div>
               </div>
@@ -2067,7 +2083,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 <input 
                   type="number" 
                   value={formData.year} 
-                  onChange={e => setFormData({...formData, year: parseInt(e.target.value)})} 
+                  onChange={e => setFormData({...formData, year: parseInt(e.target.value) || new Date().getFullYear()})} 
                   className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" 
                 />
               </div>
