@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
-import { generatePopulationReportPDF, generateMutationReportPDF } from '../../services/pdfService';
+import { generatePopulationReportPDF, generateMutationReportPDF, generateSingleMutationCertificatePDF } from '../../services/pdfService';
 import { generatePopulationReportExcel } from '../../services/excelService';
 import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction, markAllLogsBeforeDateAsGenerated, unmarkAllLogsBeforeDateAsGenerated } from '../../services/databaseService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
@@ -10,7 +10,8 @@ import {
   Users, Baby, Accessibility, Heart, User, 
   Calendar, ArrowRight, Activity, Clock, Filter, Search, MapPin as MapIcon,
   BarChart3, PieChart as PieChartIcon, List, LayoutGrid, Download, Edit2,
-  RefreshCw, Filter as FilterIcon, MessageCircle
+  RefreshCw, Filter as FilterIcon, MessageCircle, CheckSquare, Square,
+  FileUp, CheckCircle, XCircle, AlertCircle, Printer, ChevronLeft, ChevronRight, Check
 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { motion, AnimatePresence } from 'motion/react';
@@ -45,6 +46,12 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   const [logSearchTerm, setLogSearchTerm] = useState('');
   const [logTypeFilter, setLogTypeFilter] = useState<'All' | 'Newcomer' | 'MovedOut' | 'Birth' | 'Death'>('All');
   const [logStatusFilter, setLogStatusFilter] = useState<'All' | 'Unprocessed' | 'Processed'>('All');
+  const [startDateFilter, setStartDateFilter] = useState('');
+  const [endDateFilter, setEndDateFilter] = useState('');
+  const [verificationFilter, setVerificationFilter] = useState<'All' | 'Pending' | 'Approved' | 'Rejected'>('All');
+  const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [autoUpdateHouse, setAutoUpdateHouse] = useState(true);
   const [formData, setFormData] = useState<Omit<PopulationReport, 'id' | 'createdAt'>>({
     month: new Date().toISOString().slice(0, 7),
@@ -78,6 +85,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     houseId: '',
     date: new Date().toISOString().split('T')[0],
     description: '',
+    documentUrl: '',
+    verificationStatus: 'Approved' as 'Pending' | 'Approved' | 'Rejected',
+    approvalNotes: '',
     details: {
       previousAddress: '',
       reasonForMoving: '',
@@ -475,6 +485,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       houseId: log.houseId,
       date: log.date,
       description: log.description || '',
+      documentUrl: log.documentUrl || '',
+      verificationStatus: log.verificationStatus || 'Approved',
+      approvalNotes: log.approvalNotes || '',
       details: {
         previousAddress: log.details?.previousAddress || '',
         reasonForMoving: log.details?.reasonForMoving || '',
@@ -498,6 +511,51 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     });
     setEditingLogId(log.id);
     setIsLogModalOpen(true);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedLogIds.length === 0) return;
+    const isConfirmed = await confirm({
+      title: 'Hapus Log Terpilih',
+      message: `Apakah Anda yakin ingin menghapus ${selectedLogIds.length} catatan mutasi terpilih? Data yang dihapus tidak dapat dikembalikan.`,
+      confirmLabel: 'Ya, Hapus Massal',
+      cancelLabel: 'Batal'
+    });
+    if (!isConfirmed) return;
+
+    for (const id of selectedLogIds) {
+      await deletePopulationLogFromDb(id);
+    }
+    toast.success(`${selectedLogIds.length} log mutasi berhasil dihapus.`);
+    setSelectedLogIds([]);
+  };
+
+  const handleBulkMarkGenerated = async (isGen: boolean) => {
+    if (selectedLogIds.length === 0) return;
+    for (const id of selectedLogIds) {
+      await updatePopulationLogToDb(id, { isGenerated: isGen });
+    }
+    toast.success(`Status ${selectedLogIds.length} log mutasi berhasil diperbarui.`);
+    setSelectedLogIds([]);
+  };
+
+  const handleBulkVerifyStatus = async (status: 'Approved' | 'Rejected' | 'Pending') => {
+    if (selectedLogIds.length === 0) return;
+    for (const id of selectedLogIds) {
+      await updatePopulationLogToDb(id, { verificationStatus: status });
+    }
+    toast.success(`Verifikasi ${selectedLogIds.length} log mutasi diubah menjadi '${status}'.`);
+    setSelectedLogIds([]);
+  };
+
+  const handleSelectAllOnPage = () => {
+    const pageIds = paginatedLogs.map(l => l.id);
+    const allSelected = pageIds.every(id => selectedLogIds.includes(id));
+    if (allSelected) {
+      setSelectedLogIds(selectedLogIds.filter(id => !pageIds.includes(id)));
+    } else {
+      setSelectedLogIds(Array.from(new Set([...selectedLogIds, ...pageIds])));
+    }
   };
 
   const handleAddLog = async (e: React.FormEvent) => {
@@ -646,18 +704,23 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     })).slice(-6);
   }, [reports]);
 
-  const unprocessedCount = useMemo(() => {
-    return populationLogs.filter(l => !l.isGenerated).length;
-  }, [populationLogs]);
-
-  const processedCount = useMemo(() => {
-    return populationLogs.filter(l => l.isGenerated).length;
+  const currentMonthLogStats = useMemo(() => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const thisMonthLogs = populationLogs.filter(l => l.date && l.date.startsWith(currentMonth));
+    return {
+      newcomer: thisMonthLogs.filter(l => l.type === 'Newcomer').length,
+      movedOut: thisMonthLogs.filter(l => l.type === 'MovedOut').length,
+      birth: thisMonthLogs.filter(l => l.type === 'Birth').length,
+      death: thisMonthLogs.filter(l => l.type === 'Death').length,
+      pendingVerification: populationLogs.filter(l => l.verificationStatus === 'Pending').length
+    };
   }, [populationLogs]);
 
   const filteredLogs = useMemo(() => {
     return populationLogs.filter(log => {
       const matchesSearch = (log.name || '').toLowerCase().includes(logSearchTerm.toLowerCase()) || 
-                           (log.houseId || '').toLowerCase().includes(logSearchTerm.toLowerCase());
+                           (log.houseId || '').toLowerCase().includes(logSearchTerm.toLowerCase()) ||
+                           (log.description || '').toLowerCase().includes(logSearchTerm.toLowerCase());
       const matchesFilter = logTypeFilter === 'All' || log.type === logTypeFilter;
       
       let matchesStatus = true;
@@ -666,10 +729,29 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       } else if (logStatusFilter === 'Processed') {
         matchesStatus = !!log.isGenerated;
       }
+
+      let matchesVerification = true;
+      if (verificationFilter !== 'All') {
+        matchesVerification = (log.verificationStatus || 'Approved') === verificationFilter;
+      }
+
+      let matchesDate = true;
+      if (startDateFilter) {
+        matchesDate = matchesDate && log.date >= startDateFilter;
+      }
+      if (endDateFilter) {
+        matchesDate = matchesDate && log.date <= endDateFilter;
+      }
       
-      return matchesSearch && matchesFilter && matchesStatus;
+      return matchesSearch && matchesFilter && matchesStatus && matchesVerification && matchesDate;
     }).sort((a, b) => b.date.localeCompare(a.date));
-  }, [populationLogs, logSearchTerm, logTypeFilter, logStatusFilter]);
+  }, [populationLogs, logSearchTerm, logTypeFilter, logStatusFilter, verificationFilter, startDateFilter, endDateFilter]);
+
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
+  const paginatedLogs = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredLogs.slice(start, start + itemsPerPage);
+  }, [filteredLogs, currentPage, itemsPerPage]);
 
   // LIVE STATS (from houses) to match Dashboard/ResidentManager
   const liveStats = useMemo(() => {
@@ -1313,57 +1395,155 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             transition={{ duration: 0.2 }}
             className="space-y-6"
           >
+            {/* Quick Stat Cards Header for Mutasi */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Warga Baru (Bulan Ini)</p>
+                  <p className="text-xl font-black text-slate-900 mt-0.5">+{currentMonthLogStats.newcomer} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
+                </div>
+                <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl"><User size={18} /></div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-wider">Pindah Keluar (Bulan Ini)</p>
+                  <p className="text-xl font-black text-slate-900 mt-0.5">-{currentMonthLogStats.movedOut} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
+                </div>
+                <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><ArrowRight size={18} /></div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-wider">Kelahiran (Bulan Ini)</p>
+                  <p className="text-xl font-black text-slate-900 mt-0.5">+{currentMonthLogStats.birth} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
+                </div>
+                <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl"><Baby size={18} /></div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-rose-600 uppercase tracking-wider">Kematian (Bulan Ini)</p>
+                  <p className="text-xl font-black text-slate-900 mt-0.5">-{currentMonthLogStats.death} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
+                </div>
+                <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl"><Activity size={18} /></div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between col-span-2 lg:col-span-1">
+                <div>
+                  <p className="text-[10px] font-black text-purple-600 uppercase tracking-wider">Menunggu Verifikasi</p>
+                  <p className="text-xl font-black text-slate-900 mt-0.5">{currentMonthLogStats.pendingVerification} <span className="text-xs font-semibold text-slate-400">Dokumen</span></p>
+                </div>
+                <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl"><AlertCircle size={18} /></div>
+              </div>
+            </div>
+
             {/* Mutation Log Toolbelt and List */}
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
+              {/* Header & Main Search */}
               <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-slate-50/40">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><Activity size={18} /></div>
                   <div>
                     <h3 className="text-base font-black text-slate-900 tracking-tight">Log Mutasi Warga</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Peristiwa kependudukan real-time & audit trail</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Peristiwa kependudukan real-time, pengolahan & audit trail</p>
                   </div>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="relative group w-full sm:w-60">
+                <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
+                  <div className="relative group w-full sm:w-56">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                     <input 
                       type="text" 
-                      placeholder="Cari nama atau rumah..."
+                      placeholder="Cari nama, rumah, deskripsi..."
                       value={logSearchTerm}
-                      onChange={(e) => setLogSearchTerm(e.target.value)}
+                      onChange={(e) => { setLogSearchTerm(e.target.value); setCurrentPage(1); }}
                       className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-sans"
                     />
                   </div>
                   
                   <select 
                     value={logTypeFilter}
-                    onChange={(e) => setLogTypeFilter(e.target.value as any)}
-                    className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
+                    onChange={(e) => { setLogTypeFilter(e.target.value as any); setCurrentPage(1); }}
+                    className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
                   >
-                    <option value="All">Semua Mutasi</option>
+                    <option value="All">Semua Jenis Mutasi</option>
                     <option value="Newcomer">Warga Baru</option>
                     <option value="MovedOut">Pindah Keluar</option>
                     <option value="Birth">Kelahiran</option>
                     <option value="Death">Kematian</option>
                   </select>
+
+                  <select 
+                    value={verificationFilter}
+                    onChange={(e) => { setVerificationFilter(e.target.value as any); setCurrentPage(1); }}
+                    className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
+                  >
+                    <option value="All">Semua Verifikasi</option>
+                    <option value="Approved">Disetujui / Sah</option>
+                    <option value="Pending">Menunggu Verifikasi</option>
+                    <option value="Rejected">Ditolak</option>
+                  </select>
                 </div>
               </div>
 
-              {/* Status Filter Tabs (Processed vs Unprocessed) */}
+              {/* Extended Filters Bar: Date Range Picker */}
+              <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <Calendar size={13} /> Periode Tanggal:
+                  </span>
+                  <input 
+                    type="date" 
+                    value={startDateFilter}
+                    onChange={e => { setStartDateFilter(e.target.value); setCurrentPage(1); }}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-indigo-500"
+                  />
+                  <span className="text-slate-400 font-bold">s/d</span>
+                  <input 
+                    type="date" 
+                    value={endDateFilter}
+                    onChange={e => { setEndDateFilter(e.target.value); setCurrentPage(1); }}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-indigo-500"
+                  />
+                  {(startDateFilter || endDateFilter) && (
+                    <button 
+                      onClick={() => { setStartDateFilter(''); setEndDateFilter(''); setCurrentPage(1); }}
+                      className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase hover:bg-slate-200 transition-all"
+                    >
+                      Reset Tanggal
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-400 font-bold">Tampilkan:</span>
+                  <select 
+                    value={itemsPerPage}
+                    onChange={e => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                    className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700"
+                  >
+                    <option value={10}>10 per hal</option>
+                    <option value={25}>25 per hal</option>
+                    <option value={50}>50 per hal</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Status Filter Tabs & Bulk Actions */}
               <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/20 flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-3">
                 <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/50">
                   {[
                     { id: 'All', label: 'Semua Status', count: populationLogs.length },
-                    { id: 'Unprocessed', label: 'Belum Dilaporkan', count: unprocessedCount, color: 'text-amber-600 bg-amber-50 border-amber-100' },
-                    { id: 'Processed', label: 'Sudah Dilaporkan', count: processedCount, color: 'text-slate-500 bg-slate-150' }
+                    { id: 'Unprocessed', label: 'Belum Dilaporkan', count: populationLogs.filter(l => !l.isGenerated).length, color: 'text-amber-600 bg-amber-50 border-amber-100' },
+                    { id: 'Processed', label: 'Sudah Dilaporkan', count: populationLogs.filter(l => l.isGenerated).length, color: 'text-slate-500 bg-slate-150' }
                   ].map(statusTab => {
                     const isActive = logStatusFilter === statusTab.id;
                     return (
                       <button
                         key={statusTab.id}
                         type="button"
-                        onClick={() => setLogStatusFilter(statusTab.id as any)}
+                        onClick={() => { setLogStatusFilter(statusTab.id as any); setCurrentPage(1); }}
                         className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
                           isActive 
                             ? 'bg-white text-indigo-700 shadow-xs border border-indigo-100/50' 
@@ -1382,143 +1562,236 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     )
                   })}
                 </div>
-                
-                <div className="text-[10px] text-slate-400 font-bold italic">
-                  * Catatan kependudukan yang "Belum Dilaporkan" akan otomatis dihitung saat Anda membuat laporan bulanan baru.
-                </div>
+
+                {/* Bulk Action Toolbar */}
+                {selectedLogIds.length > 0 && (
+                  <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 p-1.5 rounded-2xl animate-fade-in">
+                    <span className="text-[10px] font-black text-indigo-700 px-2 uppercase tracking-wider">
+                      {selectedLogIds.length} Terpilih
+                    </span>
+                    <button 
+                      onClick={() => handleBulkVerifyStatus('Approved')}
+                      className="px-2.5 py-1 bg-emerald-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-emerald-700 transition-all"
+                      title="Setujui Verifikasi Massal"
+                    >
+                      <CheckCircle size={12} /> Setujui
+                    </button>
+                    <button 
+                      onClick={() => handleBulkMarkGenerated(true)}
+                      className="px-2.5 py-1 bg-indigo-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-indigo-700 transition-all"
+                      title="Tandai Sudah Lapor"
+                    >
+                      <RefreshCw size={12} /> Tandai Lapor
+                    </button>
+                    <button 
+                      onClick={handleBulkDelete}
+                      className="px-2.5 py-1 bg-rose-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-rose-700 transition-all"
+                      title="Hapus Terpilih"
+                    >
+                      <Trash2 size={12} /> Hapus
+                    </button>
+                    <button 
+                      onClick={() => setSelectedLogIds([])}
+                      className="px-2 py-1 text-slate-500 hover:text-slate-700 text-[10px] font-bold"
+                    >
+                      Batal
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50/50 text-slate-500 font-bold border-b border-slate-100">
                     <tr>
-                      <th className="p-5 text-left text-xs uppercase tracking-widest text-slate-400">Tanggal</th>
-                      <th className="p-5 text-left text-xs uppercase tracking-widest text-slate-400">Jenis Perubahan</th>
-                      <th className="p-5 text-left text-xs uppercase tracking-widest text-slate-400">Nama Warga</th>
-                      <th className="p-5 text-left text-xs uppercase tracking-widest text-slate-400">ID Rumah</th>
-                      <th className="p-5 text-left text-xs uppercase tracking-widest text-slate-400">Rincian Informasi</th>
-                      <th className="p-5 text-center text-xs uppercase tracking-widest text-slate-400">Aksi</th>
+                      <th className="p-4 text-center w-10">
+                        <button onClick={handleSelectAllOnPage} className="text-slate-400 hover:text-indigo-600">
+                          {paginatedLogs.length > 0 && paginatedLogs.every(l => selectedLogIds.includes(l.id)) ? (
+                            <CheckSquare size={16} className="text-indigo-600" />
+                          ) : (
+                            <Square size={16} />
+                          )}
+                        </button>
+                      </th>
+                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">Tanggal</th>
+                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">Jenis Perubahan</th>
+                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">Nama Warga</th>
+                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">ID Rumah</th>
+                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">Rincian & Berkas</th>
+                      <th className="p-4 text-center text-xs uppercase tracking-widest text-slate-400">Verifikasi</th>
+                      <th className="p-4 text-center text-xs uppercase tracking-widest text-slate-400">Aksi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-150">
-                    {filteredLogs && filteredLogs.length > 0 ? filteredLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="p-5 font-bold text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <Clock size={14} className="text-slate-400" />
-                            <span className="font-mono text-xs">{new Date(log.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                          </div>
-                        </td>
-                        <td className="p-5">
-                          <span className={`
-                            px-3 py-1.5 rounded-xl font-black text-[9px] uppercase tracking-wider inline-block
-                            ${log.type === 'Newcomer' ? 'bg-emerald-50 text-emerald-700' : 
-                              log.type === 'MovedOut' ? 'bg-amber-50 text-amber-700' : 
-                              log.type === 'Birth' ? 'bg-indigo-50 text-indigo-700' : 
-                              'bg-rose-50 text-rose-700'}
-                          `}>
-                            {log.type === 'Newcomer' ? '✓ Warga Baru' : 
-                             log.type === 'MovedOut' ? '⇄ Pindah Keluar' : 
-                             log.type === 'Birth' ? '👶 Kelahiran' : '✝ Kematian'}
-                          </span>
-                          {log.isGenerated && (
-                            <div className="mt-1">
-                              <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded-md font-bold text-[8px] uppercase tracking-wider inline-flex items-center gap-1">
-                                <RefreshCw size={8} /> Sudah Lapor
-                              </span>
+                    {paginatedLogs && paginatedLogs.length > 0 ? paginatedLogs.map((log) => {
+                      const isSelected = selectedLogIds.includes(log.id);
+                      return (
+                        <tr key={log.id} className={`hover:bg-slate-50/50 transition-colors group ${isSelected ? 'bg-indigo-50/30' : ''}`}>
+                          <td className="p-4 text-center">
+                            <button 
+                              onClick={() => {
+                                if (isSelected) setSelectedLogIds(selectedLogIds.filter(i => i !== log.id));
+                                else setSelectedLogIds([...selectedLogIds, log.id]);
+                              }}
+                              className="text-slate-400 hover:text-indigo-600"
+                            >
+                              {isSelected ? <CheckSquare size={16} className="text-indigo-600" /> : <Square size={16} />}
+                            </button>
+                          </td>
+                          <td className="p-4 font-bold text-slate-600">
+                            <div className="flex items-center gap-2">
+                              <Clock size={14} className="text-slate-400" />
+                              <span className="font-mono text-xs">{new Date(log.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                             </div>
-                          )}
-                        </td>
-                        <td className="p-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400"><User size={14}/></div>
-                            <div>
-                              <p className="font-extrabold text-slate-800">{log.name}</p>
-                              {log.details?.familyCount && log.details.familyCount > 1 && (
-                                <p className="text-[8px] text-slate-400 font-black uppercase tracking-wide">+{log.details.familyCount - 1} Anggota Keluarga</p>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-5">
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-black w-fit border border-slate-200/50">
-                            {log.houseId}
-                          </div>
-                        </td>
-                        <td className="p-5 max-w-xs">
-                          <div className="space-y-2">
-                            <p className="text-slate-600 text-xs font-medium italic line-clamp-1" title={log.description}>{log.description || '-'}</p>
-                            {log.details && (
-                              <div className="text-[10px] font-bold text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-150 grid grid-cols-1 gap-1">
-                                {log.type === 'Newcomer' && (
-                                  <>
-                                    <div className="flex justify-between items-center border-b border-slate-200/40 pb-1"><span>Asal:</span> <span className="text-blue-600 font-semibold">{log.details.previousAddress}</span></div>
-                                    <div className="flex justify-between items-center"><span>Status:</span> <span className="text-slate-700 font-semibold">{log.details.residenceType || 'Tetap'}</span></div>
-                                  </>
-                                )}
-                                {log.type === 'MovedOut' && (
-                                  <>
-                                    <div className="flex justify-between items-center border-b border-slate-200/40 pb-1"><span>Tujuan:</span> <span className="text-amber-600 font-semibold">{log.details.newAddress}</span></div>
-                                    <div className="flex justify-between items-center"><span>Alasan:</span> <span className="text-slate-700 font-semibold">{log.details.reasonForMoving}</span></div>
-                                  </>
-                                )}
-                                {log.type === 'Birth' && (
-                                  <>
-                                    <div className="flex justify-between items-center border-b border-slate-200/40 pb-1"><span>Orang Tua:</span> <span className="text-emerald-600 font-semibold">{log.details.fatherName}/{log.details.motherName}</span></div>
-                                    <div className="flex justify-between items-center"><span>Gender:</span> <span className="text-slate-700 font-semibold">{log.details.gender}</span></div>
-                                  </>
-                                )}
-                                {log.type === 'Death' && (
-                                  <>
-                                    <div className="flex justify-between items-center border-b border-slate-200/40 pb-1"><span>Penyebab:</span> <span className="text-rose-600 font-semibold">{log.details.causeOfDeath}</span></div>
-                                    <div className="flex justify-between items-center"><span>Tempat:</span> <span className="text-slate-700 font-semibold">{log.details.placeOfDeath}</span></div>
-                                  </>
-                                )}
+                          </td>
+                          <td className="p-4">
+                            <span className={`
+                              px-3 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider inline-block
+                              ${log.type === 'Newcomer' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 
+                                log.type === 'MovedOut' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' : 
+                                log.type === 'Birth' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 
+                                'bg-rose-50 text-rose-700 border border-rose-200/50'}
+                            `}>
+                              {log.type === 'Newcomer' ? '✓ Warga Baru' : 
+                               log.type === 'MovedOut' ? '⇄ Pindah Keluar' : 
+                               log.type === 'Birth' ? '👶 Kelahiran' : '✝ Kematian'}
+                            </span>
+                            {log.isGenerated && (
+                              <div className="mt-1">
+                                <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded-md font-bold text-[8px] uppercase tracking-wider inline-flex items-center gap-1">
+                                  <RefreshCw size={8} /> Sudah Lapor
+                                </span>
                               </div>
                             )}
-                          </div>
-                        </td>
-                        <td className="p-5 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            {log.phone && log.phone !== '-' && (
-                              <button 
-                                onClick={async () => {
-                                  const msg = log.type === 'Newcomer' 
-                                    ? `Halo ${log.name}, Selamat Datang di Lingkungan RT 02! Kami mengonfirmasi pencatatan domisili warga baru Anda. Jika ada pertanyaan seputar iuran, siskamling, atau administrasi surat, silakan hubungi Pengurus RT.` 
-                                    : log.type === 'MovedOut'
-                                    ? `Halo ${log.name}, Terima kasih telah menjadi bagian dari keluarga warga RT 02. Catatan kepindahan Anda telah terdaftar secara resmi.`
-                                    : `Halo ${log.name}, Pengurus RT 02 mengirimkan salam pesan mengenai data mutasi kependudukan Anda.`;
-                                  
-                                  const res = await sendWhatsAppViaGateway(log.phone, msg);
-                                  if (res?.success) toast.success(`Pesan WhatsApp berhasil dikirim ke ${log.name}`);
-                                  else toast.error(`Gagal mengirim WhatsApp: ${res?.error || 'Error'}`);
-                                }}
-                                className="p-1.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50 rounded-lg transition-all"
-                                title="Kirim Pesan WhatsApp Otomatis ke Warga"
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400"><User size={14}/></div>
+                              <div>
+                                <p className="font-extrabold text-slate-800">{log.name}</p>
+                                {log.details?.familyCount && log.details.familyCount > 1 && (
+                                  <p className="text-[8px] text-slate-400 font-black uppercase tracking-wide">+{log.details.familyCount - 1} Anggota Keluarga</p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-black w-fit border border-slate-200/50">
+                              {log.houseId}
+                            </div>
+                          </td>
+                          <td className="p-4 max-w-xs">
+                            <div className="space-y-1.5">
+                              <p className="text-slate-600 text-xs font-medium italic line-clamp-1" title={log.description}>{log.description || '-'}</p>
+                              
+                              {log.details && (
+                                <div className="text-[10px] font-bold text-slate-500 bg-slate-50 p-2 rounded-xl border border-slate-150 grid grid-cols-1 gap-1">
+                                  {log.type === 'Newcomer' && (
+                                    <>
+                                      <div className="flex justify-between items-center border-b border-slate-200/40 pb-0.5"><span>Asal:</span> <span className="text-blue-600 font-semibold">{log.details.previousAddress}</span></div>
+                                      <div className="flex justify-between items-center"><span>Status:</span> <span className="text-slate-700 font-semibold">{log.details.residenceType || 'Tetap'}</span></div>
+                                    </>
+                                  )}
+                                  {log.type === 'MovedOut' && (
+                                    <>
+                                      <div className="flex justify-between items-center border-b border-slate-200/40 pb-0.5"><span>Tujuan:</span> <span className="text-amber-600 font-semibold">{log.details.newAddress}</span></div>
+                                      <div className="flex justify-between items-center"><span>Alasan:</span> <span className="text-slate-700 font-semibold">{log.details.reasonForMoving}</span></div>
+                                    </>
+                                  )}
+                                  {log.type === 'Birth' && (
+                                    <>
+                                      <div className="flex justify-between items-center border-b border-slate-200/40 pb-0.5"><span>Orang Tua:</span> <span className="text-emerald-600 font-semibold">{log.details.fatherName}/{log.details.motherName}</span></div>
+                                      <div className="flex justify-between items-center"><span>Gender:</span> <span className="text-slate-700 font-semibold">{log.details.gender}</span></div>
+                                    </>
+                                  )}
+                                  {log.type === 'Death' && (
+                                    <>
+                                      <div className="flex justify-between items-center border-b border-slate-200/40 pb-0.5"><span>Penyebab:</span> <span className="text-rose-600 font-semibold">{log.details.causeOfDeath}</span></div>
+                                      <div className="flex justify-between items-center"><span>Tempat:</span> <span className="text-slate-700 font-semibold">{log.details.placeOfDeath}</span></div>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Document Attachment Button */}
+                              {log.documentUrl && (
+                                <a 
+                                  href={log.documentUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-black uppercase border border-indigo-200/60 hover:bg-indigo-100 transition-all mt-1"
+                                >
+                                  <FileUp size={11} /> Lihat Berkas / Surat
+                                </a>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Verification Status Badge */}
+                          <td className="p-4 text-center">
+                            <div className="flex flex-col items-center gap-1">
+                              <span className={`
+                                px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1
+                                ${(!log.verificationStatus || log.verificationStatus === 'Approved') ? 'bg-emerald-100 text-emerald-800' :
+                                  log.verificationStatus === 'Pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}
+                              `}>
+                                {(!log.verificationStatus || log.verificationStatus === 'Approved') ? <><CheckCircle size={10}/> Disetujui</> :
+                                 log.verificationStatus === 'Pending' ? <><AlertCircle size={10}/> Menunggu</> : <><XCircle size={10}/> Ditolak</>}
+                              </span>
+                            </div>
+                          </td>
+
+                          <td className="p-4 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              {/* Print Single Certificate PDF */}
+                              <button
+                                onClick={() => generateSingleMutationCertificatePDF(log)}
+                                className="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/50 rounded-lg transition-all"
+                                title="Cetak Surat Keterangan / Pengantar Mutasi (PDF)"
                               >
-                                <MessageCircle size={14} />
+                                <Printer size={14} />
                               </button>
-                            )}
-                            <button 
-                              onClick={() => handleEditLog(log)}
-                              className="p-1.5 text-slate-450 hover:text-indigo-650 hover:bg-slate-100 rounded-lg transition-all"
-                              title="Edit Log"
-                            >
-                              <Edit2 size={14} />
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteLog(log.id)}
-                              className="p-1.5 text-slate-450 hover:text-rose-650 hover:bg-rose-50 rounded-lg transition-all"
-                              title="Hapus Log"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )) : (
+
+                              {log.phone && log.phone !== '-' && (
+                                <button 
+                                  onClick={async () => {
+                                    const msg = log.type === 'Newcomer' 
+                                      ? `Halo ${log.name}, Selamat Datang di Lingkungan RT 02! Kami mengonfirmasi pencatatan domisili warga baru Anda. Jika ada pertanyaan seputar iuran, siskamling, atau administrasi surat, silakan hubungi Pengurus RT.` 
+                                      : log.type === 'MovedOut'
+                                      ? `Halo ${log.name}, Terima kasih telah menjadi bagian dari keluarga warga RT 02. Catatan kepindahan Anda telah terdaftar secara resmi.`
+                                      : `Halo ${log.name}, Pengurus RT 02 mengirimkan salam pesan mengenai data mutasi kependudukan Anda.`;
+                                    
+                                    const res = await sendWhatsAppViaGateway(log.phone, msg);
+                                    if (res?.success) toast.success(`Pesan WhatsApp berhasil dikirim ke ${log.name}`);
+                                    else toast.error(`Gagal mengirim WhatsApp: ${res?.error || 'Error'}`);
+                                  }}
+                                  className="p-1.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50 rounded-lg transition-all"
+                                  title="Kirim Pesan WhatsApp Otomatis ke Warga"
+                                >
+                                  <MessageCircle size={14} />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => handleEditLog(log)}
+                                className="p-1.5 text-slate-450 hover:text-indigo-650 hover:bg-slate-100 rounded-lg transition-all"
+                                title="Edit Log"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteLog(log.id)}
+                                className="p-1.5 text-slate-450 hover:text-rose-650 hover:bg-rose-50 rounded-lg transition-all"
+                                title="Hapus Log"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }) : (
                       <tr>
-                        <td colSpan={6} className="p-20 text-center">
+                        <td colSpan={8} className="p-20 text-center">
                           <div className="flex flex-col items-center gap-3">
                             <div className="p-5 bg-slate-50 rounded-full text-slate-300"><Clock size={40} /></div>
                             <div>
@@ -1532,6 +1805,37 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination Controls */}
+              {filteredLogs.length > 0 && (
+                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                  <p className="text-slate-500 font-semibold">
+                    Menampilkan <span className="font-bold text-slate-800">{((currentPage - 1) * itemsPerPage) + 1}</span> - <span className="font-bold text-slate-800">{Math.min(currentPage * itemsPerPage, filteredLogs.length)}</span> dari <span className="font-bold text-slate-800">{filteredLogs.length}</span> log mutasi
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 bg-white border border-slate-200 rounded-xl text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    
+                    <span className="px-3 py-1 font-bold text-slate-700 bg-white border border-slate-200 rounded-xl">
+                      {currentPage} / {totalPages}
+                    </span>
+
+                    <button 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="p-2 bg-white border border-slate-200 rounded-xl text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -2139,24 +2443,54 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 </>
               )}
 
-            <div className="col-span-2">
-              <label className="block text-xs font-bold text-slate-500 mb-1.5">
-                {logFormData.type === 'Newcomer' ? 'Catatan Kedatangan' : 
-                 logFormData.type === 'MovedOut' ? 'Catatan Kepindahan' : 
-                 logFormData.type === 'Birth' ? 'Catatan Kelahiran' : 
-                 'Catatan Kematian'}
-              </label>
-              <textarea 
-                value={logFormData.description} 
-                onChange={e => setLogFormData({ ...logFormData, description: e.target.value })} 
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all min-h-[80px] resize-none" 
-                placeholder={
-                  logFormData.type === 'Newcomer' ? 'Cth: Pindah karena tugas kerja...' : 
-                  logFormData.type === 'MovedOut' ? 'Cth: Pindah ke luar kota...' : 
-                  logFormData.type === 'Birth' ? 'Cth: Lahir normal di RS...' : 
-                  'Cth: Meninggal karena sakit...'
-                }
-              />
+            <div className="col-span-2 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
+                  <FileUp size={14} className="text-indigo-600" /> Link / URL Berkas Pendukung (Surat Pindah / Lahir / Wafat)
+                </label>
+                <input 
+                  type="url" 
+                  value={logFormData.documentUrl} 
+                  onChange={e => setLogFormData({ ...logFormData, documentUrl: e.target.value })} 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all font-mono" 
+                  placeholder="https://drive.google.com/... atau link foto dokumen"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
+                  <CheckCircle size={14} className="text-emerald-600" /> Status Verifikasi Dokumen RT
+                </label>
+                <select 
+                  value={logFormData.verificationStatus} 
+                  onChange={e => setLogFormData({ ...logFormData, verificationStatus: e.target.value as any })} 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all"
+                >
+                  <option value="Approved">✓ Disetujui / Sah (Lengkap)</option>
+                  <option value="Pending">⏳ Menunggu Verifikasi Dokumen</option>
+                  <option value="Rejected">✕ Ditolak / Kurang Syarat</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5">
+                  {logFormData.type === 'Newcomer' ? 'Catatan Kedatangan' : 
+                   logFormData.type === 'MovedOut' ? 'Catatan Kepindahan' : 
+                   logFormData.type === 'Birth' ? 'Catatan Kelahiran' : 
+                   'Catatan Kematian'}
+                </label>
+                <textarea 
+                  value={logFormData.description} 
+                  onChange={e => setLogFormData({ ...logFormData, description: e.target.value })} 
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all min-h-[80px] resize-none" 
+                  placeholder={
+                    logFormData.type === 'Newcomer' ? 'Cth: Pindah karena tugas kerja...' : 
+                    logFormData.type === 'MovedOut' ? 'Cth: Pindah ke luar kota...' : 
+                    logFormData.type === 'Birth' ? 'Cth: Lahir normal di RS...' : 
+                    'Cth: Meninggal karena sakit...'
+                  }
+                />
+              </div>
             </div>
           </div>
 
@@ -2171,7 +2505,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             <label htmlFor="autoUpdateHouse" className="text-xs font-bold text-indigo-700 cursor-pointer">
               Update data rumah otomatis? (Sinkronisasi ke Data Warga)
             </label>
-            </div>
+          </div>
           </div>
 
           <div className="flex gap-3 pt-4">

@@ -3140,3 +3140,146 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
     doc.save(`Laporan_Mutasi_Warga_RT02_${report.month}.pdf`);
     toast.success(`Laporan Mutasi (PDF) Periode ${report.month} berhasil diunduh!`);
 };
+
+export const generateSingleMutationCertificatePDF = async (log: PopulationChangeLog, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    
+    const marginX = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const centerX = pageWidth / 2;
+    let cursorY = 15;
+
+    // Header Kop Surat
+    let logoData = '';
+    try { logoData = await getImageData(config.logo); } catch (e) {}
+
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+    }
+
+    doc.setFont("times", "bold"); 
+    doc.setFontSize(14);
+    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+    doc.setLineWidth(1.0);
+    doc.line(20, 42, 190, 42);
+    doc.setLineWidth(0.3);
+    doc.line(20, 43, 190, 43);
+
+    cursorY = 52;
+
+    // Judul Surat
+    const typeTitle = log.type === 'Newcomer' ? 'SURAT KETERANGAN DOMISILI WARGA BARU' :
+                      log.type === 'MovedOut' ? 'SURAT KETERANGAN PINDAH DOMISILI' :
+                      log.type === 'Birth' ? 'SURAT KETERANGAN KELAHIRAN' : 'SURAT KETERANGAN KEMATIAN';
+    
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text(typeTitle, centerX, cursorY, { align: "center" });
+    const titleWidth = doc.getTextWidth(typeTitle);
+    doc.line(centerX - (titleWidth / 2), cursorY + 1, centerX + (titleWidth / 2), cursorY + 1);
+
+    cursorY += 6;
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    doc.text(`Nomor: ${log.id.substring(0, 8).toUpperCase()}/SKM-RT02/${new Date().getFullYear()}`, centerX, cursorY, { align: "center" });
+
+    cursorY += 12;
+    doc.text("Yang bertanda tangan di bawah ini, Pengurus Rukun Tetangga (RT) 02 Kelurahan Tondo dengan ini menerangkan bahwa:", marginX, cursorY, { maxWidth: 170 });
+    cursorY += 10;
+
+    // Detail Data Warga
+    const drawRow = (label: string, value: string) => {
+        doc.setFont("times", "bold");
+        doc.text(label, marginX + 5, cursorY);
+        doc.text(":", marginX + 55, cursorY);
+        doc.setFont("times", "normal");
+        doc.text(value || "-", marginX + 58, cursorY, { maxWidth: 110 });
+        cursorY += 6;
+    };
+
+    drawRow("Nama Lengkap", log.name || "-");
+    drawRow("ID / Blok Rumah", log.houseId || "-");
+    drawRow("Tanggal Peristiwa", new Date(log.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+    drawRow("Jenis Peristiwa Mutasi", log.type === 'Newcomer' ? 'Warga Baru / Datang' : log.type === 'MovedOut' ? 'Pindah Keluar' : log.type === 'Birth' ? 'Kelahiran' : 'Kematian');
+
+    if (log.type === 'Newcomer') {
+        drawRow("Alamat Asal", log.details?.previousAddress || "-");
+        drawRow("Status Kepenghunian", log.details?.residenceType || "Tetap");
+    } else if (log.type === 'MovedOut') {
+        drawRow("Alamat Tujuan Pindah", log.details?.newAddress || "-");
+        drawRow("Alasan Kepindahan", log.details?.reasonForMoving || "-");
+    } else if (log.type === 'Birth') {
+        drawRow("Nama Orang Tua", `${log.details?.fatherName || '-'} / ${log.details?.motherName || '-'}`);
+        drawRow("Jenis Kelamin Bayi", log.details?.gender || "-");
+    } else if (log.type === 'Death') {
+        drawRow("Penyebab Kematian", log.details?.causeOfDeath || "-");
+        drawRow("Tempat Meninggal", log.details?.placeOfDeath || "-");
+    }
+
+    drawRow("Keterangan Tambahan", log.description || "Telah dicatat secara resmi pada Log Mutasi RT 02.");
+
+    cursorY += 6;
+    doc.text("Demikian Surat Keterangan ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.", marginX, cursorY, { maxWidth: 170 });
+
+    // TTD Section
+    cursorY += 15;
+    const signX = pageWidth - 60;
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, cursorY, { align: "center" });
+    cursorY += 6;
+    doc.text(`Ketua ${config.rtName}`, signX, cursorY, { align: "center" });
+
+    const signSpaceY = cursorY + 2;
+    cursorY += 25;
+
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, cursorY, { align: "center" });
+    doc.line(signX - 25, cursorY + 1, signX + 25, cursorY + 1);
+
+    // Stempel & TTD jika ada
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 15, signSpaceY, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 5, 25, 25);
+        }
+    } catch (e) {}
+
+    // Footer Digital Authentication SODD
+    const footerY = pageHeight - 35;
+    doc.setDrawColor(220);
+    doc.setLineWidth(0.2);
+    doc.line(marginX, footerY, pageWidth - marginX, footerY);
+
+    try {
+        const baseUrl = window.location.origin;
+        const verificationUrl = `${baseUrl}/#/verify-official/${log.id}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { margin: 1, width: 200 });
+        doc.addImage(qrCodeDataUrl, 'PNG', marginX, footerY + 4, 18, 18);
+    } catch (e) {}
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(30, 41, 59);
+    doc.text("SISTEM OTENTIKASI DOKUMEN DIGITAL (SODD) RT 02", marginX + 22, footerY + 8);
+    doc.setFont("times", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`ID Otentikasi: ${log.id}`, marginX + 22, footerY + 12);
+    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, marginX + 22, footerY + 16);
+
+    doc.save(`Surat_Pengantar_Mutasi_${log.type}_${(log.name || 'Warga').replace(/\s+/g, '_')}.pdf`);
+    toast.success(`Surat Pengantar Mutasi (PDF) berhasil diunduh!`);
+};

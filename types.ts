@@ -619,6 +619,9 @@ export interface PopulationChangeLog {
   name?: string;
   phone?: string;
   isGenerated?: boolean;
+  documentUrl?: string; // NEW: File attachment (SKPWNI, Surat Lahir, Surat Kematian)
+  verificationStatus?: 'Pending' | 'Approved' | 'Rejected'; // NEW: Status verifikasi dokumen/bukti
+  approvalNotes?: string; // NEW: Catatan verifikasi
   details?: {
     // Newcomer
     previousAddress?: string;
