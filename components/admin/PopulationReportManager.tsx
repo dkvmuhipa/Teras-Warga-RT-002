@@ -325,10 +325,11 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       const allLogs = [...populationLogs, ...missingLogs];
       const logsThisMonth = allLogs.filter(log => log.date.startsWith(targetMonth) && !log.isGenerated);
     
-    if (logsThisMonth.length === 0) {
-      toast.info(`Tidak ada log mutasi baru yang belum digenerate untuk bulan ${targetMonth}.`);
-      // We still open the modal because initial population and current counts are still relevant
-    }
+      if (logsThisMonth.length === 0) {
+        toast.info(`Dihitung berdasarkan log mutasi bulan ${formatIndonesianMonthYear(targetMonth)}.`);
+      } else {
+        toast.success(`Berhasil mengkalkulasi ${logsThisMonth.length} log mutasi untuk bulan ${formatIndonesianMonthYear(targetMonth)}!`);
+      }
     const birthCount = logsThisMonth.filter(l => l.type === 'Birth').length;
     const deathCount = logsThisMonth.filter(l => l.type === 'Death').length;
     const newcomerCount = logsThisMonth.filter(l => l.type === 'Newcomer').reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
