@@ -143,8 +143,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     let syncCount = 0;
     for (const house of houses) {
       if (house.status === 'Occupied') {
-        const hasLog = populationLogs.some(l => l.type === 'Newcomer' && l.houseId === house.id);
-        if (!hasLog) {
+        const hasNewcomerLog = populationLogs.some(l => l.type === 'Newcomer' && l.houseId === house.id);
+        if (!hasNewcomerLog) {
           const vulnerability = [];
           if (house.isPKH) vulnerability.push('PKH');
           if (house.isBLT) vulnerability.push('BLT');
@@ -179,6 +179,35 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           };
           await addPopulationLogToDb(newLog);
           syncCount++;
+        }
+
+        // Auto Sync Birth Logs if house has babyCount > 0 but no Birth log exists
+        const houseBabyCount = house.babyCount || 0;
+        const birthLogsCount = populationLogs.filter(l => l.type === 'Birth' && l.houseId === house.id).length;
+        if (houseBabyCount > birthLogsCount) {
+          const missingBirths = houseBabyCount - birthLogsCount;
+          for (let i = 0; i < missingBirths; i++) {
+            const birthLog = {
+              id: Date.now().toString() + Math.random().toString(36).substring(7) + i,
+              type: 'Birth' as const,
+              name: house.headOfFamily ? `Kelahiran Bayi (Keluarga ${house.headOfFamily})` : `Kelahiran Bayi Blok ${house.block}-${house.number}`,
+              phone: house.phone || '',
+              houseId: house.id,
+              date: new Date().toISOString().split('T')[0],
+              description: 'Catatan Kelahiran Bayi (Auto-Sync dari Data Warga)',
+              isGenerated: false,
+              details: {
+                previousAddress: 'Lahir di RT 02',
+                reasonForMoving: 'Kelahiran',
+                familyCount: 1,
+                residenceType: house.residenceType || 'Tetap',
+                religion: house.religion || '-',
+                kkNumber: house.kkNumber || '-'
+              }
+            };
+            await addPopulationLogToDb(birthLog);
+            syncCount++;
+          }
         }
       }
     }
