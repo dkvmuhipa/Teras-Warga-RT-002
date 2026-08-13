@@ -218,6 +218,167 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     }
   };
 
+  const handleAutoGenerateAllYearReports = async () => {
+    const isConfirmed = await confirm({
+      title: 'Reset & Auto-Generate Laporan 2026',
+      message: 'Sistem akan secara otomatis menghapus laporan lama dan merekapitulasi laporan bulanan dari Januari hingga bulan ini secara bersih dan presisi berdasarkan data aktual RT 02. Lanjutkan?',
+      confirmLabel: 'Ya, Generate Semua',
+      cancelLabel: 'Batal'
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      setIsGeneratingLogs(true);
+      // 1. Delete existing reports
+      for (const report of reports) {
+        await onDeleteReport(report.id);
+      }
+
+      // Calculate base actual residents count from occupied houses
+      let baseTotal = 0;
+      let baseMale = 0;
+      let baseFemale = 0;
+      let basePregnant = 0;
+      let baseBaby = 0;
+      let baseToddler = 0;
+      let baseChild = 0;
+      let baseTeenager = 0;
+      let baseAdult = 0;
+      let baseElderly = 0;
+      let baseWidow = 0;
+      let baseDisability = 0;
+      let baseOrphan = 0;
+      let baseSeasonal = 0;
+      let baseSeasonalMale = 0;
+      let baseSeasonalFemale = 0;
+
+      houses.forEach(house => {
+        if (house.status === 'Occupied') {
+          const occupantsCount = Math.max(house.occupants || 1, 1 + (house.familyMembers?.length || 0));
+          const isSeasonal = house.residenceType === 'Sewa';
+          if (isSeasonal) baseSeasonal += occupantsCount;
+
+          baseTotal += occupantsCount;
+          basePregnant += house.pregnantCount || 0;
+          baseBaby += house.babyCount || 0;
+          baseToddler += house.toddlerCount || 0;
+          baseChild += house.childCount || 0;
+          baseTeenager += house.teenagerCount || 0;
+          baseAdult += house.adultCount || 0;
+          baseElderly += house.elderlyCount || 0;
+          baseWidow += house.widowCount || 0;
+          baseDisability += house.disabilityCount || 0;
+          baseOrphan += house.orphanCount || 0;
+
+          if (house.familyMembers && house.familyMembers.length > 0) {
+            baseMale += (house.gender === 'Laki-laki' || !house.gender) ? 1 : 0;
+            if (isSeasonal && (house.gender === 'Laki-laki' || !house.gender)) baseSeasonalMale++;
+            baseFemale += house.gender === 'Perempuan' ? 1 : 0;
+            if (isSeasonal && house.gender === 'Perempuan') baseSeasonalFemale++;
+
+            house.familyMembers.forEach(m => {
+              const mGender = m.gender || 'Laki-laki';
+              if (mGender === 'Laki-laki') {
+                baseMale++;
+                if (isSeasonal) baseSeasonalMale++;
+              } else if (mGender === 'Perempuan') {
+                baseFemale++;
+                if (isSeasonal) baseSeasonalFemale++;
+              }
+            });
+
+            const registeredCount = 1 + house.familyMembers.length;
+            if (occupantsCount > registeredCount) {
+              const diff = occupantsCount - registeredCount;
+              const m = Math.ceil(diff / 2);
+              const f = Math.floor(diff / 2);
+              baseMale += m;
+              baseFemale += f;
+              if (isSeasonal) {
+                baseSeasonalMale += m;
+                baseSeasonalFemale += f;
+              }
+            }
+          } else {
+            const headGender = house.gender || 'Laki-laki';
+            const headMale = headGender === 'Laki-laki' ? 1 : 0;
+            const headFemale = headGender === 'Perempuan' ? 1 : 0;
+
+            baseMale += headMale;
+            baseFemale += headFemale;
+            if (isSeasonal) {
+              if (headMale) baseSeasonalMale++;
+              if (headFemale) baseSeasonalFemale++;
+            }
+
+            if (occupantsCount > 1) {
+              const diff = occupantsCount - 1;
+              const m = Math.ceil(diff / 2);
+              const f = Math.floor(diff / 2);
+              baseMale += m;
+              baseFemale += f;
+              if (isSeasonal) {
+                baseSeasonalMale += m;
+                baseSeasonalFemale += f;
+              }
+            }
+          }
+        }
+      });
+
+      const currentMonthNum = new Date().getMonth() + 1; // 1..8
+      let runningInitial = baseTotal;
+
+      for (let m = 1; m <= currentMonthNum; m++) {
+        const monthStr = `2026-${String(m).padStart(2, '0')}`;
+        
+        // Find logs for this specific month
+        const logsThisMonth = populationLogs.filter(log => log.date.startsWith(monthStr));
+        const birthCount = logsThisMonth.filter(l => l.type === 'Birth').length;
+        const deathCount = logsThisMonth.filter(l => l.type === 'Death').length;
+        const newcomerCount = logsThisMonth.filter(l => l.type === 'Newcomer' && l.date.startsWith(monthStr)).reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
+        const movedOutCount = logsThisMonth.filter(l => l.type === 'MovedOut' && l.date.startsWith(monthStr)).reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
+
+        const reportData = {
+          month: monthStr,
+          year: 2026,
+          initialPopulation: runningInitial,
+          birthCount,
+          deathCount,
+          newcomerCount,
+          movedOutCount,
+          maleCount: baseMale,
+          femaleCount: baseFemale,
+          pregnantCount: basePregnant,
+          babyCount: baseBaby,
+          toddlerCount: baseToddler,
+          childCount: baseChild,
+          teenagerCount: baseTeenager,
+          adultCount: baseAdult,
+          elderlyCount: baseElderly,
+          widowCount: baseWidow,
+          disabilityCount: baseDisability,
+          orphanCount: baseOrphan,
+          seasonalCount: baseSeasonal,
+          seasonalMaleCount: baseSeasonalMale,
+          seasonalFemaleCount: baseSeasonalFemale,
+          createdAt: new Date().toISOString()
+        };
+
+        await onAddReport(reportData);
+        runningInitial = runningInitial + birthCount + newcomerCount - movedOutCount - deathCount;
+      }
+
+      toast.success('Berhasil meng-generate seluruh laporan bulanan 2026 secara rapi & presisi!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Gagal meng-generate laporan.');
+    } finally {
+      setIsGeneratingLogs(false);
+    }
+  };
+
   const handleBulkMarkLogsProcessed = async () => {
     const isConfirmed = await confirm({
       title: 'Bersihkan Log Mutasi Lama',
@@ -1377,16 +1538,28 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => generatePopulationReportExcel(processedReports, populationLogs)}
-                      disabled={processedReports.length === 0}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-xs transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                      title="Unduh Seluruh Rekapitulasi Laporan Bulanan ke dalam 1 File Excel (.xlsx)"
-                    >
-                      <FileUp size={15} />
-                      Export Semua Periode (.xlsx)
-                    </button>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={handleAutoGenerateAllYearReports}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+                        title="Hapus laporan lama & generate ulang laporan Januari-Agustus secara bersih & presisi"
+                      >
+                        <RefreshCw size={14} className={isGeneratingLogs ? "animate-spin" : ""} />
+                        Reset & Auto-Generate 2026
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => generatePopulationReportExcel(processedReports, populationLogs)}
+                        disabled={processedReports.length === 0}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-xs transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+                        title="Unduh Seluruh Rekapitulasi Laporan Bulanan ke dalam 1 File Excel (.xlsx)"
+                      >
+                        <FileUp size={15} />
+                        Export Semua Periode (.xlsx)
+                      </button>
+                    </div>
                   </div>
                   
                   {viewMode === 'table' ? (
