@@ -927,8 +927,9 @@ export const generateIuranReportExcel = async (
   saveAs(blob, `Laporan_Iuran_${typeLabel.replace(/\s+/g, '_')}_${month.replace(/\s+/g, '_')}.xlsx`);
 };
 
-export const generatePopulationReportExcel = async (reports: any[], logs: any[]) => {
+export const generatePopulationReportExcel = async (reportsInput: any | any[], logs: any[]) => {
   const workbook = new ExcelJS.Workbook();
+  const reports = Array.isArray(reportsInput) ? reportsInput : [reportsInput];
   
   // SHEET 1: REKAPITULASI LAPORAN
   const reportSheet = workbook.addWorksheet('Rekapitulasi Laporan');
@@ -970,7 +971,7 @@ export const generatePopulationReportExcel = async (reports: any[], logs: any[])
     cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
   });
 
-  reports.sort((a, b) => b.month.localeCompare(a.month)).forEach((r, i) => {
+  [...reports].sort((a, b) => (b.month || '').localeCompare(a.month || '')).forEach((r, i) => {
     const row = reportSheet.addRow({
       month: r.month,
       year: r.year,
