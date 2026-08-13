@@ -410,10 +410,11 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                   )}
                   <button 
                     onClick={() => handleShareWhatsApp(letter)}
-                    className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all"
-                    title="Bagikan ke WhatsApp"
+                    className="p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-1 shadow-sm shadow-emerald-200"
+                    title="Bagikan ke Broadcast WhatsApp Grup RT"
                   >
-                    <Send size={16} />
+                    <Send size={15} />
+                    <span className="text-[10px] font-black uppercase tracking-wider">WA Broadcast</span>
                   </button>
                   <button 
                     onClick={() => handleDelete(letter.id)}

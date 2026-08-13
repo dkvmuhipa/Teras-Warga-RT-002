@@ -1225,3 +1225,121 @@ export const generateCashFlowExcel = async (cashFlow: any[], selectedMonth?: str
   saveAs(blob, `Arus_Kas_RT02${filenameSuffix}.xlsx`);
 };
 
+export const generateMutationReportExcel = async (logs: any[]) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Log Mutasi Kependudukan RT 02');
+
+  worksheet.mergeCells('A1:G1');
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = 'LAPORAN REKAPITULASI MUTASI KEPENDUDUKAN RT 02';
+  titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF1E293B' } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.addRow([]);
+
+  worksheet.columns = [
+    { header: 'No', key: 'no', width: 6 },
+    { header: 'Tanggal', key: 'date', width: 14 },
+    { header: 'Jenis Peristiwa', key: 'type', width: 18 },
+    { header: 'Nama Warga', key: 'name', width: 26 },
+    { header: 'ID Rumah / Kavling', key: 'houseId', width: 18 },
+    { header: 'Keterangan Mutasi', key: 'description', width: 35 },
+    { header: 'Status Verifikasi', key: 'status', width: 18 }
+  ];
+
+  const headerRow = worksheet.getRow(3);
+  headerRow.height = 24;
+  headerRow.eachCell((cell) => {
+    cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  });
+
+  logs.forEach((log, index) => {
+    const typeLabel = log.type === 'Newcomer' ? 'Warga Baru' :
+                      log.type === 'MovedOut' ? 'Pindah Keluar' :
+                      log.type === 'Birth' ? 'Kelahiran' : 'Kematian';
+
+    const row = worksheet.addRow({
+      no: index + 1,
+      date: log.date,
+      type: typeLabel,
+      name: log.name || '-',
+      houseId: log.houseId || '-',
+      description: log.description || '-',
+      status: log.verificationStatus || 'Approved'
+    });
+
+    row.eachCell((cell) => {
+      cell.font = { name: 'Arial', size: 9 };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+      };
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Log_Mutasi_Kependudukan_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+
+export const generateGuestReportExcel = async (guests: any[]) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Laporan Tamu RT 02');
+
+  worksheet.mergeCells('A1:G1');
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = 'LAPORAN WAJIB LAPOR TAMU 24 JAM RT 02';
+  titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF1E293B' } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.addRow([]);
+
+  worksheet.columns = [
+    { header: 'No', key: 'no', width: 6 },
+    { header: 'Tgl Kedatangan', key: 'arrivalDate', width: 16 },
+    { header: 'Nama Tamu', key: 'guestName', width: 25 },
+    { header: 'No. HP Tamu', key: 'phone', width: 16 },
+    { header: 'Tuan Rumah / Kavling', key: 'residentName', width: 25 },
+    { header: 'Lama Menginap', key: 'stayDuration', width: 16 },
+    { header: 'Status Tamu', key: 'status', width: 16 }
+  ];
+
+  const headerRow = worksheet.getRow(3);
+  headerRow.height = 24;
+  headerRow.eachCell((cell) => {
+    cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE11D48' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  });
+
+  guests.forEach((g, index) => {
+    const row = worksheet.addRow({
+      no: index + 1,
+      arrivalDate: g.arrivalDate || '-',
+      guestName: g.guestName || '-',
+      phone: g.phone || '-',
+      residentName: `${g.residentName || '-'} (${g.residentHouseId || '-'})`,
+      stayDuration: g.stayDuration || '-',
+      status: g.status === 'Active' ? 'Sedang Menginap' : 'Sudah Pulang'
+    });
+
+    row.eachCell((cell) => {
+      cell.font = { name: 'Arial', size: 9 };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+      };
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Laporan_Tamu_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+

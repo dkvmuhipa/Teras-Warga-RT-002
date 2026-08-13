@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
 import { naturalSortBlockAndNumber } from "./excelService";
@@ -3399,4 +3399,99 @@ export const generateSingleMutationCertificatePDF = async (log: PopulationChange
 
     doc.save(`Surat_Pengantar_Mutasi_${log.type}_${(log.name || 'Warga').replace(/\s+/g, '_')}.pdf`);
     toast.success(`Surat Pengantar Mutasi (PDF) berhasil diunduh!`);
+};
+
+export const generateOfficialStructurePDF = async (officials: Official[], customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
+    
+    const marginX = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const centerX = pageWidth / 2;
+    let currentY = 15;
+
+    // Header Kop Surat
+    try {
+        const logoData = await getImageData(config.logo);
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+        }
+    } catch (e) {}
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text(config.rtName || "RUKUN TETANGGA 02 / RW 01", centerX, currentY + 2, { align: "center" });
+
+    doc.setFontSize(11);
+    const subHeaderStr = `KELURAHAN ${config.kelurahan || 'TONDO'}, KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`;
+    doc.text(subHeaderStr, centerX, currentY + 8, { align: "center" });
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    doc.text(config.rtAddress || "KOTA PALU, SULAWESI TENGAH 94119", centerX, currentY + 13, { align: "center" });
+
+    currentY += 20;
+    doc.setDrawColor(15, 23, 42);
+    doc.setLineWidth(0.8);
+    doc.line(marginX, currentY, pageWidth - marginX, currentY);
+    doc.setLineWidth(0.2);
+    doc.line(marginX, currentY + 1, pageWidth - marginX, currentY + 1);
+
+    currentY += 10;
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(15, 23, 42);
+    doc.text("SURAT KEPUTUSAN & STRUKTUR KEPENGURUSAN RT 02", centerX, currentY, { align: "center" });
+    doc.line(centerX - 50, currentY + 1.5, centerX + 50, currentY + 1.5);
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Nomor: SK/RT02/${new Date().getFullYear()}/001`, centerX, currentY + 6, { align: "center" });
+
+    currentY += 14;
+
+    // Table Header
+    autoTable(doc, {
+        startY: currentY,
+        margin: { left: marginX, right: marginX },
+        head: [['No', 'Nama Pengurus', 'Jabatan / Seksi', 'Kavling / Rumah', 'No. HP / WA']],
+        body: officials.map((o, idx) => [
+            (idx + 1).toString(),
+            o.name || '-',
+            o.role || '-',
+            o.houseId || '-',
+            o.phone || '-'
+        ]),
+        styles: { font: 'times', fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+        columnStyles: {
+            0: { cellWidth: 10, halign: 'center' },
+            1: { cellWidth: 45 },
+            2: { cellWidth: 45 },
+            3: { cellWidth: 30, halign: 'center' },
+            4: { cellWidth: 40, halign: 'center' }
+        }
+    });
+
+    const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 15 : currentY + 60;
+
+    // Signature Area
+    const sigX = pageWidth - marginX - 50;
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(30, 41, 59);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, sigX, finalY);
+    doc.text("Ketua RT 02 / RW 01,", sigX, finalY + 5);
+
+    doc.setFont("times", "bold");
+    const chairman = officials.find(o => o.role.toLowerCase().includes('ketua'))?.name || config.rtChairman || "Irfan Arianto";
+    doc.text(chairman, sigX, finalY + 28);
+    doc.line(sigX, finalY + 29, sigX + 45, finalY + 29);
+
+    doc.save(`Struktur_Kepengurusan_RT02_${new Date().getFullYear()}.pdf`);
+    toast.success("Dokumen Struktur Kepengurusan RT (PDF) berhasil diunduh!");
 };

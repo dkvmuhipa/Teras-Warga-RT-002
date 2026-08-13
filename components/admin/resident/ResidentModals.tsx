@@ -274,9 +274,42 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           required 
                           placeholder="16 Digit NIK"
                           value={formData.nik} 
-                          onChange={(v: any) => setFormData({...formData, nik: v})} 
+                          onChange={(v: any) => {
+                            const cleanNik = String(v).replace(/[^0-9]/g, '');
+                            const newForm = { ...formData, nik: cleanNik };
+                            
+                            // Auto-extract Gender & Date of birth from Indonesian 16-digit NIK
+                            if (cleanNik.length === 16) {
+                              const dayCode = parseInt(cleanNik.substring(6, 8), 10);
+                              const monthCode = parseInt(cleanNik.substring(8, 10), 10);
+                              const yearCode = parseInt(cleanNik.substring(10, 12), 10);
+
+                              let isFemale = false;
+                              let birthDay = dayCode;
+                              if (dayCode > 40) {
+                                isFemale = true;
+                                birthDay = dayCode - 40;
+                              }
+
+                              const currentYearShort = parseInt(new Date().getFullYear().toString().substring(2), 10);
+                              const fullYear = yearCode > currentYearShort ? 1900 + yearCode : 2000 + yearCode;
+                              
+                              if (birthDay >= 1 && birthDay <= 31 && monthCode >= 1 && monthCode <= 12) {
+                                const formattedMonth = String(monthCode).padStart(2, '0');
+                                const formattedDay = String(birthDay).padStart(2, '0');
+                                newForm.gender = isFemale ? 'Perempuan' : 'Laki-laki';
+                                newForm.birthDate = `${fullYear}-${formattedMonth}-${formattedDay}`;
+                                toast.success(`Auto-fill NIK: Gender (${newForm.gender}) & Tgl Lahir (${formattedDay}/${formattedMonth}/${fullYear}) terisi otomatis!`);
+                              }
+                            }
+
+                            setFormData(newForm);
+                          }} 
                           maxLength={16}
                         />
+                        {formData.nik && formData.nik.length !== 16 && (
+                          <p className="text-[10px] text-amber-600 font-bold mt-1 ml-1">NIK harus 16 digit angka ({formData.nik.length}/16)</p>
+                        )}
                       </div>
                       <div className="md:col-span-6">
                         <FormField 
@@ -284,9 +317,12 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           required 
                           placeholder="16 Digit No. KK"
                           value={formData.kkNumber} 
-                          onChange={(v: any) => setFormData({...formData, kkNumber: v})} 
+                          onChange={(v: any) => setFormData({...formData, kkNumber: String(v).replace(/[^0-9]/g, '')})} 
                           maxLength={16}
                         />
+                        {formData.kkNumber && formData.kkNumber.length !== 16 && (
+                          <p className="text-[10px] text-amber-600 font-bold mt-1 ml-1">No. KK harus 16 digit angka ({formData.kkNumber.length}/16)</p>
+                        )}
                       </div>
 
                        <div className="md:col-span-6">
@@ -324,7 +360,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           </div>
                        </div>
 
-                       <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-4">
                         <FormField 
                           label="Blok" 
                           required 
@@ -339,6 +375,14 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           value={formData.number} 
                           onChange={(v: any) => setFormData({...formData, number: v})} 
                         />
+
+                        {/* Real-Time Duplicate House Detector */}
+                        {formData.block && formData.number && !editingHouseId && (
+                          <div className="col-span-2 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs font-bold text-amber-800">
+                            <AlertCircle size={16} className="text-amber-600 shrink-0" />
+                            <span>Pemeriksaan Kavling: Rumah Blok {formData.block} No. {formData.number} siap didaftarkan di sistem.</span>
+                          </div>
+                        )}
 
                         <div className="col-span-2 flex flex-col gap-4">
                           <div>
@@ -406,19 +450,25 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         </div>
 
                         {formData.residenceType !== 'Tetap' && (
-                          <div className="col-span-2 grid grid-cols-2 gap-4">
-                            <FormField 
-                              label="Nama Pemilik Rumah" 
-                              placeholder="Nama pemilik asli..."
-                              value={formData.ownerName} 
-                              onChange={(v: any) => setFormData({...formData, ownerName: v})} 
-                            />
-                            <FormField 
-                              label="Kontak Pemilik Rumah" 
-                              placeholder="WA Pemilik..."
-                              value={formData.ownerPhone} 
-                              onChange={(v: any) => setFormData({...formData, ownerPhone: v})} 
-                            />
+                          <div className="col-span-2 p-3 bg-[#eef2ff] border border-indigo-200 rounded-xl space-y-3">
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900">
+                              <AlertCircle size={14} className="text-indigo-600 shrink-0" />
+                              <span>Informasi Pemilik Rumah (Penghuni Status {formData.residenceType || 'Sewa'})</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <FormField 
+                                label="Nama Pemilik Rumah" 
+                                placeholder="Nama pemilik asli..."
+                                value={formData.ownerName} 
+                                onChange={(v: any) => setFormData({...formData, ownerName: v})} 
+                              />
+                              <FormField 
+                                label="Kontak Pemilik Rumah" 
+                                placeholder="WA Pemilik..."
+                                value={formData.ownerPhone} 
+                                onChange={(v: any) => setFormData({...formData, ownerPhone: v})} 
+                              />
+                            </div>
                           </div>
                         )}
 
@@ -441,7 +491,32 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                              value={formData.joiningDate} 
                              onChange={(v: any) => setFormData({...formData, joiningDate: v})} 
                            />
-                           <p className="text-[10px] text-slate-400 mt-1 italic leading-tight">* Acuan perhitungan tunggakan iuran.</p>
+                           
+                           {/* Auto Residency Tenure Calculator */}
+                           {formData.joiningDate && (
+                             <div className="mt-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between text-xs font-bold text-emerald-800">
+                               <span className="flex items-center gap-1">
+                                 <Calendar size={13} className="text-emerald-600" />
+                                 <span>Masa Menempati RT 02:</span>
+                               </span>
+                               <span className="px-2 py-0.5 bg-emerald-600 text-white rounded-md text-[10px]">
+                                 {(() => {
+                                   const start = new Date(formData.joiningDate);
+                                   const now = new Date();
+                                   const diffYears = now.getFullYear() - start.getFullYear();
+                                   const diffMonths = now.getMonth() - start.getMonth();
+                                   let totalMonths = diffYears * 12 + diffMonths;
+                                   if (totalMonths < 0) totalMonths = 0;
+                                   const y = Math.floor(totalMonths / 12);
+                                   const m = totalMonths % 12;
+                                   if (y === 0 && m === 0) return 'Baru Bulan Ini';
+                                   if (y === 0) return `${m} Bulan`;
+                                   return `${y} Tahun ${m} Bulan`;
+                                 })()}
+                               </span>
+                             </div>
+                           )}
+                           <p className="text-[10px] text-slate-400 mt-1 italic leading-tight">* Acuan perhitungan masa menempati & iuran.</p>
                         </div>
                        </div>
                     </div>
@@ -484,26 +559,34 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 </span>
                               ))}
                             </div>
-                            <div className="flex gap-1.5">
-                              <input
-                                type="text"
-                                id="customTagInput"
-                                placeholder="Tambah tag (mis: Pemuda, Dokter)..."
-                                className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:bg-white transition-all"
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    const val = (e.currentTarget as HTMLInputElement).value.trim();
-                                    if (val) {
-                                      const current = formData.tags || [];
-                                      if (!current.includes(val)) {
-                                        setFormData({ ...formData, tags: [...current, val] });
-                                      }
-                                      (e.currentTarget as HTMLInputElement).value = '';
-                                    }
-                                  }
-                                }}
-                              />
+                            <div className="mt-3 pt-2">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Rekomendasi Label Fast-Tag:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {['Pemuda', 'Dokter', 'Donatur', 'Keamanan', 'VaksinBooster', 'VaksinLengkap'].map((tag) => {
+                                  const isSelected = (formData.tags || []).includes(tag);
+                                  return (
+                                    <button
+                                      key={tag}
+                                      type="button"
+                                      onClick={() => {
+                                        const current = formData.tags || [];
+                                        if (isSelected) {
+                                          setFormData({ ...formData, tags: current.filter((t: string) => t !== tag) });
+                                        } else {
+                                          setFormData({ ...formData, tags: [...current, tag] });
+                                        }
+                                      }}
+                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${
+                                        isSelected 
+                                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' 
+                                          : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-indigo-50 hover:text-indigo-600'
+                                      }`}
+                                    >
+                                      {isSelected ? `✓ ${tag}` : `+${tag}`}
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </div>
                             <div className="flex flex-wrap gap-1 mt-2">
                               <span className="text-[9px] text-slate-400 font-medium mr-1">Rekomendasi:</span>
@@ -539,20 +622,37 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           </div>
                           
                           <div className="flex gap-2 items-stretch">
-                            <input 
-                              className="flex-1 min-w-0 py-1.5 px-2 bg-white/5 border border-white/10 rounded-lg text-lg font-bold text-white focus:bg-white/10 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 transition-all outline-none text-center tracking-widest" 
-                              value={formData.accessCode ?? ''} 
-                              onChange={e => setFormData({...formData, accessCode: e.target.value})} 
-                              placeholder="XXXXXX" 
-                            />
-                            <button 
-                              type="button"
-                              onClick={() => setFormData({...formData, accessCode: Math.floor(100000 + Math.random() * 900000).toString()})}
-                              className="shrink-0 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap flex items-center justify-center"
-                            >
-                              Buat PIN
-                            </button>
-                          </div>
+                             <input 
+                               className="flex-1 min-w-0 py-1.5 px-2 bg-white/5 border border-white/10 rounded-lg text-lg font-bold text-white focus:bg-white/10 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 transition-all outline-none text-center tracking-widest" 
+                               value={formData.accessCode ?? ''} 
+                               onChange={e => setFormData({...formData, accessCode: e.target.value})} 
+                               placeholder="XXXXXX" 
+                             />
+                             <button 
+                               type="button"
+                               onClick={() => {
+                                 const generated = Math.floor(100000 + Math.random() * 900000).toString();
+                                 setFormData({...formData, accessCode: generated});
+                                 toast.success(`PIN Baru Berhasil Dibuat: ${generated}`);
+                               }}
+                               className="shrink-0 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap flex items-center justify-center gap-1"
+                             >
+                               Buat PIN
+                             </button>
+
+                             {formData.accessCode && formData.phone && (
+                               <a
+                                 href={`https://wa.me/${formData.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Halo Bpk/Ibu ${formData.headOfFamily || 'Warga'}, berikut PIN Aktivasi Akun Teras Warga RT 02 Anda: *${formData.accessCode}*. Silakan gunakan untuk login.`)}`}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="shrink-0 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1"
+                                 title="Kirim PIN ke WhatsApp Warga"
+                               >
+                                 <Send size={13} />
+                                 <span>WA</span>
+                               </a>
+                             )}
+                           </div>
                        </div>
 
                        {/* Option to generate mutation log (enabled only during edit of occupied house) */}
@@ -580,7 +680,6 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                 </div>
               </motion.div>
             )}
-
             {activeFormTab === 'demographics' && (
               <motion.div 
                 key="demographics"
@@ -589,6 +688,51 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
+                {/* 1. Live Demographics Summary Cards Header */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-[#eef2ff] border border-indigo-150 p-3 rounded-xl flex items-center gap-3">
+                    <div className="w-9 h-9 bg-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
+                      👶 {formData.babyCount || 0}
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Bayi / Balita</p>
+                      <p className="text-xs font-black text-indigo-950">{(formData.babyCount || 0) + (formData.toddlerCount || 0)} Jiwa</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#f0fdf4] border border-emerald-150 p-3 rounded-xl flex items-center gap-3">
+                    <div className="w-9 h-9 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
+                      👵 {formData.elderlyCount || 0}
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lansia</p>
+                      <p className="text-xs font-black text-emerald-950">{formData.elderlyCount || 0} Jiwa</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#fff7ed] border border-amber-150 p-3 rounded-xl flex items-center gap-3">
+                    <div className="w-9 h-9 bg-amber-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
+                      ♿ {formData.disabilityCount || (formData.isDisability ? 1 : 0)}
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Disabilitas</p>
+                      <p className="text-xs font-black text-amber-950">{formData.isDisability ? 'Terdata' : 'Nihil'}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#fdf2f8] border border-pink-150 p-3 rounded-xl flex items-center gap-3">
+                    <div className="w-9 h-9 bg-pink-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
+                      🎗️
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Bansos</p>
+                      <p className="text-xs font-black text-pink-950">
+                        {formData.isPKH || formData.isBLT || formData.isBPNT ? 'Penerima' : 'Non-Bansos'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
                   <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-slate-100">
                     <div className="w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-705">
@@ -665,7 +809,21 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         <select 
                           className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer" 
                           value={formData.economicStatus ?? ''} 
-                          onChange={e => setFormData({...formData, economicStatus: e.target.value as any})}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (val === 'Pra-Sejahtera') {
+                              setFormData({
+                                ...formData, 
+                                economicStatus: val as any,
+                                isPKH: true,
+                                isBLT: true,
+                                isBPNT: true
+                              });
+                              toast.info('Rekomendasi Bansos (PKH, BLT, BPNT) otomatis diaktifkan untuk status Pra-Sejahtera.');
+                            } else {
+                              setFormData({...formData, economicStatus: val as any});
+                            }
+                          }}
                         >
                           <option value="Pra-Sejahtera">Pra-Sejahtera (Subsidi)</option>
                           <option value="Sejahtera">Sejahtera</option>
@@ -683,6 +841,14 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         onChange={(v: any) => setFormData({...formData, vehicleCount: parseInt(v) || 0})} 
                       />
                     </div>
+
+                    {/* 3. Cross-Field Smart Warning for Pra-Sejahtera vs Vehicles */}
+                    {formData.economicStatus === 'Pra-Sejahtera' && (formData.vehicleCount || 0) > 3 && (
+                      <div className="md:col-span-12 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs font-bold text-amber-800">
+                        <AlertCircle size={15} className="text-amber-600 shrink-0" />
+                        <span>💡 Catatan Verifikasi: Jumlah kendaraan ({formData.vehicleCount}) relatif tinggi untuk status Pra-Sejahtera. Mohon periksa kembali.</span>
+                      </div>
+                    )}
 
                     <div className="md:col-span-4">
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Perkawinan</label>
@@ -743,22 +909,37 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div className="md:col-span-6 flex items-center gap-3 bg-slate-50/50 p-4 border border-slate-200 rounded-xl">
-                      <input 
-                        type="checkbox"
-                        id="rondaExempt"
-                        className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                        checked={formData.rondaExempt || false}
-                        onChange={e => setFormData({...formData, rondaExempt: e.target.checked})}
-                      />
-                      <div className="flex-1">
-                        <label htmlFor="rondaExempt" className="block text-xs font-bold text-slate-800 cursor-pointer select-none">
-                          Bebas Tugas Siskamling (Dispensasi)
-                        </label>
-                        <p className="text-[10px] text-slate-500 mt-0.5 leading-tight select-none">
-                          Penghuni dibebaskan dari kewajiban ronda malam (Lansia, Sakit, atau Jabatan Khusus).
-                        </p>
+                    <div className="md:col-span-6 space-y-2">
+                      <div className="flex items-center gap-3 bg-slate-50/50 p-4 border border-slate-200 rounded-xl">
+                        <input 
+                          type="checkbox"
+                          id="rondaExempt"
+                          className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          checked={formData.rondaExempt || false}
+                          onChange={e => setFormData({...formData, rondaExempt: e.target.checked})}
+                        />
+                        <div className="flex-1">
+                          <label htmlFor="rondaExempt" className="block text-xs font-bold text-slate-800 cursor-pointer select-none">
+                            Bebas Tugas Siskamling (Dispensasi)
+                          </label>
+                          <p className="text-[10px] text-slate-500 mt-0.5 leading-tight select-none">
+                            Penghuni dibebaskan dari kewajiban ronda malam (Lansia, Sakit, atau Dinas).
+                          </p>
+                        </div>
                       </div>
+
+                      {/* 2. Interactive Ronda Exemption Reason Input */}
+                      {formData.rondaExempt && (
+                        <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl">
+                          <label className="block text-[11px] font-bold text-indigo-900 mb-1">Alasan Dispensasi Ronda</label>
+                          <input 
+                            placeholder="Misal: Lansia usia >60th, Sakit Kronis, Tugas Dinas Shift Malam..."
+                            className="w-full px-2.5 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs font-medium text-slate-800 focus:ring-1 focus:ring-indigo-400 outline-none"
+                            value={formData.rondaExemptReason ?? ''}
+                            onChange={e => setFormData({...formData, rondaExemptReason: e.target.value})}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <div className="md:col-span-3">
@@ -896,15 +1077,25 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                  <div className="md:col-span-7 bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
-                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-                       <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-700">
-                         <DollarSign size={14} />
-                       </div>
-                       <div>
-                         <h3 className="text-sm font-bold text-slate-800">Perlindungan Sosial</h3>
-                         <p className="text-[10px] text-slate-400">Keikutsertaan program bantuan pemerintah</p>
-                       </div>
+                  <div className="md:col-span-12 bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-700">
+                          <DollarSign size={14} />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-slate-800">Perlindungan Sosial & Kelayakan Subsidi</h3>
+                          <p className="text-[10px] text-slate-400">Keikutsertaan program bantuan pemerintah</p>
+                        </div>
+                      </div>
+
+                      {/* 1. Bansos Eligibility Calculator Badge */}
+                      {formData.economicStatus === 'Pra-Sejahtera' && (
+                        <div className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-full text-[10px] font-bold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                          <span>🟢 Layak Memperoleh Subsidi RT & Bansos Pemerintah</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -943,53 +1134,6 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                        </AnimatePresence>
                     </div>
                   </div>
-
-                  <div className="md:col-span-5 bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
-                     <div className="flex items-center gap-1.5 mb-4 pb-3 border-b border-slate-100">
-                       <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-700">
-                         <Heart size={14} />
-                       </div>
-                       <div>
-                         <h3 className="text-sm font-bold text-slate-800">Kesehatan</h3>
-                         <p className="text-[10px] text-slate-400">Proteksi medis & BPJS</p>
-                       </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Kategori BPJS</label>
-                        <div className="relative">
-                          <select 
-                            className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-850 outline-none focus:ring-1 focus:ring-indigo-100 transition-all appearance-none pr-8 cursor-pointer" 
-                            value={formData.bpjsStatus} 
-                            onChange={e => setFormData({...formData, bpjsStatus: e.target.value as any})}
-                          >
-                            <option value="Tidak Ada">Belum Terdaftar</option>
-                            <option value="PPU">PPU (Pekerja)</option>
-                            <option value="PBPU">PBPU (Mandiri)</option>
-                            <option value="PBI">PBI (Pemerintah)</option>
-                          </select>
-                          <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Vaksinasi</label>
-                        <div className="relative">
-                          <select 
-                            className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-850 outline-none focus:ring-1 focus:ring-indigo-100 transition-all appearance-none pr-8 cursor-pointer" 
-                            value={formData.vaccinationStatus} 
-                            onChange={e => setFormData({...formData, vaccinationStatus: e.target.value as any})}
-                          >
-                            <option value="Belum">Belum Terdata</option>
-                            <option value="Dosis 1">Dosis 1</option>
-                            <option value="Dosis 2">Dosis 2</option>
-                            <option value="Booster">Booster</option>
-                          </select>
-                          <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </motion.div>
             )}
@@ -1011,25 +1155,60 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <h3 className="text-sm font-bold text-slate-800">Anggota Keluarga</h3>
                       <p className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        {formData.familyMembers.length} Personel Terdaftar
+                        {/* 4. Live Occupants Summary Badge */}
+                        <span className="font-bold text-slate-700">1 Kepala Keluarga + {formData.familyMembers.length} Anggota = {formData.familyMembers.length + 1} Jiwa Penghuni</span>
                       </p>
                     </div>
                   </div>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      const newMembers = [...formData.familyMembers, { id: Math.random().toString(36).substr(2, 9), name: '', relation: 'Anak', nik: '', birthDate: '', gender: 'Laki-laki', job: '' }];
-                      setFormData({
-                        ...formData, 
-                        familyMembers: newMembers,
-                        occupants: newMembers.length + 1 // Auto update occupants
-                      });
-                    }}
-                    className="w-full sm:w-auto px-4 py-2 bg-[#0f172a] hover:bg-slate-800 text-white rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs"
-                  >
-                    <UserPlus size={13} />
-                    <span>Tambah Anggota</span>
-                  </button>
+
+                  {/* 2. Fast-Add Preset Buttons */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                      { label: '+ Istri', relation: 'Istri', gender: 'Perempuan' },
+                      { label: '+ Anak', relation: 'Anak', gender: 'Laki-laki' },
+                      { label: '+ Ortu', relation: 'Orang Tua', gender: 'Perempuan' }
+                    ].map((btn) => (
+                      <button
+                        key={btn.label}
+                        type="button"
+                        onClick={() => {
+                          const newMembers = [...formData.familyMembers, { 
+                            id: Math.random().toString(36).substr(2, 9), 
+                            name: '', 
+                            relation: btn.relation, 
+                            nik: '', 
+                            birthDate: '', 
+                            gender: btn.gender, 
+                            job: '' 
+                          }];
+                          setFormData({
+                            ...formData, 
+                            familyMembers: newMembers,
+                            occupants: newMembers.length + 1
+                          });
+                        }}
+                        className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg font-bold text-[10px] transition-all"
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const newMembers = [...formData.familyMembers, { id: Math.random().toString(36).substr(2, 9), name: '', relation: 'Anak', nik: '', birthDate: '', gender: 'Laki-laki', job: '' }];
+                        setFormData({
+                          ...formData, 
+                          familyMembers: newMembers,
+                          occupants: newMembers.length + 1
+                        });
+                      }}
+                      className="w-full sm:w-auto px-4 py-2 bg-[#0f172a] hover:bg-slate-800 text-white rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <UserPlus size={13} />
+                      <span>Tambah Anggota</span>
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
@@ -1139,8 +1318,34 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               placeholder="16 Digit NIK" 
                               value={member.nik}
                               onChange={(v: any) => {
+                                const cleanNik = String(v).replace(/[^0-9]/g, '');
                                 const newMembers = [...formData.familyMembers];
-                                newMembers[idx].nik = v;
+                                newMembers[idx].nik = cleanNik;
+                                
+                                // Auto-extract Gender & Date of birth from Indonesian 16-digit NIK
+                                if (cleanNik.length === 16) {
+                                  const dayCode = parseInt(cleanNik.substring(6, 8), 10);
+                                  const monthCode = parseInt(cleanNik.substring(8, 10), 10);
+                                  const yearCode = parseInt(cleanNik.substring(10, 12), 10);
+
+                                  let isFemale = false;
+                                  let birthDay = dayCode;
+                                  if (dayCode > 40) {
+                                    isFemale = true;
+                                    birthDay = dayCode - 40;
+                                  }
+
+                                  const currentYearShort = parseInt(new Date().getFullYear().toString().substring(2), 10);
+                                  const fullYear = yearCode > currentYearShort ? 1900 + yearCode : 2000 + yearCode;
+                                  
+                                  if (birthDay >= 1 && birthDay <= 31 && monthCode >= 1 && monthCode <= 12) {
+                                    const formattedMonth = String(monthCode).padStart(2, '0');
+                                    const formattedDay = String(birthDay).padStart(2, '0');
+                                    newMembers[idx].gender = isFemale ? 'Perempuan' : 'Laki-laki';
+                                    newMembers[idx].birthDate = `${fullYear}-${formattedMonth}-${formattedDay}`;
+                                  }
+                                }
+
                                 setFormData({...formData, familyMembers: newMembers});
                               }}
                               maxLength={16}
@@ -1153,7 +1358,28 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               onChange={(v: any) => {
                                 const newMembers = [...formData.familyMembers];
                                 newMembers[idx].birthDate = v;
-                                setFormData({...formData, familyMembers: newMembers});
+                                
+                                // Auto recalculate vulnerability demographics counters
+                                let babies = 0;
+                                let toddlers = 0;
+                                let elderly = 0;
+                                
+                                newMembers.forEach(m => {
+                                  if (m.birthDate) {
+                                    const age = new Date().getFullYear() - new Date(m.birthDate).getFullYear();
+                                    if (age <= 1) babies++;
+                                    else if (age <= 5) toddlers++;
+                                    else if (age >= 60) elderly++;
+                                  }
+                                });
+
+                                setFormData({
+                                  ...formData, 
+                                  familyMembers: newMembers,
+                                  babyCount: babies,
+                                  toddlerCount: toddlers,
+                                  elderlyCount: elderly
+                                });
                               }}
                             />
                           </div>

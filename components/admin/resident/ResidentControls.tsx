@@ -64,12 +64,9 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
     { id: 'map', icon: MapPin, label: 'Peta' },
     { id: 'mutations', icon: FileClock, label: 'Mutasi' },
     { id: 'requests', icon: FileEdit, label: 'Update' },
-    { id: 'health', icon: Activity, label: 'Posyandu' },
-    { id: 'guests', icon: ShieldAlert, label: 'Tamu' },
-    { id: 'officials', icon: Briefcase, label: 'Pengurus' },
     { id: 'registrations', 
       icon: UserPlus, 
-      label: 'Antrean', 
+      label: 'Antrean Registrasi', 
       badge: residentRegistrations.filter(r => r.approvalStatus === 'Pending').length 
     }
   ];

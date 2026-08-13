@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, User, Phone, MapPin, Briefcase, Upload, AlertTriangle } from 'lucide-react';
+import { Plus, Edit2, Trash2, User, Phone, MapPin, Briefcase, Upload, AlertTriangle, MessageCircle, Printer, LayoutGrid, Network, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { Official, House } from '../../types';
+import { generateOfficialStructurePDF } from '../../services/pdfService';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel, handleFirestoreError, OperationType, isFirebaseConfigured } from '../../services/databaseService';
@@ -31,6 +32,9 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
   const [imageType, setImageType] = useState<'upload' | 'link'>('upload');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const [viewMode, setViewMode] = useState<'cards' | 'tree'>('cards');
+  const [expandedOfficialId, setExpandedOfficialId] = useState<string | null>(null);
 
   const resetForms = () => {
     setOffName('');
@@ -141,9 +145,37 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Struktur Kepengurusan RT 02</h2>
           <p className="text-slate-500 font-medium mt-1">Kelola data struktur organisasi, pembagian seksi, dan keanggotaan aktif Rukun Tetangga.</p>
         </div>
-        <Button onClick={() => { resetForms(); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all hover:scale-105 active:scale-95">
-          <Plus size={18} className="mr-2"/> Tambah Personil
-        </Button>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex bg-white p-1 border border-slate-200 rounded-2xl shadow-xs">
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                viewMode === 'cards' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <LayoutGrid size={14} /> Kartu Personil
+            </button>
+            <button
+              onClick={() => setViewMode('tree')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                viewMode === 'tree' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Network size={14} /> Hirarki Org-Chart
+            </button>
+          </div>
+
+          <button
+            onClick={() => generateOfficialStructurePDF(officials)}
+            className="flex items-center gap-2 px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all active:scale-95"
+          >
+            <Printer size={14} /> Cetak SK / Struktur RT
+          </button>
+
+          <Button onClick={() => { resetForms(); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all hover:scale-105 active:scale-95">
+            <Plus size={18} className="mr-2"/> Tambah Personil
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards Section */}
@@ -184,73 +216,161 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <AnimatePresence mode="popLayout">
-          {officials.map((o: Official) => { 
-            const isChairman = o.role.toLowerCase().includes('ketua'); 
-            return (
-              <motion.div 
-                key={o.id} 
-                variants={itemVariants}
-                layout
-                className="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 relative"
-              >
-                <div className={`h-28 relative ${isChairman ? 'bg-gradient-to-br from-violet-600 to-indigo-600' : 'bg-slate-800'}`}>
-                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                  <div className="absolute top-4 right-4">
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button onClick={() => handleEditOfficial(o)} className="p-2 bg-white/20 hover:bg-white text-white hover:text-indigo-600 rounded-xl backdrop-blur-sm transition-all shadow-sm"><Edit2 size={14}/></button>
-                      <button onClick={() => handleDeleteOfficial(o.id)} className="p-2 bg-white/20 hover:bg-rose-500 text-white rounded-xl backdrop-blur-sm transition-all shadow-sm"><Trash2 size={14}/></button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="absolute top-14 left-1/2 -translate-x-1/2">
-                  <div className="p-1.5 bg-white rounded-2xl shadow-lg rotate-3 group-hover:rotate-0 transition-transform duration-300">
-                    <img 
-                      src={o.photo || `https://ui-avatars.com/api/?name=${o.name}&background=random&size=128`} 
-                      className="w-20 h-20 rounded-xl object-cover bg-slate-100" 
-                      alt={o.name}
-                    />
-                  </div>
-                </div>
+      {viewMode === 'tree' ? (
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-150 shadow-xs space-y-8">
+          <div className="text-center max-w-xl mx-auto">
+            <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest rounded-full">Struktur Bagan Eksekutif</span>
+            <h3 className="text-xl font-black text-slate-900 mt-2">Bagan Hirarki Pengurus RT 02</h3>
+            <p className="text-xs text-slate-500 font-medium">Susunan kepengurusan mufakat warga periode berlangsung</p>
+          </div>
 
-                <div className="pt-16 pb-6 px-6 text-center mt-2">
-                  <h3 className="font-black text-slate-800 text-lg mb-1 group-hover:text-indigo-600 transition-colors">{o.name}</h3>
-                  <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 ${isChairman ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
-                    <Briefcase size={10} /> {o.role}
-                  </div>
-                  
-                  <div className="space-y-2 text-left bg-slate-50/50 p-4 rounded-2xl border border-slate-50">
-                    <div className="flex items-center gap-3 text-sm text-slate-600">
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 shrink-0">
-                        <Phone size={14} />
+          {/* Org Chart Top Tier: Ketua RT */}
+          <div className="flex flex-col items-center">
+            {officials.filter(o => o.role.toLowerCase().includes('ketua') && !o.role.toLowerCase().includes('wakil')).map(chairman => (
+              <div key={chairman.id} className="p-5 bg-gradient-to-br from-indigo-600 to-violet-700 text-white rounded-3xl shadow-xl w-72 text-center relative">
+                <img 
+                  src={chairman.photo || `https://ui-avatars.com/api/?name=${chairman.name}&background=random&size=128`}
+                  className="w-16 h-16 rounded-2xl mx-auto object-cover border-2 border-white/40 mb-3"
+                  alt={chairman.name}
+                />
+                <h4 className="font-black text-base">{chairman.name}</h4>
+                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mt-0.5">{chairman.role}</p>
+                <p className="text-[11px] text-indigo-100 font-semibold mt-2 flex items-center justify-center gap-1">
+                  <MapPin size={12} /> {getHouseDisplayLabel(chairman.houseId, houses)}
+                </p>
+              </div>
+            ))}
+            <div className="w-0.5 h-8 bg-indigo-300"></div>
+          </div>
+
+          {/* Org Chart Tier 2: Sekretaris & Bendahara */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {officials.filter(o => !o.role.toLowerCase().includes('ketua') || o.role.toLowerCase().includes('wakil')).map(officer => (
+              <div key={officer.id} className="p-5 bg-slate-50 border border-slate-200 rounded-3xl text-center hover:border-indigo-300 transition-all">
+                <img 
+                  src={officer.photo || `https://ui-avatars.com/api/?name=${officer.name}&background=random&size=128`}
+                  className="w-14 h-14 rounded-2xl mx-auto object-cover border border-slate-200 mb-3"
+                  alt={officer.name}
+                />
+                <h4 className="font-black text-slate-800 text-sm">{officer.name}</h4>
+                <span className="inline-block px-2.5 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-black uppercase tracking-widest rounded-full mt-1">
+                  {officer.role}
+                </span>
+                <p className="text-xs text-slate-500 font-semibold mt-2 flex items-center justify-center gap-1">
+                  <MapPin size={12} /> {getHouseDisplayLabel(officer.houseId, houses)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <AnimatePresence mode="popLayout">
+            {officials.map((o: Official) => { 
+              const isChairman = o.role.toLowerCase().includes('ketua'); 
+              const isExpanded = expandedOfficialId === o.id;
+
+              return (
+                <motion.div 
+                  key={o.id} 
+                  variants={itemVariants}
+                  layout
+                  className="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 relative flex flex-col justify-between"
+                >
+                  <div>
+                    <div className={`h-28 relative ${isChairman ? 'bg-gradient-to-br from-violet-600 to-indigo-600' : 'bg-slate-800'}`}>
+                      <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                      <div className="absolute top-4 right-4">
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <button onClick={() => handleEditOfficial(o)} className="p-2 bg-white/20 hover:bg-white text-white hover:text-indigo-600 rounded-xl backdrop-blur-sm transition-all shadow-sm"><Edit2 size={14}/></button>
+                          <button onClick={() => handleDeleteOfficial(o.id)} className="p-2 bg-white/20 hover:bg-rose-500 text-white rounded-xl backdrop-blur-sm transition-all shadow-sm"><Trash2 size={14}/></button>
+                        </div>
                       </div>
-                      <span className="font-medium truncate">{o.phone || '-'}</span>
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-slate-600">
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 shrink-0">
-                        <MapPin size={14} />
+                    
+                    <div className="absolute top-14 left-1/2 -translate-x-1/2">
+                      <div className="p-1.5 bg-white rounded-2xl shadow-lg rotate-3 group-hover:rotate-0 transition-transform duration-300">
+                        <img 
+                          src={o.photo || `https://ui-avatars.com/api/?name=${o.name}&background=random&size=128`} 
+                          className="w-20 h-20 rounded-xl object-cover bg-slate-100" 
+                          alt={o.name}
+                        />
                       </div>
-                      <span className="font-medium truncate">{getHouseDisplayLabel(o.houseId, houses)}</span>
+                    </div>
+
+                    <div className="pt-16 pb-4 px-6 text-center mt-2">
+                      <h3 className="font-black text-slate-800 text-lg mb-1 group-hover:text-indigo-600 transition-colors">{o.name}</h3>
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 ${isChairman ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
+                        <Briefcase size={10} /> {o.role}
+                      </div>
+                      
+                      <div className="space-y-2 text-left bg-slate-50/50 p-4 rounded-2xl border border-slate-50">
+                        <div className="flex items-center justify-between text-sm text-slate-600">
+                          <div className="flex items-center gap-3 truncate">
+                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 shrink-0">
+                              <Phone size={14} />
+                            </div>
+                            <span className="font-medium truncate">{o.phone || '-'}</span>
+                          </div>
+                          {o.phone && o.phone !== '-' && (
+                            <a
+                              href={`https://wa.me/${o.phone.replace(/[^0-9]/g, '')}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                              title="Kirim WhatsApp Direct"
+                            >
+                              <MessageCircle size={14} />
+                            </a>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-slate-600">
+                          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 shrink-0">
+                            <MapPin size={14} />
+                          </div>
+                          <span className="font-medium truncate">{getHouseDisplayLabel(o.houseId, houses)}</span>
+                        </div>
+                      </div>
+
+                      {/* Duty List Drawer Toggle */}
+                      {o.duties && o.duties.length > 0 && (
+                        <div className="mt-3">
+                          <button
+                            onClick={() => setExpandedOfficialId(isExpanded ? null : o.id)}
+                            className="w-full py-2 px-3 bg-slate-100/70 hover:bg-slate-100 text-slate-600 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center justify-between transition-colors"
+                          >
+                            <span>Job Desk ({o.duties.length} Tugas)</span>
+                            <ChevronDown size={14} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                          {isExpanded && (
+                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-2 text-left space-y-1.5 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 text-xs font-semibold text-indigo-900">
+                              {o.duties.map((duty, idx) => (
+                                <p key={idx} className="flex items-start gap-1.5">
+                                  <CheckCircle2 size={12} className="text-indigo-600 mt-0.5 shrink-0" />
+                                  <span>{duty}</span>
+                                </p>
+                              ))}
+                            </motion.div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ); 
-          })}
-        </AnimatePresence>
-        
-        {officials.length === 0 && (
-          <motion.div key="empty-officials" variants={itemVariants} className="col-span-full py-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-300 mx-auto mb-4 shadow-sm">
-              <User size={32} />
-            </div>
-            <p className="text-slate-400 font-bold">Belum ada data pengurus.</p>
-            <button onClick={() => setIsModalOpen(true)} className="mt-4 text-xs font-black text-indigo-600 uppercase tracking-widest hover:underline">Tambah Sekarang</button>
-          </motion.div>
-        )}
-      </div>
+                </motion.div>
+              ); 
+            })}
+          </AnimatePresence>
+        </div>
+      )}
+          {officials.length === 0 && (
+            <motion.div key="empty-officials" variants={itemVariants} className="col-span-full py-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-300 mx-auto mb-4 shadow-sm">
+                <User size={32} />
+              </div>
+              <p className="text-slate-400 font-bold">Belum ada data pengurus.</p>
+              <button onClick={() => setIsModalOpen(true)} className="mt-4 text-xs font-black text-indigo-600 uppercase tracking-widest hover:underline">Tambah Sekarang</button>
+            </motion.div>
+          )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingOfficialId ? "Edit Pengurus" : "Tambah Pengurus Baru"}>
         <form onSubmit={handleSaveOfficial} className="space-y-5">

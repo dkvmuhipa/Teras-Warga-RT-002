@@ -21,6 +21,7 @@ interface ServiceManagerProps {
   pdfConfig: PdfConfig;
   setPdfConfig: (config: PdfConfig) => void;
   onDeleteReport?: (id: string) => void;
+  initialTab?: 'letters' | 'reports' | 'official-letters' | 'letter-archive' | 'settings';
 }
 
 export const ServiceManager: React.FC<ServiceManagerProps> = ({ 
@@ -29,9 +30,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   houses,
   pdfConfig, 
   setPdfConfig,
-  onDeleteReport
+  onDeleteReport,
+  initialTab = 'letters'
 }) => {
-  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'official-letters' | 'letter-archive' | 'settings'>('letters');
+  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'official-letters' | 'letter-archive' | 'settings'>(initialTab);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showArchived, setShowArchived] = useState(false);
@@ -705,8 +707,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Layanan & Aduan</h2>
-          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">Pusat pengelolaan surat pengantar dan laporan warga secara transparan dan responsif.</p>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            {initialTab === 'reports' ? 'Aspirasi & Pengaduan Warga' : 'Persuratan RT'}
+          </h2>
+          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">
+            {initialTab === 'reports' 
+              ? 'Pusat pengawasan, penanganan keluhan, dan aspirasi warga RT 02.'
+              : 'Pusat pengelolaan surat pengantar warga, surat himbauan resmi, dan dokumen keluar.'}
+          </p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -760,65 +768,56 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             </button>
           )}
 
-          <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200/50 shadow-inner overflow-x-auto no-scrollbar w-full md:w-auto">
-            <div className="flex min-w-max w-full">
-              <button 
-                onClick={() => setActiveTab('letters')} 
-                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                  activeTab === 'letters' 
-                    ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                }`}
-              >
-                <FileText size={14} className="sm:w-4 sm:h-4" />
-                <span>Surat ({letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length})</span>
-              </button>
-              <button 
-                onClick={() => setActiveTab('reports')} 
-                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                  activeTab === 'reports' 
-                    ? 'bg-white text-rose-600 shadow-md ring-1 ring-black/5' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                }`}
-              >
-                <AlertTriangle size={14} className="sm:w-4 sm:h-4" />
-                <span>Aspirasi & Pengaduan ({reports.filter(r => r.status === 'Baru').length})</span>
-              </button>
-              <button 
-                onClick={() => setActiveTab('official-letters')} 
-                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                  activeTab === 'official-letters' 
-                    ? 'bg-white text-amber-600 shadow-md ring-1 ring-black/5' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                }`}
-              >
-                <FileText size={14} className="sm:w-4 sm:h-4" />
-                <span>Surat Resmi</span>
-              </button>
-              <button 
-                onClick={() => setActiveTab('letter-archive')} 
-                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                  activeTab === 'letter-archive' 
-                    ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                }`}
-              >
-                <Archive size={14} className="sm:w-4 sm:h-4" />
-                <span>Arsip Surat</span>
-              </button>
-              <button 
-                onClick={() => setActiveTab('settings')} 
-                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
-                  activeTab === 'settings' 
-                    ? 'bg-white text-slate-800 shadow-md ring-1 ring-black/5' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                }`}
-              >
-                <Settings size={14} className="sm:w-4 sm:h-4" />
-                <span>Pengaturan</span>
-              </button>
+          {initialTab !== 'reports' && (
+            <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200/50 shadow-inner overflow-x-auto no-scrollbar w-full md:w-auto">
+              <div className="flex min-w-max w-full">
+                <button 
+                  onClick={() => setActiveTab('letters')} 
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                    activeTab === 'letters' 
+                      ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  <FileText size={14} className="sm:w-4 sm:h-4" />
+                  <span>Surat Pengantar ({letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length})</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('official-letters')} 
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                    activeTab === 'official-letters' 
+                      ? 'bg-white text-amber-600 shadow-md ring-1 ring-black/5' 
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  <FileText size={14} className="sm:w-4 sm:h-4" />
+                  <span>Surat Resmi</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('letter-archive')} 
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                    activeTab === 'letter-archive' 
+                      ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  <Archive size={14} className="sm:w-4 sm:h-4" />
+                  <span>Arsip Surat</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('settings')} 
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                    activeTab === 'settings' 
+                      ? 'bg-white text-slate-800 shadow-md ring-1 ring-black/5' 
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  <Settings size={14} className="sm:w-4 sm:h-4" />
+                  <span>Pengaturan Kop</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -2443,6 +2442,46 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               </div>
               
               <div className="space-y-4">
+                <div className="group">
+                  <label className="block text-[10px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5 ml-1 flex items-center gap-1">
+                    <UserCheck size={12} /> Pilih Warga Terdaftar (Auto-Fill Fast Select)
+                  </label>
+                  <select
+                    className="w-full p-3.5 bg-indigo-50/50 border border-indigo-200 rounded-2xl text-xs font-bold text-indigo-900 focus:bg-white outline-none cursor-pointer"
+                    onChange={(e) => {
+                      const houseId = e.target.value;
+                      if (!houseId) return;
+                      const targetHouse = houses.find(h => h.id === houseId);
+                      if (targetHouse) {
+                        setAdminForm({
+                          ...adminForm,
+                          applicantName: targetHouse.headOfFamily || '',
+                          nik: targetHouse.nik || '',
+                          familyHeadName: targetHouse.ownerName || targetHouse.headOfFamily || '',
+                          houseId: `${targetHouse.block}-${targetHouse.number}`,
+                          currentAddress: `Kavling Blok ${targetHouse.block} No. ${targetHouse.number}`,
+                          phone: targetHouse.phone || '',
+                          birthPlace: targetHouse.birthPlace || '',
+                          birthDate: targetHouse.birthDate || '',
+                          gender: targetHouse.gender || 'Laki-laki',
+                          religion: targetHouse.religion || 'Islam',
+                          job: targetHouse.jobCategory || '',
+                          maritalStatus: targetHouse.maritalStatus || 'Belum Kawin',
+                          addressKtp: targetHouse.addressKtp || `Blok ${targetHouse.block}-${targetHouse.number} RT 02`
+                        });
+                        toast.success(`Data warga ${targetHouse.headOfFamily} (Blok ${targetHouse.block}-${targetHouse.number}) otomatis terisi!`);
+                      }
+                    }}
+                  >
+                    <option value="">-- Pilih dari Daftar Warga RT 02 --</option>
+                    {houses.map(h => (
+                      <option key={h.id} value={h.id}>
+                        {h.headOfFamily} - Blok {h.block}-{h.number} ({h.phone || 'No HP -'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="group">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Lengkap</label>
                   <input 

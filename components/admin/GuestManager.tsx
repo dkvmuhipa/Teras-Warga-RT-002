@@ -1,11 +1,14 @@
-import React from 'react';
-import { ShieldAlert, User, Calendar, Clock, Phone, Trash2, CheckCircle, ExternalLink, MapPin, History, Info, FileText, Car, UserCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldAlert, User, Calendar, Clock, Phone, Trash2, CheckCircle, ExternalLink, MapPin, History, Info, FileText, Car, UserCheck, Download, Plus, X, FileUp } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { updateGuestReportStatus, deleteGuestReportFromDb } from '../../services/databaseService';
+import { updateGuestReportStatus, deleteGuestReportFromDb, addGuestReportToDb } from '../../services/databaseService';
 import { GuestReport, PdfConfig } from '../../types';
 import { generateGuestReportPDF } from '../../services/pdfService';
+import { generateGuestReportExcel } from '../../services/excelService';
 import { ConfirmModal } from '../ui/ConfirmModal';
+import { Modal } from '../ui/Modal';
+import { toast } from 'sonner';
 
 interface GuestManagerProps {
   guestReports: GuestReport[];
@@ -28,8 +31,57 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
     type: 'warning'
   });
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    guestName: '',
+    phone: '',
+    residentName: '',
+    residentHouseId: '',
+    relationship: 'Kerabat / Saudara',
+    stayDuration: '1 Hari',
+    arrivalDate: new Date().toISOString().split('T')[0],
+    departureDate: '',
+    guestAddress: '',
+    purpose: 'Silaturahmi Keluarga'
+  });
+
   const activeGuests = guestReports.filter(g => g.status === 'Active');
   const departedGuests = guestReports.filter(g => g.status === 'Departed');
+
+  const handleAddGuestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addFormData.guestName || !addFormData.residentHouseId) {
+      toast.error('Mohon lengkapi Nama Tamu dan Rumah Tujuan!');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await addGuestReportToDb({
+        ...addFormData,
+        status: 'Active',
+        createdAt: new Date().toISOString()
+      });
+      toast.success('Laporan Tamu Wajib Lapor berhasil dicatat!');
+      setIsAddModalOpen(false);
+      setAddFormData({
+        guestName: '',
+        phone: '',
+        residentName: '',
+        residentHouseId: '',
+        relationship: 'Kerabat / Saudara',
+        stayDuration: '1 Hari',
+        arrivalDate: new Date().toISOString().split('T')[0],
+        departureDate: '',
+        guestAddress: '',
+        purpose: 'Silaturahmi Keluarga'
+      });
+    } catch (error) {
+      toast.error('Gagal mencatat tamu baru.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleStatusUpdate = async (id: string, status: 'Active' | 'Departed') => {
     setConfirmDialog({
@@ -56,23 +108,75 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Manajemen Tamu</h2>
-          <p className="text-slate-500 font-medium">Pantau tamu yang menginap di lingkungan RT 02</p>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Manajemen Wajib Lapor Tamu 24 Jam</h2>
+          <p className="text-slate-500 font-medium text-xs mt-0.5">Pemantauan & pengawasan tamu yang menginap di lingkungan RT 02 demi keamanan wilayah.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
-            onClick={() => generateGuestReportPDF(guestReports, pdfConfig)}
-            className="flex items-center gap-2"
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            onClick={() => generateGuestReportExcel(guestReports)}
+            className="flex items-center gap-2 px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-all active:scale-95"
           >
-            <ExternalLink size={16} /> Cetak Laporan
-          </Button>
-          <div className="px-4 py-2 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100 flex items-center gap-2">
-            <ShieldAlert size={16} />
-            <span className="text-xs font-black uppercase tracking-widest">{activeGuests.length} Tamu Aktif</span>
+            <Download size={14} /> Ekspor Excel
+          </button>
+          <button 
+            onClick={() => generateGuestReportPDF(guestReports, pdfConfig)}
+            className="flex items-center gap-2 px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all active:scale-95"
+          >
+            <ExternalLink size={14} /> Ekspor PDF
+          </button>
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/20 transition-all active:scale-95"
+          >
+            <Plus size={16} /> Catat Tamu Baru
+          </button>
+        </div>
+      </div>
+
+      {/* Header Bento Stats Bar */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase text-rose-600 tracking-wider">Tamu Menginap Aktif</p>
+            <p className="text-2xl font-black text-slate-900 mt-1">{activeGuests.length} <span className="text-xs font-semibold text-slate-400">Orang</span></p>
+          </div>
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+            <ShieldAlert size={20} />
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">Tamu Sudah Pulang</p>
+            <p className="text-2xl font-black text-slate-900 mt-1">{departedGuests.length} <span className="text-xs font-semibold text-slate-400">Arsip</span></p>
+          </div>
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <UserCheck size={20} />
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase text-indigo-600 tracking-wider">Total Laporan Bulan Ini</p>
+            <p className="text-2xl font-black text-slate-900 mt-1">{guestReports.length} <span className="text-xs font-semibold text-slate-400">Laporan</span></p>
+          </div>
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+            <FileText size={20} />
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Proteksi Keamanan</p>
+            <p className="text-xs font-black text-emerald-600 mt-1 flex items-center gap-1">
+              <CheckCircle size={14} /> Terkendali 24 Jam
+            </p>
+          </div>
+          <div className="p-3 bg-slate-50 text-slate-600 rounded-2xl">
+            <UserCheck size={20} />
           </div>
         </div>
       </div>
@@ -139,8 +243,20 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
               </div>
             ))}
             {activeGuests.length === 0 && (
-              <div className="col-span-full py-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                <p className="text-slate-400 font-bold">Tidak ada tamu yang sedang menginap.</p>
+              <div className="col-span-full py-16 text-center bg-white rounded-[2.5rem] border border-slate-150 p-8 shadow-xs">
+                <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+                  <ShieldAlert size={32} />
+                </div>
+                <h4 className="font-black text-slate-900 text-base mb-1">Tidak Ada Tamu Yang Sedang Menginap</h4>
+                <p className="text-xs text-slate-400 font-semibold max-w-md mx-auto mb-4">
+                  Lingkungan RT 02 dalam kondisi aman dan terkendali. Tidak ada laporan tamu menginap aktif 24 jam saat ini.
+                </p>
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all"
+                >
+                  <Plus size={14} /> Catat Laporan Tamu Baru
+                </button>
               </div>
             )}
           </div>
@@ -396,6 +512,127 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
         message={confirmDialog.message}
         type={confirmDialog.type}
       />
+
+      {/* Modal Form Catat Tamu Baru (Admin) */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Pencatatan Wajib Lapor Tamu 24 Jam"
+      >
+        <form onSubmit={handleAddGuestSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Lengkap Tamu *</label>
+              <input 
+                type="text"
+                required
+                placeholder="Contoh: Ahmad Subagja"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                value={addFormData.guestName}
+                onChange={e => setAddFormData(prev => ({ ...prev, guestName: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">No. Telp / WhatsApp Tamu</label>
+              <input 
+                type="text"
+                placeholder="0812xxxxxxx"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                value={addFormData.phone}
+                onChange={e => setAddFormData(prev => ({ ...prev, phone: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">ID Kavling / Rumah Tujuan *</label>
+              <input 
+                type="text"
+                required
+                placeholder="Contoh: C5 atau C12"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                value={addFormData.residentHouseId}
+                onChange={e => setAddFormData(prev => ({ ...prev, residentHouseId: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Tuan Rumah (Warga)</label>
+              <input 
+                type="text"
+                placeholder="Nama pemilik rumah"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                value={addFormData.residentName}
+                onChange={e => setAddFormData(prev => ({ ...prev, residentName: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Hubungan</label>
+              <select
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                value={addFormData.relationship}
+                onChange={e => setAddFormData(prev => ({ ...prev, relationship: e.target.value }))}
+              >
+                <option value="Kerabat / Saudara">Kerabat / Saudara</option>
+                <option value="Teman / Rekan Kerja">Teman / Rekan Kerja</option>
+                <option value="Orang Tua / Keluarga Inti">Orang Tua / Keluarga Inti</option>
+                <option value="Tamu Kedinasan / Kerja">Tamu Kedinasan / Kerja</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Lama Menginap</label>
+              <input 
+                type="text"
+                placeholder="1-3 Hari"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                value={addFormData.stayDuration}
+                onChange={e => setAddFormData(prev => ({ ...prev, stayDuration: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tgl Kedatangan</label>
+              <input 
+                type="date"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                value={addFormData.arrivalDate}
+                onChange={e => setAddFormData(prev => ({ ...prev, arrivalDate: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Keperluan Kunjungan</label>
+            <textarea 
+              rows={2}
+              placeholder="Jelaskan secara singkat alasan kunjungan/menginap..."
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all resize-none"
+              value={addFormData.purpose}
+              onChange={e => setAddFormData(prev => ({ ...prev, purpose: e.target.value }))}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-[2] py-3.5 bg-rose-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all"
+            >
+              Simpan Laporan Tamu
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

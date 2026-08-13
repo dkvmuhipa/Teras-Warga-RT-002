@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House, PdfConfig } from '../../types';
 import { generatePopulationReportPDF, generateMutationReportPDF, generateSingleMutationCertificatePDF } from '../../services/pdfService';
-import { generatePopulationReportExcel } from '../../services/excelService';
+import { generatePopulationReportExcel, generateMutationReportExcel } from '../../services/excelService';
 import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction, markAllLogsBeforeDateAsGenerated, unmarkAllLogsBeforeDateAsGenerated, deletePopulationReportFromDb, addPopulationReportToDb } from '../../services/databaseService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { toast } from 'sonner';
@@ -11,7 +11,7 @@ import {
   Calendar, ArrowRight, Activity, Clock, Filter, Search, MapPin as MapIcon,
   BarChart3, PieChart as PieChartIcon, List, LayoutGrid, Download, Edit2,
   RefreshCw, Filter as FilterIcon, MessageCircle, CheckSquare, Square,
-  FileUp, CheckCircle, XCircle, AlertCircle, Printer, ChevronLeft, ChevronRight, Check
+  FileUp, CheckCircle, XCircle, AlertCircle, Printer, ChevronLeft, ChevronRight, Check, X
 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { motion, AnimatePresence } from 'motion/react';
@@ -55,6 +55,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
   const [verificationFilter, setVerificationFilter] = useState<'All' | 'Pending' | 'Approved' | 'Rejected'>('All');
+  const [logViewMode, setLogViewMode] = useState<'table' | 'timeline'>('table');
+  const [selectedLogForDetail, setSelectedLogForDetail] = useState<PopulationChangeLog | null>(null);
   const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -955,13 +957,24 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       await logAction('Tambah Mutasi', `Tambah data mutasi ${logData.type} untuk ${logData.name}`);
     }
 
-    // --- INTEGRATION: Auto Update House Data ---
-    if (autoUpdateHouse && logFormData.houseId) {
+    // --- INTEGRATION: Auto Update House Data & Occupancy History (ONLY IF APPROVED) ---
+    const isApproved = logData.verificationStatus === 'Approved';
+    if (autoUpdateHouse && logFormData.houseId && isApproved) {
       const house = houses.find(h => h.id === logFormData.houseId);
       if (house) {
         let updates: any = {};
+        const currentHistory = house.occupancyHistory || [];
         
         if (logFormData.type === 'Newcomer') {
+          const newHistoryRecord = {
+            id: `occ_${Date.now()}`,
+            headOfFamily: logFormData.name,
+            startDate: logFormData.date,
+            occupantCount: logFormData.details.familyCount || 1,
+            status: 'Active' as const,
+            residenceType: logFormData.details.residenceType || 'Tetap'
+          };
+
           updates = {
             headOfFamily: logFormData.name,
             phone: logFormData.phone,
@@ -969,7 +982,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             status: 'Occupied',
             residenceType: logFormData.details.residenceType,
             religion: logFormData.details.religion,
-            // Reset vulnerable counts based on log
+            occupancyHistory: [...currentHistory.map(h => ({ ...h, status: 'Moved Out' as const, endDate: logFormData.date })), newHistoryRecord],
             babyCount: logFormData.details.vulnerability.includes('Bayi') ? 1 : 0,
             toddlerCount: logFormData.details.vulnerability.includes('Balita') ? 1 : 0,
             pregnantCount: logFormData.details.vulnerability.includes('Ibu Hamil') ? 1 : 0,
@@ -982,6 +995,11 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             headOfFamily: '-',
             occupants: 0,
             phone: '',
+            occupancyHistory: currentHistory.map(h => ({
+              ...h,
+              status: 'Moved Out' as const,
+              endDate: h.endDate || logFormData.date
+            })),
             babyCount: 0,
             toddlerCount: 0,
             pregnantCount: 0,
@@ -996,12 +1014,28 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         } else if (logFormData.type === 'Death') {
           updates = {
             occupants: Math.max(0, (house.occupants || 0) - 1),
-            // We don't know who died, but we can decrease total
           };
         }
 
         if (Object.keys(updates).length > 0) {
           await updateHouseData(house.id, updates);
+        }
+      }
+    }
+
+    // --- INTEGRATION: Auto Aggregate Monthly Report ---
+    if (isApproved && reports.length > 0) {
+      const currentMonthStr = logFormData.date.slice(0, 7);
+      const targetReport = reports.find(r => r.month === currentMonthStr);
+      if (targetReport) {
+        const reportUpdates: Partial<PopulationReport> = {};
+        if (logFormData.type === 'Newcomer') reportUpdates.newcomerCount = (targetReport.newcomerCount || 0) + (logFormData.details.familyCount || 1);
+        else if (logFormData.type === 'MovedOut') reportUpdates.movedOutCount = (targetReport.movedOutCount || 0) + 1;
+        else if (logFormData.type === 'Birth') reportUpdates.birthCount = (targetReport.birthCount || 0) + 1;
+        else if (logFormData.type === 'Death') reportUpdates.deathCount = (targetReport.deathCount || 0) + 1;
+
+        if (Object.keys(reportUpdates).length > 0) {
+          onUpdateReport(targetReport.id, reportUpdates);
         }
       }
     }
@@ -1279,11 +1313,25 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             {activeTab === 'logs' && (
               <>
                 <button 
+                  onClick={() => generateMutationReportExcel(filteredLogs)}
+                  className="flex items-center gap-2 px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95"
+                  title="Unduh Laporan Mutasi format Excel"
+                >
+                  <Download size={14} /> Ekspor Excel
+                </button>
+                <button 
+                  onClick={() => generateMutationReportPDF(latestReport || reports[0], filteredLogs, pdfConfig)}
+                  className="flex items-center gap-2 px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95"
+                  title="Unduh Laporan Mutasi format PDF"
+                >
+                  <Printer size={14} /> Ekspor PDF
+                </button>
+                <button 
                   onClick={handleSyncAllResidents}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-indigo-200 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-50 transition-all shadow-xs active:scale-95"
+                  className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:border-indigo-200 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-50 transition-all shadow-xs active:scale-95"
                   title="Sinkronkan data warga saat ini ke log"
                 >
-                  <RefreshCw size={14} className="text-indigo-600 animate-spin-slow" /> Sinkron Data
+                  <RefreshCw size={14} className="text-indigo-600 animate-spin-slow" /> Sinkron
                 </button>
                 <button 
                   onClick={handleBulkMarkLogsProcessed}
@@ -1999,12 +2047,32 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                   </div>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
-                  <div className="relative group w-full sm:w-56">
+                <div className="flex flex-col sm:flex-row gap-2 flex-wrap items-center">
+                  {/* View Mode Toggle: Table vs Timeline */}
+                  <div className="flex items-center bg-slate-200/60 p-1 rounded-xl border border-slate-200">
+                    <button
+                      onClick={() => setLogViewMode('table')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        logViewMode === 'table' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      <FileText size={14} /> Tabel Data
+                    </button>
+                    <button
+                      onClick={() => setLogViewMode('timeline')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        logViewMode === 'timeline' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      <Activity size={14} /> Linimasa Visual
+                    </button>
+                  </div>
+
+                  <div className="relative group w-full sm:w-48">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                     <input 
                       type="text" 
-                      placeholder="Cari nama, rumah, deskripsi..."
+                      placeholder="Cari nama, rumah..."
                       value={logSearchTerm}
                       onChange={(e) => { setLogSearchTerm(e.target.value); setCurrentPage(1); }}
                       className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-sans"
@@ -2014,9 +2082,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                   <select 
                     value={logTypeFilter}
                     onChange={(e) => { setLogTypeFilter(e.target.value as any); setCurrentPage(1); }}
-                    className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
+                    className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
                   >
-                    <option value="All">Semua Jenis Mutasi</option>
+                    <option value="All">Semua Mutasi</option>
                     <option value="Newcomer">Warga Baru</option>
                     <option value="MovedOut">Pindah Keluar</option>
                     <option value="Birth">Kelahiran</option>
@@ -2026,11 +2094,11 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                   <select 
                     value={verificationFilter}
                     onChange={(e) => { setVerificationFilter(e.target.value as any); setCurrentPage(1); }}
-                    className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
+                    className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
                   >
                     <option value="All">Semua Verifikasi</option>
-                    <option value="Approved">Disetujui / Sah</option>
-                    <option value="Pending">Menunggu Verifikasi</option>
+                    <option value="Approved">Disetujui</option>
+                    <option value="Pending">Menunggu</option>
                     <option value="Rejected">Ditolak</option>
                   </select>
                 </div>
@@ -2149,217 +2217,206 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 )}
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-50/50 text-slate-500 font-bold border-b border-slate-100">
-                    <tr>
-                      <th className="p-4 text-center w-10">
-                        <button onClick={handleSelectAllOnPage} className="text-slate-400 hover:text-indigo-600">
-                          {paginatedLogs.length > 0 && paginatedLogs.every(l => selectedLogIds.includes(l.id)) ? (
-                            <CheckSquare size={16} className="text-indigo-600" />
-                          ) : (
-                            <Square size={16} />
-                          )}
-                        </button>
-                      </th>
-                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">Tanggal</th>
-                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">Jenis Perubahan</th>
-                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">Nama Warga</th>
-                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">ID Rumah</th>
-                      <th className="p-4 text-left text-xs uppercase tracking-widest text-slate-400">Rincian & Berkas</th>
-                      <th className="p-4 text-center text-xs uppercase tracking-widest text-slate-400">Verifikasi</th>
-                      <th className="p-4 text-center text-xs uppercase tracking-widest text-slate-400">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-150">
-                    {paginatedLogs && paginatedLogs.length > 0 ? paginatedLogs.map((log) => {
-                      const isSelected = selectedLogIds.includes(log.id);
-                      return (
-                        <tr key={log.id} className={`hover:bg-slate-50/50 transition-colors group ${isSelected ? 'bg-indigo-50/30' : ''}`}>
-                          <td className="p-4 text-center">
-                            <button 
-                              onClick={() => {
+              {/* Timeline View vs Table View Content */}
+              {logViewMode === 'timeline' ? (
+                <div className="p-6 space-y-6">
+                  {paginatedLogs.length > 0 ? (
+                    <div className="relative pl-6 sm:pl-8 border-l-2 border-slate-200/80 space-y-6">
+                      {paginatedLogs.map((log) => {
+                        const targetHouse = (houses || []).find(h => h.id === log.houseId);
+                        const houseLabel = targetHouse ? `Blok ${targetHouse.block}-${targetHouse.number}` : log.houseId;
+
+                        return (
+                          <div key={log.id} className="relative group">
+                            {/* Timeline Node Icon Indicator */}
+                            <div className={`
+                              absolute -left-[31px] sm:-left-[39px] top-1.5 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white transition-transform group-hover:scale-110
+                              ${log.type === 'Newcomer' ? 'bg-emerald-600' :
+                                log.type === 'MovedOut' ? 'bg-amber-500' :
+                                log.type === 'Birth' ? 'bg-indigo-600' : 'bg-rose-600'}
+                            `}>
+                              {log.type === 'Newcomer' ? <CheckCircle size={12} /> :
+                               log.type === 'MovedOut' ? <ArrowRight size={12} /> :
+                               log.type === 'Birth' ? <Baby size={12} /> : <Activity size={12} />}
+                            </div>
+
+                            {/* Timeline Card Content */}
+                            <div 
+                              onClick={() => setSelectedLogForDetail(log)}
+                              className="bg-white border border-slate-200/80 hover:border-indigo-300 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all cursor-pointer space-y-3"
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                                    log.type === 'Newcomer' ? 'bg-emerald-50 text-emerald-700' :
+                                    log.type === 'MovedOut' ? 'bg-amber-50 text-amber-700' :
+                                    log.type === 'Birth' ? 'bg-indigo-50 text-indigo-700' : 'bg-rose-50 text-rose-700'
+                                  }`}>
+                                    {log.type === 'Newcomer' ? 'Warga Baru' :
+                                     log.type === 'MovedOut' ? 'Pindah Keluar' :
+                                     log.type === 'Birth' ? 'Kelahiran' : 'Kematian'}
+                                  </span>
+                                  <span className="text-xs font-bold text-slate-900">{log.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-400">
+                                  <Calendar size={13} />
+                                  <span>{log.date}</span>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150">
+                                  <span className="text-[9px] font-black uppercase text-slate-400 block">Kavling / Rumah</span>
+                                  <span className="font-bold text-slate-800 font-mono">{houseLabel}</span>
+                                </div>
+
+                                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150 col-span-2">
+                                  <span className="text-[9px] font-black uppercase text-slate-400 block">Keterangan Peristiwa</span>
+                                  <span className="font-medium text-slate-700 italic">{log.description || '-'}</span>
+                                </div>
+                              </div>
+
+                              <div className="flex justify-between items-center pt-1">
+                                <span className="text-[10px] font-bold text-indigo-600 hover:underline flex items-center gap-1">
+                                  <FileText size={12} /> Klik untuk rincian lengkap & aksi
+                                </span>
+                                <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                                  <button
+                                    onClick={() => generateSingleMutationCertificatePDF(log, pdfConfig)}
+                                    className="px-2.5 py-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-all"
+                                  >
+                                    Cetak PDF
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-16 text-slate-400 font-medium">
+                      Belum ada catatan linimasa mutasi untuk filter ini.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50/50 text-slate-500 font-bold border-b border-slate-100">
+                      <tr>
+                        <th className="p-4 text-center w-10">
+                          <button onClick={handleSelectAllOnPage} className="text-slate-400 hover:text-indigo-600">
+                            {paginatedLogs.length > 0 && paginatedLogs.every(l => selectedLogIds.includes(l.id)) ? (
+                              <CheckCircle size={16} className="text-indigo-600" />
+                            ) : (
+                              <div className="w-4 h-4 border border-slate-300 rounded" />
+                            )}
+                          </button>
+                        </th>
+                        <th className="p-4 text-left">Tanggal</th>
+                        <th className="p-4 text-left">Jenis Mutasi</th>
+                        <th className="p-4 text-left">Nama Warga</th>
+                        <th className="p-4 text-left">Lokasi Kavling</th>
+                        <th className="p-4 text-left">Rincian Peristiwa</th>
+                        <th className="p-4 text-center">Status Verifikasi</th>
+                        <th className="p-4 text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                      {paginatedLogs.length > 0 ? paginatedLogs.map((log) => {
+                        const isSelected = selectedLogIds.includes(log.id);
+                        return (
+                          <tr key={log.id} className={`hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-indigo-50/30' : ''}`}>
+                            <td className="p-4 text-center">
+                              <button onClick={() => {
                                 if (isSelected) setSelectedLogIds(selectedLogIds.filter(i => i !== log.id));
                                 else setSelectedLogIds([...selectedLogIds, log.id]);
-                              }}
-                              className="text-slate-400 hover:text-indigo-600"
-                            >
-                              {isSelected ? <CheckSquare size={16} className="text-indigo-600" /> : <Square size={16} />}
-                            </button>
-                          </td>
-                          <td className="p-4 font-bold text-slate-600">
-                            <div className="flex items-center gap-2">
-                              <Clock size={14} className="text-slate-400" />
-                              <span className="font-mono text-xs">{new Date(log.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <span className={`
-                              px-3 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider inline-block
-                              ${log.type === 'Newcomer' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 
-                                log.type === 'MovedOut' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' : 
-                                log.type === 'Birth' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 
-                                'bg-rose-50 text-rose-700 border border-rose-200/50'}
-                            `}>
-                              {log.type === 'Newcomer' ? '✓ Warga Baru' : 
-                               log.type === 'MovedOut' ? '⇄ Pindah Keluar' : 
-                               log.type === 'Birth' ? '👶 Kelahiran' : '✝ Kematian'}
-                            </span>
-                            {log.isGenerated && (
-                              <div className="mt-1">
-                                <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded-md font-bold text-[8px] uppercase tracking-wider inline-flex items-center gap-1">
-                                  <RefreshCw size={8} /> Sudah Lapor
-                                </span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400"><User size={14}/></div>
-                              <div>
-                                <p className="font-extrabold text-slate-800">{log.name}</p>
-                                {log.details?.familyCount && log.details.familyCount > 1 && (
-                                  <p className="text-[8px] text-slate-400 font-black uppercase tracking-wide">+{log.details.familyCount - 1} Anggota Keluarga</p>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            {(() => {
-                              const targetHouse = (houses || []).find(h => h.id === log.houseId);
-                              const houseLabel = targetHouse ? `Blok ${targetHouse.block}-${targetHouse.number}` : log.houseId;
-                              return (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-black w-fit border border-slate-200/50" title={`ID Dokumen: ${log.houseId}`}>
-                                  {houseLabel}
+                              }} className="text-slate-400 hover:text-indigo-600">
+                                {isSelected ? <CheckCircle size={16} className="text-indigo-600" /> : <div className="w-4 h-4 border border-slate-300 rounded" />}
+                              </button>
+                            </td>
+                            <td className="p-4 font-mono text-xs font-bold text-slate-800 whitespace-nowrap">{log.date}</td>
+                            <td className="p-4">
+                              <span className={`
+                                px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1
+                                ${log.type === 'Newcomer' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 
+                                  log.type === 'MovedOut' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' : 
+                                  log.type === 'Birth' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 
+                                  'bg-rose-50 text-rose-700 border border-rose-200/50'}
+                              `}>
+                                {log.type === 'Newcomer' ? '✓ Warga Baru' : 
+                                 log.type === 'MovedOut' ? '⇄ Pindah Keluar' : 
+                                 log.type === 'Birth' ? '👶 Kelahiran' : '✝ Kematian'}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400"><User size={14}/></div>
+                                <div>
+                                  <p className="font-extrabold text-slate-800 cursor-pointer hover:text-indigo-600" onClick={() => setSelectedLogForDetail(log)}>{log.name}</p>
                                 </div>
-                              );
-                            })()}
-                          </td>
-                          <td className="p-4 max-w-xs">
-                            <div className="space-y-1.5">
-                              <p className="text-slate-600 text-xs font-medium italic line-clamp-1" title={log.description}>{log.description || '-'}</p>
-                              
-                              {log.details && (
-                                <div className="text-[10px] font-bold text-slate-500 bg-slate-50 p-2 rounded-xl border border-slate-150 grid grid-cols-1 gap-1">
-                                  {log.type === 'Newcomer' && (
-                                    <>
-                                      <div className="flex justify-between items-center border-b border-slate-200/40 pb-0.5"><span>Asal:</span> <span className="text-blue-600 font-semibold">{log.details.previousAddress}</span></div>
-                                      <div className="flex justify-between items-center"><span>Status:</span> <span className="text-slate-700 font-semibold">{log.details.residenceType || 'Tetap'}</span></div>
-                                    </>
-                                  )}
-                                  {log.type === 'MovedOut' && (
-                                    <>
-                                      <div className="flex justify-between items-center border-b border-slate-200/40 pb-0.5"><span>Tujuan:</span> <span className="text-amber-600 font-semibold">{log.details.newAddress}</span></div>
-                                      <div className="flex justify-between items-center"><span>Alasan:</span> <span className="text-slate-700 font-semibold">{log.details.reasonForMoving}</span></div>
-                                    </>
-                                  )}
-                                  {log.type === 'Birth' && (
-                                    <>
-                                      <div className="flex justify-between items-center border-b border-slate-200/40 pb-0.5"><span>Orang Tua:</span> <span className="text-emerald-600 font-semibold">{log.details.fatherName}/{log.details.motherName}</span></div>
-                                      <div className="flex justify-between items-center"><span>Gender:</span> <span className="text-slate-700 font-semibold">{log.details.gender}</span></div>
-                                    </>
-                                  )}
-                                  {log.type === 'Death' && (
-                                    <>
-                                      <div className="flex justify-between items-center border-b border-slate-200/40 pb-0.5"><span>Penyebab:</span> <span className="text-rose-600 font-semibold">{log.details.causeOfDeath}</span></div>
-                                      <div className="flex justify-between items-center"><span>Tempat:</span> <span className="text-slate-700 font-semibold">{log.details.placeOfDeath}</span></div>
-                                    </>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Document Attachment Button */}
-                              {log.documentUrl && (
-                                <a 
-                                  href={log.documentUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-black uppercase border border-indigo-200/60 hover:bg-indigo-100 transition-all mt-1"
-                                >
-                                  <FileUp size={11} /> Lihat Berkas / Surat
-                                </a>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Verification Status Badge */}
-                          <td className="p-4 text-center">
-                            <div className="flex flex-col items-center gap-1">
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              {(() => {
+                                const targetHouse = (houses || []).find(h => h.id === log.houseId);
+                                return (
+                                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-black w-fit border border-slate-200/50">
+                                    {targetHouse ? `Blok ${targetHouse.block}-${targetHouse.number}` : log.houseId}
+                                  </div>
+                                );
+                              })()}
+                            </td>
+                            <td className="p-4 max-w-xs">
+                              <p className="text-slate-600 text-xs font-medium italic line-clamp-1">{log.description || '-'}</p>
+                            </td>
+                            <td className="p-4 text-center">
                               <span className={`
                                 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1
                                 ${(!log.verificationStatus || log.verificationStatus === 'Approved') ? 'bg-emerald-100 text-emerald-800' :
                                   log.verificationStatus === 'Pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}
                               `}>
-                                {(!log.verificationStatus || log.verificationStatus === 'Approved') ? <><CheckCircle size={10}/> Disetujui</> :
-                                 log.verificationStatus === 'Pending' ? <><AlertCircle size={10}/> Menunggu</> : <><XCircle size={10}/> Ditolak</>}
+                                {(!log.verificationStatus || log.verificationStatus === 'Approved') ? 'Disetujui' :
+                                 log.verificationStatus === 'Pending' ? 'Menunggu' : 'Ditolak'}
                               </span>
-                            </div>
-                          </td>
-
-                          <td className="p-4 text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              {/* Print Single Certificate PDF */}
-                              <button
-                                onClick={() => generateSingleMutationCertificatePDF(log, pdfConfig)}
-                                className="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/50 rounded-lg transition-all"
-                                title="Cetak Surat Keterangan / Pengantar Mutasi (PDF)"
-                              >
-                                <Printer size={14} />
-                              </button>
-
-                              {log.phone && log.phone !== '-' && (
-                                <button 
-                                  onClick={async () => {
-                                    const msg = log.type === 'Newcomer' 
-                                      ? `Halo ${log.name}, Selamat Datang di Lingkungan RT 02! Kami mengonfirmasi pencatatan domisili warga baru Anda. Jika ada pertanyaan seputar iuran, siskamling, atau administrasi surat, silakan hubungi Pengurus RT.` 
-                                      : log.type === 'MovedOut'
-                                      ? `Halo ${log.name}, Terima kasih telah menjadi bagian dari keluarga warga RT 02. Catatan kepindahan Anda telah terdaftar secara resmi.`
-                                      : `Halo ${log.name}, Pengurus RT 02 mengirimkan salam pesan mengenai data mutasi kependudukan Anda.`;
-                                    
-                                    const res = await sendWhatsAppViaGateway(log.phone || '', msg);
-                                    if (res?.success) toast.success(`Pesan WhatsApp berhasil dikirim ke ${log.name}`);
-                                    else toast.error(`Gagal mengirim WhatsApp: ${res?.error || 'Error'}`);
-                                  }}
-                                  className="p-1.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50 rounded-lg transition-all"
-                                  title="Kirim Pesan WhatsApp Otomatis ke Warga"
+                            </td>
+                            <td className="p-4 text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={() => generateSingleMutationCertificatePDF(log, pdfConfig)}
+                                  className="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/50 rounded-lg transition-all"
+                                  title="Cetak Surat PDF"
                                 >
-                                  <MessageCircle size={14} />
+                                  <Printer size={14} />
                                 </button>
-                              )}
-                              <button 
-                                onClick={() => handleEditLog(log)}
-                                className="p-1.5 text-slate-450 hover:text-indigo-650 hover:bg-slate-100 rounded-lg transition-all"
-                                title="Edit Log"
-                              >
-                                <Edit2 size={14} />
-                              </button>
-                              <button 
-                                onClick={() => handleDeleteLog(log.id)}
-                                className="p-1.5 text-slate-450 hover:text-rose-650 hover:bg-rose-50 rounded-lg transition-all"
-                                title="Hapus Log"
-                              >
-                                <Trash2 size={14} />
-                              </button>
+                                <button 
+                                  onClick={() => setSelectedLogForDetail(log)}
+                                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all"
+                                  title="Rincian Lengkap"
+                                >
+                                  <FileText size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }) : (
+                        <tr>
+                          <td colSpan={8} className="p-20 text-center">
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="p-5 bg-slate-50 rounded-full text-slate-300"><Clock size={40} /></div>
+                              <div>
+                                <p className="font-black text-slate-800 text-base">Tidak ada data mutasi</p>
+                              </div>
                             </div>
                           </td>
                         </tr>
-                      );
-                    }) : (
-                      <tr>
-                        <td colSpan={8} className="p-20 text-center">
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="p-5 bg-slate-50 rounded-full text-slate-300"><Clock size={40} /></div>
-                            <div>
-                              <p className="font-black text-slate-800 text-base">Tidak ada data mutasi</p>
-                              <p className="text-slate-400 text-xs font-semibold mt-1">Belum ada catatan mutasi yang terdaftar pada filter ini.</p>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
 
               {/* Pagination Controls */}
               {filteredLogs.length > 0 && (
@@ -3096,6 +3153,124 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           </div>
         </form>
       </Modal>
+
+      {/* Modal Log Mutation Side Drawer Viewer */}
+      <AnimatePresence>
+        {selectedLogForDetail && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" 
+              onClick={() => setSelectedLogForDetail(null)} 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 10 }} 
+              className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-8 z-10 space-y-6 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex justify-between items-start border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-3 rounded-2xl text-white ${
+                    selectedLogForDetail.type === 'Newcomer' ? 'bg-emerald-600' :
+                    selectedLogForDetail.type === 'MovedOut' ? 'bg-amber-500' :
+                    selectedLogForDetail.type === 'Birth' ? 'bg-indigo-600' : 'bg-rose-600'
+                  }`}>
+                    {selectedLogForDetail.type === 'Newcomer' ? <CheckCircle size={20} /> :
+                     selectedLogForDetail.type === 'MovedOut' ? <ArrowRight size={20} /> :
+                     selectedLogForDetail.type === 'Birth' ? <Baby size={20} /> : <Activity size={20} />}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      Rincian Log Mutasi Kependudukan
+                    </span>
+                    <h3 className="text-lg font-black text-slate-900">{selectedLogForDetail.name}</h3>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedLogForDetail(null)} 
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                  <span className="text-[9px] font-black uppercase text-slate-400 block mb-1">Tanggal Peristiwa</span>
+                  <span className="text-slate-800 font-mono font-bold text-sm">{selectedLogForDetail.date}</span>
+                </div>
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                  <span className="text-[9px] font-black uppercase text-slate-400 block mb-1">Status Verifikasi</span>
+                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                    (!selectedLogForDetail.verificationStatus || selectedLogForDetail.verificationStatus === 'Approved') ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {selectedLogForDetail.verificationStatus || 'Approved'}
+                  </span>
+                </div>
+              </div>
+
+              {selectedLogForDetail.details && (
+                <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/60 space-y-2 text-xs">
+                  <span className="text-[10px] font-black uppercase text-slate-400 block mb-2">Detail Spesifik Mutasi</span>
+                  {selectedLogForDetail.type === 'Newcomer' && (
+                    <>
+                      <div className="flex justify-between border-b border-slate-200/50 pb-1.5">
+                        <span className="text-slate-500">Alamat Asal:</span>
+                        <span className="font-bold text-indigo-600">{selectedLogForDetail.details.previousAddress || '-'}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-200/50 pb-1.5">
+                        <span className="text-slate-500">Status Kepemilikan:</span>
+                        <span className="font-bold text-slate-800">{selectedLogForDetail.details.residenceType || 'Tetap'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Jumlah Anggota Keluarga:</span>
+                        <span className="font-bold text-slate-800">{selectedLogForDetail.details.familyCount || 1} Orang</span>
+                      </div>
+                    </>
+                  )}
+                  {selectedLogForDetail.type === 'MovedOut' && (
+                    <>
+                      <div className="flex justify-between border-b border-slate-200/50 pb-1.5">
+                        <span className="text-slate-500">Alamat Tujuan:</span>
+                        <span className="font-bold text-amber-600">{selectedLogForDetail.details.newAddress || '-'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Alasan Kepindahan:</span>
+                        <span className="font-bold text-slate-800">{selectedLogForDetail.details.reasonForMoving || '-'}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => generateSingleMutationCertificatePDF(selectedLogForDetail, pdfConfig)}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-indigo-700 transition-all"
+                >
+                  <Printer size={16} /> Cetak PDF Surat Pengantar
+                </button>
+                {selectedLogForDetail.phone && selectedLogForDetail.phone !== '-' && (
+                  <button
+                    onClick={async () => {
+                      const msg = `Halo ${selectedLogForDetail.name}, Pengurus RT 02 mengonfirmasi status log mutasi domisili Anda.`;
+                      const res = await sendWhatsAppViaGateway(selectedLogForDetail.phone || '', msg);
+                      if (res?.success) toast.success("WhatsApp berhasil dikirim!");
+                      else toast.error("Gagal mengirim pesan.");
+                    }}
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-emerald-700 transition-all"
+                  >
+                    <MessageCircle size={16} /> Kirim WhatsApp
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

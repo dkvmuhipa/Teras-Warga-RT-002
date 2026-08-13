@@ -3,12 +3,13 @@ import {
   User, Phone, ChevronDown, ChevronUp, Eye, Check, X, Users, Heart, 
   GraduationCap, Briefcase, Calendar, ShieldCheck, MapPin, FileText, 
   Info, CheckCircle, Search, Baby, Smile, Accessibility, ExternalLink,
-  ClipboardList, AlertTriangle, Building, LayoutGrid
+  ClipboardList, AlertTriangle, Building, LayoutGrid, Download, Printer
 } from 'lucide-react';
 import { ResidentRegistration, PaymentStatus, House } from '../../../types';
 import { toast } from 'sonner';
 import { useConfirm } from '../../../context/ConfirmContext';
-import { formatHouseId, handleFirestoreError, OperationType } from '../../../services/databaseService';
+import { formatHouseId, handleFirestoreError, OperationType, logAction } from '../../../services/databaseService';
+import { sendWhatsAppViaGateway } from '../../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface ResidentRegistrationListProps {
@@ -141,8 +142,17 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
         });
       }
       
+      // 4. Audit Log
+      await logAction('Disetujui Pendaftaran Warga', `Menyetujui pendaftaran warga baru ${reg.headOfFamily} (Kavling Blok ${reg.block}-${reg.number})`);
+
+      // 5. Auto WhatsApp Dispatch
+      if (reg.phone && reg.phone !== '-') {
+        const msg = `Halo Bpk/Ibu ${reg.headOfFamily}, Selamat! Pengurus RT 02 mengonfirmasi bahwa permohonan pendaftaran warga baru Anda di Kavling Blok ${reg.block}-${reg.number} telah DISETUJUI. Akun & profil domisili Anda kini telah terdaftar resmi di sistem RT 02.`;
+        await sendWhatsAppViaGateway(reg.phone, msg);
+      }
+      
       toast.success('Pendaftaran Disetujui!', {
-        description: `Warga atas nama ${reg.headOfFamily} berhasil didaftarkan.`
+        description: `Warga atas nama ${reg.headOfFamily} berhasil didaftarkan & notifikasi WA terkirim.`
       });
       setExpandedRegId(null);
     } catch (error) {
@@ -166,7 +176,14 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
     setActionLoadingId(reg.id);
     try {
       await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Rejected' });
-      toast.success('Pendaftaran ditolak.');
+      await logAction('Tolak Pendaftaran Warga', `Menolak pendaftaran warga baru ${reg.headOfFamily} (Blok ${reg.block}-${reg.number})`);
+
+      if (reg.phone && reg.phone !== '-') {
+        const msg = `Halo Bpk/Ibu ${reg.headOfFamily}, permohonan pendaftaran warga baru Anda di Blok ${reg.block}-${reg.number} DITOLAK oleh Pengurus RT 02 karena berkas/data belum memenuhi syarat. Silakan periksa kembali atau hubungi pengurus RT.`;
+        await sendWhatsAppViaGateway(reg.phone, msg);
+      }
+
+      toast.success('Pendaftaran ditolak & notifikasi WA dikirim.');
       setExpandedRegId(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `residentRegistrations/${reg.id}`);
@@ -591,11 +608,13 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
             );
           })
         ) : (
-          <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center">
-            <ClipboardList className="text-slate-300 mb-3 stroke-[1.5]" size={36} />
-            <h5 className="font-extrabold text-slate-700 text-xs tracking-tight uppercase">Tidak Ada Permohonan</h5>
-            <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5 max-w-xs leading-normal">
-              Belum ada permohonan pendaftaran warga baru dengan status "{filterStatus === 'All' ? 'Semua' : filterStatus}".
+          <div className="py-16 text-center bg-white rounded-3xl border border-slate-150 p-8 shadow-xs flex flex-col items-center justify-center">
+            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100">
+              <CheckCircle size={32} />
+            </div>
+            <h4 className="font-black text-slate-900 text-base mb-1">Semua Berkas Pendaftaran Warga Selesai Diproses</h4>
+            <p className="text-xs text-slate-400 font-semibold max-w-md mx-auto">
+              Tidak ada permohonan pendaftaran warga baru dengan status "{filterStatus === 'All' ? 'Semua' : filterStatus}". Warga baru dapat mendaftar mandiri melalui portal warga online.
             </p>
           </div>
         )}

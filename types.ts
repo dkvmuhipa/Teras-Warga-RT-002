@@ -139,6 +139,10 @@ export interface House {
   isOrphan?: boolean;
   orphanCount?: number;
   economicStatus?: 'Pra-Sejahtera' | 'Sejahtera' | 'Mampu';
+  emergencyContactName?: string; // NEW: Nama Kontak Darurat
+  emergencyContactPhone?: string; // NEW: Nomor Kontak Darurat
+  bpjsNumber?: string; // NEW: Nomor Kartu BPJS 13 Digit
+  disabilityType?: string; // NEW: Jenis Disabilitas / Kebutuhan Khusus
   
   // Ronda Management
   rondaExempt?: boolean; // NEW: Pengecualian Ronda (Lansia, Sakit, dll)
@@ -878,6 +882,7 @@ export interface UpdateRequest {
     job?: string;
   }[];
   reason: string;
+  documentUrl?: string;
   status: 'Pending' | 'Approved' | 'Rejected' | 'Menunggu' | 'Disetujui' | 'Ditolak';
   adminNote?: string;
   createdAt: string;
