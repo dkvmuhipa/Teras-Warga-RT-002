@@ -2970,14 +2970,20 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
     const centerX = pageWidth / 2;
     let currentY = 15;
 
-    // Standard Header Kop Surat (Matching generateSuratPengantar)
-    let logoData = '';
+    // Standard Header Kop Surat & Logo (Matching generateSuratPengantar)
+    let logoDrawn = false;
     try {
-        logoData = await getImageData(config.logo);
+        const logoData = await getImageData(config.logo);
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+            logoDrawn = true;
+        }
     } catch (e) { console.error(e); }
 
-    if (logoData) {
-        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+    if (!logoDrawn) {
+        const lx = 30; const ly = 22;
+        doc.setDrawColor(0); doc.setLineWidth(0.5);
+        doc.lines([[10,0], [0,12], [-10,0], [0,-12]], lx, ly - 6, [1,1], 'S', true);
     }
 
     doc.setFont("times", "normal"); 
@@ -3130,65 +3136,89 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
         currentY = 20;
     }
 
-    doc.setFont("times", "normal");
-    doc.setFontSize(10);
-    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - marginX, currentY, { align: "right" });
-    currentY += 8;
+    const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const rightSignX = marginX + (contentW * 0.75);
+    const leftSignX = marginX + (contentW * 0.25);
 
-    const sigW = contentW / 2;
-    
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    doc.text(`Palu, ${dateString}`, rightSignX, currentY, { align: "center" });
+    currentY += 6;
+
     // Left Sig: Sekretaris RT
     doc.setFont("times", "bold");
     doc.setTextColor(30, 41, 59);
-    doc.text("Sekretaris RT 02", marginX + (sigW / 2), currentY, { align: "center" });
+    doc.text("Sekretaris RT 02", leftSignX, currentY, { align: "center" });
 
     // Right Sig: Ketua RT
-    doc.text(`Ketua ${config.rtName}`, marginX + sigW + (sigW / 2), currentY, { align: "center" });
+    doc.text(`Ketua ${config.rtName}`, rightSignX, currentY, { align: "center" });
 
     const signSpaceY = currentY + 2;
     currentY += 25;
 
-    doc.text("( ..................................... )", marginX + (sigW / 2), currentY, { align: "center" });
+    doc.text("( ..................................... )", leftSignX, currentY, { align: "center" });
 
-    doc.text(config.rtChairman, marginX + sigW + (sigW / 2), currentY, { align: "center" });
+    doc.text(config.rtChairman, rightSignX, currentY, { align: "center" });
     const chairmanWidth = doc.getTextWidth(config.rtChairman);
-    doc.line(marginX + sigW + (sigW / 2) - (chairmanWidth / 2), currentY + 1, marginX + sigW + (sigW / 2) + (chairmanWidth / 2), currentY + 1);
+    doc.line(rightSignX - (chairmanWidth / 2), currentY + 1, rightSignX + (chairmanWidth / 2), currentY + 1);
 
-    // Add Stamp and Signature
+    // Add Signature then Stamp (Exact placement as generateSuratPengantar)
     try {
         if (config.signature) {
             const signImg = await getImageData(config.signature);
-            if (signImg) doc.addImage(signImg, 'PNG', marginX + sigW + (sigW / 2) - 15, signSpaceY, 30, 20);
+            if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY, 30, 20);
         }
         if (config.stamp) {
             const stampImg = await getImageData(config.stamp);
-            if (stampImg) doc.addImage(stampImg, 'PNG', marginX + sigW + (sigW / 2) - 25, signSpaceY - 5, 25, 25);
+            if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 25, signSpaceY - 2, 25, 25);
         }
     } catch (e) {}
 
-    // Footer Digital Verification SODD
-    const footerY = pageHeight - 35;
+    // Footer Digital Verification SODD (Identik dengan Surat Pengantar)
+    const footerY = pageHeight - 40;
     doc.setDrawColor(200);
     doc.setLineWidth(0.2);
     doc.line(marginX, footerY, pageWidth - marginX, footerY);
 
-    try {
-        const baseUrl = window.location.origin;
-        const verificationUrl = `${baseUrl}/#/verify-official/${report.id}`;
-        const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { margin: 1, width: 200 });
-        doc.addImage(qrCodeDataUrl, 'PNG', marginX, footerY + 4, 18, 18);
-    } catch (e) {}
+    const qrSize = 22;
+    const qrX = marginX;
+    const qrY = footerY + 6;
 
+    try {
+        const baseUrl = 'https://terasrt02.vercel.app';
+        const verificationUrl = `${baseUrl}/#/verify-official/${report.id}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { 
+            margin: 1, 
+            width: 200,
+            color: { dark: '#1e293b', light: '#f8fafc' }
+        });
+        doc.addImage(qrCodeDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+    } catch (e) {
+        doc.setDrawColor(220, 220, 220);
+        doc.rect(qrX, qrY, qrSize, qrSize, 'S');
+    }
+
+    const infoX = qrX + qrSize + 6;
     doc.setFont("times", "bold");
     doc.setFontSize(8);
     doc.setTextColor(30, 41, 59);
-    doc.text("SISTEM OTENTIKASI DOKUMEN DIGITAL (SODD) RT 02", marginX + 22, footerY + 8);
+    doc.text("SISTEM OTENTIKASI DOKUMEN DIGITAL (SODD)", infoX, footerY + 10);
 
     doc.setFont("times", "normal");
     doc.setFontSize(7);
     doc.setTextColor(100, 116, 139);
-    doc.text(`ID Laporan : ${report.id.toUpperCase()}`, marginX + 22, footerY + 12);
-    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })} WITA`, marginX + 22, footerY + 16);
+    doc.text(`ID Otentikasi : ${report.id.toUpperCase()}`, infoX, footerY + 14);
+    doc.text(`Jenis Berkas   : LAPORAN REKAPITULASI MUTASI BULANAN`, infoX, footerY + 17.5);
+    doc.text(`Waktu Terbit  : ${new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })} WITA`, infoX, footerY + 21);
+
+    doc.setFont("times", "italic");
+    doc.setFontSize(6.5);
+    doc.setTextColor(148, 163, 184);
+    const disclaimer = "Dokumen ini diterbitkan secara elektronik melalui Sistem Teras Warga dan merupakan dokumen sah yang tidak memerlukan tanda tangan basah. Keaslian dokumen dapat diverifikasi melalui pemindaian QR Code di atas atau melalui portal resmi layanan warga.";
+    const splitDisclaimer = doc.splitTextToSize(disclaimer, contentW - qrSize - 10);
+    doc.text(splitDisclaimer, infoX, footerY + 26);
+
+    doc.setTextColor(0);
 
     doc.save(`Laporan_Mutasi_Warga_RT02_${report.month}.pdf`);
     toast.success(`Laporan Mutasi (PDF) Periode ${report.month} berhasil diunduh!`);
@@ -3205,11 +3235,19 @@ export const generateSingleMutationCertificatePDF = async (log: PopulationChange
     let cursorY = 15;
 
     // Header Kop Surat
-    let logoData = '';
-    try { logoData = await getImageData(config.logo); } catch (e) {}
+    let logoDrawn = false;
+    try {
+        const logoData = await getImageData(config.logo);
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+            logoDrawn = true;
+        }
+    } catch (e) { console.error(e); }
 
-    if (logoData) {
-        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+    if (!logoDrawn) {
+        const lx = 30; const ly = 22;
+        doc.setDrawColor(0); doc.setLineWidth(0.5);
+        doc.lines([[10,0], [0,12], [-10,0], [0,-12]], lx, ly - 6, [1,1], 'S', true);
     }
 
     doc.setFont("times", "normal"); 
@@ -3283,9 +3321,10 @@ export const generateSingleMutationCertificatePDF = async (log: PopulationChange
     cursorY += 6;
     doc.text("Demikian Surat Keterangan ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.", marginX, cursorY, { maxWidth: 170 });
 
-    // TTD Section
+    // TTD Section (Identik dengan Surat Pengantar)
     cursorY += 15;
     const signX = pageWidth - 60;
+    doc.setFontSize(11);
     doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, cursorY, { align: "center" });
     cursorY += 6;
     doc.text(`Ketua ${config.rtName}`, signX, cursorY, { align: "center" });
@@ -3295,9 +3334,10 @@ export const generateSingleMutationCertificatePDF = async (log: PopulationChange
 
     doc.setFont("times", "bold");
     doc.text(config.rtChairman, signX, cursorY, { align: "center" });
-    doc.line(signX - 25, cursorY + 1, signX + 25, cursorY + 1);
+    const chairmanWidth = doc.getTextWidth(config.rtChairman);
+    doc.line(signX - (chairmanWidth / 2), cursorY + 1, signX + (chairmanWidth / 2), cursorY + 1);
 
-    // Stempel & TTD jika ada
+    // Stempel & TTD (Presisi identik)
     try {
         if (config.signature) {
             const signImg = await getImageData(config.signature);
@@ -3305,32 +3345,56 @@ export const generateSingleMutationCertificatePDF = async (log: PopulationChange
         }
         if (config.stamp) {
             const stampImg = await getImageData(config.stamp);
-            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 5, 25, 25);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 2, 25, 25);
         }
     } catch (e) {}
 
     // Footer Digital Authentication SODD
-    const footerY = pageHeight - 35;
-    doc.setDrawColor(220);
+    const footerY = pageHeight - 40;
+    doc.setDrawColor(200);
     doc.setLineWidth(0.2);
     doc.line(marginX, footerY, pageWidth - marginX, footerY);
 
-    try {
-        const baseUrl = window.location.origin;
-        const verificationUrl = `${baseUrl}/#/verify-official/${log.id}`;
-        const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { margin: 1, width: 200 });
-        doc.addImage(qrCodeDataUrl, 'PNG', marginX, footerY + 4, 18, 18);
-    } catch (e) {}
+    const qrSize = 22;
+    const qrX = marginX;
+    const qrY = footerY + 6;
 
+    try {
+        const baseUrl = 'https://terasrt02.vercel.app';
+        const verificationUrl = `${baseUrl}/#/verify-official/${log.id}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { 
+            margin: 1, 
+            width: 200,
+            color: { dark: '#1e293b', light: '#f8fafc' }
+        });
+        doc.addImage(qrCodeDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+    } catch (e) {
+        doc.setDrawColor(220, 220, 220);
+        doc.rect(qrX, qrY, qrSize, qrSize, 'S');
+    }
+
+    const infoX = qrX + qrSize + 6;
+    const contentW = pageWidth - (marginX * 2);
     doc.setFont("times", "bold");
     doc.setFontSize(8);
     doc.setTextColor(30, 41, 59);
-    doc.text("SISTEM OTENTIKASI DOKUMEN DIGITAL (SODD) RT 02", marginX + 22, footerY + 8);
+    doc.text("SISTEM OTENTIKASI DOKUMEN DIGITAL (SODD)", infoX, footerY + 10);
+
     doc.setFont("times", "normal");
     doc.setFontSize(7);
     doc.setTextColor(100, 116, 139);
-    doc.text(`ID Otentikasi: ${log.id}`, marginX + 22, footerY + 12);
-    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, marginX + 22, footerY + 16);
+    doc.text(`ID Otentikasi : ${log.id.toUpperCase()}`, infoX, footerY + 14);
+    doc.text(`Kode Rumah    : ${log.houseId}`, infoX, footerY + 17.5);
+    doc.text(`Waktu Terbit  : ${new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })} WITA`, infoX, footerY + 21);
+
+    doc.setFont("times", "italic");
+    doc.setFontSize(6.5);
+    doc.setTextColor(148, 163, 184);
+    const disclaimer = "Dokumen ini diterbitkan secara elektronik melalui Sistem Teras Warga dan merupakan dokumen sah yang tidak memerlukan tanda tangan basah. Keaslian dokumen dapat diverifikasi melalui pemindaian QR Code di atas atau melalui portal resmi layanan warga.";
+    const splitDisclaimer = doc.splitTextToSize(disclaimer, contentW - qrSize - 10);
+    doc.text(splitDisclaimer, infoX, footerY + 26);
+
+    doc.setTextColor(0);
 
     doc.save(`Surat_Pengantar_Mutasi_${log.type}_${(log.name || 'Warga').replace(/\s+/g, '_')}.pdf`);
     toast.success(`Surat Pengantar Mutasi (PDF) berhasil diunduh!`);
