@@ -2651,24 +2651,30 @@ export const generateDemographicAnalyticsReportPDF = async (
   try { logoData = await getImageData(config.logo); } catch (e) {}
   if (logoData) doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
 
-  doc.setFont("times", "normal");
+  doc.setFont("times", "bold");
   doc.setFontSize(14);
   doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
   doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
   doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
   doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-  doc.setFontSize(11);
+  
+  doc.setFont("times", "normal");
+  doc.setFontSize(10);
   doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
   doc.setLineWidth(1); doc.line(20, 42, 190, 42);
   doc.setLineWidth(0.3); doc.line(20, 43, 190, 43);
 
   // Report Title
   doc.setFont("times", "bold");
-  doc.setFontSize(16);
-  doc.text("LAPORAN ANALITIK & DEMOGRAFI TERPADU", centerX, 55, { align: "center" });
-  doc.setFontSize(10);
+  doc.setFontSize(14);
+  doc.text("LAPORAN ANALITIK & DEMOGRAFI TERPADU", centerX, 53, { align: "center" });
+  const titleW = doc.getTextWidth("LAPORAN ANALITIK & DEMOGRAFI TERPADU");
+  doc.line(centerX - (titleW / 2), 54, centerX + (titleW / 2), 54);
+
+  doc.setFontSize(9.5);
   doc.setFont("times", "normal");
-  doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, centerX, 61, { align: "center" });
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, centerX, 60, { align: "center" });
 
   let y = 70;
 
@@ -2958,57 +2964,63 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
     const config = customConfig || DEFAULT_PDF_CONFIG;
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
     
-    const margin = 15;
+    const marginX = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const centerX = pageWidth / 2;
     let currentY = 15;
 
-    // Header Kop Surat RT 02
+    // Standard Header Kop Surat
     let logoData = '';
     try {
         logoData = await getImageData(config.logo);
     } catch (e) { console.error(e); }
 
-    const centerX = pageWidth / 2;
     if (logoData) {
-        doc.addImage(logoData, 'PNG', 15, 10, 20, 25);
+        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
     }
 
-    doc.setFont("helvetica", "bold"); 
-    doc.setFontSize(13);
-    doc.setTextColor(30, 41, 59);
+    doc.setFont("times", "bold"); 
+    doc.setFontSize(14);
     doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'} - KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 19.5, { align: "center" });
-    doc.text(`PENGURUS RUKUN TETANGGA 02`, centerX, 25, { align: "center" });
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
 
-    doc.setFontSize(8.5);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 116, 139);
-    doc.text(`Alamat: ${config.rtAddress || 'Jl. Tondo Utama RT 02 Palu'}`, centerX, 30, { align: "center" });
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
 
-    doc.setLineWidth(0.8);
-    doc.setDrawColor(30, 41, 59);
-    doc.line(15, 33, pageWidth - 15, 33);
-    doc.setLineWidth(0.2);
-    doc.line(15, 34, pageWidth - 15, 34);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(30, 41, 59);
-    doc.text("LAPORAN REKAPITULASI MUTASI & DINAMIKA WARGA", centerX, 41, { align: "center" });
-    doc.setFontSize(8.5);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 116, 139);
-    doc.text(`PERIODE: BULAN ${report.month.toUpperCase()} ${report.year}`, centerX, 46, { align: "center" });
+    doc.setLineWidth(1.0);
+    doc.line(20, 42, 190, 42);
+    doc.setLineWidth(0.3);
+    doc.line(20, 43, 190, 43);
 
     currentY = 52;
 
-    // Metric Summary Box
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 24, 3, 3, "F");
-    doc.setDrawColor(226, 232, 240);
-    doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 24, 3, 3, "D");
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(30, 41, 59);
+    doc.text("LAPORAN REKAPITULASI MUTASI & DINAMIKA WARGA RESMI", centerX, currentY, { align: "center" });
+    const titleWidth = doc.getTextWidth("LAPORAN REKAPITULASI MUTASI & DINAMIKA WARGA RESMI");
+    doc.line(centerX - (titleWidth / 2), currentY + 1, centerX + (titleWidth / 2), currentY + 1);
 
-    const colW = (pageWidth - (margin * 2)) / 5;
+    currentY += 6;
+    doc.setFontSize(9.5);
+    doc.setFont("times", "normal");
+    doc.setTextColor(71, 85, 105);
+    doc.text(`PERIODE: BULAN ${report.month.toUpperCase()} ${report.year}`, centerX, currentY, { align: "center" });
+
+    currentY += 10;
+
+    // Metric Summary Box
+    const contentW = pageWidth - (marginX * 2);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(marginX, currentY, contentW, 24, 3, 3, "F");
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(marginX, currentY, contentW, 24, 3, 3, "D");
+
+    const colW = contentW / 5;
     const stats = [
         { label: "Warga Awal", val: report.initialPopulation },
         { label: "Warga Masuk", val: `+${report.newcomerCount}` },
@@ -3018,13 +3030,13 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
     ];
 
     stats.forEach((s, idx) => {
-        const x = margin + (idx * colW) + (colW / 2);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(7.5);
+        const x = marginX + (idx * colW) + (colW / 2);
+        doc.setFont("times", "normal");
+        doc.setFontSize(8);
         doc.setTextColor(100, 116, 139);
         doc.text(s.label.toUpperCase(), x, currentY + 7, { align: "center" });
 
-        doc.setFont("helvetica", "bold");
+        doc.setFont("times", "bold");
         doc.setFontSize(11);
         doc.setTextColor(30, 41, 59);
         doc.text(String(s.val), x, currentY + 16, { align: "center" });
@@ -3033,25 +3045,25 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
     currentY += 32;
 
     // Section 1: Detailed Mutation Logs Table
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFont("times", "bold");
+    doc.setFontSize(10.5);
     doc.setTextColor(30, 41, 59);
-    doc.text("A. RINCIAN CATATAN MUTASI WARGA", margin, currentY);
+    doc.text("A. RINCIAN CATATAN MUTASI WARGA", marginX, currentY);
     currentY += 5;
 
     const filteredLogs = logs.filter(l => l.date.startsWith(report.month));
 
-    const colWidths = [10, 25, 28, 45, 30, 42];
+    const colWidths = [10, 25, 28, 43, 30, 34];
     const headers = ['NO', 'TANGGAL', 'JENIS MUTASI', 'NAMA WARGA', 'KONTAK', 'KETERANGAN'];
 
     // Table Header
-    doc.setFillColor(79, 70, 229);
-    doc.rect(margin, currentY, pageWidth - (margin * 2), 8, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
+    doc.setFillColor(30, 41, 59);
+    doc.rect(marginX, currentY, contentW, 8, 'F');
+    doc.setFont("times", "bold");
+    doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
 
-    let curX = margin;
+    let curX = marginX;
     headers.forEach((h, i) => {
         const align = (i === 0 || i === 1) ? "center" : "left";
         const xPos = align === "center" ? curX + (colWidths[i] / 2) : curX + 2;
@@ -3062,29 +3074,29 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
     currentY += 8;
 
     // Table Rows
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFont("times", "normal");
+    doc.setFontSize(8.5);
     doc.setTextColor(30, 41, 59);
 
     if (filteredLogs.length === 0) {
         doc.setFillColor(248, 250, 252);
-        doc.rect(margin, currentY, pageWidth - (margin * 2), 10, 'F');
+        doc.rect(marginX, currentY, contentW, 10, 'F');
         doc.setTextColor(148, 163, 184);
-        doc.text("Tidak ada catatan mutasi warga pada periode bulan ini", pageWidth / 2, currentY + 6.5, { align: "center" });
+        doc.text("Tidak ada catatan mutasi warga pada periode bulan ini", centerX, currentY + 6.5, { align: "center" });
         currentY += 10;
     } else {
         filteredLogs.forEach((log, i) => {
-            if (currentY > 260) {
+            if (currentY > 245) {
                 doc.addPage();
                 currentY = 20;
             }
 
             if (i % 2 === 1) {
                 doc.setFillColor(248, 250, 252);
-                doc.rect(margin, currentY, pageWidth - (margin * 2), 8, 'F');
+                doc.rect(marginX, currentY, contentW, 8, 'F');
             }
 
-            let cX = margin;
+            let cX = marginX;
             doc.text((i + 1).toString(), cX + (colWidths[0] / 2), currentY + 5.5, { align: "center" });
             cX += colWidths[0];
 
@@ -3092,9 +3104,9 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
             cX += colWidths[1];
 
             const typeLabel = log.type === 'Newcomer' ? 'Warga Masuk' : log.type === 'MovedOut' ? 'Pindah Out' : log.type === 'Birth' ? 'Kelahiran' : 'Kematian';
-            doc.setFont("helvetica", "bold");
+            doc.setFont("times", "bold");
             doc.text(typeLabel, cX + 2, currentY + 5.5);
-            doc.setFont("helvetica", "normal");
+            doc.setFont("times", "normal");
             cX += colWidths[2];
 
             const name = log.name.length > 22 ? log.name.substring(0, 20) + '..' : log.name;
@@ -3104,38 +3116,80 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
             doc.text(log.phone || '-', cX + 2, currentY + 5.5);
             cX += colWidths[4];
 
-            const desc = (log.description || '-').length > 22 ? (log.description || '-').substring(0, 20) + '..' : (log.description || '-');
+            const desc = (log.description || '-').length > 20 ? (log.description || '-').substring(0, 18) + '..' : (log.description || '-');
             doc.text(desc, cX + 2, currentY + 5.5);
 
             currentY += 8;
         });
     }
 
-    currentY += 15;
+    currentY += 12;
 
     // Signatures Section
-    if (currentY > 230) {
+    if (currentY > 220) {
         doc.addPage();
         currentY = 20;
     }
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
-    doc.setTextColor(100, 116, 139);
-    doc.text(`Dokumen disahkan pada: Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, margin, currentY);
-    currentY += 10;
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - marginX, currentY, { align: "right" });
+    currentY += 8;
 
-    const sigW = (pageWidth - (margin * 2)) / 2;
+    const sigW = contentW / 2;
     
     // Left Sig: Sekretaris RT
-    doc.setFont("helvetica", "bold");
+    doc.setFont("times", "bold");
     doc.setTextColor(30, 41, 59);
-    doc.text("Sekretaris RT 02", margin + (sigW / 2), currentY, { align: "center" });
-    doc.text("( ..................................... )", margin + (sigW / 2), currentY + 25, { align: "center" });
+    doc.text("Sekretaris RT 02", marginX + (sigW / 2), currentY, { align: "center" });
 
     // Right Sig: Ketua RT
-    doc.text("Ketua RT 02", margin + sigW + (sigW / 2), currentY, { align: "center" });
-    doc.text(config.ketuaRtName || "( ..................................... )", margin + sigW + (sigW / 2), currentY + 25, { align: "center" });
+    doc.text(`Ketua ${config.rtName}`, marginX + sigW + (sigW / 2), currentY, { align: "center" });
+
+    const signSpaceY = currentY + 2;
+    currentY += 25;
+
+    doc.text("( ..................................... )", marginX + (sigW / 2), currentY, { align: "center" });
+
+    doc.text(config.rtChairman, marginX + sigW + (sigW / 2), currentY, { align: "center" });
+    const chairmanWidth = doc.getTextWidth(config.rtChairman);
+    doc.line(marginX + sigW + (sigW / 2) - (chairmanWidth / 2), currentY + 1, marginX + sigW + (sigW / 2) + (chairmanWidth / 2), currentY + 1);
+
+    // Add Stamp and Signature
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', marginX + sigW + (sigW / 2) - 15, signSpaceY, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', marginX + sigW + (sigW / 2) - 25, signSpaceY - 5, 25, 25);
+        }
+    } catch (e) {}
+
+    // Footer Digital Verification SODD
+    const footerY = pageHeight - 35;
+    doc.setDrawColor(200);
+    doc.setLineWidth(0.2);
+    doc.line(marginX, footerY, pageWidth - marginX, footerY);
+
+    try {
+        const baseUrl = window.location.origin;
+        const verificationUrl = `${baseUrl}/#/verify-official/${report.id}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, { margin: 1, width: 200 });
+        doc.addImage(qrCodeDataUrl, 'PNG', marginX, footerY + 4, 18, 18);
+    } catch (e) {}
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(30, 41, 59);
+    doc.text("SISTEM OTENTIKASI DOKUMEN DIGITAL (SODD) RT 02", marginX + 22, footerY + 8);
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`ID Laporan : ${report.id.toUpperCase()}`, marginX + 22, footerY + 12);
+    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })} WITA`, marginX + 22, footerY + 16);
 
     doc.save(`Laporan_Mutasi_Warga_RT02_${report.month}.pdf`);
     toast.success(`Laporan Mutasi (PDF) Periode ${report.month} berhasil diunduh!`);
