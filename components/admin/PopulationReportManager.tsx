@@ -463,9 +463,22 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       }
     });
 
-    // Try to find the previous month's report for initial population
-    const prevMonthStr = new Date(new Date(targetMonth + '-01').setMonth(new Date(targetMonth + '-01').getMonth() - 1)).toISOString().slice(0, 7);
-    const lastMonthReport = reports.find(r => r.month === prevMonthStr);
+    // Find previous month string in local time format (YYYY-MM)
+    const [yearNum, monthNum] = targetMonth.split('-').map(Number);
+    const prevYear = monthNum === 1 ? yearNum - 1 : yearNum;
+    const prevMonth = monthNum === 1 ? 12 : monthNum - 1;
+    const prevMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+
+    // 1. First priority: Exact previous month report
+    let lastMonthReport = reports.find(r => r.month === prevMonthStr);
+    
+    // 2. Second priority: Latest report strictly before targetMonth if exact previous month report doesn't exist
+    if (!lastMonthReport) {
+      const priorReports = reports.filter(r => r.month < targetMonth).sort((a, b) => b.month.localeCompare(a.month));
+      if (priorReports.length > 0) {
+        lastMonthReport = priorReports[0];
+      }
+    }
     
     let initialPopulation = lastMonthReport ? 
       (lastMonthReport.initialPopulation + lastMonthReport.birthCount + lastMonthReport.newcomerCount - lastMonthReport.movedOutCount - (lastMonthReport.deathCount || 0)) : 
