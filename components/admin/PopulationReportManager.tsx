@@ -1326,13 +1326,24 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
               return (
                 <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
-                  <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/40">
+                  <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50/40">
                     <div>
                       <h3 className="text-base font-black text-slate-900 tracking-tight">Daftar Laporan Bulanan</h3>
                       <p className="text-[10px] text-slate-500 font-semibold tracking-wide uppercase">
                         Menampilkan {processedReports.length} dari {reports.length} Rekapitulasi Berkas Kependudukan
                       </p>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => generatePopulationReportExcel(processedReports, populationLogs)}
+                      disabled={processedReports.length === 0}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-xs transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+                      title="Unduh Seluruh Rekapitulasi Laporan Bulanan ke dalam 1 File Excel (.xlsx)"
+                    >
+                      <FileUp size={15} />
+                      Export Semua Periode (.xlsx)
+                    </button>
                   </div>
                   
                   {viewMode === 'table' ? (
