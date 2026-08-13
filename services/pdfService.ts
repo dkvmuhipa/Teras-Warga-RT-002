@@ -2970,7 +2970,7 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
     const centerX = pageWidth / 2;
     let currentY = 15;
 
-    // Standard Header Kop Surat
+    // Standard Header Kop Surat (Matching generateSuratPengantar)
     let logoData = '';
     try {
         logoData = await getImageData(config.logo);
@@ -2980,15 +2980,14 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
         doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
     }
 
-    doc.setFont("times", "bold"); 
+    doc.setFont("times", "normal"); 
     doc.setFontSize(14);
     doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
     doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
     doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
     doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
 
-    doc.setFont("times", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
 
     doc.setLineWidth(1.0);
@@ -3213,15 +3212,14 @@ export const generateSingleMutationCertificatePDF = async (log: PopulationChange
         doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
     }
 
-    doc.setFont("times", "bold"); 
+    doc.setFont("times", "normal"); 
     doc.setFontSize(14);
     doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
     doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
     doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
     doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
 
-    doc.setFont("times", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
 
     doc.setLineWidth(1.0);
