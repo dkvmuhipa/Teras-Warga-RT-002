@@ -1859,9 +1859,15 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                             </div>
                           </td>
                           <td className="p-4">
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-black w-fit border border-slate-200/50">
-                              {log.houseId}
-                            </div>
+                            {(() => {
+                              const targetHouse = (houses || []).find(h => h.id === log.houseId);
+                              const houseLabel = targetHouse ? `Blok ${targetHouse.block}-${targetHouse.number}` : log.houseId;
+                              return (
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-black w-fit border border-slate-200/50" title={`ID Dokumen: ${log.houseId}`}>
+                                  {houseLabel}
+                                </div>
+                              );
+                            })()}
                           </td>
                           <td className="p-4 max-w-xs">
                             <div className="space-y-1.5">
