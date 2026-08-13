@@ -144,7 +144,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     for (const house of houses) {
       if (house.status === 'Occupied') {
         const hasNewcomerLog = populationLogs.some(l => l.type === 'Newcomer' && l.houseId === house.id);
-        if (!hasNewcomerLog) {
+        if (!hasNewcomerLog && house.joiningDate) {
           const vulnerability = [];
           if (house.isPKH) vulnerability.push('PKH');
           if (house.isBLT) vulnerability.push('BLT');
@@ -159,7 +159,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             name: house.headOfFamily || `Warga Rumah ${house.id}`,
             phone: house.phone || '',
             houseId: house.id,
-            date: house.joiningDate ? house.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0],
+            date: house.joiningDate.split('T')[0],
             description: 'Warga baru ditambahkan melalui Sync Data Warga',
             isGenerated: false, // Ensure it shows in Log Mutasi list and reports
             details: {
@@ -277,7 +277,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       // Auto-sync missing newcomers and moved out from houses
       const missingLogs: any[] = [];
       for (const house of houses) {
-        if (house.status === 'Occupied' && house.joiningDate?.startsWith(targetMonth)) {
+        // Only create Newcomer log if house has an EXPLICIT joiningDate in targetMonth (meaning they truly moved in this month)
+        if (house.status === 'Occupied' && house.joiningDate && house.joiningDate.startsWith(targetMonth)) {
           const hasLog = populationLogs.some(l => l.type === 'Newcomer' && l.houseId === house.id) ||
                          missingLogs.some(l => l.type === 'Newcomer' && l.houseId === house.id);
           if (!hasLog) {
@@ -297,7 +298,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               houseId: house.id,
               date: house.joiningDate.split('T')[0],
               description: 'Warga baru ditambahkan melalui Data Warga (Auto-Sync)',
-              isGenerated: false, // For current month newcomers, we want them included in reports
+              isGenerated: false,
               details: {
                 previousAddress: '-',
                 reasonForMoving: '-',
