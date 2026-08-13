@@ -133,7 +133,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   const handleSyncAllResidents = async () => {
     const isConfirmed = await confirm({
       title: 'Sinkronisasi Data Warga',
-      message: 'Sistem akan memeriksa semua warga yang "Menempati" (Occupied) namun belum memiliki catatan di Log Mutasi. Data lama yang sudah ada di sistem (Legacy Data) mungkin akan terdeteksi sebagai Warga Baru jika belum pernah dicatat. Apakah Anda ingin melanjutkan?',
+      message: 'Sistem akan memeriksa semua rumah berstatus "Menempati" (Occupied) yang belum memiliki catatan di Log Mutasi dan mendaftarkannya sebagai Log Mutasi Warga Baru. Apakah Anda ingin melanjutkan?',
       confirmLabel: 'Sync Semua Data',
       cancelLabel: 'Batal'
     });
@@ -142,7 +142,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
     let syncCount = 0;
     for (const house of houses) {
-      if (house.status === 'Occupied' && house.joiningDate) {
+      if (house.status === 'Occupied') {
         const hasLog = populationLogs.some(l => l.type === 'Newcomer' && l.houseId === house.id);
         if (!hasLog) {
           const vulnerability = [];
@@ -156,15 +156,15 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           const newLog = {
             id: Date.now().toString() + Math.random().toString(36).substring(7),
             type: 'Newcomer' as const,
-            name: house.headOfFamily,
-            phone: house.phone,
+            name: house.headOfFamily || `Warga Rumah ${house.id}`,
+            phone: house.phone || '',
             houseId: house.id,
-            date: house.joiningDate.split('T')[0],
-            description: 'Warga baru ditambahkan melalui Data Warga (Manual Sync)',
-            isGenerated: true, // Mark legacy data as generated to exclude from mutation reports
+            date: house.joiningDate ? house.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0],
+            description: 'Warga baru ditambahkan melalui Sync Data Warga',
+            isGenerated: false, // Ensure it shows in Log Mutasi list and reports
             details: {
               previousAddress: '-',
-              reasonForMoving: '-',
+              reasonForMoving: 'Registrasi Warga',
               familyCount: house.occupants || 1,
               familyMembers: house.familyMembers || [],
               residenceType: house.residenceType || 'Tetap',
@@ -183,9 +183,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       }
     }
     if (syncCount > 0) {
-      toast.success(`Berhasil menyinkronkan ${syncCount} data warga ke log mutasi.`);
+      toast.success(`Berhasil menyinkronkan ${syncCount} data warga ke log mutasi!`);
     } else {
-      toast.info('Semua data warga sudah sinkron dengan log mutasi.');
+      toast.info('Semua data rumah berpenghuni sudah memiliki catatan log mutasi.');
     }
   };
 
