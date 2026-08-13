@@ -1903,6 +1903,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               populationLogs={populationLogs} 
               setPopulationLogs={setPopulationLogs} 
               houses={houses} 
+              pdfConfig={pdfConfig}
               embedded={true}
             />
         ) : viewMode === 'requests' ? (

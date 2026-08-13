@@ -29,11 +29,12 @@ interface PopulationReportManagerProps {
   populationLogs: PopulationChangeLog[];
   setPopulationLogs: (logs: PopulationChangeLog[]) => void;
   houses: House[];
+  pdfConfig?: PdfConfig;
   embedded?: boolean;
 }
 
 export const PopulationReportManager: React.FC<PopulationReportManagerProps> = ({ 
-  reports, onAddReport, onUpdateReport, onDeleteReport, populationLogs, setPopulationLogs, houses, embedded = false
+  reports, onAddReport, onUpdateReport, onDeleteReport, populationLogs, setPopulationLogs, houses, pdfConfig, embedded = false
 }) => {
   const confirm = useConfirm();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1251,14 +1252,14 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                                 <Edit2 size={16} />
                               </button>
                               <button 
-                                onClick={() => generatePopulationReportPDF(r)}
+                                onClick={() => generatePopulationReportPDF(r, pdfConfig)}
                                 className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                                 title="Download Rekapitulasi Demografi PDF"
                               >
                                 <Download size={16} />
                               </button>
                               <button 
-                                onClick={() => generateMutationReportPDF(r, populationLogs)}
+                                onClick={() => generateMutationReportPDF(r, populationLogs, pdfConfig)}
                                 className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                                 title="Cetak Laporan Mutasi Bulanan Resmi PDF (Format Kelurahan)"
                               >
@@ -1745,7 +1746,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                             <div className="flex items-center justify-center gap-1">
                               {/* Print Single Certificate PDF */}
                               <button
-                                onClick={() => generateSingleMutationCertificatePDF(log)}
+                                onClick={() => generateSingleMutationCertificatePDF(log, pdfConfig)}
                                 className="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/50 rounded-lg transition-all"
                                 title="Cetak Surat Keterangan / Pengantar Mutasi (PDF)"
                               >
