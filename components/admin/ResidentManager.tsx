@@ -1213,12 +1213,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           const oldFamilyCount = oldHouse.familyMembers?.length || 0;
           const newFamilyCount = data.familyMembers?.length || 0;
           
-          if (data.generateMutationLog && (newOccupants > oldOccupants || newFamilyCount > oldFamilyCount || data.headOfFamily !== oldHouse.headOfFamily)) {
+          const oldBabyCount = oldHouse.babyCount || 0;
+          const newBabyCount = data.babyCount || 0;
+          const isBirth = newBabyCount > oldBabyCount;
+
+          if (data.generateMutationLog && (isBirth || newOccupants > oldOccupants || newFamilyCount > oldFamilyCount || data.headOfFamily !== oldHouse.headOfFamily)) {
             const isNewHead = data.headOfFamily !== oldHouse.headOfFamily;
-            const diff = Math.max(newOccupants - oldOccupants, newFamilyCount - oldFamilyCount, 0);
-            const oldBabyCount = oldHouse.babyCount || 0;
-            const newBabyCount = data.babyCount || 0;
-            const isBirth = newBabyCount > oldBabyCount;
+            const diff = Math.max(newOccupants - oldOccupants, newFamilyCount - oldFamilyCount, isBirth ? (newBabyCount - oldBabyCount) : 0);
 
             await addPopulationLogToDb({
               id: Date.now().toString(),
