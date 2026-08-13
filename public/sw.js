@@ -35,13 +35,14 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event (Stale-While-Revalidate with full network fallback)
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests and skip browser extensions/external services
+  // Only handle GET requests and skip non-http(s), browser extensions, or external services
   if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
     return;
   }
 
-  // Skip API calls or internal dynamic routes to avoid breaking live features
-  if (event.request.url.includes('/api/') || event.request.url.includes('/firestore')) {
+  // Skip Vite HMR / WebSockets / API calls / Firestore to avoid intercepting dev server HMR or live data
+  const url = new URL(event.request.url);
+  if (url.protocol === 'ws:' || url.protocol === 'wss:' || url.pathname.includes('/api/') || url.pathname.includes('/firestore') || url.port === '24678') {
     return;
   }
 
@@ -71,11 +72,18 @@ self.addEventListener('fetch', (event) => {
         });
 
         return networkResponse;
-      }).catch(() => {
+      }).catch(async () => {
         // Offline Fallback for SPA routing: return index.html for page loads
         if (event.request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('/');
+          const fallback = await caches.match('/');
+          if (fallback) return fallback;
         }
+        // Always return a valid Response object to prevent "Failed to convert value to 'Response'" TypeError
+        return new Response('Network error occurred', {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: new Headers({ 'Content-Type': 'text/plain' })
+        });
       });
     })
   );

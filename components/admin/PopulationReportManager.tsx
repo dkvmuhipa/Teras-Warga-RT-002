@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { PopulationReport, PopulationChangeLog, House } from '../../types';
 import { generatePopulationReportPDF, generateMutationReportPDF, generateSingleMutationCertificatePDF } from '../../services/pdfService';
 import { generatePopulationReportExcel } from '../../services/excelService';
-import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction, markAllLogsBeforeDateAsGenerated, unmarkAllLogsBeforeDateAsGenerated } from '../../services/databaseService';
+import { addPopulationLogToDb, updatePopulationLogToDb, deletePopulationLogFromDb, updateHouseData, logAction, markAllLogsBeforeDateAsGenerated, unmarkAllLogsBeforeDateAsGenerated, deletePopulationReportFromDb, addPopulationReportToDb } from '../../services/databaseService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { toast } from 'sonner';
 import { 
@@ -230,74 +230,76 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
     try {
       setIsGeneratingLogs(true);
-      // 1. Delete existing reports
+      // 1. Delete existing reports directly from Firestore
       for (const report of reports) {
-        await onDeleteReport(report.id);
+        if (report.id) {
+          await deletePopulationReportFromDb(report.id);
+        }
       }
 
-      // Calculate base actual residents count from occupied houses
-      let baseTotal = 0;
-      let baseMale = 0;
-      let baseFemale = 0;
-      let basePregnant = 0;
-      let baseBaby = 0;
-      let baseToddler = 0;
-      let baseChild = 0;
-      let baseTeenager = 0;
-      let baseAdult = 0;
-      let baseElderly = 0;
-      let baseWidow = 0;
-      let baseDisability = 0;
-      let baseOrphan = 0;
-      let baseSeasonal = 0;
-      let baseSeasonalMale = 0;
-      let baseSeasonalFemale = 0;
+      // 2. Calculate actual current residents and demographic distributions from occupied houses
+      let currentTotal = 0;
+      let currentMale = 0;
+      let currentFemale = 0;
+      let currentPregnant = 0;
+      let currentBaby = 0;
+      let currentToddler = 0;
+      let currentChild = 0;
+      let currentTeenager = 0;
+      let currentAdult = 0;
+      let currentElderly = 0;
+      let currentWidow = 0;
+      let currentDisability = 0;
+      let currentOrphan = 0;
+      let currentSeasonal = 0;
+      let currentSeasonalMale = 0;
+      let currentSeasonalFemale = 0;
 
       houses.forEach(house => {
         if (house.status === 'Occupied') {
           const occupantsCount = Math.max(house.occupants || 1, 1 + (house.familyMembers?.length || 0));
           const isSeasonal = house.residenceType === 'Sewa';
-          if (isSeasonal) baseSeasonal += occupantsCount;
+          if (isSeasonal) currentSeasonal += occupantsCount;
 
-          baseTotal += occupantsCount;
-          basePregnant += house.pregnantCount || 0;
-          baseBaby += house.babyCount || 0;
-          baseToddler += house.toddlerCount || 0;
-          baseChild += house.childCount || 0;
-          baseTeenager += house.teenagerCount || 0;
-          baseAdult += house.adultCount || 0;
-          baseElderly += house.elderlyCount || 0;
-          baseWidow += house.widowCount || 0;
-          baseDisability += house.disabilityCount || 0;
-          baseOrphan += house.orphanCount || 0;
+          currentTotal += occupantsCount;
+          currentPregnant += house.pregnantCount || 0;
+          currentBaby += house.babyCount || 0;
+          currentToddler += house.toddlerCount || 0;
+          currentChild += house.childCount || 0;
+          currentTeenager += house.teenagerCount || 0;
+          currentAdult += house.adultCount || 0;
+          currentElderly += house.elderlyCount || 0;
+          currentWidow += house.widowCount || 0;
+          currentDisability += house.disabilityCount || 0;
+          currentOrphan += house.orphanCount || 0;
 
           if (house.familyMembers && house.familyMembers.length > 0) {
-            baseMale += (house.gender === 'Laki-laki' || !house.gender) ? 1 : 0;
-            if (isSeasonal && (house.gender === 'Laki-laki' || !house.gender)) baseSeasonalMale++;
-            baseFemale += house.gender === 'Perempuan' ? 1 : 0;
-            if (isSeasonal && house.gender === 'Perempuan') baseSeasonalFemale++;
+            currentMale += (house.gender === 'Laki-laki' || !house.gender) ? 1 : 0;
+            if (isSeasonal && (house.gender === 'Laki-laki' || !house.gender)) currentSeasonalMale++;
+            currentFemale += house.gender === 'Perempuan' ? 1 : 0;
+            if (isSeasonal && house.gender === 'Perempuan') currentSeasonalFemale++;
 
-            house.familyMembers.forEach(m => {
-              const mGender = m.gender || 'Laki-laki';
+            house.familyMembers.forEach(mem => {
+              const mGender = mem.gender || 'Laki-laki';
               if (mGender === 'Laki-laki') {
-                baseMale++;
-                if (isSeasonal) baseSeasonalMale++;
+                currentMale++;
+                if (isSeasonal) currentSeasonalMale++;
               } else if (mGender === 'Perempuan') {
-                baseFemale++;
-                if (isSeasonal) baseSeasonalFemale++;
+                currentFemale++;
+                if (isSeasonal) currentSeasonalFemale++;
               }
             });
 
             const registeredCount = 1 + house.familyMembers.length;
             if (occupantsCount > registeredCount) {
               const diff = occupantsCount - registeredCount;
-              const m = Math.ceil(diff / 2);
-              const f = Math.floor(diff / 2);
-              baseMale += m;
-              baseFemale += f;
+              const maleDiff = Math.ceil(diff / 2);
+              const femaleDiff = Math.floor(diff / 2);
+              currentMale += maleDiff;
+              currentFemale += femaleDiff;
               if (isSeasonal) {
-                baseSeasonalMale += m;
-                baseSeasonalFemale += f;
+                currentSeasonalMale += maleDiff;
+                currentSeasonalFemale += femaleDiff;
               }
             }
           } else {
@@ -305,72 +307,202 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             const headMale = headGender === 'Laki-laki' ? 1 : 0;
             const headFemale = headGender === 'Perempuan' ? 1 : 0;
 
-            baseMale += headMale;
-            baseFemale += headFemale;
+            currentMale += headMale;
+            currentFemale += headFemale;
             if (isSeasonal) {
-              if (headMale) baseSeasonalMale++;
-              if (headFemale) baseSeasonalFemale++;
+              if (headMale) currentSeasonalMale++;
+              if (headFemale) currentSeasonalFemale++;
             }
 
             if (occupantsCount > 1) {
               const diff = occupantsCount - 1;
-              const m = Math.ceil(diff / 2);
-              const f = Math.floor(diff / 2);
-              baseMale += m;
-              baseFemale += f;
+              const maleDiff = Math.ceil(diff / 2);
+              const femaleDiff = Math.floor(diff / 2);
+              currentMale += maleDiff;
+              currentFemale += femaleDiff;
               if (isSeasonal) {
-                baseSeasonalMale += m;
-                baseSeasonalFemale += f;
+                currentSeasonalMale += maleDiff;
+                currentSeasonalFemale += femaleDiff;
               }
             }
           }
         }
       });
 
-      const currentMonthNum = new Date().getMonth() + 1; // 1..8
-      let runningInitial = baseTotal;
+      const currentMonthNum = new Date().getMonth() + 1; // 1..8 for 2026
+
+      // 3. Build monthly statistics array
+      const monthlyReports: any[] = [];
 
       for (let m = 1; m <= currentMonthNum; m++) {
         const monthStr = `2026-${String(m).padStart(2, '0')}`;
-        
-        // Find logs for this specific month
+        const endOfMonthDateStr = `${monthStr}-31`;
+
+        // Calculate demographics for houses that joined on or before this month
+        let monthMale = 0;
+        let monthFemale = 0;
+        let monthPregnant = 0;
+        let monthBaby = 0;
+        let monthToddler = 0;
+        let monthChild = 0;
+        let monthTeenager = 0;
+        let monthAdult = 0;
+        let monthElderly = 0;
+        let monthWidow = 0;
+        let monthDisability = 0;
+        let monthOrphan = 0;
+        let monthSeasonal = 0;
+        let monthSeasonalMale = 0;
+        let monthSeasonalFemale = 0;
+
+        // If current month (m === currentMonthNum), use exact actual current demographics
+        if (m === currentMonthNum) {
+          monthMale = currentMale;
+          monthFemale = currentFemale;
+          monthPregnant = currentPregnant;
+          monthBaby = currentBaby;
+          monthToddler = currentToddler;
+          monthChild = currentChild;
+          monthTeenager = currentTeenager;
+          monthAdult = currentAdult;
+          monthElderly = currentElderly;
+          monthWidow = currentWidow;
+          monthDisability = currentDisability;
+          monthOrphan = currentOrphan;
+          monthSeasonal = currentSeasonal;
+          monthSeasonalMale = currentSeasonalMale;
+          monthSeasonalFemale = currentSeasonalFemale;
+        } else {
+          houses.forEach(house => {
+            if (house.status === 'Occupied') {
+              const jDate = house.joiningDate ? house.joiningDate.split('T')[0] : '2000-01-01';
+              if (jDate <= endOfMonthDateStr) {
+                const occupantsCount = Math.max(house.occupants || 1, 1 + (house.familyMembers?.length || 0));
+                const isSeasonal = house.residenceType === 'Sewa';
+                if (isSeasonal) monthSeasonal += occupantsCount;
+
+                monthPregnant += house.pregnantCount || 0;
+                monthBaby += house.babyCount || 0;
+                monthToddler += house.toddlerCount || 0;
+                monthChild += house.childCount || 0;
+                monthTeenager += house.teenagerCount || 0;
+                monthAdult += house.adultCount || 0;
+                monthElderly += house.elderlyCount || 0;
+                monthWidow += house.widowCount || 0;
+                monthDisability += house.disabilityCount || 0;
+                monthOrphan += house.orphanCount || 0;
+
+                if (house.familyMembers && house.familyMembers.length > 0) {
+                  monthMale += (house.gender === 'Laki-laki' || !house.gender) ? 1 : 0;
+                  if (isSeasonal && (house.gender === 'Laki-laki' || !house.gender)) monthSeasonalMale++;
+                  monthFemale += house.gender === 'Perempuan' ? 1 : 0;
+                  if (isSeasonal && house.gender === 'Perempuan') monthSeasonalFemale++;
+
+                  house.familyMembers.forEach(mem => {
+                    const mGender = mem.gender || 'Laki-laki';
+                    if (mGender === 'Laki-laki') {
+                      monthMale++;
+                      if (isSeasonal) monthSeasonalMale++;
+                    } else if (mGender === 'Perempuan') {
+                      monthFemale++;
+                      if (isSeasonal) monthSeasonalFemale++;
+                    }
+                  });
+
+                  const registeredCount = 1 + house.familyMembers.length;
+                  if (occupantsCount > registeredCount) {
+                    const diff = occupantsCount - registeredCount;
+                    const maleDiff = Math.ceil(diff / 2);
+                    const femaleDiff = Math.floor(diff / 2);
+                    monthMale += maleDiff;
+                    monthFemale += femaleDiff;
+                    if (isSeasonal) {
+                      monthSeasonalMale += maleDiff;
+                      monthSeasonalFemale += femaleDiff;
+                    }
+                  }
+                } else {
+                  const headGender = house.gender || 'Laki-laki';
+                  const headMale = headGender === 'Laki-laki' ? 1 : 0;
+                  const headFemale = headGender === 'Perempuan' ? 1 : 0;
+
+                  monthMale += headMale;
+                  monthFemale += headFemale;
+                  if (isSeasonal) {
+                    if (headMale) monthSeasonalMale++;
+                    if (headFemale) monthSeasonalFemale++;
+                  }
+
+                  if (occupantsCount > 1) {
+                    const diff = occupantsCount - 1;
+                    const maleDiff = Math.ceil(diff / 2);
+                    const femaleDiff = Math.floor(diff / 2);
+                    monthMale += maleDiff;
+                    monthFemale += femaleDiff;
+                    if (isSeasonal) {
+                      monthSeasonalMale += maleDiff;
+                      monthSeasonalFemale += femaleDiff;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
         const logsThisMonth = populationLogs.filter(log => log.date.startsWith(monthStr));
         const birthCount = logsThisMonth.filter(l => l.type === 'Birth').length;
         const deathCount = logsThisMonth.filter(l => l.type === 'Death').length;
-        const newcomerCount = logsThisMonth.filter(l => l.type === 'Newcomer' && l.date.startsWith(monthStr)).reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
-        const movedOutCount = logsThisMonth.filter(l => l.type === 'MovedOut' && l.date.startsWith(monthStr)).reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
+        const newcomerCount = logsThisMonth.filter(l => l.type === 'Newcomer').reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
+        const movedOutCount = logsThisMonth.filter(l => l.type === 'MovedOut').reduce((sum, log) => sum + (log.details?.familyCount || 1), 0);
 
-        const reportData = {
+        monthlyReports.push({
           month: monthStr,
           year: 2026,
-          initialPopulation: runningInitial,
           birthCount,
           deathCount,
           newcomerCount,
           movedOutCount,
-          maleCount: baseMale,
-          femaleCount: baseFemale,
-          pregnantCount: basePregnant,
-          babyCount: baseBaby,
-          toddlerCount: baseToddler,
-          childCount: baseChild,
-          teenagerCount: baseTeenager,
-          adultCount: baseAdult,
-          elderlyCount: baseElderly,
-          widowCount: baseWidow,
-          disabilityCount: baseDisability,
-          orphanCount: baseOrphan,
-          seasonalCount: baseSeasonal,
-          seasonalMaleCount: baseSeasonalMale,
-          seasonalFemaleCount: baseSeasonalFemale,
+          maleCount: monthMale,
+          femaleCount: monthFemale,
+          pregnantCount: monthPregnant,
+          babyCount: monthBaby,
+          toddlerCount: monthToddler,
+          childCount: monthChild,
+          teenagerCount: monthTeenager,
+          adultCount: monthAdult,
+          elderlyCount: monthElderly,
+          widowCount: monthWidow,
+          disabilityCount: monthDisability,
+          orphanCount: monthOrphan,
+          seasonalCount: monthSeasonal,
+          seasonalMaleCount: monthSeasonalMale,
+          seasonalFemaleCount: monthSeasonalFemale,
           createdAt: new Date().toISOString()
-        };
-
-        await onAddReport(reportData);
-        runningInitial = runningInitial + birthCount + newcomerCount - movedOutCount - deathCount;
+        });
       }
 
-      toast.success('Berhasil meng-generate seluruh laporan bulanan 2026 secara rapi & presisi!');
+      // 4. Force current month's final total to match actual currentTotal
+      const currentMonthIndex = currentMonthNum - 1;
+      const currentReport = monthlyReports[currentMonthIndex];
+      const netCurrentMonthMutation = currentReport.birthCount + currentReport.newcomerCount - currentReport.movedOutCount - currentReport.deathCount;
+      currentReport.initialPopulation = currentTotal - netCurrentMonthMutation;
+
+      // 5. Work backwards to compute initialPopulation for prior months
+      for (let i = currentMonthIndex - 1; i >= 0; i--) {
+        const nextReport = monthlyReports[i + 1];
+        const thisReport = monthlyReports[i];
+        const netThisMutation = thisReport.birthCount + thisReport.newcomerCount - thisReport.movedOutCount - thisReport.deathCount;
+        thisReport.initialPopulation = nextReport.initialPopulation - netThisMutation;
+        if (thisReport.initialPopulation < 0) thisReport.initialPopulation = 0;
+      }
+
+      // 6. Save clean monthly reports to Firestore
+      for (const rep of monthlyReports) {
+        await addPopulationReportToDb(rep);
+      }
+
+      toast.success('Berhasil meng-generate seluruh laporan bulanan 2026 secara akurat sesuai data warga riil!');
     } catch (err) {
       console.error(err);
       toast.error('Gagal meng-generate laporan.');
