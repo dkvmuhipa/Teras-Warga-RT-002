@@ -1867,9 +1867,16 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               reports={populationReports} 
               onAddReport={async (r) => {
                 try {
-                  await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
-                  await markPopulationLogsAsGenerated(r.month);
-                  toast.success(`Laporan ${r.month} berhasil disimpan.`);
+                  const existingReport = populationReports.find(p => p.month === r.month);
+                  if (existingReport) {
+                    await updatePopulationReportToDb(existingReport.id, r);
+                    await markPopulationLogsAsGenerated(r.month);
+                    toast.success(`Laporan periode ${r.month} berhasil diperbarui (dikonsolidasi).`);
+                  } else {
+                    await addPopulationReportToDb({ ...r, createdAt: new Date().toISOString() });
+                    await markPopulationLogsAsGenerated(r.month);
+                    toast.success(`Laporan periode ${r.month} berhasil disimpan.`);
+                  }
                 } catch (error) {
                   handleFirestoreError(error, OperationType.CREATE, "populationReports");
                 }
