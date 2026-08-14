@@ -110,62 +110,76 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
         ))}
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex flex-col xl:flex-row justify-between items-center gap-6 bg-white p-4 md:p-5 rounded-[2.5rem] border border-slate-100 shadow-sm">
-        <div className="flex items-center gap-3.5 px-2 w-full xl:w-auto">
-          <div className="p-3 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-2xl shadow-md shadow-indigo-100">
-            {activeTab === 'announcements' && <Megaphone size={20} />}
-            {activeTab === 'news' && <BookOpen size={20} />}
-            {activeTab === 'polls' && <Vote size={20} />}
-            {activeTab === 'umkm' && <ShoppingBag size={20} />}
-            {activeTab === 'gallery' && <Image size={20} />}
-            {activeTab === 'events' && <Calendar size={20} />}
-            {activeTab === 'faq' && <HelpCircle size={20} />}
+      {/* Executive Media Category Selector */}
+      <div className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl shadow-md shadow-indigo-100 shrink-0">
+              {activeTab === 'announcements' && <Megaphone size={18} />}
+              {activeTab === 'news' && <BookOpen size={18} />}
+              {activeTab === 'polls' && <Vote size={18} />}
+              {activeTab === 'umkm' && <ShoppingBag size={18} />}
+              {activeTab === 'gallery' && <Image size={18} />}
+              {activeTab === 'events' && <Calendar size={18} />}
+              {activeTab === 'faq' && <HelpCircle size={18} />}
+            </div>
+            <div>
+              <h2 className="text-base font-black text-slate-900 tracking-tight leading-snug">
+                {activeTab === 'announcements' && 'Pengumuman Resmi & Broadcast WA'}
+                {activeTab === 'news' && 'Kanal Berita & Artikel Lingkungan'}
+                {activeTab === 'polls' && 'Voting & Musyawarah Mufakat'}
+                {activeTab === 'umkm' && 'Katalog Ekonomi UMKM Warga'}
+                {activeTab === 'gallery' && 'Dokumentasi & Galeri Foto'}
+                {activeTab === 'events' && 'Agenda & Kalender Kegiatan RT'}
+                {activeTab === 'faq' && 'Pusat Bantuan & FAQ Warga'}
+              </h2>
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5">Pilih Saluran Informasi Publik</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base md:text-lg font-black text-slate-800 tracking-tight">
-              {activeTab === 'announcements' && 'Pengumuman Resmi & Broadcast WA'}
-              {activeTab === 'news' && 'Kanal Berita & Artikel Lingkungan'}
-              {activeTab === 'polls' && 'Voting & Musyawarah Mufakat'}
-              {activeTab === 'umkm' && 'Katalog Ekonomi UMKM Warga'}
-              {activeTab === 'gallery' && 'Dokumentasi & Galeri Foto'}
-              {activeTab === 'events' && 'Agenda & Kalender Kegiatan RT'}
-              {activeTab === 'faq' && 'Pusat Bantuan & FAQ Warga'}
-            </h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Kanal Penyiaran Aktif</p>
+
+          <div className="px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-[10px] font-black text-indigo-700 uppercase tracking-wider shrink-0">
+            {activeTab.toUpperCase()} ACTIVE
           </div>
         </div>
-        
-        <div className="flex bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/80 shadow-inner w-full xl:w-auto overflow-x-auto no-scrollbar">
+
+        {/* 7 Interactive Ultra-Modern Category Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
           {[
-            { id: 'announcements', icon: Megaphone, label: 'Pengumuman', count: announcements.length },
-            { id: 'news', icon: BookOpen, label: 'Berita', count: news.length },
-            { id: 'events', icon: Calendar, label: 'Acara', count: events.length },
-            { id: 'polls', icon: Vote, label: 'Voting', count: polls.length },
-            { id: 'umkm', icon: ShoppingBag, label: 'UMKM', count: umkm.length },
-            { id: 'gallery', icon: Image, label: 'Galeri', count: gallery.length },
-            { id: 'faq', icon: HelpCircle, label: 'FAQ', count: faqItems.length }
-          ].map((tab) => (
-            <button 
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)} 
-              className={`flex-1 xl:flex-none flex items-center justify-center gap-2.5 px-4 md:px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
-                activeTab === tab.id 
-                  ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80' 
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <tab.icon size={14} className="shrink-0" />
-              <span>{tab.label}</span>
-              <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${
-                activeTab === tab.id 
-                  ? 'bg-indigo-50 text-indigo-600' 
-                  : 'bg-slate-200/60 text-slate-500'
-              }`}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
+            { id: 'announcements', icon: Megaphone, label: 'Pengumuman', count: announcements.length, color: 'text-indigo-600' },
+            { id: 'news', icon: BookOpen, label: 'Berita', count: news.length, color: 'text-emerald-600' },
+            { id: 'events', icon: Calendar, label: 'Acara RT', count: events.length, color: 'text-orange-600' },
+            { id: 'polls', icon: Vote, label: 'Voting', count: polls.length, color: 'text-violet-600' },
+            { id: 'umkm', icon: ShoppingBag, label: 'UMKM', count: umkm.length, color: 'text-amber-600' },
+            { id: 'gallery', icon: Image, label: 'Galeri', count: gallery.length, color: 'text-pink-600' },
+            { id: 'faq', icon: HelpCircle, label: 'FAQ', count: faqItems.length, color: 'text-sky-600' }
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`
+                  p-3 rounded-2xl border transition-all text-left flex flex-col justify-between h-20 group relative overflow-hidden
+                  ${isActive 
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-950/20 scale-[1.02]' 
+                    : 'bg-slate-50/70 border-slate-200/80 text-slate-700 hover:bg-white hover:border-indigo-300 hover:shadow-xs'}
+                `}
+              >
+                <div className="flex items-center justify-between">
+                  <tab.icon size={15} className={isActive ? 'text-indigo-400' : tab.color} />
+                  <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-md ${
+                    isActive ? 'bg-indigo-500/30 text-indigo-300' : 'bg-slate-200/70 text-slate-600'
+                  }`}>
+                    {tab.count}
+                  </span>
+                </div>
+                <span className={`text-[11px] font-black tracking-tight leading-none ${isActive ? 'text-white' : 'text-slate-800'}`}>
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

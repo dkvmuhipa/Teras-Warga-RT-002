@@ -259,6 +259,11 @@ export interface AppEvent {
   time?: string;
   location: string;
   attendees: string[]; // House IDs or Names
+  organizer?: string;
+  category?: 'Gotong Royong' | 'Rapat RT' | 'Keagamaan' | 'Olahraga' | 'Sosial/Budaya';
+  quota?: number;
+  dresscode?: string;
+  isBroadcast?: boolean;
 }
 
 // Feature 3: Asset Management
@@ -296,6 +301,10 @@ export interface News {
   date: string;
   image?: string;
   category?: 'Kegiatan' | 'Pengumuman' | 'Warga' | 'Lainnya';
+  author?: string;
+  excerpt?: string;
+  location?: string;
+  isBroadcast?: boolean;
 }
 
 // New Notification Interface
@@ -337,6 +346,9 @@ export interface UMKM {
   gallery?: string[];
   rating?: number;
   reviewsCount?: number;
+  priceRange?: string;
+  isVerified?: boolean;
+  featuredProduct?: string;
   socialMedia?: {
     platform: 'Instagram' | 'Facebook' | 'TikTok';
     url: string;
@@ -558,6 +570,10 @@ export interface Poll {
   options: PollOption[];
   totalVotes: number;
   createdBy?: string; // Admin email/id
+  category?: 'Kebijakan RT' | 'Pemilihan Pengurus' | 'Fasilitas' | 'Kegiatan/Acara';
+  isSecret?: boolean;
+  maxChoices?: number;
+  isBroadcast?: boolean;
 }
 
 // Bursa Warga (Marketplace) Types
@@ -587,6 +603,8 @@ export interface FAQItem {
   question: string;
   answer: string;
   category?: 'layanan' | 'iuran' | 'keamanan' | 'lingkungan' | 'sosial';
+  keywords?: string[];
+  isPopular?: boolean;
 }
 
 export interface Document {

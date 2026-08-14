@@ -98,102 +98,183 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
   };
 
   return (
-    <div className="p-6 font-sans">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div className="p-4 sm:p-6 font-sans space-y-6">
+      {/* Title Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xs">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Pusat Dokumen</h1>
-          <p className="text-slate-500 font-medium">Kelola dokumen publik, aturan, dan formulir RT.</p>
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-6 bg-indigo-600 rounded-full"></div>
+            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Pusat Arsip Digital</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">Arsip Dokumen RT 02</h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Pengelolaan regulasi resmi, SK kepengurusan, aturan lingkungan, dan formulir pelayanan.</p>
         </div>
         <button
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20"
+          className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
         >
           <Plus size={18} /> Unggah Dokumen
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+      {/* 2. Live Document Statistics Bento Widgets */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/40 p-5 rounded-3xl border border-indigo-200/50 shadow-xs flex items-center gap-3.5">
+          <div className="p-3 bg-white text-indigo-600 rounded-2xl shadow-xs shrink-0">
+            <FileText size={20} />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-indigo-600 uppercase tracking-wider">Total Dokumen</p>
+            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">{documents.length} File</h4>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-amber-50 to-amber-100/40 p-5 rounded-3xl border border-amber-200/50 shadow-xs flex items-center gap-3.5">
+          <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-xs shrink-0">
+            <FileCode size={20} />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-amber-600 uppercase tracking-wider">SK RT & Kebijakan</p>
+            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">{documents.filter(d => d.category === 'SK RT').length} Berkas</h4>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/40 p-5 rounded-3xl border border-emerald-200/50 shadow-xs flex items-center gap-3.5">
+          <div className="p-3 bg-white text-emerald-600 rounded-2xl shadow-xs shrink-0">
+            <FileSpreadsheet size={20} />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-emerald-600 uppercase tracking-wider">Aturan Lingkungan</p>
+            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">{documents.filter(d => d.category === 'Aturan').length} Dokumen</h4>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100/40 p-5 rounded-3xl border border-purple-200/50 shadow-xs flex items-center gap-3.5">
+          <div className="p-3 bg-white text-purple-600 rounded-2xl shadow-xs shrink-0">
+            <FileArchive size={20} />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-purple-600 uppercase tracking-wider">Formulir Publik</p>
+            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">{documents.filter(d => d.category === 'Formulir').length} Template</h4>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Filters & Glassmorphic Search Bar */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white p-4 rounded-[2rem] border border-slate-100 shadow-xs">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
           <input 
             type="text" 
-            placeholder="Cari dokumen..." 
-            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+            placeholder="Cari judul dokumen atau regulasi..." 
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/50">
-          {(['All', 'SK RT', 'Aturan', 'Formulir', 'Lainnya'] as const).map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilterCategory(cat)}
-              className={`
-                px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all
-                ${filterCategory === cat 
-                  ? 'bg-white text-indigo-600 shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-700'}
-              `}
-            >
-              {cat === 'All' ? 'Semua' : cat}
-            </button>
-          ))}
+        <div className="flex bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/80 max-w-full overflow-x-auto no-scrollbar shadow-inner">
+          <div className="flex items-center gap-1 min-w-max">
+            {(['All', 'SK RT', 'Aturan', 'Formulir', 'Lainnya'] as const).map((cat) => {
+              const count = cat === 'All' ? documents.length : documents.filter(d => d.category === cat).length;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setFilterCategory(cat)}
+                  className={`
+                    px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5
+                    ${filterCategory === cat 
+                      ? 'bg-white text-indigo-600 shadow-sm border border-indigo-100' 
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'}
+                  `}
+                >
+                  <span>{cat === 'All' ? 'Semua' : cat}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[9px] ${filterCategory === cat ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-200/70 text-slate-500'}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* List */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          <AnimatePresence mode="popLayout">
-            {filteredDocs.map((doc) => (
+        <AnimatePresence mode="popLayout">
+          {filteredDocs.map((doc) => {
+            const ext = doc.url ? doc.url.split('.').pop()?.split('?')[0].toUpperCase() : 'PDF';
+            return (
               <motion.div
                 key={doc.id}
                 layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group relative"
+                className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-indigo-100/40 transition-all group relative flex flex-col justify-between"
               >
-                <div className="flex items-start gap-4">
-                  <div className="p-4 bg-slate-50 rounded-2xl group-hover:bg-indigo-50 transition-colors">
-                    {getFileIcon(doc.url)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-black uppercase tracking-widest rounded">
-                        {doc.category}
+                <div>
+                  <div className="flex items-start gap-4">
+                    <div className="p-4 bg-slate-50 rounded-2xl group-hover:bg-indigo-50 transition-colors shrink-0 relative">
+                      {getFileIcon(doc.url)}
+                      {/* 1. Extension Badge */}
+                      <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 bg-slate-900 text-white rounded text-[8px] font-black uppercase tracking-wider">
+                        {ext}
                       </span>
                     </div>
-                    <h3 className="text-base font-black text-slate-800 mb-1 line-clamp-1">
-                      {doc.title}
-                    </h3>
-                    <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold">
-                      <span className="flex items-center gap-1"><Clock size={12} /> {new Date(doc.uploadDate).toLocaleDateString('id-ID')}</span>
-                      <span className="flex items-center gap-1"><User size={12} /> {doc.uploadedBy}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-[9px] font-black uppercase tracking-widest rounded-md">
+                          {doc.category}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-black text-slate-900 mb-1 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
+                        {doc.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold mt-2">
+                        <span className="flex items-center gap-1"><Clock size={12} /> {new Date(doc.uploadDate).toLocaleDateString('id-ID')}</span>
+                        <span className="flex items-center gap-1"><User size={12} /> {doc.uploadedBy}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                  <div className="flex items-center gap-2 mt-6 pt-4 border-t border-slate-50">
-                    <a 
-                      href={doc.url} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
-                    >
-                      <Download size={14} /> Lihat
-                    </a>
-                    <button
-                      onClick={() => handleDelete(doc.id)}
-                      className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+
+                <div className="flex items-center gap-2 mt-6 pt-4 border-t border-slate-100">
+                  <a 
+                    href={doc.url} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xs"
+                  >
+                    <Download size={14} /> Lihat Dokumen
+                  </a>
+
+                  {/* 3. Direct Share to WhatsApp Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const shareText = `*ARSIP DOKUMEN RESMI RT 02 PALU* 📑\n\n*Judul:* ${doc.title}\n*Kategori:* ${doc.category}\n*Tanggal Muka:* ${new Date(doc.uploadDate).toLocaleDateString('id-ID')}\n\nSilakan unduh atau baca dokumen resmi melalui tautan berikut:\n${doc.url}\n\n_Hormat kami,\nPengurus RT 02 Palu_`;
+                      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+                      window.open(waUrl, '_blank');
+                    }}
+                    className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200/60 rounded-xl transition-all"
+                    title="Bagikan ke WhatsApp Warga"
+                  >
+                    <FileText size={16} className="text-emerald-600" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(doc.id)}
+                    className="p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/60 rounded-xl transition-all"
+                    title="Hapus Dokumen"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
 
       {/* Upload Modal */}
       <AnimatePresence>

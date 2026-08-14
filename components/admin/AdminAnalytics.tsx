@@ -276,27 +276,29 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
           </button>
 
           {/* Superior Level Master Tabs */}
-          <div className="flex bg-slate-100/80 p-1.5 rounded-[2rem] border border-slate-200/80 shrink-0 overflow-x-auto w-full sm:w-auto">
-            {[
-              { id: 'overview', label: 'Ringkasan Eksekutif', icon: LayoutDashboard },
-              { id: 'demographics', label: 'Kependudukan & Demografi', icon: Users },
-              { id: 'operational', label: 'Efisiensi Operasional', icon: Activity }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                id={`id_analytics` + tab.id}
-                className={`
-                  px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 shrink-0
-                  ${activeTab === tab.id 
-                    ? 'bg-white text-indigo-600 shadow-sm border border-indigo-100 font-bold' 
-                    : 'text-slate-500 hover:text-slate-800'}
-                `}
-              >
-                <tab.icon size={15} />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+          <div className="flex items-center bg-slate-100/80 p-1.5 rounded-[2rem] border border-slate-200/80 max-w-full overflow-x-auto no-scrollbar shadow-inner">
+            <div className="flex items-center gap-1 min-w-max w-full">
+              {[
+                { id: 'overview', label: 'Ringkasan Eksekutif', icon: LayoutDashboard },
+                { id: 'demographics', label: 'Kependudukan & Demografi', icon: Users },
+                { id: 'operational', label: 'Efisiensi Operasional', icon: Activity }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  id={`id_analytics` + tab.id}
+                  className={`
+                    px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-[11px] sm:text-xs font-black transition-all flex items-center justify-center gap-2 shrink-0 whitespace-nowrap
+                    ${activeTab === tab.id 
+                      ? 'bg-white text-indigo-600 shadow-md border border-indigo-100 font-bold' 
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'}
+                  `}
+                >
+                  <tab.icon size={14} className="shrink-0" />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
