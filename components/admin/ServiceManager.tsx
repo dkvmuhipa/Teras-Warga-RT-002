@@ -74,11 +74,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       const originalSave = jsPDF.prototype.save;
       let blobUrl = '';
       
-      jsPDF.prototype.save = function(filename?: string) {
+      jsPDF.prototype.save = function(this: any, filename?: string) {
         const blob = this.output('blob');
         blobUrl = URL.createObjectURL(blob);
         return this;
-      };
+      } as any;
 
       await generateSuratPengantar(letterData, configToUse, false);
       jsPDF.prototype.save = originalSave;

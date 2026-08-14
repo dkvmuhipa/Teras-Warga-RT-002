@@ -92,7 +92,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       return;
     }
 
-    if (activePatrol && activePatrol.status === 'Active') {
+    if (activePatrol && activePatrol.status === 'Ongoing') {
       const patrolAgeMinutes = (Date.now() - new Date(activePatrol.startTime).getTime()) / (1000 * 60);
       if (patrolAgeMinutes < 240) { // 4 hours timeout guard
         toast.error(`Sesi patroli masih aktif oleh ${activePatrol.officerName}! Selesaikan sesi yang ada terlebih dahulu.`);
