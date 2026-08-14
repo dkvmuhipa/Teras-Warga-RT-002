@@ -22,9 +22,21 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error captured by ErrorBoundary:", error, errorInfo);
+    
+    // Auto handle stale chunk / dynamic import cache mismatch error after Vercel deployment
+    const isChunkError = 
+      error?.name === 'ChunkLoadError' || 
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.message?.includes('Expected a JavaScript-or-Wasm module script');
+
+    if (isChunkError && !sessionStorage.getItem('chunk_reload_attempted')) {
+      sessionStorage.setItem('chunk_reload_attempted', 'true');
+      window.location.reload();
+    }
   }
 
   private handleReset = () => {
+    sessionStorage.removeItem('chunk_reload_attempted');
     this.setState({ hasError: false, error: null });
     window.location.reload();
   };
