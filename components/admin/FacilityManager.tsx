@@ -24,8 +24,9 @@ import {
 import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
 import { MapPointManager } from './MapPointManager';
-import { QrCode, Info, Share2 } from 'lucide-react';
+import { QrCode, Info, Share2, Printer, Wand2, ChevronDown } from 'lucide-react';
 import { sendWhatsAppMessage, formatRondaScheduleForWhatsApp } from '../../services/whatsappService';
+import { generateRondaSchedulePDF } from '../../services/pdfService';
 import { toast } from 'sonner';
 import { useConfirm } from '../../context/ConfirmContext';
 
@@ -73,15 +74,36 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   // Shift Management State
   const [shifts, setShifts] = useState<{ id: string; time: string; members: string[] }[]>([]);
   const [residentSearch, setResidentSearch] = useState('');
+  const [selectedTargetShiftId, setSelectedTargetShiftId] = useState<string>('1');
 
-  // Siskamling Simulator State
+  // Futuristic UI States
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [simCheckOfficerName, setSimCheckOfficerName] = useState('');
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleStartSimPatrol = async (officerName: string) => {
     if (!officerName.trim()) {
       toast.error("Format input salah: Isi Nama Petugas Patroli!");
       return;
     }
+
+    if (activePatrol && activePatrol.status === 'Active') {
+      const patrolAgeMinutes = (Date.now() - new Date(activePatrol.startTime).getTime()) / (1000 * 60);
+      if (patrolAgeMinutes < 240) { // 4 hours timeout guard
+        toast.error(`Sesi patroli masih aktif oleh ${activePatrol.officerName}! Selesaikan sesi yang ada terlebih dahulu.`);
+        return;
+      } else {
+        // Auto-finish expired patrol session
+        await finishPatrolSession(activePatrol.id);
+        toast.info(`Sesi patroli sebelumnya (>${Math.round(patrolAgeMinutes / 60)} jam) otomatis ditutup oleh sistem.`);
+      }
+    }
+
     try {
       await startPatrolSession(officerName);
       toast.success(`Sesi Patroli Siskamling oleh ${officerName} berhasil diaktifkan!`);
@@ -346,10 +368,34 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const handleRespondPanic = async (id: string) => {
     const adminName = localStorage.getItem('admin_name') || 'Admin';
     await updatePanicAlertStatus(id, 'Responding', adminName);
+    toast.success("Status Darurat diperbarui: Sedang Direspon.");
   };
 
   const handleResolvePanic = async (id: string) => {
+    const alertToResolve = activePanicAlerts.find(a => a.id === id);
     await updatePanicAlertStatus(id, 'Resolved');
+
+    if (alertToResolve) {
+      try {
+        const adminName = localStorage.getItem('admin_name') || 'Admin';
+        const targetHouse = houses.find(h => h.block === alertToResolve.location.split('-')[0] && h.number === alertToResolve.location.split('-')[1]) || houses.find(h => h.headOfFamily === alertToResolve.residentName);
+        
+        await addReportToDb({
+          type: 'Keamanan',
+          description: `[TANGGAP DARURAT PANIC ALERT] Sinyal bahaya dari ${alertToResolve.residentName} (Blok ${alertToResolve.location}) telah ditangani dan diselesaikan oleh ${alertToResolve.responderName || adminName}.`,
+          reporterName: alertToResolve.residentName || 'Warga RT 02',
+          reporterHouseId: targetHouse?.id || 'PANIC_ALERT',
+          houseId: targetHouse?.id || '',
+          date: new Date().toISOString(),
+          status: 'Selesai'
+        });
+        toast.success("Alarm Darurat diselesaikan & otomatis dicatat ke Laporan Kejadian RT!");
+      } catch (err) {
+        console.error("Gagal mencatat laporan panic alert:", err);
+      }
+    } else {
+      toast.success("Alarm Darurat diselesaikan.");
+    }
   };
 
   const handleReportHouse = (house: House) => {
@@ -499,44 +545,131 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       animate="visible"
       className="space-y-8 pb-12"
     >
-      {/* Header Section */}
+      {/* Futuristic Header Section */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="w-full lg:w-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-200">
-              <Shield size={20} />
+          <div className="flex items-center gap-3.5 mb-1.5">
+            <div className="p-3 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-2xl shadow-lg shadow-indigo-200">
+              <Shield size={24} />
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pusat Komando Keamanan</h2>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pusat Komando Keamanan</h2>
+              <p className="text-xs md:text-sm font-medium text-slate-500">Sistem Monitoring Siskamling Digital RT 02 & Tanggap Darurat</p>
+            </div>
           </div>
-          <p className="text-slate-500 text-sm md:text-base font-medium">Sistem Monitoring Siskamling Digital RT 02</p>
         </div>
-        <div className="flex flex-wrap gap-2 w-full lg:w-auto">
-          <Button onClick={() => setIsQRModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 hover:bg-slate-50 text-xs py-2">
-            <QrCode size={16} className="mr-1.5" /> <span className="hidden sm:inline">Cetak QR</span><span className="sm:hidden">QR</span>
-          </Button>
-          <Button onClick={handleSendTomorrowReminder} variant="outline" className="flex-1 sm:flex-none border-green-200 text-green-600 hover:bg-green-50 text-xs py-2">
-            <Bell size={16} className="mr-1.5" /> <span className="hidden sm:inline">Ingatkan Besok</span><span className="sm:hidden">Ingat</span>
-          </Button>
-          <Button onClick={handleShareToWhatsApp} variant="outline" className="flex-1 sm:flex-none border-emerald-200 text-emerald-600 hover:bg-emerald-50 text-xs py-2">
-            <Share2 size={16} className="mr-1.5" /> <span className="hidden sm:inline">Bagikan WA</span><span className="sm:hidden">WA</span>
-          </Button>
-          <Button onClick={handleAutoRotate} variant="outline" className="flex-1 sm:flex-none border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-xs py-2">
-            <RefreshCw size={16} className="mr-1.5" /> <span className="hidden sm:inline">Rotasi Otomatis</span><span className="sm:hidden">Rotasi</span>
-          </Button>
-          <Button onClick={handleClearSchedule} variant="outline" className="flex-1 sm:flex-none border-rose-200 text-rose-600 hover:bg-rose-50 text-xs py-2">
-            <Trash2 size={16} className="mr-1.5" /> <span className="hidden sm:inline">Kosongkan</span><span className="sm:hidden">Kosong</span>
-          </Button>
-          <Button onClick={handleDownloadCSV} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-600 hover:bg-slate-50 text-xs py-2">
-            <Download size={16} className="mr-1.5" /> <span className="hidden sm:inline">Unduh CSV</span><span className="sm:hidden">CSV</span>
-          </Button>
-          <Button onClick={() => setIsReportModalOpen(true)} className="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-200 text-xs py-2">
-            <AlertTriangle size={16} className="mr-1.5" /> <span className="hidden sm:inline">Laporkan Insiden</span><span className="sm:hidden">Lapor</span>
+
+        {/* Action Header Controls */}
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+          
+          {/* Dropdown Menu Aksi & Alat */}
+          <div className="relative">
+            <button
+              onClick={() => setShowActionMenu(!showActionMenu)}
+              className="flex items-center gap-2 px-5 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-slate-50 transition-all shadow-sm"
+            >
+              <Wand2 size={16} className="text-indigo-600" />
+              <span>Aksi & Alat</span>
+              <ChevronDown size={14} className={`text-slate-400 transition-transform ${showActionMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showActionMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-slate-100 shadow-2xl z-50 p-2 space-y-1">
+                <button
+                  onClick={() => { setIsQRModalOpen(true); setShowActionMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-colors"
+                >
+                  <QrCode size={16} className="text-indigo-500" /> Cetak QR Code Pos
+                </button>
+                <button
+                  onClick={() => {
+                    const currentPdfConfig = (window as any).pdfConfig || { rtName: 'RT 02', kelurahan: 'TONDO', kecamatan: 'MANTIKULORE', rtChairman: 'Ketua RT' };
+                    generateRondaSchedulePDF(ronda, currentPdfConfig);
+                    setShowActionMenu(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-colors"
+                >
+                  <Printer size={16} className="text-indigo-500" /> Cetak Poster PDF (A4)
+                </button>
+                <button
+                  onClick={() => { handleSendTomorrowReminder(); setShowActionMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                >
+                  <Bell size={16} className="text-emerald-500" /> Ingatkan Besok (WA)
+                </button>
+                <button
+                  onClick={() => { handleShareToWhatsApp(); setShowActionMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                >
+                  <Share2 size={16} className="text-emerald-500" /> Bagikan Jadwal WA
+                </button>
+                <div className="h-px bg-slate-100 my-1" />
+                <button
+                  onClick={() => { handleAutoRotate(); setShowActionMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-colors"
+                >
+                  <RefreshCw size={16} className="text-indigo-500" /> Acak Otomatis Jadwal
+                </button>
+                <button
+                  onClick={() => { handleDownloadCSV(); setShowActionMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  <Download size={16} className="text-slate-500" /> Unduh CSV Jadwal
+                </button>
+                <button
+                  onClick={() => { handleClearSchedule(); setShowActionMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                >
+                  <Trash2 size={16} /> Kosongkan Jadwal
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Emergency Lapor Insiden Button */}
+          <Button 
+            onClick={() => setIsReportModalOpen(true)} 
+            className="bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-200 rounded-2xl px-5 py-3 text-xs font-black uppercase tracking-wider"
+          >
+            <AlertTriangle size={16} className="mr-2 animate-bounce" /> Laporkan Insiden
           </Button>
         </div>
       </div>
 
+      {/* Cyberpunk Futuristic Console Status Header */}
+      <div className="bg-slate-900 text-white p-5 sm:p-6 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <span className="w-3.5 h-3.5 bg-emerald-500 rounded-full animate-ping absolute inset-0"></span>
+              <span className="w-3.5 h-3.5 bg-emerald-400 rounded-full relative block shadow-lg shadow-emerald-500/50"></span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-0.5 rounded-full">
+                  MAIN CONSOLE ONLINE
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">RT 02 DIGITAL NETWORK</span>
+              </div>
+              <h3 className="text-lg font-black text-slate-100 tracking-tight mt-1">Terminal Pengawasan & Komando Siskamling</h3>
+            </div>
+          </div>
+
+          {/* Live Clock Digital */}
+          <div className="flex items-center gap-4 self-end md:self-auto bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700/60 backdrop-blur-sm">
+            <Clock size={16} className="text-indigo-400" />
+            <div className="text-right">
+              <p className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">Waktu Lokal (WITA)</p>
+              <p className="text-sm font-mono font-black text-indigo-300">
+                {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} WITA
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 w-full lg:w-fit overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/80 w-full overflow-x-auto no-scrollbar shadow-inner">
         {[
           { id: 'monitoring', label: 'Pusat Kontrol Siskamling', icon: Eye, count: activePanicAlerts.length },
           { id: 'schedule', label: 'Jadwal & Keaktifan', icon: Calendar, count: rondaSwapRequests.filter(r => r.status === 'Menunggu').length },
@@ -547,14 +680,16 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-xl text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-              activeTab === tab.id ? 'bg-white text-indigo-600 shadow-lg shadow-indigo-100' : 'text-slate-500 hover:text-slate-700'
+            className={`flex-1 lg:flex-none flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+              activeTab === tab.id 
+                ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80' 
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <tab.icon size={14} className="sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-            <span className={activeTab === tab.id ? 'inline' : 'hidden sm:inline'}>{tab.label}</span>
+            <tab.icon size={15} />
+            <span>{tab.label}</span>
             {tab.count !== undefined && tab.count > 0 && (
-              <span className="bg-rose-500 text-white w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center text-[8px] md:text-[10px] animate-pulse">
+              <span className="bg-rose-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black animate-pulse">
                 {tab.count}
               </span>
             )}
@@ -631,36 +766,41 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         {activeTab === 'monitoring' && (
           <div className="lg:col-span-3 space-y-6">
             {/* Live Telemetry Overview Header Bar */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 md:p-6 bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-xl gap-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                  </span>
-                  <h3 className="font-black text-xs md:text-sm uppercase tracking-widest text-slate-100">
-                    Pusat Kontrol Keamanan Siskamling (Main Console)
-                  </h3>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2rem] border border-slate-800 shadow-2xl gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-indigo-600/30 border border-indigo-500/40 text-indigo-400 rounded-2xl shrink-0 shadow-lg shadow-indigo-500/20">
+                  <Eye size={24} className="animate-pulse" />
                 </div>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1">
-                  Terminal integrasi real-time RT 02. Status Jaringan: Aman dan Kondusif.
-                </p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <h3 className="font-black text-xs md:text-sm uppercase tracking-widest text-slate-100">
+                      Pusat Kontrol Siskamling & Telemetri Real-Time (Main Console)
+                    </h3>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-medium tracking-wide mt-1">
+                    Terminal pemantauan sensor pos ronda, gps patroli, dan sinyal tanggap darurat warga RT 02.
+                  </p>
+                </div>
               </div>
-              <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                 <Button 
                   onClick={() => {
-                    toast.success("Konektivitas Siskamling berhasil diperbarui!", {
-                      description: "Semua sensor, pos tag QR, dan sistem alarm online."
+                    toast.success("Konektivitas Siskamling & Pos QR diperbarui!", {
+                      description: "Seluruh sensor dan terminal darurat terhubung 100%."
                     });
                   }}
                   variant="outline" 
-                  className="flex-1 sm:flex-none border-slate-700 hover:bg-slate-800 text-slate-300 text-[10px] font-black uppercase py-2 tracking-wider h-auto bg-slate-800/40"
+                  className="border-slate-700 hover:bg-slate-800/80 text-slate-200 text-[10px] font-black uppercase py-2.5 px-4 rounded-xl tracking-wider h-auto bg-slate-800/50 backdrop-blur-sm"
                 >
-                  <RefreshCw size={12} className="mr-1 animate-spin" /> Segarkan Link
+                  <RefreshCw size={14} className="mr-1.5 text-indigo-400" /> Segarkan Jaringan
                 </Button>
                 {activePanicAlerts.length > 0 && (
-                  <div className="px-3.5 py-2 bg-rose-600/25 border border-rose-500/35 text-rose-300 font-black text-[10px] rounded-xl flex items-center gap-1.5 animate-pulse uppercase tracking-wider">
-                    <AlertTriangle size={12} className="text-rose-400 animate-bounce" /> {activePanicAlerts.length} Bahaya
+                  <div className="px-4 py-2.5 bg-rose-600/30 border border-rose-500/40 text-rose-200 font-black text-[10px] rounded-xl flex items-center gap-2 animate-pulse uppercase tracking-wider">
+                    <AlertTriangle size={14} className="text-rose-400 animate-bounce" /> {activePanicAlerts.length} Panggilan Darurat
                   </div>
                 )}
               </div>
@@ -1040,69 +1180,83 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             {/* Professional metric overview cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {/* Metric 1 */}
-              <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-[1.5rem] md:rounded-3xl p-5 border border-indigo-500/10 shadow-lg shadow-indigo-100 relative overflow-hidden">
+              <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white rounded-[2rem] p-5 md:p-6 border border-indigo-700/40 shadow-xl relative overflow-hidden group">
                 <div className="relative z-10 flex flex-col justify-between h-full">
-                  <span className="p-2 bg-white/10 rounded-xl w-fit text-white"><Calendar size={18} /></span>
-                  <div className="mt-4">
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-indigo-200">Total Jadwal</p>
-                    <h4 className="text-xl md:text-2xl font-black mt-1">7 Hari Aktif</h4>
+                  <div className="flex justify-between items-start">
+                    <span className="p-3 bg-indigo-500/20 border border-indigo-400/30 rounded-2xl text-indigo-300 shadow-md">
+                      <Calendar size={20} className="animate-pulse" />
+                    </span>
+                    <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800/80">
+                      LIVE
+                    </span>
                   </div>
-                </div>
-                <div className="absolute -right-4 -bottom-4 opacity-10 text-white select-none pointer-events-none">
-                  <Calendar size={120} />
+                  <div className="mt-4">
+                    <p className="text-[10px] uppercase font-mono tracking-widest text-indigo-300">Total Matriks Hari</p>
+                    <h4 className="text-xl md:text-2xl font-black mt-1 text-slate-100">7 Hari Aktif</h4>
+                  </div>
                 </div>
               </div>
 
               {/* Metric 2 */}
-              <div className="bg-white rounded-[1.5rem] md:rounded-3xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
                 <div className="relative z-10 flex flex-col justify-between h-full">
-                  <span className="p-2 bg-amber-50 rounded-xl w-fit text-amber-600"><ArrowLeftRight size={18} /></span>
+                  <div className="flex justify-between items-start">
+                    <span className="p-3 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100">
+                      <ArrowLeftRight size={20} />
+                    </span>
+                    {rondaSwapRequests.filter(r => r.status === 'Menunggu').length > 0 && (
+                      <span className="px-2 py-0.5 bg-amber-500 text-white rounded-full text-[9px] font-black animate-pulse">
+                        PERLU RESPON
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-4">
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Pertukaran Jadwal</p>
-                    <h4 className="text-xl md:text-2xl font-black text-slate-800 mt-1">
+                    <p className="text-[10px] uppercase font-extrabold tracking-widest text-slate-400">Tukar Jadwal</p>
+                    <h4 className="text-xl md:text-2xl font-black text-slate-900 mt-1">
                       {rondaSwapRequests.filter(r => r.status === 'Menunggu').length} Menunggu
                     </h4>
                   </div>
                 </div>
-                <div className="absolute -right-4 -bottom-4 opacity-5 text-indigo-600 select-none pointer-events-none">
-                  <ArrowLeftRight size={120} />
-                </div>
               </div>
 
               {/* Metric 3 */}
-              <div className="bg-white rounded-[1.5rem] md:rounded-3xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
                 <div className="relative z-10 flex flex-col justify-between h-full">
-                  <span className="p-2 bg-emerald-50 rounded-xl w-fit text-emerald-600"><Users size={18} /></span>
+                  <div className="flex justify-between items-start">
+                    <span className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
+                      <Users size={20} />
+                    </span>
+                    <span className="text-[9px] font-mono text-emerald-600 font-extrabold uppercase">SIAGA HARI INI</span>
+                  </div>
                   <div className="mt-4">
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Ronda Malam ini</p>
-                    <h4 className="text-xl md:text-2xl font-black text-slate-800 mt-1">
+                    <p className="text-[10px] uppercase font-extrabold tracking-widest text-slate-400">Ronda Malam Ini</p>
+                    <h4 className="text-xl md:text-2xl font-black text-slate-900 mt-1">
                       {ronda.find(r => r.day === today)?.shifts?.reduce((acc, s) => acc + s.members.length, 0) || ronda.find(r => r.day === today)?.members?.length || 0} Personil
                     </h4>
                   </div>
                 </div>
-                <div className="absolute -right-4 -bottom-4 opacity-5 text-indigo-600 select-none pointer-events-none">
-                  <Users size={120} />
-                </div>
               </div>
 
               {/* Metric 4 */}
-              <div className="bg-white rounded-[1.5rem] md:rounded-3xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
                 <div className="relative z-10 flex flex-col justify-between h-full">
-                  <span className="p-2 bg-indigo-50 rounded-xl w-fit text-indigo-600"><ShieldCheck size={18} /></span>
+                  <div className="flex justify-between items-start">
+                    <span className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
+                      <ShieldCheck size={20} />
+                    </span>
+                    <span className="text-[9px] font-black text-indigo-600 uppercase">POIN TERTINGGI</span>
+                  </div>
                   <div className="mt-4">
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Skor Tertinggi</p>
-                    <h4 className="text-lg md:text-xl font-black text-indigo-700 mt-1 truncate">
+                    <p className="text-[10px] uppercase font-extrabold tracking-widest text-slate-400">Juara Keaktifan</p>
+                    <h4 className="text-base md:text-lg font-black text-indigo-700 mt-1 truncate">
                       {(() => {
                         const occupied = houses.filter(h => h.status === 'Occupied');
                         if (occupied.length === 0) return "-";
                         const best = [...occupied].sort((a, b) => (b.rondaPoints || 0) - (a.rondaPoints || 0))[0];
-                        return best ? `${best.headOfFamily} (${best.rondaPoints || 0})` : "-";
+                        return best ? `${best.headOfFamily} (${best.rondaPoints || 0} Pts)` : "-";
                       })()}
                     </h4>
                   </div>
-                </div>
-                <div className="absolute -right-4 -bottom-4 opacity-5 text-indigo-600 select-none pointer-events-none">
-                  <ShieldCheck size={120} />
                 </div>
               </div>
             </div>
@@ -1271,56 +1425,130 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                             <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">Siskamling & Patroli Pos Ronda Malam</p>
                           </div>
                           
-                          <Button
-                            onClick={() => handleEditRonda(selectedDayData)}
-                            className="bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white text-[10px] md:text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-100"
-                          >
-                            📝 Susun Shift Petugas
-                          </Button>
+                          <div className="flex flex-wrap gap-2 items-center">
+                            {shiftsData.some(s => s.members.length > 0) && (
+                              <Button
+                                variant="outline"
+                                onClick={async () => {
+                                  const isConfirmed = await confirm({
+                                    title: `Kosongkan Seluruh Shift ${selectedDayData.day}`,
+                                    message: `Apakah Anda yakin ingin mengosongkan seluruh personil ronda pada hari ${selectedDayData.day}?`,
+                                    confirmLabel: 'Ya, Kosongkan Semua',
+                                    isDanger: true
+                                  });
+                                  if (!isConfirmed || !selectedDayData.id) return;
+                                  const clearedShifts = shiftsData.map(s => ({ ...s, members: [] }));
+                                  await updateRondaScheduleFull(selectedDayData.id, {
+                                    members: [],
+                                    shifts: clearedShifts
+                                  });
+                                  toast.success(`Seluruh shift hari ${selectedDayData.day} berhasil dikosongkan.`);
+                                }}
+                                className="border-rose-200 text-rose-600 hover:bg-rose-50 text-[10px] md:text-xs font-black uppercase tracking-wider px-3.5 py-2.5 rounded-xl transition-all shadow-sm"
+                              >
+                                🗑️ Kosongkan Semua
+                              </Button>
+                            )}
+
+                            <Button
+                              onClick={() => handleEditRonda(selectedDayData)}
+                              className="bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white text-[10px] md:text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-100"
+                            >
+                              📝 Susun Shift Petugas
+                            </Button>
+                          </div>
                         </div>
 
                         {/* Shift cards display */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                          {shiftsData.map((shift, shiftIdx) => (
-                            <div key={shift.id} className="bg-slate-50/70 border border-slate-100 rounded-2xl p-5 relative overflow-hidden group">
-                              <div className="flex justify-between items-center mb-4">
-                                <span className="px-2.5 py-1 bg-white border border-slate-200/60 rounded-lg text-[9px] font-black uppercase tracking-widest text-indigo-600 shadow-sm">
-                                  Shift {shiftIdx + 1}
-                                </span>
-                                <span className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase">
-                                  <Clock size={11} className="text-slate-400" /> {shift.time}
-                                </span>
-                              </div>
+                          {shiftsData.map((shift, shiftIdx) => {
+                            const isShiftNow = (selectedDayData.day === today);
 
-                              <div className="space-y-2 min-h-[120px] max-h-[220px] overflow-y-auto no-scrollbar">
-                                {shift.members.length > 0 ? (
-                                  shift.members.map((member, memIdx) => {
-                                    // Query house block to show block info if available
-                                    const residentHouse = houses.find(h => h.headOfFamily?.toLowerCase() === member.toLowerCase());
-                                    return (
-                                      <div key={`${member}-${memIdx}`} className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm hover:border-indigo-100 hover:shadow-md transition-all">
-                                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-black shrink-0">
-                                          {member.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                          <p className="text-xs font-black text-slate-700 truncate">{member}</p>
-                                          <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
-                                            {residentHouse ? `Blok ${residentHouse.block}-${residentHouse.number}` : 'Rumah Warga'}
-                                          </p>
-                                        </div>
-                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0"></div>
-                                      </div>
-                                    );
-                                  })
-                                ) : (
-                                  <div className="flex flex-col items-center justify-center py-6 text-center h-full">
-                                    <p className="text-[10px] text-slate-400 italic font-bold">Belum ada warga ditugaskan</p>
-                                    <p className="text-[9px] text-slate-400 mt-1 max-w-[150px]">Atur sekarang dengan mengklik Susun Shift Petugas</p>
+                            return (
+                              <div key={shift.id} className="bg-slate-900 text-white rounded-[2rem] p-6 border border-slate-800 shadow-xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                                
+                                <div className="flex justify-between items-center mb-5 relative z-10">
+                                  <div className="flex items-center gap-2">
+                                    <span className="px-3 py-1 bg-indigo-500/20 border border-indigo-400/30 rounded-xl text-[10px] font-black uppercase tracking-widest text-indigo-300 shadow-sm">
+                                      Shift {shiftIdx + 1}
+                                    </span>
+                                    {isShiftNow && (
+                                      <span className="flex items-center gap-1 text-[8px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full">
+                                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
+                                        DIJADWALKAN HARI INI
+                                      </span>
+                                    )}
                                   </div>
-                                )}
+
+                                  <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300 bg-slate-950/80 px-3 py-1 rounded-xl border border-slate-800">
+                                    <Clock size={12} className="text-indigo-400" /> {shift.time}
+                                  </span>
+                                </div>
+
+                                <div className="space-y-2.5 min-h-[140px] max-h-[240px] overflow-y-auto no-scrollbar relative z-10 pr-1">
+                                  {shift.members.length > 0 ? (
+                                    shift.members.map((member, memIdx) => {
+                                      const residentHouse = houses.find(h => h.headOfFamily?.toLowerCase() === member.toLowerCase());
+                                      return (
+                                        <div key={`${member}-${memIdx}`} className="flex items-center justify-between bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80 hover:border-indigo-500/50 hover:bg-slate-950 transition-all group/item">
+                                          <div className="flex items-center gap-3 min-w-0">
+                                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-md">
+                                              {member.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="min-w-0">
+                                              <p className="text-xs font-black text-slate-100 truncate">{member}</p>
+                                              <p className="text-[9px] font-mono text-indigo-300 uppercase tracking-widest mt-0.5">
+                                                {residentHouse ? `Blok ${residentHouse.block}-${residentHouse.number}` : 'Warga RT 02'}
+                                              </p>
+                                            </div>
+                                          </div>
+
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-[8px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-md uppercase hidden sm:inline-block">
+                                              SIAGA
+                                            </span>
+
+                                            {/* Direct Quick Remove Button */}
+                                            <button
+                                              type="button"
+                                              onClick={async (e) => {
+                                                e.stopPropagation();
+                                                if (!selectedDayData.id) return;
+                                                const updatedShifts = shiftsData.map(s => 
+                                                  s.id === shift.id 
+                                                    ? { ...s, members: s.members.filter(m => m !== member) } 
+                                                    : s
+                                                );
+                                                const updatedMembers = updatedShifts.flatMap(s => s.members);
+                                                await updateRondaScheduleFull(selectedDayData.id, {
+                                                  members: updatedMembers,
+                                                  shifts: updatedShifts
+                                                });
+                                                toast.success(`${member} dihapus dari Shift ${shiftIdx + 1}`);
+                                              }}
+                                              className="p-1.5 bg-rose-950/80 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800/80 rounded-xl text-[9px] font-black transition-all"
+                                              title={`Hapus ${member} dari Shift ${shiftIdx + 1}`}
+                                            >
+                                              <X size={13} />
+                                            </button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })
+                                  ) : (
+                                    <div className="flex flex-col items-center justify-center py-8 text-center h-full">
+                                      <div className="w-10 h-10 rounded-2xl bg-slate-800/60 flex items-center justify-center text-slate-500 mb-2">
+                                        <Users size={18} />
+                                      </div>
+                                      <p className="text-xs text-slate-400 font-bold">Belum ada personil shift ini</p>
+                                      <p className="text-[9px] text-slate-500 mt-1 max-w-[170px]">Klik Susun Shift Petugas di atas untuk mengisi personil</p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
 
                         {/* Block Diversity and statistics info box */}
@@ -1632,20 +1860,29 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         )}
 
         {activeTab === 'logs' && (
-          <motion.div variants={itemVariants} className="lg:col-span-3 bg-white rounded-[1.5rem] md:rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-5 md:p-8 border-b border-slate-50">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6 md:mb-8">
+          <motion.div variants={itemVariants} className="lg:col-span-3 bg-slate-900 text-white rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="p-6 md:p-8 border-b border-slate-800/80 relative z-10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6">
                 <div>
-                  <h3 className="text-lg md:text-xl font-black text-slate-900">Log Aktivitas Digital</h3>
-                  <p className="text-[10px] md:text-xs font-medium text-slate-400 mt-1">Monitoring riwayat keamanan secara real-time</p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-mono uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    PATROL AUDIT STREAM
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-100 tracking-tight">Log Patroli & Audit Keamanan Siskamling</h3>
+                  <p className="text-xs text-slate-400 font-medium mt-1">Rekam jejak digital sesi ronda, pemantauan pos checkpoint, dan insiden darurat warga RT 02</p>
                 </div>
-                <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl md:rounded-2xl border border-slate-100 w-full md:w-auto overflow-x-auto no-scrollbar">
+
+                <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800 w-full md:w-auto">
                   {(['All', 'Aman', 'Insiden'] as const).map((f) => (
                     <button
                       key={f}
                       onClick={() => setLogFilter(f)}
-                      className={`flex-1 md:flex-none px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                        logFilter === f ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                      className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-mono font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+                        logFilter === f 
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50' 
+                          : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
                       {f}
@@ -1655,58 +1892,67 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               </div>
 
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 md:w-[18px] md:h-[18px]" size={16} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
                   type="text"
-                  placeholder="Cari petugas, lokasi, atau catatan..."
-                  className="w-full pl-11 md:pl-12 pr-4 py-2.5 md:py-3 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-xs md:text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                  placeholder="Cari nama petugas, lokasi pos, atau kata kunci catatan..."
+                  className="w-full pl-12 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-2xl text-xs font-bold text-slate-200 placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500/30 outline-none transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto max-h-[500px] md:max-h-[600px] p-5 md:p-8 space-y-4 md:space-y-6 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto max-h-[550px] p-6 md:p-8 space-y-5 custom-scrollbar relative z-10">
               {filteredLogs.length > 0 ? (
                 filteredLogs.map((log, idx) => (
-                  <div key={log.id} className="relative pl-6 md:pl-8 group">
+                  <div key={log.id} className="relative pl-7 md:pl-9 group">
                     {/* Timeline Line */}
                     {idx !== filteredLogs.length - 1 && (
-                      <div className="absolute left-[9px] md:left-[11px] top-6 md:top-8 bottom-[-16px] md:bottom-[-24px] w-0.5 bg-slate-100 group-hover:bg-indigo-100 transition-colors"></div>
+                      <div className="absolute left-[10px] md:left-[13px] top-8 bottom-[-24px] w-0.5 bg-slate-800 group-hover:bg-indigo-500/40 transition-colors"></div>
                     )}
                     {/* Timeline Dot */}
-                    <div className={`absolute left-0 top-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-[3px] md:border-4 border-white shadow-sm z-10 transition-transform group-hover:scale-125 ${
-                      log.status === 'Aman' ? 'bg-emerald-500' : 'bg-rose-500'
+                    <div className={`absolute left-0 top-2.5 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-slate-900 shadow-md z-10 transition-transform group-hover:scale-125 ${
+                      log.status === 'Aman' ? 'bg-emerald-400 shadow-emerald-500/50' : 'bg-rose-500 shadow-rose-500/50'
                     }`}></div>
 
-                    <div className="bg-slate-50/50 border border-slate-100 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all">
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 md:gap-4 mb-3 md:mb-4">
-                        <div className="flex items-center gap-2.5 md:gap-3">
-                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-[10px] md:text-xs font-black text-indigo-600">
-                            {log.officerName.charAt(0)}
+                    <div className="bg-slate-950/60 border border-slate-800/80 rounded-3xl p-5 md:p-6 hover:bg-slate-950 hover:border-slate-700 transition-all shadow-lg">
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-md">
+                            {log.officerName.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <h4 className="font-black text-slate-900 text-sm md:text-base">{log.officerName}</h4>
-                            <div className="flex items-center gap-2 md:gap-3 text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                              <span className="flex items-center gap-1"><Clock size={10} className="md:w-3 md:h-3" /> {new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
-                              <span className="flex items-center gap-1"><MapPin size={10} className="md:w-3 md:h-3" /> Pos Utama</span>
+                            <h4 className="font-black text-slate-100 text-sm md:text-base tracking-tight">{log.officerName}</h4>
+                            <div className="flex items-center gap-3 text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-1">
+                              <span className="flex items-center gap-1.5">
+                                <Clock size={11} className="text-indigo-400" />
+                                {new Date(log.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} • {new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WITA
+                              </span>
                             </div>
                           </div>
                         </div>
-                        <span className={`px-2.5 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest border ${
-                          log.status === 'Aman' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
+
+                        <span className={`px-3 py-1 rounded-xl text-[9px] font-mono font-black uppercase tracking-widest border ${
+                          log.status === 'Aman' 
+                            ? 'bg-emerald-950/80 text-emerald-300 border-emerald-800/80' 
+                            : 'bg-rose-950/80 text-rose-300 border-rose-800/80 animate-pulse'
                         }`}>
-                          {log.status}
+                          {log.status === 'Aman' ? '✓ STATUS AMAN' : '⚠️ INSIDEN CATATAN'}
                         </span>
                       </div>
                       
-                      <p className="text-xs md:text-sm text-slate-600 leading-relaxed italic mb-3 md:mb-4">"{log.note || 'Kondisi terpantau aman terkendali.'}"</p>
-                      
+                      <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800/80 mb-4">
+                        <p className="text-xs text-slate-300 leading-relaxed font-sans italic">
+                          "{log.note || 'Petugas telah melakukan ronda rutin. Situasi pos dan blok perumahan RT 02 dalam kondisi aman terkendali.'}"
+                        </p>
+                      </div>
+
                       {log.photoUrl && (
-                        <div className="relative w-full h-32 md:h-48 rounded-xl md:rounded-2xl overflow-hidden border border-slate-200 group/img">
-                          <img src={log.photoUrl} alt="Bukti Patroli" className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" />
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                            <Button size="sm" variant="secondary" className="bg-white/90 backdrop-blur-sm text-[10px] h-8">Lihat Detail</Button>
+                        <div className="relative w-full h-40 md:h-52 rounded-2xl overflow-hidden border border-slate-800 group/img">
+                          <img src={log.photoUrl} alt="Bukti Patroli" className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105" />
+                          <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button size="sm" variant="secondary" className="bg-white text-slate-900 font-bold text-xs">Lihat Bukti Foto Patroli</Button>
                           </div>
                         </div>
                       )}
@@ -1714,12 +1960,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   </div>
                 ))
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 md:py-20 text-center">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 rounded-2xl md:rounded-3xl flex items-center justify-center text-slate-200 mb-4">
-                    <Search size={32} className="md:w-10 md:h-10" />
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 bg-slate-800/60 rounded-3xl flex items-center justify-center text-slate-500 mb-4 border border-slate-700/50">
+                    <Search size={32} />
                   </div>
-                  <h4 className="text-base md:text-lg font-bold text-slate-800">Tidak Ada Data</h4>
-                  <p className="text-xs text-slate-400 max-w-xs mx-auto mt-1">Coba ubah filter atau kata kunci pencarian Anda.</p>
+                  <h4 className="text-base font-bold text-slate-200">Belum Ada Rekaman Log</h4>
+                  <p className="text-xs text-slate-400 max-w-xs mx-auto mt-1">Semua aktivitas siskamling dan scan pos checkpoint akan tercatat secara otomatis di sini.</p>
                 </div>
               )}
             </div>
@@ -1728,87 +1974,172 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
         {activeTab === 'attendance' && (
           <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6">
-            <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] border border-slate-100 shadow-sm p-5 md:p-8">
-              <div className="flex justify-between items-center mb-6 md:mb-8">
+            <div className="bg-slate-900 text-white rounded-[2.5rem] border border-slate-800 shadow-2xl p-6 md:p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-800 pb-6 relative z-10">
                 <div>
-                  <h3 className="text-lg md:text-xl font-black text-slate-900">Pencatatan Absensi Ronda</h3>
-                  <p className="text-[10px] md:text-xs font-medium text-slate-400 mt-1">Catat kehadiran warga yang bertugas malam ini</p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-mono uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    PRESENSI SIAGA SISKAMLING
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-100 tracking-tight">Portal Absensi & Verifikasi Kehadiran Ronda</h3>
+                  <p className="text-xs text-slate-400 font-medium mt-1">Catat kehadiran petugas ronda malam ini untuk menguji skor keaktifan warga secara transparan</p>
                 </div>
-                <div className="p-2.5 md:p-3 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl">
-                  <UserCheck size={20} className="md:w-6 md:h-6" />
+                <div className="p-3.5 bg-indigo-600/30 text-indigo-400 rounded-2xl border border-indigo-500/30 shrink-0">
+                  <UserCheck size={24} className="animate-pulse" />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Pilih Tanggal</label>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 relative z-10">
+                {/* Inputs Left Side */}
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Pilih Tanggal Dinas</label>
                     <input 
                       type="date" 
                       value={attendanceDate}
                       onChange={(e) => setAttendanceDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                      className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3.5 text-xs font-bold text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all font-mono"
                     />
                   </div>
                   
-                  <div>
-                    <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Catatan Tambahan</label>
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Catatan & Berita Acara</label>
                     <textarea 
                       value={attendanceNotes}
                       onChange={(e) => setAttendanceNotes(e.target.value)}
-                      placeholder="Contoh: Warga A sakit, digantikan oleh Warga B"
-                      className="w-full bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all h-24 resize-none"
+                      placeholder="Contoh: Petugas A sakit, digantikan oleh Petugas B (Rumah Blok A-12)..."
+                      className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3.5 text-xs font-medium text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all h-28 resize-none"
                     />
+                  </div>
+
+                  {/* Quick Attendance Ratio Summary Card */}
+                  <div className="p-4 bg-slate-950/90 rounded-2xl border border-slate-800 space-y-2">
+                    <span className="text-[9px] font-mono text-indigo-400 uppercase tracking-widest">Ringkasan Presensi Hari Ini</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-300">Tingkat Kehadiran:</span>
+                      <span className="text-sm font-mono font-black text-emerald-400">
+                        {(() => {
+                          const [yr, mo, dy] = attendanceDate.split('-').map(Number);
+                          const localDate = new Date(yr, mo - 1, dy);
+                          const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
+                          const schedule = ronda.find(r => r.day === day);
+                          const total = schedule?.members?.length || 0;
+                          if (total === 0) return '0%';
+                          return `${Math.round((presentMembers.length / total) * 100)}% (${presentMembers.length}/${total})`;
+                        })()}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="lg:col-span-2">
-                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Daftar Petugas (Centang yang Hadir)</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Checklist Members Right Side */}
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">
+                      Daftar Petugas Terjadwal (Centang yang Hadir)
+                    </label>
+                    
+                    {(() => {
+                      const [yr, mo, dy] = attendanceDate.split('-').map(Number);
+                      const localDate = new Date(yr, mo - 1, dy);
+                      const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
+                      const schedule = ronda.find(r => r.day === day);
+                      const allMembers = schedule?.members || [];
+
+                      if (allMembers.length === 0) return null;
+
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (presentMembers.length === allMembers.length) {
+                              setPresentMembers([]);
+                            } else {
+                              setPresentMembers(allMembers);
+                            }
+                          }}
+                          className="text-[10px] font-mono font-black text-indigo-300 hover:text-white bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800/80 px-3 py-1 rounded-xl transition-all uppercase tracking-wider"
+                        >
+                          {presentMembers.length === allMembers.length ? "Batal Centang" : "✓ Centang Semua Hadir"}
+                        </button>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[160px]">
                     {(() => {
                       const [yr, mo, dy] = attendanceDate.split('-').map(Number);
                       const localDate = new Date(yr, mo - 1, dy);
                       const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
                       
                       const schedule = ronda.find(r => r.day === day);
-                      if (!schedule) return <p className="text-slate-400 text-xs italic">Tidak ada jadwal untuk hari {day}</p>;
+                      if (!schedule || !schedule.members || schedule.members.length === 0) {
+                        return (
+                          <div className="col-span-full flex flex-col items-center justify-center p-8 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800 text-center">
+                            <p className="text-slate-400 text-xs font-bold">Tidak ada petugas terjadwal untuk hari {day}</p>
+                            <p className="text-slate-500 text-[10px] mt-1">Susun shift petugas terlebih dahulu pada menu Jadwal Shift</p>
+                          </div>
+                        );
+                      }
                       
                       const allMembers = schedule.members || [];
-                      return allMembers.map((member, idx) => (
-                        <div 
-                          key={`${member}-${idx}`}
-                          onClick={() => {
-                            if (presentMembers.includes(member)) {
-                              setPresentMembers(presentMembers.filter(m => m !== member));
-                            } else {
-                              setPresentMembers([...presentMembers, member]);
-                            }
-                          }}
-                          className={`flex items-center gap-3 p-3 rounded-xl md:rounded-2xl border transition-all cursor-pointer ${
-                            presentMembers.includes(member)
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                            : 'bg-slate-50 border-slate-100 text-slate-600 hover:border-slate-200'
-                          }`}
-                        >
-                          <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
-                            presentMembers.includes(member)
-                            ? 'bg-emerald-500 border-emerald-500 text-white'
-                            : 'bg-white border-slate-200'
-                          }`}>
-                            {presentMembers.includes(member) && <Check size={12} strokeWidth={4} />}
+                      return allMembers.map((member, idx) => {
+                        const resHouse = houses.find(h => h.headOfFamily?.toLowerCase() === member.toLowerCase());
+                        const isPresent = presentMembers.includes(member);
+
+                        return (
+                          <div 
+                            key={`${member}-${idx}`}
+                            onClick={() => {
+                              if (isPresent) {
+                                setPresentMembers(presentMembers.filter(m => m !== member));
+                              } else {
+                                setPresentMembers([...presentMembers, member]);
+                              }
+                            }}
+                            className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
+                              isPresent
+                                ? 'bg-emerald-950/60 border-emerald-500/80 text-emerald-200 shadow-md shadow-emerald-950/30'
+                                : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:bg-slate-950'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-all shrink-0 ${
+                                isPresent
+                                  ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-black'
+                                  : 'bg-slate-900 border-slate-700 text-transparent'
+                              }`}>
+                                <Check size={14} strokeWidth={4} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className={`text-xs font-black truncate ${isPresent ? 'text-slate-100' : 'text-slate-300'}`}>{member}</p>
+                                <p className="text-[9px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">
+                                  {resHouse ? `Blok ${resHouse.block}-${resHouse.number}` : 'Rumah Warga'}
+                                </p>
+                              </div>
+                            </div>
+
+                            <span className={`text-[8px] font-mono font-black uppercase px-2 py-0.5 rounded-md border ${
+                              isPresent 
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
+                                : 'bg-slate-900 text-slate-500 border-slate-800'
+                            }`}>
+                              {isPresent ? 'HADIR (+10 PTS)' : 'ABSEN'}
+                            </span>
                           </div>
-                          <span className="text-xs md:text-sm font-black">{member}</span>
-                        </div>
-                      ));
+                        );
+                      });
                     })()}
                   </div>
 
-                  <div className="mt-8 flex justify-end">
+                  <div className="mt-6 flex justify-end">
                     <Button 
                       onClick={handleSaveAttendance}
-                      className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs"
+                      className="bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-950/50 px-8 py-3.5 rounded-2xl font-black uppercase tracking-widest text-xs text-white"
                     >
-                      {rondaAttendance.some(a => a.date === attendanceDate) ? "Perbarui Absensi" : "Simpan Absensi"}
+                      {rondaAttendance.some(a => a.date === attendanceDate) ? "Perbarui Absensi (+10 Poin)" : "Simpan Absensi (+10 Poin)"}
                     </Button>
                   </div>
                 </div>
@@ -1884,89 +2215,190 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         )}
       </div>
 
-      <Modal isOpen={isRondaModalOpen} onClose={() => setIsRondaModalOpen(false)} title={`Pengaturan Jadwal: ${editingRonda?.day}`}>
-        <form onSubmit={handleSaveRonda} className="space-y-8 max-w-2xl mx-auto">
-          <div className="p-6 bg-indigo-50 rounded-[2rem] border border-indigo-100 flex items-center gap-6">
-            <div className="p-4 bg-white rounded-2xl text-indigo-600 shadow-xl shadow-indigo-100"><Users size={28} /></div>
-            <div>
-              <p className="text-sm font-black text-indigo-900 uppercase tracking-widest">Konfigurasi Shift & Petugas</p>
-              <p className="text-xs text-indigo-600 font-medium mt-1">Pilih warga dari daftar untuk ditugaskan pada shift malam ini.</p>
+      <Modal isOpen={isRondaModalOpen} onClose={() => setIsRondaModalOpen(false)} title={`Pengaturan Shift & Jadwal Ronda: ${editingRonda?.day}`}>
+        <form onSubmit={handleSaveRonda} className="space-y-6 max-w-3xl mx-auto">
+          {/* Header Info */}
+          <div className="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-indigo-600/30 text-indigo-400 rounded-2xl border border-indigo-500/30">
+                <Users size={24} className="animate-pulse" />
+              </div>
+              <div>
+                <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/80">
+                  HARI: {editingRonda?.day?.toUpperCase()}
+                </span>
+                <h3 className="text-base font-black text-slate-100 tracking-tight mt-1">Konfigurasi Pembagian Shift Siskamling</h3>
+              </div>
+            </div>
+            <div className="text-right hidden sm:block">
+              <p className="text-[9px] font-mono text-slate-400 uppercase">Total Petugas</p>
+              <p className="text-base font-mono font-black text-indigo-300">
+                {shifts.reduce((acc, s) => acc + s.members.length, 0)} Warga
+              </p>
             </div>
           </div>
 
-          <div className="space-y-6">
+          {/* Quick Add Resident Chips Selector */}
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-1.5">
+                <UserCheck size={14} className="text-indigo-600" /> Pilih Kepala Keluarga & Target Shift:
+              </span>
+              
+              {/* Target Shift Selector Buttons */}
+              <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                {shifts.map((s, idx) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setSelectedTargetShiftId(s.id)}
+                    className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                      (selectedTargetShiftId || shifts[0]?.id) === s.id
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                    }`}
+                  >
+                    Shift {idx + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+              <input 
+                type="text"
+                placeholder="Ketik nama warga untuk memfilter..."
+                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                value={residentSearch}
+                onChange={(e) => setResidentSearch(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto no-scrollbar pt-1">
+              {filteredResidents.slice(0, 20).map((residentName) => {
+                const assignedShift = shifts.find(s => s.members.includes(residentName));
+                const isAssigned = !!assignedShift;
+                const house = houses.find(h => h.headOfFamily?.toLowerCase() === residentName.toLowerCase());
+                const targetShift = selectedTargetShiftId || shifts[0]?.id || '1';
+                const targetShiftIndex = shifts.findIndex(s => s.id === targetShift) + 1;
+
+                return (
+                  <button
+                    key={residentName}
+                    type="button"
+                    onClick={() => {
+                      if (isAssigned && assignedShift) {
+                        handleRemoveMemberFromShift(assignedShift.id, residentName);
+                      } else {
+                        handleAddMemberToShift(targetShift, residentName);
+                      }
+                    }}
+                    title={isAssigned ? `Klik untuk menghapus dari Shift ${shifts.findIndex(s => s.id === assignedShift.id) + 1}` : `Klik untuk menambahkan ke Shift ${targetShiftIndex}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      isAssigned 
+                        ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 shadow-sm active:scale-95' 
+                        : 'bg-white text-slate-700 border border-slate-200 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50/50 shadow-sm active:scale-95'
+                    }`}
+                  >
+                    {isAssigned ? (
+                      <X size={12} className="text-rose-500" />
+                    ) : (
+                      <Plus size={12} className="text-indigo-500" />
+                    )}
+                    <span>{residentName}</span>
+                    {house && <span className="text-[9px] font-normal opacity-70">({house.block}-{house.number})</span>}
+                    {isAssigned ? (
+                      <span className="text-[8px] font-black uppercase text-rose-600 bg-white/80 px-1.5 py-0.5 rounded-full ml-1">
+                        S{shifts.findIndex(s => s.id === assignedShift.id) + 1} (Hapus)
+                      </span>
+                    ) : (
+                      <span className="text-[8px] font-black uppercase text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded-full ml-1">
+                        +S{targetShiftIndex}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Shift Cards Grid */}
+          <div className="space-y-4">
             {shifts.map((shift, sIdx) => (
-              <div key={shift.id} className="bg-slate-50 rounded-[2.5rem] p-8 border border-slate-100 relative group">
-                <div className="flex justify-between items-center mb-6">
+              <div key={shift.id} className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm relative space-y-4">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xs font-black text-indigo-600 shadow-sm">{sIdx + 1}</span>
-                    <h4 className="font-black text-slate-900 uppercase tracking-widest text-sm">Shift {sIdx + 1}</h4>
+                    <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-black shadow-md shadow-indigo-100">
+                      S{sIdx + 1}
+                    </span>
+                    <div>
+                      <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs">Shift {sIdx + 1}</h4>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase">{shift.members.length} Personil Bertugas</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm">
-                    <Clock size={14} className="text-indigo-500" />
-                    <input 
-                      type="text" 
-                      className="bg-transparent border-none outline-none text-xs font-black text-slate-700 w-24 text-center"
-                      value={shift.time}
-                      onChange={(e) => setShifts(prev => prev.map(s => s.id === shift.id ? { ...s, time: e.target.value } : s))}
-                    />
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                      <Clock size={13} className="text-indigo-600" />
+                      <input 
+                        type="text" 
+                        className="bg-transparent border-none outline-none text-xs font-black text-slate-800 w-28 text-center"
+                        value={shift.time}
+                        onChange={(e) => setShifts(prev => prev.map(s => s.id === shift.id ? { ...s, time: e.target.value } : s))}
+                      />
+                    </div>
+
+                    {shift.members.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setShifts(prev => prev.map(s => s.id === shift.id ? { ...s, members: [] } : s))}
+                        className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1"
+                        title="Kosongkan seluruh personil di shift ini"
+                      >
+                        <X size={12} /> Kosongkan Shift
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    {shift.members.map((m, mIdx) => (
-                      <div key={`${m}-${mIdx}`} className="flex items-center gap-2 bg-white pl-3 pr-1 py-1 rounded-xl border border-slate-200 shadow-sm animate-slide-in-right">
-                        <span className="text-xs font-bold text-slate-700">{m}</span>
+                {/* Assigned Member Badges */}
+                <div className="flex flex-wrap gap-2 min-h-[50px] p-2 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                  {shift.members.map((m, mIdx) => {
+                    const resHouse = houses.find(h => h.headOfFamily?.toLowerCase() === m.toLowerCase());
+                    return (
+                      <div key={`${m}-${mIdx}`} className="flex items-center gap-2 bg-white pl-3 pr-1.5 py-1.5 rounded-xl border border-slate-200 shadow-sm text-xs font-bold text-slate-800 group">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>{m}</span>
+                        {resHouse && <span className="text-[9px] text-slate-400 font-medium">({resHouse.block}-{resHouse.number})</span>}
                         <button 
                           type="button"
                           onClick={() => handleRemoveMemberFromShift(shift.id, m)}
-                          className="p-1 hover:bg-rose-50 text-slate-300 hover:text-rose-500 rounded-lg transition-colors"
+                          className="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition-colors ml-1"
+                          title="Hapus dari shift"
                         >
                           <X size={14} />
                         </button>
                       </div>
-                    ))}
-                    {shift.members.length === 0 && (
-                      <p className="text-xs text-slate-400 italic py-2">Belum ada warga terpilih</p>
-                    )}
-                  </div>
-
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                    <input 
-                      type="text"
-                      placeholder="Cari nama warga..."
-                      className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
-                      onChange={(e) => setResidentSearch(e.target.value)}
-                      onFocus={() => setResidentSearch('')}
-                    />
-                    {residentSearch && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-48 overflow-y-auto custom-scrollbar p-2">
-                        {filteredResidents.length > 0 ? filteredResidents.map((r, i) => (
-                          <button
-                            key={r}
-                            type="button"
-                            onClick={() => handleAddMemberToShift(shift.id, r)}
-                            className="w-full text-left px-4 py-3 hover:bg-indigo-50 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-between group"
-                          >
-                            {r}
-                            <Plus size={14} className="opacity-0 group-hover:opacity-100 text-indigo-600" />
-                          </button>
-                        )) : (
-                          <p className="text-xs text-slate-400 italic p-4 text-center">Warga tidak ditemukan</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                    );
+                  })}
+                  {shift.members.length === 0 && (
+                    <div className="w-full flex items-center justify-center py-3 text-slate-400 text-xs italic font-bold">
+                      Klik nama warga di atas untuk menambahkan ke Shift ini
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex gap-4">
-            <Button type="button" variant="outline" onClick={() => setIsRondaModalOpen(false)} className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-xs">Batal</Button>
-            <Button type="submit" className="flex-1 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 font-black uppercase tracking-widest text-xs">Simpan Jadwal</Button>
+          <div className="flex gap-4 pt-2">
+            <Button type="button" variant="outline" onClick={() => setIsRondaModalOpen(false)} className="flex-1 py-3.5 rounded-2xl font-black uppercase tracking-widest text-xs">
+              Batal
+            </Button>
+            <Button type="submit" className="flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 font-black uppercase tracking-widest text-xs">
+              Simpan Perubahan Shift
+            </Button>
           </div>
         </form>
       </Modal>

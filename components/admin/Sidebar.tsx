@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, DollarSign, FileText, 
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
-  ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert,
+  ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert, AlertTriangle,
   PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox
 } from 'lucide-react';
 import { Logo } from '../../constants';
@@ -113,26 +113,25 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
-        { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu' },
+        { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
       ] 
     },
     { 
-      title: "Layanan & Keuangan", 
+      title: "Layanan & Pelaporan", 
       items: [
-        { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan' },
-        { id: 'services', icon: FileText, label: 'Surat & Laporan' },
-        { id: 'incoming_mails', icon: Inbox, label: 'Surat Masuk' },
+        { id: 'services', icon: FileText, label: 'Pusat Persuratan' },
+        { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
       ] 
     },
     { 
-      title: "Operasional & Media", 
+      title: "Operasional & Keuangan", 
       items: [
+        { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan' },
         { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
         { id: 'content', icon: Megaphone, label: 'Pusat Informasi' },
         { id: 'activities', icon: Calendar, label: 'Agenda & Presensi' },
         { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
-        { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
       ] 
     },
     { 
@@ -157,7 +156,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       } else if (role === Role.SECRETARY) {
         isAllowed = [
           'overview', 'analytics', 'residents', 
-          'health', 'guests', 'officials', 'services', 'incoming_mails', 'documents', 'activities', 
+          'health', 'officials', 'services', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       }
@@ -215,12 +214,13 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         const pendingReg = residentRegistrations.filter(r => r.approvalStatus === 'Pending').length;
         const pendingUpd = updateRequests.filter(r => r.status === 'Pending').length;
         return pendingReg + pendingUpd;
-      case 'guests':
-        return guestReports.filter(g => g.status === 'Active' || g.status === 'Pending').length;
+      case 'reports-warga':
+        const pendingGuests = guestReports.filter(g => g.status === 'Active' || g.status === 'Pending').length;
+        const pendingR = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
+        return pendingGuests + pendingR;
       case 'services':
         const pendingL = letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length;
-        const pendingR = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
-        return pendingL + pendingR;
+        return pendingL;
       case 'facilities':
         return rondaSwapRequests.filter(s => s.status === 'Menunggu' || s.status === 'Pending').length;
       default:

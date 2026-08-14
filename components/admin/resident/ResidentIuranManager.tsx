@@ -8,8 +8,8 @@ import { House, PdfConfig, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 import { toast } from 'sonner';
 import { useConfirm } from '../../../context/ConfirmContext';
-import { handleFirestoreError, OperationType } from '../../../services/databaseService';
-import { generateIuranReportExcel } from '../../../services/excelService';
+import { handleFirestoreError, OperationType, addIuranPaymentToDb } from '../../../services/databaseService';
+import { generateIuranReportExcel, generateIuranBatchTemplateExcel, parseIuranBatchExcel } from '../../../services/excelService';
 
 interface ResidentIuranManagerProps {
   houses: House[];
@@ -225,6 +225,68 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
           >
             <Clock size={16} /> {showOnlyArrears ? 'Tampil Semua' : 'Fokus Tunggakan'}
           </button>
+          <button 
+            type="button"
+            onClick={() => generateIuranBatchTemplateExcel(houses, selectedMonth)}
+            className="flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-100 transition-all shadow-sm"
+            title="Download Template Excel Penagihan Iuran Warga"
+          >
+            <Download size={15} /> Unduh Template Excel
+          </button>
+          <label className="flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 cursor-pointer">
+            <Share2 size={15} /> Import Rekap Excel
+            <input 
+              type="file" 
+              className="hidden" 
+              accept=".xlsx, .xls"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                try {
+                  toast.loading("Membaca data Excel penagihan...");
+                  const parsed = await parseIuranBatchExcel(file);
+                  const lunasItems = parsed.filter(item => item.status === 'Lunas');
+                  
+                  if (lunasItems.length === 0) {
+                    toast.dismiss();
+                    toast.error("Tidak ada data warga dengan status 'Lunas' ditemukan dalam file.");
+                    return;
+                  }
+
+                  let successCount = 0;
+                  for (const item of lunasItems) {
+                    const house = houses.find(h => 
+                      h.block.toLowerCase().trim() === item.block.toLowerCase().trim() && 
+                      h.number.toLowerCase().trim() === item.number.toLowerCase().trim()
+                    );
+
+                    if (house) {
+                      await addIuranPaymentToDb({
+                        houseId: house.id,
+                        block: house.block,
+                        number: house.number,
+                        headOfFamily: house.headOfFamily,
+                        payerName: item.headOfFamily || house.headOfFamily,
+                        amount: item.amount || 50000,
+                        month: selectedMonth,
+                        type: item.type,
+                        date: new Date().toISOString().split('T')[0],
+                        notes: 'Imported via Batch Excel Penagihan'
+                      });
+                      successCount++;
+                    }
+                  }
+
+                  toast.dismiss();
+                  toast.success(`Berhasil mengimpor ${successCount} data pembayaran iuran warga!`);
+                } catch (err) {
+                  console.error(err);
+                  toast.dismiss();
+                  toast.error("Gagal mengimpor file Excel. Pastikan format file sesuai.");
+                }
+              }} 
+            />
+          </label>
           <button 
             onClick={() => {
               const typeLabel = filterType === 'All' ? 'Semua Iuran' : filterType === 'Air' ? 'Iuran Air' : 'Iuran Sampah';

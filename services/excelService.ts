@@ -1343,3 +1343,121 @@ export const generateGuestReportExcel = async (guests: any[]) => {
   saveAs(blob, `Laporan_Tamu_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
+export const generateIuranBatchTemplateExcel = async (houses: House[], monthYear: string) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Template Iuran');
+
+  // Title
+  worksheet.mergeCells('A1:G1');
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = `TEMPLATE PENAGIHAN IURAN WARGA RT 02 - PERIODE ${monthYear.toUpperCase()}`;
+  titleCell.font = { name: 'Arial', size: 12, bold: true, color: { argb: 'FF1E293B' } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.addRow([]);
+
+  worksheet.columns = [
+    { header: 'No', key: 'no', width: 6 },
+    { header: 'Blok', key: 'block', width: 10 },
+    { header: 'No Rumah', key: 'number', width: 12 },
+    { header: 'Nama Kepala Keluarga', key: 'headOfFamily', width: 28 },
+    { header: 'Status Pembayaran (Lunas/Belum)', key: 'status', width: 25 },
+    { header: 'Jenis Iuran (Air/Sampah/Semua)', key: 'type', width: 22 },
+    { header: 'Nominal Bayar (Rp)', key: 'amount', width: 20 },
+  ];
+
+  const headerRow = worksheet.getRow(3);
+  headerRow.height = 24;
+  headerRow.eachCell((cell) => {
+    cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  });
+
+  const occupiedHouses = houses.filter(h => h.status === 'Occupied')
+    .sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
+
+  occupiedHouses.forEach((h, index) => {
+    const row = worksheet.addRow({
+      no: index + 1,
+      block: h.block,
+      number: h.number,
+      headOfFamily: h.headOfFamily,
+      status: 'Belum',
+      type: 'Semua',
+      amount: 50000
+    });
+
+    row.eachCell((cell, colNumber) => {
+      cell.font = { name: 'Arial', size: 9 };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+      };
+      if (colNumber === 5) {
+        cell.alignment = { horizontal: 'center' };
+      }
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Template_Penagihan_Iuran_RT02_${monthYear.replace(/\s+/g, '_')}.xlsx`);
+};
+
+export const parseIuranBatchExcel = async (file: File): Promise<Array<{
+  block: string;
+  number: string;
+  headOfFamily: string;
+  status: 'Lunas' | 'Belum';
+  type: 'Air' | 'Sampah' | 'Both';
+  amount: number;
+}>> => {
+  const buffer = await file.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer);
+
+  const worksheet = workbook.getWorksheet(1);
+  if (!worksheet) return [];
+
+  const results: Array<{
+    block: string;
+    number: string;
+    headOfFamily: string;
+    status: 'Lunas' | 'Belum';
+    type: 'Air' | 'Sampah' | 'Both';
+    amount: number;
+  }> = [];
+
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber <= 3) return; // Skip title and header
+
+    const block = row.getCell(2).value?.toString().trim() || '';
+    const number = row.getCell(3).value?.toString().trim() || '';
+    const headOfFamily = row.getCell(4).value?.toString().trim() || '';
+    const rawStatus = row.getCell(5).value?.toString().trim().toLowerCase() || '';
+    const rawType = row.getCell(6).value?.toString().trim().toLowerCase() || '';
+    const rawAmount = parseInt(row.getCell(7).value?.toString() || '0', 10);
+
+    if (block && number) {
+      const status: 'Lunas' | 'Belum' = (rawStatus === 'lunas' || rawStatus === 'ya' || rawStatus === 'paid') ? 'Lunas' : 'Belum';
+      let type: 'Air' | 'Sampah' | 'Both' = 'Both';
+      if (rawType.includes('air')) type = 'Air';
+      else if (rawType.includes('sampah')) type = 'Sampah';
+
+      results.push({
+        block,
+        number,
+        headOfFamily,
+        status,
+        type,
+        amount: isNaN(rawAmount) ? 0 : rawAmount
+      });
+    }
+  });
+
+  return results;
+};
+

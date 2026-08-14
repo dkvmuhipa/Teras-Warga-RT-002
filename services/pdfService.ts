@@ -470,6 +470,10 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   }
 
   cursorY += 15;
+  if (cursorY > pageHeight - 65) {
+      doc.addPage();
+      cursorY = 25;
+  }
   const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const leftSignX = 50;
@@ -3494,4 +3498,55 @@ export const generateOfficialStructurePDF = async (officials: Official[], custom
 
     doc.save(`Struktur_Kepengurusan_RT02_${new Date().getFullYear()}.pdf`);
     toast.success("Dokumen Struktur Kepengurusan RT (PDF) berhasil diunduh!");
+};
+
+export const generateRondaSchedulePDF = async (schedules: any[], config: PdfConfig) => {
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    const centerX = pageWidth / 2;
+
+    // Header KOP
+    doc.setFont('times', 'bold');
+    doc.setFontSize(14);
+    doc.text(`JADWAL RONDA SISKAMLING ${config.rtName?.toUpperCase() || 'RT 02'}`, centerX, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setFont('times', 'normal');
+    doc.text(`KELURAHAN ${config.kelurahan?.toUpperCase() || 'TONDO'} - KECAMATAN ${config.kecamatan?.toUpperCase() || 'MANTIKULORE'}`, centerX, 20, { align: 'center' });
+    doc.setLineWidth(0.5);
+    doc.line(margin, 24, pageWidth - margin, 24);
+
+    const daysOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    const sortedSchedules = [...schedules].sort((a, b) => daysOrder.indexOf(a.day) - daysOrder.indexOf(b.day));
+
+    autoTable(doc, {
+        startY: 28,
+        margin: { left: margin, right: margin },
+        head: [['Hari', 'Shift 1 (22:00 - 01:00 WITA)', 'Shift 2 (01:00 - 04:00 WITA)', 'Koor. Lapangan']],
+        body: sortedSchedules.map((s) => {
+            const shift1 = s.shifts?.find((sh: any) => sh.id === '1')?.members?.join(', ') || '-';
+            const shift2 = s.shifts?.find((sh: any) => sh.id === '2')?.members?.join(', ') || '-';
+            const coordinator = s.members && s.members.length > 0 ? s.members[0] : '-';
+            return [s.day, shift1, shift2, coordinator];
+        }),
+        styles: { font: 'times', fontSize: 10, cellPadding: 4, valign: 'middle' },
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+        columnStyles: {
+            0: { cellWidth: 30, fontStyle: 'bold', halign: 'center' },
+            1: { cellWidth: 100 },
+            2: { cellWidth: 100 },
+            3: { cellWidth: 37, halign: 'center' }
+        }
+    });
+
+    const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 12 : 120;
+    const sigX = pageWidth - margin - 60;
+    doc.setFontSize(9);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, sigX, finalY);
+    doc.text(`Ketua ${config.rtName || 'RT 02'},`, sigX, finalY + 5);
+    doc.setFont('times', 'bold');
+    doc.text(config.rtChairman || 'NAMA KETUA RT', sigX, finalY + 22);
+
+    doc.save(`Jadwal_Ronda_Siskamling_${config.rtName?.replace(/\s+/g, '_') || 'RT02'}.pdf`);
+    toast.success("Poster Jadwal Ronda Siskamling (PDF) berhasil diunduh!");
 };

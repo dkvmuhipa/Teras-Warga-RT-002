@@ -11,6 +11,7 @@ import { Button } from '../ui/Button';
 import { SignaturePad } from './SignaturePad';
 import { OfficialLetterManager } from './OfficialLetterManager';
 import { LetterArchiveManager } from './LetterArchiveManager';
+import { IncomingMailManager } from './IncomingMailManager';
 import { toast } from 'sonner';
 import { useConfirm } from '../../context/ConfirmContext';
 
@@ -21,7 +22,8 @@ interface ServiceManagerProps {
   pdfConfig: PdfConfig;
   setPdfConfig: (config: PdfConfig) => void;
   onDeleteReport?: (id: string) => void;
-  initialTab?: 'letters' | 'reports' | 'official-letters' | 'letter-archive' | 'settings';
+  incomingMails?: any[];
+  initialTab?: 'letters' | 'reports' | 'official-letters' | 'incoming_mails' | 'letter-archive' | 'settings';
 }
 
 export const ServiceManager: React.FC<ServiceManagerProps> = ({ 
@@ -31,9 +33,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   pdfConfig, 
   setPdfConfig,
   onDeleteReport,
+  incomingMails = [],
   initialTab = 'letters'
 }) => {
-  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'official-letters' | 'letter-archive' | 'settings'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'official-letters' | 'incoming_mails' | 'letter-archive' | 'settings'>(initialTab);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showArchived, setShowArchived] = useState(false);
@@ -53,9 +56,42 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const [isVerifyingGroup, setIsVerifyingGroup] = useState(false);
   const [availableGroups, setAvailableGroups] = useState<{id: string, name: string}[]>([]);
   const [showGroupList, setShowGroupList] = useState(false);
+  const [previewPdfBlobUrl, setPreviewPdfBlobUrl] = useState<string | null>(null);
+  const [showPdfPreviewModal, setShowPdfPreviewModal] = useState(false);
   const [officialLetters, setOfficialLetters] = useState<OfficialLetter[]>([]);
   const [detailModalTab, setDetailModalTab] = useState<'profil' | 'keperluan' | 'penerbitan'>('profil');
+  const [settingSubTab, setSettingSubTab] = useState<'identity' | 'assets' | 'templates' | 'whatsapp'>('identity');
   const lastLoadedIdRef = React.useRef<string | null>(null);
+
+  const handleGenerateLivePreview = async (letterToPreview: LetterRequest) => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      // Create PDF in memory and get Blob URL
+      const letterData = { ...letterToPreview, letterNumber: letterNumberInput || letterToPreview.letterNumber };
+      const configToUse = tempSignature ? { ...pdfConfig, signature: tempSignature } : pdfConfig;
+      
+      // Temporarily store original save
+      const originalSave = jsPDF.prototype.save;
+      let blobUrl = '';
+      
+      jsPDF.prototype.save = function(filename?: string) {
+        const blob = this.output('blob');
+        blobUrl = URL.createObjectURL(blob);
+        return this;
+      };
+
+      await generateSuratPengantar(letterData, configToUse, false);
+      jsPDF.prototype.save = originalSave;
+
+      if (blobUrl) {
+        setPreviewPdfBlobUrl(blobUrl);
+        setShowPdfPreviewModal(true);
+      }
+    } catch (e) {
+      console.error("Live preview error:", e);
+      toast.error("Gagal memuat pratinjau PDF.");
+    }
+  };
   
   const extractNum = (str: string) => {
     const parts = str.split('/');
@@ -794,6 +830,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <span>Surat Resmi</span>
                 </button>
                 <button 
+                  onClick={() => setActiveTab('incoming_mails')} 
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                    activeTab === 'incoming_mails' 
+                      ? 'bg-white text-teal-600 shadow-md ring-1 ring-black/5' 
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  <FileText size={14} className="sm:w-4 sm:h-4" />
+                  <span>Surat Masuk ({incomingMails.length})</span>
+                </button>
+                <button 
                   onClick={() => setActiveTab('letter-archive')} 
                   className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
                     activeTab === 'letter-archive' 
@@ -802,7 +849,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   }`}
                 >
                   <Archive size={14} className="sm:w-4 sm:h-4" />
-                  <span>Arsip Surat</span>
+                  <span>Repositori Surat</span>
                 </button>
                 <button 
                   onClick={() => setActiveTab('settings')} 
@@ -894,79 +941,81 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         </div>
       )}
 
-      {/* Filters */}
-      <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center bg-white p-4 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
-          <input 
-            type="text" 
-            placeholder={activeTab === 'letters' ? "Cari pemohon atau jenis surat..." : "Cari pelapor atau isi laporan..."}
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {activeTab === 'letters' && (
-            <Button onClick={() => setIsCreatingLetter(true)} className="bg-indigo-600 hover:bg-indigo-700">
-              <Plus size={18} className="mr-2" /> Buat Surat Baru
-            </Button>
-          )}
-          {activeTab === 'reports' && (
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => generateIncidentReportPDF(filteredReports, houses, pdfConfig)} 
-                className="bg-slate-800 hover:bg-slate-900 border border-slate-700 shadow-lg shadow-slate-200"
-              >
-                <Printer size={18} className="mr-2" /> Cetak Rekap Harian
-              </Button>
-              <Button onClick={() => setIsCreatingReport(true)} className="bg-rose-600 hover:bg-rose-700">
-                <Plus size={18} className="mr-2" /> Buat Aspirasi/Pengaduan
-              </Button>
-            </div>
-          )}
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
-             <Filter size={14} className="text-slate-400"/>
-             <select className="bg-transparent border-none text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" value={filterStatus} onChange={(e:any) => setFilterStatus(e.target.value)}>
-               <option value="All">Semua Status</option>
-               {activeTab === 'letters' ? (
-                 <>
-                   <option value="Menunggu">Menunggu</option>
-                   <option value="Disetujui">Disetujui</option>
-                   <option value="Ditolak">Ditolak</option>
-                 </>
-               ) : (
-                 <>
-                   <option value="Baru">Baru</option>
-                   <option value="Diproses">Diproses</option>
-                   <option value="Selesai">Selesai</option>
-                 </>
-               )}
-             </select>
+      {/* Filters (Only show for active list views: letters & reports) */}
+      {(activeTab === 'letters' || activeTab === 'reports') && (
+        <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center bg-white p-4 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm">
+          <div className="relative flex-1 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+            <input 
+              type="text" 
+              placeholder={activeTab === 'letters' ? "Cari pemohon atau jenis surat..." : "Cari pelapor atau isi laporan..."}
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
           </div>
-          <button 
-            onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all text-[10px] font-black uppercase tracking-widest ${
-              showArchived 
-                ? 'bg-indigo-600 text-white border-indigo-600' 
-                : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
-            }`}
-          >
-            <Archive size={14} />
-            {showArchived ? 'Lihat Aktif' : 'Lihat Arsip'}
-          </button>
-          {!showArchived && (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {activeTab === 'letters' && (
+              <Button onClick={() => setIsCreatingLetter(true)} className="bg-indigo-600 hover:bg-indigo-700">
+                <Plus size={18} className="mr-2" /> Buat Surat Baru
+              </Button>
+            )}
+            {activeTab === 'reports' && (
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => generateIncidentReportPDF(filteredReports, houses, pdfConfig)} 
+                  className="bg-slate-800 hover:bg-slate-900 border border-slate-700 shadow-lg shadow-slate-200"
+                >
+                  <Printer size={18} className="mr-2" /> Cetak Rekap Harian
+                </Button>
+                <Button onClick={() => setIsCreatingReport(true)} className="bg-rose-600 hover:bg-rose-700">
+                  <Plus size={18} className="mr-2" /> Buat Aspirasi/Pengaduan
+                </Button>
+              </div>
+            )}
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
+               <Filter size={14} className="text-slate-400"/>
+               <select className="bg-transparent border-none text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" value={filterStatus} onChange={(e:any) => setFilterStatus(e.target.value)}>
+                 <option value="All">Semua Status</option>
+                 {activeTab === 'letters' ? (
+                   <>
+                     <option value="Menunggu">Menunggu</option>
+                     <option value="Disetujui">Disetujui</option>
+                     <option value="Ditolak">Ditolak</option>
+                   </>
+                 ) : (
+                   <>
+                     <option value="Baru">Baru</option>
+                     <option value="Diproses">Diproses</option>
+                     <option value="Selesai">Selesai</option>
+                   </>
+                 )}
+               </select>
+            </div>
             <button 
-              onClick={handleAutoArchive}
-              className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-2xl hover:bg-amber-100 transition-all text-[10px] font-black uppercase tracking-widest"
-              title="Arsipkan data yang sudah selesai lebih dari 30 hari"
+              onClick={() => setShowArchived(!showArchived)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all text-[10px] font-black uppercase tracking-widest ${
+                showArchived 
+                  ? 'bg-indigo-600 text-white border-indigo-600' 
+                  : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+              }`}
             >
               <Archive size={14} />
-              Auto Arsip
+              {showArchived ? 'Lihat Aktif' : 'Lihat Terarsip'}
             </button>
-          )}
+            {!showArchived && (
+              <button 
+                onClick={handleAutoArchive}
+                className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-2xl hover:bg-amber-100 transition-all text-[10px] font-black uppercase tracking-widest"
+                title="Arsipkan data yang sudah selesai lebih dari 30 hari"
+              >
+                <Archive size={14} />
+                Auto Arsip (30 Hari)
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Content */}
       <AnimatePresence mode="wait">
@@ -978,6 +1027,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             exit={{ opacity: 0, y: -20 }}
           >
             <OfficialLetterManager pdfConfig={pdfConfig} setPdfConfig={setPdfConfig} residentLetters={letters} />
+          </motion.div>
+        ) : activeTab === 'incoming_mails' ? (
+          <motion.div
+            key="incoming_mails"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <IncomingMailManager incomingMails={incomingMails} />
           </motion.div>
         ) : activeTab === 'letter-archive' ? (
           <motion.div
@@ -996,595 +1054,595 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             exit={{ opacity: 0, y: -20 }}
             className="space-y-8"
           >
-            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-              <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
+            {/* Kop Settings Top Navigation & Card Container */}
+            <div className="bg-white p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+              
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl">
-                    <Settings size={24} />
+                  <div className="p-3.5 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-2xl shadow-lg shadow-indigo-200">
+                    <Settings size={22} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-slate-900">Konfigurasi Kop Surat & Validasi</h3>
-                    <p className="text-sm font-medium text-slate-500">Atur informasi RT dan aset visual untuk dokumen resmi.</p>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Pengaturan Kop Surat & Dokumen Resmi</h3>
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">Kelola identitas RT, stempel digital, logo, template surat, dan integrasi broadcast WhatsApp.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nama RT (Kop Surat)</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={pdfConfig.rtName || ''} 
-                        onChange={e => {
-                          const newConfig = {...pdfConfig, rtName: e.target.value};
-                          setPdfConfig(newConfig);
-                        }} 
-                        placeholder="RT 02 / RW 005"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nama Ketua RT</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={pdfConfig.rtChairman || ''} 
-                        onChange={e => {
-                          const newConfig = {...pdfConfig, rtChairman: e.target.value};
-                          setPdfConfig(newConfig);
-                        }} 
-                        placeholder="NAMA KETUA RT"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">No. Surat Terakhir</label>
-                      <div className="flex gap-2">
-                        <input 
-                          type="number"
-                          className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                          value={pdfConfig.lastLetterNumber || 0} 
-                          onChange={e => {
-                            const newConfig = {...pdfConfig, lastLetterNumber: parseInt(e.target.value) || 0};
-                            setPdfConfig(newConfig);
-                          }} 
-                          placeholder="0"
-                        />
-                        <button 
-                          onClick={async () => {
-                            let maxNum = 0;
-                            // Scan resident letters
-                            letters.forEach(l => {
-                              if (l.letterNumber) {
-                                const match = ["", (extractNum(l.letterNumber) || 0).toString()];
-                                if (match) {
-                                  const num = parseInt(match[1]);
-                                  if (!isNaN(num) && num > maxNum) maxNum = num;
-                                }
-                              }
-                            });
-                            // Scan official letters
-                            officialLetters.forEach(ol => {
-                              if (ol.letterNumber) {
-                                const match = ["", (extractNum(ol.letterNumber) || 0).toString()];
-                                if (match) {
-                                  const num = parseInt(match[1]);
-                                  if (!isNaN(num) && num > maxNum) maxNum = num;
-                                }
-                              }
-                            });
-                            if (maxNum > 0) {
-                              const newConfig = { ...pdfConfig, lastLetterNumber: maxNum };
-                              setPdfConfig(newConfig);
-                              try {
-                                await updatePdfConfig(newConfig);
-                                toast.success(`Counter disinkronkan ke nomor: ${maxNum} (dari seluruh dokumen surat)`);
-                              } catch (err) {
-                                console.error(err);
-                                toast.error("Gagal menyimpan sinkronisasi nomor surat ke cloud.");
-                              }
-                            } else {
-                              toast.error("Tidak ditemukan nomor surat valid untuk sinkronisasi.");
-                            }
-                          }}
-                          className="px-4 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-2xl hover:bg-indigo-100 transition-all"
-                          title="Sinkronkan dengan nomor tertinggi dari surat yang ada"
-                        >
-                          <RefreshCw size={18} />
-                        </button>
+              {/* Sub Navigation Bar inside Settings */}
+              <div className="flex bg-slate-100/70 p-1.5 rounded-2xl border border-slate-200/60 shadow-inner overflow-x-auto no-scrollbar">
+                <button
+                  onClick={() => setSettingSubTab('identity')}
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    settingSubTab === 'identity'
+                      ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <Home size={15} />
+                  <span>1. Identitas Wilayah</span>
+                </button>
+                <button
+                  onClick={() => setSettingSubTab('assets')}
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    settingSubTab === 'assets'
+                      ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <ImageIcon size={15} />
+                  <span>2. Logo, Stempel & TTD</span>
+                </button>
+                <button
+                  onClick={() => setSettingSubTab('templates')}
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    settingSubTab === 'templates'
+                      ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <FileText size={15} />
+                  <span>3. Template & Teks Surat</span>
+                </button>
+                <button
+                  onClick={() => setSettingSubTab('whatsapp')}
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    settingSubTab === 'whatsapp'
+                      ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <MessageCircle size={15} />
+                  <span>4. Integrasi WhatsApp</span>
+                </button>
+              </div>
+
+              {/* Main Content & Live Preview Layout Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* Left Side (7 Cols): Dynamic Form Content */}
+                <div className="lg:col-span-7 space-y-6">
+                  
+                  {/* TAB 1: IDENTITAS WILAYAH */}
+                  {settingSubTab === 'identity' && (
+                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                      <div className="bg-indigo-50/40 p-4 rounded-2xl border border-indigo-100 flex items-center gap-3">
+                        <Info size={18} className="text-indigo-600 shrink-0" />
+                        <p className="text-xs font-bold text-indigo-900 leading-relaxed">
+                          Informasi wilayah di bawah ini akan secara otomatis tampil pada bagian **KOP Header** setiap Surat Pengantar Warga dan Surat Resmi RT.
+                        </p>
                       </div>
-                      <p className="text-[9px] text-slate-400 mt-1 ml-1 leading-tight">
-                        Digunakan untuk penomoran otomatis. Format: KODE/NOMOR/RT/BULAN/TAHUN
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Kelurahan</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={pdfConfig.kelurahan || ''} 
-                        onChange={e => {
-                          const newConfig = {...pdfConfig, kelurahan: e.target.value};
-                          setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                        }} 
-                        placeholder="TONDO"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Kecamatan</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={pdfConfig.kecamatan || ''} 
-                        onChange={e => {
-                          const newConfig = {...pdfConfig, kecamatan: e.target.value};
-                          setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                        }} 
-                        placeholder="MANTIKULORE"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Kota</label>
-                      <input 
-                        type="text"
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                        value={pdfConfig.kota || ''} 
-                        onChange={e => {
-                          const newConfig = {...pdfConfig, kota: e.target.value};
-                          setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                        }} 
-                        placeholder="PALU"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Alamat Lengkap RT</label>
-                    <textarea 
-                      rows={3}
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none" 
-                      value={pdfConfig.rtAddress || ''} 
-                      onChange={e => {
-                        const newConfig = {...pdfConfig, rtAddress: e.target.value};
-                        setPdfConfig(newConfig);
-                        localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                      }} 
-                      placeholder="Alamat lengkap untuk kop surat..."
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Logo */}
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Logo RT / Kota</p>
-                    <div className="relative aspect-video bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload">
-                      {pdfConfig.logo ? (
-                        <>
-                          <img src={pdfConfig.logo} alt="Logo" className="w-full h-full object-contain p-4" />
-                          <button 
-                            onClick={() => {
-                              const newConfig = {...pdfConfig, logo: ''};
-                              setPdfConfig(newConfig);
-                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                            }}
-                            className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </>
-                      ) : (
-                        <div className="text-center p-4">
-                          <ImageIcon size={24} className="mx-auto text-slate-300 mb-1" />
-                          <p className="text-[9px] font-bold text-slate-400 uppercase">Belum Ada Logo</p>
-                        </div>
-                      )}
-                      <label className="absolute inset-0 cursor-pointer">
-                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Stempel */}
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Stempel RT</p>
-                    <div className="relative aspect-video bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload">
-                      {pdfConfig.stamp ? (
-                        <>
-                          <img src={pdfConfig.stamp} alt="Stempel" className="w-full h-full object-contain p-4" />
-                          <button 
-                            onClick={() => {
-                              const newConfig = {...pdfConfig, stamp: ''};
-                              setPdfConfig(newConfig);
-                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                            }}
-                            className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </>
-                      ) : (
-                        <div className="text-center p-4">
-                          <ImageIcon size={24} className="mx-auto text-slate-300 mb-1" />
-                          <p className="text-[9px] font-bold text-slate-400 uppercase">Belum Ada Stempel</p>
-                        </div>
-                      )}
-                      <label className="absolute inset-0 cursor-pointer">
-                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'stamp')} />
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Tanda Tangan */}
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tanda Tangan Ketua RT</p>
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                      <SignaturePad 
-                        initialValue={pdfConfig.signature}
-                        onSave={(dataUrl) => {
-                          const newConfig = { ...pdfConfig, signature: dataUrl };
-                          setPdfConfig(newConfig);
-                          toast.success("Tanda tangan berhasil disimpan!");
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-100">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl">
-                    <FileText size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-slate-900">Pengaturan Template Surat</h3>
-                    <p className="text-sm font-medium text-slate-500">Atur jenis surat dan saran pengisian untuk warga.</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button 
-                    onClick={() => {
-                      const defaultTemplates = [
-                        { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
-                        { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
-                        { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
-                        { type: 'Surat Keterangan Domisili', suggestion: 'Bahwa yang bersangkutan benar-benar merupakan warga / penduduk yang berdomisili menetap di wilayah RT kami. Surat keterangan ini digunakan untuk persyaratan [cth: melamar pekerjaan / pembukaan rekening bank / pendaftaran sekolah].' },
-                        { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Bahwa yang bersangkutan adalah benar warga RT kami dan berdasarkan keadaan yang sebenarnya, yang bersangkutan termasuk dalam keluarga prasejahtera / Kurang Mampu. Surat Keterangan ini digunakan untuk keperluan persyaratan [cth: pengajuan beasiswa / keringanan biaya rumah sakit / bantuan sosial].' },
-                        { type: 'Surat Izin Keramaian', suggestion: 'Surat ini sebagai pengantar / rekomendasi izin penyelenggaraan acara keramaian berupa [Nama/Jenis Acara, cth: Resepsi Pernikahan] yang akan diselenggarakan pada hari/tanggal [Tanggal Acara] bertempat di [Lokasi Acara].' },
-                        { type: 'Surat Keterangan Usaha', suggestion: 'Bahwa yang bersangkutan benar merupakan warga kami dan memiliki usaha / bisnis di bidang [Jenis Usaha, cth: Perdagangan/Kuliner] dengan nama usaha [Nama Usaha] yang berlokasi di wilayah RT kami. Surat ini dibuat untuk keperluan [cth: pengajuan kredit UMKM / pembuatan NPWP badan].' },
-                        { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Bahwa yang bersangkutan adalah warga kami yang senantiasa berkelakuan baik, belum pernah tersangkut tindak pidana, dan tidak pernah mengganggu ketertiban lingkungan. Surat ini sebagai pengantar untuk pembuatan SKCK di kepolisian untuk keperluan [cth: pendaftaran TNI/Polri / melamar pekerjaan].' },
-                        { type: 'Surat Keterangan Kematian', suggestion: 'Menerangkan dengan sebenarnya bahwa warga kami yang bernama [Nama Almarhum/Almarhumah] telah meninggal dunia pada [Hari, Tanggal, Jam] dikarenakan [Sakit/Usia/dll]. Surat keterangan ini digunakan untuk persyaratan administrasi kepengurusan Akta Kematian di Kelurahan.' },
-                        { type: 'Surat Keterangan Kelahiran', suggestion: 'Menerangkan bahwa telah lahir seorang anak [Laki-laki / Perempuan] bernama [Nama Anak] pada tanggal [Tanggal Lahir] dari pasangan suami istri [Nama Ayah] dan [Nama Ibu]. Surat pengantar ini digunakan untuk keperluan pembuatan Akta Kelahiran.' },
-                        { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Surat keterangan ini menerangkan susunan ahli waris yang sah dari almarhum/almarhumah [Nama Almarhum] untuk digunakan sebagai persyaratan administrasi kepengurusan turun waris / pembagian harta warisan keluarga.' },
-                        { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Bahwa yang bersangkutan bermaksud untuk mengurus administrasi pindah alamat dari RT kami menuju [Alamat Tujuan Pindah] / melapor kedatangan sebagai warga baru yang pindah dari [Alamat Asal].' },
-                        { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Menerangkan bahwa yang bersangkutan bermaksud untuk melangsungkan pernikahan. Surat pengantar ini dibuat sebagai persyaratan pengurusan berkas administrasi pernikahan (N1, N2, N3, N4) di tingkat Kelurahan.' },
-                      ];
-                      const newConfig = { ...pdfConfig, letterTemplates: defaultTemplates };
-                      setPdfConfig(newConfig);
-                      // Make sure to sync with Firebase if that's configured! Assuming auto-sync is on
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all"
-                  >
-                    <RefreshCw size={16} /> Reset Default
-                  </button>
-                  <Button 
-                    onClick={() => {
-                      const newTemplates = [...(pdfConfig.letterTemplates || []), { type: 'Jenis Surat Baru', suggestion: 'Isi saran pengisian di sini...' }];
-                      const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
-                      setPdfConfig(newConfig);
-                    }}
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                  >
-                    <Plus size={18} className="mr-2" /> Tambah Jenis Surat
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                {(pdfConfig.letterTemplates && pdfConfig.letterTemplates.length > 0 ? pdfConfig.letterTemplates : [
-                  { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
-                  { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
-                  { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
-                  { type: 'Surat Keterangan Domisili', suggestion: 'Bahwa yang bersangkutan benar-benar merupakan warga / penduduk yang berdomisili menetap di wilayah RT kami. Surat keterangan ini digunakan untuk persyaratan [cth: melamar pekerjaan / pembukaan rekening bank / pendaftaran sekolah].' },
-                  { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Bahwa yang bersangkutan adalah benar warga RT kami dan berdasarkan keadaan yang sebenarnya, yang bersangkutan termasuk dalam keluarga prasejahtera / Kurang Mampu. Surat Keterangan ini digunakan untuk keperluan persyaratan [cth: pengajuan beasiswa / keringanan biaya rumah sakit / bantuan sosial].' },
-                  { type: 'Surat Izin Keramaian', suggestion: 'Surat ini sebagai pengantar / rekomendasi izin penyelenggaraan acara keramaian berupa [Nama/Jenis Acara, cth: Resepsi Pernikahan] yang akan diselenggarakan pada hari/tanggal [Tanggal Acara] bertempat di [Lokasi Acara].' },
-                  { type: 'Surat Keterangan Usaha', suggestion: 'Bahwa yang bersangkutan benar merupakan warga kami dan memiliki usaha / bisnis di bidang [Jenis Usaha, cth: Perdagangan/Kuliner] dengan nama usaha [Nama Usaha] yang berlokasi di wilayah RT kami. Surat ini dibuat untuk keperluan [cth: pengajuan kredit UMKM / pembuatan NPWP badan].' },
-                  { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Bahwa yang bersangkutan adalah warga kami yang senantiasa berkelakuan baik, belum pernah tersangkut tindak pidana, dan tidak pernah mengganggu ketertiban lingkungan. Surat ini sebagai pengantar untuk pembuatan SKCK di kepolisian untuk keperluan [cth: pendaftaran TNI/Polri / melamar pekerjaan].' },
-                  { type: 'Surat Keterangan Kematian', suggestion: 'Menerangkan dengan sebenarnya bahwa warga kami yang bernama [Nama Almarhum/Almarhumah] telah meninggal dunia pada [Hari, Tanggal, Jam] dikarenakan [Sakit/Usia/dll]. Surat keterangan ini digunakan untuk persyaratan administrasi kepengurusan Akta Kematian di Kelurahan.' },
-                  { type: 'Surat Keterangan Kelahiran', suggestion: 'Menerangkan bahwa telah lahir seorang anak [Laki-laki / Perempuan] bernama [Nama Anak] pada tanggal [Tanggal Lahir] dari pasangan suami istri [Nama Ayah] dan [Nama Ibu]. Surat pengantar ini digunakan untuk keperluan pembuatan Akta Kelahiran.' },
-                  { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Surat keterangan ini menerangkan susunan ahli waris yang sah dari almarhum/almarhumah [Nama Almarhum] untuk digunakan sebagai persyaratan administrasi kepengurusan turun waris / pembagian harta warisan keluarga.' },
-                  { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Bahwa yang bersangkutan bermaksud untuk mengurus administrasi pindah alamat dari RT kami menuju [Alamat Tujuan Pindah] / melapor kedatangan sebagai warga baru yang pindah dari [Alamat Asal].' },
-                  { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Menerangkan bahwa yang bersangkutan bermaksud untuk melangsungkan pernikahan. Surat pengantar ini dibuat sebagai persyaratan pengurusan berkas administrasi pernikahan (N1, N2, N3, N4) di tingkat Kelurahan.' },
-                ]).map((template, idx) => (
-                  <div key={idx} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 relative group">
-                    <button 
-                      onClick={() => {
-                        const newTemplates = (pdfConfig.letterTemplates || []).filter((_, i) => i !== idx);
-                        const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
-                        setPdfConfig(newConfig);
-                        localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                      }}
-                      className="absolute top-4 right-4 p-2 text-rose-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jenis Surat</label>
-                        <input 
-                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:border-indigo-500 outline-none transition-all"
-                          value={template.type}
-                          onChange={(e) => {
-                            const newTemplates = [...(pdfConfig.letterTemplates || [])];
-                            if (newTemplates.length === 0) {
-                              // Initialize if empty
-                              newTemplates.push(...[
-                                { type: 'Surat Pengantar', suggestion: 'Surat pengantar umum untuk berbagai keperluan administratif.' },
-                                { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
-                                { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
-                                { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
-                                { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Persyaratan pengajuan bantuan sosial / beasiswa pendidikan / keringanan biaya medis.' },
-                                { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
-                                { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
-                                { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
-                                { type: 'Surat Keterangan Kematian', suggestion: 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan.' },
-                                { type: 'Surat Keterangan Kelahiran', suggestion: 'Persyaratan pembuatan akta kelahiran anak baru / pendaftaran ke dalam Kartu Keluarga.' },
-                                { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Persyaratan administrasi pengurusan hak waris / pembagian harta waris keluarga.' },
-                                { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Persyaratan pengurusan surat pindah domisili keluar daerah atau pelaporan kedatangan warga baru.' },
-                                { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Persyaratan rekomendasi pernikahan untuk pengurusan berkas administrasi N1 - N4 di Kantor Kelurahan.' },
-                              ]);
-                            }
-                            newTemplates[idx].type = e.target.value;
-                            const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
-                            setPdfConfig(newConfig);
-                            localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                          }}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Saran Pengisian (Template)</label>
-                        <textarea 
-                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:border-indigo-500 outline-none transition-all h-20 resize-none"
-                          value={template.suggestion}
-                          onChange={(e) => {
-                            const newTemplates = [...(pdfConfig.letterTemplates || [])];
-                            if (newTemplates.length === 0) {
-                              newTemplates.push(...[
-                                { type: 'Surat Pengantar', suggestion: 'Surat pengantar umum untuk berbagai keperluan administratif.' },
-                                { type: 'Surat Pengantar KTP', suggestion: 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.' },
-                                { type: 'Surat Pengantar KK', suggestion: 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.' },
-                                { type: 'Surat Keterangan Domisili', suggestion: 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.' },
-                                { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Persyaratan pengajuan bantuan sosial / beasiswa pendidikan / keringanan biaya medis.' },
-                                { type: 'Surat Izin Keramaian', suggestion: 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Lokasi].' },
-                                { type: 'Surat Keterangan Usaha', suggestion: 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.' },
-                                { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.' },
-                                { type: 'Surat Keterangan Kematian', suggestion: 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan.' },
-                                { type: 'Surat Keterangan Kelahiran', suggestion: 'Persyaratan pembuatan akta kelahiran anak baru / pendaftaran ke dalam Kartu Keluarga.' },
-                                { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Persyaratan administrasi pengurusan hak waris / pembagian harta waris keluarga.' },
-                                { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Persyaratan pengurusan surat pindah domisili keluar daerah atau pelaporan kedatangan warga baru.' },
-                                { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Persyaratan rekomendasi pernikahan untuk pengurusan berkas administrasi N1 - N4 di Kantor Kelurahan.' },
-                              ]);
-                            }
-                            newTemplates[idx].suggestion = e.target.value;
-                            const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
-                            setPdfConfig(newConfig);
-                            localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-12 pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Teks Pembuka Surat (Intro)</label>
-                  <textarea 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-32 resize-none"
-                    value={pdfConfig.introText || `Yang bertanda tangan di bawah ini Ketua ${pdfConfig.rtName}, Kel. ${pdfConfig.kelurahan || 'Tondo'}, Kec. ${pdfConfig.kecamatan || 'Mantikulore'}, Kota ${pdfConfig.kota || 'Palu'}, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :`}
-                    onChange={(e) => {
-                      const newConfig = { ...pdfConfig, introText: e.target.value };
-                      setPdfConfig(newConfig);
-                      localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Teks Penutup Surat (Closing)</label>
-                  <textarea 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-32 resize-none"
-                    value={pdfConfig.closingText || "Demikian surat keterangan ini dibuat, untuk dipergunakan sebagaimana mestinya."}
-                    onChange={(e) => {
-                      const newConfig = { ...pdfConfig, closingText: e.target.value };
-                      setPdfConfig(newConfig);
-                      localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Field Visibility Toggles */}
-              <div className="mt-12 pt-12 border-t border-slate-100">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
-                    <Eye size={18} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Visibilitas Data Surat</h4>
-                    <p className="text-[10px] font-bold text-slate-400 mt-1">Pilih data apa saja yang akan ditampilkan pada Surat Pengantar PDF.</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[
-                    { id: 'applicantName', defaultLabel: 'Nama Lengkap' },
-                    { id: 'nik', defaultLabel: 'NIK / No KTP' },
-                    { id: 'familyHeadName', defaultLabel: 'Kepala Keluarga' },
-                    { id: 'birthPlaceDate', defaultLabel: 'Tempat/Tgl Lahir' },
-                    { id: 'gender', defaultLabel: 'Jenis Kelamin' },
-                    { id: 'addressKtp', defaultLabel: 'Alamat KTP' },
-                    { id: 'currentAddress', defaultLabel: 'Alamat Domisili' },
-                    { id: 'religion', defaultLabel: 'Agama' },
-                    { id: 'maritalStatus', defaultLabel: 'Status Kawin' },
-                    { id: 'job', defaultLabel: 'Pekerjaan' },
-                    { id: 'education', defaultLabel: 'Pendidikan' },
-                    { id: 'familyStatus', defaultLabel: 'Hub. Keluarga' },
-                    { id: 'bloodType', defaultLabel: 'Gol. Darah' },
-                    { id: 'nationality', defaultLabel: 'Kewarganegaraan' },
-                    { id: 'purposeDetail', defaultLabel: 'Keperluan' }
-                  ].map(field => (
-                    <div 
-                      key={field.id}
-                      className={`
-                        p-4 rounded-2xl border transition-all
-                        ${(pdfConfig.visibleFields?.[field.id] !== false) 
-                          ? 'bg-white border-slate-200 shadow-sm' 
-                          : 'bg-slate-50 border-slate-100 opacity-60 hover:opacity-100'}
-                      `}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Field ID: {field.id}</span>
-                        <label className="relative inline-flex items-center cursor-pointer">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama RT (Kop Surat)</label>
                           <input 
-                            type="checkbox" 
-                            className="sr-only peer"
-                            checked={pdfConfig.visibleFields?.[field.id] !== false}
+                            type="text"
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            value={pdfConfig.rtName || ''} 
+                            onChange={e => {
+                              const newConfig = {...pdfConfig, rtName: e.target.value};
+                              setPdfConfig(newConfig);
+                            }} 
+                            placeholder="RT 02 / RW 020"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Ketua RT</label>
+                          <input 
+                            type="text"
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            value={pdfConfig.rtChairman || ''} 
+                            onChange={e => {
+                              const newConfig = {...pdfConfig, rtChairman: e.target.value};
+                              setPdfConfig(newConfig);
+                            }} 
+                            placeholder="NAMA KETUA RT"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kelurahan</label>
+                          <input 
+                            type="text"
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            value={pdfConfig.kelurahan || ''} 
+                            onChange={e => {
+                              const newConfig = {...pdfConfig, kelurahan: e.target.value};
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                            }} 
+                            placeholder="TONDO"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kecamatan</label>
+                          <input 
+                            type="text"
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            value={pdfConfig.kecamatan || ''} 
+                            onChange={e => {
+                              const newConfig = {...pdfConfig, kecamatan: e.target.value};
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                            }} 
+                            placeholder="MANTIKULORE"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kota / Kabupaten</label>
+                          <input 
+                            type="text"
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            value={pdfConfig.kota || ''} 
+                            onChange={e => {
+                              const newConfig = {...pdfConfig, kota: e.target.value};
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                            }} 
+                            placeholder="PALU"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Alamat Sekertariat / RT</label>
+                        <textarea 
+                          rows={3}
+                          className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none" 
+                          value={pdfConfig.rtAddress || ''} 
+                          onChange={e => {
+                            const newConfig = {...pdfConfig, rtAddress: e.target.value};
+                            setPdfConfig(newConfig);
+                            localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                          }} 
+                          placeholder="Jln. Raya Tondo No. 12, Kota Palu, Sulawesi Tengah"
+                        />
+                      </div>
+
+                      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Counter Nomor Surat Terakhir</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="number"
+                            className="flex-1 p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-black text-indigo-700 focus:outline-none" 
+                            value={pdfConfig.lastLetterNumber || 0} 
+                            onChange={e => {
+                              const newConfig = {...pdfConfig, lastLetterNumber: parseInt(e.target.value) || 0};
+                              setPdfConfig(newConfig);
+                            }} 
+                          />
+                          <button 
+                            type="button"
+                            onClick={async () => {
+                              let maxNum = 0;
+                              letters.forEach(l => {
+                                if (l.letterNumber) {
+                                  const num = extractNum(l.letterNumber);
+                                  if (num > maxNum) maxNum = num;
+                                }
+                              });
+                              officialLetters.forEach(ol => {
+                                if (ol.letterNumber) {
+                                  const num = extractNum(ol.letterNumber);
+                                  if (num > maxNum) maxNum = num;
+                                }
+                              });
+                              if (maxNum > 0) {
+                                const newConfig = { ...pdfConfig, lastLetterNumber: maxNum };
+                                setPdfConfig(newConfig);
+                                await updatePdfConfig(newConfig);
+                                toast.success(`Counter nomor surat berhasil disinkronkan ke nomor urut: ${maxNum}`);
+                              } else {
+                                toast.error("Belum ada data nomor surat di database.");
+                              }
+                            }}
+                            className="px-4 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5"
+                          >
+                            <RefreshCw size={14} /> Sinkronkan Database
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* TAB 2: ASET VISUAL (LOGO, STEMPEL, TTD) */}
+                  {settingSubTab === 'assets' && (
+                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {/* Logo Upload Card */}
+                        <div className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Logo Resmi RT / Kota</h4>
+                            {pdfConfig.logo && <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Terpasang</span>}
+                          </div>
+                          <div className="relative aspect-[4/3] bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload shadow-inner">
+                            {pdfConfig.logo ? (
+                              <>
+                                <img src={pdfConfig.logo} alt="Logo" className="w-full h-full object-contain p-4" />
+                                <button 
+                                  onClick={() => {
+                                    const newConfig = {...pdfConfig, logo: ''};
+                                    setPdfConfig(newConfig);
+                                    localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                                  }}
+                                  className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </>
+                            ) : (
+                              <div className="text-center p-4">
+                                <ImageIcon size={28} className="mx-auto text-slate-300 mb-1.5" />
+                                <p className="text-[10px] font-bold text-slate-400 uppercase">Klik / Geser Logo Ke Sini</p>
+                              </div>
+                            )}
+                            <label className="absolute inset-0 cursor-pointer">
+                              <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Stempel Upload Card */}
+                        <div className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Stempel Transparan RT</h4>
+                            {pdfConfig.stamp && <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Terpasang</span>}
+                          </div>
+                          <div className="relative aspect-[4/3] bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload shadow-inner">
+                            {pdfConfig.stamp ? (
+                              <>
+                                <img src={pdfConfig.stamp} alt="Stempel" className="w-full h-full object-contain p-4" />
+                                <button 
+                                  onClick={() => {
+                                    const newConfig = {...pdfConfig, stamp: ''};
+                                    setPdfConfig(newConfig);
+                                    localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                                  }}
+                                  className="absolute top-2 right-2 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/upload:opacity-100 transition-opacity shadow-lg"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </>
+                            ) : (
+                              <div className="text-center p-4">
+                                <ImageIcon size={28} className="mx-auto text-slate-300 mb-1.5" />
+                                <p className="text-[10px] font-bold text-slate-400 uppercase">Klik / Geser Stempel (PNG)</p>
+                              </div>
+                            )}
+                            <label className="absolute inset-0 cursor-pointer">
+                              <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'stamp')} />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Signature Pad Card */}
+                      <div className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                        <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Tanda Tangan Digital Ketua RT</h4>
+                        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                          <SignaturePad 
+                            initialValue={pdfConfig.signature}
+                            onSave={(dataUrl) => {
+                              const newConfig = { ...pdfConfig, signature: dataUrl };
+                              setPdfConfig(newConfig);
+                              toast.success("Tanda tangan Ketua RT tersimpan!");
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* TAB 3: TEMPLATE & TEKS SURAT */}
+                  {settingSubTab === 'templates' && (
+                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Teks Pembuka Surat (Intro)</label>
+                          <textarea 
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed"
+                            value={pdfConfig.introText || `Yang bertanda tangan di bawah ini Ketua ${pdfConfig.rtName}, Kel. ${pdfConfig.kelurahan || 'Tondo'}, Kec. ${pdfConfig.kecamatan || 'Mantikulore'}, Kota ${pdfConfig.kota || 'Palu'}, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :`}
                             onChange={(e) => {
-                              const newVisibleFields = { 
-                                ...(pdfConfig.visibleFields || {}), 
-                                [field.id]: e.target.checked 
-                              };
-                              const newConfig = { ...pdfConfig, visibleFields: newVisibleFields };
+                              const newConfig = { ...pdfConfig, introText: e.target.value };
                               setPdfConfig(newConfig);
                               localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                             }}
                           />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
-                        </label>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Teks Penutup Surat (Closing)</label>
+                          <textarea 
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none transition-all h-20 resize-none leading-relaxed"
+                            value={pdfConfig.closingText || "Demikian surat keterangan ini dibuat, untuk dipergunakan sebagaimana mestinya."}
+                            onChange={(e) => {
+                              const newConfig = { ...pdfConfig, closingText: e.target.value };
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                            }}
+                          />
+                        </div>
                       </div>
-                      <input 
-                        type="text"
-                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all"
-                        value={pdfConfig.fieldLabels?.[field.id] || field.defaultLabel}
-                        onChange={(e) => {
-                          const newLabels = {
-                            ...(pdfConfig.fieldLabels || {}),
-                            [field.id]: e.target.value
-                          };
-                          const newConfig = { ...pdfConfig, fieldLabels: newLabels };
-                          setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                        }}
-                        placeholder={field.defaultLabel}
-                        disabled={pdfConfig.visibleFields?.[field.id] === false}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* WhatsApp Integration */}
-              <div className="mt-12 pt-12 border-t border-slate-100">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <MessageCircle size={18} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Integrasi WhatsApp</h4>
-                    <p className="text-[10px] font-bold text-slate-400 mt-1">Hubungkan aplikasi dengan grup WhatsApp warga untuk notifikasi otomatis.</p>
-                  </div>
-                </div>
+                      <div className="space-y-4 pt-4 border-t border-slate-100">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Daftar Jenis Surat & Template Keperluan</h4>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                const defaultTemplates = [
+                                  { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
+                                  { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
+                                  { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
+                                  { type: 'Surat Keterangan Domisili', suggestion: 'Bahwa yang bersangkutan benar-benar merupakan warga / penduduk yang berdomisili menetap di wilayah RT kami. Surat keterangan ini digunakan untuk persyaratan [cth: melamar pekerjaan / pembukaan rekening bank / pendaftaran sekolah].' },
+                                  { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Bahwa yang bersangkutan adalah benar warga RT kami dan berdasarkan keadaan yang sebenarnya, yang bersangkutan termasuk dalam keluarga prasejahtera / Kurang Mampu. Surat Keterangan ini digunakan untuk keperluan persyaratan [cth: pengajuan beasiswa / keringanan biaya rumah sakit / bantuan sosial].' },
+                                  { type: 'Surat Izin Keramaian', suggestion: 'Surat ini sebagai pengantar / rekomendasi izin penyelenggaraan acara keramaian berupa [Nama/Jenis Acara, cth: Resepsi Pernikahan] yang akan diselenggarakan pada hari/tanggal [Tanggal Acara] bertempat di [Lokasi Acara].' },
+                                  { type: 'Surat Keterangan Usaha', suggestion: 'Bahwa yang bersangkutan benar merupakan warga kami dan memiliki usaha / bisnis di bidang [Jenis Usaha, cth: Perdagangan/Kuliner] dengan nama usaha [Nama Usaha] yang berlokasi di wilayah RT kami. Surat ini dibuat untuk keperluan [cth: pengajuan kredit UMKM / pembuatan NPWP badan].' },
+                                  { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Bahwa yang bersangkutan adalah warga kami yang senantiasa berkelakuan baik, belum pernah tersangkut tindak pidana, dan tidak pernah mengganggu ketertiban lingkungan. Surat ini sebagai pengantar untuk pembuatan SKCK di kepolisian untuk keperluan [cth: pendaftaran TNI/Polri / melamar pekerjaan].' },
+                                  { type: 'Surat Keterangan Kematian', suggestion: 'Menerangkan dengan sebenarnya bahwa warga kami yang bernama [Nama Almarhum/Almarhumah] telah meninggal dunia pada [Hari, Tanggal, Jam] dikarenakan [Sakit/Usia/dll]. Surat keterangan ini digunakan untuk persyaratan administrasi kepengurusan Akta Kematian di Kelurahan.' },
+                                  { type: 'Surat Keterangan Kelahiran', suggestion: 'Menerangkan bahwa telah lahir seorang anak [Laki-laki / Perempuan] bernama [Nama Anak] pada tanggal [Tanggal Lahir] dari pasangan suami istri [Nama Ayah] dan [Nama Ibu]. Surat pengantar ini digunakan untuk keperluan pembuatan Akta Kelahiran.' },
+                                  { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Surat keterangan ini menerangkan susunan ahli waris yang sah dari almarhum/almarhumah [Nama Almarhum] untuk digunakan sebagai persyaratan administrasi kepengurusan turun waris / pembagian harta warisan keluarga.' },
+                                  { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Bahwa yang bersangkutan bermaksud untuk mengurus administrasi pindah alamat dari RT kami menuju [Alamat Tujuan Pindah] / melapor kedatangan sebagai warga baru yang pindah dari [Alamat Asal].' },
+                                  { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Menerangkan bahwa yang bersangkutan bermaksud untuk melangsungkan pernikahan. Surat pengantar ini dibuat sebagai persyaratan pengurusan berkas administrasi pernikahan (N1, N2, N3, N4) di tingkat Kelurahan.' },
+                                ];
+                                setPdfConfig({ ...pdfConfig, letterTemplates: defaultTemplates });
+                                toast.success("13 Template Jenis Surat & Keperluan standar berhasil diisi!");
+                              }}
+                              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1"
+                            >
+                              <RefreshCw size={12} /> Isi 13 Template Standar
+                            </button>
+                            <Button 
+                              onClick={() => {
+                                const newTemplates = [...(pdfConfig.letterTemplates || []), { type: 'Surat Baru', suggestion: 'Saran teks pengisian...' }];
+                                const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
+                                setPdfConfig(newConfig);
+                              }}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-xs py-1.5"
+                            >
+                              <Plus size={14} className="mr-1" /> Tambah Template
+                            </Button>
+                          </div>
+                        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp Group ID (JID)</label>
-                    <div className="flex gap-2">
-                      <input 
-                        className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all font-mono" 
-                        placeholder="Cth: 1234567890@g.us"
-                        value={pdfConfig.whatsappGroupId || ''} 
-                        onChange={e => {
-                          const newConfig = {...pdfConfig, whatsappGroupId: e.target.value};
-                          setPdfConfig(newConfig);
-                          localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                        }} 
-                      />
-                      <button 
-                        type="button" 
-                        onClick={handleVerifyGroup}
-                        disabled={isVerifyingGroup}
-                        className="px-4 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-2xl hover:bg-indigo-100 transition-all"
-                      >
-                        {isVerifyingGroup ? '...' : <Search size={18} />}
-                      </button>
-                    </div>
-
-                    {showGroupList && availableGroups.length > 0 && (
-                      <div className="p-3 bg-white border border-indigo-100 rounded-xl shadow-inner max-h-40 overflow-y-auto space-y-2">
-                        <p className="text-[10px] font-bold text-indigo-600 uppercase mb-2">Pilih dari Grup Anda:</p>
-                        {availableGroups.map(group => (
-                          <button
-                            key={group.id}
-                            type="button"
-                            onClick={() => selectGroup(group.id, group.name)}
-                            className="w-full text-left p-2 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-between group"
-                          >
-                            <div className="overflow-hidden">
-                              <p className="text-xs font-bold text-slate-700 truncate">{group.name}</p>
-                              <p className="text-[9px] text-slate-400 truncate">{group.id}</p>
+                        <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
+                          {(pdfConfig.letterTemplates && pdfConfig.letterTemplates.length > 0 ? pdfConfig.letterTemplates : [
+                            { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
+                            { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
+                            { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
+                            { type: 'Surat Keterangan Domisili', suggestion: 'Bahwa yang bersangkutan benar-benar merupakan warga / penduduk yang berdomisili menetap di wilayah RT kami. Surat keterangan ini digunakan untuk persyaratan [cth: melamar pekerjaan / pembukaan rekening bank / pendaftaran sekolah].' },
+                            { type: 'Surat Keterangan Tidak Mampu', suggestion: 'Bahwa yang bersangkutan adalah benar warga RT kami dan berdasarkan keadaan yang sebenarnya, yang bersangkutan termasuk dalam keluarga prasejahtera / Kurang Mampu. Surat Keterangan ini digunakan untuk keperluan persyaratan [cth: pengajuan beasiswa / keringanan biaya rumah sakit / bantuan sosial].' },
+                            { type: 'Surat Izin Keramaian', suggestion: 'Surat ini sebagai pengantar / rekomendasi izin penyelenggaraan acara keramaian berupa [Nama/Jenis Acara, cth: Resepsi Pernikahan] yang akan diselenggarakan pada hari/tanggal [Tanggal Acara] bertempat di [Lokasi Acara].' },
+                            { type: 'Surat Keterangan Usaha', suggestion: 'Bahwa yang bersangkutan benar merupakan warga kami dan memiliki usaha / bisnis di bidang [Jenis Usaha, cth: Perdagangan/Kuliner] dengan nama usaha [Nama Usaha] yang berlokasi di wilayah RT kami. Surat ini dibuat untuk keperluan [cth: pengajuan kredit UMKM / pembuatan NPWP badan].' },
+                            { type: 'Surat Keterangan Berkelakuan Baik', suggestion: 'Bahwa yang bersangkutan adalah warga kami yang senantiasa berkelakuan baik, belum pernah tersangkut tindak pidana, dan tidak pernah mengganggu ketertiban lingkungan. Surat ini sebagai pengantar untuk pembuatan SKCK di kepolisian untuk keperluan [cth: pendaftaran TNI/Polri / melamar pekerjaan].' },
+                            { type: 'Surat Keterangan Kematian', suggestion: 'Menerangkan dengan sebenarnya bahwa warga kami yang bernama [Nama Almarhum/Almarhumah] telah meninggal dunia pada [Hari, Tanggal, Jam] dikarenakan [Sakit/Usia/dll]. Surat keterangan ini digunakan untuk persyaratan administrasi kepengurusan Akta Kematian di Kelurahan.' },
+                            { type: 'Surat Keterangan Kelahiran', suggestion: 'Menerangkan bahwa telah lahir seorang anak [Laki-laki / Perempuan] bernama [Nama Anak] pada tanggal [Tanggal Lahir] dari pasangan suami istri [Nama Ayah] dan [Nama Ibu]. Surat pengantar ini digunakan untuk keperluan pembuatan Akta Kelahiran.' },
+                            { type: 'Surat Keterangan Waris / Ahli Waris', suggestion: 'Surat keterangan ini menerangkan susunan ahli waris yang sah dari almarhum/almarhumah [Nama Almarhum] untuk digunakan sebagai persyaratan administrasi kepengurusan turun waris / pembagian harta warisan keluarga.' },
+                            { type: 'Surat Keterangan Pindah / Datang', suggestion: 'Bahwa yang bersangkutan bermaksud untuk mengurus administrasi pindah alamat dari RT kami menuju [Alamat Tujuan Pindah] / melapor kedatangan sebagai warga baru yang pindah dari [Alamat Asal].' },
+                            { type: 'Surat Pengantar Nikah (N1 - N4)', suggestion: 'Menerangkan bahwa yang bersangkutan bermaksud untuk melangsungkan pernikahan. Surat pengantar ini dibuat sebagai persyaratan pengurusan berkas administrasi pernikahan (N1, N2, N3, N4) di tingkat Kelurahan.' },
+                          ]).map((template, idx) => (
+                            <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2 relative group">
+                              <button 
+                                onClick={() => {
+                                  const newTemplates = (pdfConfig.letterTemplates || []).filter((_, i) => i !== idx);
+                                  const newConfig = { ...pdfConfig, letterTemplates: newTemplates };
+                                  setPdfConfig(newConfig);
+                                }}
+                                className="absolute top-3 right-3 text-rose-400 hover:text-rose-600 p-1"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                              <input 
+                                className="w-4/5 p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none"
+                                value={template.type}
+                                onChange={(e) => {
+                                  const newTemplates = [...(pdfConfig.letterTemplates || [])];
+                                  newTemplates[idx].type = e.target.value;
+                                  setPdfConfig({ ...pdfConfig, letterTemplates: newTemplates });
+                                }}
+                              />
+                              <textarea 
+                                className="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-600 outline-none h-14 resize-none"
+                                value={template.suggestion}
+                                onChange={(e) => {
+                                  const newTemplates = [...(pdfConfig.letterTemplates || [])];
+                                  newTemplates[idx].suggestion = e.target.value;
+                                  setPdfConfig({ ...pdfConfig, letterTemplates: newTemplates });
+                                }}
+                              />
                             </div>
-                            <CheckCircle2 size={14} className="text-indigo-400 opacity-0 group-hover:opacity-100" />
-                          </button>
-                        ))}
-                        <button 
-                          type="button" 
-                          onClick={() => setShowGroupList(false)}
-                          className="w-full text-center py-1 text-[10px] text-slate-400 hover:text-slate-600"
-                        >
-                          Tutup Daftar
-                        </button>
+                          ))}
+                        </div>
                       </div>
-                    )}
+                    </motion.div>
+                  )}
+
+                  {/* TAB 4: INTEGRASI WHATSAPP */}
+                  {settingSubTab === 'whatsapp' && (
+                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                      <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 flex items-start gap-3">
+                        <MessageCircle size={20} className="text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-black text-emerald-900 uppercase tracking-widest">Pengaturan Broadcast WhatsApp Warga</h4>
+                          <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
+                            Menghubungkan pengiriman notifikasi otomatis saat surat warga diterbitkan atau pengumuman RT disiarkan.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp Group ID (JID)</label>
+                          <div className="flex gap-2">
+                            <input 
+                              className="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-800 outline-none" 
+                              placeholder="Cth: 1234567890@g.us"
+                              value={pdfConfig.whatsappGroupId || ''} 
+                              onChange={e => setPdfConfig({...pdfConfig, whatsappGroupId: e.target.value})} 
+                            />
+                            <button 
+                              type="button" 
+                              onClick={handleVerifyGroup}
+                              disabled={isVerifyingGroup}
+                              className="px-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 text-xs font-bold transition-all"
+                            >
+                              {isVerifyingGroup ? 'Verifikasi...' : 'Cari Grup'}
+                            </button>
+                          </div>
+
+                          {showGroupList && availableGroups.length > 0 && (
+                            <div className="p-3 bg-white border border-emerald-200 rounded-2xl shadow-lg max-h-48 overflow-y-auto space-y-2 mt-2">
+                              <p className="text-[10px] font-bold text-emerald-700 uppercase mb-2">Pilih Grup WA Terdeteksi:</p>
+                              {availableGroups.map(group => (
+                                <button
+                                  key={group.id}
+                                  type="button"
+                                  onClick={() => selectGroup(group.id, group.name)}
+                                  className="w-full text-left p-2.5 hover:bg-emerald-50 rounded-xl transition-colors flex items-center justify-between group"
+                                >
+                                  <div>
+                                    <p className="text-xs font-bold text-slate-800">{group.name}</p>
+                                    <p className="text-[9px] text-slate-400 font-mono">{group.id}</p>
+                                  </div>
+                                  <CheckCircle2 size={16} className="text-emerald-500 opacity-0 group-hover:opacity-100" />
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Tampilan Grup WhatsApp</label>
+                          <input 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 outline-none" 
+                            placeholder="Cth: Warga RT 02 Official"
+                            value={pdfConfig.whatsappGroupName || ''} 
+                            onChange={e => setPdfConfig({...pdfConfig, whatsappGroupName: e.target.value})} 
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Submit Button */}
+                  <div className="pt-6 border-t border-slate-100">
+                    <Button 
+                      onClick={handleSaveConfig} 
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 rounded-2xl font-black text-xs uppercase tracking-widest"
+                      disabled={isSaving}
+                    >
+                      <Save size={18} className="mr-2" /> 
+                      {isSaving ? 'Menyimpan...' : 'Simpan Seluruh Pengaturan Cloud'}
+                    </Button>
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Grup WhatsApp (Display)</label>
-                    <input 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
-                      placeholder="Cth: Warga RT 02 Official"
-                      value={pdfConfig.whatsappGroupName || ''} 
-                      onChange={e => {
-                        const newConfig = {...pdfConfig, whatsappGroupName: e.target.value};
-                        setPdfConfig(newConfig);
-                        localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
-                      }} 
-                    />
+                </div>
+
+                {/* Right Side (5 Cols): REAL-TIME LIVE KOP SURAT MOCKUP */}
+                <div className="lg:col-span-5 sticky top-24">
+                  <div className="bg-slate-900 text-white p-5 rounded-[2rem] shadow-xl space-y-4 border border-slate-800">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">
+                        <Sparkles size={12} /> Pratinjau KOP Surat Real-Time
+                      </span>
+                      <span className="text-[9px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">A4 Document</span>
+                    </div>
+
+                    {/* Paper Mockup Container */}
+                    <div className="bg-white text-slate-900 p-5 rounded-xl shadow-2xl space-y-3 font-serif min-h-[320px] relative overflow-hidden flex flex-col justify-between">
+                      
+                      {/* Kop Header Mockup */}
+                      <div>
+                        <div className="flex items-center justify-between gap-2 border-b-2 border-slate-900 pb-2 mb-0.5">
+                          <div className="w-10 h-12 shrink-0 flex items-center justify-center">
+                            {pdfConfig.logo ? (
+                              <img src={pdfConfig.logo} alt="Logo" className="max-h-full max-w-full object-contain" />
+                            ) : (
+                              <div className="w-8 h-10 border border-dashed border-slate-300 flex items-center justify-center text-[7px] text-slate-400">Logo</div>
+                            )}
+                          </div>
+                          
+                          <div className="text-center flex-1 leading-tight">
+                            <p className="text-[9px] font-bold uppercase tracking-tight text-slate-800">PEMERINTAH KOTA {pdfConfig.kota || 'PALU'}</p>
+                            <p className="text-[9px] font-bold uppercase tracking-tight text-slate-800">KECAMATAN {pdfConfig.kecamatan || 'MANTIKULORE'}</p>
+                            <p className="text-[9px] font-bold uppercase tracking-tight text-slate-800">KELURAHAN {pdfConfig.kelurahan || 'TONDO'}</p>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-indigo-900 mt-0.5">PENGURUS {pdfConfig.rtName || 'RT 02'}</p>
+                            <p className="text-[7px] font-sans font-medium text-slate-500 mt-0.5 line-clamp-1">{pdfConfig.rtAddress || 'Alamat RT...'}</p>
+                          </div>
+                        </div>
+                        <div className="h-0.5 bg-slate-900 w-full mb-3" />
+
+                        {/* Title Mockup */}
+                        <div className="text-center my-3">
+                          <p className="text-[10px] font-bold uppercase underline text-slate-900">SURAT PENGANTAR</p>
+                          <p className="text-[8px] font-sans text-slate-500">Nomor: SPK/001/{pdfConfig.rtName?.replace(/\s/g, '') || 'RT02'}/VIII/2026</p>
+                        </div>
+
+                        {/* Content Placeholder Mockup */}
+                        <div className="space-y-1.5 text-[7px] font-sans text-slate-600 leading-normal">
+                          <p className="indent-4">Yang bertanda tangan di bawah ini Ketua {pdfConfig.rtName || 'RT 02'}, Kel. {pdfConfig.kelurahan || 'TONDO'} menerangkan bahwa:</p>
+                          <div className="pl-4 space-y-0.5">
+                            <p><span className="inline-block w-16">Nama</span>: BUDI SANTOSO</p>
+                            <p><span className="inline-block w-16">Keperluan</span>: Pengurusan Administrasi KTP Baru</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer Signature & Stamp Mockup */}
+                      <div className="pt-4 flex justify-between items-end text-[7px] font-sans border-t border-slate-100">
+                        <div className="text-center">
+                          <p>Pemohon,</p>
+                          <div className="h-6" />
+                          <p className="font-bold">( BUDIRAHARJO )</p>
+                        </div>
+
+                        <div className="text-center relative">
+                          <p>Palu, 14 Agustus 2026</p>
+                          <p className="font-bold">Ketua {pdfConfig.rtName || 'RT 02'}</p>
+                          
+                          <div className="relative h-10 w-24 mx-auto flex items-center justify-center my-0.5">
+                            {pdfConfig.stamp && (
+                              <img src={pdfConfig.stamp} alt="Stamp" className="absolute left-0 w-8 h-8 object-contain opacity-80" />
+                            )}
+                            {pdfConfig.signature && (
+                              <img src={pdfConfig.signature} alt="TTD" className="relative w-16 h-8 object-contain z-10" />
+                            )}
+                          </div>
+                          <p className="font-bold">{pdfConfig.rtChairman || 'NAMA KETUA RT'}</p>
+                        </div>
+                      </div>
+
+                    </div>
                   </div>
                 </div>
+
               </div>
 
-              <div className="mt-12 pt-8 border-t border-slate-100">
-                <Button 
-                  onClick={handleSaveConfig} 
-                  className="w-full py-5 bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-100 rounded-[2rem]"
-                  disabled={isSaving}
-                >
-                  <Save size={20} className="mr-2" /> 
-                  {isSaving ? 'Menyimpan...' : 'Simpan Seluruh Konfigurasi ke Cloud'}
-                </Button>
-                <p className="text-[10px] text-center text-slate-400 mt-4 font-bold uppercase tracking-widest">
-                  Klik simpan agar perubahan logo, stempel, TTD, dan WhatsApp tersimpan permanen.
-                </p>
-              </div>
             </div>
           </motion.div>
         ) : activeTab === 'letters' ? (
@@ -2374,28 +2432,53 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     )}
 
                     {/* Review inline actions status change */}
-                    {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') && (
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2">
-                        <Button 
-                          onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Ditolak')}
-                          className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none py-2.5 sm:py-3.5 text-[10px] sm:text-xs hover:scale-[1.01] transition-all"
-                        >
-                          <XCircle size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Tolak Pengajuan
-                        </Button>
-                        <Button 
-                          onClick={() => {
-                            handleUpdateLetterStatus(selectedLetter.id, 'Disetujui', {
+                    <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 pt-2">
+                      <Button 
+                        type="button"
+                        onClick={() => {
+                          if (selectedLetter) {
+                            handleGenerateLivePreview({
                               ...selectedLetter,
                               ...editLetterData,
-                              letterNumber: letterNumberInput,
-                            }, tempSignature);
-                          }}
-                          className="bg-emerald-600 hover:bg-emerald-750 font-black tracking-wide text-[10px] sm:text-xs py-2.5 sm:py-3.5 hover:scale-[1.01] transition-all shadow-md shadow-emerald-200"
+                              letterNumber: letterNumberInput
+                            } as LetterRequest);
+                          }
+                        }}
+                        className="flex-1 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 py-2.5 sm:py-3.5 text-[10px] sm:text-xs"
+                      >
+                        <Eye size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Pratinjau PDF
+                      </Button>
+
+                      {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') ? (
+                        <>
+                          <Button 
+                            onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Ditolak')}
+                            className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none py-2.5 sm:py-3.5 text-[10px] sm:text-xs hover:scale-[1.01] transition-all"
+                          >
+                            <XCircle size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Tolak
+                          </Button>
+                          <Button 
+                            onClick={() => {
+                              handleUpdateLetterStatus(selectedLetter.id, 'Disetujui', {
+                                ...selectedLetter,
+                                ...editLetterData,
+                                letterNumber: letterNumberInput,
+                              }, tempSignature);
+                            }}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-750 font-black tracking-wide text-[10px] sm:text-xs py-2.5 sm:py-3.5 hover:scale-[1.01] transition-all shadow-md shadow-emerald-200"
+                          >
+                            <CheckCircle2 size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Setujui & Terbitkan
+                          </Button>
+                        </>
+                      ) : (
+                        <Button 
+                          onClick={handleSaveLetterDetails}
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black tracking-wide text-[10px] sm:text-xs py-2.5 sm:py-3.5 shadow-md"
                         >
-                          <CheckCircle2 size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Setujui & Terbitkan
+                          <Save size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Simpan Detail Surat
                         </Button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </motion.div>
                 )}
 
@@ -2795,13 +2878,79 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white pb-2">
+          <div className="pt-6 border-t border-slate-100 flex flex-wrap sm:flex-nowrap justify-end gap-3 sticky bottom-0 bg-white pb-2">
             <Button type="button" variant="secondary" onClick={() => setIsCreatingLetter(false)} className="px-6">Batal</Button>
+            <Button 
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                if (!adminForm.applicantName) {
+                  toast.error("Isi nama pemohon terlebih dahulu!");
+                  return;
+                }
+                const mockLetter: LetterRequest = {
+                  ...adminForm as LetterRequest,
+                  id: 'preview-' + Date.now(),
+                  status: 'Disetujui',
+                  date: new Date().toISOString(),
+                  letterNumber: adminLetterNumber
+                };
+                handleGenerateLivePreview(mockLetter);
+              }}
+              className="bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
+            >
+              <Eye size={16} className="mr-1.5" /> Pratinjau PDF
+            </Button>
             <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 px-8">
               <Printer size={18} className="mr-2" /> Terbitkan & Cetak
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Live PDF Preview Modal */}
+      <Modal 
+        isOpen={showPdfPreviewModal} 
+        onClose={() => {
+          setShowPdfPreviewModal(false);
+          if (previewPdfBlobUrl) {
+            URL.revokeObjectURL(previewPdfBlobUrl);
+            setPreviewPdfBlobUrl(null);
+          }
+        }} 
+        title="Pratinjau Visual Surat Pengantar (PDF)" 
+        maxWidth="max-w-4xl"
+      >
+        <div className="space-y-4">
+          <div className="bg-slate-100 rounded-2xl p-2 h-[70vh] w-full overflow-hidden border border-slate-200 flex items-center justify-center">
+            {previewPdfBlobUrl ? (
+              <iframe 
+                src={previewPdfBlobUrl} 
+                className="w-full h-full rounded-xl border-none"
+                title="Pratinjau Dokumen Surat PDF"
+              />
+            ) : (
+              <div className="text-center p-8">
+                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-sm font-bold text-slate-600">Menyusun dokumen PDF...</p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button 
+              variant="secondary" 
+              onClick={() => {
+                setShowPdfPreviewModal(false);
+                if (previewPdfBlobUrl) {
+                  URL.revokeObjectURL(previewPdfBlobUrl);
+                  setPreviewPdfBlobUrl(null);
+                }
+              }}
+            >
+              Tutup Pratinjau
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* Admin Create Report Modal */}

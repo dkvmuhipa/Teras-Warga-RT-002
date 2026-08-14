@@ -316,88 +316,125 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Pengumuman" : "Buat Pengumuman Baru"}>
-        <form onSubmit={handleSaveAnnouncement} className="space-y-6">
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Judul Pengumuman</label>
-            <div className="relative group/input">
-              <input 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
-                value={annTitle} 
-                onChange={e=>setAnnTitle(e.target.value)} 
-                placeholder="Contoh: Kerja Bakti Minggu Ini..." 
-                required
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Form Side */}
+          <form onSubmit={handleSaveAnnouncement} className="lg:col-span-3 space-y-5">
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Judul Pengumuman</label>
+              <div className="relative group/input">
+                <input 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                  value={annTitle} 
+                  onChange={e=>setAnnTitle(e.target.value)} 
+                  placeholder="Contoh: Kerja Bakti Minggu Ini..." 
+                  required
+                />
+              </div>
+              <p className="text-[10px] font-bold text-slate-400">Gunakan judul yang singkat dan jelas agar mudah dipahami warga.</p>
             </div>
-            <p className="text-[10px] font-bold text-slate-400">Gunakan judul yang singkat dan jelas agar mudah dipahami warga.</p>
-          </div>
-          
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Detail & Isi Pengumuman</label>
-              <Button type="button" onClick={handleGenerateWithAi} className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 shadow-none text-[10px] py-1.5 px-3 rounded-full">
-                {isAiLoading ? (
-                  <Loader2 size={12} className="mr-1.5 animate-spin" />
+            
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Detail & Isi Pengumuman</label>
+                <Button type="button" onClick={handleGenerateWithAi} className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 shadow-none text-[10px] py-1.5 px-3 rounded-full">
+                  {isAiLoading ? (
+                    <Loader2 size={12} className="mr-1.5 animate-spin" />
+                  ) : (
+                    <Sparkles size={12} className="mr-1.5" />
+                  )}
+                  {isAiLoading ? 'Menyusun Draft...' : 'Bantu Tulis dengan AI'}
+                </Button>
+              </div>
+              <div className="relative group/textarea">
+                <textarea 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[140px] resize-none" 
+                  value={annContent} 
+                  onChange={e=>setAnnContent(e.target.value)} 
+                  placeholder="Tuliskan detail waktu, tempat, dan instruksi lengkap untuk warga RT 02..." 
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Tipe / Kategori</label>
+              <div className="grid grid-cols-3 gap-2.5">
+                {[
+                  { id: 'Info', label: 'Info Umum', desc: 'Informasi reguler', icon: <Info size={16} /> },
+                  { id: 'Urgent', label: 'Penting', desc: 'Sifatnya mendesak', icon: <AlertTriangle size={16} /> },
+                  { id: 'Event', label: 'Kegiatan', desc: 'Acara warga', icon: <CalendarDays size={16} /> }
+                ].map((type) => (
+                  <button
+                    key={type.id}
+                    type="button"
+                    onClick={() => setAnnType(type.id as any)}
+                    className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden group ${
+                      annType === type.id 
+                        ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20' 
+                        : 'bg-white border-slate-200 hover:bg-slate-50 hover:border-indigo-200 hover:shadow-sm'
+                    }`}
+                  >
+                    <div className={`mb-2 inline-block p-1.5 rounded-xl ${annType === type.id ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-500'} transition-colors`}>
+                      {type.icon}
+                    </div>
+                    <p className={`text-[11px] font-black ${annType === type.id ? 'text-indigo-700' : 'text-slate-700'}`}>{type.label}</p>
+                    <p className={`text-[8.5px] font-bold mt-0.5 ${annType === type.id ? 'text-indigo-500' : 'text-slate-400'}`}>{type.desc}</p>
+                    
+                    {annType === type.id && (
+                      <div className="absolute top-2.5 right-2.5 text-indigo-500">
+                        <CheckCircle2 size={14} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="pt-3 border-t border-slate-100">
+              <Button type="submit" className="w-full py-3.5 text-xs font-black uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-500/20 flex justify-center items-center gap-2 group/submit">
+                {editingId ? (
+                  <>Simpan Perubahan <CheckCircle2 size={16} className="group-hover/submit:scale-110 transition-transform" /></>
                 ) : (
-                  <Sparkles size={12} className="mr-1.5" />
+                  <>Terbitkan Pengumuman <Megaphone size={16} className="group-hover/submit:scale-110 transition-transform" /></>
                 )}
-                {isAiLoading ? 'Menyusun Draft...' : 'Bantu Tulis dengan AI'}
               </Button>
             </div>
-            <div className="relative group/textarea">
-              <textarea 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[140px] resize-none" 
-                value={annContent} 
-                onChange={e=>setAnnContent(e.target.value)} 
-                placeholder="Tuliskan detail waktu, tempat, dan instruksi lengkap untuk warga rT 02..." 
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Tipe / Kategori</label>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { id: 'Info', label: 'Info Umum', desc: 'Informasi reguler', icon: <Info size={18} /> },
-                { id: 'Urgent', label: 'Penting', desc: 'Sifatnya mendesak', icon: <AlertTriangle size={18} /> },
-                { id: 'Event', label: 'Kegiatan', desc: 'Acara warga', icon: <CalendarDays size={18} /> }
-              ].map((type) => (
-                <button
-                  key={type.id}
-                  type="button"
-                  onClick={() => setAnnType(type.id as any)}
-                  className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden group ${
-                    annType === type.id 
-                      ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20' 
-                      : 'bg-white border-slate-200 hover:bg-slate-50 hover:border-indigo-200 hover:shadow-sm'
-                  }`}
-                >
-                  <div className={`mb-3 inline-block p-2 rounded-xl ${annType === type.id ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-500'} transition-colors`}>
-                    {type.icon}
+          </form>
+
+          {/* WhatsApp Live Preview Side */}
+          <div className="lg:col-span-2 hidden lg:flex flex-col bg-slate-900 rounded-[2rem] p-4 text-white border border-slate-800 shadow-xl justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
+                  <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">LIVE BROADCAST MOCKUP</span>
+                </div>
+                <MessageCircle size={14} className="text-emerald-400" />
+              </div>
+              <p className="text-[9.5px] text-slate-400 font-bold uppercase tracking-wider mb-2">Pratinjau Pesan WA Warga:</p>
+              
+              <div className="bg-[#0b141a] p-3.5 rounded-2xl border border-slate-800 space-y-2 text-xs font-sans shadow-inner leading-relaxed">
+                <div className="bg-[#005c4b] text-white p-3 rounded-2xl rounded-tr-none shadow-md">
+                  <p className="font-extrabold text-emerald-200 text-xs mb-1">
+                    📢 PENGUMUMAN RT 02 {annType === 'Urgent' ? '⚠️ (PENTING)' : ''}
+                  </p>
+                  <p className="font-black text-white text-sm mb-1.5">{annTitle || '[Judul Pengumuman]'}</p>
+                  <p className="text-[11px] text-emerald-50 whitespace-pre-wrap leading-normal opacity-95">
+                    {annContent || '[Isi pengumuman lengkap akan tampil di sini...]'}
+                  </p>
+                  <div className="flex items-center justify-end gap-1 mt-2 text-[8px] text-emerald-300 font-mono">
+                    <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span>✓✓</span>
                   </div>
-                  <p className={`text-xs font-black ${annType === type.id ? 'text-indigo-700' : 'text-slate-700'}`}>{type.label}</p>
-                  <p className={`text-[9px] font-bold mt-1 ${annType === type.id ? 'text-indigo-500' : 'text-slate-400'}`}>{type.desc}</p>
-                  
-                  {annType === type.id && (
-                    <div className="absolute top-3 right-3 text-indigo-500">
-                      <CheckCircle2 size={16} />
-                    </div>
-                  )}
-                </button>
-              ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-800/80 text-[9px] text-slate-400 font-medium text-center">
+              Tampilan format otomatis saat pesan dikirim via WhatsApp Gateway.
             </div>
           </div>
-          
-          <div className="pt-4 border-t border-slate-100">
-            <Button type="submit" className="w-full py-4 text-sm font-black uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-500/20 flex justify-center items-center gap-2 group/submit">
-              {editingId ? (
-                <>Simpan Perubahan <CheckCircle2 size={18} className="group-hover/submit:scale-110 transition-transform" /></>
-              ) : (
-                <>Terbitkan Pengumuman <Megaphone size={18} className="group-hover/submit:scale-110 transition-transform" /></>
-              )}
-            </Button>
-          </div>
-        </form>
+        </div>
       </Modal>
 
       <Modal 

@@ -618,14 +618,16 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                    <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Kategori</label>
                    <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={category} onChange={e => setCategory(e.target.value)} list="cat-suggestions" placeholder="Pilih atau ketik..." />
                    <datalist id="cat-suggestions">
+                      <option value="Setoran Iuran Sampah (Kolektif)"/>
+                      <option value="Setoran Iuran Air (Kolektif)"/>
+                      <option value="Setoran Iuran Kebersihan"/>
                       <option value="Iuran Warga"/>
-                      <option value="Sumbangan"/>
+                      <option value="Sumbangan & Donasi"/>
                       <option value="Pembangunan"/>
-                      <option value="Operasional"/>
-                      <option value="Sosial"/>
-                      <option value="Listrik & Air"/>
-                      <option value="Keamanan"/>
-                      <option value="Kebersihan"/>
+                      <option value="Operasional RT"/>
+                      <option value="Kegiatan Sosial"/>
+                      <option value="Listrik & Air Fasum"/>
+                      <option value="Keamanan Lingkungan"/>
                    </datalist>
                 </div>
 

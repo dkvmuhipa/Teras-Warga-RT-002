@@ -162,9 +162,9 @@
       display: none !important;
     }
 
-    body.print-map-mode @page {
-      size: landscape;
-      margin: 0;
+    /* Map Page Printing Scenario */
+    body.print-map-mode * {
+      visibility: hidden !important;
     }
 
     /* 2. E-ID Card Printing Scenario */

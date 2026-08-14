@@ -450,33 +450,43 @@ export const deleteDocumentFromDb = async (id: string) => {
 
 // --- CHECKPOINTS SERVICES ---
 export const subscribeToCheckpoints = (callback: (data: Checkpoint[]) => void) => {
-    if (!isFirebaseConfigured || !db) return () => {};
+    if (!isFirebaseConfigured || !db) {
+        callback([]);
+        return () => {};
+    }
     const q = query(collection(db, CHECKPOINTS_COL));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Checkpoint));
         callback(data);
     }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, CHECKPOINTS_COL);
+        console.warn("Firestore Checkpoints error fallback:", error);
+        callback([]);
     });
 };
 
 export const addCheckpointToDb = async (checkpoint: Omit<Checkpoint, 'id'>) => {
+    if (!isFirebaseConfigured || !db) return null;
     try {
-        await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(checkpoint));
+        const docRef = await addDoc(collection(db, CHECKPOINTS_COL), deepSanitize(checkpoint));
+        return docRef.id;
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, CHECKPOINTS_COL);
+        return null;
     }
 };
 
 export const updateCheckpointInDb = async (id: string, data: Partial<Checkpoint>) => {
+    if (!isFirebaseConfigured || !db) return;
     try {
-        await updateDoc(doc(db, CHECKPOINTS_COL, id), deepSanitize(data));
+        const { id: _, ...cleanData } = data;
+        await updateDoc(doc(db, CHECKPOINTS_COL, id), deepSanitize(cleanData));
     } catch (error) {
         handleFirestoreError(error, OperationType.UPDATE, `${CHECKPOINTS_COL}/${id}`);
     }
 };
 
 export const deleteCheckpointFromDb = async (id: string) => {
+    if (!isFirebaseConfigured || !db) return;
     try {
         await deleteDoc(doc(db, CHECKPOINTS_COL, id));
     } catch (error) {
@@ -484,27 +494,44 @@ export const deleteCheckpointFromDb = async (id: string) => {
     }
 };
 
+export const updateCheckpointPosition = async (id: string, x: number, y: number) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        await setDoc(doc(db, CHECKPOINTS_COL, id), { x, y }, { merge: true });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${CHECKPOINTS_COL}/${id}`);
+    }
+};
+
 // --- MAP POINTS SERVICES ---
 export const subscribeToMapPoints = (callback: (data: MapPoint[]) => void) => {
-    if (!isFirebaseConfigured || !db) return () => {};
+    if (!isFirebaseConfigured || !db) {
+        callback([]);
+        return () => {};
+    }
     const q = query(collection(db, MAP_POINTS_COL));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MapPoint));
         callback(data);
     }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, MAP_POINTS_COL);
+        console.warn("Firestore MapPoints fallback:", error);
+        callback([]);
     });
 };
 
 export const addMapPointToDb = async (point: Partial<MapPoint>) => {
+    if (!isFirebaseConfigured || !db) return null;
     try {
-        await addDoc(collection(db, MAP_POINTS_COL), deepSanitize(point));
+        const docRef = await addDoc(collection(db, MAP_POINTS_COL), deepSanitize(point));
+        return docRef.id;
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, MAP_POINTS_COL);
+        return null;
     }
 };
 
 export const updateMapPointInDb = async (id: string, point: Partial<MapPoint>) => {
+    if (!isFirebaseConfigured || !db) return;
     try {
         const { id: _, ...data } = point;
         await setDoc(doc(db, MAP_POINTS_COL, id), deepSanitize(data), { merge: true });
@@ -514,20 +541,11 @@ export const updateMapPointInDb = async (id: string, point: Partial<MapPoint>) =
 };
 
 export const deleteMapPointFromDb = async (id: string) => {
+    if (!isFirebaseConfigured || !db) return;
     try {
         await deleteDoc(doc(db, MAP_POINTS_COL, id));
     } catch (error) {
         handleFirestoreError(error, OperationType.DELETE, `${MAP_POINTS_COL}/${id}`);
-    }
-};
-
-// --- CHECKPOINTS SERVICES ---
-
-export const updateCheckpointPosition = async (id: string, x: number, y: number) => {
-    try {
-        await setDoc(doc(db, CHECKPOINTS_COL, id), { x, y }, { merge: true });
-    } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `${CHECKPOINTS_COL}/${id}`);
     }
 };
 

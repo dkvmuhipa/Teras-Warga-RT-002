@@ -1391,21 +1391,32 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                               );
                           })}
 
-                          {/* Active Patrol Location */}
+                          {/* Active Patrol Location with Smooth Transition */}
                           {activePatrol?.currentLocation && (
                               <motion.div 
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2"
-                                  style={{ left: `${activePatrol.currentLocation.x}%`, top: `${activePatrol.currentLocation.y}%` }}
+                                  initial={{ scale: 0, opacity: 0 }}
+                                  animate={{ 
+                                    scale: 1, 
+                                    opacity: 1,
+                                    left: `${activePatrol.currentLocation.x}%`, 
+                                    top: `${activePatrol.currentLocation.y}%` 
+                                  }}
+                                  transition={{
+                                    type: "spring",
+                                    stiffness: 100,
+                                    damping: 15,
+                                    mass: 1
+                                  }}
+                                  className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                               >
                                   <div className="relative">
-                                      <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-25 scale-150"></div>
-                                      <div className="bg-indigo-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-indigo-300 ring-4 ring-white relative z-10">
+                                      <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-35 scale-150"></div>
+                                      <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-indigo-400 ring-4 ring-white relative z-10">
                                           <Navigation size={24} fill="currentColor" className="animate-pulse" />
                                       </div>
                                   </div>
-                                  <div className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg border-2 border-white whitespace-nowrap">
+                                  <div className="mt-2 bg-slate-900 text-white px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl border-2 border-indigo-400 whitespace-nowrap flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                                       Petugas: {activePatrol.officerName}
                                   </div>
                               </motion.div>

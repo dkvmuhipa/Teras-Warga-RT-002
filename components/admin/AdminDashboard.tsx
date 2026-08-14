@@ -103,11 +103,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'analytics', icon: BarChart3, label: 'Pusat Analitik', desc: 'Statistik & demografi kependudukan', color: 'bg-blue-50 text-blue-600 border-blue-100/60 hover:bg-blue-100/50' },
     { id: 'residents', icon: Users, label: 'Data Warga', desc: 'Database KK & data penduduk', color: 'bg-emerald-50 text-emerald-600 border-emerald-100/60 hover:bg-emerald-100/50' },
     { id: 'health', icon: Activity, label: 'Posyandu Digital', desc: 'Pemantauan kesehatan & lansia', color: 'bg-teal-50 text-teal-600 border-teal-100/60 hover:bg-teal-100/50' },
-    { id: 'guests', icon: ShieldAlert, label: 'Laporan Tamu', desc: 'Log tamu wajib lapor 24 jam', color: 'bg-amber-50 text-amber-600 border-amber-100/60 hover:bg-amber-100/50' },
     { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan', desc: 'Pengelolaan keuangan & iuran warga', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
-    { id: 'services', icon: FileText, label: 'Surat Pengantar', desc: 'Pengajuan surat pengantar warga', color: 'bg-violet-50 text-violet-600 border-violet-100/60 hover:bg-violet-100/50' },
-    { id: 'official-letters', icon: FileText, label: 'Surat Resmi RT', desc: 'Penerbitan surat himbauan & undangan resmi', color: 'bg-amber-50 text-amber-600 border-amber-100/60 hover:bg-amber-100/50' },
-    { id: 'reports-warga', icon: AlertTriangle, label: 'Aspirasi & Aduan', desc: 'Pengawasan keluhan & laporan warga', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
+    { id: 'services', icon: FileText, label: 'Pusat Persuratan', desc: 'Surat pengantar warga, surat resmi RT, & surat masuk', color: 'bg-violet-50 text-violet-600 border-violet-100/60 hover:bg-violet-100/50' },
+    { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu', desc: 'Aspirasi, pengaduan warga, & log wajib lapor tamu', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
     { id: 'documents', icon: FileText, label: 'Arsip Dokumen', desc: 'Penyimpanan regulasi & AD/ART', color: 'bg-purple-50 text-purple-600 border-purple-100/60 hover:bg-purple-100/50' },
     { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda', desc: 'Jadwal ronda & alarm darurat', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
     { id: 'content', icon: Megaphone, label: 'Pusat Informasi', desc: 'Pengumuman, berita, & info UMKM', color: 'bg-sky-50 text-sky-600 border-sky-100/60 hover:bg-sky-100/50' },
@@ -130,7 +128,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (role === Role.SECRETARY) {
       const allowed = [
         'overview', 'analytics', 'residents', 
-        'health', 'guests', 'officials', 'services', 'official-letters', 'reports-warga', 'documents', 'activities', 
+        'health', 'officials', 'services', 'reports-warga', 'documents', 'activities', 
         'assets', 'content', 'audit', 'notifications', 'settings'
       ];
       return allowed.includes(item.id);
@@ -235,34 +233,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           />
         );
       case 'services':
-        return (
-          <ServiceManager 
-            letters={letters} 
-            reports={reports} 
-            houses={houses}
-            pdfConfig={pdfConfig} 
-            setPdfConfig={setPdfConfig} 
-            initialTab="letters"
-            onDeleteReport={async (id) => {
-              const isConfirmed = await confirm({
-                title: 'Hapus Laporan',
-                message: 'Apakah Anda yakin ingin menghapus laporan warga ini?',
-                confirmLabel: 'Hapus',
-                isDanger: true
-              });
-
-              if (isConfirmed) {
-                try {
-                  await deleteReportFromDb(id);
-                  toast.success('Laporan berhasil dihapus.');
-                } catch (error) {
-                  handleFirestoreError(error, OperationType.DELETE, `reports/${id}`);
-                }
-              }
-            }}
-          />
-        );
       case 'official-letters':
+      case 'incoming_mails':
         return (
           <ServiceManager 
             letters={letters} 
@@ -270,7 +242,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             houses={houses}
             pdfConfig={pdfConfig} 
             setPdfConfig={setPdfConfig} 
-            initialTab="official-letters"
+            incomingMails={incomingMails}
+            initialTab={activeTab === 'official-letters' ? 'official-letters' : activeTab === 'incoming_mails' ? 'incoming_mails' : 'letters'}
             onDeleteReport={async (id) => {
               const isConfirmed = await confirm({
                 title: 'Hapus Laporan',
@@ -386,12 +359,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             notifications={notifications}
             settings={settings}
             onUpdateSettings={onUpdateSettings}
-          />
-        );
-      case 'incoming_mails':
-        return (
-          <IncomingMailManager 
-            incomingMails={incomingMails}
           />
         );
       case 'analytics':
