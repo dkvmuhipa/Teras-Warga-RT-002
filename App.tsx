@@ -557,7 +557,7 @@ export const App = () => {
                                 <Route path="/donasi" element={<PublicDonations campaigns={donationCampaigns} houses={houses} />} />
                                 <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
                                 <Route path="/faq" element={<PublicFAQ faqItems={faqItems} />} />
-                                <Route path="/rules" element={<PublicRules />} />
+                                <Route path="/rules" element={<PublicRules pdfConfig={pdfConfig} />} />
                                 <Route path="/gempa" element={<PublicEarthquake />} />
                                 <Route path="/literasi" element={<PublicLibrary />} />
                                 <Route path="/forum" element={<PublicForum houses={houses} isAdmin={isAdmin} />} />

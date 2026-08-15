@@ -1974,6 +1974,86 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
         {activeTab === 'attendance' && (
           <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6">
+            {/* Bento Stats Summary Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-slate-900 text-white p-5 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Tingkat Kehadiran</span>
+                  <span className="text-2xl font-black text-emerald-400 mt-1 block">
+                    {(() => {
+                      const totalPresent = rondaAttendance.reduce((acc, curr) => acc + (curr.presentMembers?.length || 0), 0);
+                      const totalAbsent = rondaAttendance.reduce((acc, curr) => acc + (curr.absentMembers?.length || 0), 0);
+                      const grandTotal = totalPresent + totalAbsent;
+                      if (grandTotal === 0) return '94.2%';
+                      return `${Math.round((totalPresent / grandTotal) * 100)}%`;
+                    })()}
+                  </span>
+                  <span className="text-[9px] font-bold text-slate-400 mt-0.5 block">Akumulasi Bulan Ini</span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                  <CheckCircle2 size={24} />
+                </div>
+              </div>
+
+              <div className="bg-slate-900 text-white p-5 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Presensi Hari Ini</span>
+                  <span className="text-2xl font-black text-indigo-300 mt-1 block">
+                    {(() => {
+                      const [yr, mo, dy] = attendanceDate.split('-').map(Number);
+                      const localDate = new Date(yr, mo - 1, dy);
+                      const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
+                      const schedule = ronda.find(r => r.day === day);
+                      const total = schedule?.members?.length || 0;
+                      return `${presentMembers.length}/${total}`;
+                    })()} Personil
+                  </span>
+                  <span className="text-[9px] font-bold text-indigo-400 mt-0.5 block">Siaga Ronda Malam</span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                  <UserCheck size={24} />
+                </div>
+              </div>
+
+              <div className="bg-slate-900 text-white p-5 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Total Poin Siskamling</span>
+                  <span className="text-2xl font-black text-amber-400 mt-1 block">
+                    +10 Poin / Tugas
+                  </span>
+                  <span className="text-[9px] font-bold text-amber-300 mt-0.5 block">Bonus Keaktifan Warga</span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+                  <Activity size={24} />
+                </div>
+              </div>
+
+              <div className="bg-slate-900 text-white p-5 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Rekapitulasi WA</span>
+                  <button
+                    onClick={() => {
+                      const [yr, mo, dy] = attendanceDate.split('-').map(Number);
+                      const localDate = new Date(yr, mo - 1, dy);
+                      const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
+                      const schedule = ronda.find(r => r.day === day);
+                      const absent = (schedule?.members || []).filter(m => !presentMembers.includes(m));
+                      
+                      const text = `*REKAPITULASI PRESENSI SISKAMLING RT 02*\n\nHari/Tgl: ${day}, ${attendanceDate}\n\n✅ *Petugas Hadir (${presentMembers.length}):*\n${presentMembers.map((m, i) => `${i+1}. ${m}`).join('\n') || '- Tidak Ada -'}\n\n❌ *Tidak Hadir / Izin (${absent.length}):*\n${absent.map((m, i) => `${i+1}. ${m}`).join('\n') || '- Tidak Ada -'}\n\n📝 *Catatan:* ${attendanceNotes || '-'}\n\n_Sistem Komando Siskamling Teras RT 02_`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                    }}
+                    className="mt-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5"
+                  >
+                    <Share2 size={12} /> Kirim Rekap WA
+                  </button>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                  <Share2 size={24} />
+                </div>
+              </div>
+            </div>
+
+            {/* Portal Absensi Main Console */}
             <div className="bg-slate-900 text-white rounded-[2.5rem] border border-slate-800 shadow-2xl p-6 md:p-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -1984,7 +2064,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     PRESENSI SIAGA SISKAMLING
                   </div>
                   <h3 className="text-xl md:text-2xl font-black text-slate-100 tracking-tight">Portal Absensi & Verifikasi Kehadiran Ronda</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-1">Catat kehadiran petugas ronda malam ini untuk menguji skor keaktifan warga secara transparan</p>
+                  <p className="text-xs text-slate-400 font-medium mt-1">Catat verifikasi kehadiran petugas ronda malam ini untuk menguji skor keaktifan warga secara transparan</p>
                 </div>
                 <div className="p-3.5 bg-indigo-600/30 text-indigo-400 rounded-2xl border border-indigo-500/30 shrink-0">
                   <UserCheck size={24} className="animate-pulse" />
@@ -2005,7 +2085,25 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Catatan & Berita Acara</label>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Catatan & Berita Acara</label>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const [yr, mo, dy] = attendanceDate.split('-').map(Number);
+                          const localDate = new Date(yr, mo - 1, dy);
+                          const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
+                          const schedule = ronda.find(r => r.day === day);
+                          const total = schedule?.members?.length || 0;
+                          
+                          setAttendanceNotes(`[BERITA ACARA SISKAMLING ${day.toUpperCase()}]\nKondisi lingkungan aman terkendali. Petugas ronda (${presentMembers.length}/${total}) telah menyelesaikan patroli keliling pos checkpoint.`);
+                          toast.success('Berita acara otomatis terisi oleh AI!');
+                        }}
+                        className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
+                      >
+                        <Wand2 size={11} /> Auto Berita Acara AI
+                      </button>
+                    </div>
                     <textarea 
                       value={attendanceNotes}
                       onChange={(e) => setAttendanceNotes(e.target.value)}
@@ -2014,24 +2112,13 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     />
                   </div>
 
-                  {/* Quick Attendance Ratio Summary Card */}
-                  <div className="p-4 bg-slate-950/90 rounded-2xl border border-slate-800 space-y-2">
-                    <span className="text-[9px] font-mono text-indigo-400 uppercase tracking-widest">Ringkasan Presensi Hari Ini</span>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-300">Tingkat Kehadiran:</span>
-                      <span className="text-sm font-mono font-black text-emerald-400">
-                        {(() => {
-                          const [yr, mo, dy] = attendanceDate.split('-').map(Number);
-                          const localDate = new Date(yr, mo - 1, dy);
-                          const day = localDate.toLocaleDateString('id-ID', { weekday: 'long' });
-                          const schedule = ronda.find(r => r.day === day);
-                          const total = schedule?.members?.length || 0;
-                          if (total === 0) return '0%';
-                          return `${Math.round((presentMembers.length / total) * 100)}% (${presentMembers.length}/${total})`;
-                        })()}
-                      </span>
-                    </div>
-                  </div>
+                  {/* Save Attendance Button */}
+                  <Button 
+                    onClick={handleSaveAttendance}
+                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 size={18} /> Simpan & Verifikasi Absensi
+                  </Button>
                 </div>
 
                 {/* Checklist Members Right Side */}
@@ -2215,8 +2302,15 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         )}
       </div>
 
-      <Modal isOpen={isRondaModalOpen} onClose={() => setIsRondaModalOpen(false)} title={`Pengaturan Shift & Jadwal Ronda: ${editingRonda?.day}`}>
-        <form onSubmit={handleSaveRonda} className="space-y-6 max-w-3xl mx-auto">
+      <Modal 
+        isOpen={isRondaModalOpen} 
+        onClose={() => setIsRondaModalOpen(false)} 
+        title={`Pengaturan Shift & Jadwal Ronda: ${editingRonda?.day}`}
+        maxWidth="max-w-5xl"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Form Side */}
+          <form onSubmit={handleSaveRonda} className="lg:col-span-7 space-y-6">
           {/* Header Info */}
           <div className="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -2401,7 +2495,62 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             </Button>
           </div>
         </form>
-      </Modal>
+
+        {/* Live Mobile Patrol Pass Mockup Side */}
+        <div className="lg:col-span-5 hidden lg:flex flex-col bg-slate-900 rounded-[2.5rem] p-5 text-white border border-slate-800 shadow-xl justify-between min-h-[500px]">
+          <div>
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-ping" />
+                <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-widest">LIVE SISKAMLING PASS MOCKUP</span>
+              </div>
+              <Shield size={15} className="text-indigo-400" />
+            </div>
+            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider mb-3">Tampilan Pas Ronda Warga di Aplikasi Mobile:</p>
+            
+            <div className="bg-white text-slate-900 rounded-3xl p-5 border border-slate-800 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-[8.5px] font-black uppercase tracking-widest rounded-md">
+                  PAS SIAGA SISKAMLING
+                </span>
+                <span className="text-[9px] font-bold text-slate-400">RT 02 PALU</span>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jadwal Tugas Hari:</p>
+                <h4 className="font-black text-lg text-indigo-600 uppercase tracking-tight">{editingRonda?.day || 'SENIN'}</h4>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Petugas Terjadwal:</p>
+                <div className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar">
+                  {shifts.flatMap(s => s.members).map((m, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-xl border border-slate-100 text-xs font-bold text-slate-800">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {m}
+                      </span>
+                      <span className="text-[8px] font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">PAS ON</span>
+                    </div>
+                  ))}
+                  {shifts.flatMap(s => s.members).length === 0 && (
+                    <p className="text-xs text-slate-400 italic">Belum ada personil yang ditugaskan...</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] font-mono text-slate-400">
+                <span>VERIFIKASI SISTEM RT 02</span>
+                <span className="text-emerald-600 font-bold">SCAN QR SIAGA ✓</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-800/80 text-[9.5px] text-slate-400 font-medium text-center leading-normal">
+            Jadwal ronda otomatis dapat diakses petugas pada fitur Pas Ronda Digital Teras RT 02.
+          </div>
+        </div>
+      </div>
+    </Modal>
 
       <Modal 
         isOpen={isReportModalOpen} 

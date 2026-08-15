@@ -783,17 +783,38 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               </p>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col space-y-3">
+            <div className="flex-1 flex flex-col space-y-4">
               <textarea 
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                className="w-full flex-1 min-h-[300px] bg-slate-50/70 border border-slate-100 hover:border-slate-200 rounded-2xl p-4 text-sm font-medium leading-relaxed font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white resize-none transition-all text-slate-800"
+                className="w-full min-h-[220px] bg-slate-50/70 border border-slate-100 hover:border-slate-200 rounded-2xl p-4 text-sm font-medium leading-relaxed font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white resize-none transition-all text-slate-800"
                 placeholder="Rancang teks pengumuman di sini..."
               />
               
-              <div className="flex justify-between items-center text-xs text-slate-400 font-bold uppercase tracking-wider">
-                <span>Panjang Karakter: {draft.length}</span>
-                <span>Jumlah Target: {targetPhoneNumbers.length} Nomor</span>
+              {/* Live WhatsApp Smartphone Bubble Chat Screen Mockup */}
+              <div className="bg-emerald-950/90 rounded-[2rem] p-4 text-white border border-emerald-800 shadow-xl space-y-3">
+                <div className="flex items-center justify-between border-b border-emerald-800/80 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse" />
+                    <span className="text-[10px] font-mono text-emerald-300 font-bold uppercase tracking-widest">LIVE WA BUBBLE MOCKUP</span>
+                  </div>
+                  <span className="text-[9px] font-mono text-slate-400">Pengurus RT 02 → Warga</span>
+                </div>
+
+                <div className="bg-[#0b141a] p-4 rounded-2xl border border-emerald-900/60 font-sans space-y-2">
+                  <div className="bg-[#005c4b] text-emerald-50 p-3.5 rounded-2xl rounded-tr-none text-xs font-medium leading-relaxed shadow-sm space-y-2 border border-emerald-700/40">
+                    <p className="whitespace-pre-line leading-relaxed font-sans">{draft}</p>
+                    <div className="text-[9px] text-emerald-300/80 font-mono text-right font-bold flex items-center justify-end gap-1">
+                      <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="text-emerald-300">✓✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-[9.5px] font-mono text-emerald-400">
+                  <span>PANJANG: {draft.length} CHARS</span>
+                  <span>TARGET: {targetPhoneNumbers.length} NOMOR WARGA</span>
+                </div>
               </div>
             </div>
           )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Calendar, MapPin, Users, QrCode, Trash2, Edit2, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Calendar, MapPin, Users, QrCode, Trash2, Edit2, CheckCircle, Clock, AlertTriangle, Share2, Sparkles, Printer } from 'lucide-react';
 import { Activity, Attendance, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -15,6 +15,7 @@ import {
   handleFirestoreError,
   OperationType
 } from '../../services/databaseService';
+import { generateEventAttendanceReportPDF } from '../../services/pdfService';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
@@ -361,8 +362,18 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                   <Users size={14} /> Presensi
                 </button>
                 <button 
+                  onClick={() => {
+                    const text = `*UNDANGAN KEGIATAN TERAS RT 02*\n\n📌 *Agenda:* ${activity.title}\n📅 *Waktu:* ${new Date(activity.date).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}\n📍 *Lokasi:* ${activity.location}\n📂 *Jenis:* ${activity.type}${activity.isMandatory ? ' *(WAJIB HADIR)*' : ''}\n\n📝 *Deskripsi:*\n${activity.description}\n\n_Mohon kehadiran seluruh bapak/ibu warga RT 02 tepat waktu. Terima kasih!_`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                  }}
+                  className="px-3 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl font-bold transition-all flex items-center justify-center"
+                  title="Sebar Undangan via WhatsApp"
+                >
+                  <Share2 size={16} />
+                </button>
+                <button 
                   onClick={() => { setSelectedActivity(activity); }}
-                  className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-indigo-600 transition-all flex items-center justify-center"
+                  className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-indigo-600 transition-all flex items-center justify-center"
                   title="Tampilkan QR Code"
                 >
                   <QrCode size={18} />
@@ -384,137 +395,257 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
         </AnimatePresence>
       </div>
 
-      {/* Create/Edit Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingActivityId ? "Edit Kegiatan" : "Buat Kegiatan Baru"}>
-        <form onSubmit={handleSave} className="space-y-4">
-          <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Judul Kegiatan</label>
-            <input 
-              type="text" 
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-              value={form.title}
-              onChange={e => setForm({...form, title: e.target.value})}
-              placeholder="Contoh: Rapat Bulanan RT"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Deskripsi</label>
-            <textarea 
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[100px]"
-              value={form.description}
-              onChange={e => setForm({...form, description: e.target.value})}
-              placeholder="Detail kegiatan..."
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal & Waktu</label>
-              <input 
-                type="datetime-local" 
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                value={form.date}
-                onChange={e => setForm({...form, date: e.target.value})}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Lokasi</label>
+      {/* Create/Edit Modal (Max-W-5XL Split View Layout) */}
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title={editingActivityId ? "Edit Agenda Kegiatan RT" : "Buat Agenda Kegiatan Baru"}
+        maxWidth="max-w-5xl"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Form Input Side */}
+          <form onSubmit={handleSave} className="lg:col-span-7 space-y-4">
+            <div className="space-y-1">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Judul Kegiatan / Agenda</label>
               <input 
                 type="text" 
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                value={form.location}
-                onChange={e => setForm({...form, location: e.target.value})}
-                placeholder="Contoh: Balai RT"
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                value={form.title}
+                onChange={e => setForm({...form, title: e.target.value})}
+                placeholder="Contoh: Rapat Kerja Musyawarah Warga RT 02"
+                required
               />
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Jenis</label>
-              <select 
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                value={form.type}
-                onChange={e => setForm({...form, type: e.target.value as Activity['type']})}
-              >
-                <option value="Rapat">Rapat</option>
-                <option value="Kerja Bakti">Kerja Bakti</option>
-                <option value="Arisan">Arisan</option>
-                <option value="Posyandu">Posyandu</option>
-                <option value="Lainnya">Lainnya</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status</label>
-              <select 
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                value={form.status}
-                onChange={e => setForm({...form, status: e.target.value as Activity['status']})}
-              >
-                <option value="Upcoming">Upcoming</option>
-                <option value="Ongoing">Ongoing</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-white rounded-lg text-rose-500 shadow-sm border border-slate-100">
-                  <AlertTriangle size={14} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-slate-800">Kegiatan Wajib</p>
-                  <p className="text-[10px] text-slate-500 font-medium">Berlaku iuran kompensasi bagi yang absen</p>
-                </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Jenis Kegiatan</label>
+                <select 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                  value={form.type}
+                  onChange={e => setForm({...form, type: e.target.value as Activity['type']})}
+                >
+                  <option value="Rapat">Rapat Musyawarah</option>
+                  <option value="Kerja Bakti">Kerja Bakti / Gotong Royong</option>
+                  <option value="Arisan">Arisan / Silaturahmi</option>
+                  <option value="Posyandu">Posyandu & Kesehatan</option>
+                  <option value="Lainnya">Kegiatan Lainnya</option>
+                </select>
               </div>
-              <input 
-                type="checkbox" 
-                className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                checked={form.isMandatory}
-                onChange={e => setForm({...form, isMandatory: e.target.checked})}
-              />
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Status Agenda</label>
+                <select 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                  value={form.status}
+                  onChange={e => setForm({...form, status: e.target.value as Activity['status']})}
+                >
+                  <option value="Upcoming">Akan Datang (Upcoming)</option>
+                  <option value="Ongoing">Sedang Berjalan (Ongoing)</option>
+                  <option value="Completed">Selesai (Completed)</option>
+                </select>
+              </div>
             </div>
-            {form.isMandatory && (
-              <div className="animate-fade-in">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Besar Kompensasi (Rp)</label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Tanggal & Waktu Acara</label>
                 <input 
-                  type="number" 
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                  value={form.compensationAmount}
-                  onChange={e => setForm({...form, compensationAmount: parseInt(e.target.value)})}
-                  placeholder="20000"
+                  type="datetime-local" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                  value={form.date}
+                  onChange={e => setForm({...form, date: e.target.value})}
+                  required
                 />
               </div>
-            )}
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Lokasi Pelaksanaan</label>
+                <input 
+                  type="text" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                  value={form.location}
+                  onChange={e => setForm({...form, location: e.target.value})}
+                  placeholder="Contoh: Balai Pertemuan RT 02"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Deskripsi & Agenda Kegiatan</label>
+                <button 
+                  type="button" 
+                  onClick={async () => {
+                    if (!form.title) return toast.error('Isi judul agenda kegiatan terlebih dahulu');
+                    const draft = `Undangan ${form.type}: ${form.title}.\n\nDimohon kehadiran seluruh bapak/ibu warga RT 02 pada waktu dan tempat yang tertera. Harap membawa perlengkapan pribadi yang dibutuhkan.\n\nDemikian pengumuman ini disampaikan, terima kasih atas perhatian dan partisipasinya.`;
+                    setForm(prev => ({ ...prev, description: draft }));
+                    toast.success('Deskripsi agenda kegiatan AI berhasil dibuat!');
+                  }}
+                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/70 text-[11px] font-black py-1.5 px-3 rounded-full transition-all shrink-0 active:scale-95"
+                >
+                  <Sparkles size={13} className="text-indigo-600 animate-pulse" />
+                  <span>Bantu Tulis AI Agenda</span>
+                </button>
+              </div>
+              <textarea 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[100px] resize-none leading-relaxed" 
+                rows={4}
+                value={form.description}
+                onChange={e => setForm({...form, description: e.target.value})}
+                placeholder="Tuliskan poin-poin agenda rapat atau instruksi kerja bakti..."
+              />
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-rose-50 text-rose-600 rounded-xl border border-rose-100">
+                    <AlertTriangle size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-slate-900">Agenda Wajib Kehadiran</p>
+                    <p className="text-[10px] text-slate-500 font-medium">Aktifkan jika berlaku iuran kompensasi bagi warga yang absen</p>
+                  </div>
+                </div>
+                <input 
+                  type="checkbox" 
+                  className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  checked={form.isMandatory}
+                  onChange={e => setForm({...form, isMandatory: e.target.checked})}
+                />
+              </div>
+
+              {form.isMandatory && (
+                <div className="pt-2 border-t border-slate-200/60">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Besar Iuran Kompensasi Absen (Rp)</label>
+                  <input 
+                    type="number" 
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={form.compensationAmount}
+                    onChange={e => setForm({...form, compensationAmount: Number(e.target.value)})}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex gap-3">
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 rounded-2xl text-xs font-black uppercase">
+                Batal
+              </Button>
+              <Button type="submit" className="flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black uppercase shadow-lg shadow-indigo-200">
+                {editingActivityId ? "Simpan Perubahan Agenda" : "Terbitkan Agenda Digital"}
+              </Button>
+            </div>
+          </form>
+
+          {/* Live Mobile Digital Pass Mockup Side */}
+          <div className="lg:col-span-5 hidden lg:flex flex-col bg-slate-900 rounded-[2.5rem] p-5 text-white border border-slate-800 shadow-xl justify-between min-h-[500px]">
+            <div>
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-ping" />
+                  <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-widest">LIVE EVENT PASS MOCKUP</span>
+                </div>
+                <Calendar size={15} className="text-indigo-400" />
+              </div>
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider mb-3">Tampilan Tiket Presensi Digital Warga:</p>
+              
+              <div className="bg-white text-slate-900 rounded-3xl p-5 border border-slate-800 shadow-2xl space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-[8.5px] font-black uppercase tracking-widest rounded-md">
+                    {form.type || 'Rapat'}
+                  </span>
+                  {form.isMandatory ? (
+                    <span className="px-2 py-0.5 bg-rose-50 text-rose-600 border border-rose-100 text-[8.5px] font-black uppercase tracking-widest rounded-md">
+                      WAJIB HADIR
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-bold text-slate-400">AGENDA RT 02</span>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className="font-black text-sm text-slate-900 leading-snug">
+                    {form.title || '[Judul Agenda Kegiatan RT]'}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-medium">
+                    {form.description || '[Deskripsi dan arahan kegiatan akan tampil di sini...]'}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1.5 text-[10.5px] font-bold text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <Calendar size={12} className="text-indigo-600" />
+                    <span>{form.date ? new Date(form.date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '[Waktu Acara]'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin size={12} className="text-indigo-600" />
+                    <span>{form.location || '[Lokasi Acara]'}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between text-[9px] font-mono text-slate-400 border-t border-slate-100">
+                  <span>SISTEM PRESENSI TERAS</span>
+                  <span className="text-indigo-600 font-bold">SCAN QR CARD ✓</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-800/80 text-[9.5px] text-slate-400 font-medium text-center leading-normal">
+              Kegiatan otomatis tersinkronisasi di kalender aplikasi warga Teras RT 02.
+            </div>
           </div>
-          <Button type="submit" className="w-full py-4 shadow-xl shadow-indigo-200 mt-4">
-            {editingActivityId ? 'Simpan Perubahan' : 'Buat Kegiatan'}
-          </Button>
-        </form>
+        </div>
       </Modal>
 
       {/* Attendance Modal */}
       <Modal isOpen={isAttendanceModalOpen} onClose={() => setIsAttendanceModalOpen(false)} title={`Presensi: ${selectedActivity?.title}`}>
         <div className="space-y-4">
-          <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm">
                 <Users size={20} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none mb-1">Total Kehadiran</p>
-                <p className="text-xl font-black text-slate-800 leading-none">{attendance.length} Warga</p>
+                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none mb-1">Total Kehadiran Warga</p>
+                <p className="text-xl font-black text-slate-800 leading-none">{attendance.length} Personil / Rumah</p>
               </div>
             </div>
-            {selectedActivity?.isMandatory && selectedActivity?.status === 'Completed' && !selectedActivity?.compensationApplied && (
-              <Button onClick={handleApplyCompensations} size="sm" className="bg-rose-600 hover:bg-rose-700 shadow-rose-100">
-                Terapkan Sanksi
+            
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <Button
+                onClick={() => {
+                  if (!selectedActivity) return;
+                  const currentPdfConfig = (window as any).pdfConfig || { rtName: 'RT 02', kelurahan: 'TONDO', kecamatan: 'MANTIKULORE', rtChairman: 'Ketua RT' };
+                  generateEventAttendanceReportPDF(selectedActivity, attendance, houses, currentPdfConfig);
+                }}
+                size="sm"
+                variant="outline"
+                className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 text-[10px] font-black uppercase tracking-wider py-2"
+              >
+                <Printer size={14} className="mr-1 text-indigo-600" /> Cetak PDF
               </Button>
-            )}
-            {selectedActivity?.compensationApplied && (
-              <div className="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-200 flex items-center gap-1">
-                <CheckCircle size={12} /> Sanksi Diterapkan
-              </div>
-            )}
+
+              <Button
+                onClick={() => {
+                  if (!selectedActivity) return;
+                  const text = `*REKAPITULASI PRESENSI KEGIATAN RT 02*\n\n📌 *Agenda:* ${selectedActivity.title}\n📅 *Waktu:* ${new Date(selectedActivity.date).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}\n📍 *Lokasi:* ${selectedActivity.location}\n👥 *Total Hadir:* ${attendance.length} Warga\n\n✅ *Daftar Hadir:*\n${attendance.map((a, i) => `${i+1}. ${a.residentName} (Blok ${a.houseId})`).join('\n') || '- Belum Ada -'}\n\n_Pusat Data Presensi Teras RT 02_`;
+                  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                }}
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-wider py-2"
+              >
+                <Share2 size={14} className="mr-1" /> Rekap WA
+              </Button>
+
+              {selectedActivity?.isMandatory && selectedActivity?.status === 'Completed' && !selectedActivity?.compensationApplied && (
+                <Button onClick={handleApplyCompensations} size="sm" className="bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-wider py-2">
+                  Terapkan Sanksi
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Navigation Tabs for Attendance */}

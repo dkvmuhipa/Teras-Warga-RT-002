@@ -3550,3 +3550,415 @@ export const generateRondaSchedulePDF = async (schedules: any[], config: PdfConf
     doc.save(`Jadwal_Ronda_Siskamling_${config.rtName?.replace(/\s+/g, '_') || 'RT02'}.pdf`);
     toast.success("Poster Jadwal Ronda Siskamling (PDF) berhasil diunduh!");
 };
+
+export const generateEventAttendanceReportPDF = async (activity: any, attendanceRecords: any[], houses: House[], customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const centerX = pageWidth / 2;
+
+    doc.setFont("times", "bold"); 
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`PEMERINTAH KOTA ${config.kota?.toUpperCase() || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.text(`KECAMATAN ${config.kecamatan?.toUpperCase() || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+    doc.text(`KELURAHAN ${config.kelurahan?.toUpperCase() || 'TONDO'}`, centerX, 26, { align: "center" });
+    doc.text(`PENGURUS ${config.rtName?.toUpperCase() || 'RT 02'}`, centerX, 32, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setFont("times", "normal");
+    doc.text(`Alamat : ${config.rtAddress || 'Jl. Soekarno Hatta, Tondo, Palu'}`, centerX, 38, { align: "center" });
+
+    doc.setLineWidth(0.8);
+    doc.line(20, 42, 190, 42);
+    doc.setLineWidth(0.2);
+    doc.line(20, 43, 190, 43);
+
+    // Title
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text("LAPORAN PRESENSI & DAFTAR HADIR KEGIATAN RT", centerX, 52, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.setFont("times", "normal");
+    doc.text(`Agenda: ${activity.title}`, margin, 62);
+    doc.text(`Waktu Acara: ${new Date(activity.date).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}`, margin, 67);
+    doc.text(`Lokasi: ${activity.location}`, margin, 72);
+    doc.text(`Kategori / Jenis: ${activity.type} ${activity.isMandatory ? '(Wajib Hadir)' : '(Sukarela)'}`, margin, 77);
+    doc.text(`Total Kehadiran: ${attendanceRecords.length} Warga`, margin, 82);
+
+    autoTable(doc, {
+        startY: 88,
+        margin: { left: margin, right: margin },
+        head: [['No', 'Nama Peserta Warga', 'Blok Rumah', 'Waktu Presensi', 'Status Kehadiran']],
+        body: attendanceRecords.map((rec, idx) => [
+            (idx + 1).toString(),
+            rec.residentName || '-',
+            `Blok ${rec.houseId || '-'}`,
+            new Date(rec.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WITA',
+            'HADIR (VERIFIED ✓)'
+        ]),
+        styles: { font: 'times', fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+        columnStyles: {
+            0: { cellWidth: 12, halign: 'center' },
+            1: { cellWidth: 60 },
+            2: { cellWidth: 35, halign: 'center' },
+            3: { cellWidth: 35, halign: 'center' },
+            4: { cellWidth: 30, halign: 'center' }
+        }
+    });
+
+    const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 15 : 160;
+    const sigX = pageWidth - margin - 50;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, sigX, finalY);
+    doc.text(`Ketua ${config.rtName || 'RT 02'},`, sigX, finalY + 5);
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman || 'Irfan Arianto', sigX, finalY + 24);
+
+    doc.save(`Laporan_Presensi_${activity.title.replace(/\s+/g, '_')}.pdf`);
+    toast.success("Laporan Presensi Kegiatan (PDF) berhasil diunduh!");
+};
+
+export const generateRulesPDF = async (rule: { title: string; nomorBerkas: string; nomorSurat: string; tentang: string; menimbang: string; items: string[] }, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 18;
+    const centerX = pageWidth / 2;
+
+    // Load Logo, Stamp & Signature Image Data
+    let logoData = '';
+    let stampData = '';
+    let signatureData = '';
+    try {
+        if (config.logo) logoData = await getImageData(config.logo);
+        if (config.stamp) stampData = await getImageData(config.stamp);
+        if (config.signature) signatureData = await getImageData(config.signature);
+    } catch (e) {
+        console.warn("Could not load images for PDF:", e);
+    }
+
+    // Render Logo Resmi Pemkot / RT di Sisi Kiri Kop Surat
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', margin, 10, 22, 28);
+    }
+
+    // Background Subtle Watermark
+    doc.setTextColor(240, 243, 248);
+    doc.setFont("times", "bold");
+    doc.setFontSize(54);
+    doc.text("DOKUMEN HUKUM RT 02", centerX, pageHeight / 2, { align: "center", angle: 45 });
+
+    // Restores Text Color
+    doc.setTextColor(0, 0, 0);
+
+    // KOP SURAT PERSURATAN BAKU PEMERINTAHAN (TATA NASKAH DINAS PERMENDAGRI / PERWALI)
+    doc.setFont("times", "bold"); 
+    doc.setFontSize(13);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`PEMERINTAH KOTA ${config.kota?.toUpperCase() || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.setFontSize(13);
+    doc.text(`KECAMATAN ${config.kecamatan?.toUpperCase() || 'MANTIKULORE'}`, centerX, 19.5, { align: "center" });
+    doc.setFontSize(13);
+    doc.text(`KELURAHAN ${config.kelurahan?.toUpperCase() || 'TONDO'}`, centerX, 25, { align: "center" });
+    doc.setFontSize(14);
+    doc.text(`PENGURUS ${config.rtName?.toUpperCase() || 'RT 02'} RW 020`, centerX, 31, { align: "center" });
+
+    doc.setFontSize(9);
+    doc.setFont("times", "normal");
+    doc.text(`Sekretariat: ${config.rtAddress || 'Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Kode Pos 94119'}`, centerX, 36.5, { align: "center" });
+
+    // Double Kop Divider Line (Baku Tata Naskah Dinas: Tebal 1.0mm & Tipis 0.3mm)
+    doc.setLineWidth(1.0);
+    doc.setDrawColor(0, 0, 0);
+    doc.line(margin, 40, pageWidth - margin, 40);
+    doc.setLineWidth(0.3);
+    doc.line(margin, 41.2, pageWidth - margin, 41.2);
+
+    // Judul Naskah Keputusan
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text("PERATURAN & TATA TERTIB LINGKUNGAN RESMI RT 02", centerX, 50, { align: "center" });
+    
+    doc.setFontSize(9.5);
+    doc.setFont("times", "bold");
+    doc.text(`KODE REGISTRASI: ${rule.nomorBerkas} | ${rule.nomorSurat.toUpperCase()}`, centerX, 55.5, { align: "center" });
+
+    // Konsideran Menimbang & Tentang
+    let currentY = 63;
+    doc.setFontSize(9.5);
+    
+    doc.setFont("times", "bold");
+    doc.text("TENTANG   :", margin, currentY);
+    doc.setFont("times", "normal");
+    const tentangLines = doc.splitTextToSize(rule.tentang, 140);
+    doc.text(tentangLines, margin + 26, currentY);
+    currentY += (tentangLines.length * 4.5) + 3;
+
+    doc.setFont("times", "bold");
+    doc.text("MENIMBANG :", margin, currentY);
+    doc.setFont("times", "italic");
+    const menimbangLines = doc.splitTextToSize(rule.menimbang, 138);
+    doc.text(menimbangLines, margin + 26, currentY);
+    currentY += (menimbangLines.length * 4.5) + 6;
+
+    // Tabel Ketentuan Pasal
+    autoTable(doc, {
+        startY: currentY,
+        margin: { left: margin, right: margin },
+        head: [['Pasal / Poin', 'Ketentuan & Ketetapan Hukum Tata Tertib RT 02']],
+        body: rule.items.map((item, idx) => [
+            `Pasal ${idx + 1}`,
+            item
+        ]),
+        styles: { font: 'times', fontSize: 9, cellPadding: 3.5, textColor: [15, 23, 42] },
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+            0: { cellWidth: 24, fontStyle: 'bold', halign: 'center' },
+            1: { cellWidth: 150 }
+        },
+        didDrawPage: (data) => {
+            const pageCount = (doc as any).internal.getNumberOfPages();
+            doc.setFontSize(8);
+            doc.setFont("times", "italic");
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Teras Warga RT 02 - Lembaran Salinan Peraturan Resmi [Hal ${data.pageNumber} dari ${pageCount}]`, margin, pageHeight - 8);
+            doc.text(`Kode Dokumen: ${rule.nomorBerkas}`, pageWidth - margin, pageHeight - 8, { align: "right" });
+        }
+    });
+
+    const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 12 : 200;
+    const sigX = pageWidth - margin - 55;
+
+    // Area Tanda Tangan & Legalisasi Digital
+    if (finalY + 38 > pageHeight) {
+        doc.addPage();
+    }
+
+    const stampY = finalY > pageHeight - 45 ? pageHeight - 45 : finalY;
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("times", "normal");
+    doc.setFontSize(9.5);
+    doc.text(`Ditetapkan di : Palu`, sigX, stampY);
+    doc.text(`Pada Tanggal : ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, sigX, stampY + 5);
+    doc.text(`Ketua ${config.rtName || 'RT 02'} RW 020,`, sigX, stampY + 10);
+    
+    // Render Stempel Asli RT dari Pengaturan Admin jika ada
+    if (stampData) {
+        doc.addImage(stampData, 'PNG', sigX - 18, stampY + 8, 30, 30);
+    } else {
+        // Fallback Digital Stamp Circle
+        doc.setDrawColor(37, 99, 235);
+        doc.setLineWidth(0.4);
+        doc.circle(sigX - 8, stampY + 22, 10);
+        doc.setFontSize(6.5);
+        doc.setFont("times", "bold");
+        doc.setTextColor(37, 99, 235);
+        doc.text("PENGURUS RT 02", sigX - 8, stampY + 20, { align: "center" });
+        doc.text("VERIFIED", sigX - 8, stampY + 23, { align: "center" });
+    }
+
+    // Render Tanda Tangan Basah / Digital Image jika tersedia
+    if (signatureData) {
+        doc.addImage(signatureData, 'PNG', sigX + 5, stampY + 11, 32, 16);
+    }
+
+    // Nama Ketua RT
+    doc.setFontSize(10);
+    doc.setFont("times", "bold");
+    doc.setTextColor(0, 0, 0);
+    doc.text(config.rtChairman || 'IRFAN ARIANTO', sigX, stampY + 28);
+    doc.setFontSize(8.5);
+    doc.setFont("times", "normal");
+    doc.text(`NIP/ID: RT02-PLU-${new Date().getFullYear()}`, sigX, stampY + 32);
+
+    doc.save(`Berkas_Peraturan_${rule.nomorBerkas}_RT02.pdf`);
+    toast.success(`Dokumen Peraturan ${rule.nomorBerkas} (PDF) dengan Logo, Stempel & TTD Resmi berhasil diunduh!`);
+};
+
+export const generateAllRulesPDF = async (allRules: Array<{ title: string; nomorBerkas: string; nomorSurat: string; tentang: string; menimbang: string; items: string[] }>, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 18;
+    const centerX = pageWidth / 2;
+
+    // Load Logo, Stamp & Signature Image Data
+    let logoData = '';
+    let stampData = '';
+    let signatureData = '';
+    try {
+        if (config.logo) logoData = await getImageData(config.logo);
+        if (config.stamp) stampData = await getImageData(config.stamp);
+        if (config.signature) signatureData = await getImageData(config.signature);
+    } catch (e) {
+        console.warn("Could not load images for PDF:", e);
+    }
+
+    // Render Logo Resmi Pemkot / RT di Sisi Kiri Kop Surat
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', margin, 10, 22, 28);
+    }
+
+    // Cover / Header Kop Utama Baku
+    doc.setFont("times", "bold"); 
+    doc.setFontSize(13);
+    doc.text(`PEMERINTAH KOTA ${config.kota?.toUpperCase() || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.setFontSize(13);
+    doc.text(`KECAMATAN ${config.kecamatan?.toUpperCase() || 'MANTIKULORE'}`, centerX, 19.5, { align: "center" });
+    doc.setFontSize(13);
+    doc.text(`KELURAHAN ${config.kelurahan?.toUpperCase() || 'TONDO'}`, centerX, 25, { align: "center" });
+    doc.setFontSize(14);
+    doc.text(`PENGURUS ${config.rtName?.toUpperCase() || 'RT 02'} RW 020`, centerX, 31, { align: "center" });
+
+    doc.setFontSize(9);
+    doc.setFont("times", "normal");
+    doc.text(`Sekretariat: ${config.rtAddress || 'Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Kode Pos 94119'}`, centerX, 36.5, { align: "center" });
+
+    // Double Line Kop Baku
+    doc.setLineWidth(1.0);
+    doc.setDrawColor(0, 0, 0);
+    doc.line(margin, 40, pageWidth - margin, 40);
+    doc.setLineWidth(0.3);
+    doc.line(margin, 41.2, pageWidth - margin, 41.2);
+
+    // Judul Utama BUKU HIMPUNAN PERATURAN
+    doc.setFont("times", "bold");
+    doc.setFontSize(13.5);
+    doc.text("BUKU HIMPUNAN PERATURAN & TATA TERTIB RESMI RT 02", centerX, 51, { align: "center" });
+    doc.setFontSize(9.5);
+    doc.setFont("times", "bold");
+    doc.text(`KODIFIKASI RESMI ${allRules.length} BAB TATA TERTIB & PERATURAN LINGKUNGAN HUNTAP TONDO 2`, centerX, 56.5, { align: "center" });
+
+    let startY = 64;
+
+    allRules.forEach((rule, idx) => {
+        // Halaman Baru untuk Tiap BAB (Page Break per BAB) kecuali BAB 1 pada Halaman Pertama
+        if (idx > 0) {
+            doc.addPage();
+            startY = 20;
+        }
+
+        // Header Judul BAB (Warna Slate Gelap, Font Tegas)
+        doc.setFont("times", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(30, 41, 59);
+        const babTitle = `BAB ${idx + 1}: ${rule.title.toUpperCase()} (${rule.nomorSurat})`;
+        const titleLines = doc.splitTextToSize(babTitle, pageWidth - (margin * 2) - 45);
+        doc.text(titleLines, margin, startY);
+        
+        doc.setFontSize(8.5);
+        doc.setFont("times", "bold");
+        doc.setTextColor(71, 85, 105);
+        doc.text(`KODE: ${rule.nomorBerkas}`, pageWidth - margin, startY, { align: 'right' });
+        
+        startY += (titleLines.length * 5) + 1;
+
+        doc.setFontSize(8.5);
+        doc.setFont("times", "italic");
+        doc.setTextColor(100, 116, 139);
+        const tentangTxt = doc.splitTextToSize(`Tentang: ${rule.tentang}`, pageWidth - (margin * 2));
+        doc.text(tentangTxt, margin, startY);
+        startY += (tentangTxt.length * 3.8) + 3;
+
+        autoTable(doc, {
+            startY: startY,
+            margin: { left: margin, right: margin },
+            head: [['Pasal / Poin', 'Ketentuan & Ketetapan Hukum Tata Tertib RT 02']],
+            body: rule.items.map((item, pIdx) => [
+                `Pasal ${pIdx + 1}`,
+                item
+            ]),
+            styles: { font: 'times', fontSize: 8.5, cellPadding: 3.5, textColor: [15, 23, 42] },
+            headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
+            columnStyles: {
+                0: { cellWidth: 24, fontStyle: 'bold', halign: 'center' },
+                1: { cellWidth: 148 }
+            },
+            didDrawPage: (data) => {
+                const pageCount = (doc as any).internal.getNumberOfPages();
+                doc.setFontSize(8);
+                doc.setFont("times", "italic");
+                doc.setTextColor(100, 116, 139);
+                doc.text(`Buku Naskah Kompilasi Peraturan Resmi RT 02 [Hal ${data.pageNumber} dari ${pageCount}]`, margin, pageHeight - 8);
+                doc.text(`Kode Dokumen: ${rule.nomorBerkas}`, pageWidth - margin, pageHeight - 8, { align: "right" });
+            }
+        });
+
+        startY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 12 : startY + 50;
+    });
+
+    // Area Tanda Tangan Pengesahan Akhir
+    const finalPageHeight = doc.internal.pageSize.getHeight();
+    if (startY + 40 > finalPageHeight) {
+        doc.addPage();
+        startY = 25;
+    }
+
+    const sigX = pageWidth - margin - 55;
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("times", "normal");
+    doc.setFontSize(9.5);
+    doc.text(`Ditetapkan & Disahkan di : Palu`, sigX, startY);
+    doc.text(`Pada Tanggal : ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, sigX, startY + 5);
+    doc.text(`Ketua ${config.rtName || 'RT 02'} RW 020,`, sigX, startY + 10);
+    
+    // Render Stempel Asli RT dari Pengaturan Admin jika ada
+    if (stampData) {
+        doc.addImage(stampData, 'PNG', sigX - 18, startY + 8, 30, 30);
+    } else {
+        // Digital Stamp Circle
+        doc.setDrawColor(37, 99, 235);
+        doc.setLineWidth(0.4);
+        doc.circle(sigX - 8, startY + 22, 10);
+        doc.setFontSize(6.5);
+        doc.setFont("times", "bold");
+        doc.setTextColor(37, 99, 235);
+        doc.text("PENGURUS RT 02", sigX - 8, startY + 20, { align: "center" });
+        doc.text("VERIFIED", sigX - 8, startY + 23, { align: "center" });
+    }
+
+    // Render Tanda Tangan Basah / Digital Image jika tersedia
+    if (signatureData) {
+        doc.addImage(signatureData, 'PNG', sigX + 5, startY + 11, 32, 16);
+    }
+
+    doc.setFontSize(10);
+    doc.setFont("times", "bold");
+    doc.setTextColor(0, 0, 0);
+    doc.text(config.rtChairman || 'IRFAN ARIANTO', sigX, startY + 28);
+    doc.setFontSize(8.5);
+    doc.setFont("times", "normal");
+    doc.text(`NIP/ID: RT02-PLU-${new Date().getFullYear()}`, sigX, startY + 32);
+
+    doc.save(`Buku_Himpunan_Peraturan_Lengkap_RT02.pdf`);
+    toast.success(`Buku Himpunan Seluruh Peraturan RT 02 (${allRules.length} BAB PDF) dengan Logo, Stempel & TTD Resmi berhasil diunduh!`);
+};
