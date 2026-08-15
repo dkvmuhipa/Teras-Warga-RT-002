@@ -682,10 +682,20 @@ export interface PopulationReport {
   
   // Data Utama
   initialPopulation: number; // Penduduk Awal
+  initialMaleCount?: number;   // Penduduk Awal Laki-laki
+  initialFemaleCount?: number; // Penduduk Awal Perempuan
   birthCount: number;        // Lahir
+  birthMaleCount?: number;     // Lahir Laki-laki
+  birthFemaleCount?: number;   // Lahir Perempuan
   deathCount: number;        // Meninggal
+  deathMaleCount?: number;     // Meninggal Laki-laki
+  deathFemaleCount?: number;   // Meninggal Perempuan
   newcomerCount: number;     // Pendatang
+  newcomerMaleCount?: number;  // Pendatang Laki-laki
+  newcomerFemaleCount?: number; // Pendatang Perempuan
   movedOutCount: number;     // Pindah
+  movedOutMaleCount?: number;  // Pindah Laki-laki
+  movedOutFemaleCount?: number; // Pindah Perempuan
   
   // Data Demografi Akhir
   maleCount: number;         // Laki-laki

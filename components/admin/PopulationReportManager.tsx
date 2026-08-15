@@ -11,7 +11,7 @@ import {
   Calendar, ArrowRight, Activity, Clock, Filter, Search, MapPin as MapIcon,
   BarChart3, PieChart as PieChartIcon, List, LayoutGrid, Download, Edit2,
   RefreshCw, Filter as FilterIcon, MessageCircle, CheckSquare, Square,
-  FileUp, CheckCircle, XCircle, AlertCircle, Printer, ChevronLeft, ChevronRight, Check, X
+  FileUp, CheckCircle, XCircle, AlertCircle, Printer, ChevronLeft, ChevronRight, Check, X, Sparkles
 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { motion, AnimatePresence } from 'motion/react';
@@ -484,19 +484,29 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         });
       }
 
-      // 4. Force current month's final total to match actual currentTotal
+      // 4. Hitung Warga Awal & Warga Akhir berurutan dari bulan ke bulan (Warga Awal bulan N = Warga Akhir bulan N-1)
       const currentMonthIndex = currentMonthNum - 1;
+      
+      // Hitung mutasi kumulatif dari Januari sampai bulan sebelum bulan berjalan
+      let netPriorMutations = 0;
+      for (let i = 0; i < currentMonthIndex; i++) {
+        const rep = monthlyReports[i];
+        netPriorMutations += (rep.birthCount + rep.newcomerCount - rep.movedOutCount - rep.deathCount);
+      }
+      
+      // Mutasi di bulan berjalan
       const currentReport = monthlyReports[currentMonthIndex];
-      const netCurrentMonthMutation = currentReport.birthCount + currentReport.newcomerCount - currentReport.movedOutCount - currentReport.deathCount;
-      currentReport.initialPopulation = currentTotal - netCurrentMonthMutation;
+      const netCurrentMutation = currentReport.birthCount + currentReport.newcomerCount - currentReport.movedOutCount - currentReport.deathCount;
 
-      // 5. Work backwards to compute initialPopulation for prior months
-      for (let i = currentMonthIndex - 1; i >= 0; i--) {
-        const nextReport = monthlyReports[i + 1];
-        const thisReport = monthlyReports[i];
-        const netThisMutation = thisReport.birthCount + thisReport.newcomerCount - thisReport.movedOutCount - thisReport.deathCount;
-        thisReport.initialPopulation = nextReport.initialPopulation - netThisMutation;
-        if (thisReport.initialPopulation < 0) thisReport.initialPopulation = 0;
+      // Warga Awal Januari 2026 dihitung mundur dari total warga riil saat ini
+      const baseJanInitial = Math.max(0, currentTotal - (netPriorMutations + netCurrentMutation));
+
+      let runningPop = baseJanInitial;
+      for (let i = 0; i <= currentMonthIndex; i++) {
+        const rep = monthlyReports[i];
+        rep.initialPopulation = runningPop;
+        const netMut = rep.birthCount + rep.newcomerCount - rep.movedOutCount - rep.deathCount;
+        runningPop = Math.max(0, runningPop + netMut);
       }
 
       // 6. Save clean monthly reports to Firestore
@@ -2453,7 +2463,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         )}
       </AnimatePresence>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tambah Laporan Bulanan">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tambah Laporan Bulanan" maxWidth="max-w-4xl">
         <form onSubmit={handleSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
           {/* Header Info */}
           <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-3xl text-white shadow-lg shadow-indigo-600/20">
@@ -2478,10 +2488,10 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 type="button"
                 onClick={handleGenerateFromLog}
                 disabled={isGeneratingLogs}
-                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                className="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-2xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-1.5 cursor-pointer active:scale-95"
                 title="Hitung otomatis seluruh data demografi & mutasi untuk bulan ini"
               >
-                <RefreshCw size={12} className={isGeneratingLogs ? "animate-spin" : ""} />
+                <RefreshCw size={13} className={isGeneratingLogs ? "animate-spin" : ""} />
                 Auto-Kalkulasi Bulan Ini
               </button>
             </div>
@@ -2495,7 +2505,13 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     onChange={e => {
                       const newMonth = e.target.value;
                       const year = newMonth ? parseInt(newMonth.split('-')[0]) : new Date().getFullYear();
-                      setFormData(prev => ({ ...prev, month: newMonth, year }));
+                      
+                      // Auto-sync initial population from previous month's final population
+                      const sorted = [...(reports || [])].sort((a, b) => (a.month || '').localeCompare(b.month || ''));
+                      const prevRep = sorted.filter(r => (r.month || '') < newMonth).pop();
+                      const autoInitial = prevRep ? (prevRep.initialPopulation + prevRep.birthCount + prevRep.newcomerCount - prevRep.movedOutCount - (prevRep.deathCount || 0)) : formData.initialPopulation;
+
+                      setFormData(prev => ({ ...prev, month: newMonth, year, initialPopulation: autoInitial }));
                     }} 
                     className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all cursor-pointer" 
                   />
@@ -2513,45 +2529,156 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
             </div>
           </div>
 
+          {/* Live Mathematical Formula Banner */}
+          <div className="bg-gradient-to-r from-emerald-500/10 via-indigo-500/10 to-blue-500/10 p-4 rounded-2xl border border-indigo-200/60 text-slate-800 space-y-1">
+            <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-indigo-900">
+              <span className="flex items-center gap-1.5">
+                <Sparkles size={14} className="text-amber-500" /> Live Formula Matematika Demografi
+              </span>
+              <span className="px-2 py-0.5 bg-emerald-600 text-white rounded-md text-[9px] font-black">Validasi Otomatis</span>
+            </div>
+            <p className="text-xs font-mono font-bold text-slate-700 leading-relaxed pt-1">
+              <span className="text-slate-900 font-extrabold">{formData.initialPopulation}</span> (Awal) + <span className="text-emerald-600 font-extrabold">{formData.birthCount}</span> (Lahir) + <span className="text-blue-600 font-extrabold">{formData.newcomerCount}</span> (Datang) - <span className="text-rose-600 font-extrabold">{formData.deathCount || 0}</span> (Mati) - <span className="text-amber-600 font-extrabold">{formData.movedOutCount}</span> (Keluar) = <span className="text-indigo-700 font-black text-sm bg-white px-2 py-0.5 rounded-lg border border-indigo-200 shadow-xs">{formData.initialPopulation + formData.birthCount + formData.newcomerCount - formData.movedOutCount - (formData.deathCount || 0)} Jiwa (Akhir)</span>
+            </p>
+          </div>
+
           {/* Data Utama Section */}
           <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-5 shadow-sm">
             <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
-              <TrendingUp size={14} /> Angka Perubahan & Mutasi
+              <TrendingUp size={14} /> Angka Perubahan & Mutasi per Gender (L/P)
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="col-span-full bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Penduduk Awal Bulan</label>
+              {/* Penduduk Awal Bulan dengan Gender */}
+              <div className="col-span-full bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Penduduk Awal Bulan (Total)</label>
+                  <span className="text-xs font-black text-slate-700">{formData.initialPopulation} Jiwa</span>
+                </div>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400"><Users size={18} /></div>
                   <input 
                     type="number" 
                     value={formData.initialPopulation} 
-                    onChange={e => setFormData({...formData, initialPopulation: parseInt(e.target.value)})} 
-                    className="flex-1 p-2 bg-transparent text-lg font-black text-slate-800 outline-none" 
+                    onChange={e => setFormData({...formData, initialPopulation: parseInt(e.target.value) || 0})} 
+                    className="w-24 p-2 bg-white border border-slate-200 rounded-xl text-base font-black text-slate-800 outline-none" 
                   />
+                  <div className="flex-1 grid grid-cols-2 gap-2">
+                    <div className="bg-white p-2 rounded-xl border border-slate-200 flex items-center gap-2">
+                      <span className="text-[10px] font-black text-blue-600 uppercase">L:</span>
+                      <input type="number" value={formData.initialMaleCount || 0} onChange={e => setFormData({...formData, initialMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-slate-800 text-xs outline-none" placeholder="0" />
+                    </div>
+                    <div className="bg-white p-2 rounded-xl border border-slate-200 flex items-center gap-2">
+                      <span className="text-[10px] font-black text-pink-600 uppercase">P:</span>
+                      <input type="number" value={formData.initialFemaleCount || 0} onChange={e => setFormData({...formData, initialFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-slate-800 text-xs outline-none" placeholder="0" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* Kelahiran & Pendatang (Masuk) */}
               <div className="space-y-4">
-                <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
-                  <label className="block text-[10px] font-bold text-emerald-600 mb-1.5 uppercase">Kelahiran (+)</label>
-                  <input type="number" value={formData.birthCount} onChange={e => setFormData({...formData, birthCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-emerald-700 outline-none" />
+                <div className="p-4.5 bg-emerald-50/60 rounded-3xl border border-emerald-200/80 space-y-3 shadow-xs">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] font-black text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <Baby size={14} /> Kelahiran (+)
+                    </label>
+                    <span className="text-xs font-black text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">+{formData.birthCount} Jiwa</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-emerald-200/80">
+                      <span className="text-[10px] font-black text-slate-400 uppercase w-12 shrink-0">Total:</span>
+                      <input type="number" value={formData.birthCount} onChange={e => setFormData({...formData, birthCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-black text-emerald-800 outline-none" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-white p-2 rounded-xl border border-blue-200/80 flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-blue-600 shrink-0">L:</span>
+                        <input type="number" value={formData.birthMaleCount || 0} onChange={e => setFormData({...formData, birthMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
+                      </div>
+                      <div className="bg-white p-2 rounded-xl border border-pink-200/80 flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-pink-600 shrink-0">P:</span>
+                        <input type="number" value={formData.birthFemaleCount || 0} onChange={e => setFormData({...formData, birthFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
-                  <label className="block text-[10px] font-bold text-blue-600 mb-1.5 uppercase">Pendatang (+)</label>
-                  <input type="number" value={formData.newcomerCount} onChange={e => setFormData({...formData, newcomerCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-blue-700 outline-none" />
+
+                <div className="p-4.5 bg-blue-50/60 rounded-3xl border border-blue-200/80 space-y-3 shadow-xs">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] font-black text-blue-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <Users size={14} /> Pendatang Masuk (+)
+                    </label>
+                    <span className="text-xs font-black text-blue-700 bg-white px-2 py-0.5 rounded-lg border border-blue-200 shadow-2xs">+{formData.newcomerCount} Jiwa</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-blue-200/80">
+                      <span className="text-[10px] font-black text-slate-400 uppercase w-12 shrink-0">Total:</span>
+                      <input type="number" value={formData.newcomerCount} onChange={e => setFormData({...formData, newcomerCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-black text-blue-800 outline-none" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-white p-2 rounded-xl border border-blue-200/80 flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-blue-600 shrink-0">L:</span>
+                        <input type="number" value={formData.newcomerMaleCount || 0} onChange={e => setFormData({...formData, newcomerMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
+                      </div>
+                      <div className="bg-white p-2 rounded-xl border border-pink-200/80 flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-pink-600 shrink-0">P:</span>
+                        <input type="number" value={formData.newcomerFemaleCount || 0} onChange={e => setFormData({...formData, newcomerFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* Kematian & Pindah Keluar */}
               <div className="space-y-4">
-                <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-100">
-                  <label className="block text-[10px] font-bold text-rose-600 mb-1.5 uppercase">Kematian (-)</label>
-                  <input type="number" value={formData.deathCount} onChange={e => setFormData({...formData, deathCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-rose-700 outline-none" />
+                <div className="p-4.5 bg-rose-50/60 rounded-3xl border border-rose-200/80 space-y-3 shadow-xs">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] font-black text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <Activity size={14} /> Kematian (-)
+                    </label>
+                    <span className="text-xs font-black text-rose-700 bg-white px-2 py-0.5 rounded-lg border border-rose-200 shadow-2xs">-{formData.deathCount || 0} Jiwa</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-rose-200/80">
+                      <span className="text-[10px] font-black text-slate-400 uppercase w-12 shrink-0">Total:</span>
+                      <input type="number" value={formData.deathCount} onChange={e => setFormData({...formData, deathCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-black text-rose-800 outline-none" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-white p-2 rounded-xl border border-blue-200/80 flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-blue-600 shrink-0">L:</span>
+                        <input type="number" value={formData.deathMaleCount || 0} onChange={e => setFormData({...formData, deathMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
+                      </div>
+                      <div className="bg-white p-2 rounded-xl border border-pink-200/80 flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-pink-600 shrink-0">P:</span>
+                        <input type="number" value={formData.deathFemaleCount || 0} onChange={e => setFormData({...formData, deathFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100">
-                  <label className="block text-[10px] font-bold text-amber-600 mb-1.5 uppercase">Pindah Keluar (-)</label>
-                  <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value)})} className="w-full bg-transparent text-xl font-black text-amber-700 outline-none" />
+
+                <div className="p-4.5 bg-amber-50/60 rounded-3xl border border-amber-200/80 space-y-3 shadow-xs">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] font-black text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <ArrowRight size={14} /> Pindah Keluar (-)
+                    </label>
+                    <span className="text-xs font-black text-amber-700 bg-white px-2 py-0.5 rounded-lg border border-amber-200 shadow-2xs">-{formData.movedOutCount} Jiwa</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-amber-200/80">
+                      <span className="text-[10px] font-black text-slate-400 uppercase w-12 shrink-0">Total:</span>
+                      <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-black text-amber-800 outline-none" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-white p-2 rounded-xl border border-blue-200/80 flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-blue-600 shrink-0">L:</span>
+                        <input type="number" value={formData.movedOutMaleCount || 0} onChange={e => setFormData({...formData, movedOutMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
+                      </div>
+                      <div className="bg-white p-2 rounded-xl border border-pink-200/80 flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-pink-600 shrink-0">P:</span>
+                        <input type="number" value={formData.movedOutFemaleCount || 0} onChange={e => setFormData({...formData, movedOutFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

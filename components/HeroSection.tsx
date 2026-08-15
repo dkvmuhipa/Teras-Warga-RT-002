@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles } from 'lucide-react';
+import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles, Building2, Lock, Shield } from 'lucide-react';
 import { motion } from 'motion/react';
 import { RT_NAME } from '../constants';
-import { Button } from './ui/Button';
-
+import { toast } from 'sonner';
 import { useWeather } from '../hooks/useWeather';
 
 interface HeroSectionProps {
@@ -16,7 +15,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
     const { weather } = useWeather();
 
     useEffect(() => { 
-        const timer = setInterval(() => setDate(new Date()), 60000); 
+        const timer = setInterval(() => setDate(new Date()), 1000); 
         const handleMouseMove = (e: MouseEvent) => {
             const rect = document.getElementById('hero-container')?.getBoundingClientRect();
             if (rect) {
@@ -45,18 +44,24 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
         return <Sun size={28} className="text-amber-400 animate-spin-slow" />;
     };
 
+    const handleSmartEnvClick = () => {
+        toast.info("🌱 Status Lingkungan Cerdas (Smart Env) RT 02", {
+            description: `Kondisi Udara: ${weather ? weather.condition : 'Cerah Bersahabat'} | Suhu: ${weather ? weather.temp : '31'}°C | Kualitas Udara (AQI): ${weather?.aqi || '42'} (Sangat Baik & Bebas Polusi)`
+        });
+    };
+
     return (
       <motion.div 
         id="hero-container"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-[#022c22]/20 rounded-3xl md:rounded-[3rem] overflow-hidden mb-6 md:mb-12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.4)] group min-h-0 md:min-h-[320px] flex items-center border border-white/5"
+        className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-[#022c22]/30 rounded-3xl md:rounded-[3rem] overflow-hidden mb-6 md:mb-12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.4)] group min-h-0 md:min-h-[340px] flex items-center border border-white/10"
       >
         {/* Subtle grid pattern overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff05_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
 
-        {/* Quiet, Premium glow fields (no harsh neon colors) */}
+        {/* Quiet, Premium glow fields */}
         <div className="absolute inset-0 overflow-hidden">
             <motion.div 
                 animate={{ 
@@ -85,7 +90,6 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
                 className="absolute top-[20%] right-[10%] w-[35%] h-[35%] bg-indigo-500/10 blur-[110px] rounded-full" 
             />
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay"></div>
         </div>
         
         {/* Interactive Mouse Glow */}
@@ -104,13 +108,13 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 backdrop-blur-2xl rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] border border-amber-500/20 text-[#dfb975] shadow-sm"
+              className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-amber-500/10 backdrop-blur-2xl rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] border border-amber-500/20 text-[#dfb975] shadow-sm"
             >
-              <div className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+              <div className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </div>
-              Sistem Informasi Digital
+              <span>Sistem Informasi Digital • Online</span>
             </motion.div>
             
             <div className="space-y-2 md:space-y-3">
@@ -136,25 +140,46 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               </motion.p>
             </div>
 
+            {/* 3 Quick Stat Pills */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55 }}
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1"
+            >
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300">
+                <Building2 size={13} className="text-amber-400" />
+                <span>120+ Hunian</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300">
+                <Shield size={13} className="text-emerald-400" />
+                <span>24 Jam Siskamling</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300">
+                <Lock size={13} className="text-sky-400" />
+                <span>Data Terenkripsi</span>
+              </span>
+            </motion.div>
+
             <motion.div 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-row flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-4 w-full"
+              className="flex flex-row flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-4 w-full pt-2"
             >
               <button 
                 onClick={onExplore}
-                className="flex items-center gap-2 px-6 py-3.5 md:px-8 md:py-4 text-xs font-black uppercase tracking-wider bg-gradient-to-r from-[#dfb975] via-[#e2c184] to-[#c69a52] text-slate-950 rounded-2xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer font-sans"
+                className="flex items-center gap-2 px-6 py-3.5 md:px-8 md:py-4 text-xs font-black uppercase tracking-wider bg-gradient-to-r from-[#dfb975] via-[#e2c184] to-[#c69a52] text-slate-950 rounded-2xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer font-sans hover:scale-105"
               >
                 <span>Mulai Jelajahi</span>
                 <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
               </button>
               
               <button 
-                disabled
-                className="flex items-center gap-2 px-6 py-3.5 md:px-8 md:py-4 text-xs font-black uppercase tracking-wider bg-white/5 border border-white/10 text-slate-350 rounded-2xl cursor-default transition-all font-sans"
+                onClick={handleSmartEnvClick}
+                className="flex items-center gap-2 px-6 py-3.5 md:px-8 md:py-4 text-xs font-black uppercase tracking-wider bg-white/5 hover:bg-white/10 border border-white/15 text-white rounded-2xl transition-all font-sans cursor-pointer hover:border-emerald-400/40"
               >
-                <ShieldCheck size={16} className="text-emerald-400" />
+                <ShieldCheck size={16} className="text-emerald-400 animate-pulse" />
                 <span>Smart Env</span>
               </button>
             </motion.div>
@@ -166,7 +191,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
             transition={{ delay: 0.7, duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="w-full lg:w-auto z-10"
           >
-            <div className="bg-slate-900/40 backdrop-blur-3xl border border-slate-800/80 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-8 text-white w-full lg:min-w-[340px] shadow-[0_45px_100px_-25px_rgba(0,0,0,0.6)] relative group/widget overflow-hidden hover:border-[#dfb975]/20 transition-all duration-700">
+            <div className="bg-slate-900/50 backdrop-blur-3xl border border-slate-700/60 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-8 text-white w-full lg:min-w-[340px] shadow-[0_45px_100px_-25px_rgba(0,0,0,0.6)] relative group/widget overflow-hidden hover:border-[#dfb975]/30 transition-all duration-700">
               {/* Subtle shining top line */}
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#dfb975]/40 via-[#dfb975]/10 to-transparent pointer-events-none" />
               
@@ -176,10 +201,10 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 <div className="flex justify-between items-start gap-4">
                   <div className="space-y-1">
                     <p className="text-4xl md:text-5xl font-serif font-black tracking-tight flex items-baseline gap-1 text-white">
-                      <span>{date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span>{date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                       <span className="text-[10px] text-[#dfb975] font-mono font-black uppercase tracking-widest bg-[#dfb975]/10 px-2 py-0.5 rounded-md border border-[#dfb975]/20 ml-1">WITA</span>
                     </p>
-                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.15em] flex items-center gap-1.5">
+                    <p className="text-[10px] md:text-xs font-bold text-slate-300 uppercase tracking-[0.15em] flex items-center gap-1.5">
                       <Sparkles size={11} className="text-[#dfb975]" />
                       {date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
                     </p>
@@ -195,7 +220,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                     {weather?.aqi !== undefined && (
                       <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md shrink-0">
                         <Activity size={10} className={weather.aqiColor} />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-white/80">AQI {weather.aqi}</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-white/90">AQI {weather.aqi}</span>
                       </div>
                     )}
                   </div>
@@ -205,7 +230,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
+                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.04] border border-white/10 rounded-xl hover:bg-white/[0.08] transition-all duration-300">
                       <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400 shrink-0">
                         <Thermometer size={14} />
                       </div>
@@ -215,7 +240,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
+                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.04] border border-white/10 rounded-xl hover:bg-white/[0.08] transition-all duration-300">
                       <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400 shrink-0">
                         <Droplets size={14} />
                       </div>
@@ -227,7 +252,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
+                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.04] border border-white/10 rounded-xl hover:bg-white/[0.08] transition-all duration-300">
                       <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400 shrink-0">
                         <WindIcon size={14} />
                       </div>
@@ -237,8 +262,8 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
-                      <div className="p-2 bg-sky-500/20 rounded-lg text-sky-450 shrink-0">
+                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.04] border border-white/10 rounded-xl hover:bg-white/[0.08] transition-all duration-300">
+                      <div className="p-2 bg-sky-500/20 rounded-lg text-sky-400 shrink-0">
                         <Cloud size={14} />
                       </div>
                       <div className="min-w-0">

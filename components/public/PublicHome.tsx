@@ -4,7 +4,8 @@ import { toast } from 'sonner';
 import { 
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
-  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare, Scale, HelpCircle
+  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare, Scale, HelpCircle,
+  BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint } from '../../types';
@@ -184,6 +185,15 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       link: '/info' 
     },
     { 
+      label: 'Peraturan RT', 
+      icon: BookOpen, 
+      color: 'bg-[#10b981]', 
+      shadow: 'shadow-[#10b981]/30', 
+      link: '/rules',
+      badge: '13 BAB',
+      badgeColor: 'bg-[#059669]'
+    },
+    { 
       label: 'E-Voting', 
       icon: CheckSquare, 
       color: 'bg-[#5c72e6]', 
@@ -198,6 +208,19 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       color: 'bg-[#ff3b30]', 
       shadow: 'shadow-[#ff3b30]/30', 
       action: () => setIsReportModalOpen(true) 
+    },
+    { 
+      label: 'Kontak Darurat', 
+      icon: PhoneCall, 
+      color: 'bg-[#dc2626]', 
+      shadow: 'shadow-[#dc2626]/30', 
+      action: () => {
+        toast.info("Kontak Darurat RT 02 Huntap Tondo 2", {
+          description: "Ketua RT: +62 859-6119-4621 | Satpam Pos: +62 812-4455-8800 | Pemadam: 113 | Ambulans: 118"
+        });
+      },
+      badge: '24 JAM',
+      badgeColor: 'bg-[#991b1b]'
     }
   ], []);
 
@@ -224,6 +247,38 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       <HeroSection onExplore={handleExplore} />
+
+      {/* Modern Live Info Marquee Banner */}
+      <motion.div 
+        variants={itemVariants} 
+        className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-3.5 border border-indigo-500/20 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-3 overflow-hidden"
+      >
+        <div className="flex items-center gap-2.5 shrink-0 px-2">
+          <span className="flex h-3 w-3 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+            <Sparkles size={13} /> LIVE UPDATE RT 02
+          </span>
+        </div>
+
+        <div className="flex-1 w-full overflow-hidden text-center md:text-left">
+          <p className="text-xs font-medium text-slate-200 truncate">
+            🌙 <span className="font-bold text-amber-300">Ronda Malam Ini ({today}):</span> {todayRonda && todayRonda.members.length > 0 ? todayRonda.members.slice(0, 3).join(', ') : 'Satgas Siskamling Standby'} &nbsp;|&nbsp; 
+            💰 <span className="font-bold text-emerald-300">Iuran Terkumpul Transparan:</span> Rp {(summaries.totalCollected || 0).toLocaleString('id-ID')} &nbsp;|&nbsp;
+            📜 <span className="font-bold text-sky-300">Tata Tertib:</span> 13 BAB Peraturan Lingkungan Resmi Disahkan
+          </p>
+        </div>
+
+        <button 
+          onClick={() => navigate('/info')}
+          className="shrink-0 text-[11px] font-black uppercase tracking-wider text-indigo-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+        >
+          <span>Pusat Info</span>
+          <ChevronRight size={12} />
+        </button>
+      </motion.div>
 
       {/* Personalized Greeting */}
       <div ref={contentRef} className="text-center md:text-left">
