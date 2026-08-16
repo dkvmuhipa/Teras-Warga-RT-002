@@ -434,56 +434,61 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
       {/* Resident Dues Widget - NEW Bento Card */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 bg-gradient-to-br from-slate-900 to-slate-800 p-8 rounded-[3rem] text-white shadow-2xl shadow-slate-200 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
-            <Droplets size={120} />
+        <div className="md:col-span-1 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 p-8 rounded-[3rem] text-white shadow-2xl shadow-slate-200 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+            <Droplets size={140} />
           </div>
           <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Keuangan Warga</p>
-            <h3 className="text-2xl font-black mb-4 tracking-tight">Iuran Bulanan</h3>
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Keuangan Warga</p>
+              <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-[9px] font-black uppercase tracking-wider">Transparan</span>
+            </div>
+            <h3 className="text-2xl font-black mb-4 tracking-tight">Iuran & Kas RT</h3>
+
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-2xl border border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                  <div className="p-2 bg-blue-500/20 rounded-xl text-blue-400">
                     <Droplets size={16} />
                   </div>
-                  <span className="text-xs font-bold">Tarif Air</span>
+                  <span className="text-xs font-bold text-slate-200">Tarif Air</span>
                 </div>
-                <span className="text-xs font-black">Rp {financialSettings.airFee.toLocaleString('id-ID')}</span>
+                <span className="text-xs font-black text-white">Rp {financialSettings.airFee.toLocaleString('id-ID')}</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+
+              <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-2xl border border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
+                  <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400">
                     <ShoppingCart size={16} />
                   </div>
-                  <span className="text-xs font-bold">Tarif Sampah</span>
+                  <span className="text-xs font-bold text-slate-200">Tarif Sampah</span>
                 </div>
-                <span className="text-xs font-black">Rp {financialSettings.sampahFee.toLocaleString('id-ID')}</span>
+                <span className="text-xs font-black text-white">Rp {financialSettings.sampahFee.toLocaleString('id-ID')}</span>
               </div>
               
               {/* Info Transparansi Tambahan */}
-              <div className="pt-4 mt-4 border-t border-white/10 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dana Air Terkumpul</span>
-                  <span className="text-sm font-black text-blue-400">Rp {summaries.air.totalCollected.toLocaleString('id-ID')}</span>
+              <div className="pt-3 mt-3 border-t border-white/10 space-y-2.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dana Air Terkumpul</span>
+                  <span className="font-black text-blue-400">Rp {summaries.air.totalCollected.toLocaleString('id-ID')}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dana Sampah Terkumpul</span>
-                  <span className="text-sm font-black text-emerald-400">Rp {summaries.sampah.totalCollected.toLocaleString('id-ID')}</span>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dana Sampah Terkumpul</span>
+                  <span className="font-black text-emerald-400">Rp {summaries.sampah.totalCollected.toLocaleString('id-ID')}</span>
                 </div>
-                <div className="pt-2 border-t border-white/5 flex justify-between items-center">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Keseluruhan</span>
-                  <span className="text-sm font-black text-white">Rp {summaries.totalCollected.toLocaleString('id-ID')}</span>
+                <div className="pt-2 border-t border-white/10 flex justify-between items-center">
+                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Total Iuran Terkumpul</span>
+                  <span className="text-base font-black text-emerald-300">Rp {summaries.totalCollected.toLocaleString('id-ID')}</span>
                 </div>
-                <p className="text-[8px] text-slate-500 font-bold uppercase tracking-tighter mt-1">Bulan {summaries.totalCollected > 0 ? 'Berjalan' : 'Ini'}</p>
               </div>
             </div>
+
             <Button 
               onClick={() => navigate('/services?tab=iuran')}
               variant="secondary" 
-              className="w-full py-4 rounded-2xl text-[10px] tracking-widest"
+              className="w-full py-4 rounded-2xl text-[10px] font-black tracking-widest uppercase shadow-lg cursor-pointer hover:bg-white transition-all"
             >
-              Bayar Sekarang
+              Bayar Iuran Sekarang
             </Button>
           </div>
         </div>

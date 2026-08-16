@@ -416,111 +416,91 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
     const showFinancial = activeLayers.includes('Financial');
 
     return (
-        <button 
-            id={`house-${house.id}`}
-            onClick={onClick} 
-            className={`relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-300 min-h-[60px] w-full hover:shadow-md hover:-translate-y-0.5 ${getHouseColor()} ${
-                activePanicAlert ? 'animate-pulsating-glow ring-2 ring-rose-500 z-30' : ''
-            } ${
-                isHighlighted ? 'ring-4 ring-indigo-500 ring-offset-2 z-30 scale-105 shadow-xl' : ''
-            }`}
-        >
-            {activePanicAlert && (
-                <span className="absolute -top-2 -right-2 flex h-4 w-4 z-40">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-600 text-[8px] font-black text-white items-center justify-center">🚨</span>
-                </span>
-            )}
-            {isHighlighted && (
-                <div className="absolute -inset-1 bg-indigo-500/20 rounded-xl animate-pulse -z-10"></div>
-            )}
-            <span className={`font-black leading-none drop-shadow-sm ${officialRole ? 'text-lg' : 'text-sm'}`}>{house.number}</span>
-            
-            <div className="flex items-center justify-center mt-1 w-full gap-0.5">
-                {formattedRole ? (
-                    <div className="flex flex-col items-center w-full px-1">
-                        <span className="text-[8px] font-bold uppercase tracking-tight bg-black/30 px-2 py-1 rounded text-amber-300 mt-1 w-full text-center leading-none border border-white/10 shadow-sm break-words whitespace-normal">{formattedRole}</span>
+        <div className="relative hover:z-[999] group/card w-full">
+            <button 
+                id={`house-${house.id}`}
+                onClick={onClick} 
+                className={`relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-300 min-h-[60px] w-full hover:shadow-md hover:-translate-y-0.5 ${getHouseColor()} ${
+                    activePanicAlert ? 'animate-pulsating-glow ring-2 ring-rose-500 z-30' : ''
+                } ${
+                    isHighlighted ? 'ring-4 ring-indigo-500 ring-offset-2 z-30 scale-105 shadow-xl' : ''
+                }`}
+            >
+                {activePanicAlert && (
+                    <span className="absolute -top-2 -right-2 flex h-4 w-4 z-40">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-600 text-[8px] font-black text-white items-center justify-center">🚨</span>
+                    </span>
+                )}
+                {isHighlighted && (
+                    <div className="absolute -inset-1 bg-indigo-500/20 rounded-xl animate-pulse -z-10"></div>
+                )}
+                <span className={`font-black leading-none drop-shadow-sm ${officialRole ? 'text-lg' : 'text-sm'}`}>{house.number}</span>
+                
+                <div className="flex items-center justify-center mt-1 w-full gap-0.5">
+                    {formattedRole ? (
+                        <div className="flex flex-col items-center w-full px-1">
+                            <span className="text-[8px] font-bold uppercase tracking-tight bg-black/30 px-2 py-1 rounded text-amber-300 mt-1 w-full text-center leading-none border border-white/10 shadow-sm break-words whitespace-normal">{formattedRole}</span>
+                        </div>
+                    ) : house.status === 'Business' ? (
+                        <Store size={12} className="opacity-80"/>
+                    ) : (
+                        <div className="flex flex-wrap items-center justify-center gap-0.5">
+                            {(house.residenceType === 'Sewa') ? <Key size={10} className="opacity-80 text-amber-800" /> : 
+                             (house.status === 'Visiting') ? <Clock size={10} className="opacity-80 text-indigo-800" /> :
+                             <Home size={10} className="opacity-80"/>}
+                        </div>
+                    )}
+                </div>
+            </button>
+
+            {/* Glassmorphism Quick Hover Preview Card */}
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-3 bg-slate-900/95 backdrop-blur-md text-white rounded-2xl border border-white/20 shadow-2xl opacity-0 group-hover/card:opacity-100 transition-all duration-300 pointer-events-none group-hover/card:pointer-events-auto z-[999] scale-95 group-hover/card:scale-100 hidden md:block">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
+                    <div className="flex items-center gap-2">
+                        <span className="font-black text-sm text-amber-300">{house.block}-{house.number}</span>
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${house.status === 'Occupied' ? 'bg-emerald-500' : 'bg-slate-500'}`}>
+                            {house.status === 'Occupied' ? 'Dihuni' : 'Kosong'}
+                        </span>
                     </div>
-                ) : house.status === 'Business' ? (
-                    <Store size={12} className="opacity-80"/>
-                ) : (
-                    <div className="flex flex-wrap items-center justify-center gap-0.5">
-                        {(house.residenceType === 'Sewa') ? <Key size={10} className="opacity-80 text-amber-800" /> : 
-                         (house.status === 'Visiting') ? <Clock size={10} className="opacity-80 text-indigo-800" /> :
-                         <Home size={10} className="opacity-80"/>}
-                        
-                        {house.paymentStatusSampah === PaymentStatus.PAID && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm" title="Iuran Sampah Lunas" />
-                        )}
-                        
-                        {showSocial && (
-                          <div className="flex flex-wrap items-center justify-center gap-1 mt-1 bg-white/40 backdrop-blur-[2px] rounded-md px-1 py-0.5 border border-white/20">
-                            {((house.babyCount || 0) > 0) && (
-                                <div className="flex items-center gap-0.5" title="Bayi">
-                                    <Baby size={10} className="text-rose-500" />
-                                    <span className="text-[8px] font-black text-rose-600">{house.babyCount}</span>
-                                </div>
-                            )}
-                            {((house.toddlerCount || 0) > 0) && (
-                                <div className="flex items-center gap-0.5" title="Balita">
-                                    <Baby size={10} className="text-orange-500" />
-                                    <span className="text-[8px] font-black text-orange-600">{house.toddlerCount}</span>
-                                </div>
-                            )}
-                            {((house.elderlyCount || 0) > 0) && (
-                                <div className="flex items-center gap-0.5" title="Lansia">
-                                    <Accessibility size={10} className="text-indigo-500" />
-                                    <span className="text-[8px] font-black text-indigo-600">{house.elderlyCount}</span>
-                                </div>
-                            )}
-                            {((house.pregnantCount || 0) > 0) && (
-                                <div className="flex items-center gap-0.5" title="Ibu Hamil">
-                                    <Heart size={10} className="text-rose-400" fill="currentColor" />
-                                    <span className="text-[8px] font-black text-rose-500">{house.pregnantCount}</span>
-                                </div>
-                            )}
-                            {((house.widowCount || 0) > 0) && (
-                                <div className="flex items-center gap-0.5" title="Janda">
-                                    <User size={10} className="text-slate-600" />
-                                    <span className="text-[8px] font-black text-slate-700">{house.widowCount}</span>
-                                </div>
-                            )}
-                          </div>
-                        )}
+                    {officialRole && (
+                        <span className="text-[8px] font-black uppercase tracking-wider text-amber-300 bg-amber-400/20 px-1.5 py-0.5 rounded border border-amber-400/30">Pengurus</span>
+                    )}
+                </div>
+
+                <div className="space-y-1.5 text-left text-xs">
+                    <p className="font-bold text-slate-200 truncate flex items-center gap-1.5">
+                        <User size={12} className="text-indigo-400 shrink-0" />
+                        <span>{house.headOfFamily || 'Belum Terisi'}</span>
+                    </p>
+                    <p className="text-[10px] text-slate-400 flex items-center justify-between">
+                        <span>Total Penghuni:</span>
+                        <span className="font-black text-white">{house.occupants || 0} Jiwa</span>
+                    </p>
+                    <div className="flex items-center justify-between text-[10px] pt-1 border-t border-white/10">
+                        <span className="text-slate-400">Iuran Air & Sampah:</span>
+                        <span className={`font-black ${statusAir === PaymentStatus.PAID && statusSampah === PaymentStatus.PAID ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {statusAir === PaymentStatus.PAID && statusSampah === PaymentStatus.PAID ? 'Lunas 🟢' : 'Tunggakan 🔴'}
+                        </span>
+                    </div>
+                </div>
+
+                {house.phone && (
+                    <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between">
+                        <span className="text-[9px] text-slate-400 font-mono">{house.phone}</span>
+                        <a 
+                            href={`https://wa.me/${house.phone.replace(/^0/, '62').replace(/\D/g, '')}`} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            onClick={(e) => e.stopPropagation()} 
+                            className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[9px] font-black flex items-center gap-1 transition-all"
+                        >
+                            <MessageCircle size={10} /> WhatsApp
+                        </a>
                     </div>
                 )}
             </div>
-            {!officialRole && showFinancial && (
-                <div className="absolute top-1 right-1 flex flex-col gap-0.5">
-                    <div className={`w-2 h-2 rounded-full border border-white shadow-sm ${
-                        (statusAir === PaymentStatus.PAID && statusSampah === PaymentStatus.PAID) 
-                        ? 'bg-emerald-500' 
-                        : 'bg-rose-500 animate-pulse'
-                    }`}></div>
-                </div>
-            )}
-            {hasIssue && activeLayers.includes('Security') && <div className="absolute -top-2.5 -left-2.5 text-rose-600 bg-white rounded-full p-1 border border-rose-200 shadow-sm z-20"><AlertTriangle size={14} fill="#e11d48"/></div>}
-            
-            {activePanicAlert && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                    <div className="absolute inset-0 bg-rose-500/20 animate-pulse rounded-lg"></div>
-                    <motion.div 
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ scale: [1, 1.2, 1], opacity: 1 }}
-                        transition={{ repeat: Infinity, duration: 1 }}
-                        className="relative"
-                    >
-                        <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50"></div>
-                        <div className="bg-rose-600 text-white p-1.5 rounded-full shadow-lg border-2 border-white relative z-10">
-                            <Bell size={16} className="animate-shake" fill="currentColor" />
-                        </div>
-                    </motion.div>
-                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-rose-600 text-white px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl border border-white whitespace-nowrap z-50 animate-bounce">
-                        {activePanicAlert.residentName} ({house.block}-{house.number})
-                    </div>
-                </div>
-            )}
-        </button>
+        </div>
     );
 };
 
@@ -542,10 +522,16 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
     const getPanicAlert = (hid: string) => activePanicAlerts.find(a => formatHouseId(a.houseId) === formatHouseId(hid));
 
     return (
-        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(15,23,42,0.15)] rounded-[2rem] ${className || 'h-full'} transition-all hover:shadow-[12px_12px_0px_0px_rgba(15,23,42,0.2)] hover:-translate-y-1`}>
-            <div className="bg-slate-900 text-white text-center py-3 border-b-2 border-slate-800 relative overflow-hidden shrink-0 rounded-t-[1.8rem]">
+        <div id={`block-${blockCode}`} className={`flex flex-col bg-white border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(15,23,42,0.15)] rounded-[2rem] ${className || 'h-full'} transition-all hover:shadow-[12px_12px_0px_0px_rgba(15,23,42,0.2)] hover:-translate-y-1 hover:z-[50] relative`}>
+            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white text-center py-3 border-b-2 border-slate-800 relative overflow-hidden shrink-0 rounded-t-[1.8rem] flex items-center justify-between px-5">
                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-                 <h3 className="text-2xl font-black tracking-tighter relative z-10 drop-shadow-md">{blockCode}</h3>
+                 <div className="flex items-center gap-2 relative z-10">
+                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-sm"></span>
+                     <h3 className="text-xl md:text-2xl font-black tracking-tighter drop-shadow-md text-amber-300">BLOK {blockCode}</h3>
+                 </div>
+                 <span className="relative z-10 text-[9px] font-black uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded-full border border-white/20 text-slate-200">
+                     {houses.length} Rumah
+                 </span>
             </div>
             <div className="flex-1 bg-slate-50/50 p-3 relative">
                  <div className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-0 border-l-2 border-dashed border-slate-200 z-0"></div>
@@ -655,7 +641,7 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
                     </div>
                 </div>
                 
-                <div className="flex items-center justify-center px-8 md:px-12 py-8 bg-slate-800 border-y-4 border-slate-700 relative overflow-hidden group shadow-2xl shadow-slate-900/40">
+                <div className="flex items-center justify-between px-6 md:px-12 py-8 bg-slate-800 border-y-4 border-slate-700 relative overflow-hidden group shadow-2xl shadow-slate-900/40">
                     {/* Asphalt Texture */}
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asphalt-dark.png')] opacity-50 pointer-events-none"></div>
                     
@@ -666,15 +652,30 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
                     {/* Center Lane Divider (Dashed) */}
                     <div className="absolute top-1/2 left-0 right-0 h-1.5 border-t-4 border-dashed border-amber-400/80 -translate-y-1/2 shadow-[0_0_8px_rgba(251,191,36,0.4)]"></div>
                     
+                    {/* Zebra Cross Marking Left Side */}
+                    <div className="relative z-10 flex gap-1.5 h-12 items-center bg-white/10 px-2 rounded-lg border border-white/10">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="w-2.5 h-10 bg-white shadow-sm rounded-xs"></div>
+                        ))}
+                    </div>
+
                     <div className="flex items-center gap-6 relative z-10">
-                        <div className="flex flex-col items-center">
-                            <span className="text-xs font-black uppercase tracking-[0.6em] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-1">Jl. Pue Lombe</span>
-                            <div className="flex items-center gap-1">
+                        <div className="flex flex-col items-center bg-black/40 px-6 py-2 rounded-2xl border border-white/10 backdrop-blur-sm">
+                            <span className="text-xs font-black uppercase tracking-[0.6em] text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-1">Jl. Pue Lombe (Utama)</span>
+                            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-300">
+                                <span>Gerbang Masuk RT 02</span>
                                 <ChevronRight size={12} className="text-amber-400 animate-pulse" />
                                 <ChevronRight size={12} className="text-amber-400 animate-pulse delay-75" />
                                 <ChevronRight size={12} className="text-amber-400 animate-pulse delay-150" />
                             </div>
                         </div>
+                    </div>
+
+                    {/* Zebra Cross Marking Right Side */}
+                    <div className="relative z-10 flex gap-1.5 h-12 items-center bg-white/10 px-2 rounded-lg border border-white/10">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="w-2.5 h-10 bg-white shadow-sm rounded-xs"></div>
+                        ))}
                     </div>
                 </div>
 
