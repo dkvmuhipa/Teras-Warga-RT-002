@@ -95,21 +95,28 @@ export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, let
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group relative overflow-hidden"
+            className="bg-white/95 backdrop-blur-md p-8 rounded-[2.5rem] border border-slate-100/90 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 group relative overflow-hidden flex flex-col justify-between"
           >
-            <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} opacity-20 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700`} />
+            {/* Top Accent Gradient Circle */}
+            <div className={`absolute top-0 right-0 w-32 h-32 ${stat.bg} opacity-40 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition-transform duration-700 blur-xl pointer-events-none`} />
             
             <div className="relative z-10">
-              <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-6 transition-transform shadow-sm`}>
-                <stat.icon size={28} />
+              <div className="flex items-center justify-between mb-6">
+                <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center group-hover:rotate-6 group-hover:scale-110 transition-all duration-300 shadow-md shadow-slate-100 border border-white/60`}>
+                  <stat.icon size={26} strokeWidth={2.4} />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 rounded-full border border-slate-100 transition-colors">
+                  Live Stat
+                </span>
               </div>
-              <h3 className="text-4xl font-black text-slate-900 mb-1 tracking-tighter tabular-nums">
+
+              <h3 className="text-5xl font-black text-slate-900 mb-2 tracking-tighter tabular-nums group-hover:text-indigo-600 transition-colors">
                 {stat.value}
               </h3>
-              <p className="text-xs font-black text-slate-800 uppercase tracking-widest mb-2">
+              <p className="text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5">
                 {stat.label}
               </p>
-              <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
+              <p className="text-[11px] font-bold text-slate-400 leading-relaxed">
                 {stat.description}
               </p>
             </div>

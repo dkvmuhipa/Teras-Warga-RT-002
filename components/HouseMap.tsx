@@ -869,20 +869,37 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
     }
   };
 
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Occupied' | 'Sewa' | 'Empty'>('All');
+
   const filteredHouses = useMemo(() => {
-    if (!searchQuery) return houses;
-    const query = searchQuery.toLowerCase();
-    return houses.filter(h => {
-      const fullHouseId = `${h.block}-${h.number}`.toLowerCase();
-      const fullHouseIdNoDash = `${h.block}${h.number}`.toLowerCase();
-      
-      return h.number.toLowerCase().includes(query) || 
-             h.headOfFamily.toLowerCase().includes(query) ||
-             h.block.toLowerCase().includes(query) ||
-             fullHouseId.includes(query) ||
-             fullHouseIdNoDash.includes(query);
-    });
-  }, [houses, searchQuery]);
+    let result = houses;
+
+    // Filter berdasarkan status filter chip jika dipilih
+    if (statusFilter === 'Occupied') {
+      result = result.filter(h => h.status === 'Occupied');
+    } else if (statusFilter === 'Sewa') {
+      result = result.filter(h => h.residenceType === 'Sewa' || h.status === 'Business' || h.status === 'Visiting');
+    } else if (statusFilter === 'Empty') {
+      result = result.filter(h => h.status === 'Empty');
+    }
+
+    // Filter berdasarkan kata kunci pencarian teks (jika ada)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(h => {
+        const fullHouseId = `${h.block}-${h.number}`.toLowerCase();
+        const fullHouseIdNoDash = `${h.block}${h.number}`.toLowerCase();
+        
+        return h.number.toLowerCase().includes(query) || 
+               h.headOfFamily.toLowerCase().includes(query) ||
+               h.block.toLowerCase().includes(query) ||
+               fullHouseId.includes(query) ||
+               fullHouseIdNoDash.includes(query);
+      });
+    }
+
+    return result;
+  }, [houses, statusFilter, searchQuery]);
 
   const highlightedHouseId = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return null;
@@ -950,18 +967,34 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                  )}
                </div>
             </div>
-            
-            <div className="flex gap-3 text-[9px] md:text-xs font-bold bg-slate-50 p-2 rounded-xl border border-slate-100 overflow-x-auto no-scrollbar w-full md:w-auto no-print print:hidden">
-               <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-2 whitespace-nowrap ${showCheckpoints ? 'text-indigo-600' : 'text-slate-500'}`}>
-                   <ShieldCheck size={12}/> {showCheckpoints ? 'Sembunyikan' : 'Tampilkan'} Patroli
-               </button>
-               {isAdmin && showCheckpoints && (
-                 <button onClick={() => setIsManageMode(!isManageMode)} className={`flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap ${isManageMode ? 'text-rose-600' : 'text-slate-500'}`}>
-                    {isManageMode ? <Save size={12}/> : <Settings2 size={12}/>} {isManageMode ? 'Selesai' : 'Atur'}
-                 </button>
-               )}
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Droplets size={12} className="text-blue-500"/> OP Air</div>
-               <div className="flex items-center gap-1.5 px-2 border-l border-slate-200 whitespace-nowrap"><Trash2 size={12} className="text-slate-500"/> Sampah</div>
+            <div className="flex flex-wrap items-center gap-2 text-[9px] md:text-xs font-bold bg-slate-50 p-2 rounded-2xl border border-slate-200/80 w-full md:w-auto no-print print:hidden">
+                <button 
+                  onClick={() => setStatusFilter('All')}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${statusFilter === 'All' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200/50'}`}
+                >
+                  Semua Rumah ({houses.length})
+                </button>
+                <button 
+                  onClick={() => setStatusFilter('Occupied')}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Occupied' ? 'bg-emerald-600 text-white shadow-sm font-black' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Dihuni ({houses.filter(h => h.status === 'Occupied').length})
+                </button>
+                <button 
+                  onClick={() => setStatusFilter('Sewa')}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Sewa' ? 'bg-amber-600 text-white shadow-sm font-black' : 'text-amber-700 bg-amber-50 hover:bg-amber-100'}`}
+                >
+                  <Key size={10} /> Kontrak/Sewa ({houses.filter(h => h.residenceType === 'Sewa' || h.status === 'Business' || h.status === 'Visiting').length})
+                </button>
+                <button 
+                  onClick={() => setStatusFilter('Empty')}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Empty' ? 'bg-slate-700 text-white shadow-sm font-black' : 'text-slate-600 bg-slate-200/60 hover:bg-slate-200'}`}
+                >
+                  <Home size={10} /> Kosong ({houses.filter(h => h.status === 'Empty').length})
+                </button>
+                <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-l border-slate-200 whitespace-nowrap cursor-pointer ${showCheckpoints ? 'text-indigo-600 font-black' : 'text-slate-500'}`}>
+                    <ShieldCheck size={12}/> Patroli
+                </button>
             </div>
         </div>
       </div>
