@@ -34,7 +34,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 }) => {
   const confirm = useConfirm();
   const prompt = usePrompt();
-  const [activeTab, setActiveTab] = useState<'profile' | 'fees' | 'gateway' | 'system'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'fees' | 'cleanliness' | 'gateway' | 'system'>('profile');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -43,6 +43,11 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   // Fee Settings State
   const [airFee, setAirFee] = React.useState(settings?.airFee || 10000);
   const [sampahFee, setSampahFee] = React.useState(settings?.sampahFee || 5000);
+
+  // Cleanliness Settings State
+  const [cleanestBlock, setCleanestBlock] = React.useState(settings?.cleanestBlock || 'BLOK C5 (Kavling 1-12)');
+  const [cleanestScore, setCleanestScore] = React.useState(settings?.cleanestScore || 98);
+  const [cleanestMonth, setCleanestMonth] = React.useState(settings?.cleanestMonth || 'Agustus 2026');
 
   // Gateway Settings State
   const [waGatewayUrl, setWaGatewayUrl] = React.useState(settings?.waGatewayUrl || 'https://api.whatsapp-gateway.local');
@@ -53,10 +58,28 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     if (settings) {
       setAirFee(settings.airFee);
       setSampahFee(settings.sampahFee);
+      if (settings.cleanestBlock) setCleanestBlock(settings.cleanestBlock);
+      if (settings.cleanestScore) setCleanestScore(settings.cleanestScore);
+      if (settings.cleanestMonth) setCleanestMonth(settings.cleanestMonth);
       if (settings.waGatewayUrl) setWaGatewayUrl(settings.waGatewayUrl);
       if (settings.waApiKey) setWaApiKey(settings.waApiKey);
     }
   }, [settings]);
+
+  const handleUpdateCleanliness = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await onUpdateSettings({
+        ...settings,
+        cleanestBlock,
+        cleanestScore: Number(cleanestScore),
+        cleanestMonth
+      });
+      toast.success('Pengaturan Blok Terbersih berhasil diperbarui!');
+    } catch (error) {
+      toast.error('Gagal memperbarui pengaturan kebersihan.');
+    }
+  };
 
   const handleUpdateFees = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,6 +229,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           {[
             { id: 'profile', label: 'Profil Admin', icon: User },
             { id: 'fees', label: 'Tarif Iuran', icon: Wallet },
+            { id: 'cleanliness', label: 'Kebersihan Blok', icon: ShieldCheck },
             { id: 'gateway', label: 'WA Gateway API', icon: MessageSquare },
             { id: 'system', label: 'Sistem & Backup', icon: Database },
           ].map((tab) => (
@@ -410,6 +434,87 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 <div className="pt-2 border-t border-indigo-800/60 flex justify-between font-black text-sm text-emerald-400">
                   <span>Total Pengeluaran Standard:</span>
                   <span>Rp {(Number(sampahFee) + Number(airFee)).toLocaleString()} / KK</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'cleanliness' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-7">
+            <Card title="Pengaturan Papan Kebersihan Blok Terbersih" icon={ShieldCheck} className="border-slate-200/80 rounded-[2.5rem] p-6 md:p-8">
+              <p className="text-xs text-slate-500 font-semibold mb-6 leading-relaxed">
+                Tentukan pemenang Juara 1 Kebersihan Blok bulanan, nilai evaluasi gotong royong, dan periode evaluasi untuk ditampilkan di Beranda Warga.
+              </p>
+              <form onSubmit={handleUpdateCleanliness} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Nama Blok Pemenang</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                    value={cleanestBlock}
+                    onChange={(e) => setCleanestBlock(e.target.value)}
+                    placeholder="Contoh: BLOK C5 (Kavling 1-12)"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Nilai Evaluasi (1-100)</label>
+                    <input 
+                      type="number"
+                      max={100}
+                      min={0}
+                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                      value={cleanestScore}
+                      onChange={(e) => setCleanestScore(Number(e.target.value))}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Periode Bulan & Tahun</label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                      value={cleanestMonth}
+                      onChange={(e) => setCleanestMonth(e.target.value)}
+                      placeholder="Contoh: Agustus 2026"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20">
+                  Simpan Pengaturan Kebersihan
+                </Button>
+              </form>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="bg-gradient-to-br from-amber-500/20 via-amber-600/10 to-slate-900 rounded-[2.5rem] p-6 text-white border border-amber-500/30 shadow-xl space-y-4">
+              <div className="flex items-center gap-3 border-b border-amber-500/20 pb-3">
+                <ShieldCheck className="text-amber-400" size={24} />
+                <div>
+                  <h4 className="font-black text-base text-amber-300">Preview Papan Kebersihan</h4>
+                  <p className="text-[10px] font-mono text-amber-200/70 uppercase">LIVE DISPLAY HOMEPAGE</p>
+                </div>
+              </div>
+              <div className="p-4 bg-slate-950/80 rounded-2xl border border-amber-500/30 space-y-3 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400 font-medium">Juara Terbersih:</span>
+                  <span className="font-black text-amber-300">{cleanestBlock}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400 font-medium">Nilai Score:</span>
+                  <span className="font-black text-emerald-400">{cleanestScore} / 100</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400 font-medium">Periode Evaluasi:</span>
+                  <span className="font-black text-indigo-300">{cleanestMonth}</span>
                 </div>
               </div>
             </div>

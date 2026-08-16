@@ -37,7 +37,13 @@ interface FinancialContextType {
       arrearsHouseCount: number;
     };
   };
-  settings: { airFee: number; sampahFee: number };
+  settings: { 
+    airFee: number; 
+    sampahFee: number;
+    cleanestBlock?: string;
+    cleanestScore?: number;
+    cleanestMonth?: string;
+  };
   isMonthMatch: (monthA: string, monthB: string) => boolean;
 }
 
@@ -49,7 +55,7 @@ export const FinancialProvider: React.FC<{
   iuranPayments: any[];
   cashFlow: CashFlow[];
   bills: Bill[];
-  settings: { airFee: number; sampahFee: number };
+  settings: any;
 }> = ({ children, houses, iuranPayments, cashFlow, bills, settings }) => {
   const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
 

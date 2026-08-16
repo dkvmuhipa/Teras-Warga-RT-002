@@ -488,7 +488,9 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                 <Award size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest">Penghargaan Lingkungan</span>
               </div>
-              <span className="text-[10px] font-black text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 uppercase">Agustus 2026</span>
+              <span className="text-[10px] font-black text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 uppercase">
+                {financialSettings?.cleanestMonth || 'Periode Berjalan'}
+              </span>
             </div>
 
             <div>
@@ -496,18 +498,34 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               <p className="text-xs text-slate-500 font-medium">Berdasarkan penilaian kebersihan got, kerapihan pekarangan & keasrian tanaman.</p>
             </div>
 
-            <div className="p-4 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl text-white shadow-md flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white">
-                  <Trophy size={24} />
+            {financialSettings?.cleanestBlock ? (
+              <div className="p-4 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl text-white shadow-md flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white">
+                    <Trophy size={24} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-amber-100">Juara 1 Kebersihan</p>
+                    <p className="text-xl font-black text-white">
+                      {financialSettings.cleanestBlock}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-100">Juara 1 Kebersihan</p>
-                  <p className="text-xl font-black text-white">BLOK C5 (Kavling 1-12)</p>
-                </div>
+                {financialSettings.cleanestScore ? (
+                  <span className="text-[10px] font-black bg-white text-amber-700 px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-sm">
+                    Nilai {financialSettings.cleanestScore}/100
+                  </span>
+                ) : null}
               </div>
-              <span className="text-[10px] font-black bg-white text-amber-700 px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-sm">Nilai 98/100</span>
-            </div>
+            ) : (
+              <div className="p-5 bg-amber-500/10 border-2 border-dashed border-amber-300 rounded-2xl text-center space-y-1">
+                <div className="inline-flex p-2.5 bg-amber-500/20 text-amber-700 rounded-xl mb-1">
+                  <Award size={20} />
+                </div>
+                <p className="text-xs font-black text-amber-900 uppercase tracking-wider">Penilaian Sedang Berlangsung</p>
+                <p className="text-[11px] font-bold text-amber-700/80">Pengurus RT sedang melakukan evaluasi kebersihan lingkungan blok bulan ini.</p>
+              </div>
+            )}
           </div>
 
           <div className="relative z-10 pt-4 mt-4 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-slate-500">
