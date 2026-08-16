@@ -83,8 +83,8 @@ service cloud.firestore {
 
     // Notifications
     match /notifications/{id} {
-      allow read, update: if true;
-      allow create, delete: if isAdmin();
+      allow read, update, delete: if true;
+      allow create: if isAdmin();
     }
 
     // Polls

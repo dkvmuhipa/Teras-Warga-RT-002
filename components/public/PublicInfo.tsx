@@ -315,26 +315,32 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
             className="max-w-7xl mx-auto px-4 py-8 mb-24 space-y-12"
         >
             {/* Hero Section */}
-            <motion.div variants={itemVariants} className="relative rounded-[3rem] overflow-hidden bg-slate-900 shadow-2xl shadow-slate-900/20 min-h-[400px] flex items-center justify-center text-center px-6 py-12 group">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay group-hover:scale-105 transition-transform duration-700"></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 via-slate-900/80 to-slate-900"></div>
+            <motion.div variants={itemVariants} className="relative rounded-[3rem] overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 shadow-2xl shadow-indigo-950/20 p-8 md:p-14 text-white flex flex-col items-center justify-center text-center group border border-slate-800">
+                {/* Glowing Orbs */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:scale-125 transition-transform duration-700"></div>
+                <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
                 
                 <div className="relative z-10 max-w-4xl mx-auto space-y-6">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-bold tracking-widest uppercase backdrop-blur-md animate-pulse">
-                        <ShieldCheck size={14} /> Transparansi & Akuntabilitas
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-black tracking-widest uppercase backdrop-blur-md shadow-inner">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <ShieldCheck size={14} /> Transparansi & Digitalisasi RT 02
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-tight drop-shadow-lg">
-                        Wajah Baru <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">RT 02</span>
+                    <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight">
+                        Pusat Informasi & Layanan Publik <br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-cyan-300 to-emerald-300 italic font-serif">Teras Warga RT 02</span>
                     </h1>
-                    <p className="text-slate-300 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-medium drop-shadow-md">
-                        Mewujudkan lingkungan yang aman, nyaman, dan harmonis melalui digitalisasi layanan dan keterbukaan informasi.
+                    <p className="text-slate-300 text-sm md:text-base leading-relaxed max-w-2xl mx-auto font-medium">
+                        Keterbukaan informasi real-time, transparansi keuangan kas, jadwal siskamling, dan agenda kegiatan di lingkungan Huntap Tondo 2.
                     </p>
-                    <div className="flex justify-center gap-4 pt-4">
-                        <Link to="/services?tab=surat" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2">
-                            <Briefcase size={18} /> Layanan Warga
+                    <div className="flex flex-wrap justify-center gap-3 pt-2">
+                        <Link to="/services?tab=surat" className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                            <Briefcase size={16} /> Buat Surat Mandiri
                         </Link>
-                        <Link to="/peta" className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-sm transition-all backdrop-blur-sm flex items-center gap-2">
-                            <MapIcon size={18} /> Peta Wilayah
+                        <Link to="/peta" className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-black text-xs uppercase tracking-wider transition-all backdrop-blur-md flex items-center gap-2">
+                            <MapIcon size={16} /> Denah Kawasan Digital Twin
                         </Link>
                     </div>
                 </div>
@@ -347,98 +353,107 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                     <EmergencyContacts />
                 </motion.div>
 
-                {/* Upcoming Events (New Event Management) */}
-                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden h-full">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                            <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><Calendar size={24}/></div>
-                            Agenda & Event Warga
-                        </h2>
-                        <Link to="/kegiatan" className="text-xs font-bold text-indigo-600 hover:underline uppercase tracking-wider">Lihat Semua</Link>
+                {/* Upcoming Events */}
+                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40 relative overflow-hidden h-full flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-center mb-6">
+                          <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
+                              <div className="p-2.5 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100/80 shadow-xs"><Calendar size={22}/></div>
+                              Agenda & Event Warga
+                          </h2>
+                          <Link to="/kegiatan" className="text-xs font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest flex items-center gap-1">
+                            Lihat Semua <ArrowUpRight size={14} />
+                          </Link>
+                      </div>
+                      
+                      {upcomingEventsList.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {upcomingEventsList.map((event) => (
+                                  <div key={event.id} className="p-5 rounded-3xl bg-slate-50/80 border border-slate-100 hover:border-amber-300 hover:bg-amber-50/20 transition-all duration-300 group relative overflow-hidden flex flex-col justify-between">
+                                      <div className="relative z-10 space-y-2.5">
+                                          <div className="flex items-center justify-between">
+                                              <span className="px-3 py-1 rounded-xl bg-amber-500/10 text-amber-700 border border-amber-500/20 text-[10px] font-black uppercase tracking-wider">
+                                                  {new Date(event.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                                              </span>
+                                              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Kegiatan RT</span>
+                                          </div>
+                                          <h3 className="text-base font-black text-slate-900 leading-snug group-hover:text-amber-700 transition-colors line-clamp-2">{event.title}</h3>
+                                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">{event.description}</p>
+                                      </div>
+
+                                      <div className="pt-3 mt-3 border-t border-slate-200/60 flex items-center justify-between text-[11px] font-bold text-slate-400">
+                                          <span className="flex items-center gap-1"><Clock size={12} className="text-amber-500" /> {new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WITA</span>
+                                          <span className="flex items-center gap-1"><MapPin size={12} className="text-indigo-500" /> {event.location}</span>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                      ) : (
+                          <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/80 rounded-3xl border-2 border-dashed border-slate-200/80">
+                              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-slate-300 mb-3 shadow-xs">
+                                  <Calendar size={28} />
+                              </div>
+                              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Belum Ada Agenda</h3>
+                              <p className="text-slate-400 text-xs max-w-xs mx-auto mt-1 font-medium">Belum ada acara mendatang yang dijadwalkan.</p>
+                          </div>
+                      )}
                     </div>
-                    
-                    {upcomingEventsList.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {upcomingEventsList.map((event) => (
-                                <div key={event.id} className="p-5 rounded-3xl bg-slate-50 border border-slate-100 hover:border-amber-200 hover:bg-amber-50/30 transition-all group relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-100 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div className="relative z-10">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-wide">
-                                                {new Date(event.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                                            </span>
-                                            <span className="text-[10px] font-bold text-slate-400">Agenda</span>
-                                        </div>
-                                        <h3 className="text-lg font-black text-slate-800 mb-2 line-clamp-2 group-hover:text-amber-700 transition-colors">{event.title}</h3>
-                                        <p className="text-xs text-slate-500 line-clamp-2 mb-4">{event.description}</p>
-                                        <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                                            <Clock size={14} />
-                                            <span>{new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Makassar' })} WITA</span>
-                                            <span className="mx-1">•</span>
-                                            <MapPin size={14} />
-                                            <span>{event.location}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-64 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-300 mb-4 shadow-sm">
-                                <Calendar size={32} />
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-800">Tidak Ada Agenda</h3>
-                            <p className="text-slate-400 text-sm max-w-xs mx-auto mt-1">Belum ada kegiatan atau acara yang dijadwalkan dalam waktu dekat.</p>
-                        </div>
-                    )}
                 </motion.div>
             </div>
 
-            {/* News & Announcements Feed (Direct Communication) */}
+            {/* News & Announcements Feed */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Pengumuman (Urgent) */}
-                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><AlertTriangle size={24}/></div>
-                        <h2 className="text-2xl font-black text-slate-800">Pengumuman Penting</h2>
+                {/* Pengumuman Penting */}
+                <motion.div variants={itemVariants} className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/80 shadow-xs"><AlertTriangle size={22}/></div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Pengumuman Penting</h2>
                     </div>
                     <div className="space-y-4">
                         {announcements.filter(a => a.type === 'Urgent').map(a => (
-                            <div key={a.id} onClick={() => setSelectedAnnouncement(a)} className="p-6 bg-rose-50 rounded-3xl border border-rose-100 hover:border-rose-200 transition-colors group cursor-pointer">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide bg-rose-100 text-rose-700">Penting</span>
-                                    <span className="text-xs font-bold text-rose-400">{new Date(a.date).toLocaleDateString('id-ID')}</span>
+                            <div key={a.id} onClick={() => setSelectedAnnouncement(a)} className="p-6 bg-rose-50/60 rounded-3xl border border-rose-100/80 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 group cursor-pointer">
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider bg-rose-600 text-white shadow-xs">Penting</span>
+                                    <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1.5">
+                                      <Clock size={12} /> {new Date(a.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                    </span>
                                 </div>
-                                <h4 className="font-black text-slate-800 text-lg group-hover:text-rose-700 transition-colors">{a.title}</h4>
+                                <h4 className="font-black text-slate-900 text-lg group-hover:text-rose-600 transition-colors leading-snug">{a.title}</h4>
                             </div>
                         ))}
                         {announcements.filter(a => a.type === 'Urgent').length === 0 && (
-                            <p className="text-sm text-slate-400 italic">Tidak ada pengumuman penting saat ini.</p>
+                            <div className="p-10 text-center bg-slate-50/60 rounded-3xl border-2 border-dashed border-slate-200/80">
+                              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Tidak ada pengumuman penting saat ini</p>
+                            </div>
                         )}
                     </div>
                 </motion.div>
 
-                {/* Berita Terbaru (News) */}
-                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><Megaphone size={24}/></div>
-                        <h2 className="text-2xl font-black text-slate-800">Berita Terkini</h2>
+                {/* Berita Terkini */}
+                <motion.div variants={itemVariants} className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/80 shadow-xs"><Megaphone size={22}/></div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Berita Terkini Warga</h2>
                     </div>
                     <div className="space-y-4">
                         {latestNews.map(n => (
-                            <div key={n.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-indigo-100 transition-colors group cursor-pointer">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide bg-indigo-100 text-indigo-700">
+                            <div key={n.id} className="p-6 bg-slate-50/80 rounded-3xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/20 transition-all duration-300 group cursor-pointer">
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-600 border border-indigo-100">
                                         {n.category}
                                     </span>
-                                    <span className="text-xs font-bold text-slate-400">{new Date(n.date).toLocaleDateString('id-ID')}</span>
+                                    <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                                      <Clock size={12} /> {new Date(n.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                    </span>
                                 </div>
-                                <h4 className="font-black text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{n.title}</h4>
-                                <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">{n.content}</p>
+                                <h4 className="font-black text-slate-900 text-lg group-hover:text-indigo-600 transition-colors leading-snug mb-2">{n.title}</h4>
+                                <p className="text-xs text-slate-500 leading-relaxed font-medium line-clamp-2">{n.content}</p>
                             </div>
                         ))}
                         {latestNews.length === 0 && (
-                            <p className="text-sm text-slate-400 italic">Belum ada berita terbaru.</p>
+                            <div className="p-10 text-center bg-slate-50/60 rounded-3xl border-2 border-dashed border-slate-200/80">
+                              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Belum ada berita terkini</p>
+                            </div>
                         )}
                     </div>
                 </motion.div>
@@ -447,74 +462,76 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
             {/* UMKM & Waste Bank Summary */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* UMKM Highlights */}
-                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
-                    <div className="flex justify-between items-center mb-8">
+                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40">
+                    <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><Store size={24}/></div>
-                            <h2 className="text-2xl font-black text-slate-800">Produk Unggulan Warga</h2>
+                            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100/80 shadow-xs"><Store size={22}/></div>
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Produk Unggulan UMKM Warga</h2>
                         </div>
-                        <Link to="/umkm" className="text-xs font-bold text-indigo-600 hover:underline uppercase tracking-wider">Lihat Semua</Link>
+                        <Link to="/umkm" className="text-xs font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest flex items-center gap-1">
+                          Lihat Pasar <ArrowUpRight size={14} />
+                        </Link>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {featuredUMKM.map(item => (
                             <div key={item.id} className="group cursor-pointer">
-                                <div className="aspect-square rounded-3xl overflow-hidden mb-3 border border-slate-100 shadow-sm group-hover:shadow-md transition-all">
+                                <div className="aspect-square rounded-3xl overflow-hidden mb-3 border border-slate-100 shadow-xs group-hover:shadow-lg group-hover:scale-102 transition-all duration-300">
                                     <SmartImage src={item.image} alt={item.name} className="w-full h-full object-cover" width={400} />
                                 </div>
-                                <h4 className="font-black text-slate-800 text-sm truncate group-hover:text-indigo-600 transition-colors">{item.name}</h4>
+                                <h4 className="font-black text-slate-900 text-sm truncate group-hover:text-indigo-600 transition-colors leading-tight">{item.name}</h4>
                             </div>
                         ))}
                     </div>
                 </motion.div>
 
                 {/* Waste Bank Summary */}
-                <motion.div variants={itemVariants} className="bg-indigo-600 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
-                        <Trash2 size={120} />
+                <motion.div variants={itemVariants} className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-xl shadow-indigo-600/20 flex flex-col justify-between border border-indigo-500/30">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-700 pointer-events-none">
+                        <Trash2 size={130} />
                     </div>
-                    <div className="relative z-10 h-full flex flex-col">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-white/20 rounded-xl"><Trash2 size={24}/></div>
-                            <h2 className="text-2xl font-black">Bank Sampah</h2>
+                    <div className="relative z-10 space-y-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-white/20 rounded-2xl border border-white/20"><Trash2 size={22}/></div>
+                            <h2 className="text-2xl font-black tracking-tight">Bank Sampah Digital</h2>
                         </div>
-                        <div className="flex-1 space-y-6">
+                        <div className="space-y-4">
                             <div>
-                                <p className="text-indigo-100 text-xs font-bold uppercase tracking-widest mb-1">Total Sampah Terkelola</p>
-                                <h3 className="text-4xl font-black">{totalWasteCollected.toFixed(1)} <span className="text-xl">Kg</span></h3>
+                                <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Total Sampah Terkelola</p>
+                                <h3 className="text-4xl font-black tracking-tight">{totalWasteCollected.toFixed(1)} <span className="text-xl font-bold text-indigo-200">Kg</span></h3>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] font-bold text-indigo-200 uppercase mb-1">Organik</p>
-                                    <p className="text-lg font-black">{wasteDeposits.filter(d => d.type === 'Organik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3.5 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                    <p className="text-[9px] font-black text-emerald-300 uppercase tracking-wider mb-1">Organik</p>
+                                    <p className="text-base font-black">{wasteDeposits.filter(d => d.type === 'Organik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
                                 </div>
-                                <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] font-bold text-indigo-200 uppercase mb-1">Anorganik</p>
-                                    <p className="text-lg font-black">{wasteDeposits.filter(d => d.type === 'Anorganik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
+                                <div className="p-3.5 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                    <p className="text-[9px] font-black text-amber-300 uppercase tracking-wider mb-1">Anorganik</p>
+                                    <p className="text-base font-black">{wasteDeposits.filter(d => d.type === 'Anorganik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
                                 </div>
                             </div>
                         </div>
-                        <Link to="/sampah" className="mt-8 w-full py-3 bg-white text-indigo-600 rounded-2xl font-black text-center hover:bg-indigo-50 transition-colors">
-                            Setor Sampah
-                        </Link>
                     </div>
+                    <Link to="/sampah" className="mt-6 w-full py-3.5 bg-white text-indigo-700 rounded-2xl font-black text-xs uppercase tracking-wider text-center hover:bg-indigo-50 transition-all shadow-lg shadow-black/10">
+                        Setor Sampah Sekarang
+                    </Link>
                 </motion.div>
             </div>
 
             {/* Polls, Forum & Donations Summary */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Active Polls */}
-                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                <motion.div variants={itemVariants} className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-black text-slate-800 flex items-center gap-3">
-                            <div className="p-2 bg-purple-50 text-purple-600 rounded-xl"><Vote size={20}/></div>
-                            E-Voting
+                        <h2 className="text-xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
+                            <div className="p-2 bg-purple-50 text-purple-600 rounded-2xl border border-purple-100/80"><Vote size={20}/></div>
+                            E-Voting Active
                         </h2>
-                        <Link to="/voting" className="text-[10px] font-bold text-indigo-600 hover:underline uppercase tracking-wider">Ikut Memilih</Link>
+                        <Link to="/voting" className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Ikut Memilih</Link>
                     </div>
                     <div className="space-y-4">
                         {activePolls.slice(0, 2).map(poll => (
-                            <div key={poll.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <h4 className="font-bold text-slate-800 text-sm mb-3">{poll.title}</h4>
+                            <div key={poll.id} className="p-4 bg-slate-50/80 rounded-2xl border border-slate-100">
+                                <h4 className="font-black text-slate-900 text-sm mb-3 leading-snug">{poll.title}</h4>
                                 <div className="space-y-2">
                                     {poll.options.slice(0, 2).map(opt => {
                                         const percentage = poll.totalVotes > 0 ? Math.round((opt.votes / poll.totalVotes) * 100) : 0;
@@ -525,7 +542,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                                     <span>{percentage}%</span>
                                                 </div>
                                                 <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-purple-500" style={{ width: `${percentage}%` }}></div>
+                                                    <div className="h-full bg-purple-600" style={{ width: `${percentage}%` }}></div>
                                                 </div>
                                             </div>
                                         );
@@ -533,27 +550,27 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 </div>
                             </div>
                         ))}
-                        {activePolls.length === 0 && <p className="text-xs text-slate-400 italic">Tidak ada voting aktif.</p>}
+                        {activePolls.length === 0 && <p className="text-xs text-slate-400 font-medium italic">Tidak ada voting aktif.</p>}
                     </div>
                 </motion.div>
 
                 {/* Active Donations */}
-                <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                <motion.div variants={itemVariants} className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-black text-slate-800 flex items-center gap-3">
-                            <div className="p-2 bg-rose-50 text-rose-600 rounded-xl"><Heart size={20}/></div>
+                        <h2 className="text-xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
+                            <div className="p-2 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/80"><Heart size={20}/></div>
                             Donasi Sosial
                         </h2>
-                        <Link to="/donasi" className="text-[10px] font-bold text-indigo-600 hover:underline uppercase tracking-wider">Donasi</Link>
+                        <Link to="/donasi" className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Donasi</Link>
                     </div>
                     <div className="space-y-4">
                         {activeDonations.slice(0, 2).map(campaign => {
                             const progress = campaign.targetAmount ? Math.min(100, Math.round((campaign.currentAmount / campaign.targetAmount) * 100)) : 100;
                             return (
                                 <div key={campaign.id} className="p-4 bg-rose-50/30 rounded-2xl border border-rose-100">
-                                    <h4 className="font-bold text-slate-800 text-sm mb-2 line-clamp-1">{campaign.title}</h4>
+                                    <h4 className="font-bold text-slate-900 text-sm mb-2 line-clamp-1">{campaign.title}</h4>
                                     <div className="flex justify-between text-[10px] font-black text-rose-600 mb-1">
-                                        <span>Rp {campaign.currentAmount.toLocaleString()}</span>
+                                        <span>Rp {campaign.currentAmount.toLocaleString('id-ID')}</span>
                                         <span>{progress}%</span>
                                     </div>
                                     <div className="h-1.5 bg-rose-100 rounded-full overflow-hidden">
@@ -562,41 +579,29 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 </div>
                             );
                         })}
-                        {activeDonations.length === 0 && <p className="text-xs text-slate-400 italic">Tidak ada kampanye donasi aktif.</p>}
+                        {activeDonations.length === 0 && <p className="text-xs text-slate-400 font-medium italic">Tidak ada kampanye donasi aktif.</p>}
                     </div>
                 </motion.div>
             </div>
 
-
-
             {/* Digital Services Section */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Link to="/kegiatan" className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Calendar size={120} />
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Link to="/kegiatan" className="group relative bg-white/95 backdrop-blur-md p-7 rounded-[2.5rem] border border-slate-100/90 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex items-center gap-5">
+                    <div className="p-4 bg-indigo-50 text-indigo-600 rounded-3xl group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-xs border border-indigo-100/80">
+                        <CheckCircle2 size={30} />
                     </div>
-                    <div className="relative z-10 flex items-center gap-6">
-                        <div className="p-4 bg-indigo-50 text-indigo-600 rounded-3xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                            <CheckCircle2 size={32} />
-                        </div>
-                        <div>
-                            <h3 className="text-2xl font-black text-slate-800 mb-1">Presensi Kegiatan</h3>
-                            <p className="text-slate-500 text-sm font-medium">Digital Guest Book & Absensi QR Code untuk setiap kegiatan warga.</p>
-                        </div>
+                    <div>
+                        <h3 className="text-xl font-black text-slate-900 mb-1 tracking-tight">Presensi Kegiatan Warga</h3>
+                        <p className="text-slate-500 text-xs font-medium leading-relaxed">Guest book & absensi QR Code kegiatan warga.</p>
                     </div>
                 </Link>
-                <Link to="/kesehatan" className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Heart size={120} />
+                <Link to="/kesehatan" className="group relative bg-white/95 backdrop-blur-md p-7 rounded-[2.5rem] border border-slate-100/90 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex items-center gap-5">
+                    <div className="p-4 bg-rose-50 text-rose-600 rounded-3xl group-hover:bg-rose-600 group-hover:text-white transition-colors duration-300 shadow-xs border border-rose-100/80">
+                        <Baby size={30} />
                     </div>
-                    <div className="relative z-10 flex items-center gap-6">
-                        <div className="p-4 bg-rose-50 text-rose-600 rounded-3xl group-hover:bg-rose-600 group-hover:text-white transition-colors">
-                            <Baby size={32} />
-                        </div>
-                        <div>
-                            <h3 className="text-2xl font-black text-slate-800 mb-1">Posyandu Digital</h3>
-                            <p className="text-slate-500 text-sm font-medium">Monitoring kesehatan Bayi, Balita, Remaja, Dewasa, Ibu Hamil, dan Lansia secara digital.</p>
-                        </div>
+                    <div>
+                        <h3 className="text-xl font-black text-slate-900 mb-1 tracking-tight">Posyandu Digital</h3>
+                        <p className="text-slate-500 text-xs font-medium leading-relaxed">Monitoring kesehatan balita, lansia & ibu hamil.</p>
                     </div>
                 </Link>
 

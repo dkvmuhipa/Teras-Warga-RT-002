@@ -12,6 +12,7 @@ interface ChatBotProps {
   houses?: House[];
   cashFlow?: CashFlow[];
   reports?: Report[];
+  settings?: any;
 }
 
 interface Message {
@@ -23,14 +24,14 @@ interface Message {
 
 const SUGGESTIONS = [
   { text: 'Siapa jadwal ronda malam hari ini?', label: '👮 Ronda Malam Ini', color: 'bg-indigo-50/60 border-indigo-100 text-indigo-700 hover:bg-indigo-100/80 hover:text-indigo-800' },
+  { text: 'Blok mana yang jadi pemenang Blok Terbersih bulan ini?', label: '🏆 Blok Terbersih', color: 'bg-amber-50/60 border-amber-100 text-amber-700 hover:bg-amber-100/80 hover:text-amber-800' },
   { text: 'Apa saja syarat mengurus Surat Pengantar RT?', label: '📋 Syarat Surat', color: 'bg-emerald-50/60 border-emerald-100 text-emerald-700 hover:bg-emerald-100/80 hover:text-emerald-800' },
-  { text: 'Berapa nominal iuran bulanan warga RT 02?', label: '💰 Iuran RT02', color: 'bg-amber-50/60 border-amber-100 text-amber-700 hover:bg-amber-100/80 hover:text-amber-800' },
-  { text: 'Kapan jadwal pengangkutan sampah warga?', label: '🗑️ Jadwal Sampah', color: 'bg-rose-50/60 border-rose-100 text-rose-700 hover:bg-rose-100/80 hover:text-rose-800' },
+  { text: 'Berapa nominal iuran bulanan warga RT 02?', label: '💰 Iuran RT02', color: 'bg-indigo-50/60 border-indigo-100 text-indigo-700 hover:bg-indigo-100/80 hover:text-indigo-800' },
+  { text: 'Kapan jadwal pengangkutan sampah organik & plastik?', label: '🗑️ Jadwal Sampah', color: 'bg-rose-50/60 border-rose-100 text-rose-700 hover:bg-rose-100/80 hover:text-rose-800' },
   { text: 'Bisa minta daftar kontak Pengurus RT yang aktif?', label: '📞 Kontak Pengurus', color: 'bg-sky-50/60 border-sky-100 text-sky-700 hover:bg-sky-100/80 hover:text-sky-800' },
-  { text: 'Ada pengumuman terbaru apa minggu ini?', label: '📢 Pengumuman', color: 'bg-purple-50/60 border-purple-100 text-purple-700 hover:bg-purple-100/80 hover:text-purple-800' },
 ];
 
-export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, officials, houses, cashFlow, reports }) => {
+export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, officials, houses, cashFlow, reports, settings }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
@@ -68,7 +69,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
     setIsTyping(true);
 
     try {
-      const answer = await askRit(textToSend, { announcements, ronda, officials, houses, cashFlow, reports });
+      const answer = await askRit(textToSend, { announcements, ronda, officials, houses, cashFlow, reports, settings });
 
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),

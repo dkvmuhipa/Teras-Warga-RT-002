@@ -973,10 +973,12 @@ export const deleteAllNotificationsFromDb = async () => {
     try {
         const q = query(collection(db, NOTIFICATIONS_COL));
         const snapshot = await getDocs(q);
-        const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+        const deletePromises = snapshot.docs.map(docSnap => deleteDoc(doc(db, NOTIFICATIONS_COL, docSnap.id)).catch(err => {
+            console.warn("Could not delete notification doc from Firestore:", err);
+        }));
         await Promise.all(deletePromises);
     } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, NOTIFICATIONS_COL);
+        console.warn("Handled firestore error during notification deletion:", error);
     }
 };
 

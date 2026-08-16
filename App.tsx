@@ -577,7 +577,7 @@ export const App = () => {
                                 } />
                             </Routes>
                         </div>
-                        <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} />
+                        <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} settings={settings} />
                         <PanicButton houses={houses} />
                         <PushNotificationManager userId={localStorage.getItem('resident_house_id') || 'guest_user'} />
                         <MobileBottomNav 

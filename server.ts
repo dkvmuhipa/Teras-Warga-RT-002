@@ -1048,7 +1048,7 @@ Salam hangat rukun warga,
       Format: Plain text. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Bahasa Indonesia yang baik dan benar.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt,
       });
 
@@ -1074,7 +1074,7 @@ Salam hangat rukun warga,
       Berikan ringkasan eksekutif singkat (maksimal 3 poin) mengenai isu utama yang perlu ditangani oleh Ketua RT. DILARANG menggunakan karakter asterik (*) atau format bold/italic.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt,
       });
 
@@ -1111,7 +1111,7 @@ Salam hangat rukun warga,
       Format output menggunakan daftar poin (list) agar mudah dibaca. DILARANG menggunakan karakter asterik (*) atau format bold/italic. Gunakan bahasa Indonesia yang formal, solutif, dan menyemangati.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt,
       });
 
@@ -1132,7 +1132,7 @@ Salam hangat rukun warga,
       }
       const ai = getAiAdmin();
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: 'gemini-3.6-flash',
         contents: question,
         config: {
           systemInstruction: systemInstruction,
@@ -1175,7 +1175,7 @@ Salam hangat rukun warga,
       }
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt,
       });
 
