@@ -78,25 +78,25 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
       animate="visible"
       className="max-w-7xl mx-auto px-4 py-8 mb-24 font-sans"
     >
-      <div className="text-center mb-12">
+      <div className="text-center mb-10">
         <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
+          initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-blue-100 shadow-sm"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest mb-5 border border-blue-100 shadow-xs"
         >
-          <Star size={14} strokeWidth={3} /> 
-          Ekonomi Warga
+          <Star size={14} className="text-blue-600" /> 
+          Pemberdayaan Ekonomi Warga
         </motion.div>
-        <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight mb-6">
-          UMKM <span className="text-blue-600">RT 02</span>
+        <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+          Direktori UMKM <span className="text-blue-600 font-serif italic">RT 02</span>
         </h1>
-        <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto leading-relaxed mb-8">
-          Dukung usaha tetangga, majukan ekonomi warga. Temukan berbagai produk dan jasa menarik di lingkungan kita.
+        <p className="text-slate-500 font-medium text-xs md:text-sm max-w-2xl mx-auto leading-relaxed mb-6">
+          Dukung usaha tetangga, majukan ekonomi lokal. Temukan produk kuliner, jasa, hingga kriya buatan warga Huntap Tondo 2.
         </p>
         <div className="flex justify-center">
           <Button 
             onClick={() => window.open(`https://wa.me/6285961194621?text=Halo Pengurus RT, saya ingin mendaftarkan UMKM saya di website.`, '_blank')}
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-200 px-8 py-4 rounded-2xl flex items-center gap-2 group transition-all hover:scale-105"
+            className="bg-slate-900 hover:bg-slate-800 text-white shadow-md px-6 py-3 rounded-2xl flex items-center gap-2 text-xs uppercase tracking-wider font-black transition-all hover:scale-105"
           >
             <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
             Daftarkan UMKM Anda

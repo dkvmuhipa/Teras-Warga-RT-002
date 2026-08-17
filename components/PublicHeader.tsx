@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, ChevronDown, LayoutGrid, Wallet, Users, Info, Download, X, Smartphone, Sparkles, HelpCircle,
-  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen
+  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, Package, ShieldAlert, UserPlus
 } from 'lucide-react';
 import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
@@ -70,8 +70,9 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       width: 'w-[480px] sm:w-[540px]',
       items: [
         { path: '/services?tab=surat', label: 'Persuratan', desc: 'Pengisian form surat pengantar RT kilat', icon: FileText, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
-        { path: '/services?tab=lapor', label: 'Lapor Masalah', desc: 'Aduan fasilitas & kendala lingkungan', icon: AlertTriangle, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
-        { path: '/services?tab=mutasi', label: 'Mutasi Warga', desc: 'Pencatatan data warga baru & pindah huni', icon: Users, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
+        { path: '/services?tab=tamu', label: 'Lapor Tamu 24 Jam', desc: 'Pelaporan tamu menginap & keberadaan', icon: ShieldAlert, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
+        { path: '/inventaris', label: 'Peminjaman Inventaris', desc: 'Pinjam barang hajatan & peralatan RT', icon: Package, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
+        { path: '/services?tab=mutasi', label: 'Mutasi Warga', desc: 'Pendataan lapor pindah, lahir & duka', icon: UserPlus, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
         { path: '/services?tab=tamu', label: 'Lapor Tamu', desc: 'Wajib lapor kunjungan menginap 24 jam', icon: Home, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
         { path: '/dokumen', label: 'Arsip Dokumen', desc: 'Berita acara, regulasi, & draf surat kosong', icon: Download, color: 'text-blue-600 bg-blue-50/70 border-blue-150' },
         { path: '/voting', label: 'E-Voting', desc: 'Salurkan hak suara mufakat bersama', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/70 border-violet-150' },

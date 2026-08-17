@@ -74,6 +74,7 @@ import { PublicRules } from './components/public/PublicRules';
 import { PublicEarthquake } from './components/public/PublicEarthquake';
 import { PublicAbout } from './components/public/PublicAbout';
 import { PublicLibrary } from './components/public/PublicLibrary';
+import { PublicInventory } from './components/public/PublicInventory';
 import { PublicForum } from './components/public/PublicForum';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
@@ -560,6 +561,7 @@ export const App = () => {
                                 <Route path="/rules" element={<PublicRules pdfConfig={pdfConfig} />} />
                                 <Route path="/gempa" element={<PublicEarthquake />} />
                                 <Route path="/literasi" element={<PublicLibrary />} />
+                                <Route path="/inventaris" element={<PublicInventory inventory={inventory} houses={houses} />} />
                                 <Route path="/forum" element={<PublicForum houses={houses} isAdmin={isAdmin} />} />
                                 <Route path="/about" element={
                                     <PublicAbout 

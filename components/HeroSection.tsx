@@ -53,62 +53,22 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
     return (
       <motion.div 
         id="hero-container"
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-[#022c22]/30 rounded-3xl md:rounded-[3rem] overflow-hidden mb-6 md:mb-12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.4)] group min-h-0 md:min-h-[340px] flex items-center border border-white/10"
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="relative bg-white rounded-3xl md:rounded-[2.5rem] overflow-hidden mb-6 md:mb-12 shadow-sm border border-slate-200/70 group min-h-0 md:min-h-[340px] flex items-center"
       >
-        {/* Subtle grid pattern overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff05_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
-
-        {/* Quiet, Premium glow fields */}
-        <div className="absolute inset-0 overflow-hidden">
-            <motion.div 
-                animate={{ 
-                    scale: [1, 1.15, 1],
-                    x: [0, 40, 0],
-                    y: [0, -20, 0]
-                }}
-                transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-                className="absolute -top-[20%] -left-[10%] w-[65%] h-[65%] bg-amber-500/10 blur-[130px] rounded-full" 
-            />
-            <motion.div 
-                animate={{ 
-                    scale: [1.15, 1, 1.15],
-                    x: [0, -30, 0],
-                    y: [0, 30, 0]
-                }}
-                transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-                className="absolute -bottom-[20%] -right-[10%] w-[55%] h-[55%] bg-emerald-500/10 blur-[120px] rounded-full" 
-            />
-            <motion.div 
-                animate={{ 
-                    scale: [1, 1.2, 1],
-                    x: [0, 20, 0],
-                    y: [0, 40, 0]
-                }}
-                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                className="absolute top-[20%] right-[10%] w-[35%] h-[35%] bg-indigo-500/10 blur-[110px] rounded-full" 
-            />
-        </div>
+        {/* Subtle Ambient Glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-50/70 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-50/60 rounded-full blur-3xl pointer-events-none" />
         
-        {/* Interactive Mouse Glow */}
-        <motion.div 
-            className="absolute pointer-events-none w-[600px] h-[600px] bg-amber-500/5 blur-[120px] rounded-full z-0"
-            animate={{
-                x: mousePos.x - 300,
-                y: mousePos.y - 300,
-            }}
-            transition={{ type: "spring", damping: 45, stiffness: 100 }}
-        />
-
-        <div className="relative w-full px-6 py-8 md:px-16 md:py-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10">
-          <div className="text-center lg:text-left max-w-2xl z-10 w-full space-y-4 md:space-y-6">
+        <div className="relative w-full px-6 py-8 md:px-14 md:py-12 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10 z-10">
+          <div className="text-center lg:text-left max-w-2xl z-10 w-full space-y-4 md:space-y-5">
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-amber-500/10 backdrop-blur-2xl rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] border border-amber-500/20 text-[#dfb975] shadow-sm"
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-amber-50 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] border border-amber-200/70 text-amber-800 shadow-xs"
             >
               <div className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -119,65 +79,65 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
             
             <div className="space-y-2 md:space-y-3">
               <motion.h1 
-                initial={{ y: 30, opacity: 0 }}
+                initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="text-4xl md:text-6xl lg:text-7xl font-sans font-black leading-none tracking-tight text-white"
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="text-3xl md:text-5xl lg:text-6xl font-sans font-black leading-tight tracking-tight text-slate-900"
               >
                 TERAS <br className="hidden md:block"/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-[#dfb975] to-emerald-300 drop-shadow-[0_4px_12px_rgba(223,185,117,0.15)] font-serif italic font-bold">
+                <span className="text-amber-600 font-serif italic font-bold">
                   {RT_NAME}
                 </span>
               </motion.h1>
               
               <motion.p 
-                initial={{ y: 20, opacity: 0 }}
+                initial={{ y: 15, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-slate-300 text-xs md:text-base font-medium leading-relaxed max-w-lg"
+                transition={{ delay: 0.4 }}
+                className="text-slate-500 text-xs md:text-sm font-medium leading-relaxed max-w-lg"
               >
-                Harmoni warga dalam satu genggaman. Platform digital modern untuk mewujudkan <span className="text-white hover:text-[#dfb975] font-black cursor-default transition-colors">RT 02 yang Sinergis, Aman, dan Transparan.</span>
+                Harmoni warga dalam satu genggaman. Platform digital modern untuk mewujudkan <span className="text-slate-800 font-black">RT 02 yang Sinergis, Aman, dan Transparan.</span>
               </motion.p>
             </div>
 
             {/* 3 Quick Stat Pills */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55 }}
+              transition={{ delay: 0.45 }}
               className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1"
             >
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300">
-                <Building2 size={13} className="text-amber-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/60 rounded-xl text-[11px] font-bold text-slate-700">
+                <Building2 size={13} className="text-amber-500" />
                 <span>120+ Hunian</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300">
-                <Shield size={13} className="text-emerald-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/60 rounded-xl text-[11px] font-bold text-slate-700">
+                <Shield size={13} className="text-emerald-500" />
                 <span>24 Jam Siskamling</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300">
-                <Lock size={13} className="text-sky-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/60 rounded-xl text-[11px] font-bold text-slate-700">
+                <Lock size={13} className="text-indigo-500" />
                 <span>Data Terenkripsi</span>
               </span>
             </motion.div>
 
             <motion.div 
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 15, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.5 }}
               className="flex flex-row flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-4 w-full pt-2"
             >
               <button 
                 onClick={onExplore}
-                className="flex items-center gap-2 px-6 py-3.5 md:px-8 md:py-4 text-xs font-black uppercase tracking-wider bg-gradient-to-r from-[#dfb975] via-[#e2c184] to-[#c69a52] text-slate-950 rounded-2xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer font-sans hover:scale-105"
+                className="flex items-center gap-2 px-6 py-3 md:px-7 md:py-3.5 text-xs font-black uppercase tracking-wider bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer hover:scale-105"
               >
                 <span>Mulai Jelajahi</span>
-                <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
               
               <button 
                 onClick={handleSmartEnvClick}
-                className="flex items-center gap-2 px-6 py-3.5 md:px-8 md:py-4 text-xs font-black uppercase tracking-wider bg-white/5 hover:bg-white/10 border border-white/15 text-white rounded-2xl transition-all font-sans cursor-pointer hover:border-emerald-400/40"
+                className="flex items-center gap-2 px-6 py-3 md:px-7 md:py-3.5 text-xs font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-800 rounded-2xl transition-all cursor-pointer font-sans"
               >
                 <ShieldCheck size={16} className="text-emerald-400 animate-pulse" />
                 <span>Smart Env</span>

@@ -274,40 +274,48 @@ export const PublicLibrary: React.FC = () => {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 select-none" id="library-container">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-150 px-3 py-1 rounded-full">
-            Taman Bacaan Digital & Komunitas Literasi
-          </span>
-          <h1 className="text-3xl font-black text-slate-800 mt-2 tracking-tight">TERAS Micro-Library Exchange</h1>
-          <p className="text-slate-500 font-medium text-sm mt-1">Gagas tukar buku fisik, sumbang karya, & baca materi edukasi digital eksklusif warga RT 02.</p>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 font-sans" id="library-container">
+      {/* Clean Modern Page Header */}
+      <div className="bg-white rounded-[2.5rem] p-8 md:p-12 text-slate-900 border border-slate-200/70 shadow-sm mb-10 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/60 rounded-full blur-3xl pointer-events-none" />
         
-        {/* Navigation Tabs */}
-        <div className="flex bg-slate-100 rounded-2xl p-1 w-full md:w-auto shadow-sm border border-slate-200">
-          <button
-            onClick={() => setActiveTab('katalog')}
-            className={`flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${activeTab === 'katalog' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
-          >
-            <BookOpen size={14} />
-            Katalog Buku
-          </button>
-          <button
-            onClick={() => setActiveTab('permintaan')}
-            className={`flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${activeTab === 'permintaan' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
-          >
-            <Clock size={14} />
-            Aktivitas {requests.length > 0 && <span className="px-1.5 py-0.5 bg-indigo-500 text-white rounded-full text-[9px] font-black">{requests.length}</span>}
-          </button>
-          <button
-            onClick={() => setActiveTab('kontribusi')}
-            className={`flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${activeTab === 'kontribusi' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
-          >
-            <Plus size={14} />
-            Sumbang Buku
-          </button>
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 bg-indigo-50 border border-indigo-100 px-4 py-1.5 rounded-full shadow-xs">
+              <Sparkles size={14} className="text-indigo-600" /> Taman Bacaan & Inventaris Literasi Digital RT 02
+            </span>
+            <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+              Micro-Library <span className="text-indigo-600 font-serif italic">& Inventaris Warga</span>
+            </h1>
+            <p className="text-slate-500 font-medium text-xs md:text-sm max-w-2xl leading-relaxed">
+              Gagas pinjam tukar buku fisik, sumbang karya literasi, serta baca materi edukasi digital eksklusif warga RT 02.
+            </p>
+          </div>
+          
+          {/* Clean Navigation Tabs */}
+          <div className="flex bg-slate-100 p-1.5 rounded-2xl w-full md:w-auto border border-slate-200/80">
+            <button
+              onClick={() => setActiveTab('katalog')}
+              className={`flex-1 md:flex-initial px-4 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'katalog' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
+            >
+              <BookOpen size={15} />
+              Katalog
+            </button>
+            <button
+              onClick={() => setActiveTab('permintaan')}
+              className={`flex-1 md:flex-initial px-4 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'permintaan' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
+            >
+              <Clock size={15} />
+              Aktivitas {requests.length > 0 && <span className="px-1.5 py-0.5 bg-indigo-500 text-white rounded-full text-[9px] font-black">{requests.length}</span>}
+            </button>
+            <button
+              onClick={() => setActiveTab('kontribusi')}
+              className={`flex-1 md:flex-initial px-4 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'kontribusi' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
+            >
+              <Plus size={15} />
+              Sumbang Buku
+            </button>
+          </div>
         </div>
       </div>
 
