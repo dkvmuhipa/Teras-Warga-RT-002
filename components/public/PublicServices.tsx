@@ -738,80 +738,98 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="max-w-5xl mx-auto px-4 py-8 mb-24 font-sans"
+      className="max-w-6xl mx-auto px-4 py-8 mb-24 font-sans"
     >
-      {/* Header Section */}
-      <div className="relative mb-20 pt-10">
-        {/* Atmospheric Background Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[10%] w-[40%] h-[60%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[10%] w-[30%] h-[50%] bg-violet-200/20 blur-[100px] rounded-full" />
-        </div>
+      {/* Clean Modern Hero Section dengan Animasi Soft Floating */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative bg-white rounded-[2.5rem] p-8 md:p-12 text-slate-900 border border-slate-200/70 shadow-sm mb-10 overflow-hidden"
+      >
+        {/* Animated Background Glow Orbs */}
+        <motion.div 
+          animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/70 rounded-full blur-3xl pointer-events-none" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50/60 rounded-full blur-3xl pointer-events-none" 
+        />
 
-        <div className="text-center max-w-4xl mx-auto">
+        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-5">
           <motion.div 
-            initial={{ y: 20, opacity: 0 }}
+            initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md border border-indigo-100 rounded-full shadow-sm mb-8"
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full shadow-xs"
           >
-            <Sparkles size={16} className="text-indigo-600" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">Layanan Digital Terpadu</span>
+            <Sparkles size={14} className="text-indigo-600 animate-spin-slow" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700">Layanan Digital Terpadu RT 02</span>
           </motion.div>
           
           <motion.h1 
-            initial={{ y: 20, opacity: 0 }}
+            initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-8 leading-[0.95]"
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
           >
-            Solusi Administrasi <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 bg-[length:200%_auto] animate-gradient-x">
-              Warga Lebih Cerdas.
+            Layanan Warga Mandiri & <br/>
+            <span className="text-indigo-600 font-serif italic">
+              Respon Cepat Lingkungan.
             </span>
           </motion.h1>
           
           <motion.p 
-            initial={{ y: 20, opacity: 0 }}
+            initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-slate-500 font-medium text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-12"
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="text-slate-500 font-medium text-xs md:text-sm max-w-2xl mx-auto leading-relaxed"
           >
-            Urus surat pengantar, lapor kejadian, hingga mutasi warga kini lebih mudah, cepat, dan transparan langsung dari genggaman Anda.
+            Pengajuan surat pengantar mandiri, pelaporan tamu 24 jam, aduan ketertiban lingkungan, hingga mutasi kependudukan terintegrasi.
           </motion.p>
 
-          {/* Quick Stats / Info */}
+          {/* Clean Features Grid dengan Animated Cards */}
           <motion.div 
-            initial={{ y: 20, opacity: 0 }}
+            initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto"
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 max-w-3xl mx-auto text-left"
           >
             {[
-              { label: 'Proses Cepat', icon: Clock, desc: '1x24 Jam' },
-              { label: 'Transparan', icon: Eye, desc: 'Pantau Status' },
-              { label: 'Paperless', icon: FileText, desc: 'Digital PDF' },
-              { label: 'Terintegrasi', icon: CheckCircle2, desc: 'Data Akurat' }
+              { label: 'Estimasi Selesai', icon: Clock, desc: '1x24 Jam Kerja', color: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
+              { label: 'Pelacakan Berkas', icon: Eye, desc: 'Pantau Real-Time', color: 'text-amber-600 bg-amber-50 border-amber-100' },
+              { label: 'Format Resmi', icon: FileText, desc: 'Cetak PDF Digital', color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+              { label: 'Keamanan Data', icon: ShieldCheck, desc: 'Verifikasi PIN RT', color: 'text-blue-600 bg-blue-50 border-blue-100' }
             ].map((item, i) => (
-              <div key={i} className="p-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-3xl text-left hover:bg-white hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
-                <item.icon size={20} className="text-indigo-600 mb-3 group-hover:scale-110 transition-transform" />
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">{item.label}</p>
-                <p className="text-sm font-bold text-slate-700">{item.desc}</p>
-              </div>
+              <motion.div 
+                key={i} 
+                whileHover={{ y: -4, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                className="p-3.5 bg-slate-50/80 border border-slate-200/60 rounded-2xl transition-all hover:bg-white hover:shadow-lg hover:shadow-indigo-500/5 cursor-pointer group"
+              >
+                <div className={`w-8 h-8 rounded-xl ${item.color} border flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
+                  <item.icon size={16} />
+                </div>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.label}</p>
+                <p className="text-xs font-black text-slate-800 mt-0.5">{item.desc}</p>
+              </motion.div>
             ))}
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Modern Tabs Navigation */}
-      <div className="sticky top-[64px] md:top-[80px] z-30 flex justify-center mb-8 md:mb-16 px-4 pointer-events-none">
-        <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-[2rem] inline-flex shadow-2xl shadow-indigo-500/10 border border-white/50 overflow-x-auto no-scrollbar max-w-full pointer-events-auto">
+      {/* Animated Floating Tabs Navigation */}
+      <div className="sticky top-[64px] md:top-[80px] z-30 flex justify-center mb-8 md:mb-10 px-4 pointer-events-none">
+        <div className="bg-white/95 backdrop-blur-xl p-1.5 rounded-2xl inline-flex shadow-xl shadow-slate-900/5 border border-slate-200/80 overflow-x-auto no-scrollbar max-w-full pointer-events-auto">
           {[
-            { id: 'surat', label: 'Layanan Surat', shortLabel: 'Surat', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-            { id: 'tamu', label: 'Lapor Tamu', shortLabel: 'Tamu', icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50' },
-            { id: 'lapor', label: 'Lapor Warga', shortLabel: 'Aduan', icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
-            { id: 'mutasi', label: 'Mutasi Warga', shortLabel: 'Mutasi', icon: UserPlus, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { id: 'history', label: 'Cek Status', shortLabel: 'Status', icon: History, color: 'text-amber-600', bg: 'bg-amber-50' }
+            { id: 'surat', label: 'Layanan Surat', icon: FileText },
+            { id: 'tamu', label: 'Lapor Tamu', icon: ShieldAlert },
+            { id: 'lapor', label: 'Aduan Warga', icon: AlertTriangle },
+            { id: 'mutasi', label: 'Mutasi Warga', icon: UserPlus },
+            { id: 'history', label: 'Cek Status', icon: History }
           ].map(tab => {
             const isActive = activeTab === tab.id;
             return (
@@ -819,28 +837,21 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`
-                  relative flex items-center justify-center gap-1.5 px-3 py-2.5 sm:px-6 sm:py-3 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-wider md:tracking-widest transition-all duration-300
+                  relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all cursor-pointer whitespace-nowrap active:scale-95
                   ${isActive 
-                    ? `${tab.bg} ${tab.color} shadow-sm px-4 sm:px-6` 
-                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}
+                    ? 'text-white' 
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'}
                 `}
               >
-                <tab.icon size={15} strokeWidth={2.5} className={`${isActive ? 'scale-110' : 'scale-100'} transition-transform shrink-0`} />
-                <span className={`
-                  text-[9px] md:text-xs font-black tracking-wider whitespace-nowrap transition-all duration-300
-                  ${isActive 
-                    ? 'block opacity-100 ml-1' 
-                    : 'hidden sm:block opacity-60 overflow-hidden'}
-                `}>
-                  {isActive ? tab.shortLabel : tab.label}
-                </span>
                 {isActive && (
                   <motion.div 
-                    layoutId="activeTab"
-                    className="absolute inset-0 border-2 border-current opacity-10 rounded-2xl"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    layoutId="activeCleanTabIndicator"
+                    className="absolute inset-0 bg-slate-900 rounded-xl shadow-md"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
+                <tab.icon size={15} strokeWidth={2} className="relative z-10" />
+                <span className="relative z-10">{tab.label}</span>
               </button>
             );
           })}
@@ -863,21 +874,21 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
         {activeTab === 'surat' && (
           <motion.div 
             key="surat"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="bg-white p-6 md:p-16 rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl shadow-indigo-100/30 overflow-hidden"
+            exit={{ opacity: 0, y: -15 }}
+            className="bg-white p-6 md:p-12 rounded-[2.5rem] border border-slate-200/80 shadow-sm overflow-hidden"
           >
             {/* Header Area */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 pb-8 border-b border-slate-100">
-              <div className="flex items-center gap-5">
-                <div className="p-4 bg-indigo-600 text-white rounded-[1.8rem] shadow-xl shadow-indigo-200/80 transition-transform duration-300 hover:scale-105">
-                  <FileText size={36} strokeWidth={2} />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-6 border-b border-slate-100">
+              <div className="flex items-center gap-4">
+                <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100 shrink-0">
+                  <FileText size={28} strokeWidth={2} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.25em] block mb-1">E-Layanan Mandiri</span>
-                  <h2 className="text-2xl md:text-3.5xl font-black text-slate-900 tracking-tight">Permohonan Surat</h2>
-                  <p className="text-slate-500 text-xs md:text-sm font-medium mt-0.5">Dapatkan surat pengantar resmi RT 02 ke Kelurahan secara instan dan aman.</p>
+                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] block mb-0.5">Pelayanan Administrasi Warga</span>
+                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Permohonan Surat Pengantar</h2>
+                  <p className="text-slate-500 text-xs font-medium mt-0.5">Dapatkan pengantar resmi RT 02 ke Kelurahan Tondo secara instan dan digital.</p>
                 </div>
               </div>
             </div>

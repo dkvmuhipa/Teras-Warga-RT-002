@@ -48,6 +48,16 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const [cleanestBlock, setCleanestBlock] = React.useState(settings?.cleanestBlock || 'BLOK C5 (Kavling 1-12)');
   const [cleanestScore, setCleanestScore] = React.useState(settings?.cleanestScore || 98);
   const [cleanestMonth, setCleanestMonth] = React.useState(settings?.cleanestMonth || 'Agustus 2026');
+  
+  const [cleanestRankings, setCleanestRankings] = React.useState<Array<{ rank: number; block: string; score: number; status: string }>>(
+    settings?.cleanestRankings || [
+      { rank: 1, block: 'BLOK C5 (Kavling 1-12)', score: 98, status: 'Sangat Asri & Bebas Sampah' },
+      { rank: 2, block: 'BLOK A2 (Kavling 13-24)', score: 95, status: 'Saluran Drainase Sangat Bersih' },
+      { rank: 3, block: 'BLOK B1 (Kavling 25-36)', score: 91, status: 'Kerapian Pekarangan Baik' },
+      { rank: 4, block: 'BLOK D4 (Kavling 37-48)', score: 87, status: 'Pekarangan Rapi' },
+      { rank: 5, block: 'BLOK E3 (Kavling 49-60)', score: 84, status: 'Cukup Rapi' },
+    ]
+  );
 
   // Gateway Settings State
   const [waGatewayUrl, setWaGatewayUrl] = React.useState(settings?.waGatewayUrl || 'https://api.whatsapp-gateway.local');
@@ -61,6 +71,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       if (settings.cleanestBlock) setCleanestBlock(settings.cleanestBlock);
       if (settings.cleanestScore) setCleanestScore(settings.cleanestScore);
       if (settings.cleanestMonth) setCleanestMonth(settings.cleanestMonth);
+      if (settings.cleanestRankings) setCleanestRankings(settings.cleanestRankings);
       if (settings.waGatewayUrl) setWaGatewayUrl(settings.waGatewayUrl);
       if (settings.waApiKey) setWaApiKey(settings.waApiKey);
     }
@@ -69,13 +80,16 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const handleUpdateCleanliness = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Sync rank 1 to cleanestBlock and cleanestScore
+      const rank1 = cleanestRankings[0];
       await onUpdateSettings({
         ...settings,
-        cleanestBlock,
-        cleanestScore: Number(cleanestScore),
-        cleanestMonth
+        cleanestBlock: rank1?.block || cleanestBlock,
+        cleanestScore: Number(rank1?.score || cleanestScore),
+        cleanestMonth,
+        cleanestRankings
       });
-      toast.success('Pengaturan Blok Terbersih berhasil diperbarui!');
+      toast.success('Pengaturan Peringkat Kebersihan 5 Blok berhasil diperbarui!');
     } catch (error) {
       toast.error('Gagal memperbarui pengaturan kebersihan.');
     }
@@ -444,51 +458,93 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       {activeTab === 'cleanliness' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7">
-            <Card title="Pengaturan Papan Kebersihan Blok Terbersih" icon={ShieldCheck} className="border-slate-200/80 rounded-[2.5rem] p-6 md:p-8">
+            <Card title="Manajemen Papan Peringkat Kebersihan 5 Blok" icon={ShieldCheck} className="border-slate-200/80 rounded-[2.5rem] p-6 md:p-8">
               <p className="text-xs text-slate-500 font-semibold mb-6 leading-relaxed">
-                Tentukan pemenang Juara 1 Kebersihan Blok bulanan, nilai evaluasi gotong royong, dan periode evaluasi untuk ditampilkan di Beranda Warga.
+                Kelola urutan peringkat 1 sampai 5 kebersihan blok bulanan, nilai evaluasi (1-100), dan status deskripsi untuk ditampilkan di Beranda & Modal Peta Warga.
               </p>
-              <form onSubmit={handleUpdateCleanliness} className="space-y-4">
+              <form onSubmit={handleUpdateCleanliness} className="space-y-6">
                 <div>
-                  <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Nama Blok Pemenang</label>
+                  <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Periode Bulan & Tahun Evaluation</label>
                   <input 
                     type="text"
                     className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-                    value={cleanestBlock}
-                    onChange={(e) => setCleanestBlock(e.target.value)}
-                    placeholder="Contoh: BLOK C5 (Kavling 1-12)"
+                    value={cleanestMonth}
+                    onChange={(e) => setCleanestMonth(e.target.value)}
+                    placeholder="Contoh: Agustus 2026"
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Nilai Evaluasi (1-100)</label>
-                    <input 
-                      type="number"
-                      max={100}
-                      min={0}
-                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-                      value={cleanestScore}
-                      onChange={(e) => setCleanestScore(Number(e.target.value))}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Periode Bulan & Tahun</label>
-                    <input 
-                      type="text"
-                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-                      value={cleanestMonth}
-                      onChange={(e) => setCleanestMonth(e.target.value)}
-                      placeholder="Contoh: Agustus 2026"
-                      required
-                    />
-                  </div>
+                <div className="space-y-4 pt-2 border-t border-slate-100">
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Input Peringkat Blok (Juara 1 - 5)</h4>
+                  
+                  {cleanestRankings.map((rankItem, index) => (
+                    <div key={rankItem.rank} className="p-4 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                          index === 0 ? 'bg-amber-500 text-white' : index === 1 ? 'bg-slate-300 text-slate-800' : index === 2 ? 'bg-amber-700 text-white' : 'bg-slate-200 text-slate-700'
+                        }`}>
+                          {index === 0 ? '🥇 Juara 1 (Emas)' : index === 1 ? '🥈 Juara 2 (Perak)' : index === 2 ? '🥉 Juara 3 (Perunggu)' : `Peringkat ${rankItem.rank}`}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400">Rank #{rankItem.rank}</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div className="md:col-span-8">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nama Blok & Kavling</label>
+                          <input 
+                            type="text"
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:border-indigo-500 outline-none"
+                            value={rankItem.block}
+                            onChange={(e) => {
+                              const newRankings = [...cleanestRankings];
+                              newRankings[index].block = e.target.value;
+                              setCleanestRankings(newRankings);
+                              if (index === 0) setCleanestBlock(e.target.value);
+                            }}
+                            placeholder="Contoh: BLOK C5 (Kavling 1-12)"
+                            required
+                          />
+                        </div>
+                        <div className="md:col-span-4">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Score (1-100)</label>
+                          <input 
+                            type="number"
+                            max={100}
+                            min={0}
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:border-indigo-500 outline-none"
+                            value={rankItem.score}
+                            onChange={(e) => {
+                              const newRankings = [...cleanestRankings];
+                              newRankings[index].score = Number(e.target.value);
+                              setCleanestRankings(newRankings);
+                              if (index === 0) setCleanestScore(Number(e.target.value));
+                            }}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Catatan Evaluasi Lingkungan</label>
+                        <input 
+                          type="text"
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:border-indigo-500 outline-none"
+                          value={rankItem.status}
+                          onChange={(e) => {
+                            const newRankings = [...cleanestRankings];
+                            newRankings[index].status = e.target.value;
+                            setCleanestRankings(newRankings);
+                          }}
+                          placeholder="Contoh: Sangat Asri & Bebas Sampah"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20">
-                  Simpan Pengaturan Kebersihan
+                  Simpan Pengaturan Peringkat Kebersihan
                 </Button>
               </form>
             </Card>

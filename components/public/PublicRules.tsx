@@ -719,16 +719,16 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
                   </p>
                 </motion.div>
               ) : (
-                filteredRules.map((rule) => {
+                filteredRules.map((rule, ruleIdx) => {
                   const badge = getBadgeDetails(rule.category);
                   const isOpen = isRuleExpanded(rule.title);
-                  const originalIndex = rules.findIndex(r => r.title === rule.title);
-                  const pasalNumber = originalIndex + 1;
+                  const originalIndex = rules.findIndex(r => r.nomorBerkas === rule.nomorBerkas);
+                  const pasalNumber = (originalIndex !== -1 ? originalIndex : ruleIdx) + 1;
                   const shortRegistry = `0${pasalNumber}/2026`;
                   
                   return (
                     <motion.div 
-                      key={rule.title}
+                      key={`${rule.nomorBerkas || rule.title}-${ruleIdx}`}
                       id={`rule-card-${rule.title}`}
                       layout="position"
                       variants={itemVariants}

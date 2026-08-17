@@ -581,7 +581,12 @@ export const App = () => {
                         <PanicButton houses={houses} />
                         <PushNotificationManager userId={localStorage.getItem('resident_house_id') || 'guest_user'} />
                         <MobileBottomNav 
-                            currentTab={window.location.hash.replace('#/', '') || 'info'}
+                            currentTab={
+                              window.location.hash.includes('/rules') ? 'rules' :
+                              window.location.hash.includes('/services') ? 'services' :
+                              window.location.hash.includes('/admin') ? 'admin' :
+                              'info'
+                            }
                             onTabChange={(tab) => {
                               if (tab === 'admin') {
                                 window.location.hash = '#/admin';

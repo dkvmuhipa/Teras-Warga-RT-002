@@ -43,6 +43,7 @@ interface FinancialContextType {
     cleanestBlock?: string;
     cleanestScore?: number;
     cleanestMonth?: string;
+    cleanestRankings?: Array<{ rank: number; block: string; score: number; status: string }>;
   };
   isMonthMatch: (monthA: string, monthB: string) => boolean;
 }
