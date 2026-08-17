@@ -151,85 +151,87 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
             transition={{ delay: 0.7, duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="w-full lg:w-auto z-10"
           >
-            <div className="bg-slate-900/50 backdrop-blur-3xl border border-slate-700/60 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-8 text-white w-full lg:min-w-[340px] shadow-[0_45px_100px_-25px_rgba(0,0,0,0.6)] relative group/widget overflow-hidden hover:border-[#dfb975]/30 transition-all duration-700">
-              {/* Subtle shining top line */}
-              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#dfb975]/40 via-[#dfb975]/10 to-transparent pointer-events-none" />
-              
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-emerald-500/5 opacity-0 group-hover/widget:opacity-100 transition-opacity duration-1000" />
-              
-              <div className="relative z-10 space-y-4 md:space-y-6">
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.8rem] p-6 md:p-8 text-slate-900 border border-slate-200/90 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.08)] w-full lg:min-w-[360px] relative group/widget overflow-hidden transition-all duration-700 hover:shadow-[0_40px_90px_-15px_rgba(217,119,6,0.12)]">
+              {/* Subtle ambient light glow orbs */}
+              <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-200/40 rounded-full blur-3xl pointer-events-none group-hover/widget:scale-125 transition-transform duration-1000" />
+              <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-emerald-200/35 rounded-full blur-3xl pointer-events-none group-hover/widget:scale-125 transition-transform duration-1000" />
+
+              <div className="relative z-10 space-y-6">
+                {/* Top Bar: Time & Weather Badge */}
                 <div className="flex justify-between items-start gap-4">
-                  <div className="space-y-1">
-                    <p className="text-4xl md:text-5xl font-serif font-black tracking-tight flex items-baseline gap-1 text-white">
-                      <span>{date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
-                      <span className="text-[10px] text-[#dfb975] font-mono font-black uppercase tracking-widest bg-[#dfb975]/10 px-2 py-0.5 rounded-md border border-[#dfb975]/20 ml-1">WITA</span>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Live Station</span>
+                    </div>
+                    <p className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 flex items-baseline gap-2 font-sans">
+                      <span>{date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-50/90 px-2.5 py-1 rounded-xl border border-amber-200/80 shadow-2xs">WITA</span>
                     </p>
-                    <p className="text-[10px] md:text-xs font-bold text-slate-300 uppercase tracking-[0.15em] flex items-center gap-1.5">
-                      <Sparkles size={11} className="text-[#dfb975]" />
+                    <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-[0.18em] flex items-center gap-1.5 pt-0.5">
+                      <Sparkles size={13} className="text-amber-500 animate-spin-slow" />
                       {date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
                     </p>
                   </div>
-                  
-                  <div className="flex flex-col items-end gap-2 shrink-0">
+
+                  <div className="flex flex-col items-end gap-2.5 shrink-0">
                     <motion.div 
-                        whileHover={{ scale: 1.05, rotate: 5 }}
-                        className="p-3 bg-white/5 rounded-2xl border border-white/10 shadow-lg backdrop-blur-xl shrink-0"
+                      whileHover={{ scale: 1.1, rotate: 6 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      className="p-4 bg-slate-900 text-amber-400 rounded-3xl shadow-lg border border-slate-800 shrink-0 cursor-pointer"
                     >
                       {getWeatherIcon(weather?.weatherCode)}
                     </motion.div>
                     {weather?.aqi !== undefined && (
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md shrink-0">
-                        <Activity size={10} className={weather.aqiColor} />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-white/90">AQI {weather.aqi}</span>
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50/80 rounded-xl border border-amber-200/70 shrink-0 shadow-2xs">
+                        <Activity size={12} className="text-amber-600" />
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-900">AQI {weather.aqi}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="h-px bg-gradient-to-r from-white/10 via-white/5 to-transparent" />
+                <div className="h-px bg-slate-100" />
 
+                {/* 4 Weather Parameter Cards Grid */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.04] border border-white/10 rounded-xl hover:bg-white/[0.08] transition-all duration-300">
-                      <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400 shrink-0">
-                        <Thermometer size={14} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Suhu</p>
-                        <p className="text-xs md:text-sm font-black text-white mt-0.5">{weather ? `${weather.temp}°C` : '--'}</p>
-                      </div>
+                  <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl border border-rose-100/80 shrink-0 shadow-2xs">
+                      <Thermometer size={16} />
                     </div>
-                    
-                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.04] border border-white/10 rounded-xl hover:bg-white/[0.08] transition-all duration-300">
-                      <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400 shrink-0">
-                        <Droplets size={14} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Lembab</p>
-                        <p className="text-xs md:text-sm font-black text-white mt-0.5">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
-                      </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Suhu Udara</p>
+                      <p className="text-sm font-black text-slate-900 mt-0.5">{weather ? `${weather.temp}°C` : '--'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100/80 shrink-0 shadow-2xs">
+                      <WindIcon size={16} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Laju Angin</p>
+                      <p className="text-sm font-black text-slate-900 mt-0.5 truncate">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.04] border border-white/10 rounded-xl hover:bg-white/[0.08] transition-all duration-300">
-                      <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400 shrink-0">
-                        <WindIcon size={14} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Angin</p>
-                        <p className="text-xs md:text-sm font-black text-white mt-0.5 truncate">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
-                      </div>
+                  <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100/80 shrink-0 shadow-2xs">
+                      <Droplets size={16} />
                     </div>
-                    
-                    <div className="flex items-center gap-2.5 p-2 bg-white/[0.04] border border-white/10 rounded-xl hover:bg-white/[0.08] transition-all duration-300">
-                      <div className="p-2 bg-sky-500/20 rounded-lg text-sky-400 shrink-0">
-                        <Cloud size={14} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Kondisi</p>
-                        <p className="text-xs md:text-sm font-black text-white mt-0.5 truncate">{weather ? weather.condition : '--'}</p>
-                      </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kelembaban</p>
+                      <p className="text-sm font-black text-slate-900 mt-0.5">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="p-2.5 bg-sky-50 text-sky-600 rounded-xl border border-sky-100/80 shrink-0 shadow-2xs">
+                      <Cloud size={16} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kondisi</p>
+                      <p className="text-sm font-black text-slate-900 mt-0.5 truncate">{weather ? weather.condition : 'Cerah'}</p>
                     </div>
                   </div>
                 </div>

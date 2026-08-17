@@ -252,29 +252,29 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       {/* Modern Live Info Marquee Banner */}
       <motion.div 
         variants={itemVariants} 
-        className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-3.5 border border-indigo-500/20 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-3 overflow-hidden"
+        className="bg-white/90 backdrop-blur-md rounded-3xl p-4 border border-slate-200/80 shadow-xs text-slate-800 flex flex-col md:flex-row items-center justify-between gap-3 overflow-hidden"
       >
         <div className="flex items-center gap-2.5 shrink-0 px-2">
-          <span className="flex h-3 w-3 relative">
+          <span className="flex h-2.5 w-2.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
           </span>
-          <span className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1">
-            <Sparkles size={13} /> LIVE UPDATE RT 02
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full flex items-center gap-1">
+            <Sparkles size={11} className="text-emerald-600" /> LIVE UPDATE RT 02
           </span>
         </div>
 
         <div className="flex-1 w-full overflow-hidden text-center md:text-left">
-          <p className="text-xs font-medium text-slate-200 truncate">
-            🌙 <span className="font-bold text-amber-300">Ronda Malam Ini ({today}):</span> {todayRonda && todayRonda.members.length > 0 ? todayRonda.members.slice(0, 3).join(', ') : 'Satgas Siskamling Standby'} &nbsp;|&nbsp; 
-            💰 <span className="font-bold text-emerald-300">Iuran Terkumpul Transparan:</span> Rp {(summaries.totalCollected || 0).toLocaleString('id-ID')} &nbsp;|&nbsp;
-            📜 <span className="font-bold text-sky-300">Tata Tertib:</span> 13 BAB Peraturan Lingkungan Resmi Disahkan
+          <p className="text-xs font-semibold text-slate-600 truncate">
+            🌙 <span className="font-bold text-slate-900">Ronda Malam Ini ({today}):</span> {todayRonda && todayRonda.members.length > 0 ? todayRonda.members.slice(0, 3).join(', ') : 'Satgas Siskamling Standby'} &nbsp;&bull;&nbsp; 
+            💰 <span className="font-bold text-emerald-700">Iuran Terkumpul:</span> Rp {(summaries.totalCollected || 0).toLocaleString('id-ID')} &nbsp;&bull;&nbsp;
+            📜 <span className="font-bold text-amber-700">Regulasi RT:</span> 13 BAB Peraturan Lingkungan Resmi Disahkan
           </p>
         </div>
 
         <button 
           onClick={() => navigate('/info')}
-          className="shrink-0 text-[11px] font-black uppercase tracking-wider text-indigo-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+          className="shrink-0 text-[10px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
         >
           <span>Pusat Info</span>
           <ChevronRight size={12} />
@@ -345,88 +345,98 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
       {/* Peraturan RT 02 - RT2LAW & Buku Saku Section */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* RT2LAW Card */}
-        <div 
+        {/* RT2LAW Card - Supreme Point of Interest (POI) */}
+        <motion.div 
+          whileHover={{ y: -6, scale: 1.01 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
           onClick={() => navigate('/rules')}
-          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-[#0c3127] to-[#041410] rounded-[3rem] p-8 md:p-10 border border-emerald-950/60 shadow-xl hover:shadow-emerald-900/10 transition-all duration-500 relative overflow-hidden group flex flex-col justify-between min-h-[320px]"
+          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 rounded-[3rem] p-8 md:p-12 text-white border border-amber-500/40 shadow-[0_30px_90px_-20px_rgba(217,119,6,0.25)] hover:shadow-[0_40px_110px_-15px_rgba(217,119,6,0.35)] transition-all duration-700 relative overflow-hidden group flex flex-col justify-between min-h-[360px]"
         >
-          {/* Subtle Pinstripe Pattern */}
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.015)_0px,rgba(255,255,255,0.015)_1px,transparent_1px,transparent_12px)] pointer-events-none" />
-          {/* Accent Glow */}
-          <div className="absolute top-[-50%] right-[-10%] w-[60%] h-[100%] bg-emerald-500/5 rounded-full blur-[100px] group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
+          {/* Subtle Golden Pinstripe Luxury Grid Overlay */}
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(217,119,6,0.03)_0px,rgba(217,119,6,0.03)_1px,transparent_1px,transparent_16px)] pointer-events-none" />
+          
+          {/* Radiant Ambient Gold & Emerald Light Orbs */}
+          <div className="absolute -top-20 -right-20 w-96 h-96 bg-amber-500/20 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+          <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-emerald-500/15 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
           
           <div className="relative z-10 space-y-6">
-            {/* Top header */}
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-[#dfb975] to-[#b38a43] text-[#0c3127] rounded-2xl shadow-md group-hover:scale-105 transition-transform">
-                <Scale size={24} strokeWidth={2.2} />
+            {/* Top Badge & Header */}
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="p-3.5 bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 rounded-2xl shadow-lg shadow-amber-500/20 group-hover:rotate-6 transition-transform">
+                  <Scale size={26} strokeWidth={2.4} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-400 block leading-none mb-1">Landasan Hukum RT 02</span>
+                  <span className="text-xs font-bold text-slate-300">Resmi Disahkan Wartha &amp; Pengurus</span>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#dfb975] leading-none mb-1">PERATURAN</p>
-                <p className="text-sm font-black text-white/90 leading-none">RT 02 Huntap Tondo 2</p>
-              </div>
+
+              <span className="px-3.5 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                <Sparkles size={12} className="text-amber-400 animate-spin-slow" /> 13 BAB RESMI
+              </span>
             </div>
 
-            {/* Middle Big Title */}
-            <div className="space-y-1 pt-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#dfb975]/85">PERATURAN WARGA</p>
-              <h2 className="text-4xl md:text-5xl font-black text-white tracking-[0.02em]">
-                RT2<span className="text-[#dfb975]">LAW</span>
+            {/* Middle Landmark Title */}
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">POINT OF INTEREST REGULASI</span>
+              </div>
+              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">
+                RT2<span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent font-serif italic">LAW</span>
               </h2>
-              <p className="text-white/70 text-xs md:text-sm font-semibold pt-1">
-                Peraturan resmi lingkungan RT — baca daftar & teks lengkap
+              <p className="text-slate-300 text-xs md:text-sm font-medium leading-relaxed max-w-xl">
+                Konstitusi &amp; Tata Tertib Lingkungan Terpadu 13 BAB yang mengatur norma sosial, ketertiban ronda, hingga sanksi keberadaban demi keharmonisan bersama.
               </p>
             </div>
           </div>
 
           {/* Separator and Footer */}
-          <div className="relative z-10 pt-4 mt-6">
-            <div className="border-t border-[#dfb975]/10 w-full mb-5" />
-            <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-white/40 tracking-[0.2em] uppercase font-black text-[10px]">KEL. TONDO, PALU</span>
-              <span className="flex items-center gap-2 text-[#dfb975] font-black group-hover:text-amber-300 transition-colors">
-                Baca Selengkapnya
-                <ChevronRight size={16} className="transform group-hover:translate-x-1.5 transition-transform" strokeWidth={3} />
-              </span>
-            </div>
+          <div className="relative z-10 pt-5 mt-6 border-t border-white/10 flex items-center justify-between">
+            <span className="text-slate-400 tracking-[0.2em] uppercase font-black text-[10px] flex items-center gap-2">
+              <ShieldCheck size={14} className="text-amber-400" /> KELURAHAN TONDO &bull; PALU
+            </span>
+            <span className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-all">
+              <span>Buka Regulasi Lengkap</span>
+              <ChevronRight size={16} strokeWidth={3} />
+            </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Companion Card: Buku Saku RT 02 */}
         <div 
           onClick={() => navigate('/faq')}
-          className="lg:col-span-1 cursor-pointer bg-slate-900 rounded-[3rem] p-8 border border-slate-800 shadow-xl hover:shadow-indigo-950/20 transition-all duration-500 relative overflow-hidden group flex flex-col justify-between min-h-[320px]"
+          className="lg:col-span-1 cursor-pointer bg-white rounded-[2.5rem] p-8 border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-500 relative overflow-hidden group flex flex-col justify-between min-h-[320px]"
         >
-          {/* Accent light ray */}
-          <div className="absolute bottom-[-20%] left-[-20%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[60px]" />
+          {/* Subtle Ambient Light Glow */}
+          <div className="absolute top-0 right-0 w-60 h-60 bg-indigo-50/70 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
           
-          <div className="relative z-10 space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl border border-indigo-500/20">
+          <div className="relative z-10 space-y-5">
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-indigo-50 text-indigo-700 rounded-2xl border border-indigo-100/80">
                 <HelpCircle size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 leading-none mb-1">TANYA JAWAB</p>
-                <p className="text-sm font-black text-white/90 leading-none">Bantuan Warga</p>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 block">Pusat Bantuan Warga</span>
+                <span className="text-xs font-bold text-slate-400">FAQ &amp; Informasi</span>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-400/80">FAQ CENTER</p>
-              <h3 className="text-2xl font-black text-white leading-tight">Buku Saku <br/><span className="text-indigo-400 italic font-serif">Digital</span></h3>
-              <p className="text-xs text-slate-400 leading-relaxed font-semibold">
-                Panduan administratif, tata cara surat pengantar, lapor tamu, & penanganan masalah darurat.
+            <div className="space-y-2 pt-2">
+              <h3 className="text-2xl font-black text-slate-900 leading-tight">Buku Saku <span className="text-indigo-600 font-serif italic">Digital</span></h3>
+              <p className="text-xs font-medium text-slate-500 leading-relaxed">
+                Panduan administratif kilat, tata cara pengajuan surat, lapor tamu 24 jam, dan penanganan darurat.
               </p>
             </div>
           </div>
 
-          <div className="relative z-10 pt-4 mt-6">
-            <div className="border-t border-slate-800 w-full mb-5" />
+          <div className="relative z-10 pt-4 mt-6 border-t border-slate-100">
             <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-slate-500 tracking-widest uppercase font-black text-[9px]">SISTEM TERAS RT</span>
-              <span className="flex items-center gap-2 text-indigo-400 font-extrabold group-hover:text-indigo-300 transition-colors">
-                Buka FAQ
-                <ChevronRight size={16} className="transform group-hover:translate-x-1.5 transition-transform" strokeWidth={3} />
+              <span className="text-slate-400 tracking-widest uppercase font-black text-[9px]">SISTEM TERAS RT</span>
+              <span className="flex items-center gap-1.5 text-slate-900 font-black group-hover:text-indigo-600 transition-colors">
+                <span>Buka FAQ</span>
+                <ChevronRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
               </span>
             </div>
           </div>

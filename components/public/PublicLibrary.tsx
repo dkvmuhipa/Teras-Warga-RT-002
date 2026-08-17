@@ -59,13 +59,76 @@ export const PublicLibrary: React.FC = () => {
   // Seed data if empty
   const defaultBooks: Omit<Book, 'id'>[] = [
     {
+      title: 'Buka Mata Terbaca: Panduan Kesiapsiagaan Gempa & Bencana Palu',
+      author: 'Tim Mitigasi & IT RT 02',
+      category: 'Sains & Teknologi',
+      synopsis: 'Buku saku digital mitigasi bencana alam gempa bumi & likuefaksi khusus kawasan Palu - Huntap Tondo. Berisi panduan evakuasi 10 detik pertama, jalur evakuasi aman RT 02, tas siaga bencana, dan pertolongan pertama.',
+      status: 'Digital Only',
+      ownerName: 'Tim Mitigasi RT 02',
+      coverUrl: 'bg-rose-700',
+      digitalUrl: `# BUKU SAKU DIGITAL MITIGASI BENCANA RT 02 / RW 020\n\nSelamat membaca panduan kesiapsiagaan mandiri warga Huntap Tondo 2.\n\n---\n\n### BAB 1: KODE RESPON 10 DETIK PERTAMA GEMPA BUMI\n\nSaat terjadi guncangan gempa bumi di wilayah Palu dan sekitarnya:\n1. **DROP / MERUNDUK**: Segera merunduk dan lindungi kepala serta leher dengan kedua tangan atau tas.\n2. **COVER / BERLINDUNG**: Berlindung di bawah meja kayu/besi yang kuat. Jangan berlindung dekat kaca atau lemari tinggi.\n3. **HOLD ON / BERPEGANGAN**: Pegang kaki meja erat-erat hingga guncangan gempa selesai.\n\n---\n\n### BAB 2: EVAKUASI MANDIRI KE TITIK KUMPUL (EVACUATION POINT)\n\nSetelah guncangan berhenti:\n* Keluar rumah secara tenang, jangan berlari saling mendorong.\n* Hindari tiang listrik, pohon tinggi, dan tembok pembatas yang retak.\n* Segera berkumpul di **Titik Kumpul Lapangan Serbaguna Blok A RT 02**.\n* Tim Satgas Siskamling RT akan melakukan pengecekan jumlah anggota keluarga berdasarkan Data Master Rumah.\n\n---\n\n### BAB 3: DAFTAR ISI TAS SIAGA BENCANA (TSB)\n\nSetiap rumah tangga RT 02 disarankan menyiapkan 1 Tas Siaga Bencana di dekat pintu keluar yang berisi:\n* Dokumen penting (Surat Tanah, Kartu Keluarga, Ijazah) dalam plastik kedap air.\n* Air minum kemasan (3 liter/orang) & Makanan siap saji tahan lama (biskuit/roti).\n* Kotak P3K standar (Kasa, Betadine, Obat Pribadi, Plester).\n* Senter LED, Baterai Cadangan, & Peluit Darurat.\n* Masker N95 & Pakaian ganti untuk 3 hari.\n\n---\n\n### KONTROL DARURAT BENCANA RT 02 PALU:\n* Pos Siskamling RT 02: +62 859-6119-4621\n* BPBD Kota Palu: (0451) 421-113\n* Basarnas Palu: 115 / (0451) 481-111`,
+      rating: 5.0,
+      createdAt: new Date().toISOString(),
+      reviews: [
+        { reviewerName: 'Pak RT 02', rating: 5, comment: 'Buku panduan ini wajib dibaca oleh seluruh warga baru & lama RT 02!', date: new Date().toISOString() }
+      ]
+    },
+    {
+      title: 'Panduan Siskamling & Keamanan Lingkungan Mandiri',
+      author: 'Pengurus Keamanan RT 02',
+      category: 'Non-Fiksi',
+      synopsis: 'Buku acuan tata cara pelaksanaan siskamling, patroli malam, SOP penanganan pencurian, lapor tamu 24 jam, dan protokol tanggap darurat bahaya kebakaran di kawasan pemukiman RT 02.',
+      status: 'Digital Only',
+      ownerName: 'Sie Keamanan RT 02',
+      coverUrl: 'bg-indigo-700',
+      digitalUrl: `# PANDUAN SISKAMLING & KEAMANAN LINGKUNGAN MANDIRI RT 02\n\n### PENDAHULUAN\nSiskamling (Sistem Keamanan Lingkungan) RT 02 diselenggarakan secara bergiliran oleh warga demi menjamin ketenangan huni 24 jam.\n\n---\n\n### BAB 1: JAM OPERASIONAL & PATROLI SISKAMLING\n* **Shift 1**: Pukul 22.00 - 01.00 WITA (Patroli Jalur Blok A & B)\n* **Shift 2**: Pukul 01.00 - 04.30 WITA (Patroli Jalur Blok C, D, & E)\n* Petugas ronda wajib mengisi **Buku Absensi Digital Siskamling** di Pos Garda Utama.\n\n---\n\n### BAB 2: KODE KETUKAN KENTONGAN SISKAMLING\n1. **Ketukan 1-1-1**: Tanda Patroli Aman (Setiap Jam)\n2. **Ketukan 2-2-2**: Tanda Pencurian / Bahaya Kejahatan\n3. **Ketukan 3-3-3**: Tanda Keberadaan Kebakaran\n4. **Ketukan 4-4-4**: Tanda Bencana Alam / Gempa\n5. **Ketukan Continuous (Continuous Roll)**: Tanda Bahaya Darurat / Memanggil Seluruh Warga\n\n---\n\n### BAB 3: SOP PENANGANAN TAMU ASING & TIDAK DIKENAL\n* Bila menjumpai orang asing mencurigakan di atas pukul 23.00 WITA, sapa secara sopan:\n  > *"Selamat malam Pak/Bu, ada yang bisa kami bantu? Mohon maaf sedang mencari rumah siapa?"*\n* Apabila tamu menginap lebih dari 1x24 jam, ingatkan tuan rumah untuk mengisi formulir **Lapor Tamu Online** pada aplikasi TERAS RT 02.`,
+      rating: 4.9,
+      createdAt: new Date().toISOString()
+    },
+    {
+      title: 'Manajemen Keuangan Rumah Tangga & Bisnis UMKM Warga',
+      author: 'Tim Ekonomi & UMKM RT 02',
+      category: 'Pengembangan Diri',
+      synopsis: 'E-book praktis mengelola pos keuangan keluarga, metode pencatatan kas harian UMKM, pemasaran produk lokal di Pasar Warga Digital RT 02, dan strategi investasi aman.',
+      status: 'Digital Only',
+      ownerName: 'Pokja UMKM RT 02',
+      coverUrl: 'bg-emerald-700',
+      digitalUrl: `# MANAJEMEN KEUANGAN RUMAH TANGGA & BISNIS UMKM WARGA\n\n### METODE 50-30-20 KEUANGAN KELUARGA\n1. **50% Kebutuhan Pokok**: Beras, Lauk, Listrik, Air PBB, Iuran RT, & Kesehatan.\n2. **30% Keinginan & Rekreasi**: Belanja kebutuhan tersier & hiburan keluarga.\n3. **20% Tabungan & Dana Darurat**: Disimpan untuk kejadian tidak terduga atau modal usaha.\n\n---\n\n### CARA MENDAFTARKAN PRODUK DI PASAR WARGA RT 02\n1. Buka menu **Pasar Warga / UMKM** pada aplikasi TERAS RT 02.\n2. Klik **Daftarkan Produk UMKM Saya**.\n3. Masukkan foto produk yang bersih, harga, dan nomor WhatsApp pemesanan.\n4. Produk Anda akan otomatis tampil di katalog publik warga RT 02!`,
+      rating: 4.8,
+      createdAt: new Date().toISOString()
+    },
+    {
+      title: 'Habis Gelap Terbitlah Terang (Letters of a Javanese Princess)',
+      author: 'R.A. Kartini',
+      category: 'Non-Fiksi',
+      synopsis: 'Koleksi surat-surat bersejarah Raden Ajeng Kartini (Public Domain Naskah Resmi Perpustakaan Nasional & Open Access) yang memperjuangkan kesetaraan pendidikan, kemanusiaan, dan pemikiran berdikari perempuan Nusantara.',
+      status: 'Digital Only',
+      ownerName: 'Arsip Perpustakaan Nasional',
+      coverUrl: 'bg-violet-700',
+      digitalUrl: `# HABIS GELAP TERBITLAH TERANG\n## Kumpulan Surat-Surat Raden Ajeng Kartini (1899 - 1904)\n\n### SURAT 1: KEPADA ESTELLE H. ZEEHANDELAAR\n*Jepara, 25 Mei 1899*\n\nSaya telah lama mendambakan untuk berkenalan dengan seorang "gadis modern", gadis berdikari yang melangkah gagah berani di jalannya sendiri melalui kehidupan ini; gadis yang bekerja tidak hanya demi kesejahteraan dan kebahagiaannya sendiri, tetapi juga membanting tulang untuk kemanusiaan yang lebih luas.\n\nHati saya selalu menyala-nyala oleh semangat kemajuan. Kami, gadis-gadis Jawa, masih terikat pada adat lama yang kaku. Namun jiwa kami tidak pernah berhenti berbisik tentang indahnya kebebasan berpikir dan pendidikan yang merata untuk seluruh anak bangsa.\n\n---\n\n### SURAT 2: KEPADA NYONYA R.M. ABENDANON-MANDRI\n*Jepara, 27 Oktober 1902*\n\nBanyak orang berkata: "Setelah malam gelap berlalu, fajar terang pasti akan tiba." Saya percaya bahwa kegelapan kebodohan dan keterbelakangan tidak akan selamanya mengurung kita. Melalui buku, ilmu pengetahuan, dan rasa kasih sayang antar sesama warga, kita dapat membangun masyarakat yang berbudi pekerti luhur.\n\nJangan pernah patah semangat hanya karena rintangan kecil di depan mata. Pendidikan adalah kunci utama yang akan membuka pintu kemajuan bagi generasi penerus kita.`,
+      rating: 5.0,
+      createdAt: new Date().toISOString()
+    },
+    {
+      title: 'Buku Saku Edukasi Sains & Lingkungan Hidup',
+      author: 'Kementerian Pendidikan & Kebudayaan RI (BSE Open Access)',
+      category: 'Sains & Teknologi',
+      synopsis: 'E-Book Sekolah Elektronik (BSE) lisensi terbuka pemerintah untuk pembelajaran mandiri keluarga warga RT 02. Berisi dasar-dasar daur ulang sampah rumah tangga, pemanfaatan energi surya, dan ekologi lingkungan pemukiman.',
+      status: 'Digital Only',
+      ownerName: 'Kemdikbud RI / Perpusnas',
+      coverUrl: 'bg-emerald-700',
+      digitalUrl: `# PANDUAN SAINS LINGKUNGAN & DAUR ULANG SAMPAH RT\n\n### BAB 1: PEMISAHAN SAMPAH MANDIRI DARI DAPUR RUMAH\n1. **Sampah Organik (Hijau)**: Sisa sayuran, buah-buahan, & dedaunan. (Bahan baku kompos komposter RT).\n2. **Sampah Anorganik (Kuning)**: Botol plastik, kaleng bekas, & kardus. (Dapat disetorkan ke Bank Sampah RT).\n3. **Sampah B3 / Berbahaya (Merah)**: Baterai bekas, lampu neon, & kemasan obat-obatan.\n\n---\n\n### BAB 2: PEMBUATAN KOMPOS SEDERHANA DI PEKARANGAN\n* Sediakan wadah ember bekas yang dilubangi di bagian bawahnya.\n* Masukkan tanah humus sebagai lapisan pertama (5 cm).\n* Masukkan sisa sampah organik dapur yang sudah dicincang halus.\n* Siram sedikit air gula merah / larutan EM4 untuk mempercepat pembusukan.\n* Tutup rapat dan biarkan selama 3-4 minggu hingga berubah menjadi pupuk organik kaya nutrisi!`,
+      rating: 4.9,
+      createdAt: new Date().toISOString()
+    },
+    {
       title: 'Laskar Pelangi',
       author: 'Andrea Hirata',
       category: 'Novel & Fiksi',
       synopsis: 'Kisah inspiratif tentang perjuangan sepuluh anak di Belitung dari keluarga miskin yang bersekolah di sekolah Muhammadiyah yang sangat sederhana. Dengan segala keterbatasan, mereka tidak pernah menyerah untuk meraih mimpi-mimpi mereka.',
       status: 'Tersedia',
       ownerName: 'Taman Bacaan RT 02',
-      coverUrl: 'bg-indigo-700',
+      coverUrl: 'bg-amber-700',
       rating: 4.8,
       createdAt: new Date().toISOString(),
       reviews: [
@@ -79,36 +142,12 @@ export const PublicLibrary: React.FC = () => {
       synopsis: 'Sebuah buku pengantar filsafat Stoisisme atau Stoic yang dikemas secara praktis dan relevan untuk kehidupan modern. Membantu kita mengatasi rasa cemas berlebih, mengendalikan emosi negatif, dan melatih mental yang tangguh.',
       status: 'Tersedia',
       ownerName: 'Admin RT 02',
-      coverUrl: 'bg-emerald-700',
+      coverUrl: 'bg-sky-700',
       rating: 4.9,
       createdAt: new Date().toISOString(),
       reviews: [
         { reviewerName: 'Dewi Sartika', rating: 5, comment: 'Sangat praktis, cocok dibaca di kala pikiran sedang bising.', date: new Date().toISOString() }
       ]
-    },
-    {
-      title: 'Kancil & Buaya yang Cerdik',
-      author: 'Dongeng Nusantara',
-      category: 'Anak-Anak',
-      synopsis: 'Dongeng klasik anak nusantara yang mengajarkan kecerdikan dalam menghadapi masalah. Cocok dibaca bersama anak sebelum tidur untuk merangsang kreativitas berpikir mereka.',
-      status: 'Digital Only',
-      ownerName: 'Taman Bacaan RT',
-      coverUrl: 'bg-amber-700',
-      digitalUrl: 'Mari membaca bersama!\n\nPada suatu hari, Sang Kancil yang cerdik sedang berjalan-jalan di pinggir hutan dekat sungai. Dia merasa lapar dan melihat buah-buahan ranum yang lezat di seberang sungai.\n\nNamun, sungai itu sangat deras dan dihuni oleh sekelompok buaya besar yang lapar. Sang Kancil pun memutar otak. Dia mendekati pinggir sungai dan berteriak,\n\n"Hai Buaya-buaya yang perkasa! Aku membawa pesan dari Raja hutan. Beliau ingin memberikan pesta makanan lezat untuk kalian semua. Tapi aku harus menghitung jumlah kalian dahulu!"\n\nBuaya yang tamak pun langsung gembira dan menyetujui usul Kancil. Pemimpin buaya berkata, "Baiklah Kancil, beritahu kami apa yang harus kami lakukan!"\n\nKancil menjawab, "Kalian harus berbaris rapi dari tepi sungai ini hingga ke seberang sana, agar aku bisa menyeberang sambil menghitung kalian satu per satu!"\n\nTanpa ragu, buaya-buaya itu berbaris membentuk jembatan. Kancil pun melompat dari satu punggung buaya ke buaya berikutnya sambil menghitung,\n\n"Satu... dua... tiga... empat... lima... hingga akhirnya sampai ke seberang sungai!"\n\nSesampainya di seberang, Kancil tertawa riang dan berkata, "Terima kasih buaya-buaya yang baik! Aku sudah berhasil menyeberang sungai dengan aman dan kenyang!"\n\nBuaya-buaya itu pun tersadar bahwa mereka telah ditipu oleh kecerdikan Sang Kancil. Sejak hari itu, buaya berjanji akan lebih waspada terhadap kecerdikan sang kancil.',
-      rating: 4.5,
-      createdAt: new Date().toISOString()
-    },
-    {
-      title: 'Membangun Web Modern React',
-      author: 'Developer RT 02',
-      category: 'Sains & Teknologi',
-      synopsis: 'Buku saku digital yang dibuat oleh tim IT TERAS RT 02. Berisi dasar-dasar pengembangan aplikasi web menggunakan React 18, Tailwind CSS v4, dan integrasi backend Firebase Firestore. Sangat cocok bagi remaja RT 02 yang tertarik belajar coding.',
-      status: 'Digital Only',
-      ownerName: 'Tim IT RT 02',
-      coverUrl: 'bg-sky-700',
-      digitalUrl: '# Panduan Belajar React & Tailwind RT 02\n\nSelamat datang di panduan coding praktis warga!\n\n## Mengapa Belajar React?\nReact adalah pustaka Javascript terpopuler di dunia untuk membangun antarmuka pengguna (UI) yang interaktif dan dinamis. Dipadukan dengan Tailwind CSS, Anda bisa membuat desain web profesional hanya dalam hitungan menit.\n\n## Langkah 1: Persiapan Lingkungan\nPastikan Anda sudah menginstal Node.js di komputer Anda. Lalu buat proyek baru:\n```bash\nnpm create vite@latest belajar-react -- --template react-ts\ncd belajar-react\nnpm install\n```\n\n## Langkah 2: Menginstal Tailwind CSS\nInstal tailwindcss dan konfigurasikan:\n```bash\nnpm install tailwindcss @tailwindcss/vite\n```\nEdit `vite.config.ts` untuk mengaktifkan plugin Tailwind.\n\n## Langkah 3: Membuat Komponen Pertama Anda\nKomponen React adalah blok pembangun visual. Contoh komponen tombol yang cantik:\n```tsx\nexport const Button = () => {\n  return (\n    <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow-md transition-all">\n      Klik Saya!\n    </button>\n  );\n}\n```\n\n## Langkah 4: Hubungkan ke Firebase\nDengan Firebase Firestore, Anda bisa membuat database real-time secara instan tanpa menulis server backend yang rumit.\n\nSemoga panduan singkat ini memicu semangat belajar teknologi warga RT 02! Kunjungi Sekretariat RT jika membutuhkan bantuan praktis atau bimbingan tatap muka.',
-      rating: 5.0,
-      createdAt: new Date().toISOString()
     }
   ];
 
@@ -120,8 +159,16 @@ export const PublicLibrary: React.FC = () => {
         defaultBooks.forEach(async (b) => {
           await addBook(b);
         });
+        setBooks(defaultBooks.map((b, idx) => ({ ...b, id: `default-${idx}` })));
       } else {
-        setBooks(fetchedBooks);
+        // Merge fetched books with default original ebooks if not already present
+        const merged = [...fetchedBooks];
+        defaultBooks.forEach((db, idx) => {
+          if (!merged.some(b => b.title.toLowerCase() === db.title.toLowerCase())) {
+            merged.unshift({ ...db, id: `default-ebook-${idx}` });
+          }
+        });
+        setBooks(merged);
       }
     });
 
@@ -276,19 +323,34 @@ export const PublicLibrary: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 font-sans" id="library-container">
       {/* Clean Modern Page Header */}
-      <div className="bg-white rounded-[2.5rem] p-8 md:p-12 text-slate-900 border border-slate-200/70 shadow-sm mb-10 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/60 rounded-full blur-3xl pointer-events-none" />
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white rounded-[2.5rem] p-8 md:p-12 text-slate-900 border border-slate-200/70 shadow-sm mb-10 overflow-hidden relative"
+      >
+        {/* Subtle Animated Ambient Glow */}
+        <motion.div 
+          animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/70 rounded-full blur-3xl pointer-events-none" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute bottom-0 left-0 w-96 h-96 bg-amber-50/60 rounded-full blur-3xl pointer-events-none" 
+        />
         
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-3">
             <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 bg-indigo-50 border border-indigo-100 px-4 py-1.5 rounded-full shadow-xs">
-              <Sparkles size={14} className="text-indigo-600" /> Taman Bacaan & Inventaris Literasi Digital RT 02
+              <Sparkles size={14} className="text-indigo-600 animate-spin-slow" /> Taman Bacaan &amp; Literasi Digital RT 02
             </span>
             <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
-              Micro-Library <span className="text-indigo-600 font-serif italic">& Inventaris Warga</span>
+              Micro-Library <span className="text-indigo-600 font-serif italic">&amp; Perpustakaan Warga</span>
             </h1>
             <p className="text-slate-500 font-medium text-xs md:text-sm max-w-2xl leading-relaxed">
-              Gagas pinjam tukar buku fisik, sumbang karya literasi, serta baca materi edukasi digital eksklusif warga RT 02.
+              Gagas pinjam tukar buku fisik, sumbang karya literasi, serta baca materi edukasi digital eksklusif secara mandiri &amp; gratis.
             </p>
           </div>
           
@@ -317,44 +379,44 @@ export const PublicLibrary: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Grid Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200/70 shadow-xs hover:shadow-md transition-all flex items-center gap-4 group">
+          <div className="p-3.5 bg-indigo-50 rounded-2xl text-indigo-600 border border-indigo-100 group-hover:scale-105 transition-transform">
             <BookOpen size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Koleksi</p>
-            <p className="text-xl font-black text-slate-800 mt-0.5">{books.length} Buku</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Koleksi</p>
+            <p className="text-xl font-black text-slate-900 mt-0.5">{books.length} Buku</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200/70 shadow-xs hover:shadow-md transition-all flex items-center gap-4 group">
+          <div className="p-3.5 bg-emerald-50 rounded-2xl text-emerald-600 border border-emerald-100 group-hover:scale-105 transition-transform">
             <FileText size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Format Digital</p>
-            <p className="text-xl font-black text-slate-800 mt-0.5">{books.filter(b => b.status === 'Digital Only').length} E-Book</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Format Digital</p>
+            <p className="text-xl font-black text-slate-900 mt-0.5">{books.filter(b => b.status === 'Digital Only').length} E-Book</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200/70 shadow-xs hover:shadow-md transition-all flex items-center gap-4 group">
+          <div className="p-3.5 bg-amber-50 rounded-2xl text-amber-600 border border-amber-100 group-hover:scale-105 transition-transform">
             <BookMarked size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Buku Fisik</p>
-            <p className="text-xl font-black text-slate-800 mt-0.5">{books.filter(b => b.status !== 'Digital Only').length} Eksemplar</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Buku Fisik</p>
+            <p className="text-xl font-black text-slate-900 mt-0.5">{books.filter(b => b.status !== 'Digital Only').length} Eksemplar</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200/70 shadow-xs hover:shadow-md transition-all flex items-center gap-4 group">
+          <div className="p-3.5 bg-rose-50 rounded-2xl text-rose-600 border border-rose-100 group-hover:scale-105 transition-transform">
             <Clock size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Selesai</p>
-            <p className="text-xl font-black text-slate-800 mt-0.5">{requests.filter(r => r.status === 'Selesai').length} Transaksi</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Selesai</p>
+            <p className="text-xl font-black text-slate-900 mt-0.5">{requests.filter(r => r.status === 'Selesai').length} Transaksi</p>
           </div>
         </div>
       </div>
@@ -363,27 +425,27 @@ export const PublicLibrary: React.FC = () => {
       {activeTab === 'katalog' && (
         <div className="space-y-6">
           {/* Filter Bar */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* Search Input */}
             <div className="relative w-full md:w-80">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
               <input
                 type="text"
                 placeholder="Cari judul, penulis, sinopsis..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-11 pr-4 py-2.5 text-xs bg-slate-50/80 border border-slate-200/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-800 transition-all"
               />
             </div>
 
             {/* Type and Category Selectors */}
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-              <div className="flex bg-slate-50 border border-slate-200 rounded-xl p-0.5">
+              <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/70">
                 {['Semua', 'Fisik', 'Digital'].map((t) => (
                   <button
                     key={t}
                     onClick={() => setSelectedType(t)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${selectedType === t ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black cursor-pointer transition-all ${selectedType === t ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                   >
                     {t}
                   </button>
@@ -394,23 +456,23 @@ export const PublicLibrary: React.FC = () => {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="appearance-none pr-8 pl-3 py-2 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  className="appearance-none pr-9 pl-4 py-2.5 text-xs font-black text-slate-800 bg-slate-50 border border-slate-200/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                 >
                   {categories.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
-                <Filter className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" size={14} />
+                <Filter className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" size={14} />
               </div>
             </div>
           </div>
 
           {/* Book Catalog Grid */}
           {filteredBooks.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
+            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-xs">
               <BookOpen size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="text-lg font-bold text-slate-700">Koleksi Tidak Ditemukan</h3>
-              <p className="text-slate-400 text-sm mt-1">Gunakan kata kunci pencarian lain atau pilih kategori yang berbeda.</p>
+              <h3 className="text-lg font-black text-slate-800">Koleksi Tidak Ditemukan</h3>
+              <p className="text-slate-400 text-xs font-medium mt-1">Gunakan kata kunci pencarian lain atau pilih kategori yang berbeda.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -423,58 +485,60 @@ export const PublicLibrary: React.FC = () => {
                     key={book.id}
                     layoutId={`book-card-${book.id}`}
                     onClick={() => setSelectedBook(book)}
-                    className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col group h-full"
+                    whileHover={{ y: -6, scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                    className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-xs hover:shadow-xl hover:border-indigo-200 transition-all cursor-pointer flex flex-col group h-full relative"
                   >
-                    {/* Cover Art Box */}
-                    <div className="relative aspect-[3/4] w-full flex items-center justify-center p-4 overflow-hidden bg-slate-50 border-b border-slate-100">
-                      <div className={`w-3/4 h-5/6 rounded-lg shadow-lg flex flex-col justify-between p-4 text-white relative transition-all group-hover:scale-102 ${hasCoverColor ? book.coverUrl : 'bg-gradient-to-br from-indigo-600 to-indigo-800'}`}>
-                        {/* Book Spine Accent */}
-                        <div className="absolute left-0 top-0 bottom-0 w-2.5 bg-black/20 rounded-l-lg" />
+                    {/* Cover Art Box with Realistic 3D Book Shadow */}
+                    <div className="relative aspect-[3/4] w-full flex items-center justify-center p-5 overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100/60 border-b border-slate-100">
+                      <div className={`w-4/5 h-5/6 rounded-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.3)] flex flex-col justify-between p-4.5 text-white relative transition-all group-hover:scale-105 group-hover:rotate-1 ${hasCoverColor ? book.coverUrl : 'bg-gradient-to-br from-indigo-700 to-indigo-900'}`}>
+                        {/* 3D Book Spine Accent */}
+                        <div className="absolute left-0 top-0 bottom-0 w-3 bg-black/25 rounded-l-xl border-r border-white/10" />
                         
-                        <div className="pl-2">
-                          <span className="text-[8px] font-black tracking-widest uppercase text-white/70 block">{book.category}</span>
-                          <h4 className="text-sm font-black mt-1 leading-snug line-clamp-3">{book.title}</h4>
+                        <div className="pl-3">
+                          <span className="text-[7.5px] font-black tracking-[0.2em] uppercase text-white/75 block">{book.category}</span>
+                          <h4 className="text-xs md:text-sm font-black mt-1 leading-snug line-clamp-3 font-sans tracking-tight">{book.title}</h4>
                         </div>
                         
-                        <div className="pl-2 flex items-center justify-between border-t border-white/20 pt-2">
-                          <span className="text-[9px] font-bold text-white/80 truncate pr-2">{book.author}</span>
+                        <div className="pl-3 flex items-center justify-between border-t border-white/20 pt-2.5">
+                          <span className="text-[9px] font-bold text-white/90 truncate pr-2">{book.author}</span>
                           {isDigital ? (
-                            <span className="bg-white/20 text-[8px] font-black px-1.5 py-0.5 rounded-full tracking-wider uppercase">E-Book</span>
+                            <span className="bg-white/25 backdrop-blur-xs text-[8px] font-black px-2 py-0.5 rounded-full tracking-wider uppercase">E-Book</span>
                           ) : (
-                            <span className="bg-indigo-900/40 text-[8px] font-black px-1.5 py-0.5 rounded-full tracking-wider uppercase">Fisik</span>
+                            <span className="bg-slate-900/60 text-[8px] font-black px-2 py-0.5 rounded-full tracking-wider uppercase">Fisik</span>
                           )}
                         </div>
                       </div>
                     </div>
 
                     {/* Book Metadata */}
-                    <div className="p-4 flex-1 flex flex-col justify-between">
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                       <div>
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10px] font-black text-indigo-600 uppercase tracking-wider">{book.category}</span>
-                          <div className="flex items-center gap-0.5 text-amber-500 font-bold text-xs">
+                          <span className="text-[9px] font-black text-indigo-700 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">{book.category}</span>
+                          <div className="flex items-center gap-1 text-amber-500 font-black text-xs">
                             <Star size={12} className="fill-current" />
                             <span>{book.rating || '5.0'}</span>
                           </div>
                         </div>
                         
-                        <h3 className="text-sm font-black text-slate-800 mt-1 line-clamp-2 leading-snug group-hover:text-indigo-600 transition-colors">
+                        <h3 className="text-sm font-black text-slate-900 mt-2 line-clamp-2 leading-snug group-hover:text-indigo-600 transition-colors">
                           {book.title}
                         </h3>
-                        <p className="text-xs text-slate-400 mt-0.5 font-medium">Karya {book.author}</p>
+                        <p className="text-xs text-slate-400 mt-0.5 font-bold">Karya {book.author}</p>
                         <p className="text-slate-500 text-xs mt-2 line-clamp-2 font-medium leading-relaxed">
                           {book.synopsis}
                         </p>
                       </div>
 
-                      <div className="border-t border-slate-100 pt-3 mt-3 flex items-center justify-between">
+                      <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
                         <span className="text-[10px] text-slate-400 font-bold truncate max-w-[120px]">
                           Oleh {book.ownerName}
                         </span>
                         
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
-                          book.status === 'Tersedia' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                          book.status === 'Digital Only' ? 'bg-sky-50 text-sky-600 border border-sky-100' :
+                        <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-lg ${
+                          book.status === 'Tersedia' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80' :
+                          book.status === 'Digital Only' ? 'bg-sky-50 text-sky-700 border border-sky-200/80' :
                           'bg-slate-100 text-slate-500 border border-slate-200'
                         }`}>
                           {book.status}
@@ -999,35 +1063,81 @@ export const PublicLibrary: React.FC = () => {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 50, opacity: 0 }}
-              className="relative w-full max-w-4xl bg-stone-50 rounded-3xl overflow-hidden shadow-2xl z-10 h-[85vh] flex flex-col border border-stone-200"
+              className="relative w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl z-10 h-[90vh] flex flex-col border border-slate-200"
             >
-              {/* Header */}
-              <div className="p-5 border-b border-stone-200 bg-white flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-bold text-indigo-600 uppercase tracking-widest">{selectedBook.category}</h3>
-                  <h2 className="text-base font-black text-stone-800 leading-tight mt-0.5">{selectedBook.title}</h2>
-                  <p className="text-[11px] text-stone-500">Karya {selectedBook.author} • Kontributor {selectedBook.ownerName}</p>
+              {/* Reader Header Toolbar */}
+              <div className="p-5 border-b border-slate-200 bg-white flex items-center justify-between shadow-2xs z-20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100">
+                    <BookOpen size={20} />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest block">{selectedBook.category}</span>
+                    <h2 className="text-sm md:text-base font-black text-slate-900 leading-tight">{selectedBook.title}</h2>
+                    <p className="text-[11px] text-slate-500 font-medium">Karya {selectedBook.author} &bull; Kontributor {selectedBook.ownerName}</p>
+                  </div>
                 </div>
 
-                <button
-                  onClick={() => setShowReaderModal(false)}
-                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 active:scale-95 text-stone-600 font-bold text-xs rounded-xl cursor-pointer transition-all flex items-center gap-1"
-                >
-                  <ArrowLeft size={14} />
-                  Selesai Membaca
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200/80 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                    <CheckCircle2 size={12} /> E-Book Resmi TERAS RT 02
+                  </span>
+                  <button
+                    onClick={() => setShowReaderModal(false)}
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl cursor-pointer transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                  >
+                    <ArrowLeft size={14} />
+                    Selesai Membaca
+                  </button>
+                </div>
               </div>
 
               {/* Reading Stage (Parchment Styled Layout) */}
-              <div className="flex-1 overflow-y-auto p-8 sm:p-12 md:p-16 max-w-3xl mx-auto space-y-6">
-                <div className="prose prose-stone max-w-none text-stone-800 font-serif leading-relaxed text-sm sm:text-base whitespace-pre-line antialiased">
-                  {selectedBook.digitalUrl || "Maaf, draf naskah digital ini masih kosong atau tidak lengkap."}
-                </div>
+              <div className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-12 max-w-4xl mx-auto space-y-6 bg-slate-50/50 w-full">
+                {selectedBook.digitalUrl && selectedBook.digitalUrl.startsWith('http') ? (
+                  <div className="w-full h-[70vh] rounded-[2rem] overflow-hidden border border-slate-200 shadow-md bg-white">
+                    <iframe 
+                      src={selectedBook.digitalUrl} 
+                      className="w-full h-full border-none"
+                      title={`E-Book ${selectedBook.title}`}
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-white p-8 sm:p-12 md:p-14 rounded-[2.5rem] border border-slate-200/80 shadow-md">
+                    <div className="text-slate-800 font-serif leading-loose text-sm sm:text-base md:text-lg antialiased space-y-4">
+                      {selectedBook.digitalUrl ? (
+                        selectedBook.digitalUrl.split('\n\n').map((paragraph, pIdx) => {
+                          if (paragraph.startsWith('# ')) {
+                            return <h1 key={pIdx} className="text-2xl md:text-3xl font-black font-sans text-slate-900 border-b border-slate-200 pb-3 mb-4">{paragraph.replace('# ', '')}</h1>;
+                          }
+                          if (paragraph.startsWith('## ')) {
+                            return <h2 key={pIdx} className="text-xl md:text-2xl font-bold font-sans text-slate-800 border-b border-slate-100 pb-2 mt-6 mb-3">{paragraph.replace('## ', '')}</h2>;
+                          }
+                          if (paragraph.startsWith('### ')) {
+                            return <h3 key={pIdx} className="text-base md:text-lg font-black font-sans text-indigo-700 mt-6 mb-2">{paragraph.replace('### ', '')}</h3>;
+                          }
+                          if (paragraph.startsWith('* ') || paragraph.startsWith('- ')) {
+                            return (
+                              <ul key={pIdx} className="list-disc list-inside space-y-1 my-3 text-slate-700 font-sans text-xs sm:text-sm">
+                                {paragraph.split('\n').map((item, iIdx) => (
+                                  <li key={iIdx}>{item.replace(/^[*|-]\s*/, '')}</li>
+                                ))}
+                              </ul>
+                            );
+                          }
+                          return <p key={pIdx} className="text-justify leading-relaxed text-slate-700">{paragraph}</p>;
+                        })
+                      ) : (
+                        <p className="text-slate-400 text-center py-10 font-sans">Naskah digital belum tersedia.</p>
+                      )}
+                    </div>
 
-                {/* End of content accent */}
-                <div className="pt-12 border-t border-stone-200 text-center text-stone-400 text-xs font-serif italic pb-8">
-                  ~ Akhir dari Lembaran Digital ~
-                </div>
+                    {/* End of content accent */}
+                    <div className="pt-10 mt-10 border-t border-slate-100 text-center text-slate-400 text-xs font-sans font-black uppercase tracking-widest">
+                      ~ Akhir dari Naskah Resmi E-Book TERAS RT 02 ~
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
