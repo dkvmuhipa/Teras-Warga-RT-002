@@ -86,52 +86,61 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
       className="max-w-7xl mx-auto px-4 py-8 mb-24 font-sans"
     >
       {/* Hero Banner */}
-      <div className="relative rounded-[3rem] overflow-hidden bg-emerald-900 shadow-2xl shadow-emerald-900/20 min-h-[300px] flex items-center justify-center text-center px-6 py-12 mb-12 group">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1472851294608-415105094a3f?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay group-hover:scale-105 transition-transform duration-[20s]"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/90 to-teal-900/90"></div>
+      <div className="relative rounded-[2.5rem] overflow-hidden bg-white shadow-md border border-slate-200/80 min-h-[280px] flex items-center justify-center text-center px-6 py-12 mb-10 group">
+        {/* Subtle Ambient Light Glow Orbs */}
+        <motion.div 
+          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 right-0 w-96 h-96 bg-emerald-50/70 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute bottom-0 left-0 w-80 h-80 bg-teal-50/60 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none" 
+        />
         
-        <div className="relative z-10 max-w-3xl mx-auto space-y-6">
+        <div className="relative z-10 max-w-3xl mx-auto space-y-5">
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-emerald-100 text-[10px] font-black uppercase tracking-widest shadow-lg"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest shadow-2xs"
           >
-            <ShoppingCart size={14} strokeWidth={3} /> Marketplace Warga
+            <ShoppingCart size={14} className="text-emerald-600" /> Marketplace Warga RT 02
           </motion.div>
           
           <motion.h1 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-4xl md:text-6xl font-black text-white tracking-tight drop-shadow-lg leading-tight"
+            className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight"
           >
-            Bursa Warga <span className="text-emerald-300">RT 02</span>
+            Bursa Warga <span className="text-emerald-600 italic font-serif">RT 02</span>
           </motion.h1>
           
           <motion.p 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-emerald-50 text-lg font-medium max-w-xl mx-auto leading-relaxed"
+            className="text-slate-500 text-sm md:text-base font-medium max-w-xl mx-auto leading-relaxed"
           >
-            Jual barang bekas, barter tanaman, atau berbagi makanan. Dari warga, untuk warga.
+            Jual barang bekas berkualiatas, barter tanaman hias, atau berbagi makanan. Dari warga, untuk warga.
           </motion.p>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="sticky top-[64px] md:top-[80px] z-30 bg-white/90 backdrop-blur-xl p-4 rounded-[2rem] border border-slate-200/50 shadow-lg shadow-slate-200/20 mb-12 flex flex-col md:flex-row justify-between items-center gap-4 transition-all">
+      <div className="sticky top-[64px] md:top-[80px] z-30 bg-white/95 backdrop-blur-xl p-3.5 rounded-[2.2rem] border border-slate-200/80 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 transition-all">
         <div className="flex w-full md:w-auto gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
           {['All', 'Jual', 'Barter', 'Gratis'].map(cat => (
             <button 
               key={cat} 
               onClick={() => setFilter(cat)}
               className={`
-                px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap
+                px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer
                 ${filter === cat 
-                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 scale-105' 
-                  : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}
+                  ? 'bg-slate-900 text-white shadow-sm' 
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}
               `}
             >
               {cat === 'All' ? 'Semua' : cat}
@@ -141,20 +150,20 @@ export const PublicMarket: React.FC<PublicMarketProps> = ({ items }) => {
 
         <div className="flex w-full md:w-auto gap-3">
           <div className="relative flex-1 md:w-80 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors" size={17} />
             <input 
               type="text" 
-              placeholder="Cari barang..." 
-              className="w-full pl-12 pr-6 py-3 bg-slate-50 border-2 border-transparent focus:bg-white focus:border-emerald-500 rounded-2xl text-sm font-bold outline-none transition-all placeholder:text-slate-400"
+              placeholder="Cari barang atau produk..." 
+              className="w-full pl-11 pr-5 py-2.5 bg-slate-50 border border-slate-200/80 focus:bg-white focus:border-emerald-500 rounded-2xl text-xs font-bold outline-none transition-all placeholder:text-slate-400 text-slate-800"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </div>
           <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => setIsPostModalOpen(true)} 
-            className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 flex items-center gap-2 whitespace-nowrap"
+            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-md active:scale-95 flex items-center gap-2 whitespace-nowrap cursor-pointer"
           >
             <Plus size={16} strokeWidth={3}/> Pasang Iklan
           </motion.button>

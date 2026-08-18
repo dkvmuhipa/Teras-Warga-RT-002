@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote, Info, ChevronDown, ChevronUp, Minus, Search } from 'lucide-react';
+import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote, Info, ChevronDown, ChevronUp, Minus, Search, Sparkles } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { 
@@ -315,31 +315,39 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
             className="max-w-7xl mx-auto px-4 py-8 mb-24 space-y-12"
         >
             {/* Hero Section */}
-            <motion.div variants={itemVariants} className="relative rounded-[3rem] overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 shadow-2xl shadow-indigo-950/20 p-8 md:p-14 text-white flex flex-col items-center justify-center text-center group border border-slate-800">
-                {/* Glowing Orbs */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:scale-125 transition-transform duration-700"></div>
-                <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
+            <motion.div variants={itemVariants} className="relative rounded-[2.5rem] overflow-hidden bg-white shadow-md p-8 md:p-14 text-slate-900 flex flex-col items-center justify-center text-center group border border-slate-200/80">
+                {/* Glowing Ambient Light Orbs */}
+                <motion.div 
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/70 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" 
+                />
+                <motion.div 
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-50/60 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none" 
+                />
                 
                 <div className="relative z-10 max-w-4xl mx-auto space-y-6">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-black tracking-widest uppercase backdrop-blur-md shadow-inner">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-black tracking-widest uppercase shadow-xs">
                         <span className="relative flex h-2 w-2">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
-                        <ShieldCheck size={14} /> Transparansi & Digitalisasi RT 02
+                        <ShieldCheck size={14} className="text-indigo-600" /> Transparansi &amp; Digitalisasi RT 02
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight">
-                        Pusat Informasi & Layanan Publik <br/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-cyan-300 to-emerald-300 italic font-serif">Teras Warga RT 02</span>
+                    <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+                        Pusat Informasi &amp; Layanan Publik <br/>
+                        <span className="text-indigo-600 italic font-serif">Teras Warga RT 02</span>
                     </h1>
-                    <p className="text-slate-300 text-sm md:text-base leading-relaxed max-w-2xl mx-auto font-medium">
+                    <p className="text-slate-500 text-sm md:text-base leading-relaxed max-w-2xl mx-auto font-medium">
                         Keterbukaan informasi real-time, transparansi keuangan kas, jadwal siskamling, dan agenda kegiatan di lingkungan Huntap Tondo 2.
                     </p>
                     <div className="flex flex-wrap justify-center gap-3 pt-2">
-                        <Link to="/services?tab=surat" className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                        <Link to="/services?tab=surat" className="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center gap-2">
                             <Briefcase size={16} /> Buat Surat Mandiri
                         </Link>
-                        <Link to="/peta" className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-black text-xs uppercase tracking-wider transition-all backdrop-blur-md flex items-center gap-2">
+                        <Link to="/peta" className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-800 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2">
                             <MapIcon size={16} /> Denah Kawasan Digital Twin
                         </Link>
                     </div>
@@ -484,34 +492,62 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                     </div>
                 </motion.div>
 
-                {/* Waste Bank Summary */}
-                <motion.div variants={itemVariants} className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-xl shadow-indigo-600/20 flex flex-col justify-between border border-indigo-500/30">
+                {/* Waste Bank Summary - Supreme POI Ekologi & Daur Ulang */}
+                <motion.div 
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  variants={itemVariants} 
+                  className="bg-gradient-to-br from-teal-950 via-slate-900 to-emerald-950 rounded-[3rem] p-8 text-white relative overflow-hidden group shadow-[0_30px_90px_-20px_rgba(20,184,166,0.3)] hover:shadow-[0_40px_110px_-15px_rgba(20,184,166,0.45)] transition-all duration-700 flex flex-col justify-between border border-teal-500/40"
+                >
+                    {/* Subtle Teal Pinstripe Luxury Grid Overlay */}
+                    <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(20,184,166,0.03)_0px,rgba(20,184,166,0.03)_1px,transparent_1px,transparent_16px)] pointer-events-none" />
+
+                    {/* Radiant Ambient Teal & Emerald Light Orbs */}
+                    <div className="absolute -top-20 -right-20 w-80 h-80 bg-teal-500/25 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+                    <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+
                     <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-700 pointer-events-none">
-                        <Trash2 size={130} />
+                        <Trash2 size={140} />
                     </div>
+                    
                     <div className="relative z-10 space-y-6">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-white/20 rounded-2xl border border-white/20"><Trash2 size={22}/></div>
-                            <h2 className="text-2xl font-black tracking-tight">Bank Sampah Digital</h2>
+                        <div className="flex justify-between items-start gap-4">
+                            <div className="flex items-center gap-3.5">
+                                <div className="p-3.5 bg-gradient-to-br from-teal-400 to-emerald-500 text-slate-950 rounded-2xl shadow-lg shadow-teal-500/30 group-hover:rotate-6 transition-transform">
+                                  <Trash2 size={26} strokeWidth={2.4} />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-teal-300">POINT OF INTEREST EKOLOGI</span>
+                                    </div>
+                                    <h2 className="text-xl md:text-2xl font-black tracking-tight text-white mt-0.5">Bank Sampah Digital</h2>
+                                </div>
+                            </div>
+
+                            <span className="px-3 py-1 bg-teal-500/20 border border-teal-400/40 text-teal-200 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm shrink-0">
+                              <Sparkles size={11} className="text-teal-400 animate-pulse" /> TERINTEGRASI
+                            </span>
                         </div>
-                        <div className="space-y-4">
+
+                        <div className="space-y-4 pt-2">
                             <div>
-                                <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Total Sampah Terkelola</p>
-                                <h3 className="text-4xl font-black tracking-tight">{totalWasteCollected.toFixed(1)} <span className="text-xl font-bold text-indigo-200">Kg</span></h3>
+                                <p className="text-teal-200/80 text-[10px] font-black uppercase tracking-widest mb-1">Total Sampah Terkelola Lingkungan</p>
+                                <h3 className="text-4xl md:text-5xl font-black tracking-tight text-white">{totalWasteCollected.toFixed(1)} <span className="text-xl font-bold text-teal-300">Kg</span></h3>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="p-3.5 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                <div className="p-4 bg-white/10 rounded-2xl border border-white/15 backdrop-blur-md">
                                     <p className="text-[9px] font-black text-emerald-300 uppercase tracking-wider mb-1">Organik</p>
-                                    <p className="text-base font-black">{wasteDeposits.filter(d => d.type === 'Organik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
+                                    <p className="text-lg font-black text-white">{wasteDeposits.filter(d => d.type === 'Organik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
                                 </div>
-                                <div className="p-3.5 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                <div className="p-4 bg-white/10 rounded-2xl border border-white/15 backdrop-blur-md">
                                     <p className="text-[9px] font-black text-amber-300 uppercase tracking-wider mb-1">Anorganik</p>
-                                    <p className="text-base font-black">{wasteDeposits.filter(d => d.type === 'Anorganik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
+                                    <p className="text-lg font-black text-white">{wasteDeposits.filter(d => d.type === 'Anorganik').reduce((acc, d) => acc + (d.weight || 0), 0).toFixed(1)} kg</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <Link to="/sampah" className="mt-6 w-full py-3.5 bg-white text-indigo-700 rounded-2xl font-black text-xs uppercase tracking-wider text-center hover:bg-indigo-50 transition-all shadow-lg shadow-black/10">
+                    <Link to="/sampah" className="mt-8 relative z-10 w-full py-4 bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 rounded-2xl font-black text-xs uppercase tracking-wider text-center hover:scale-102 transition-all shadow-lg shadow-teal-500/20 block">
                         Setor Sampah Sekarang
                     </Link>
                 </motion.div>
@@ -727,19 +763,38 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                 </div>
             </motion.div>
 
-            {/* Financial Report */}
-            <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            {/* Financial Report - Supreme POI Akuntabilitas Kas RT */}
+            <motion.div 
+              whileHover={{ y: -4, scale: 1.005 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              variants={itemVariants} 
+              className="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 rounded-[3rem] p-8 md:p-12 text-white border border-emerald-500/40 shadow-[0_30px_90px_-20px_rgba(16,185,129,0.25)] hover:shadow-[0_40px_110px_-15px_rgba(16,185,129,0.35)] transition-all duration-700 relative overflow-hidden group"
+            >
+                {/* Subtle Emerald Pinstripe Luxury Grid Overlay */}
+                <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(16,185,129,0.03)_0px,rgba(16,185,129,0.03)_1px,transparent_1px,transparent_16px)] pointer-events-none" />
+
+                {/* Radiant Ambient Emerald Light Orbs */}
+                <div className="absolute -top-20 -right-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+                <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-teal-500/15 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div>
-                        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><TrendingUp size={24}/></div>
-                            Transparansi Keuangan
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">POINT OF INTEREST AKUNTABILITAS</span>
+                        </div>
+                        <h2 className="text-3xl md:text-5xl font-black text-white flex items-center gap-3 tracking-tight">
+                            Transparansi Kas <span className="bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400 bg-clip-text text-transparent font-serif italic">&amp; Audit Finansial</span>
                         </h2>
-                        <p className="text-slate-500 font-medium">Visualisasi alokasi dana dan tren kas RT 02</p>
+                        <p className="text-slate-300 font-medium text-xs md:text-sm mt-1">Laporan arus kas publik real-time &amp; pertanggungjawaban bendahara RT 02</p>
                     </div>
+
+                    <span className="px-4 py-2 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm shrink-0">
+                        <Sparkles size={13} className="text-emerald-400 animate-spin-slow" /> AUDIT TRANSPARAN 100%
+                    </span>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
                         <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Alokasi Pengeluaran</h3>
                         <div className="h-[300px]">

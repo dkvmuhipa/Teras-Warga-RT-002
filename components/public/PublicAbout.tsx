@@ -69,7 +69,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
   // Calculating Real Dynamic Statistics
   const totalKK = houses.length;
-  const totalOccupants = houses.reduce((sum, h) => sum + (h.occupants || 0), 0);
+  const totalOccupants = houses.reduce((sum, h) => {
+    if (h.status !== 'Occupied') return sum;
+    const familyMembersCount = h.familyMembers ? h.familyMembers.length : 0;
+    const baseOccupants = h.occupants || 1;
+    return sum + Math.max(baseOccupants, 1 + familyMembersCount);
+  }, 0);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const emptyHouses = houses.filter(h => h.status === 'Empty').length;
   const businessHouses = houses.filter(h => h.status === 'Business').length;
@@ -220,18 +225,31 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         <motion.div 
           initial={{ opacity: 0, y: 15 }} 
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          className="relative text-center mb-14 bg-white rounded-[2.5rem] p-8 sm:p-14 border border-slate-200/80 shadow-md overflow-hidden group"
         >
-          <div className="inline-flex p-4 bg-rose-50 text-rose-600 rounded-3xl mb-4 shadow-sm border border-rose-100/60">
-            <Heart size={36} className="animate-pulse" />
+          {/* Subtle Ambient Light Glow Orbs */}
+          <motion.div 
+            animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/70 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" 
+          />
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute bottom-0 left-0 w-80 h-80 bg-rose-50/60 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none" 
+          />
+
+          <div className="relative z-10 space-y-4">
+            <div className="inline-flex p-3.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/80 shadow-2xs">
+              <Heart size={32} className="animate-pulse" />
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+              Profil Lingkungan &amp; <span className="text-rose-600 italic font-serif">TERAS RT 02</span>
+            </h1>
+            <p className="text-sm sm:text-base font-medium text-slate-500 max-w-2xl mx-auto leading-relaxed">
+              Menyajikan transparansi rekapitulasi data kependudukan riil, komitmen kepengurusan, etalase swadaya ekonomi, hingga asuransi keselamatan warga Huntap Tondo 2 secara real-time.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight uppercase">
-            Tentang Kami &amp; <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-indigo-600 font-serif italic">TERAS RT 02</span>
-          </h1>
-          <p className="text-sm sm:text-base font-semibold text-slate-500 mt-3 max-w-2xl mx-auto leading-relaxed">
-            Menyajikan transparansi rekapitulasi data kependudukan riil, komitmen kepengurusan, etalase swadaya ekonomi, hingga asuransi keselamatan warga Huntap Tondo 2 secara real-time.
-          </p>
-          <div className="h-1.5 w-32 bg-gradient-to-r from-rose-500 via-indigo-500 to-emerald-500 mx-auto mt-6 rounded-full shadow-sm" />
         </motion.div>
 
         {/* INTEGRATED CORE STATS TICKER */}
