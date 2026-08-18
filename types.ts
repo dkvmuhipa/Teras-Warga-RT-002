@@ -455,7 +455,12 @@ export interface MapPoint {
   y: number;
   icon: string;
   facilityInfo?: string; // NEW: Jadwal/Info Fasilitas
-  cctvUrl?: string; // NEW: Link/Mock Stream CCTV
+  cctvUrl?: string; // Link Stream CCTV
+  cctvStreamType?: 'HLS' | 'iFrame' | 'RTSP' | 'MP4'; // Tipe protokol stream
+  cctvStatus?: 'Online' | 'Maintenance' | 'Offline'; // Status kamera
+  cctvResolution?: '4K Ultra HD' | '1080P Full HD' | '720P HD'; // Resolusi lensa
+  cctvLocationZone?: string; // Zona pengawasan (Pos Satpam, Gerbang Utama, dsb)
+  cctvOperatorContact?: string; // Kontak penanggung jawab pos siskamling
 }
 
 export interface PatrolSession {

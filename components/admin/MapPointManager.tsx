@@ -35,6 +35,12 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
     const [type, setType] = useState<MapPoint['type']>('Other');
     const [x, setX] = useState<number>(50);
     const [y, setY] = useState<number>(50);
+    const [cctvUrl, setCctvUrl] = useState<string>('');
+    const [cctvStreamType, setCctvStreamType] = useState<'HLS' | 'iFrame' | 'RTSP' | 'MP4'>('iFrame');
+    const [cctvStatus, setCctvStatus] = useState<'Online' | 'Maintenance' | 'Offline'>('Online');
+    const [cctvResolution, setCctvResolution] = useState<'4K Ultra HD' | '1080P Full HD' | '720P HD'>('1080P Full HD');
+    const [cctvLocationZone, setCctvLocationZone] = useState<string>('Pos Satpam Utama');
+    const [cctvOperatorContact, setCctvOperatorContact] = useState<string>('+62 812-4455-8800');
     const mapRef = React.useRef<HTMLDivElement>(null);
 
     const handleMapClick = (e: React.MouseEvent) => {
@@ -52,15 +58,27 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
         setType(point.type);
         setX(point.x);
         setY(point.y);
+        setCctvUrl(point.cctvUrl || '');
+        setCctvStreamType(point.cctvStreamType || 'iFrame');
+        setCctvStatus(point.cctvStatus || 'Online');
+        setCctvResolution(point.cctvResolution || '1080P Full HD');
+        setCctvLocationZone(point.cctvLocationZone || 'Pos Satpam Utama');
+        setCctvOperatorContact(point.cctvOperatorContact || '+62 812-4455-8800');
         setIsModalOpen(true);
     };
 
     const handleAdd = () => {
         setEditingPoint(null);
         setLabel('');
-        setType('Other');
+        setType('CCTV');
         setX(50);
         setY(50);
+        setCctvUrl('');
+        setCctvStreamType('iFrame');
+        setCctvStatus('Online');
+        setCctvResolution('1080P Full HD');
+        setCctvLocationZone('Pos Satpam Utama');
+        setCctvOperatorContact('+62 812-4455-8800');
         setIsModalOpen(true);
     };
 
@@ -72,7 +90,15 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
         }
 
         try {
-            const data = { label, type, x, y };
+            const data: any = { label, type, x, y };
+            if (type === 'CCTV') {
+                if (cctvUrl) data.cctvUrl = cctvUrl;
+                data.cctvStreamType = cctvStreamType;
+                data.cctvStatus = cctvStatus;
+                data.cctvResolution = cctvResolution;
+                data.cctvLocationZone = cctvLocationZone;
+                data.cctvOperatorContact = cctvOperatorContact;
+            }
             
             if (editingPoint) {
                 await updateMapPointInDb(editingPoint.id, data);
@@ -206,6 +232,99 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                             <option value="Other">Lainnya</option>
                         </select>
                     </div>
+
+                    {type === 'CCTV' && (
+                        <div className="p-5 bg-slate-900 text-white rounded-[2rem] border border-slate-800 space-y-4 shadow-xl">
+                            <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
+                                <div className="p-2 bg-rose-500/20 text-rose-400 rounded-xl">
+                                    <Video size={18} className="animate-pulse" />
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-black uppercase tracking-wider text-white">Konfigurasi Pengawasan CCTV Terstandar</h4>
+                                    <p className="text-[10px] text-slate-400 font-medium">Pengaturan protokol streaming, resolusi lensa, &amp; zona pengawasan</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1.5">
+                                    URL Live Streaming CCTV
+                                </label>
+                                <input 
+                                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none placeholder:text-slate-600 font-mono"
+                                    placeholder="Contoh: https://my-stream.m3u8 atau link embed iFrame EZVIZ / YouTube"
+                                    value={cctvUrl}
+                                    onChange={e => setCctvUrl(e.target.value)}
+                                />
+                                <p className="text-[9px] text-slate-500 font-medium mt-1 italic">
+                                    Mendukung format link HLS (.m3u8), video direct stream (.mp4), maupun link embed iframe dari EZVIZ, Tuya, Dahua, Hikvision Cloud, atau YouTube Live.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Protokol Stream</label>
+                                    <select 
+                                        className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none"
+                                        value={cctvStreamType}
+                                        onChange={e => setCctvStreamType(e.target.value as any)}
+                                    >
+                                        <option value="HLS">HLS (.m3u8 Stream)</option>
+                                        <option value="iFrame">iFrame Embed (EZVIZ / YouTube)</option>
+                                        <option value="RTSP">RTSP Media Gateway</option>
+                                        <option value="MP4">Direct MP4 Video</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Status Kamera</label>
+                                    <select 
+                                        className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none"
+                                        value={cctvStatus}
+                                        onChange={e => setCctvStatus(e.target.value as any)}
+                                    >
+                                        <option value="Online">🟢 Online (Aktif Normal)</option>
+                                        <option value="Maintenance">🟡 Maintenance (Perbaikan)</option>
+                                        <option value="Offline">🔴 Offline (Sinyal Terputus)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Resolusi Lensa</label>
+                                    <select 
+                                        className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none"
+                                        value={cctvResolution}
+                                        onChange={e => setCctvResolution(e.target.value as any)}
+                                    >
+                                        <option value="1080P Full HD">1080P Full HD (Standar)</option>
+                                        <option value="4K Ultra HD">4K Ultra HD (High Quality)</option>
+                                        <option value="720P HD">720P HD (Low Bandwidth)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Zona Pengawasan</label>
+                                    <input 
+                                        className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none placeholder:text-slate-600"
+                                        placeholder="Contoh: Pos Satpam Utama"
+                                        value={cctvLocationZone}
+                                        onChange={e => setCctvLocationZone(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Kontak Penanggung Jawab / Pos Satpam</label>
+                                <input 
+                                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none placeholder:text-slate-600"
+                                    placeholder="Contoh: +62 812-4455-8800 (Pos Ronda Siskamling)"
+                                    value={cctvOperatorContact}
+                                    onChange={e => setCctvOperatorContact(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    )}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Posisi X (%)</label>

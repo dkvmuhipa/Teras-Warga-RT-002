@@ -1047,112 +1047,135 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
           )}
 
           {/* Map Legend Section */}
-          <div className="space-y-6">
-            <div>
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Fasilitas & Keamanan</h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-rose-600 flex items-center justify-center shadow-sm shadow-rose-200"><Video size={8} className="text-white"/></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Titik CCTV</span>
+          <div className="space-y-6 pt-2">
+            <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/70">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3.5 flex items-center justify-between">
+                <span>Fasilitas &amp; Keamanan</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              </h4>
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs hover:border-slate-300 transition-colors">
+                  <div className="w-6 h-6 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0"><Video size={12} strokeWidth={2.5}/></div>
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">TITIK CCTV LINGKUNGAN</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm shadow-emerald-200"><Shield size={8} className="text-white"/></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Pos Keamanan</span>
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs hover:border-slate-300 transition-colors">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0"><Shield size={12} strokeWidth={2.5}/></div>
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">POS KEAMANAN / SATPAM</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-red-600 flex items-center justify-center shadow-sm shadow-red-200"><Flame size={8} className="text-white"/></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Titik APAR</span>
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs hover:border-slate-300 transition-colors">
+                  <div className="w-6 h-6 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shrink-0"><Flame size={12} strokeWidth={2.5}/></div>
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">TITIK APAR PEMADAM</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center shadow-sm shadow-green-200"><Users size={8} className="text-white"/></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Titik Kumpul</span>
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs hover:border-slate-300 transition-colors">
+                  <div className="w-6 h-6 rounded-lg bg-green-50 border border-green-100 flex items-center justify-center text-green-600 shrink-0"><Users size={12} strokeWidth={2.5}/></div>
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">TITIK KUMPUL EVAKUASI</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-teal-500 flex items-center justify-center shadow-sm shadow-teal-200"><ArrowRight size={8} className="text-white"/></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Jalur Evakuasi</span>
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs hover:border-slate-300 transition-colors">
+                  <div className="w-6 h-6 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0"><ArrowRight size={12} strokeWidth={2.5}/></div>
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">JALUR EVAKUASI BENCANA</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-blue-500 flex items-center justify-center shadow-sm shadow-blue-200"><Droplets size={8} className="text-white"/></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Hydrant / Air</span>
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs hover:border-slate-300 transition-colors">
+                  <div className="w-6 h-6 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0"><Droplets size={12} strokeWidth={2.5}/></div>
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">HYDRANT / SUMBER AIR</span>
                 </div>
               </div>
             </div>
 
-            <div>
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Status Hunian</h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded bg-gradient-to-br from-emerald-100 to-teal-200 border border-emerald-500"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Tetap</span>
+            <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/70">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3.5 flex items-center justify-between">
+                <span>Status Hunian Kavling</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              </h4>
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs">
+                  <div className="w-4 h-4 rounded-md bg-emerald-500/20 border-2 border-emerald-500 shrink-0" />
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">RUMAH TETAP (TERISI)</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded bg-gradient-to-br from-amber-100 to-orange-200 border border-amber-500"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Sewa / Kontrak</span>
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs">
+                  <div className="w-4 h-4 rounded-md bg-amber-500/20 border-2 border-amber-500 shrink-0" />
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">RUMAH SEWA / KONTRAK</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded bg-slate-100 border border-slate-300 border-dashed"></div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kosong</span>
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs">
+                  <div className="w-4 h-4 rounded-md bg-slate-100 border-2 border-dashed border-slate-400 shrink-0" />
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">RUMAH KOSONG</span>
                 </div>
               </div>
             </div>
 
             {showHeatmap && (
-              <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Kepadatan Penghuni</h4>
+              <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/70">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3">Kepadatan Penghuni</h4>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded bg-rose-500"></div>
-                    <span className="text-[10px] font-bold text-slate-600 uppercase">&gt; 5 Orang</span>
+                  <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60">
+                    <div className="w-3.5 h-3.5 rounded-md bg-rose-500 shrink-0" />
+                    <span className="text-[10px] font-extrabold text-slate-800 uppercase">&gt; 5 Orang</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded bg-orange-400"></div>
-                    <span className="text-[10px] font-bold text-slate-600 uppercase">3 - 5 Orang</span>
+                  <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60">
+                    <div className="w-3.5 h-3.5 rounded-md bg-orange-400 shrink-0" />
+                    <span className="text-[10px] font-extrabold text-slate-800 uppercase">3 - 5 Orang</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded bg-emerald-400"></div>
-                    <span className="text-[10px] font-bold text-slate-600 uppercase">1 - 2 Orang</span>
+                  <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60">
+                    <div className="w-3.5 h-3.5 rounded-md bg-emerald-400 shrink-0" />
+                    <span className="text-[10px] font-extrabold text-slate-800 uppercase">1 - 2 Orang</span>
                   </div>
                 </div>
               </div>
             )}
 
-            <div>
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Kelompok Rentan</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center justify-between p-2 bg-rose-50 rounded-xl border border-rose-100">
-                  <div className="flex items-center gap-2">
-                    <Baby size={12} className="text-rose-500" />
-                    <span className="text-[9px] font-bold text-slate-500 uppercase">Bayi</span>
+            <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/70">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3.5 flex items-center justify-between">
+                <span>Kelompok Rentan &amp; Proteksi</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+              </h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-rose-100 shadow-2xs hover:border-rose-200 transition-colors">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
+                      <Baby size={13} className="text-rose-600" />
+                    </div>
+                    <span className="text-[10px] font-extrabold text-slate-800 uppercase tracking-tight truncate">BAYI</span>
                   </div>
-                  <span className="text-[10px] font-black text-rose-600">{totalBaby}</span>
+                  <span className="text-[11px] font-black text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-lg shrink-0 font-mono">{totalBaby}</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-orange-50 rounded-xl border border-orange-100">
-                  <div className="flex items-center gap-2">
-                    <Baby size={12} className="text-orange-500" />
-                    <span className="text-[9px] font-bold text-slate-500 uppercase">Balita</span>
+
+                <div className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-amber-100 shadow-2xs hover:border-amber-200 transition-colors">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-6 h-6 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+                      <Baby size={13} className="text-amber-600" />
+                    </div>
+                    <span className="text-[10px] font-extrabold text-slate-800 uppercase tracking-tight truncate">BALITA</span>
                   </div>
-                  <span className="text-[10px] font-black text-orange-600">{totalToddler}</span>
+                  <span className="text-[11px] font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg shrink-0 font-mono">{totalToddler}</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-xl border border-indigo-100">
-                  <div className="flex items-center gap-2">
-                    <Accessibility size={12} className="text-indigo-500" />
-                    <span className="text-[9px] font-bold text-slate-500 uppercase">Lansia</span>
+
+                <div className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-indigo-100 shadow-2xs hover:border-indigo-200 transition-colors">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                      <Accessibility size={13} className="text-indigo-600" />
+                    </div>
+                    <span className="text-[10px] font-extrabold text-slate-800 uppercase tracking-tight truncate">LANSIA</span>
                   </div>
-                  <span className="text-[10px] font-black text-indigo-600">{totalElderly}</span>
+                  <span className="text-[11px] font-black text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-lg shrink-0 font-mono">{totalElderly}</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-rose-50 rounded-xl border border-rose-100">
-                  <div className="flex items-center gap-2">
-                    <Heart size={12} className="text-rose-400" />
-                    <span className="text-[9px] font-bold text-slate-500 uppercase">Hamil</span>
+
+                <div className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-pink-100 shadow-2xs hover:border-pink-200 transition-colors">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-6 h-6 rounded-lg bg-pink-50 flex items-center justify-center shrink-0">
+                      <Heart size={13} className="text-pink-600" />
+                    </div>
+                    <span className="text-[10px] font-extrabold text-slate-800 uppercase tracking-tight truncate">IBU HAMIL</span>
                   </div>
-                  <span className="text-[10px] font-black text-rose-600">{totalPregnant}</span>
+                  <span className="text-[11px] font-black text-pink-700 bg-pink-50 border border-pink-200 px-2.5 py-0.5 rounded-lg shrink-0 font-mono">{totalPregnant}</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-slate-50 rounded-xl border border-slate-100 col-span-2">
-                  <div className="flex items-center gap-2">
-                    <User size={12} className="text-slate-500" />
-                    <span className="text-[9px] font-bold text-slate-500 uppercase">Janda / Duda</span>
+
+                <div className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs hover:border-slate-300 transition-colors">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                      <User size={13} className="text-slate-600" />
+                    </div>
+                    <span className="text-[10px] font-extrabold text-slate-800 uppercase tracking-tight truncate">JANDA / DUDA SENIOR</span>
                   </div>
-                  <span className="text-[10px] font-black text-slate-600">{totalWidow}</span>
+                  <span className="text-[11px] font-black text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-lg shrink-0 font-mono">{totalWidow}</span>
                 </div>
               </div>
             </div>
@@ -1355,13 +1378,15 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                           {/* Map Points Overlay (General Info) */}
                           {mapPoints.map((point) => {
                               // Filter by layer
-                              if (point.type === 'CCTV' && !activeLayers.includes('Security')) return null;
-                              if (point.type === 'PJU' && !activeLayers.includes('Security')) return null;
-                              if (point.type === 'Hydrant' && !activeLayers.includes('Security')) return null;
-                              if (point.type === 'APAR' && !activeLayers.includes('Security')) return null;
-                              if (point.type === 'Security' && !activeLayers.includes('Security')) return null;
-                              if (point.type === 'Trash' && !activeLayers.includes('Social')) return null;
-                              if (point.type === 'Facility' && !activeLayers.includes('Facility')) return null;
+                              if (activeLayers.length > 0) {
+                                  if (point.type === 'CCTV' && !activeLayers.includes('Security')) return null;
+                                  if (point.type === 'PJU' && !activeLayers.includes('Security')) return null;
+                                  if (point.type === 'Hydrant' && !activeLayers.includes('Security')) return null;
+                                  if (point.type === 'APAR' && !activeLayers.includes('Security')) return null;
+                                  if (point.type === 'Security' && !activeLayers.includes('Security')) return null;
+                                  if (point.type === 'Trash' && !activeLayers.includes('Social')) return null;
+                                  if (point.type === 'Facility' && !activeLayers.includes('Facility')) return null;
+                              }
 
                               return (
                               <div 
@@ -1378,22 +1403,22 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                           else setSelectedFacility(point);
                                       }
                                   }}
-                                  className={`absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 transition-all ${draggingId === point.id && draggingType === 'mappoint' ? 'scale-125 z-40' : ''} ${isManageMode ? 'cursor-pointer hover:scale-110' : 'cursor-pointer'}`}
+                                  className={`absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 transition-all ${draggingId === point.id && draggingType === 'mappoint' ? 'scale-125 z-60' : 'hover:scale-125 hover:z-60'} ${isManageMode ? 'cursor-pointer' : 'cursor-pointer'}`}
                                   style={{ left: `${point.x}%`, top: `${point.y}%` }}
                               >
-                                  <div className={`p-1.5 rounded-full shadow-md ${
+                                  <div className={`p-2 rounded-full shadow-lg ${
                                       draggingId === point.id && draggingType === 'mappoint' ? 'bg-rose-500 ring-4 ring-rose-200' :
-                                      point.type === 'Gate' ? 'bg-amber-500' :
-                                      point.type === 'Security' ? 'bg-blue-500' :
-                                      point.type === 'Block' ? 'bg-emerald-500' :
-                                      point.type === 'PJU' ? 'bg-yellow-500' :
-                                      point.type === 'CCTV' ? 'bg-indigo-500' :
-                                      point.type === 'Hydrant' ? 'bg-rose-500' :
-                                      point.type === 'APAR' ? 'bg-red-600' :
-                                      point.type === 'AssemblyPoint' ? 'bg-green-600' :
-                                      point.type === 'EvacuationRoute' ? 'bg-teal-500' :
-                                      point.type === 'Trash' ? 'bg-orange-500' :
-                                      point.type === 'Facility' ? 'bg-purple-600' :
+                                      point.type === 'Gate' ? 'bg-amber-500 shadow-amber-500/50' :
+                                      point.type === 'Security' ? 'bg-blue-500 shadow-blue-500/50' :
+                                      point.type === 'Block' ? 'bg-emerald-500 shadow-emerald-500/50' :
+                                      point.type === 'PJU' ? 'bg-yellow-500 shadow-yellow-500/50' :
+                                      point.type === 'CCTV' ? 'bg-rose-600 ring-2 ring-rose-300 shadow-rose-600/50 animate-pulse' :
+                                      point.type === 'Hydrant' ? 'bg-rose-500 shadow-rose-500/50' :
+                                      point.type === 'APAR' ? 'bg-red-600 shadow-red-600/50' :
+                                      point.type === 'AssemblyPoint' ? 'bg-green-600 shadow-green-600/50' :
+                                      point.type === 'EvacuationRoute' ? 'bg-teal-500 shadow-teal-500/50' :
+                                      point.type === 'Trash' ? 'bg-orange-500 shadow-orange-500/50' :
+                                      point.type === 'Facility' ? 'bg-purple-600 shadow-purple-600/50' :
                                       'bg-slate-500'
                                   } text-white border-2 border-white`}>
                                       {point.type === 'Gate' ? <Move size={14} /> : 
@@ -1502,62 +1527,104 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
       
       {/* CCTV Modal */}
       {activeCctv && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border-4 border-slate-800"
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-3xl overflow-hidden border border-slate-800 text-white flex flex-col"
           >
-            <div className="bg-slate-800 p-4 flex justify-between items-center text-white">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-slate-700 rounded-lg">
-                  <Video size={20} className="text-amber-400" />
+            {/* Header Toolbar */}
+            <div className="bg-slate-950/90 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-3.5">
+                <div className="p-2.5 bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/30">
+                  <Video size={22} className="animate-pulse" />
                 </div>
                 <div>
-                  <h3 className="font-black uppercase tracking-tighter text-lg">{activeCctv.label}</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live Surveillance Feed</p>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${activeCctv.cctvStatus === 'Offline' ? 'bg-rose-600' : activeCctv.cctvStatus === 'Maintenance' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400 animate-ping'}`} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-rose-400">
+                      {activeCctv.cctvStatus ? `SURVEILLANCE CAM • ${activeCctv.cctvStatus.toUpperCase()}` : 'SURVEILLANCE CAM LIVE'}
+                    </span>
+                  </div>
+                  <h3 className="font-black text-lg md:text-xl text-white tracking-tight leading-tight">{activeCctv.label}</h3>
                 </div>
               </div>
-              <button onClick={() => setActiveCctv(null)} className="p-2 hover:bg-slate-700 rounded-full transition-colors">
-                <X size={24} />
+              <button 
+                onClick={() => setActiveCctv(null)} 
+                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-colors cursor-pointer"
+              >
+                <X size={20} />
               </button>
             </div>
-            <div className="aspect-video bg-black relative flex items-center justify-center group">
+
+            {/* Video Stage */}
+            <div className="aspect-video bg-black relative flex items-center justify-center group overflow-hidden">
               {activeCctv.cctvUrl ? (
-                <iframe 
-                  src={activeCctv.cctvUrl} 
-                  className="w-full h-full"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
+                activeCctv.cctvUrl.match(/\.(mp4|webm|m3u8)$/i) ? (
+                  <video 
+                    src={activeCctv.cctvUrl}
+                    className="w-full h-full object-cover"
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <iframe 
+                    src={activeCctv.cctvUrl} 
+                    className="w-full h-full border-none"
+                    allow="autoplay; encrypted-media; fullscreen"
+                    allowFullScreen
+                    title={`Live Stream ${activeCctv.label}`}
+                  />
+                )
               ) : (
-                <div className="text-center p-8">
-                  <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-slate-700">
-                    <VideoOff size={32} className="text-slate-500" />
+                <div className="text-center p-8 max-w-sm">
+                  <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-800 text-rose-500/80 shadow-inner">
+                    <VideoOff size={32} />
                   </div>
-                  <p className="text-slate-400 font-black uppercase tracking-widest text-sm">Signal Lost / Camera Offline</p>
-                  <p className="text-slate-600 text-xs mt-2 font-bold italic">Check connection or contact security administrator</p>
+                  <h4 className="text-white font-black uppercase tracking-wider text-sm">KAMERA STANDBY / UNCONFIGURED</h4>
+                  <p className="text-slate-400 text-xs mt-1.5 font-medium leading-relaxed">
+                    Pengurus RT belum menginput URL Streaming RTSP / iFrame untuk titik lokasi CCTV ini.
+                  </p>
                 </div>
               )}
-              <div className="absolute top-4 left-4 flex items-center gap-2 bg-rose-600 px-2 py-1 rounded text-[10px] font-black text-white uppercase tracking-widest animate-pulse">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-                Live
+
+              {/* Overlay Status Badge */}
+              <div className="absolute top-4 left-4 flex items-center gap-2 bg-rose-600/90 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-rose-400/40 shadow-md">
+                <span className="w-2 h-2 bg-white rounded-full animate-ping" />
+                LIVE STREAMING &bull; {activeCctv.cctvResolution || '1080P FULL HD'}
               </div>
             </div>
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-              <div className="flex items-center gap-4 text-slate-500">
-                <div className="flex items-center gap-1">
-                  <Activity size={14} className="text-emerald-500" />
-                  <span className="text-[10px] font-bold uppercase">Bitrate: 4.2 Mbps</span>
+
+            {/* Footer Status Bar */}
+            <div className="px-6 py-4 bg-slate-950/80 border-t border-slate-800 flex flex-wrap justify-between items-center gap-3 text-xs">
+              <div className="flex items-center gap-5 text-slate-400 font-mono text-[11px] font-bold">
+                <div className="flex items-center gap-1.5">
+                  <Activity size={14} className="text-emerald-400" />
+                  <span className="text-slate-300">BITRATE: 4.8 Mbps</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Clock size={14} />
-                  <span className="text-[10px] font-bold uppercase">{new Date().toLocaleTimeString()}</span>
+                <div className="flex items-center gap-1.5">
+                  <Clock size={14} className="text-rose-400" />
+                  <span className="text-slate-300">{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} WITA</span>
                 </div>
               </div>
-              <button className="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all shadow-lg">
-                Full Screen
-              </button>
+
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-slate-800 text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                  ZONA: {activeCctv.cctvLocationZone || 'POS SATPAM RT 02'}
+                </span>
+                {activeCctv.cctvOperatorContact && (
+                  <a 
+                    href={`tel:${activeCctv.cctvOperatorContact}`}
+                    className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors flex items-center gap-1.5"
+                  >
+                    <Phone size={12} /> {activeCctv.cctvOperatorContact}
+                  </a>
+                )}
+              </div>
             </div>
           </motion.div>
         </div>
