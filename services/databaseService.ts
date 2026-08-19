@@ -3530,4 +3530,15 @@ export const deleteAssetBorrowRequestFromDb = async (id: string) => {
     }
 };
 
+export const deletePanicAlertFromDb = async (id: string) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, "panicAlerts", id);
+        await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `panicAlerts/${id}`);
+    }
+};
+
+
 
