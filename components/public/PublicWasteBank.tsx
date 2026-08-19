@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, History, DollarSign, TrendingUp, Info, ArrowRight, ArrowLeft, Wallet, Calendar, Clock, CheckCircle, AlertCircle, Shield } from 'lucide-react';
+import { Package, History, DollarSign, TrendingUp, Info, ArrowRight, ArrowLeft, Wallet, Calendar, Clock, CheckCircle, AlertCircle, Shield, Trophy, Award, Send } from 'lucide-react';
 import { WasteDeposit, WasteBalance, WastePrice, House } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
@@ -23,27 +23,37 @@ interface PublicWasteBankProps {
 
 export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, houses }) => {
   const [deposits, setDeposits] = useState<WasteDeposit[]>([]);
+  const [allDeposits, setAllDeposits] = useState<WasteDeposit[]>([]);
   const [prices, setPrices] = useState<WastePrice[]>([]);
   const [balance, setBalance] = useState<WasteBalance | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'prices'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'prices' | 'leaderboard'>('overview');
   const [selectedHouseId, setSelectedHouseId] = useState(houseId);
 
   useEffect(() => {
-    if (!selectedHouseId) return;
-    const unsubDeposits = subscribeToWasteDeposits((all) => {
-      setDeposits(all.filter(d => d.houseId === selectedHouseId));
+    const unsubAll = subscribeToWasteDeposits((all) => {
+      setAllDeposits(all);
+      if (selectedHouseId) {
+        setDeposits(all.filter(d => d.houseId === selectedHouseId));
+      }
     });
     const unsubPrices = subscribeToWastePrices(setPrices);
-    const unsubBalance = subscribeToWasteBalance(selectedHouseId, setBalance);
+    let unsubBalance = () => {};
+    if (selectedHouseId) {
+      unsubBalance = subscribeToWasteBalance(selectedHouseId, setBalance);
+    }
     
     return () => {
-      unsubDeposits();
+      unsubAll();
       unsubPrices();
       unsubBalance();
     };
   }, [selectedHouseId]);
 
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
+  const [redeemType, setRedeemType] = useState<'Iuran' | 'Tunai' | 'UMKM'>('Iuran');
+  const [redeemAmount, setRedeemAmount] = useState(0);
+
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [tempHouseId, setTempHouseId] = useState('');
@@ -95,10 +105,60 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
     }
   };
 
+  const handleRedeemSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (redeemAmount <= 0) {
+      toast.error('Masukkan jumlah nominal yang valid.');
+      return;
+    }
+    if (redeemAmount > (balance?.totalBalance || 0)) {
+      toast.error('Saldo tabungan Anda tidak mencukupi.');
+      return;
+    }
+
+    const currentHouse = houses.find(h => h.id === selectedHouseId);
+    const houseName = currentHouse ? `Blok ${currentHouse.block}-${currentHouse.number} (${currentHouse.headOfFamily})` : selectedHouseId;
+    const message = `Halo Bendahara RT 02,%0ASaya dari *${houseName}* ingin mengajukan penukaran saldo Bank Sampah sebesar *Rp ${redeemAmount.toLocaleString()}* untuk keperluan *${redeemType}*. Mohon proses pengajuan ini. Terima kasih!`;
+    
+    window.open(`https://wa.me/?text=${message}`, '_blank');
+    setIsRedeemModalOpen(false);
+    toast.success('Permintaan penukaran telah dibuat.', {
+      description: 'Dialihkan ke WhatsApp Bendahara RT...'
+    });
+  };
+
   const handleSetHouse = (id: string) => {
     setSelectedHouseId(id);
     localStorage.setItem('resident_house_id', id);
   };
+
+  // Compute Leaderboard Eco Champions
+  const leaderboardData = React.useMemo(() => {
+    const houseTotals: { [houseId: string]: { weight: number; value: number } } = {};
+    allDeposits
+      .filter(d => d.status === 'Confirmed')
+      .forEach(d => {
+        if (!houseTotals[d.houseId]) {
+          houseTotals[d.houseId] = { weight: 0, value: 0 };
+        }
+        houseTotals[d.houseId].weight += d.weight;
+        houseTotals[d.houseId].value += d.totalValue;
+      });
+
+    return Object.entries(houseTotals)
+      .map(([hId, data]) => {
+        const h = houses.find(house => house.id === hId);
+        return {
+          houseId: hId,
+          block: h ? `${h.block}-${h.number}` : hId,
+          headOfFamily: h ? h.headOfFamily : 'Warga RT 02',
+          weight: data.weight,
+          value: data.value
+        };
+      })
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 5);
+  }, [allDeposits, houses]);
 
   if (!selectedHouseId) {
     const sortedHouses = [...houses]
@@ -262,11 +322,12 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
       </div>
 
       {/* Modern Minimalist Navigation Pills */}
-      <div className="flex items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60 w-fit">
+      <div className="flex items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar">
         {[
           { id: 'overview', label: 'Ringkasan', icon: Wallet },
           { id: 'history', label: 'Riwayat Setoran', icon: History },
-          { id: 'prices', label: 'Daftar Harga', icon: DollarSign }
+          { id: 'prices', label: 'Daftar Harga', icon: DollarSign },
+          { id: 'leaderboard', label: 'Leaderboard Warga', icon: Trophy }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -310,13 +371,25 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                   </span>
                 </div>
 
-                <div>
-                  <h3 className="text-4xl sm:text-5xl font-black tracking-tight mb-2">
-                    Rp {(balance?.totalBalance || 0).toLocaleString()}
-                  </h3>
-                  <p className="text-xs text-white/70 font-medium">
-                    Pembaruan terakhir: {balance ? new Date(balance.lastUpdated).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
-                  </p>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                  <div>
+                    <h3 className="text-4xl sm:text-5xl font-black tracking-tight mb-2">
+                      Rp {(balance?.totalBalance || 0).toLocaleString()}
+                    </h3>
+                    <p className="text-xs text-white/70 font-medium">
+                      Pembaruan terakhir: {balance ? new Date(balance.lastUpdated).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
+                    </p>
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      setRedeemAmount(balance?.totalBalance || 0);
+                      setIsRedeemModalOpen(true);
+                    }}
+                    className="px-5 py-3 bg-white text-emerald-800 hover:bg-emerald-50 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center gap-2 shrink-0"
+                  >
+                    <Send size={14} /> Gunakan Saldo
+                  </button>
                 </div>
               </div>
 
@@ -370,6 +443,67 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'leaderboard' && (
+          <motion.div 
+            key="leaderboard"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
+          >
+            <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 sm:p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100">
+                  <Trophy size={24} />
+                </div>
+                <div>
+                  <h4 className="font-black text-slate-900 text-lg">Podium Warga Peduli Lingkungan (Top 5)</h4>
+                  <p className="text-xs text-slate-500 font-medium">Peringkat warga paling aktif dan paling banyak menyetorkan sampah di RT 02</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {leaderboardData.map((item, idx) => {
+                  const rankColors = [
+                    'bg-amber-100 text-amber-800 border-amber-300',
+                    'bg-slate-200 text-slate-800 border-slate-300',
+                    'bg-amber-700/20 text-amber-900 border-amber-700/30',
+                    'bg-slate-100 text-slate-700 border-slate-200',
+                    'bg-slate-100 text-slate-700 border-slate-200'
+                  ];
+                  return (
+                    <motion.div 
+                      key={item.houseId} 
+                      variants={itemVariants}
+                      className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/70 flex items-center justify-between gap-4"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-black text-xs shrink-0 ${rankColors[idx]}`}>
+                          #{idx + 1}
+                        </div>
+                        <div>
+                          <p className="font-black text-slate-900 text-sm">Blok {item.block} • {item.headOfFamily}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Hasil: Rp {item.value.toLocaleString()}</p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-black">
+                          {item.weight.toFixed(1)} kg
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+
+                {leaderboardData.length === 0 && (
+                  <p className="text-center py-8 text-xs text-slate-400 font-bold">Belum ada data akumulasi peringkat.</p>
+                )}
               </div>
             </div>
           </motion.div>
@@ -484,6 +618,41 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal Gunakan / Tarik Saldo */}
+      <Modal isOpen={isRedeemModalOpen} onClose={() => setIsRedeemModalOpen(false)} title="Pengajuan Penukaran Saldo">
+        <form onSubmit={handleRedeemSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Keperluan Penukaran</label>
+            <select 
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              value={redeemType}
+              onChange={e => setRedeemType(e.target.value as any)}
+            >
+              <option value="Iuran">Potong Iuran Bulanan RT</option>
+              <option value="Tunai">Pencairan Tunai</option>
+              <option value="UMKM">Voucher Belanja UMKM Warga</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nominal (Rp)</label>
+            <input 
+              type="number" 
+              required
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              value={redeemAmount || ''}
+              onChange={e => setRedeemAmount(parseInt(e.target.value) || 0)}
+              placeholder="0"
+            />
+            <p className="text-[10px] text-slate-400 font-medium mt-1">Saldo Maksimal: Rp {(balance?.totalBalance || 0).toLocaleString()}</p>
+          </div>
+
+          <Button type="submit" className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-600/20 mt-2 flex items-center justify-center gap-2">
+            <Send size={14} /> Ajukan via WhatsApp Bendahara
+          </Button>
+        </form>
+      </Modal>
 
       {/* Modal Ajukan Setoran Sampah */}
       <Modal isOpen={isDepositModalOpen} onClose={() => setIsDepositModalOpen(false)} title="Setorkan Sampah Anorganik">

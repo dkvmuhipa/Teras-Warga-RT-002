@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus, CheckCircle, Search, Filter, History, DollarSign, Package, User, Home, Calendar, Clock, AlertTriangle, Shield } from 'lucide-react';
+import { Trash2, Plus, CheckCircle, Search, Filter, History, DollarSign, Package, User, Home, Calendar, Clock, AlertTriangle, Shield, Download, FileText } from 'lucide-react';
 import { WasteDeposit, WastePrice, House } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -152,11 +152,41 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       );
       setIsConfirmModalOpen(false);
       setSelectedDeposit(null);
-      toast.success('Setoran berhasil dikonfirmasi!');
+      toast.success('Setoran berhasil dikonfirmasi!', {
+        description: `Saldo Rp ${confirmForm.totalValue.toLocaleString()} ditambahkan.`
+      });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `wasteDeposits/${selectedDeposit.id}`);
       toast.error('Gagal mengonfirmasi setoran.');
     }
+  };
+
+  const handleExportCSV = () => {
+    if (deposits.length === 0) {
+      toast.error('Tidak ada data untuk diekspor.');
+      return;
+    }
+    const headers = ['ID', 'Warga', 'Rumah', 'Jenis Sampah', 'Berat (kg)', 'Tarif/kg', 'Total (Rp)', 'Status', 'Tanggal'];
+    const rows = deposits.map(d => [
+      d.id,
+      `"${d.residentName || '-'}"`,
+      `"${getHouseLabel(d.houseId)}"`,
+      `"${d.type}"`,
+      d.weight,
+      d.pricePerUnit,
+      d.totalValue,
+      d.status,
+      d.date
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Rekap_Bank_Sampah_RT02_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Laporan rekap CSV berhasil diunduh!');
   };
 
   const handleConfirmWeightChange = (weight: number) => {
@@ -186,7 +216,6 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
   const handleUpdatePrice = async (id: string, newPrice: number) => {
     try {
       await updateWastePriceInDb(id, newPrice);
-      // Optional: toast.success('Harga diperbarui');
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `wastePrices/${id}`);
       toast.error('Gagal memperbarui harga.');
@@ -261,6 +290,9 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto">
+          <Button onClick={handleExportCSV} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 text-xs py-3 px-4 rounded-2xl font-black uppercase tracking-wider">
+            <Download size={16} className="mr-1.5 text-indigo-600" /> Ekspor Rekap
+          </Button>
           <Button onClick={() => setIsPriceModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 text-xs py-3 px-4 rounded-2xl font-black uppercase tracking-wider">
             <DollarSign size={16} className="mr-1.5 text-emerald-600" /> Katalog Harga
           </Button>
