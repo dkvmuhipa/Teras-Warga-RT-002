@@ -287,58 +287,66 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 mb-24 space-y-8">
-      {/* Header Banner - Clean Minimalist */}
-      <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 sm:p-8 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-widest">
-              Bank Sampah RT 02
-            </span>
-            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-widest">
-              Blok {getHouseLabel(selectedHouseId)}
-            </span>
+    <div className="max-w-6xl mx-auto px-4 py-10 mb-24 space-y-10">
+      {/* Apple-style Ultra-Modern Hero Banner */}
+      <div className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl border border-slate-800/80 overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-teal-500/20 rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="px-3.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[10px] font-mono font-black uppercase tracking-widest backdrop-blur-md">
+                🌿 BANK SAMPAH DIGITAL RT 02
+              </span>
+              <span className="px-3.5 py-1 bg-slate-800/80 text-slate-300 border border-slate-700/60 rounded-full text-[10px] font-mono font-black uppercase tracking-widest">
+                BLOK {getHouseLabel(selectedHouseId)}
+              </span>
+            </div>
+            
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+              Tabungan Sampah Warga
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm font-medium max-w-xl leading-relaxed">
+              Konversikan sampah anorganik menjadi saldo bernilai ekonomi secara real-time untuk iuran bulanan & lingkungan bersih.
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Tabungan Sampah Warga</h2>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-            Ubah sampah anorganik menjadi bernilai ekonomi untuk kebersihan & iuran warga.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <button 
-            onClick={() => {
-              setSelectedHouseId('');
-              localStorage.removeItem('resident_house_id');
-            }}
-            className="flex-1 md:flex-none px-4 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/80 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2"
-          >
-            <ArrowLeft size={14} /> Ganti Rumah
-          </button>
-          <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 py-3 px-5 rounded-2xl font-black uppercase tracking-wider text-xs">
-            <Package size={16} className="mr-2" /> Setorkan Sampah
-          </Button>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <button 
+              onClick={() => {
+                setSelectedHouseId('');
+                localStorage.removeItem('resident_house_id');
+              }}
+              className="flex-1 md:flex-none px-5 py-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/80 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 backdrop-blur-md"
+            >
+              <ArrowLeft size={14} /> Ganti Rumah
+            </button>
+            <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 md:flex-none bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black shadow-xl shadow-emerald-500/20 py-3.5 px-6 rounded-2xl uppercase tracking-wider text-xs border border-emerald-400/30">
+              <Package size={16} className="mr-2 stroke-[2.5]" /> Setorkan Sampah
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Modern Minimalist Navigation Pills */}
-      <div className="flex items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar">
+      {/* Floating Segmented Control */}
+      <div className="flex items-center gap-1.5 bg-slate-200/50 backdrop-blur-md p-1.5 rounded-2xl border border-slate-300/40 w-full sm:w-fit overflow-x-auto no-scrollbar shadow-inner">
         {[
-          { id: 'overview', label: 'Ringkasan', icon: Wallet },
+          { id: 'overview', label: 'Ringkasan Saldo', icon: Wallet },
           { id: 'history', label: 'Riwayat Setoran', icon: History },
-          { id: 'prices', label: 'Daftar Harga', icon: DollarSign },
-          { id: 'leaderboard', label: 'Leaderboard Warga', icon: Trophy }
+          { id: 'prices', label: 'Katalog Harga', icon: DollarSign },
+          { id: 'leaderboard', label: 'Top Eco Champions', icon: Trophy }
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
               activeTab === tab.id 
-              ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/80' 
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-white text-emerald-700 shadow-md shadow-slate-300/50 border border-slate-200/80' 
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
             }`}
           >
-            <tab.icon size={15} />
+            <tab.icon size={16} className={activeTab === tab.id ? 'text-emerald-600' : 'text-slate-400'} />
             {tab.label}
           </button>
         ))}
@@ -351,32 +359,34 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-6"
+            className="space-y-8"
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Primary Balance Minimal Card */}
-              <div className="lg:col-span-2 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-[2.5rem] p-8 text-white shadow-xl shadow-emerald-600/10 flex flex-col justify-between relative overflow-hidden">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl">
-                      <Wallet size={24} />
+              {/* Luxury Glass Balance Card */}
+              <div className="lg:col-span-2 bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-800 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl shadow-emerald-900/20 border border-emerald-400/20 flex flex-col justify-between relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+
+                <div className="flex justify-between items-start mb-8 relative z-10">
+                  <div className="flex items-center gap-3.5">
+                    <div className="p-3.5 bg-white/15 backdrop-blur-md rounded-2xl border border-white/20">
+                      <Wallet size={26} />
                     </div>
                     <div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">SALDO AKTIF</span>
-                      <p className="text-xs text-white/80 font-medium">Tabungan Sampah Anda</p>
+                      <span className="text-[10px] font-mono font-black uppercase tracking-widest text-emerald-200 block">TOTAL SALDO AKTIF</span>
+                      <p className="text-xs text-white/80 font-medium">Bisa dicarikan atau digunakan iuran</p>
                     </div>
                   </div>
-                  <span className="px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-[9px] font-black uppercase tracking-widest text-white">
-                    Tersedia
+                  <span className="px-3.5 py-1.5 bg-white/15 backdrop-blur-md border border-white/20 rounded-full text-[9px] font-mono font-black uppercase tracking-widest text-white">
+                    ✓ TERDEDIKASI
                   </span>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 relative z-10">
                   <div>
-                    <h3 className="text-4xl sm:text-5xl font-black tracking-tight mb-2">
+                    <h3 className="text-4xl sm:text-6xl font-black tracking-tight text-white mb-2">
                       Rp {(balance?.totalBalance || 0).toLocaleString()}
                     </h3>
-                    <p className="text-xs text-white/70 font-medium">
+                    <p className="text-xs font-mono text-emerald-100/80">
                       Pembaruan terakhir: {balance ? new Date(balance.lastUpdated).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
                     </p>
                   </div>
@@ -386,58 +396,62 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                       setRedeemAmount(balance?.totalBalance || 0);
                       setIsRedeemModalOpen(true);
                     }}
-                    className="px-5 py-3 bg-white text-emerald-800 hover:bg-emerald-50 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center gap-2 shrink-0"
+                    className="px-6 py-3.5 bg-white text-emerald-900 hover:bg-emerald-50 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-xl flex items-center gap-2 shrink-0 border border-white/40"
                   >
-                    <Send size={14} /> Gunakan Saldo
+                    <Send size={15} /> Gunakan Saldo
                   </button>
                 </div>
               </div>
 
-              {/* Minimal Metrics */}
+              {/* High-End Sub Metrics */}
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-                <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm flex items-center justify-between">
+                <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">TOTAL TERKUMPUL</p>
+                    <p className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1">TOTAL TERKUMPUL</p>
                     <p className="text-2xl font-black text-slate-900">{totalWeight.toFixed(1)} <span className="text-xs font-bold text-slate-400">kg</span></p>
+                    <p className="text-[10px] text-emerald-600 font-bold mt-1">✓ Terverifikasi</p>
                   </div>
-                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
-                    <Package size={22} />
+                  <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
+                    <Package size={26} />
                   </div>
                 </div>
 
-                <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm flex items-center justify-between">
+                <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">TOTAL SETORAN</p>
+                    <p className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1">TOTAL AKTIVITAS</p>
                     <p className="text-2xl font-black text-slate-900">{deposits.length} <span className="text-xs font-bold text-slate-400">Kali</span></p>
+                    <p className="text-[10px] text-indigo-600 font-bold mt-1">Sesi Penyetoran</p>
                   </div>
-                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
-                    <TrendingUp size={22} />
+                  <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
+                    <TrendingUp size={26} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Clean Instructions Card */}
-            <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 sm:p-8 shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
-                  <Info size={20} />
+            {/* Benefit Grid Minimal */}
+            <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
+                  <Info size={22} />
                 </div>
                 <div>
-                  <h4 className="font-black text-slate-900 text-base">Manfaat & Penggunaan Saldo</h4>
-                  <p className="text-xs text-slate-500 font-medium">Saldo tabungan sampah dapat digunakan secara praktis untuk:</p>
+                  <h4 className="font-black text-slate-900 text-lg tracking-tight">Opsi Penukaran & Manfaat Saldo</h4>
+                  <p className="text-xs text-slate-500 font-medium">Penukaran saldo dapat dilakukan secara instan langsung ke Bendahara RT</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 {[
                   { title: 'Pembayaran Iuran RT', desc: 'Potong otomatis dari tagihan kebersihan bulanan warga.', icon: DollarSign },
                   { title: 'Belanja UMKM Warga', desc: 'Gunakan saldo untuk bertransaksi di Pasar Warga RT 02.', icon: Package },
                   { title: 'Pencairan Tunai', desc: 'Ambil langsung secara tunai melalui Pengurus / Bendahara RT.', icon: Wallet }
                 ].map((item, idx) => (
-                  <div key={idx} className="p-5 bg-slate-50/60 border border-slate-200/60 rounded-2xl space-y-1.5">
-                    <div className="flex items-center gap-2 text-emerald-700">
-                      <item.icon size={16} />
+                  <div key={idx} className="p-5 bg-slate-50/80 border border-slate-200/70 rounded-2xl space-y-2 hover:border-emerald-300 transition-all">
+                    <div className="flex items-center gap-2.5 text-emerald-700">
+                      <div className="p-2 bg-emerald-100/80 rounded-xl">
+                        <item.icon size={16} />
+                      </div>
                       <p className="text-xs font-black uppercase tracking-wider">{item.title}</p>
                     </div>
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
