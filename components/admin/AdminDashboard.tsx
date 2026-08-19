@@ -35,6 +35,7 @@ const AuditLogManager = React.lazy(() => import('./AuditLogManager').then(m => (
 const NotificationCombined = React.lazy(() => import('./NotificationCombined').then(m => ({ default: m.NotificationCombined })));
 const AdminAnalytics = React.lazy(() => import('./AdminAnalytics').then(m => ({ default: m.AdminAnalytics })));
 const IncomingMailManager = React.lazy(() => import('./IncomingMailManager').then(m => ({ default: m.IncomingMailManager })));
+const VehicleManager = React.lazy(() => import('./VehicleManager').then(m => ({ default: m.VehicleManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -293,6 +294,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         );
       case 'facilities':
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaAttendance={rondaAttendance} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
+      case 'vehicles':
+        return <VehicleManager houses={houses} />;
       case 'assets':
         return <AssetManager inventory={inventory} inventoryLogs={inventoryLogs} />;
       case 'audit':

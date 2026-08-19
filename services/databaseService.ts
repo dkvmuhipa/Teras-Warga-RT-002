@@ -3417,3 +3417,60 @@ export const subscribeToForumIdeas = (callback: (data: ForumIdea[]) => void) => 
         handleFirestoreError(error, OperationType.LIST, FORUM_IDEAS_COL);
     });
 };
+
+// ==========================================
+// RESIDENT VEHICLE MANAGEMENT (E-STIKER SATPAM)
+// ==========================================
+const VEHICLES_COL = "residentVehicles";
+
+export const subscribeToResidentVehicles = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) {
+        console.warn(`Firebase not configured, skipping subscription to ${VEHICLES_COL}`);
+        callback([]);
+        return () => {};
+    }
+    const q = query(collection(db, VEHICLES_COL), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const vehicles = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+        }));
+        callback(vehicles);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, VEHICLES_COL);
+        callback([]);
+    });
+};
+
+export const addResidentVehicleToDb = async (vehicleData: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        await addDoc(collection(db, VEHICLES_COL), {
+            ...vehicleData,
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, VEHICLES_COL);
+    }
+};
+
+export const updateResidentVehicleInDb = async (id: string, updates: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, VEHICLES_COL, id);
+        await updateDoc(docRef, updates);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${VEHICLES_COL}/${id}`);
+    }
+};
+
+export const deleteResidentVehicleFromDb = async (id: string) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, VEHICLES_COL, id);
+        await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${VEHICLES_COL}/${id}`);
+    }
+};
+

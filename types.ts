@@ -980,6 +980,19 @@ export interface ForumIdea {
   createdAt?: string;
 }
 
+export interface ResidentVehicle {
+  id: string;
+  houseId: string;
+  plateNumber: string; // Misal: B 1234 ABC
+  vehicleType: 'Mobil' | 'Motor' | 'Sepeda Listrik' | 'Lainnya';
+  brandModel: string; // Misal: Toyota Avanza, Honda Vario
+  color: string; // Misal: Hitam Metalik
+  ownerName: string;
+  stickerNumber?: string; // Misal: STK-RT02-045
+  status: 'Terverifikasi' | 'Menunggu' | 'Ditolak';
+  createdAt: string;
+}
+
 export interface IncomingMail {
   id: string;
   mailNumber: string;         // Nomor Surat Asli Pihak Luar
