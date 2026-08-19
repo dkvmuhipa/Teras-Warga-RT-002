@@ -3474,3 +3474,60 @@ export const deleteResidentVehicleFromDb = async (id: string) => {
     }
 };
 
+// ==========================================
+// ASSET BORROW REQUESTS (PEMINJAMAN INVENTARIS RT)
+// ==========================================
+const BORROWS_COL = "assetBorrowRequests";
+
+export const subscribeToAssetBorrowRequests = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) {
+        console.warn(`Firebase not configured, skipping subscription to ${BORROWS_COL}`);
+        callback([]);
+        return () => {};
+    }
+    const q = query(collection(db, BORROWS_COL), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const requests = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+        }));
+        callback(requests);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, BORROWS_COL);
+        callback([]);
+    });
+};
+
+export const addAssetBorrowRequestToDb = async (requestData: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        await addDoc(collection(db, BORROWS_COL), {
+            ...requestData,
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, BORROWS_COL);
+    }
+};
+
+export const updateAssetBorrowRequestInDb = async (id: string, updates: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, BORROWS_COL, id);
+        await updateDoc(docRef, updates);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${BORROWS_COL}/${id}`);
+    }
+};
+
+export const deleteAssetBorrowRequestFromDb = async (id: string) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, BORROWS_COL, id);
+        await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${BORROWS_COL}/${id}`);
+    }
+};
+
+

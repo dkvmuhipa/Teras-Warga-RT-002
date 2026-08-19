@@ -993,6 +993,21 @@ export interface ResidentVehicle {
   createdAt: string;
 }
 
+export interface AssetBorrowRequest {
+  id: string;
+  houseId: string;
+  borrowerName: string;
+  borrowerPhone: string;
+  itemName: string;
+  quantity: number;
+  borrowDate: string;
+  returnDate: string;
+  purpose: string;
+  status: 'Menunggu' | 'Disetujui' | 'Dipinjam' | 'Dikembalikan' | 'Ditolak';
+  notes?: string;
+  createdAt: string;
+}
+
 export interface IncomingMail {
   id: string;
   mailNumber: string;         // Nomor Surat Asli Pihak Luar
