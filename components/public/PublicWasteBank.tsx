@@ -329,6 +329,26 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
         </div>
       </div>
 
+      {/* Banner Operational Schedule Status */}
+      <div className="bg-emerald-950 text-white rounded-3xl p-4 sm:p-5 border border-emerald-800/80 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping shrink-0" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono font-black text-emerald-400 uppercase tracking-widest">🟢 JADWAL PENIMBANGAN AKTIF</span>
+              <span className="px-2 py-0.5 bg-emerald-900 text-emerald-300 rounded text-[9px] font-mono font-bold">POS RONDA RT 02</span>
+            </div>
+            <p className="text-xs text-slate-300 font-medium mt-0.5">
+              Setiap hari Sabtu Pagi Pukul <span className="font-bold text-white">08:00 - 11:00 WIB</span>. Petugas siap melayani di Pos Ronda.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs font-mono font-bold text-emerald-300 bg-emerald-900/60 px-3 py-1.5 rounded-xl border border-emerald-800 shrink-0">
+          <Clock size={14} /> Jam Layanan: 08:00 - 11:00 WIB
+        </div>
+      </div>
+
       {/* Floating Segmented Control */}
       <div className="flex items-center gap-1.5 bg-slate-200/50 backdrop-blur-md p-1.5 rounded-2xl border border-slate-300/40 w-full sm:w-fit overflow-x-auto no-scrollbar shadow-inner">
         {[
@@ -429,32 +449,28 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
               </div>
             </div>
 
-            {/* Benefit Grid Minimal */}
-            <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-8 shadow-sm">
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
+            {/* Eco Education Guide Minimal */}
+            <div className="bg-emerald-50/50 border border-emerald-100 rounded-[2.5rem] p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-emerald-200/60">
+                <div className="p-3 bg-emerald-600 text-white rounded-2xl shadow-md">
                   <Info size={22} />
                 </div>
                 <div>
-                  <h4 className="font-black text-slate-900 text-lg tracking-tight">Opsi Penukaran & Manfaat Saldo</h4>
-                  <p className="text-xs text-slate-500 font-medium">Penukaran saldo dapat dilakukan secara instan langsung ke Bendahara RT</p>
+                  <h4 className="font-black text-slate-900 text-lg tracking-tight">Panduan Cepat Pemilahan Sampah</h4>
+                  <p className="text-xs text-slate-500 font-medium">Tips agar nilai timbangan sampah Anda maksimal & mempercepat penimbangan</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 {[
-                  { title: 'Pembayaran Iuran RT', desc: 'Potong otomatis dari tagihan kebersihan bulanan warga.', icon: DollarSign },
-                  { title: 'Belanja UMKM Warga', desc: 'Gunakan saldo untuk bertransaksi di Pasar Warga RT 02.', icon: Package },
-                  { title: 'Pencairan Tunai', desc: 'Ambil langsung secara tunai melalui Pengurus / Bendahara RT.', icon: Wallet }
-                ].map((item, idx) => (
-                  <div key={idx} className="p-5 bg-slate-50/80 border border-slate-200/70 rounded-2xl space-y-2 hover:border-emerald-300 transition-all">
-                    <div className="flex items-center gap-2.5 text-emerald-700">
-                      <div className="p-2 bg-emerald-100/80 rounded-xl">
-                        <item.icon size={16} />
-                      </div>
-                      <p className="text-xs font-black uppercase tracking-wider">{item.title}</p>
-                    </div>
-                    <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                  { tag: 'PLASTIK PET', tips: 'Kosongkan isi cairan, bilas singkat, dan pipihkan botol.', color: 'border-blue-200 bg-blue-50/60 text-blue-800' },
+                  { tag: 'KARDUS & KERTAS', tips: 'Lipat kardus hingga pipih dan ikat rapi agar hemat tempat.', color: 'border-amber-200 bg-amber-50/60 text-amber-800' },
+                  { tag: 'LOGAM / KALENG', tips: 'Pastikan bebas dari sisa minyak atau bahan kimia berbahaya.', color: 'border-slate-200 bg-slate-100/60 text-slate-800' },
+                  { tag: 'BOTOL KACA', tips: 'Pisahkan tutup botol dan pastikan botol utuh tidak pecah.', color: 'border-emerald-200 bg-emerald-100/60 text-emerald-800' }
+                ].map((guide, idx) => (
+                  <div key={idx} className={`p-4 rounded-2xl border ${guide.color} space-y-1.5`}>
+                    <span className="text-[9px] font-mono font-black uppercase tracking-widest">{guide.tag}</span>
+                    <p className="text-xs font-medium leading-relaxed opacity-90">{guide.tips}</p>
                   </div>
                 ))}
               </div>
