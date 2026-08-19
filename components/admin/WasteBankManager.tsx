@@ -247,146 +247,172 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
   const pendingCount = deposits.filter(d => d.status === 'Pending').length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="w-full lg:w-auto">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Bank Sampah Digital</h2>
-          <p className="text-slate-500 text-sm font-medium mt-1">Kelola tabungan sampah warga dan konversi menjadi saldo ekonomi.</p>
-        </div>
-        <div className="flex flex-wrap gap-2 w-full lg:w-auto">
-          <Button onClick={() => setIsPriceModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-xs py-2">
-            <DollarSign size={16} className="mr-1.5" /> <span className="hidden sm:inline">Atur Harga</span><span className="sm:hidden">Harga</span>
-          </Button>
-          <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 text-xs py-2">
-            <Plus size={16} className="mr-1.5" /> <span className="hidden sm:inline">Input Setoran</span><span className="sm:hidden">Setor</span>
-          </Button>
+    <div className="space-y-8">
+      {/* Cyber Admin Banner Header */}
+      <div className="bg-slate-900 text-white rounded-[2.5rem] p-6 md:p-8 border border-slate-800 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-mono font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              CYBER-ECO ADMIN SYSTEM
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-100 tracking-tight">Manajemen Bank Sampah Digital</h2>
+            <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">
+              Verifikasi penimbangan sampah warga, atur tarif katalog pengepul, dan kelola alokasi saldo ekonomi RT 02.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto">
+            <Button onClick={() => setIsPriceModalOpen(true)} variant="outline" className="flex-1 sm:flex-none bg-slate-950/80 hover:bg-slate-950 text-slate-200 border-slate-800 text-xs py-3.5 px-5 rounded-2xl font-mono font-black uppercase tracking-wider">
+              <DollarSign size={16} className="mr-2 text-emerald-400" /> Katalog Harga
+            </Button>
+            <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-950/50 text-xs py-3.5 px-6 rounded-2xl font-black uppercase tracking-wider">
+              <Plus size={16} className="mr-2" /> Input Setoran Baru
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <Card className="p-5 md:p-6 bg-emerald-50 border-emerald-100 sm:col-span-2 lg:col-span-1">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white rounded-xl md:rounded-2xl text-emerald-600 shadow-sm">
-              <Package size={20} className="md:w-6 md:h-6" />
+      {/* Cyber KPI Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="p-4 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-2xl">
+              <Package size={26} />
             </div>
             <div>
-              <p className="text-[8px] md:text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Total Tabungan Terkonfirmasi</p>
-              <p className="text-xl md:text-2xl font-black text-slate-800">Rp {totalConfirmedValue.toLocaleString()}</p>
+              <p className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">TERKONFIRMASI</p>
+              <p className="text-2xl font-mono font-black text-emerald-400">Rp {totalConfirmedValue.toLocaleString()}</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Saldo telah disalurkan</p>
             </div>
           </div>
-        </Card>
-        <Card className="p-5 md:p-6 bg-amber-50 border-amber-100">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white rounded-xl md:rounded-2xl text-amber-600 shadow-sm">
-              <Clock size={20} className="md:w-6 md:h-6" />
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="p-4 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-2xl">
+              <Clock size={26} />
             </div>
             <div>
-              <p className="text-[8px] md:text-[10px] font-black text-amber-600 uppercase tracking-widest mb-0.5">Menunggu Konfirmasi</p>
-              <p className="text-xl md:text-2xl font-black text-slate-800">{pendingCount} <span className="text-xs font-bold opacity-60">Transaksi</span></p>
+              <p className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">MENUNGGU VERIFIKASI</p>
+              <p className="text-2xl font-mono font-black text-amber-400">{pendingCount} <span className="text-xs font-sans text-slate-400 font-bold">Pengajuan</span></p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Perlu konfirmasi fisik</p>
             </div>
           </div>
-        </Card>
-        <Card className="p-5 md:p-6 bg-indigo-50 border-indigo-100">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white rounded-xl md:rounded-2xl text-indigo-600 shadow-sm">
-              <History size={20} className="md:w-6 md:h-6" />
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] text-white shadow-xl relative overflow-hidden group sm:col-span-2 lg:col-span-1">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="p-4 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-2xl">
+              <History size={26} />
             </div>
             <div>
-              <p className="text-[8px] md:text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-0.5">Total Transaksi</p>
-              <p className="text-xl md:text-2xl font-black text-slate-800">{deposits.length} <span className="text-xs font-bold opacity-60">Data</span></p>
+              <p className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">TOTAL SETORAN</p>
+              <p className="text-2xl font-mono font-black text-indigo-400">{deposits.length} <span className="text-xs font-sans text-slate-400 font-bold">Sesi</span></p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Keseluruhan rekam log</p>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-400 transition-colors" size={18} />
           <input 
             type="text" 
-            placeholder="Cari nama warga atau blok..." 
-            className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all shadow-sm"
+            placeholder="Cari nama warga, blok rumah, atau jenis sampah..." 
+            className="w-full pl-12 pr-4 py-3.5 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-slate-200 placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none transition-all shadow-inner"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1.5 bg-white p-1 border border-slate-200 rounded-xl shadow-sm overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 bg-slate-900 p-1.5 border border-slate-800 rounded-2xl shadow-xl overflow-x-auto no-scrollbar">
           {(['All', 'Pending', 'Confirmed'] as const).map((status) => (
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-black uppercase tracking-wider transition-all whitespace-nowrap ${
                 filterStatus === status 
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-100' 
-                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950/50' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
               }`}
             >
-              {status === 'All' ? 'Semua' : status === 'Pending' ? 'Menunggu' : 'Selesai'}
+              {status === 'All' ? 'Semua' : status === 'Pending' ? '⏳ Menunggu' : '✓ Terkonfirmasi'}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="bg-white rounded-[1.5rem] md:rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+      {/* Modern High-Tech Table Container */}
+      <div className="bg-slate-900 text-white rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left border-collapse min-w-[700px]">
+          <table className="w-full text-left border-collapse min-w-[750px]">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Warga</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Jenis & Berat</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nilai Ekonomi</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Aksi</th>
+              <tr className="bg-slate-950/80 border-b border-slate-800">
+                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Identitas Warga</th>
+                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Kategori & Berat</th>
+                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Nilai Saldo</th>
+                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Status Setoran</th>
+                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest text-right">Opsi Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-slate-800/80">
               {filteredDeposits.map((deposit) => (
-                <tr key={deposit.id} className="hover:bg-slate-50/50 transition-colors group">
+                <tr key={deposit.id} className="hover:bg-slate-950/50 transition-colors group">
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black shadow-sm text-sm">
-                        {(deposit.residentName || '?').charAt(0)}
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-slate-950 font-black flex items-center justify-center shadow-md text-sm shrink-0">
+                        {(deposit.residentName || '?').charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-800 leading-none mb-1">{deposit.residentName || '-'}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Blok {getHouseLabel(deposit.houseId)}</p>
+                        <p className="text-sm font-black text-slate-100 leading-none mb-1">{deposit.residentName || '-'}</p>
+                        <p className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Blok {getHouseLabel(deposit.houseId)}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[9px] font-black uppercase tracking-widest">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[9px] font-mono font-black uppercase tracking-widest">
                         {deposit.type}
                       </span>
                     </div>
-                    <p className="text-sm font-black text-slate-700">{deposit.weight} kg</p>
+                    <p className="text-sm font-mono font-black text-slate-200">{deposit.weight} kg</p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm font-black text-emerald-600">Rp {deposit.totalValue.toLocaleString()}</p>
-                    <p className="text-[10px] font-bold text-slate-400">@ Rp {deposit.pricePerUnit.toLocaleString()}/kg</p>
+                    <p className="text-sm font-mono font-black text-emerald-400">Rp {deposit.totalValue.toLocaleString()}</p>
+                    <p className="text-[10px] font-mono text-slate-400">@ Rp {deposit.pricePerUnit.toLocaleString()}/kg</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
-                      deposit.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+                    <span className={`px-3 py-1 rounded-xl text-[9px] font-mono font-black uppercase tracking-widest border ${
+                      deposit.status === 'Confirmed' 
+                        ? 'bg-emerald-950/80 text-emerald-300 border-emerald-800' 
+                        : 'bg-amber-950/80 text-amber-300 border-amber-800 animate-pulse'
                     }`}>
-                      {deposit.status === 'Confirmed' ? 'Selesai' : 'Menunggu'}
+                      {deposit.status === 'Confirmed' ? '✓ SELESAI' : '⏳ MENUNGGU DITIMBANG'}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1">
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
                       {deposit.status === 'Pending' && (
                         <button 
                           onClick={() => handleConfirmDeposit(deposit)}
-                          className="p-1.5 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-mono font-bold transition-all shadow-md flex items-center gap-1.5"
                           title="Konfirmasi & Tambah Saldo"
                         >
-                          <CheckCircle size={16} />
+                          <CheckCircle size={14} /> Konfirmasi
                         </button>
                       )}
                       <button 
                         onClick={() => handleDeleteDeposit(deposit.id)}
-                        className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                        title="Hapus Data"
+                        className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-950/60 rounded-xl transition-all"
+                        title="Hapus Data Setoran"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -396,11 +422,11 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               ))}
               {filteredDeposits.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-4">
+                  <td colSpan={5} className="px-6 py-16 text-center">
+                    <div className="w-16 h-16 bg-slate-800/60 rounded-3xl flex items-center justify-center text-slate-500 mx-auto mb-4 border border-slate-700/50">
                       <Package size={32} />
                     </div>
-                    <p className="text-slate-400 font-bold">Tidak ada data setoran ditemukan.</p>
+                    <p className="text-slate-300 font-bold text-sm">Tidak ada data setoran ditemukan.</p>
                   </td>
                 </tr>
               )}
