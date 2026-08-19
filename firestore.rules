@@ -302,9 +302,16 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Incoming Mails (Surat Masuk Pihak Luar)
-    match /incomingMails/{id} {
-      allow read, write: if isAdmin();
+    // Resident Vehicles (Stiker Kendaraan Satpam)
+    match /residentVehicles/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Asset Borrow Requests (Peminjaman Aset RT)
+    match /assetBorrowRequests/{id} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
     }
 
     // Default Deny Catch-all

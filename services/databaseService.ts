@@ -3429,15 +3429,17 @@ export const subscribeToResidentVehicles = (callback: (data: any[]) => void) => 
         callback([]);
         return () => {};
     }
-    const q = query(collection(db, VEHICLES_COL), orderBy("createdAt", "desc"));
+    const q = collection(db, VEHICLES_COL);
     return onSnapshot(q, (snapshot) => {
         const vehicles = snapshot.docs.map(doc => ({
             ...doc.data(),
             id: doc.id
         }));
+        // Sort in memory by createdAt descending
+        vehicles.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
         callback(vehicles);
     }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, VEHICLES_COL);
+        console.warn("Firestore subscription error for residentVehicles:", error);
         callback([]);
     });
 };
@@ -3485,15 +3487,17 @@ export const subscribeToAssetBorrowRequests = (callback: (data: any[]) => void) 
         callback([]);
         return () => {};
     }
-    const q = query(collection(db, BORROWS_COL), orderBy("createdAt", "desc"));
+    const q = collection(db, BORROWS_COL);
     return onSnapshot(q, (snapshot) => {
         const requests = snapshot.docs.map(doc => ({
             ...doc.data(),
             id: doc.id
         }));
+        // Sort in memory by createdAt descending
+        requests.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
         callback(requests);
     }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, BORROWS_COL);
+        console.warn("Firestore subscription error for assetBorrowRequests:", error);
         callback([]);
     });
 };
