@@ -3,6 +3,7 @@ import { Package, Plus, Edit2, Trash2, Box, CheckCircle2, History, User, Calenda
 import { motion } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { AssetBorrowManager } from './AssetBorrowManager';
 import { InventoryItem, MaintenanceLog } from '../../types';
 import { addInventoryToDb, updateInventoryInDb, deleteInventoryFromDb, addInventoryLogToDb, updateInventoryLogStatus, deleteInventoryLogFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { toast } from 'sonner';
