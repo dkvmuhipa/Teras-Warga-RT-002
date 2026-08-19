@@ -247,155 +247,137 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
   const pendingCount = deposits.filter(d => d.status === 'Pending').length;
 
   return (
-    <div className="space-y-8">
-      {/* Cyber Admin Banner Header */}
-      <div className="bg-slate-900 text-white rounded-[2.5rem] p-6 md:p-8 border border-slate-800 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="space-y-6">
+      {/* Admin Clean Header Banner */}
+      <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div>
+          <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 inline-block">
+            Panel Pengurus RT 02
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Kelola Bank Sampah Digital</h2>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+            Verifikasi fisik setoran warga, perbarui tarif per-kg, dan pantau total saldo terdistribusi.
+          </p>
+        </div>
 
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-mono font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              CYBER-ECO ADMIN SYSTEM
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-100 tracking-tight">Manajemen Bank Sampah Digital</h2>
-            <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">
-              Verifikasi penimbangan sampah warga, atur tarif katalog pengepul, dan kelola alokasi saldo ekonomi RT 02.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto">
-            <Button onClick={() => setIsPriceModalOpen(true)} variant="outline" className="flex-1 sm:flex-none bg-slate-950/80 hover:bg-slate-950 text-slate-200 border-slate-800 text-xs py-3.5 px-5 rounded-2xl font-mono font-black uppercase tracking-wider">
-              <DollarSign size={16} className="mr-2 text-emerald-400" /> Katalog Harga
-            </Button>
-            <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-950/50 text-xs py-3.5 px-6 rounded-2xl font-black uppercase tracking-wider">
-              <Plus size={16} className="mr-2" /> Input Setoran Baru
-            </Button>
-          </div>
+        <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto">
+          <Button onClick={() => setIsPriceModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 text-xs py-3 px-4 rounded-2xl font-black uppercase tracking-wider">
+            <DollarSign size={16} className="mr-1.5 text-emerald-600" /> Katalog Harga
+          </Button>
+          <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 text-xs py-3 px-5 rounded-2xl font-black uppercase tracking-wider">
+            <Plus size={16} className="mr-1.5" /> Input Setoran Baru
+          </Button>
         </div>
       </div>
 
-      {/* Cyber KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="p-4 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-2xl">
-              <Package size={26} />
-            </div>
-            <div>
-              <p className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">TERKONFIRMASI</p>
-              <p className="text-2xl font-mono font-black text-emerald-400">Rp {totalConfirmedValue.toLocaleString()}</p>
-              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Saldo telah disalurkan</p>
-            </div>
+      {/* Clean KPI Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm flex items-center gap-4">
+          <div className="p-3.5 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl">
+            <Package size={24} />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">TERKONFIRMASI</p>
+            <p className="text-2xl font-black text-slate-900">Rp {totalConfirmedValue.toLocaleString()}</p>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="p-4 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-2xl">
-              <Clock size={26} />
-            </div>
-            <div>
-              <p className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">MENUNGGU VERIFIKASI</p>
-              <p className="text-2xl font-mono font-black text-amber-400">{pendingCount} <span className="text-xs font-sans text-slate-400 font-bold">Pengajuan</span></p>
-              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Perlu konfirmasi fisik</p>
-            </div>
+        <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm flex items-center gap-4">
+          <div className="p-3.5 bg-amber-50 border border-amber-100 text-amber-600 rounded-2xl">
+            <Clock size={24} />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">MENUNGGU KONFIRMASI</p>
+            <p className="text-2xl font-black text-slate-900">{pendingCount} <span className="text-xs font-bold text-slate-400">Pengajuan</span></p>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] text-white shadow-xl relative overflow-hidden group sm:col-span-2 lg:col-span-1">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="p-4 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-2xl">
-              <History size={26} />
-            </div>
-            <div>
-              <p className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">TOTAL SETORAN</p>
-              <p className="text-2xl font-mono font-black text-indigo-400">{deposits.length} <span className="text-xs font-sans text-slate-400 font-bold">Sesi</span></p>
-              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Keseluruhan rekam log</p>
-            </div>
+        <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm flex items-center gap-4 sm:col-span-2 lg:col-span-1">
+          <div className="p-3.5 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl">
+            <History size={24} />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">TOTAL SETORAN</p>
+            <p className="text-2xl font-black text-slate-900">{deposits.length} <span className="text-xs font-bold text-slate-400">Transaksi</span></p>
           </div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-400 transition-colors" size={18} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors" size={18} />
           <input 
             type="text" 
             placeholder="Cari nama warga, blok rumah, atau jenis sampah..." 
-            className="w-full pl-12 pr-4 py-3.5 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-slate-200 placeholder:text-slate-500 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none transition-all shadow-inner"
+            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2 bg-slate-900 p-1.5 border border-slate-800 rounded-2xl shadow-xl overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 border border-slate-200/60 rounded-2xl overflow-x-auto no-scrollbar">
           {(['All', 'Pending', 'Confirmed'] as const).map((status) => (
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
                 filterStatus === status 
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950/50' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/80' 
+                : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              {status === 'All' ? 'Semua' : status === 'Pending' ? '⏳ Menunggu' : '✓ Terkonfirmasi'}
+              {status === 'All' ? 'Semua' : status === 'Pending' ? 'Menunggu' : 'Terkonfirmasi'}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Modern High-Tech Table Container */}
-      <div className="bg-slate-900 text-white rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden">
+      {/* Clean Modern Table Container */}
+      <div className="bg-white rounded-[2rem] border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse min-w-[750px]">
             <thead>
-              <tr className="bg-slate-950/80 border-b border-slate-800">
-                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Identitas Warga</th>
-                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Kategori & Berat</th>
-                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Nilai Saldo</th>
-                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Status Setoran</th>
-                <th className="px-6 py-5 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest text-right">Opsi Aksi</th>
+              <tr className="bg-slate-50/60 border-b border-slate-200/80">
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Identitas Warga</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Kategori & Berat</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nilai Saldo</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status Setoran</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-slate-100">
               {filteredDeposits.map((deposit) => (
-                <tr key={deposit.id} className="hover:bg-slate-950/50 transition-colors group">
+                <tr key={deposit.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-slate-950 font-black flex items-center justify-center shadow-md text-sm shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 font-black flex items-center justify-center border border-emerald-100 text-sm shrink-0">
                         {(deposit.residentName || '?').charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-100 leading-none mb-1">{deposit.residentName || '-'}</p>
-                        <p className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Blok {getHouseLabel(deposit.houseId)}</p>
+                        <p className="text-sm font-black text-slate-900 leading-none mb-1">{deposit.residentName || '-'}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Blok {getHouseLabel(deposit.houseId)}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2.5 py-0.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[9px] font-mono font-black uppercase tracking-widest">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[9px] font-black uppercase tracking-widest">
                         {deposit.type}
                       </span>
                     </div>
-                    <p className="text-sm font-mono font-black text-slate-200">{deposit.weight} kg</p>
+                    <p className="text-sm font-black text-slate-800">{deposit.weight} kg</p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm font-mono font-black text-emerald-400">Rp {deposit.totalValue.toLocaleString()}</p>
-                    <p className="text-[10px] font-mono text-slate-400">@ Rp {deposit.pricePerUnit.toLocaleString()}/kg</p>
+                    <p className="text-sm font-black text-emerald-600">Rp {deposit.totalValue.toLocaleString()}</p>
+                    <p className="text-[10px] font-bold text-slate-400">@ Rp {deposit.pricePerUnit.toLocaleString()}/kg</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-xl text-[9px] font-mono font-black uppercase tracking-widest border ${
+                    <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
                       deposit.status === 'Confirmed' 
-                        ? 'bg-emerald-950/80 text-emerald-300 border-emerald-800' 
-                        : 'bg-amber-950/80 text-amber-300 border-amber-800 animate-pulse'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' 
+                        : 'bg-amber-50 text-amber-700 border-amber-200/60'
                     }`}>
-                      {deposit.status === 'Confirmed' ? '✓ SELESAI' : '⏳ MENUNGGU DITIMBANG'}
+                      {deposit.status === 'Confirmed' ? 'Selesai' : 'Menunggu Ditingbang'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -403,7 +385,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                       {deposit.status === 'Pending' && (
                         <button 
                           onClick={() => handleConfirmDeposit(deposit)}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-mono font-bold transition-all shadow-md flex items-center gap-1.5"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
                           title="Konfirmasi & Tambah Saldo"
                         >
                           <CheckCircle size={14} /> Konfirmasi
@@ -411,7 +393,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                       )}
                       <button 
                         onClick={() => handleDeleteDeposit(deposit.id)}
-                        className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-950/60 rounded-xl transition-all"
+                        className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                         title="Hapus Data Setoran"
                       >
                         <Trash2 size={16} />
@@ -423,10 +405,10 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               {filteredDeposits.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-16 text-center">
-                    <div className="w-16 h-16 bg-slate-800/60 rounded-3xl flex items-center justify-center text-slate-500 mx-auto mb-4 border border-slate-700/50">
+                    <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-3xl flex items-center justify-center mx-auto mb-3 border border-slate-100">
                       <Package size={32} />
                     </div>
-                    <p className="text-slate-300 font-bold text-sm">Tidak ada data setoran ditemukan.</p>
+                    <p className="text-slate-400 font-bold text-sm">Tidak ada data setoran ditemukan.</p>
                   </td>
                 </tr>
               )}
