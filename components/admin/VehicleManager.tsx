@@ -374,25 +374,87 @@ export const VehicleManager: React.FC<VehicleManagerProps> = ({ houses }) => {
       {/* Modal Digital Sticker Preview */}
       <Modal isOpen={isStickerModalOpen} onClose={() => setIsStickerModalOpen(false)} title="Kartu E-Stiker Akses Kendaraan">
         {selectedVehicle && (
-          <div className="space-y-6 text-center py-4">
-            <div className="bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded-[2rem] p-6 border border-slate-800 shadow-2xl relative overflow-hidden">
-              <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-3">
-                <span className="text-[10px] font-mono font-black text-emerald-400 uppercase tracking-widest">E-STIKER RT 02</span>
-                <span className="text-[10px] font-mono font-bold text-slate-400">{selectedVehicle.stickerNumber}</span>
+          <div className="space-y-6 text-center py-2">
+            {/* Printable ID Card Container */}
+            <div id="printable-stiker-card" className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white rounded-[2rem] p-6 border-2 border-emerald-500/40 shadow-2xl relative overflow-hidden text-left mx-auto max-w-sm">
+              <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] font-mono font-black text-emerald-400 uppercase tracking-widest">E-STIKER RESMI RT 02</span>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded">{selectedVehicle.stickerNumber}</span>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-4">
-                <p className="text-3xl font-mono font-black text-white tracking-widest">{selectedVehicle.plateNumber}</p>
+              {/* Plat Nomor Box */}
+              <div className="bg-slate-950 border-2 border-slate-700/80 p-4 rounded-2xl mb-4 text-center shadow-inner">
+                <p className="text-3xl font-mono font-black text-amber-400 tracking-widest uppercase drop-shadow">
+                  {selectedVehicle.plateNumber}
+                </p>
+                <p className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-1">VERIFIKASI AKSES GERBANG SATPAM</p>
               </div>
 
-              <div className="text-left space-y-1.5 text-xs">
-                <p className="text-slate-400 font-medium">Pemilik: <span className="font-bold text-white">{selectedVehicle.ownerName}</span> (Blok {getHouseLabel(selectedVehicle.houseId)})</p>
-                <p className="text-slate-400 font-medium">Jenis / Model: <span className="font-bold text-white">{selectedVehicle.vehicleType} • {selectedVehicle.brandModel || '-'}</span></p>
+              {/* Detail Kendaraan & Pemilik */}
+              <div className="space-y-2 text-xs bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/50">
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-medium">Pemilik:</span>
+                  <span className="font-bold text-white">{selectedVehicle.ownerName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-medium">Rumah / Blok:</span>
+                  <span className="font-bold text-emerald-400">Blok {getHouseLabel(selectedVehicle.houseId)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-medium">Jenis / Model:</span>
+                  <span className="font-bold text-white">{selectedVehicle.vehicleType} • {selectedVehicle.brandModel || '-'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-medium">Warna:</span>
+                  <span className="font-bold text-white">{selectedVehicle.color || '-'}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-800/80 flex justify-between items-center text-[9px] font-mono text-slate-400">
+                <span>TERAS WARGA RT 02</span>
+                <span className="text-emerald-400 font-bold">✓ STIKER AKTIF</span>
               </div>
             </div>
 
-            <Button onClick={() => window.print()} className="w-full py-3 bg-slate-900 text-white font-bold text-xs rounded-xl">
-              Cetak Kartu Akses Satpam
+            <Button 
+              onClick={() => {
+                const printContent = document.getElementById('printable-stiker-card');
+                if (printContent) {
+                  const win = window.open('', '_blank');
+                  if (win) {
+                    win.document.write(`
+                      <html>
+                        <head>
+                          <title>Cetak E-Stiker - ${selectedVehicle.plateNumber}</title>
+                          <script src="https://cdn.tailwindcss.com"></script>
+                          <style>
+                            body { margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f8fafc; }
+                            @media print {
+                              body { background: white; padding: 0; }
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          ${printContent.outerHTML}
+                          <script>
+                            setTimeout(() => {
+                              window.print();
+                              window.close();
+                            }, 500);
+                          </script>
+                        </body>
+                      </html>
+                    `);
+                    win.document.close();
+                  }
+                }
+              }} 
+              className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-600/20"
+            >
+              🖨️ Cetak Kartu Akses Satpam (Print Preview)
             </Button>
           </div>
         )}
