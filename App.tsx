@@ -531,6 +531,7 @@ export const App = () => {
                                 <Route path="/market" element={<PublicMarket items={marketItems} />} />
                                 <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
                                 <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
+                                <Route path="/layanan" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
                                 <Route path="/verify/:id" element={<PublicVerification />} />
                                 <Route path="/surat/:id" element={<PublicLetterDownload pdfConfig={pdfConfig} />} />
                                 <Route path="/download/:id" element={<PublicLetterDownload pdfConfig={pdfConfig} />} />
