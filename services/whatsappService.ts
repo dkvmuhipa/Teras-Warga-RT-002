@@ -106,9 +106,9 @@ export const formatLetterStatusForWhatsApp = (
   
   const statusLabel = isApproved ? '✅ DISETUJUI & SELESAI' : isRejected ? '❌ DITOLAK / TIDAK DAPAT DIPROSES' : '⏳ SEDANG DIVERIFIKASI';
   
-  // Direct tracking & download link based on current domain / fallback domain
+  // Direct tracking & download link based on current domain with HashRouter support
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://terasrt02.vercel.app';
-  const downloadLink = letterId ? `${baseUrl}/surat/${letterId}` : `${baseUrl}/layanan?tab=history`;
+  const downloadLink = letterId ? `${baseUrl}/#/surat/${letterId}` : `${baseUrl}/#/services?tab=history`;
 
   let detailsBlock = `*Jenis Surat:* ${type}\n*Status Permohonan:* ${statusLabel}`;
   if (letterNumber) {

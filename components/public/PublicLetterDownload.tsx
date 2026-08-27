@@ -28,16 +28,41 @@ interface PublicLetterDownloadProps {
 }
 
 export const PublicLetterDownload: React.FC<PublicLetterDownloadProps> = ({ pdfConfig }) => {
-  const { id } = useParams<{ id: string }>();
+  const { id: paramId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [letter, setLetter] = useState<any>(null);
   const [error, setError] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Extract ID from path params or URL query string (hash router fallback)
+  const getCleanId = () => {
+    if (paramId && paramId !== ':id') return paramId;
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const trackQuery = url.searchParams.get('track') || url.searchParams.get('id');
+      if (trackQuery) return trackQuery;
+      
+      // Hash query fallback: /#/surat?track=...
+      const hashParts = window.location.hash.split('?');
+      if (hashParts.length > 1) {
+        const hashParams = new URLSearchParams(hashParts[1]);
+        const hashTrack = hashParams.get('track') || hashParams.get('id');
+        if (hashTrack) return hashTrack;
+      }
+    }
+    return null;
+  };
+
+  const id = getCleanId();
+
   useEffect(() => {
     const fetchLetter = async () => {
-      if (!id) return;
+      if (!id) {
+        setError(true);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const data = await getLetterById(id);

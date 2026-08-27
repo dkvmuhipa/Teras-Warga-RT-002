@@ -534,7 +534,9 @@ export const App = () => {
                                 <Route path="/layanan" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
                                 <Route path="/verify/:id" element={<PublicVerification />} />
                                 <Route path="/surat/:id" element={<PublicLetterDownload pdfConfig={pdfConfig} />} />
+                                <Route path="/surat" element={<PublicLetterDownload pdfConfig={pdfConfig} />} />
                                 <Route path="/download/:id" element={<PublicLetterDownload pdfConfig={pdfConfig} />} />
+                                <Route path="/download" element={<PublicLetterDownload pdfConfig={pdfConfig} />} />
                                 <Route path="/umkm" element={<PublicUMKM umkmData={umkm} />} />
                                 <Route path="/peta" element={<PublicMap houses={houses} reports={reports} officials={officials} mapPoints={mapPoints} iuranPayments={iuranPayments} />} />
                                 <Route path="/info" element={<PublicInfo 
