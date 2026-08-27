@@ -230,15 +230,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    const id = searchParams.get('id');
+    const id = searchParams.get('id') || searchParams.get('track');
     
-    if (tab === 'lapor' || tab === 'tamu' || tab === 'surat' || tab === 'mutasi' || tab === 'history') {
+    if (id) {
+      setActiveTab('history');
+      setStatusSearchId(id);
+      handleSearchById(id);
+    } else if (tab === 'lapor' || tab === 'tamu' || tab === 'surat' || tab === 'mutasi' || tab === 'history') {
       setActiveTab(tab as any);
-      
-      if (tab === 'history' && id) {
-        setStatusSearchId(id);
-        handleSearchById(id);
-      }
     }
   }, [searchParams]);
   

@@ -94,26 +94,61 @@ Terima kasih atas perhatiannya.
 _Pesan otomatis dari Pengurus RT 02_`;
 };
 
-export const formatLetterStatusForWhatsApp = (name: string, type: string, status: string) => {
-  const statusLabel = status === 'Approved' ? '✅ DISETUJUI' : status === 'Rejected' ? '❌ DITOLAK' : '⏳ SEDANG DIPROSES';
-  const footer = status === 'Approved' 
-    ? '\nSilakan mengambil dokumen fisik di rumah Ketua RT dengan membawa persyaratan yang diperlukan.' 
-    : '';
+export const formatLetterStatusForWhatsApp = (
+  name: string, 
+  type: string, 
+  status: string, 
+  letterId?: string, 
+  letterNumber?: string
+) => {
+  const isApproved = status === 'Disetujui' || status === 'Approved';
+  const isRejected = status === 'Ditolak' || status === 'Rejected';
+  
+  const statusLabel = isApproved ? '✅ DISETUJUI & SELESAI' : isRejected ? '❌ DITOLAK / TIDAK DAPAT DIPROSES' : '⏳ SEDANG DIVERIFIKASI';
+  
+  // Direct tracking & download link based on current domain / fallback domain
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://terasrt02.vercel.app';
+  const downloadLink = letterId ? `${baseUrl}/layanan?track=${letterId}` : `${baseUrl}/layanan?tab=history`;
 
-  return `*KONFIRMASI LAYANAN SURAT RT 02*
+  let detailsBlock = `*Jenis Surat:* ${type}\n*Status Permohonan:* ${statusLabel}`;
+  if (letterNumber) {
+    detailsBlock += `\n*Nomor Surat:* ${letterNumber}`;
+  }
+  if (letterId) {
+    detailsBlock += `\n*ID Pelacakan:* \`${letterId}\``;
+  }
+
+  let bodyMessage = '';
+  if (isApproved) {
+    bodyMessage = `Kabar baik! Permohonan surat Anda telah selesai ditinjau dan disahkan secara resmi oleh Pengurus RT 02.
+
+📥 *UNDUH DOKUMEN SURAT (PDF RESMI):*
+👉 ${downloadLink}
+
+_Dokumen PDF digital di atas sudah dilengkapi Tanda Tangan Digital & Stempel Sah RT 02 dan dapat langsung dicetak atau dilampirkan ke Kelurahan/Kecamatan/Instansi terkait._`;
+  } else if (isRejected) {
+    bodyMessage = `Mohon maaf, permohonan surat belum dapat kami setujui saat ini. Silakan periksa detail keterangan atau hubungi pengurus RT untuk melengkapi persyaratan yang dibutuhkan.
+
+🔍 *Cek Status & Keterangan:*
+👉 ${downloadLink}`;
+  } else {
+    bodyMessage = `Permohonan surat Anda telah kami terima dan sedang dalam proses verifikasi oleh Ketua RT. Anda dapat memantau progresnya secara berkala melalui tautan berikut:
+
+🔍 *Pantau Progres Permohonan:*
+👉 ${downloadLink}`;
+  }
+
+  return `*KONFIRMASI LAYANAN PERSURATAN RT 02*
 ------------------------------------------
 
 Yth. Sdr/i *${name}*,
 
-Kami menginformasikan bahwa permohonan surat Anda:
+${bodyMessage}
 
-*Jenis:* ${type}
-*Status:* ${statusLabel}
-${footer}
+------------------------------------------
+${detailsBlock}
 
-Terima kasih telah menggunakan layanan digital RT 02.
-Akses portal mandiri: https://terasrt02.vercel.app
-
+Terima kasih telah menggunakan sistem pelayanan digital *TERAS WARGA RT 02*.
 _Pesan otomatis dari Pengurus RT 02_`;
 };
 

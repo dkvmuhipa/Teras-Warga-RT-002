@@ -1727,7 +1727,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           </div>
                           <button
                             onClick={() => {
-                              const templateText = formatLetterStatusForWhatsApp(letter.applicantName, letter.type, letter.status);
+                              const templateText = formatLetterStatusForWhatsApp(
+                                letter.applicantName, 
+                                letter.type, 
+                                letter.status,
+                                letter.id,
+                                letter.letterNumber
+                              );
                               sendWhatsAppMessage(letter.phone, templateText);
                             }}
                             className="p-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors flex items-center gap-1 shadow-sm shadow-emerald-600/10"
@@ -2493,7 +2499,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   </Button>
                   
                   <Button 
-                    onClick={() => sendWhatsAppMessage(selectedLetter.phone, formatLetterStatusForWhatsApp(selectedLetter.applicantName, selectedLetter.type, selectedLetter.status))}
+                    onClick={() => sendWhatsAppMessage(
+                      selectedLetter.phone, 
+                      formatLetterStatusForWhatsApp(
+                        selectedLetter.applicantName, 
+                        selectedLetter.type, 
+                        selectedLetter.status,
+                        selectedLetter.id,
+                        letterNumberInput || selectedLetter.letterNumber
+                      )
+                    )}
                     className="w-full sm:flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.01] transition-all font-bold py-2.5 sm:py-3 text-xs shadow-md shadow-emerald-200"
                   >
                     <MessageCircle size={14} className="mr-1.5 shrink-0" /> Kirim Update WhatsApp

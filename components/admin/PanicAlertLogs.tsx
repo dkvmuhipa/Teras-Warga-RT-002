@@ -64,16 +64,15 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
   const filteredAlerts = alerts.filter(a => {
     const houseLabel = getHouseLabel(a.houseId);
     const search = searchQuery.toLowerCase();
-    const matchesSearch = a.senderName.toLowerCase().includes(search) || 
-                          a.type.toLowerCase().includes(search) ||
-                          houseLabel.toLowerCase().includes(search) ||
-                          (a.notes || '').toLowerCase().includes(search);
+    const matchesSearch = (a.residentName || '').toLowerCase().includes(search) || 
+                          (a.location || '').toLowerCase().includes(search) ||
+                          houseLabel.toLowerCase().includes(search);
     const matchesStatus = statusFilter === 'All' || a.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const activeAlertsCount = alerts.filter(a => a.status === 'ACTIVE').length;
-  const resolvedAlertsCount = alerts.filter(a => a.status === 'RESOLVED').length;
+  const activeAlertsCount = alerts.filter(a => a.status === 'Active' || a.status === 'Responding').length;
+  const resolvedAlertsCount = alerts.filter(a => a.status === 'Resolved').length;
 
   return (
     <div className="space-y-6">
@@ -167,20 +166,20 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredAlerts.map((alert) => (
-                <tr key={alert.id} className={`transition-colors group ${alert.status === 'ACTIVE' ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-slate-50/50'}`}>
+                <tr key={alert.id} className={`transition-colors group ${alert.status === 'Active' ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-slate-50/50'}`}>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl border ${alert.status === 'ACTIVE' ? 'bg-rose-500 text-white border-rose-600 animate-pulse' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                      <div className={`p-2.5 rounded-xl border ${alert.status === 'Active' ? 'bg-rose-500 text-white border-rose-600 animate-pulse' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                         <AlertTriangle size={18} />
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-900 leading-none mb-1">{alert.type}</p>
+                        <p className="text-sm font-black text-slate-900 leading-none mb-1">{alert.location || 'Lokasi Terdaftar'}</p>
                         <p className="text-[10px] text-slate-400 font-medium">Lat/Long Terdeteksi</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm font-black text-slate-900 leading-none mb-1">{alert.senderName}</p>
+                    <p className="text-sm font-black text-slate-900 leading-none mb-1">{alert.residentName}</p>
                     <p className="text-[10px] font-mono text-emerald-600 font-bold">Blok {getHouseLabel(alert.houseId)}</p>
                   </td>
                   <td className="px-6 py-4">
@@ -188,16 +187,16 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-xl text-[9px] font-mono font-black uppercase tracking-widest border ${
-                      alert.status === 'ACTIVE' 
+                      alert.status === 'Active' 
                         ? 'bg-rose-100 text-rose-800 border-rose-300 animate-pulse' 
                         : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                     }`}>
-                      {alert.status === 'ACTIVE' ? '🚨 SOS AKTIF' : '✓ AMAN / SELESAI'}
+                      {alert.status === 'Active' ? '🚨 SOS AKTIF' : '✓ AMAN / SELESAI'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {alert.status === 'ACTIVE' && (
+                      {alert.status === 'Active' && (
                         <button 
                           onClick={() => handleResolveAlert(alert.id)}
                           className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
