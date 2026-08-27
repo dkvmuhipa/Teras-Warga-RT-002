@@ -58,9 +58,13 @@ service cloud.firestore {
 
     // Letters
     match /letters/{id} {
-      allow create: if true;
-      allow read: if isAdmin() || (resource != null && resource.data.houseId != null);
+      allow read, create: if true;
       allow update, delete: if isAdmin();
+    }
+
+    // Incoming Mails (Surat Masuk RT)
+    match /incomingMails/{id} {
+      allow read, write: if isAdmin();
     }
 
     // Inventory
