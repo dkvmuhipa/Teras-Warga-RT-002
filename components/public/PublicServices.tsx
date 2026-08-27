@@ -2852,6 +2852,40 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                 </div>
                               </div>
 
+                              {/* Prominent Download Banner for Approved Letters */}
+                              {(searchResult.category === 'Surat' || searchResult.applicantName || searchResult.requestType || searchResult.letterNumber) && 
+                               (searchResult.status === 'Disetujui' || searchResult.status === 'Approved' || searchResult.status === 'Selesai' || searchResult.status === 'Completed') && (
+                                <div className="p-6 md:p-8 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-[2rem] text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-400/30">
+                                  <div className="flex items-center gap-4 text-left">
+                                    <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 border border-white/30">
+                                      <FileText size={28} />
+                                    </div>
+                                    <div>
+                                      <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest inline-block mb-1 text-emerald-100">
+                                        Dokumen Digital Resmi
+                                      </span>
+                                      <h4 className="text-lg md:text-xl font-black tracking-tight">Surat Pengantar Telah Siap</h4>
+                                      <p className="text-xs text-emerald-100 font-medium">Lengkap dengan Tanda Tangan Digital &amp; Stempel Sah RT 02.</p>
+                                    </div>
+                                  </div>
+                                  <button 
+                                    onClick={async () => {
+                                      try {
+                                        toast.info('Menyiapkan berkas PDF resmi...');
+                                        await generateSuratPengantar(searchResult, pdfConfig, false);
+                                        toast.success('Surat digital berhasil diunduh.');
+                                      } catch (err) {
+                                        console.error(err);
+                                        toast.error('Gagal mengunduh dokumen.');
+                                      }
+                                    }}
+                                    className="w-full md:w-auto px-8 py-4 bg-white hover:bg-emerald-50 text-emerald-800 font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                                  >
+                                    <Download size={16} /> Unduh PDF Resmi Sekarang
+                                  </button>
+                                </div>
+                              )}
+
                               {/* BENTO GRID DETAILS */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                                 <div className="space-y-4">
@@ -2925,7 +2959,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                               <div className="pt-6 border-t border-slate-100 flex flex-wrap gap-4 justify-between items-center">
                                 <div className="flex flex-wrap gap-3">
                                   {/* Re-download PDF of Letter if approved */}
-                                  {searchResult.category === 'Surat' && (searchResult.status === 'Disetujui' || searchResult.status === 'Approved') && (
+                                  {(searchResult.category === 'Surat' || searchResult.applicantName || searchResult.requestType || searchResult.letterNumber) && 
+                                   (searchResult.status === 'Disetujui' || searchResult.status === 'Approved' || searchResult.status === 'Selesai' || searchResult.status === 'Completed') && (
                                     <button 
                                       onClick={async () => {
                                         try {
@@ -2937,9 +2972,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                           toast.error('Gagal mengunduh dokumen.');
                                         }
                                       }}
-                                      className="flex items-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md active:scale-95 cursor-pointer"
+                                      className="flex items-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer animate-pulse"
                                     >
-                                      <Download size={14} /> Unduh Surat Resmi (PDF)
+                                      <Download size={16} /> Unduh Surat Resmi (PDF)
                                     </button>
                                   )}
 
