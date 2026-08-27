@@ -176,6 +176,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
         toast.success('Lacak Data Berhasil!', {
           description: `Ditemukan data kategori: ${fetchedData.category || 'Layanan'}.`
         });
+        setTimeout(() => {
+          const el = document.getElementById('search-details-node');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 200);
       } else if (foundLocal) {
         // It was found locally, but NOT on the server database. This means it has been deleted by the admin!
         const updatedHistory = localHistory.filter(h => h.id !== cleanId);
@@ -235,7 +241,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     if (id) {
       setActiveTab('history');
       setStatusSearchId(id);
-      handleSearchById(id);
+      setTimeout(() => {
+        handleSearchById(id);
+      }, 100);
     } else if (tab === 'lapor' || tab === 'tamu' || tab === 'surat' || tab === 'mutasi' || tab === 'history') {
       setActiveTab(tab as any);
     }
