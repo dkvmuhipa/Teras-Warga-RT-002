@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teras-rt02-v1';
+const CACHE_NAME = 'teras-rt02-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -7,24 +7,24 @@ const ASSETS_TO_CACHE = [
   '/manifest.json'
 ];
 
-// Install Event
+// Install Event: Pre-cache App Shell & Core Assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Caching app shell and core assets');
+      console.log('[Service Worker v2] Pre-caching core app assets for offline readiness');
       return cache.addAll(ASSETS_TO_CACHE);
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate Event
+// Activate Event: Instant cache cleanup
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('[Service Worker] Clearing old cache:', cache);
+            console.log('[Service Worker v2] Purging deprecated cache:', cache);
             return caches.delete(cache);
           }
         })

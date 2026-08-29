@@ -714,42 +714,57 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
 
                 {/* Emergency Hotline fast dial contacts */}
                 <div className="space-y-2">
-                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Telepon Hotline Cepat</span>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Telepon Hotline Siaga Darurat</span>
+                    <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Siap Offline</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <a 
-                      href="tel:+6282123456789"
-                      className="p-2.5 bg-slate-800/30 border border-slate-850 hover:bg-slate-800 rounded-xl flex items-center gap-2 group transition-all"
+                      href="tel:+6285961194621"
+                      className="p-2.5 bg-slate-800/40 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-800 rounded-xl flex items-center gap-2 group transition-all"
                     >
-                      <div className="p-1.5 bg-rose-500/10 text-rose-400 rounded-lg group-hover:bg-rose-500 group-hover:text-white transition-all">
+                      <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg group-hover:bg-emerald-500 group-hover:text-white transition-all shrink-0">
                         <PhoneCall size={12} />
                       </div>
-                      <div className="text-left overflow-hidden">
-                        <span className="text-[9px] font-bold text-slate-300 block">Pos Satpam</span>
-                        <span className="text-[8px] text-slate-500 font-medium block truncate">Siaga 24 Jam</span>
+                      <div className="text-left overflow-hidden min-w-0">
+                        <span className="text-[10px] font-black text-slate-200 block truncate">Ketua RT 02</span>
+                        <span className="text-[8px] text-slate-400 font-mono block truncate">+62 859-6119-4621</span>
+                      </div>
+                    </a>
+                    <a 
+                      href="tel:+6281244558800"
+                      className="p-2.5 bg-slate-800/40 border border-slate-800 hover:border-rose-500/40 hover:bg-slate-800 rounded-xl flex items-center gap-2 group transition-all"
+                    >
+                      <div className="p-1.5 bg-rose-500/10 text-rose-400 rounded-lg group-hover:bg-rose-500 group-hover:text-white transition-all shrink-0">
+                        <Shield size={12} />
+                      </div>
+                      <div className="text-left overflow-hidden min-w-0">
+                        <span className="text-[10px] font-black text-slate-200 block truncate">Pos Satpam</span>
+                        <span className="text-[8px] text-slate-400 font-mono block truncate">Pos Kamling 24 Jam</span>
                       </div>
                     </a>
                     <a 
                       href="tel:113"
-                      className="p-2.5 bg-slate-800/30 border border-slate-850 hover:bg-slate-800 rounded-xl flex items-center gap-2 group transition-all"
+                      className="p-2.5 bg-slate-800/40 border border-slate-800 hover:border-orange-500/40 hover:bg-slate-800 rounded-xl flex items-center gap-2 group transition-all"
                     >
-                      <div className="p-1.5 bg-orange-500/10 text-orange-400 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-all">
+                      <div className="p-1.5 bg-orange-500/10 text-orange-400 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-all shrink-0">
                         <Flame size={12} />
                       </div>
-                      <div className="text-left overflow-hidden">
-                        <span className="text-[9px] font-bold text-slate-300 block">Pemadam</span>
-                        <span className="text-[8px] text-slate-500 font-medium block truncate">Damkar Sipil</span>
+                      <div className="text-left overflow-hidden min-w-0">
+                        <span className="text-[10px] font-black text-slate-200 block truncate">Pemadam 113</span>
+                        <span className="text-[8px] text-slate-400 font-medium block truncate">Damkar Kota Palu</span>
                       </div>
                     </a>
                     <a 
                       href="tel:118"
-                      className="p-2.5 bg-slate-800/30 border border-slate-850 hover:bg-slate-800 rounded-xl flex items-center gap-2 group transition-all"
+                      className="p-2.5 bg-slate-800/40 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-800 rounded-xl flex items-center gap-2 group transition-all"
                     >
-                      <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-all">
+                      <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-all shrink-0">
                         <Activity size={12} />
                       </div>
-                      <div className="text-left overflow-hidden">
-                        <span className="text-[9px] font-bold text-slate-300 block">Ambulans</span>
-                        <span className="text-[8px] text-slate-500 font-medium block truncate">Layanan IG</span>
+                      <div className="text-left overflow-hidden min-w-0">
+                        <span className="text-[10px] font-black text-slate-200 block truncate">Ambulans 118</span>
+                        <span className="text-[8px] text-slate-400 font-medium block truncate">IGD Mantikulore</span>
                       </div>
                     </a>
                   </div>
