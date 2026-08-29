@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, ChevronDown, LayoutGrid, Wallet, Users, Info, Download, X, Smartphone, Sparkles, HelpCircle,
-  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, Package, ShieldAlert, UserPlus
+  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, Package, ShieldAlert, UserPlus, Menu
 } from 'lucide-react';
 import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
@@ -23,6 +23,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
   const navigate = useNavigate();
   const location = useLocation();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // PWA & Mobile integration hooks
   const { isInstallable, isStandalone, installPWA } = usePWA();
@@ -73,7 +74,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
         { path: '/services?tab=tamu', label: 'Lapor Tamu 24 Jam', desc: 'Pelaporan tamu menginap & keberadaan', icon: ShieldAlert, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
         { path: '/inventaris', label: 'Peminjaman Inventaris', desc: 'Pinjam barang hajatan & peralatan RT', icon: Package, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
         { path: '/services?tab=mutasi', label: 'Mutasi Warga', desc: 'Pendataan lapor pindah, lahir & duka', icon: UserPlus, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
-        { path: '/services?tab=tamu', label: 'Lapor Tamu', desc: 'Wajib lapor kunjungan menginap 24 jam', icon: Home, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
         { path: '/dokumen', label: 'Arsip Dokumen', desc: 'Berita acara, regulasi, & draf surat kosong', icon: Download, color: 'text-blue-600 bg-blue-50/70 border-blue-150' },
         { path: '/voting', label: 'E-Voting', desc: 'Salurkan hak suara mufakat bersama', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/70 border-violet-150' },
       ]
@@ -252,30 +252,138 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                   Panel Admin
                 </button>
             </div>
-            <div className="flex items-center lg:hidden gap-2">
-               {/* Mobile PWA Install Button */}
-               {!isStandalone && (isInstallable || isIOS) && (
-                 <button 
-                   onClick={handleInstallClick}
-                   className="flex items-center gap-1 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-xl transition-all"
-                   title="Pasang Aplikasi PWA"
-                 >
-                   <Download size={12} className="animate-bounce" />
-                   <span>Pasang</span>
-                 </button>
-               )}
-               <button 
-                 onClick={() => navigate('/admin')} 
-                 className="p-2 text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-slate-100/80 rounded-xl transition-all border border-slate-100 focus:outline-none"
-                 title="Panel Admin"
-               >
-                 <User size={18}/>
-               </button>
-             </div>
-           </div>
-         </div>
-       </nav>
-       {/* Mobile bottom nav is controlled globally in App.tsx */}
+             <div className="flex items-center lg:hidden gap-1.5">
+                {/* Mobile PWA Install Button */}
+                {!isStandalone && (isInstallable || isIOS) && (
+                  <button 
+                    onClick={handleInstallClick}
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-xl transition-all"
+                    title="Pasang Aplikasi PWA"
+                  >
+                    <Download size={12} className="animate-bounce" />
+                    <span>Pasang</span>
+                  </button>
+                )}
+                
+                {/* Mobile Hamburger Menu Toggle Button */}
+                <button 
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+                  className={`p-2 rounded-xl transition-all border focus:outline-none ${
+                    isMobileMenuOpen 
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/30" 
+                      : "text-slate-700 bg-slate-50 hover:bg-slate-100/80 border-slate-200/80"
+                  }`}
+                  title="Buka Menu Lengkap"
+                  aria-label="Toggle Mobile Menu"
+                >
+                  {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Mobile Slide-down Full Menu Drawer */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="lg:hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[70] top-18"
+              />
+
+              {/* Drawer Container */}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="lg:hidden fixed inset-x-0 top-18 bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-2xl z-[80] max-h-[80vh] overflow-y-auto p-4 sm:p-6"
+              >
+                {/* Quick Home & Admin Shortcuts */}
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => {
+                      navigate('/');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`flex-1 py-3 px-4 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 border transition-all ${
+                      isActive('/') 
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20' 
+                        : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Home size={15} /> Beranda
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      navigate('/admin');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex-1 py-3 px-4 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white border border-slate-900 shadow-md transition-all"
+                  >
+                    <User size={15} /> Panel Admin
+                  </button>
+                </div>
+
+                {/* Nav Groups Iteration */}
+                <div className="space-y-6 pb-6">
+                  {navGroups.map((group) => {
+                    const GroupIcon = group.icon;
+                    return (
+                      <div key={group.id} className="space-y-2.5">
+                        <div className="flex items-center gap-2 px-1 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                          <GroupIcon size={14} className="text-indigo-600" />
+                          <span>{group.label}</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {group.items.map((item) => {
+                            const ItemIcon = item.icon;
+                            const isItemActive = isActive(item.path);
+
+                            return (
+                              <button
+                                key={item.path}
+                                onClick={() => {
+                                  navigate(item.path);
+                                  setIsMobileMenuOpen(false);
+                                }}
+                                className={`flex items-center gap-3 p-3 rounded-2xl w-full text-left transition-all border ${
+                                  isItemActive
+                                    ? "bg-indigo-50 border-indigo-200 text-indigo-900 font-bold"
+                                    : "bg-slate-50/70 hover:bg-slate-100/80 border-slate-100 text-slate-700"
+                                }`}
+                              >
+                                <div className={`p-2 rounded-xl shrink-0 ${item.color}`}>
+                                  <ItemIcon size={16} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs font-black text-slate-800 leading-tight">
+                                    {item.label}
+                                  </p>
+                                  <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+        {/* Mobile bottom nav is controlled globally in App.tsx */}
 
       {/* iOS Safari PWA Installation Guideline Modal */}
       <AnimatePresence>
