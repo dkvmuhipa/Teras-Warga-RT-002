@@ -11,10 +11,21 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator && (import.met
       .register("/sw.js")
       .then((registration) => {
         console.log("PWA Service Worker registered successfully:", registration.scope);
+        // Check for updates on every page load
+        registration.update();
       })
       .catch((error) => {
         console.error("PWA Service Worker registration failed:", error);
       });
+  });
+
+  // Automatically refresh when new service worker takes control (instant auto-update)
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
   });
 }
 
