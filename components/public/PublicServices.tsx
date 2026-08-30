@@ -511,22 +511,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
       const formattedHouseId = formatHouseId(houseId);
       
-      // Check Waste Retribution (Mandatory in Palu City)
+      // Check Waste Retribution (Informative reminder without blocking citizen public services)
       const retribution = await checkWasteRetribution(formattedHouseId);
       if (!retribution.paid) {
-        if (retribution.isMandatory) {
-          toast.warning("PENGURUSAN DITANGGUHKAN", {
-            description: `Pembayaran Retribusi Sampah & Air untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan, iuran wajib dilunasi paling lambat tanggal 20 setiap bulannya. Silakan hubungi petugas atau Ketua RT.`,
-            duration: 10000
-          });
-          return;
-        } else {
-          // Information only, not blocking
-          toast.info("INFORMASI TAGIHAN", {
-            description: `Tagihan Sampah & Air bulan ${retribution.month} sudah tersedia. Batas pelunasan adalah tanggal 20. Mohon segera melakukan pembayaran agar tidak menghambat pengurusan administrasi di akhir bulan.`,
-            duration: 8000
-          });
-        }
+        toast.info("INFORMASI IURAN LINGKUNGAN", {
+          description: `Tagihan Iuran Sampah & Air untuk bulan ${retribution.month || 'berjalan'} belum tercatat. Pengajuan surat Anda tetap diproses. Mohon luangkan waktu untuk menyelesaikan iuran lingkungan.`,
+          duration: 8000
+        });
       }
 
       const finalRequestType = requestType === 'Lainnya' ? customRequestType : requestType;
