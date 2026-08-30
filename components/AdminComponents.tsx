@@ -216,7 +216,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
         {/* Footer Link */}
         <div className="mt-8 text-center">
           <a 
-            href="/" 
+            href="#/" 
             className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-900 transition-all hover:gap-3"
           >
             <ArrowLeft size={18} /> 
