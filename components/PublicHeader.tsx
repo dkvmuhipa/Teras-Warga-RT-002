@@ -153,7 +153,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
         )}
       </AnimatePresence>
 
-      <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 transition-all">
+      <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-18">
             <div className="flex items-center cursor-pointer py-1" onClick={() => navigate('/')}>
@@ -281,7 +281,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
               </div>
             </div>
           </div>
-        </nav>
 
         {/* Mobile Slide-down Full Menu Drawer */}
         <AnimatePresence>
@@ -293,16 +292,16 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="lg:hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[70] top-18"
+                className="lg:hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[95] top-0"
               />
 
               {/* Drawer Container */}
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="lg:hidden fixed inset-x-0 top-18 bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-2xl z-[80] max-h-[80vh] overflow-y-auto p-4 sm:p-6"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="lg:hidden absolute left-0 right-0 top-full bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-2xl z-[100] max-h-[calc(100vh-5rem)] overflow-y-auto p-4 sm:p-6"
               >
                 {/* Quick Home & Admin Shortcuts */}
                 <div className="flex gap-2 mb-6">
@@ -383,7 +382,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
             </>
           )}
         </AnimatePresence>
-        {/* Mobile bottom nav is controlled globally in App.tsx */}
+      </nav>
+      {/* Mobile bottom nav is controlled globally in App.tsx */}
 
       {/* iOS Safari PWA Installation Guideline Modal */}
       <AnimatePresence>
