@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official, MonthlyActivityReport } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
 import { naturalSortBlockAndNumber } from "./excelService";
@@ -255,6 +255,193 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
     addPageNumbers(doc);
     doc.save(`Laporan_Penduduk_${report.month}_${report.year}.pdf`);
 };
+
+// =========================================================================
+// LAPORAN BULANAN KEGIATAN & PERISTIWA RT (DEDICATED ACTIVITY MONTHLY REPORT PDF)
+// =========================================================================
+export const generateDedicatedMonthlyActivityReportPDF = async (report: MonthlyActivityReport, customConfig?: PdfConfig) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    // 1. Professional Header (Kop Surat Resmi)
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+    }
+
+    doc.setFont("times", "normal"); 
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
+
+    doc.setLineWidth(1.0);
+    doc.line(20, 42, 190, 42);
+    doc.setLineWidth(0.3);
+    doc.line(20, 43, 190, 43);
+
+    // 2. Title Section
+    doc.setFont("times", "bold");
+    doc.setFontSize(13);
+    doc.text("LAPORAN BULANAN KEGIATAN & PERISTIWA LINGKUNGAN", centerX, 52, { align: "center" });
+    doc.setFontSize(11);
+    doc.text(`PERIODE : ${getIndonesianMonthYear(report.month || '').toUpperCase()}`, centerX, 58, { align: "center" });
+
+    let y = 68;
+
+    // 3. Ringkasan Eksekutif (Executive Summary)
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
+    doc.text("I. RINGKASAN SITUASI & KINERJA PENGURUS RT", margin + 2, y);
+    doc.setTextColor(0);
+    y += 8;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9.5);
+    const summaryText = report.executiveSummary || 'Seluruh program kerja lingkungan, pelayanan administratif kependudukan, dan agenda sosial kemasyarakatan pada periode bulan ini telah berjalan dengan baik, tertib, dan lancar atas dukungan partisipasi aktif seluruh warga RT 02.';
+    const splitSummary = doc.splitTextToSize(summaryText, contentWidth - 4);
+    doc.text(splitSummary, margin + 2, y);
+    y += (splitSummary.length * 4.5) + 6;
+
+    // 4. Situasi Kamtibmas & Keamanan (Opsional)
+    if (report.securitySummary) {
+        if (y > pageHeight - 60) { doc.addPage(); y = 30; }
+        doc.setFont("times", "bold");
+        doc.setFillColor(30, 41, 59);
+        doc.rect(margin, y - 6, contentWidth, 8, 'F');
+        doc.setTextColor(255);
+        doc.text("II. LAPORAN KAMTIBMAS & SISKAMLING", margin + 2, y);
+        doc.setTextColor(0);
+        y += 8;
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(9.5);
+        const splitSec = doc.splitTextToSize(report.securitySummary, contentWidth - 4);
+        doc.text(splitSec, margin + 2, y);
+        y += (splitSec.length * 4.5) + 6;
+    }
+
+    // 5. Tabel Rincian Uraian Kegiatan & Lokasi
+    if (y > pageHeight - 80) { doc.addPage(); y = 30; }
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
+    doc.text("III. TABEL RINCIAN AGENDA, LOKASI & URAIAN KEGIATAN", margin + 2, y);
+    doc.setTextColor(0);
+    y += 6;
+
+    const tableBody = (report.activities || []).map((act, idx) => [
+        (idx + 1).toString(),
+        act.date || '-',
+        `${act.title}\n(${act.category || 'Kegiatan'})`,
+        act.location || 'Lingkungan RT 02',
+        act.picName || 'Pengurus RT',
+        act.description || '-'
+    ]);
+
+    if (tableBody.length === 0) {
+        tableBody.push(['1', '-', 'Tidak ada agenda kegiatan tercatat', '-', '-', '-']);
+    }
+
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['No', 'Tanggal', 'Nama Kegiatan', 'Lokasi Kegiatan', 'Koordinator / PIC', 'Uraian Hasil & Catatan']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [15, 23, 42],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: 9,
+            halign: 'center'
+        },
+        bodyStyles: {
+            fontSize: 8.5,
+            textColor: [30, 41, 59]
+        },
+        columnStyles: {
+            0: { cellWidth: 10, halign: 'center' },
+            1: { cellWidth: 22, halign: 'center' },
+            2: { cellWidth: 35 },
+            3: { cellWidth: 30 },
+            4: { cellWidth: 25 },
+            5: { cellWidth: 'auto' }
+        },
+        didDrawPage: (data) => {
+            y = data.cursor?.y || y;
+        }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 12 : y + 20;
+
+    // 6. Signatures: Sekretaris (Kiri) & Ketua RT (Kanan)
+    if (y > pageHeight - 50) {
+        doc.addPage();
+        y = 30;
+    }
+
+    const leftSignX = margin + 35;
+    const rightSignX = pageWidth - margin - 35;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    doc.text(`Mengetahui,`, rightSignX, y, { align: "center" });
+    doc.text(`Dibuat oleh,`, leftSignX, y, { align: "center" });
+    y += 5;
+    doc.text(`Ketua ${config.rtName}`, rightSignX, y, { align: "center" });
+    doc.text(`Sekretaris ${config.rtName}`, leftSignX, y, { align: "center" });
+
+    const signSpaceY = y + 2;
+    y += 24;
+
+    doc.setFont("times", "bold");
+    doc.text(report.approvedBy || config.rtChairman, rightSignX, y, { align: "center" });
+    doc.line(rightSignX - 25, y + 1, rightSignX + 25, y + 1);
+
+    doc.text(report.preparedBy || 'Sekretaris RT 02', leftSignX, y, { align: "center" });
+    doc.line(leftSignX - 25, y + 1, leftSignX + 25, y + 1);
+
+    // Stempel & Tanda Tangan
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 28, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
+
+    addPageNumbers(doc);
+    const cleanMonth = (report.month || 'periode').replace(/[^a-zA-Z0-9_-]/g, '_');
+    doc.save(`Laporan_Kegiatan_Bulanan_RT02_${cleanMonth}.pdf`);
+};
+
 
 // --- Shared Helper Functions ---
 // Fungsi universal untuk mengambil ID file dari berbagai format link Google Drive

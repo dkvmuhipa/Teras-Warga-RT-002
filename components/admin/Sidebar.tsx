@@ -120,6 +120,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Layanan & Pelaporan", 
       items: [
         { id: 'services', icon: FileText, label: 'Pusat Persuratan' },
+        { id: 'laporan-kegiatan', icon: FileText, label: 'Laporan Kegiatan Bulanan' },
         { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
       ] 
@@ -159,7 +160,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       } else if (role === Role.SECRETARY) {
         isAllowed = [
           'overview', 'analytics', 'residents', 
-          'health', 'officials', 'services', 'reports-warga', 'documents', 'activities', 
+          'health', 'officials', 'services', 'laporan-kegiatan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       }

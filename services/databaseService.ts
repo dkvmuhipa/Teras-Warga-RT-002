@@ -3602,6 +3602,67 @@ export const deleteCommunityWorkFromDb = async (id: string) => {
     }
 };
 
+// ==========================================
+// LAPORAN BULANAN KEGIATAN & PROGRAM KERJA RT
+// ==========================================
+const MONTHLY_ACTIVITY_REPORTS_COL = "monthlyActivityReports";
+
+export const subscribeToMonthlyActivityReports = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) {
+        console.warn(`Firebase not configured, skipping subscription to ${MONTHLY_ACTIVITY_REPORTS_COL}`);
+        callback([]);
+        return () => {};
+    }
+    const q = collection(db, MONTHLY_ACTIVITY_REPORTS_COL);
+    return onSnapshot(q, (snapshot) => {
+        const reps = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+        }));
+        reps.sort((a: any, b: any) => (b.month || '').localeCompare(a.month || ''));
+        callback(reps);
+    }, (error) => {
+        console.warn("Firestore subscription error for monthlyActivityReports:", error);
+        callback([]);
+    });
+};
+
+export const addMonthlyActivityReportToDb = async (reportData: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        await addDoc(collection(db, MONTHLY_ACTIVITY_REPORTS_COL), {
+            ...reportData,
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, MONTHLY_ACTIVITY_REPORTS_COL);
+    }
+};
+
+export const updateMonthlyActivityReportInDb = async (id: string, updates: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, MONTHLY_ACTIVITY_REPORTS_COL, id);
+        await updateDoc(docRef, {
+            ...updates,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${MONTHLY_ACTIVITY_REPORTS_COL}/${id}`);
+    }
+};
+
+export const deleteMonthlyActivityReportFromDb = async (id: string) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, MONTHLY_ACTIVITY_REPORTS_COL, id);
+        await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${MONTHLY_ACTIVITY_REPORTS_COL}/${id}`);
+    }
+};
+
+
 
 
 

@@ -742,6 +742,37 @@ export interface PopulationReport {
   createdAt: string;
 }
 
+// Laporan Bulanan Kegiatan & Program Kerja RT (Dedicated Activity Monthly Report)
+export interface MonthlyActivityItem {
+  id: string;
+  title: string;           // Nama Kegiatan (mis: Kerja Bakti Akbar, Rapat Bulanan Warga)
+  category: 'Rapat Warga' | 'Kerja Bakti' | 'Posyandu & Kesehatan' | 'Keagamaan / Sosial' | 'Keamanan / Siskamling' | 'Pembangunan & Fasum' | 'Lainnya';
+  date: string;            // YYYY-MM-DD
+  startTime?: string;      // 08:00
+  endTime?: string;        // 11:30
+  location: string;        // Pos Ronda RT 02 / Lapangan Fasum Huntap Tondo 2
+  picName: string;         // Koordinator / Seksi Penanggung Jawab
+  attendanceCount?: number;// Estimasi / Jumlah Kehadiran Warga (KK/Jiwa)
+  budgetSpent?: number;    // Biaya / Pengeluaran Kas (Rp)
+  description: string;     // Uraian Hasil / Notulensi / Perkembangan Kegiatan
+  photoUrls?: string[];    // Dokumentasi Foto Kegiatan
+}
+
+export interface MonthlyActivityReport {
+  id: string;
+  month: string;           // YYYY-MM (mis: 2026-03)
+  year: number;            // 2026
+  title: string;           // Laporan Kegiatan Lingkungan RT 02 - Bulan Maret 2026
+  executiveSummary: string;// Ringkasan Umum Kinerja Pengurus & Situasi Lingkungan
+  securitySummary?: string;// Laporan Situasi Ketertiban & Keamanan (Kamtibmas)
+  socialSummary?: string;  // Laporan Kerukunan & Gotong Royong
+  activities: MonthlyActivityItem[];
+  preparedBy: string;      // Sekretaris RT 02
+  approvedBy: string;      // Ketua RT 02
+  createdAt: string;
+  updatedAt?: string;
+}
+
 // Digital Guest Book & Presensi Kegiatan
 export interface Activity {
   id: string;
