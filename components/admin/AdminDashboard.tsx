@@ -37,6 +37,7 @@ const AdminAnalytics = React.lazy(() => import('./AdminAnalytics').then(m => ({ 
 const IncomingMailManager = React.lazy(() => import('./IncomingMailManager').then(m => ({ default: m.IncomingMailManager })));
 const VehicleManager = React.lazy(() => import('./VehicleManager').then(m => ({ default: m.VehicleManager })));
 const PanicAlertLogs = React.lazy(() => import('./PanicAlertLogs').then(m => ({ default: m.PanicAlertLogs })));
+const CommunityWorkManager = React.lazy(() => import('./CommunityWorkManager').then(m => ({ default: m.CommunityWorkManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -295,6 +296,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         );
       case 'facilities':
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaAttendance={rondaAttendance} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
+      case 'kerja-bakti':
+        return <CommunityWorkManager houses={houses} />;
       case 'vehicles':
         return <VehicleManager houses={houses} />;
       case 'panic-logs':

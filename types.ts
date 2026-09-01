@@ -1025,4 +1025,40 @@ export interface IncomingMail {
   updatedAt?: string;
 }
 
+export interface CommunityWorkTask {
+  id: string;
+  title: string;          // Misal: Bersihkan Selokan Blok C, Potong Ranting Jalan Utama
+  zone: string;           // Misal: Blok A-B, Blok C-D, Lapangan Fasum
+  picName: string;        // Penanggung Jawab Zona
+  targetHouses?: string[]; // Blok rumah yang ditugaskan
+  isDone: boolean;
+}
+
+export interface CommunityWorkAttendance {
+  houseId: string;
+  headOfFamily: string;
+  attendedBy: string;    // Nama warga yang hadir mewakili rumah
+  status: 'Hadir' | 'Izin / Diwakilkan' | 'Kompensasi' | 'Alpha';
+  checkInTime?: string;
+  notes?: string;
+}
+
+export interface CommunityWork {
+  id: string;
+  title: string;          // Misal: Kerja Bakti Akbar Menyambut Bulan Ramadan
+  description: string;
+  date: string;           // YYYY-MM-DD
+  startTime: string;      // 07:30
+  endTime: string;        // 11:00
+  assemblyPoint: string;  // Titik Kumpul (misal: Pos Ronda RT 02)
+  toolsNeeded: string[];  // Cangkul, Sabit, Karung Sampah, Sapu Lidi
+  snackPIC?: string;      // Seksi Konsumsi
+  status: 'Direncanakan' | 'Berlangsung' | 'Selesai' | 'Dibatalkan';
+  tasks: CommunityWorkTask[];
+  attendances: CommunityWorkAttendance[];
+  photoUrls?: string[];
+  createdAt: string;
+}
+
+
 

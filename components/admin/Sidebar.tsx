@@ -129,6 +129,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan' },
         { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
+        { id: 'kerja-bakti', icon: Users, label: 'Kerja Bakti & Gotong Royong' },
         { id: 'vehicles', icon: Car, label: 'Stiker Kendaraan Satpam' },
         { id: 'panic-logs', icon: ShieldAlert, label: 'Log Panic Button SOS' },
         { id: 'content', icon: Megaphone, label: 'Pusat Informasi' },

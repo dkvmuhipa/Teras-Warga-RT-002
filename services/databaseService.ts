@@ -3544,5 +3544,64 @@ export const deletePanicAlertFromDb = async (id: string) => {
     }
 };
 
+// ==========================================
+// AGENDA KERJA BAKTI & GOTONG ROYONG RT 02
+// ==========================================
+const COMMUNITY_WORKS_COL = "communityWorks";
+
+export const subscribeToCommunityWorks = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) {
+        console.warn(`Firebase not configured, skipping subscription to ${COMMUNITY_WORKS_COL}`);
+        callback([]);
+        return () => {};
+    }
+    const q = collection(db, COMMUNITY_WORKS_COL);
+    return onSnapshot(q, (snapshot) => {
+        const works = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+        }));
+        // Sort in memory by date descending
+        works.sort((a: any, b: any) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+        callback(works);
+    }, (error) => {
+        console.warn("Firestore subscription error for communityWorks:", error);
+        callback([]);
+    });
+};
+
+export const addCommunityWorkToDb = async (workData: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        await addDoc(collection(db, COMMUNITY_WORKS_COL), {
+            ...workData,
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, COMMUNITY_WORKS_COL);
+    }
+};
+
+export const updateCommunityWorkInDb = async (id: string, updates: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, COMMUNITY_WORKS_COL, id);
+        await updateDoc(docRef, updates);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${COMMUNITY_WORKS_COL}/${id}`);
+    }
+};
+
+export const deleteCommunityWorkFromDb = async (id: string) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, COMMUNITY_WORKS_COL, id);
+        await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${COMMUNITY_WORKS_COL}/${id}`);
+    }
+};
+
+
 
 

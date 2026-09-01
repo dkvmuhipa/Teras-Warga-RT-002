@@ -318,6 +318,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Community Works (Agenda Kerja Bakti & Gotong Royong)
+    match /communityWorks/{id} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;
