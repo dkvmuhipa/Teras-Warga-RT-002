@@ -81,7 +81,7 @@ export const PWAInstallPrompt: React.FC = () => {
         initial={{ opacity: 0, y: 50, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 50, scale: 0.95 }}
-        className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-50 pointer-events-auto"
+        className="fixed bottom-24 md:bottom-8 left-4 right-4 md:left-auto md:right-28 md:max-w-md z-[55] pointer-events-auto"
       >
         <div className="relative bg-slate-900/95 backdrop-blur-xl text-white p-5 rounded-[2rem] border border-slate-700/80 shadow-2xl shadow-slate-950/50 overflow-hidden">
           {/* Ambient Glow */}
@@ -132,13 +132,13 @@ export const PWAInstallPrompt: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleInstallClick}
-                  className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-transform active:scale-95"
+                  className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-transform active:scale-95 cursor-pointer"
                 >
                   <Download size={15} className="stroke-[2.5]" /> Install ke Layar HP
                 </button>
                 <button
                   onClick={handleDismiss}
-                  className="py-3 px-4 bg-slate-800 hover:bg-slate-700/80 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider transition-colors"
+                  className="py-3 px-4 bg-slate-800 hover:bg-slate-700/80 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer"
                 >
                   Nanti Saja
                 </button>
