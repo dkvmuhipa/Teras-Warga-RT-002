@@ -14,17 +14,28 @@ import {
   updateMonthlyActivityReportInDb, 
   deleteMonthlyActivityReportFromDb 
 } from '../../services/databaseService';
-import { generateDedicatedMonthlyActivityReportPDF } from '../../services/pdfService';
+import { 
+  generateDedicatedMonthlyActivityReportPDF, 
+  generateIntegratedMonthlyReportPDF 
+} from '../../services/pdfService';
 import { motion, AnimatePresence } from 'motion/react';
 import { useConfirm } from '../../context/ConfirmContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
+import { CashFlow, PopulationReport } from '../../types';
 
 interface MonthlyActivityReportManagerProps {
   houses?: House[];
   pdfConfig?: PdfConfig;
+  cashFlow?: CashFlow[];
+  populationReports?: PopulationReport[];
 }
 
-export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManagerProps> = ({ houses = [], pdfConfig }) => {
+export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManagerProps> = ({ 
+  houses = [], 
+  pdfConfig,
+  cashFlow = [],
+  populationReports = []
+}) => {
   const confirm = useConfirm();
   const [reports, setReports] = useState<MonthlyActivityReport[]>([]);
   const [activeReport, setActiveReport] = useState<MonthlyActivityReport | null>(null);
@@ -297,13 +308,21 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig)}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-transform active:scale-95 cursor-pointer border border-indigo-400/30"
+                      title="Download Dokumen Lengkap Terpadu (Satu Kesatuan)"
+                    >
+                      <Sparkles size={14} className="text-amber-300 animate-pulse" /> 
+                      <span>Unduh Laporan Terpadu (1 Kesatuan)</span>
+                    </button>
                     <button
                       onClick={() => generateDedicatedMonthlyActivityReportPDF(activeReport, pdfConfig)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-transform active:scale-95 cursor-pointer"
-                      title="Download Dokumen PDF Resmi"
+                      className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-white/10"
+                      title="Download PDF Khusus Agenda Kegiatan"
                     >
-                      <Download size={15} /> Unduh PDF
+                      <Download size={14} /> Khusus Agenda
                     </button>
                     <button 
                       onClick={() => handleEditReport(activeReport)}

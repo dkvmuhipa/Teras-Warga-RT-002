@@ -456,6 +456,284 @@ export const generateDedicatedMonthlyActivityReportPDF = async (report: MonthlyA
     doc.save(`Laporan_Kegiatan_Bulanan_RT02_${cleanMonth}.pdf`);
 };
 
+/**
+ * =========================================================================================
+ * LAPORAN BULANAN TERPADU SATU KESATUAN (INTEGRATED MONTHLY REPORT PDF)
+ * Menggabungkan Eksekutif & Kamtibmas + Kependudukan & Rentan + Rekap Kas + Agenda Kegiatan
+ * =========================================================================================
+ */
+export const generateIntegratedMonthlyReportPDF = async (
+    activityReport: MonthlyActivityReport,
+    houses: House[] = [],
+    cashFlow: CashFlow[] = [],
+    populationReports: PopulationReport[] = [],
+    config: PdfConfig = DEFAULT_PDF_CONFIG
+) => {
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+    });
+
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    const currentMonthLabel = getIndonesianMonthYear(activityReport.month || '');
+
+    // Cari Data Kependudukan untuk bulan ini
+    let popReport = populationReports.find(p => isMonthMatch(p.month, activityReport.month));
+    if (!popReport && populationReports.length > 0) {
+        popReport = populationReports[0];
+    }
+
+    // Perhitungan Real-Time jika tidak ada popReport statis
+    const occupiedHouses = houses.filter(h => h.status === 'Occupied' || (h.occupants && h.occupants > 0));
+    const totalPop = popReport 
+        ? ((popReport.maleCount || 0) + (popReport.femaleCount || 0) || popReport.initialPopulation)
+        : occupiedHouses.reduce((acc, h) => acc + (h.occupants || 0), 0);
+    const totalKK = occupiedHouses.length;
+    const pregnantCount = popReport?.pregnantCount || houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0);
+    const babyCount = popReport?.babyCount || houses.reduce((acc, h) => acc + (h.babyCount || 0), 0);
+    const toddlerCount = popReport?.toddlerCount || houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0);
+    const elderlyCount = popReport?.elderlyCount || houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0);
+    const widowCount = popReport?.widowCount || houses.reduce((acc, h) => acc + (h.widowCount || 0), 0);
+    const teenagerCount = popReport?.teenagerCount || houses.reduce((acc, h) => acc + (h.teenagerCount || 0), 0);
+
+    // Filter Keuangan Bulan Berjalan
+    const monthCash = cashFlow.filter(c => isMonthMatch(c.date, activityReport.month));
+    const totalIncome = monthCash.filter(c => c.type === 'Income').reduce((acc, c) => acc + Number(c.amount || 0), 0);
+    const totalExpense = monthCash.filter(c => c.type === 'Expense').reduce((acc, c) => acc + Number(c.amount || 0), 0);
+    const netBalance = totalIncome - totalExpense;
+
+    // Helper Kop Surat
+    const drawOfficialHeader = async () => {
+        try {
+            const logoToUse = config.logo;
+            if (logoToUse) {
+                const imgData = await getImageData(logoToUse);
+                if (imgData) {
+                    doc.addImage(imgData, 'PNG', 20, 12, 22, 22);
+                }
+            }
+        } catch (e) {
+            console.error("Gagal memuat logo kop:", e);
+        }
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(12);
+        doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 16, { align: "center" });
+        doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 21, { align: "center" });
+        doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+        doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(10);
+        doc.text(`Alamat : ${config.rtAddress}`, centerX, 37, { align: "center" });
+
+        doc.setLineWidth(0.8);
+        doc.line(margin, 41, pageWidth - margin, 41);
+        doc.setLineWidth(0.3);
+        doc.line(margin, 42, pageWidth - margin, 42);
+    };
+
+    await drawOfficialHeader();
+
+    // Judul Dokumen Terpadu
+    doc.setFont("times", "bold");
+    doc.setFontSize(13);
+    doc.text("LAPORAN PERTANGGUNGJAWABAN BULANAN TERPADU", centerX, 50, { align: "center" });
+    doc.setFontSize(10.5);
+    doc.text(`PERIODE : ${currentMonthLabel.toUpperCase()}`, centerX, 56, { align: "center" });
+
+    let y = 64;
+
+    // 1. Executive Summary & Kamtibmas
+    doc.setFillColor(15, 23, 42);
+    doc.rect(margin, y - 5, contentWidth, 7, 'F');
+    doc.setTextColor(255);
+    doc.setFont("times", "bold");
+    doc.setFontSize(9.5);
+    doc.text("I. RINGKASAN SITUASI WILAYAH & KAMTIBMAS", margin + 2.5, y);
+    doc.setTextColor(0);
+    y += 7;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    const summary = activityReport.executiveSummary || 'Situasi lingkungan RT 02 selama periode ini berjalan kondusif, harmonis, aman, dan tertib.';
+    const splitSum = doc.splitTextToSize(`Situasi Umum: ${summary}`, contentWidth - 4);
+    doc.text(splitSum, margin + 2, y);
+    y += (splitSum.length * 4.2) + 3;
+
+    if (activityReport.securitySummary) {
+        const splitSec = doc.splitTextToSize(`Kamtibmas & Siskamling: ${activityReport.securitySummary}`, contentWidth - 4);
+        doc.text(splitSec, margin + 2, y);
+        y += (splitSec.length * 4.2) + 4;
+    }
+
+    // 2. Data Kependudukan & Kelompok Rentan
+    doc.setFillColor(15, 23, 42);
+    doc.rect(margin, y - 5, contentWidth, 7, 'F');
+    doc.setTextColor(255);
+    doc.setFont("times", "bold");
+    doc.setFontSize(9.5);
+    doc.text("II. REKAPITULASI KEPENDUDUKAN & KELOMPOK RENTAN", margin + 2.5, y);
+    doc.setTextColor(0);
+    y += 4;
+
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['Indikator Kependudukan', 'Jumlah', 'Kelompok Rentan & Khusus', 'Jumlah']],
+        body: [
+            ['Total Jiwa / Penduduk', `${totalPop} Jiwa`, 'Ibu Hamil', `${pregnantCount} Orang`],
+            ['Jumlah Kepala Keluarga (KK)', `${totalKK} KK`, 'Bayi & Balita (0-5 thn)', `${babyCount + toddlerCount} Anak`],
+            ['Warga Tetap Terdaftar', `${totalPop} Jiwa`, 'Remaja & Pemuda', `${teenagerCount} Orang`],
+            ['Warga Lansia (>60 thn)', `${elderlyCount} Orang`, 'Janda / Duda Lingkungan', `${widowCount} Orang`]
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [51, 65, 85], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5, halign: 'center' },
+        bodyStyles: { fontSize: 8, textColor: [30, 41, 59] },
+        columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 35, halign: 'center', fontStyle: 'bold' }, 2: { cellWidth: 50 }, 3: { cellWidth: 'auto', halign: 'center', fontStyle: 'bold' } }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 8 : y + 35;
+
+    // 3. Rekapitulasi Kas & Keuangan Lingkungan
+    doc.setFillColor(15, 23, 42);
+    doc.rect(margin, y - 5, contentWidth, 7, 'F');
+    doc.setTextColor(255);
+    doc.setFont("times", "bold");
+    doc.setFontSize(9.5);
+    doc.text("III. RINGKASAN KEUANGAN & REALISASI KAS LINGKUNGAN", margin + 2.5, y);
+    doc.setTextColor(0);
+    y += 4;
+
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['Penerimaan Kas (Income)', 'Pengeluaran Kas (Expense)', 'Surplus / Defisit Periode']],
+        body: [
+            [
+                `Rp ${totalIncome.toLocaleString('id-ID')}`,
+                `Rp ${totalExpense.toLocaleString('id-ID')}`,
+                `Rp ${netBalance.toLocaleString('id-ID')}`
+            ]
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [71, 85, 105], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5, halign: 'center' },
+        bodyStyles: { fontSize: 9, halign: 'center', fontStyle: 'bold', textColor: [15, 23, 42] }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 8 : y + 25;
+
+    // 4. Agenda Kegiatan & Peristiwa
+    if (y > pageHeight - 75) {
+        doc.addPage();
+        y = 25;
+    }
+
+    doc.setFillColor(15, 23, 42);
+    doc.rect(margin, y - 5, contentWidth, 7, 'F');
+    doc.setTextColor(255);
+    doc.setFont("times", "bold");
+    doc.setFontSize(9.5);
+    doc.text("IV. TABEL RINCIAN AGENDA KEGIATAN & PERISTIWA LINGKUNGAN", margin + 2.5, y);
+    doc.setTextColor(0);
+    y += 4;
+
+    const activityRows = (activityReport.activities || []).map((act, idx) => [
+        (idx + 1).toString(),
+        act.date || '-',
+        `${act.title}\n(${act.category || 'Kegiatan'})`,
+        act.location || 'Lingkungan RT 02',
+        act.picName || 'Pengurus RT',
+        act.description || '-'
+    ]);
+
+    if (activityRows.length === 0) {
+        activityRows.push(['1', '-', 'Tidak ada agenda khusus tercatat pada periode ini', '-', '-', '-']);
+    }
+
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['No', 'Tanggal', 'Nama Kegiatan', 'Lokasi', 'Koordinator', 'Uraian Hasil']],
+        body: activityRows,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5, halign: 'center' },
+        bodyStyles: { fontSize: 8, textColor: [30, 41, 59] },
+        columnStyles: {
+            0: { cellWidth: 8, halign: 'center' },
+            1: { cellWidth: 20, halign: 'center' },
+            2: { cellWidth: 35 },
+            3: { cellWidth: 28 },
+            4: { cellWidth: 25 },
+            5: { cellWidth: 'auto' }
+        }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 12 : y + 30;
+
+    // 5. Tanda Tangan Pengesahan (Sekretaris & Ketua RT)
+    if (y > pageHeight - 50) {
+        doc.addPage();
+        y = 30;
+    }
+
+    const leftSignX = margin + 35;
+    const rightSignX = pageWidth - margin - 35;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    doc.text(`Mengetahui,`, rightSignX, y, { align: "center" });
+    doc.text(`Dibuat oleh,`, leftSignX, y, { align: "center" });
+    y += 5;
+    doc.text(`Ketua ${config.rtName}`, rightSignX, y, { align: "center" });
+    doc.text(`Sekretaris ${config.rtName}`, leftSignX, y, { align: "center" });
+
+    const signSpaceY = y + 2;
+    y += 24;
+
+    doc.setFont("times", "bold");
+    doc.text(activityReport.approvedBy || config.rtChairman, rightSignX, y, { align: "center" });
+    doc.line(rightSignX - 25, y + 1, rightSignX + 25, y + 1);
+
+    doc.text(activityReport.preparedBy || 'Sekretaris RT 02', leftSignX, y, { align: "center" });
+    doc.line(leftSignX - 25, y + 1, leftSignX + 25, y + 1);
+
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY + 2, 30, 20);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 28, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
+
+    // Penomoran Halaman Terpadu
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFont("times", "italic");
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text(
+            `Halaman ${i} dari ${totalPages}  |  Laporan Bulanan Terpadu RT 02 Huntap Tondo 2 (${currentMonthLabel})`,
+            centerX,
+            pageHeight - 8,
+            { align: "center" }
+        );
+    }
+
+    const cleanMonth = (activityReport.month || 'periode').replace(/[^a-zA-Z0-9_-]/g, '_');
+    doc.save(`Laporan_Terpadu_Satu_Kesatuan_RT02_${cleanMonth}.pdf`);
+};
+
 
 // --- Shared Helper Functions ---
 // Fungsi universal untuk mengambil ID file dari berbagai format link Google Drive

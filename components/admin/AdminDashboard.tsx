@@ -298,7 +298,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'facilities':
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaAttendance={rondaAttendance} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
       case 'laporan-kegiatan':
-        return <MonthlyActivityReportManager houses={houses} pdfConfig={pdfConfig} />;
+        return (
+          <MonthlyActivityReportManager 
+            houses={houses} 
+            pdfConfig={pdfConfig} 
+            cashFlow={cashFlow} 
+            populationReports={populationReports} 
+          />
+        );
       case 'kerja-bakti':
         return <CommunityWorkManager houses={houses} />;
       case 'vehicles':
