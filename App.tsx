@@ -53,6 +53,8 @@ import { useConfirm } from './context/ConfirmContext';
 import { ResidentRegistrationForm } from './components/ResidentRegistrationForm';
 import { GuestReportForm } from './components/GuestReportForm';
 import { ChatBot } from './components/ChatBot';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { PWAStatusHandler } from './components/PWAStatusHandler';
 import { PublicHeader } from './components/PublicHeader';
 import { HeroSection } from './components/HeroSection';
 import { PublicHome } from './components/public/PublicHome';
@@ -588,6 +590,8 @@ export const App = () => {
                         <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} settings={settings} />
                         <PanicButton houses={houses} />
                         <PushNotificationManager userId={localStorage.getItem('resident_house_id') || 'guest_user'} />
+                        <PWAInstallPrompt />
+                        <PWAStatusHandler />
                         <MobileBottomNav 
                             currentTab={
                               window.location.hash.includes('/rules') ? 'rules' :
@@ -621,25 +625,6 @@ export const App = () => {
                 } />
             </Routes>
         </FinancialProvider>
-        <AnimatePresence>
-          {!isOnline && (
-            <motion.div
-              initial={{ opacity: 0, y: 50, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 50, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-              className="fixed bottom-6 left-6 z-[9999] flex items-center gap-3 bg-rose-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-rose-950/20 border border-rose-500/30 max-w-sm font-sans"
-            >
-              <div className="p-2 bg-rose-500 rounded-xl">
-                <WifiOff className="w-5 h-5 text-white animate-pulse" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold tracking-wide uppercase">Mode Offline RT02</h4>
-                <p className="text-[10px] text-rose-100 mt-0.5 leading-relaxed font-medium">Sistem bekerja secara lokal. Semua perubahan akan disinkronkan otomatis saat online.</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
     </HashRouter>
   );
 };
