@@ -10,28 +10,55 @@ export const INDONESIAN_MONTHS = [
 /**
  * Formats a Date object or string (e.g. '2026-08' or ISO date) to "Month Year" string in Indonesian
  */
-export const getIndonesianMonthYear = (dateInput: Date | string | undefined | null): string => {
+export const getIndonesianMonthYear = (dateInput?: any): string => {
   if (!dateInput) {
     const now = new Date();
     return `${INDONESIAN_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
   }
+
+  // If it's a valid Date instance
+  if (dateInput instanceof Date && !isNaN(dateInput.getTime())) {
+    return `${INDONESIAN_MONTHS[dateInput.getMonth()]} ${dateInput.getFullYear()}`;
+  }
+
+  // If it's a string
   if (typeof dateInput === 'string') {
-    // If it's in YYYY-MM format
-    if (/^\d{4}-\d{2}$/.test(dateInput.trim())) {
-      const [yearStr, monthStr] = dateInput.trim().split('-');
+    const str = dateInput.trim();
+    // Format YYYY-MM (e.g. "2026-08")
+    if (/^\d{4}-\d{2}$/.test(str)) {
+      const [yearStr, monthStr] = str.split('-');
       const monthIdx = parseInt(monthStr, 10) - 1;
       const year = parseInt(yearStr, 10);
       if (monthIdx >= 0 && monthIdx < 12) {
         return `${INDONESIAN_MONTHS[monthIdx]} ${year}`;
       }
     }
+    
+    // Check if already in "Bulan Tahun" format (e.g. "Agustus 2026")
+    const lower = str.toLowerCase();
+    const hasMonthName = INDONESIAN_MONTHS.some(m => lower.includes(m.toLowerCase()));
+    if (hasMonthName) {
+      return str;
+    }
+
+    const parsed = new Date(str);
+    if (!isNaN(parsed.getTime())) {
+      return `${INDONESIAN_MONTHS[parsed.getMonth()]} ${parsed.getFullYear()}`;
+    }
+
+    return str;
+  }
+
+  // Fallback if unexpected object or type
+  try {
     const parsed = new Date(dateInput);
     if (!isNaN(parsed.getTime())) {
       return `${INDONESIAN_MONTHS[parsed.getMonth()]} ${parsed.getFullYear()}`;
     }
-    return dateInput; // Return as-is if already formatted or non-date string
-  }
-  return `${INDONESIAN_MONTHS[dateInput.getMonth()]} ${dateInput.getFullYear()}`;
+  } catch (e) {}
+
+  const now = new Date();
+  return `${INDONESIAN_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
 };
 
 /**
