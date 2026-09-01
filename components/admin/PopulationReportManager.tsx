@@ -98,6 +98,9 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     widowCount: 0,
     disabilityCount: 0,
     orphanCount: 0,
+    executiveSummary: '',
+    securityOverview: '',
+    activities: []
   });
 
   const [logFormData, setLogFormData] = useState({
@@ -2956,6 +2959,154 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* NEW: Uraian Kegiatan & Lokasi Kegiatan RT Bulanan */}
+          <div className="bg-white p-6 rounded-[2rem] border border-slate-200/80 space-y-4 shadow-sm">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <div>
+                <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                  <Calendar size={14} /> Uraian Kegiatan & Peristiwa RT Bulan Ini
+                </h4>
+                <p className="text-xs text-slate-500 font-medium">Catatan agenda yang telah terlaksana untuk dilampirkan pada laporan resmi</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const newAct = {
+                    id: `act-${Date.now()}`,
+                    title: '',
+                    date: formData.month ? `${formData.month}-01` : new Date().toISOString().split('T')[0],
+                    location: 'Pos Ronda / Lingkungan RT 02',
+                    description: '',
+                    category: 'Kerja Bakti' as const,
+                    picName: 'Pengurus RT 02'
+                  };
+                  setFormData({
+                    ...formData,
+                    activities: [...(formData.activities || []), newAct]
+                  });
+                }}
+                className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                <Plus size={13} /> Tambah Kegiatan
+              </button>
+            </div>
+
+            {formData.activities && formData.activities.length > 0 ? (
+              <div className="space-y-3">
+                {formData.activities.map((act, index) => (
+                  <div key={act.id || index} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/70 space-y-3 relative">
+                    <div className="flex justify-between items-center">
+                      <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[9px] font-mono font-black uppercase tracking-wider">
+                        Kegiatan #{index + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = formData.activities?.filter((_, i) => i !== index);
+                          setFormData({ ...formData, activities: updated });
+                        }}
+                        className="text-rose-500 hover:text-rose-700 p-1 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="Hapus Kegiatan"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Nama Kegiatan</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="mis: Kerja Bakti Lingkungan, Rapat Warga"
+                          value={act.title}
+                          onChange={e => {
+                            const updated = [...(formData.activities || [])];
+                            updated[index].title = e.target.value;
+                            setFormData({ ...formData, activities: updated });
+                          }}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Kategori Kegiatan</label>
+                        <select
+                          value={act.category || 'Kerja Bakti'}
+                          onChange={e => {
+                            const updated = [...(formData.activities || [])];
+                            updated[index].category = e.target.value as any;
+                            setFormData({ ...formData, activities: updated });
+                          }}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500"
+                        >
+                          <option value="Kerja Bakti">Kerja Bakti</option>
+                          <option value="Rapat">Rapat Warga</option>
+                          <option value="Posyandu/Kesehatan">Posyandu / Kesehatan</option>
+                          <option value="Sosial/Keagamaan">Sosial / Keagamaan</option>
+                          <option value="Keamanan/Ronda">Keamanan / Ronda</option>
+                          <option value="Pembangunan/Fasum">Pembangunan / Fasum</option>
+                          <option value="Lainnya">Lainnya</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tanggal Pelaksanaan</label>
+                        <input
+                          type="date"
+                          value={act.date}
+                          onChange={e => {
+                            const updated = [...(formData.activities || [])];
+                            updated[index].date = e.target.value;
+                            setFormData({ ...formData, activities: updated });
+                          }}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Lokasi Kegiatan</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="mis: Pos Ronda RT 02 / Lapangan Fasum"
+                          value={act.location}
+                          onChange={e => {
+                            const updated = [...(formData.activities || [])];
+                            updated[index].location = e.target.value;
+                            setFormData({ ...formData, activities: updated });
+                          }}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Uraian / Hasil / Catatan Kegiatan</label>
+                      <textarea
+                        rows={2}
+                        placeholder="mis: Pembersihan selokan Blok A-D, dihadiri 35 KK, situasi aman dan lancar."
+                        value={act.description}
+                        onChange={e => {
+                          const updated = [...(formData.activities || [])];
+                          updated[index].description = e.target.value;
+                          setFormData({ ...formData, activities: updated });
+                        }}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-indigo-500 resize-none"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-6 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs font-medium">
+                Belum ada rincian kegiatan yang ditambahkan untuk periode bulan ini. Klik <b>"Tambah Kegiatan"</b> di atas.
+              </div>
+            )}
           </div>
 
           {/* Summary Card */}

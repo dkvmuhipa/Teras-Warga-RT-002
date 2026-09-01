@@ -722,7 +722,23 @@ export interface PopulationReport {
   widowCount?: number;
   disabilityCount?: number;
   orphanCount?: number;
+
+  // Rincian Kegiatan & Peristiwa Bulanan RT
+  activities?: {
+    id: string;
+    title: string;           // Nama Kegiatan (mis: Rapat Warga, Kerja Bakti, Posyandu)
+    date: string;            // Tanggal Pelaksanaan
+    location: string;        // Lokasi Kegiatan (mis: Pos Ronda, Lapangan Fasum, Rumah Ketua RT)
+    description: string;     // Uraian Hasil / Catatan Kegiatan
+    category?: 'Rapat' | 'Kerja Bakti' | 'Sosial/Keagamaan' | 'Posyandu/Kesehatan' | 'Keamanan/Ronda' | 'Pembangunan/Fasum' | 'Lainnya';
+    picName?: string;        // Penanggung Jawab / Koordinator
+    attendanceCount?: number;// Jumlah Warga yang Hadir
+  }[];
   
+  // Catatan Khusus Pengurus RT
+  executiveSummary?: string;  // Ringkasan Kondisi Lingkungan Bulan Ini
+  securityOverview?: string;  // Kondisi Kamtibmas & Keamanan
+
   createdAt: string;
 }
 

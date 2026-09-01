@@ -186,6 +186,41 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
     addStatRow("- Laki-laki (Musiman)", report.seasonalMaleCount || 0);
     addStatRow("- Perempuan (Musiman)", report.seasonalFemaleCount || 0, false, undefined, true);
 
+    y += 8;
+
+    // --- Section 4: Uraian Kegiatan & Lokasi Kegiatan RT ---
+    if (report.activities && report.activities.length > 0) {
+        if (y > pageHeight - 75) { doc.addPage(); y = 30; }
+        doc.setFont("times", "bold");
+        doc.setFillColor(30, 41, 59);
+        doc.rect(margin, y - 6, contentWidth, 8, 'F');
+        doc.setTextColor(255);
+        doc.text("IV. URAIAN KEGIATAN & PERISTIWA RT", margin + 2, y);
+        doc.setTextColor(0);
+        y += 10;
+
+        report.activities.forEach((act, idx) => {
+            if (y > pageHeight - 40) { doc.addPage(); y = 30; }
+            doc.setFillColor(248, 250, 252);
+            doc.rect(margin, y - 5, contentWidth, 14, 'F');
+            doc.setDrawColor(226, 232, 240);
+            doc.rect(margin, y - 5, contentWidth, 14, 'S');
+
+            doc.setFont("times", "bold");
+            doc.setFontSize(10);
+            doc.setTextColor(30, 41, 59);
+            doc.text(`${idx + 1}. ${act.title} (${act.category || 'Kegiatan RT'})`, margin + 3, y);
+
+            doc.setFont("times", "normal");
+            doc.setFontSize(8.5);
+            doc.setTextColor(71, 85, 105);
+            doc.text(`Tanggal: ${act.date || '-'}  |  Lokasi: ${act.location || '-'}  |  PIC: ${act.picName || 'Pengurus RT'}`, margin + 3, y + 4.5);
+            doc.text(`Uraian / Hasil: ${act.description || '-'}`, margin + 3, y + 8);
+            
+            y += 16;
+        });
+    }
+
     y += 10;
     if (y > pageHeight - 50) {
         doc.addPage();
