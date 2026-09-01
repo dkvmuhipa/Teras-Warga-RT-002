@@ -376,9 +376,6 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                               {index + 1}
                             </span>
                             <h5 className="font-black text-sm text-slate-900">{act.title}</h5>
-                            <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded text-[9px] font-bold">
-                              {act.category}
-                            </span>
                           </div>
                           <span className="text-[11px] font-mono font-bold text-slate-500">
                             📅 {act.date}

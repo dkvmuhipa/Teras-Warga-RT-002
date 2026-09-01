@@ -356,7 +356,7 @@ export const generateDedicatedMonthlyActivityReportPDF = async (report: MonthlyA
     const tableBody = (report.activities || []).map((act, idx) => [
         (idx + 1).toString(),
         act.date || '-',
-        `${act.title}\n(${act.category || 'Kegiatan'})`,
+        act.title || '-',
         act.location || 'Lingkungan RT 02',
         act.picName || 'Pengurus RT',
         act.description || '-'
@@ -666,7 +666,7 @@ export const generateIntegratedMonthlyReportPDF = async (
         return [
             (idx + 1).toString(),
             dateAndWaktu,
-            `${act.title}\n[${act.category || 'Kegiatan'}]`,
+            act.title || '-',
             act.location || 'Lingkungan RT 02',
             act.picName || 'Pengurus RT',
             resultDetails
@@ -680,7 +680,7 @@ export const generateIntegratedMonthlyReportPDF = async (
     autoTable(doc, {
         startY: y,
         margin: { left: margin, right: margin },
-        head: [['No', 'Tanggal & Waktu', 'Nama & Kategori Agenda', 'Lokasi Acara', 'Koordinator / PIC', 'Uraian Hasil, Notulensi & Partisipasi']],
+        head: [['No', 'Tanggal & Waktu', 'Nama Kegiatan', 'Lokasi Acara', 'Koordinator / PIC', 'Uraian Hasil, Notulensi & Partisipasi']],
         body: activityRows,
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5, halign: 'center' },
