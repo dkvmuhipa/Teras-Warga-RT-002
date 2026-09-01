@@ -1157,11 +1157,17 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     return filteredLogs.slice(start, start + itemsPerPage);
   }, [filteredLogs, currentPage, itemsPerPage]);
 
-  // LIVE STATS (from houses) to match Dashboard/ResidentManager with Permanent vs Seasonal breakdown
+  // LIVE STATS (from houses) to match Dashboard/ResidentManager with Permanent vs Seasonal & Gender breakdown
   const liveStats = useMemo(() => {
     let totalSoul = 0;
+    let totalMale = 0;
+    let totalFemale = 0;
     let totalTetap = 0;
+    let tetapMale = 0;
+    let tetapFemale = 0;
     let totalMusiman = 0;
+    let musimanMale = 0;
+    let musimanFemale = 0;
     let housesTetap = 0;
     let housesMusiman = 0;
     let totalPregnant = 0;
@@ -1179,14 +1185,50 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       if (h.status === 'Occupied') {
         const soul = Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0));
         totalSoul += soul;
+
+        // Gender Calculation from head of family and family members
+        let houseMale = 0;
+        let houseFemale = 0;
+
+        // Head of family gender
+        if (h.gender === 'Perempuan') {
+          houseFemale += 1;
+        } else {
+          houseMale += 1; // Default to male if not specified
+        }
+
+        // Family members gender
+        if (h.familyMembers && h.familyMembers.length > 0) {
+          h.familyMembers.forEach(m => {
+            if (m.gender === 'Perempuan') {
+              houseFemale += 1;
+            } else {
+              houseMale += 1;
+            }
+          });
+        } else if (soul > 1) {
+          // If family members array is empty but occupants > 1, estimate evenly
+          const remaining = soul - 1;
+          const femaleEstimated = Math.floor(remaining / 2);
+          const maleEstimated = remaining - femaleEstimated;
+          houseFemale += femaleEstimated;
+          houseMale += maleEstimated;
+        }
+
+        totalMale += houseMale;
+        totalFemale += houseFemale;
         
         // Status Domisili: Tetap vs Musiman/Sewa
         const isMusiman = h.residenceType === 'Sewa' || h.residenceType === 'Rumah Keluarga' || h.status === 'Visiting';
         if (isMusiman) {
           totalMusiman += soul;
+          musimanMale += houseMale;
+          musimanFemale += houseFemale;
           housesMusiman += 1;
         } else {
           totalTetap += soul;
+          tetapMale += houseMale;
+          tetapFemale += houseFemale;
           housesTetap += 1;
         }
 
@@ -1205,8 +1247,14 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
     return {
       totalSoul,
+      totalMale,
+      totalFemale,
       totalTetap,
+      tetapMale,
+      tetapFemale,
       totalMusiman,
+      musimanMale,
+      musimanFemale,
       housesTetap,
       housesMusiman,
       vulnerableTotal: totalPregnant + totalBaby + totalToddler + totalDisability + totalOrphan + totalWidow,
@@ -1501,21 +1549,35 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Card Penduduk Tetap */}
-                <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo-50/60 to-blue-50/40 border border-indigo-100/80 relative overflow-hidden">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
-                        WARGA TETAP (KTP/KK RT 02)
-                      </span>
-                      <h4 className="text-3xl font-black text-indigo-950 mt-3">
-                        {liveStats.totalTetap} <span className="text-sm font-bold text-indigo-600">Jiwa</span>
-                      </h4>
-                      <p className="text-xs text-indigo-800/80 font-medium mt-1">
-                        Tersebar di <b>{liveStats.housesTetap} Rumah / KK</b> (Milik Sendiri / Domisili Utama)
-                      </p>
+                <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo-50/60 to-blue-50/40 border border-indigo-100/80 relative overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
+                          WARGA TETAP (KTP/KK RT 02)
+                        </span>
+                        <h4 className="text-3xl font-black text-indigo-950 mt-3">
+                          {liveStats.totalTetap} <span className="text-sm font-bold text-indigo-600">Jiwa</span>
+                        </h4>
+                        <p className="text-xs text-indigo-800/80 font-medium mt-1">
+                          Tersebar di <b>{liveStats.housesTetap} Rumah / KK</b> (Milik Sendiri)
+                        </p>
+                      </div>
+                      <div className="p-3 bg-white text-indigo-600 rounded-2xl shadow-sm">
+                        <Users size={24} />
+                      </div>
                     </div>
-                    <div className="p-3 bg-white text-indigo-600 rounded-2xl shadow-sm">
-                      <Users size={24} />
+
+                    {/* Gender Breakdown Pill */}
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      <div className="px-3 py-2 bg-white/80 border border-indigo-100/80 rounded-xl">
+                        <span className="text-[9px] font-mono font-bold text-indigo-500 uppercase block">Laki-laki</span>
+                        <p className="text-sm font-black text-indigo-950">{liveStats.tetapMale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
+                      </div>
+                      <div className="px-3 py-2 bg-white/80 border border-indigo-100/80 rounded-xl">
+                        <span className="text-[9px] font-mono font-bold text-rose-500 uppercase block">Perempuan</span>
+                        <p className="text-sm font-black text-indigo-950">{liveStats.tetapFemale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
+                      </div>
                     </div>
                   </div>
 
@@ -1534,21 +1596,35 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 </div>
 
                 {/* Card Penduduk Musiman / Sewa */}
-                <div className="p-5 rounded-3xl bg-gradient-to-br from-amber-50/60 to-orange-50/40 border border-amber-100/80 relative overflow-hidden">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="px-2.5 py-1 bg-amber-500 text-slate-950 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
-                        WARGA MUSIMAN / KONTRAK / KOST
-                      </span>
-                      <h4 className="text-3xl font-black text-amber-950 mt-3">
-                        {liveStats.totalMusiman} <span className="text-sm font-bold text-amber-600">Jiwa</span>
-                      </h4>
-                      <p className="text-xs text-amber-800/80 font-medium mt-1">
-                        Tersebar di <b>{liveStats.housesMusiman} Rumah / Unit</b> (Sewa / Tinggal Sementara)
-                      </p>
+                <div className="p-5 rounded-3xl bg-gradient-to-br from-amber-50/60 to-orange-50/40 border border-amber-100/80 relative overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="px-2.5 py-1 bg-amber-500 text-slate-950 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
+                          WARGA MUSIMAN / KONTRAK / KOST
+                        </span>
+                        <h4 className="text-3xl font-black text-amber-950 mt-3">
+                          {liveStats.totalMusiman} <span className="text-sm font-bold text-amber-600">Jiwa</span>
+                        </h4>
+                        <p className="text-xs text-amber-800/80 font-medium mt-1">
+                          Tersebar di <b>{liveStats.housesMusiman} Rumah / Unit</b> (Sewa / Kost)
+                        </p>
+                      </div>
+                      <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm">
+                        <Clock size={24} />
+                      </div>
                     </div>
-                    <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm">
-                      <Clock size={24} />
+
+                    {/* Gender Breakdown Pill */}
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      <div className="px-3 py-2 bg-white/80 border border-amber-100/80 rounded-xl">
+                        <span className="text-[9px] font-mono font-bold text-indigo-500 uppercase block">Laki-laki</span>
+                        <p className="text-sm font-black text-amber-950">{liveStats.musimanMale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
+                      </div>
+                      <div className="px-3 py-2 bg-white/80 border border-amber-100/80 rounded-xl">
+                        <span className="text-[9px] font-mono font-bold text-rose-500 uppercase block">Perempuan</span>
+                        <p className="text-sm font-black text-amber-950">{liveStats.musimanFemale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
+                      </div>
                     </div>
                   </div>
 
