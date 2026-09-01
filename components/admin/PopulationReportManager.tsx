@@ -1157,9 +1157,13 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     return filteredLogs.slice(start, start + itemsPerPage);
   }, [filteredLogs, currentPage, itemsPerPage]);
 
-  // LIVE STATS (from houses) to match Dashboard/ResidentManager
+  // LIVE STATS (from houses) to match Dashboard/ResidentManager with Permanent vs Seasonal breakdown
   const liveStats = useMemo(() => {
     let totalSoul = 0;
+    let totalTetap = 0;
+    let totalMusiman = 0;
+    let housesTetap = 0;
+    let housesMusiman = 0;
     let totalPregnant = 0;
     let totalBaby = 0;
     let totalToddler = 0;
@@ -1173,7 +1177,19 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
     houses.forEach(h => {
       if (h.status === 'Occupied') {
-        totalSoul += Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0));
+        const soul = Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0));
+        totalSoul += soul;
+        
+        // Status Domisili: Tetap vs Musiman/Sewa
+        const isMusiman = h.residenceType === 'Sewa' || h.residenceType === 'Rumah Keluarga' || h.status === 'Visiting';
+        if (isMusiman) {
+          totalMusiman += soul;
+          housesMusiman += 1;
+        } else {
+          totalTetap += soul;
+          housesTetap += 1;
+        }
+
         totalPregnant += (h.pregnantCount || 0);
         totalBaby += (h.babyCount || 0);
         totalToddler += (h.toddlerCount || 0);
@@ -1189,6 +1205,10 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
 
     return {
       totalSoul,
+      totalTetap,
+      totalMusiman,
+      housesTetap,
+      housesMusiman,
       vulnerableTotal: totalPregnant + totalBaby + totalToddler + totalDisability + totalOrphan + totalWidow,
       totalPregnant, totalBaby, totalToddler, totalChild, totalTeenager, totalAdult, totalElderly, totalWidow, totalDisability, totalOrphan
     };
@@ -1454,6 +1474,96 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 <h3 className="text-3xl font-black text-slate-900">-{latestReport?.movedOutCount || 0} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
                 <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-amber-600">
                   <TrendingDown size={12} /> <span>Pindah Domisili Keluar</span>
+                </div>
+              </div>
+            </div>
+
+            {/* NEW: Status Kepenghunian (Penduduk Tetap vs Penduduk Musiman/Sewa) */}
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200/80 shadow-sm space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                <div>
+                  <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-[9px] font-mono font-black uppercase tracking-wider">
+                    KLASIFIKASI DOMISILI WARGA
+                  </span>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight mt-1">
+                    Perbandingan Penduduk Tetap vs Penduduk Musiman / Sewa
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Rasio kependudukan berdasarkan status kepemilikan dan hak tinggal di lingkungan RT 02
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-600">
+                  <span className="px-3 py-1.5 bg-slate-100 rounded-xl">
+                    Total KK: <b>{liveStats.housesTetap + liveStats.housesMusiman} Rumah</b>
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Card Penduduk Tetap */}
+                <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo-50/60 to-blue-50/40 border border-indigo-100/80 relative overflow-hidden">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
+                        WARGA TETAP (KTP/KK RT 02)
+                      </span>
+                      <h4 className="text-3xl font-black text-indigo-950 mt-3">
+                        {liveStats.totalTetap} <span className="text-sm font-bold text-indigo-600">Jiwa</span>
+                      </h4>
+                      <p className="text-xs text-indigo-800/80 font-medium mt-1">
+                        Tersebar di <b>{liveStats.housesTetap} Rumah / KK</b> (Milik Sendiri / Domisili Utama)
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white text-indigo-600 rounded-2xl shadow-sm">
+                      <Users size={24} />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-indigo-100/60">
+                    <div className="flex justify-between text-[11px] font-bold text-indigo-900 mb-1">
+                      <span>Porsi Populasi Tetap</span>
+                      <span>{liveStats.totalSoul > 0 ? ((liveStats.totalTetap / liveStats.totalSoul) * 100).toFixed(1) : 0}%</span>
+                    </div>
+                    <div className="w-full bg-indigo-100/70 h-2.5 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-indigo-600 h-full rounded-full transition-all duration-500"
+                        style={{ width: `${liveStats.totalSoul > 0 ? (liveStats.totalTetap / liveStats.totalSoul) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Penduduk Musiman / Sewa */}
+                <div className="p-5 rounded-3xl bg-gradient-to-br from-amber-50/60 to-orange-50/40 border border-amber-100/80 relative overflow-hidden">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="px-2.5 py-1 bg-amber-500 text-slate-950 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
+                        WARGA MUSIMAN / KONTRAK / KOST
+                      </span>
+                      <h4 className="text-3xl font-black text-amber-950 mt-3">
+                        {liveStats.totalMusiman} <span className="text-sm font-bold text-amber-600">Jiwa</span>
+                      </h4>
+                      <p className="text-xs text-amber-800/80 font-medium mt-1">
+                        Tersebar di <b>{liveStats.housesMusiman} Rumah / Unit</b> (Sewa / Tinggal Sementara)
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm">
+                      <Clock size={24} />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-amber-100/60">
+                    <div className="flex justify-between text-[11px] font-bold text-amber-900 mb-1">
+                      <span>Porsi Populasi Musiman</span>
+                      <span>{liveStats.totalSoul > 0 ? ((liveStats.totalMusiman / liveStats.totalSoul) * 100).toFixed(1) : 0}%</span>
+                    </div>
+                    <div className="w-full bg-amber-100/70 h-2.5 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                        style={{ width: `${liveStats.totalSoul > 0 ? (liveStats.totalMusiman / liveStats.totalSoul) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2328,6 +2438,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                         <th className="p-4 text-left">Jenis Mutasi</th>
                         <th className="p-4 text-left">Nama Warga</th>
                         <th className="p-4 text-left">Lokasi Kavling</th>
+                        <th className="p-4 text-center">Status Domisili</th>
                         <th className="p-4 text-left">Rincian Peristiwa</th>
                         <th className="p-4 text-center">Status Verifikasi</th>
                         <th className="p-4 text-center">Aksi</th>
@@ -2375,6 +2486,21 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                                   <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-black w-fit border border-slate-200/50">
                                     {targetHouse ? `Blok ${targetHouse.block}-${targetHouse.number}` : log.houseId}
                                   </div>
+                                );
+                              })()}
+                            </td>
+                            <td className="p-4 text-center">
+                              {(() => {
+                                const resType = log.details?.residenceType || 'Tetap';
+                                const isMusiman = resType === 'Sewa' || resType === 'Rumah Keluarga';
+                                return (
+                                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-mono font-black uppercase tracking-wider ${
+                                    isMusiman 
+                                      ? 'bg-amber-100 text-amber-800 border border-amber-200/80' 
+                                      : 'bg-indigo-100 text-indigo-800 border border-indigo-200/80'
+                                  }`}>
+                                    {isMusiman ? 'Musiman / Sewa' : 'Penduduk Tetap'}
+                                  </span>
                                 );
                               })()}
                             </td>
