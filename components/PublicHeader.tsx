@@ -7,10 +7,8 @@ import {
 import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
 import { NotificationCenter } from './NotificationCenter';
-import { MobileBottomNav } from './MobileBottomNav';
 import { AppNotification } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { usePWA } from '../hooks/usePWA';
 
 interface PublicHeaderProps {
   notifications: AppNotification[];
@@ -88,111 +86,99 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
             </div>
             
             <div className="flex items-center gap-2">
-                <div className="hidden lg:flex items-center space-x-1.5 mr-4">
-                  <button 
-                    onClick={() => navigate('/')} 
-                    className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${isActive('/') ? "text-indigo-600 bg-indigo-50/70" : "text-slate-600 hover:bg-slate-50"}`}
-                  >
-                    Beranda
-                  </button>
-
-                  {navGroups.map((group) => (
-                    <div 
-                      key={group.id}
-                      className="relative"
-                      onMouseEnter={() => setActiveDropdown(group.id)}
-                      onMouseLeave={() => setActiveDropdown(null)}
-                    >
-                      <button 
-                        className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                          group.items.some(item => isActive(item.path)) 
-                          ? "text-indigo-600 bg-indigo-50/70" 
-                          : "text-slate-600 hover:bg-slate-50"
-                        }`}
-                      >
-                        {group.label}
-                        <ChevronDown size={14} className={`transition-transform duration-200 ${activeDropdown === group.id ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      <AnimatePresence>
-                        {activeDropdown === group.id && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                            transition={{ duration: 0.15, ease: 'easeOut' }}
-                            className={`absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white/95 backdrop-blur-xl border border-slate-200/60 rounded-[1.75rem] shadow-xl p-4 z-50 overflow-hidden ${group.width}`}
-                          >
-                            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-500" />
-                            <div className={group.columns === 2 ? 'grid grid-cols-2 gap-3' : 'space-y-2'}>
-                              {group.items.map((item) => {
-                                const ItemIcon = item.icon;
-                                const isItemActive = isActive(item.path);
-                                return (
-                                  <button
-                                    key={item.path}
-                                    onClick={() => {
-                                      navigate(item.path);
-                                      setActiveDropdown(null);
-                                    }}
-                                    className={`group flex items-start gap-3 p-2.5 rounded-2xl w-full text-left transition-all ${
-                                      isItemActive
-                                      ? "bg-indigo-50/80 text-indigo-700 border border-indigo-100/40"
-                                      : "hover:bg-slate-50/80 text-slate-700 hover:text-slate-900 border border-transparent"
-                                    }`}
-                                  >
-                                    <div className={`p-2 rounded-xl transition-transform group-hover:scale-105 shrink-0 ${item.color}`}>
-                                      <ItemIcon size={16} />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="text-xs font-black tracking-tight text-slate-800 group-hover:text-indigo-600 transition-colors">
-                                        {item.label}
-                                      </p>
-                                      <p className="text-[10px] text-slate-400 font-semibold leading-normal mt-0.5 max-w-[200px] truncate">
-                                        {item.desc}
-                                      </p>
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ))}
-                </div>
-                
-                <NotificationCenter 
-                  notifications={notifications} 
-                  onMarkRead={onMarkRead} 
-                  onDelete={onDeleteNotification}
-                  onDeleteAll={onDeleteAllNotifications}
-                />
-
-                <div className="hidden md:block h-6 w-px bg-slate-200 mx-2"></div>
+              <div className="hidden lg:flex items-center space-x-1.5 mr-4">
                 <button 
-                  onClick={() => navigate('/admin')} 
-                  className="hidden md:flex items-center gap-1.5 ml-2 text-xs font-black uppercase tracking-wider h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-850 text-white shadow-sm active:scale-95 transition-all cursor-pointer font-sans"
+                  onClick={() => navigate('/')} 
+                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${isActive('/') ? "text-indigo-600 bg-indigo-50/70" : "text-slate-600 hover:bg-slate-50"}`}
                 >
-                  <User size={13} />
-                  Panel Admin
+                  Beranda
                 </button>
-            </div>
-             <div className="flex items-center lg:hidden gap-1.5">
-                {/* Mobile PWA Install Button */}
-                {!isStandalone && (isInstallable || isIOS) && (
-                  <button 
-                    onClick={handleInstallClick}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-xl transition-all"
-                    title="Pasang Aplikasi PWA"
+
+                {navGroups.map((group) => (
+                  <div 
+                    key={group.id}
+                    className="relative"
+                    onMouseEnter={() => setActiveDropdown(group.id)}
+                    onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <Download size={12} className="animate-bounce" />
-                    <span>Pasang</span>
-                  </button>
-                )}
-                
-                {/* Mobile Hamburger Menu Toggle Button */}
+                    <button 
+                      className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                        group.items.some(item => isActive(item.path)) 
+                        ? "text-indigo-600 bg-indigo-50/70" 
+                        : "text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {group.label}
+                      <ChevronDown size={14} className={`transition-transform duration-200 ${activeDropdown === group.id ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {activeDropdown === group.id && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                          transition={{ duration: 0.15, ease: 'easeOut' }}
+                          className={`absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white/95 backdrop-blur-xl border border-slate-200/60 rounded-[1.75rem] shadow-xl p-4 z-50 overflow-hidden ${group.width}`}
+                        >
+                          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-500" />
+                          <div className={group.columns === 2 ? 'grid grid-cols-2 gap-3' : 'space-y-2'}>
+                            {group.items.map((item) => {
+                              const ItemIcon = item.icon;
+                              const isItemActive = isActive(item.path);
+                              return (
+                                <button
+                                  key={item.path}
+                                  onClick={() => {
+                                    navigate(item.path);
+                                    setActiveDropdown(null);
+                                  }}
+                                  className={`group flex items-start gap-3 p-2.5 rounded-2xl w-full text-left transition-all ${
+                                    isItemActive
+                                    ? "bg-indigo-50/80 text-indigo-700 border border-indigo-100/40"
+                                    : "hover:bg-slate-50/80 text-slate-700 hover:text-slate-900 border border-transparent"
+                                  }`}
+                                >
+                                  <div className={`p-2 rounded-xl transition-transform group-hover:scale-105 shrink-0 ${item.color}`}>
+                                    <ItemIcon size={16} />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="text-xs font-black tracking-tight text-slate-800 group-hover:text-indigo-600 transition-colors">
+                                      {item.label}
+                                    </p>
+                                    <p className="text-[10px] text-slate-400 font-semibold leading-normal mt-0.5 max-w-[200px] truncate">
+                                      {item.desc}
+                                    </p>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </div>
+              
+              <NotificationCenter 
+                notifications={notifications} 
+                onMarkRead={onMarkRead} 
+                onDelete={onDeleteNotification}
+                onDeleteAll={onDeleteAllNotifications}
+              />
+
+              <div className="hidden md:block h-6 w-px bg-slate-200 mx-2"></div>
+              <button 
+                onClick={() => navigate('/admin')} 
+                className="hidden md:flex items-center gap-1.5 ml-2 text-xs font-black uppercase tracking-wider h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-sm active:scale-95 transition-all cursor-pointer font-sans"
+              >
+                <User size={13} />
+                Panel Admin
+              </button>
+
+              {/* Mobile Hamburger Menu Toggle Button */}
+              <div className="flex items-center lg:hidden gap-1.5">
                 <button 
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
                   className={`p-2 rounded-xl transition-all border focus:outline-none ${
@@ -208,6 +194,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
               </div>
             </div>
           </div>
+        </div>
 
         {/* Mobile Slide-down Full Menu Drawer */}
         <AnimatePresence>
@@ -272,7 +259,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                           {group.items.map((item) => {
                             const ItemIcon = item.icon;
                             const isItemActive = isActive(item.path);
-
                             return (
                               <button
                                 key={item.path}
@@ -282,20 +268,16 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                                 }}
                                 className={`flex items-center gap-3 p-3 rounded-2xl w-full text-left transition-all border ${
                                   isItemActive
-                                    ? "bg-indigo-50 border-indigo-200 text-indigo-900 font-bold"
-                                    : "bg-slate-50/70 hover:bg-slate-100/80 border-slate-100 text-slate-700"
+                                    ? "bg-indigo-50/80 border-indigo-200 text-indigo-700 font-bold"
+                                    : "bg-slate-50/50 border-slate-100 text-slate-700 hover:bg-slate-100/80"
                                 }`}
                               >
                                 <div className={`p-2 rounded-xl shrink-0 ${item.color}`}>
                                   <ItemIcon size={16} />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-xs font-black text-slate-800 leading-tight">
-                                    {item.label}
-                                  </p>
-                                  <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
-                                    {item.desc}
-                                  </p>
+                                  <p className="text-xs font-black text-slate-800 leading-snug">{item.label}</p>
+                                  <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">{item.desc}</p>
                                 </div>
                               </button>
                             );
@@ -310,7 +292,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
           )}
         </AnimatePresence>
       </nav>
-      {/* Mobile bottom nav is controlled globally in App.tsx */}
     </>
   );
 };
