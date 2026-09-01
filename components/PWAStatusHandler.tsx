@@ -12,7 +12,7 @@ export const PWAStatusHandler: React.FC = () => {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker
   } = useRegisterSW({
-    onRegistered(r) {
+    onRegistered(r?: any) {
       // Periodically check for SW updates every 1 hour
       if (r) {
         setInterval(() => {
@@ -20,7 +20,7 @@ export const PWAStatusHandler: React.FC = () => {
         }, 60 * 60 * 1000);
       }
     },
-    onRegisterError(error) {
+    onRegisterError(error?: any) {
       console.warn('SW registration error', error);
     }
   });

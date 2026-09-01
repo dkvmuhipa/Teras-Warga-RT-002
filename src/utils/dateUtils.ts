@@ -8,10 +8,30 @@ export const INDONESIAN_MONTHS = [
 ];
 
 /**
- * Formats a Date object to "Month Year" string in Indonesian
+ * Formats a Date object or string (e.g. '2026-08' or ISO date) to "Month Year" string in Indonesian
  */
-export const getIndonesianMonthYear = (date: Date): string => {
-  return `${INDONESIAN_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+export const getIndonesianMonthYear = (dateInput: Date | string | undefined | null): string => {
+  if (!dateInput) {
+    const now = new Date();
+    return `${INDONESIAN_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+  }
+  if (typeof dateInput === 'string') {
+    // If it's in YYYY-MM format
+    if (/^\d{4}-\d{2}$/.test(dateInput.trim())) {
+      const [yearStr, monthStr] = dateInput.trim().split('-');
+      const monthIdx = parseInt(monthStr, 10) - 1;
+      const year = parseInt(yearStr, 10);
+      if (monthIdx >= 0 && monthIdx < 12) {
+        return `${INDONESIAN_MONTHS[monthIdx]} ${year}`;
+      }
+    }
+    const parsed = new Date(dateInput);
+    if (!isNaN(parsed.getTime())) {
+      return `${INDONESIAN_MONTHS[parsed.getMonth()]} ${parsed.getFullYear()}`;
+    }
+    return dateInput; // Return as-is if already formatted or non-date string
+  }
+  return `${INDONESIAN_MONTHS[dateInput.getMonth()]} ${dateInput.getFullYear()}`;
 };
 
 /**

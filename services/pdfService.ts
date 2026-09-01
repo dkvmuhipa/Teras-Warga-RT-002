@@ -437,7 +437,21 @@ export const generateDedicatedMonthlyActivityReportPDF = async (report: MonthlyA
         }
     } catch (e) { console.error(e); }
 
-    addPageNumbers(doc);
+    // Add Page Numbers
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFont("times", "italic");
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text(
+            `Halaman ${i} dari ${totalPages}  |  Laporan Bulanan Kegiatan RT 02 Huntap Tondo 2`,
+            centerX,
+            pageHeight - 8,
+            { align: "center" }
+        );
+    }
+
     const cleanMonth = (report.month || 'periode').replace(/[^a-zA-Z0-9_-]/g, '_');
     doc.save(`Laporan_Kegiatan_Bulanan_RT02_${cleanMonth}.pdf`);
 };

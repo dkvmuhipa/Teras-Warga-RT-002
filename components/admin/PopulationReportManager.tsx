@@ -1222,7 +1222,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         totalFemale += houseFemale;
         
         // Status Domisili: Tetap vs Musiman/Sewa
-        const isMusiman = h.residenceType === 'Sewa' || h.residenceType === 'Rumah Keluarga' || h.status === 'Visiting';
+        const isMusiman = h.residenceType === 'Sewa' || h.residenceType === 'Rumah Keluarga' || (h.status as any) === 'Visiting';
         if (isMusiman) {
           totalMusiman += soul;
           musimanMale += houseMale;
