@@ -629,7 +629,7 @@ export const generateIntegratedMonthlyReportPDF = async (
 
     y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 8 : y + 25;
 
-    // 4. Agenda Kegiatan & Peristiwa
+    // 4. Agenda Kegiatan & Peristiwa Bulan Berjalan (Diurutkan Kronologis Tanggal & Waktu)
     if (y > pageHeight - 75) {
         doc.addPage();
         y = 25;
@@ -640,37 +640,57 @@ export const generateIntegratedMonthlyReportPDF = async (
     doc.setTextColor(255);
     doc.setFont("times", "bold");
     doc.setFontSize(9.5);
-    doc.text("IV. TABEL RINCIAN AGENDA KEGIATAN & PERISTIWA LINGKUNGAN", margin + 2.5, y);
+    doc.text("IV. TABEL RINCIAN AGENDA & PERISTIWA LINGKUNGAN BULAN BERJALAN", margin + 2.5, y);
     doc.setTextColor(0);
     y += 4;
 
-    const activityRows = (activityReport.activities || []).map((act, idx) => [
-        (idx + 1).toString(),
-        act.date || '-',
-        `${act.title}\n(${act.category || 'Kegiatan'})`,
-        act.location || 'Lingkungan RT 02',
-        act.picName || 'Pengurus RT',
-        act.description || '-'
-    ]);
+    // Sort kronologis berdasarkan tanggal dan jam pelaksanaan
+    const sortedActivities = [...(activityReport.activities || [])].sort((a, b) => {
+        const dateA = `${a.date || ''} ${a.startTime || '00:00'}`;
+        const dateB = `${b.date || ''} ${b.startTime || '00:00'}`;
+        return dateA.localeCompare(dateB);
+    });
+
+    const activityRows = sortedActivities.map((act, idx) => {
+        const timeInfo = act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime} WITA` : `${act.startTime} WITA`) : '';
+        const dateAndWaktu = timeInfo ? `${act.date || '-'}\n(${timeInfo})` : (act.date || '-');
+        
+        let resultDetails = act.description || '-';
+        if (act.attendanceCount && act.attendanceCount > 0) {
+            resultDetails += `\n• Kehadiran: ${act.attendanceCount} Warga`;
+        }
+        if (act.budgetSpent && act.budgetSpent > 0) {
+            resultDetails += `\n• Biaya: Rp ${act.budgetSpent.toLocaleString('id-ID')}`;
+        }
+
+        return [
+            (idx + 1).toString(),
+            dateAndWaktu,
+            `${act.title}\n[${act.category || 'Kegiatan'}]`,
+            act.location || 'Lingkungan RT 02',
+            act.picName || 'Pengurus RT',
+            resultDetails
+        ];
+    });
 
     if (activityRows.length === 0) {
-        activityRows.push(['1', '-', 'Tidak ada agenda khusus tercatat pada periode ini', '-', '-', '-']);
+        activityRows.push(['1', '-', 'Tidak ada agenda khusus tercatat pada periode bulan ini', '-', '-', '-']);
     }
 
     autoTable(doc, {
         startY: y,
         margin: { left: margin, right: margin },
-        head: [['No', 'Tanggal', 'Nama Kegiatan', 'Lokasi', 'Koordinator', 'Uraian Hasil']],
+        head: [['No', 'Tanggal & Waktu', 'Nama & Kategori Agenda', 'Lokasi Acara', 'Koordinator / PIC', 'Uraian Hasil, Notulensi & Partisipasi']],
         body: activityRows,
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5, halign: 'center' },
         bodyStyles: { fontSize: 8, textColor: [30, 41, 59] },
         columnStyles: {
             0: { cellWidth: 8, halign: 'center' },
-            1: { cellWidth: 20, halign: 'center' },
-            2: { cellWidth: 35 },
+            1: { cellWidth: 26, halign: 'center' },
+            2: { cellWidth: 38 },
             3: { cellWidth: 28 },
-            4: { cellWidth: 25 },
+            4: { cellWidth: 24 },
             5: { cellWidth: 'auto' }
         }
     });
