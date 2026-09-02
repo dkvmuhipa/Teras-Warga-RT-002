@@ -262,7 +262,9 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
 export const generateDedicatedMonthlyActivityReportPDF = async (
     report: MonthlyActivityReport, 
     customConfig?: PdfConfig,
-    orientation: 'portrait' | 'landscape' = 'portrait'
+    orientation: 'portrait' | 'landscape' = 'portrait',
+    includeSignature: boolean = true,
+    includeStamp: boolean = true
 ) => {
     const config = customConfig || DEFAULT_PDF_CONFIG;
     const doc = new jsPDF({ 
@@ -485,13 +487,13 @@ export const generateDedicatedMonthlyActivityReportPDF = async (
     doc.text(report.preparedBy || 'Sekretaris RT 02', leftSignX, y, { align: "center" });
     doc.line(leftSignX - 25, y + 1, leftSignX + 25, y + 1);
 
-    // Stempel & Tanda Tangan
+    // Stempel & Tanda Tangan Digital (Bisa diatur On / Off terpisah)
     try {
-        if (config.signature) {
+        if (includeSignature && config.signature) {
             const signImg = await getImageData(config.signature);
             if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY + 2, 30, 20);
         }
-        if (config.stamp) {
+        if (includeStamp && config.stamp) {
             const stampImg = await getImageData(config.stamp);
             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 28, signSpaceY - 2, 22, 22);
         }
@@ -528,7 +530,9 @@ export const generateIntegratedMonthlyReportPDF = async (
     cashFlow: CashFlow[] = [],
     populationReports: PopulationReport[] = [],
     config: PdfConfig = DEFAULT_PDF_CONFIG,
-    orientation: 'portrait' | 'landscape' = 'portrait'
+    orientation: 'portrait' | 'landscape' = 'portrait',
+    includeSignature: boolean = true,
+    includeStamp: boolean = true
 ) => {
     const doc = new jsPDF({
         orientation: orientation,
@@ -841,12 +845,13 @@ export const generateIntegratedMonthlyReportPDF = async (
     doc.text(activityReport.preparedBy || 'Sekretaris RT 02', leftSignX, y, { align: "center" });
     doc.line(leftSignX - 25, y + 1, leftSignX + 25, y + 1);
 
+    // Stempel & Tanda Tangan Digital (Bisa diatur On / Off terpisah)
     try {
-        if (config.signature) {
+        if (includeSignature && config.signature) {
             const signImg = await getImageData(config.signature);
             if (signImg) doc.addImage(signImg, 'PNG', rightSignX - 15, signSpaceY + 2, 30, 20);
         }
-        if (config.stamp) {
+        if (includeStamp && config.stamp) {
             const stampImg = await getImageData(config.stamp);
             if (stampImg) doc.addImage(stampImg, 'PNG', rightSignX - 28, signSpaceY - 2, 22, 22);
         }

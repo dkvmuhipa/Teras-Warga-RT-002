@@ -47,6 +47,8 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
   const [editingReportId, setEditingReportId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [pdfOrientation, setPdfOrientation] = useState<'portrait' | 'landscape'>('portrait');
+  const [includeSignature, setIncludeSignature] = useState(true);
+  const [includeStamp, setIncludeStamp] = useState(true);
 
   // Form State for Monthly Activity Report
   const [form, setForm] = useState<{
@@ -401,16 +403,44 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                       </button>
                     </div>
 
+                    {/* Signature & Stamp Independent Toggles */}
+                    <div className="flex items-center bg-white/10 p-1 rounded-xl border border-white/10 gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setIncludeSignature(!includeSignature)}
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                          includeSignature 
+                            ? 'bg-indigo-500 text-white shadow-sm' 
+                            : 'bg-white/5 text-slate-400 hover:text-slate-200 line-through opacity-70'
+                        }`}
+                        title={includeSignature ? "Tanda Tangan Digital Aktif" : "Tanda Tangan Dikosongkan (Manual/Basah)"}
+                      >
+                        ✍️ TTD: {includeSignature ? 'ON' : 'OFF'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIncludeStamp(!includeStamp)}
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                          includeStamp 
+                            ? 'bg-purple-600 text-white shadow-sm' 
+                            : 'bg-white/5 text-slate-400 hover:text-slate-200 line-through opacity-70'
+                        }`}
+                        title={includeStamp ? "Stempel/Cap RT Digital Aktif" : "Stempel/Cap Dikosongkan (Cap Basah)"}
+                      >
+                        💮 Cap: {includeStamp ? 'ON' : 'OFF'}
+                      </button>
+                    </div>
+
                     <button
-                      onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig, pdfOrientation)}
+                      onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig, pdfOrientation, includeSignature, includeStamp)}
                       className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-transform active:scale-95 cursor-pointer border border-indigo-400/30"
                       title={`Download Dokumen Lengkap Terpadu format ${pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'}`}
                     >
                       <Sparkles size={14} className="text-amber-300 animate-pulse" /> 
-                      <span>Unduh Terpadu ({pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'})</span>
+                      <span>Unduh Terpadu</span>
                     </button>
                     <button
-                      onClick={() => generateDedicatedMonthlyActivityReportPDF(activeReport, pdfConfig, pdfOrientation)}
+                      onClick={() => generateDedicatedMonthlyActivityReportPDF(activeReport, pdfConfig, pdfOrientation, includeSignature, includeStamp)}
                       className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-white/10"
                       title={`Download PDF Khusus Agenda format ${pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'}`}
                     >
