@@ -42,6 +42,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingReportId, setEditingReportId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [pdfOrientation, setPdfOrientation] = useState<'portrait' | 'landscape'>('portrait');
 
   // Form State for Monthly Activity Report
   const [form, setForm] = useState<{
@@ -309,18 +310,46 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
+                    {/* Orientation Selector Toggle */}
+                    <div className="flex items-center bg-white/10 p-1 rounded-xl border border-white/10">
+                      <button
+                        type="button"
+                        onClick={() => setPdfOrientation('portrait')}
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                          pdfOrientation === 'portrait' 
+                            ? 'bg-white text-slate-900 shadow-sm' 
+                            : 'text-slate-300 hover:text-white'
+                        }`}
+                        title="Format Vertikal (Tegak / Portrait)"
+                      >
+                        Vertical
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPdfOrientation('landscape')}
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                          pdfOrientation === 'landscape' 
+                            ? 'bg-white text-slate-900 shadow-sm' 
+                            : 'text-slate-300 hover:text-white'
+                        }`}
+                        title="Format Horizontal (Melebar / Landscape)"
+                      >
+                        Landscape
+                      </button>
+                    </div>
+
                     <button
-                      onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig)}
+                      onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig, pdfOrientation)}
                       className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-transform active:scale-95 cursor-pointer border border-indigo-400/30"
-                      title="Download Dokumen Lengkap Terpadu (Satu Kesatuan)"
+                      title={`Download Dokumen Lengkap Terpadu format ${pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'}`}
                     >
                       <Sparkles size={14} className="text-amber-300 animate-pulse" /> 
-                      <span>Unduh Laporan Terpadu (1 Kesatuan)</span>
+                      <span>Unduh Terpadu ({pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'})</span>
                     </button>
                     <button
-                      onClick={() => generateDedicatedMonthlyActivityReportPDF(activeReport, pdfConfig)}
+                      onClick={() => generateDedicatedMonthlyActivityReportPDF(activeReport, pdfConfig, pdfOrientation)}
                       className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-white/10"
-                      title="Download PDF Khusus Agenda Kegiatan"
+                      title={`Download PDF Khusus Agenda format ${pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'}`}
                     >
                       <Download size={14} /> Khusus Agenda
                     </button>

@@ -259,10 +259,14 @@ export const generatePopulationReportPDF = async (report: PopulationReport, cust
 // =========================================================================
 // LAPORAN BULANAN KEGIATAN & PERISTIWA RT (DEDICATED ACTIVITY MONTHLY REPORT PDF)
 // =========================================================================
-export const generateDedicatedMonthlyActivityReportPDF = async (report: MonthlyActivityReport, customConfig?: PdfConfig) => {
+export const generateDedicatedMonthlyActivityReportPDF = async (
+    report: MonthlyActivityReport, 
+    customConfig?: PdfConfig,
+    orientation: 'portrait' | 'landscape' = 'portrait'
+) => {
     const config = customConfig || DEFAULT_PDF_CONFIG;
     const doc = new jsPDF({ 
-        orientation: "portrait", 
+        orientation: orientation, 
         unit: "mm", 
         format: "a4",
         compress: true 
@@ -270,7 +274,7 @@ export const generateDedicatedMonthlyActivityReportPDF = async (report: MonthlyA
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
+    const margin = orientation === 'landscape' ? 20 : 20;
     const contentWidth = pageWidth - (margin * 2);
     const centerX = pageWidth / 2;
 
@@ -281,7 +285,7 @@ export const generateDedicatedMonthlyActivityReportPDF = async (report: MonthlyA
     } catch (e) { console.error(e); }
 
     if (logoData) {
-        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+        doc.addImage(logoData, 'PNG', margin, 10, 22, 28);
     }
 
     doc.setFont("times", "normal"); 
@@ -296,9 +300,9 @@ export const generateDedicatedMonthlyActivityReportPDF = async (report: MonthlyA
     doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
 
     doc.setLineWidth(1.0);
-    doc.line(20, 42, 190, 42);
+    doc.line(margin, 42, pageWidth - margin, 42);
     doc.setLineWidth(0.3);
-    doc.line(20, 43, 190, 43);
+    doc.line(margin, 43, pageWidth - margin, 43);
 
     // 2. Title Section
     doc.setFont("times", "bold");
@@ -467,16 +471,18 @@ export const generateIntegratedMonthlyReportPDF = async (
     houses: House[] = [],
     cashFlow: CashFlow[] = [],
     populationReports: PopulationReport[] = [],
-    config: PdfConfig = DEFAULT_PDF_CONFIG
+    config: PdfConfig = DEFAULT_PDF_CONFIG,
+    orientation: 'portrait' | 'landscape' = 'portrait'
 ) => {
     const doc = new jsPDF({
-        orientation: "portrait",
+        orientation: orientation,
         unit: "mm",
-        format: "a4"
+        format: "a4",
+        compress: true
     });
 
-    const pageWidth = 210;
-    const pageHeight = 297;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     const contentWidth = pageWidth - (margin * 2);
     const centerX = pageWidth / 2;
