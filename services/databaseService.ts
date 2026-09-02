@@ -172,6 +172,56 @@ export const subscribeToPdfConfig = (callback: (data: any) => void) => {
     });
 };
 
+// Helper untuk otomatis mengompresi Base64 gambar lama yang tersimpan di localStorage / state
+const compressBase64Image = (dataUrl: string, maxDim: number = 400): Promise<string> => {
+    return new Promise((resolve) => {
+        if (!dataUrl || !dataUrl.startsWith('data:image') || typeof window === 'undefined') {
+            return resolve(dataUrl);
+        }
+        // Jika sudah kecil (< 100 KB), tidak perlu dikompres ulang
+        if (dataUrl.length < 120000) {
+            return resolve(dataUrl);
+        }
+
+        const img = new Image();
+        img.onload = () => {
+            try {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxDim) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    }
+                } else {
+                    if (height > maxDim) {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const result = canvas.toDataURL('image/png');
+                    resolve(result);
+                } else {
+                    resolve(dataUrl);
+                }
+            } catch (e) {
+                console.error("Gagal compress base64:", e);
+                resolve(dataUrl);
+            }
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+    });
+};
+
 export const updatePdfConfig = async (config: any) => {
     try {
         const docRef = doc(db, CONFIGS_COL, "pdf");
@@ -179,22 +229,21 @@ export const updatePdfConfig = async (config: any) => {
         // Ensure we have a clean, plain object without circular references or complex types
         let cleanData: any = {};
         try {
-            // Use safeJsonStringify to ensure it's a plain object
             cleanData = JSON.parse(safeJsonStringify(config));
         } catch (e) {
             console.error("Error sanitizing PDF config:", e);
             cleanData = { error: "Sanitization failed", timestamp: new Date().toISOString() };
         }
 
-        const payloadString = JSON.stringify(cleanData);
-        // Firestore limit is 1,048,576 bytes (~1 MB)
-        if (payloadString.length > 950000) {
-            console.warn("PDF Config payload exceeds Firestore 1MB limit. Compressing assets...");
-            // Jika payload masih terlalu besar karena base64 gambar lama belum terkompresi
-            if (cleanData.logo && cleanData.logo.length > 300000) {
-                // Potong atau beri tanda agar tidak membuat crash database
-                console.warn("Logo base64 too large for Firestore document.");
-            }
+        // Kompresi otomatis field gambar jika ada gambar lama yang besar
+        if (cleanData.logo && cleanData.logo.length > 120000) {
+            cleanData.logo = await compressBase64Image(cleanData.logo, 400);
+        }
+        if (cleanData.stamp && cleanData.stamp.length > 120000) {
+            cleanData.stamp = await compressBase64Image(cleanData.stamp, 400);
+        }
+        if (cleanData.signature && cleanData.signature.length > 120000) {
+            cleanData.signature = await compressBase64Image(cleanData.signature, 400);
         }
 
         await setDoc(docRef, {
