@@ -25,6 +25,8 @@ import { useConfirm } from '../../context/ConfirmContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
 import { CashFlow, PopulationReport } from '../../types';
 
+import { exportProfessionalMonthlyReportExcel } from '../../services/excelService';
+
 interface MonthlyActivityReportManagerProps {
   houses?: House[];
   pdfConfig?: PdfConfig;
@@ -218,36 +220,14 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
     (r.month || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleExportCSV = (report: MonthlyActivityReport) => {
-    if (!report.activities || report.activities.length === 0) {
-      toast.error('Belum ada agenda kegiatan untuk diekspor.');
-      return;
+  const handleExportExcel = async (report: MonthlyActivityReport) => {
+    try {
+      await exportProfessionalMonthlyReportExcel(report, pdfConfig, cashFlow);
+      toast.success('File Excel Resmi (.xlsx) berhasil diunduh!');
+    } catch (e) {
+      console.error(e);
+      toast.error('Gagal mengekspor file Excel.');
     }
-
-    const headers = ['No', 'Tanggal', 'Jam', 'Uraian Kegiatan', 'Lokasi Kegiatan', 'Koordinator / PIC', 'Kehadiran (Warga)', 'Biaya (Rp)', 'Keterangan'];
-    const rows = report.activities.map((act, idx) => [
-      idx + 1,
-      `"${act.date || '-'}"`,
-      `"${act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime}` : act.startTime) : '-'}"`,
-      `"${(act.title || '').replace(/"/g, '""')}"`,
-      `"${(act.location || '').replace(/"/g, '""')}"`,
-      `"${(act.picName || '').replace(/"/g, '""')}"`,
-      act.attendanceCount || 0,
-      act.budgetSpent || 0,
-      `"${(act.description || '').replace(/"/g, '""')}"`
-    ]);
-
-    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + 
-      [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Rekap_Kegiatan_RT02_${report.month || 'Bulanan'}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('File Rekap CSV / Excel berhasil diunduh!');
   };
 
   const handleBroadcastWhatsApp = (report: MonthlyActivityReport) => {
@@ -437,11 +417,11 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                       <Download size={14} /> Khusus Agenda
                     </button>
                     <button
-                      onClick={() => handleExportCSV(activeReport)}
+                      onClick={() => handleExportExcel(activeReport)}
                       className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-600/80 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-emerald-500/30"
-                      title="Ekspor Rekap Kegiatan ke Format Excel / CSV"
+                      title="Ekspor Laporan Resmi ke Format Excel (.xlsx)"
                     >
-                      <FileSpreadsheet size={14} /> Excel / CSV
+                      <FileSpreadsheet size={14} /> Excel (.xlsx)
                     </button>
                     <button
                       onClick={() => handleBroadcastWhatsApp(activeReport)}

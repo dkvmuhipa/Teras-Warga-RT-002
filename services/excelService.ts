@@ -1407,6 +1407,195 @@ export const generateIuranBatchTemplateExcel = async (houses: House[], monthYear
   saveAs(blob, `Template_Penagihan_Iuran_RT02_${monthYear.replace(/\s+/g, '_')}.xlsx`);
 };
 
+export const exportProfessionalMonthlyReportExcel = async (
+  report: any,
+  pdfConfig?: any,
+  cashFlow: any[] = []
+) => {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Teras Warga RT 02';
+  workbook.created = new Date();
+
+  const worksheet = workbook.addWorksheet('Laporan Bulanan RT', {
+    views: [{ showGridLines: true }]
+  });
+
+  const rtName = pdfConfig?.rtName || 'RT 02';
+  const kelurahan = pdfConfig?.kelurahan || 'TONDO';
+  const kecamatan = pdfConfig?.kecamatan || 'MANTIKULORE';
+  const kota = pdfConfig?.kota || 'PALU';
+  const monthLabel = report.month || 'Bulan Berjalan';
+
+  // 1. Header Resmi RT 02
+  worksheet.mergeCells('A1:G1');
+  const title1 = worksheet.getCell('A1');
+  title1.value = `PEMERINTAH KOTA ${kota.toUpperCase()} - KECAMATAN ${kecamatan.toUpperCase()} - KELURAHAN ${kelurahan.toUpperCase()}`;
+  title1.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF475569' } };
+  title1.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.mergeCells('A2:G2');
+  const title2 = worksheet.getCell('A2');
+  title2.value = `PENGURUS ${rtName.toUpperCase()} HUNTAP TONDO 2`;
+  title2.font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FF0F172A' } };
+  title2.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.mergeCells('A3:G3');
+  const title3 = worksheet.getCell('A3');
+  title3.value = `LAPORAN PERTANGGUNGJAWABAN BULANAN TERPADU - PERIODE: ${monthLabel.toUpperCase()}`;
+  title3.font = { name: 'Calibri', size: 12, bold: true, color: { argb: 'FF4F46E5' } };
+  title3.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.addRow([]); // Blank row A4
+
+  // 2. Ringkasan Eksekutif & Kamtibmas Box
+  worksheet.mergeCells('A5:G5');
+  const sumHeader = worksheet.getCell('A5');
+  sumHeader.value = 'I. RINGKASAN SITUASI WILAYAH & KAMTIBMAS';
+  sumHeader.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+  sumHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+  sumHeader.alignment = { vertical: 'middle', indent: 1 };
+  worksheet.getRow(5).height = 24;
+
+  worksheet.mergeCells('A6:G6');
+  const sumContent = worksheet.getCell('A6');
+  sumContent.value = `Situasi Umum: ${report.executiveSummary || 'Kondisi lingkungan aman, kondusif, dan harmonis.'}`;
+  sumContent.font = { name: 'Calibri', size: 10, italic: true };
+  sumContent.alignment = { vertical: 'middle', wrapText: true };
+  worksheet.getRow(6).height = 28;
+
+  if (report.securitySummary) {
+    worksheet.mergeCells('A7:G7');
+    const secContent = worksheet.getCell('A7');
+    secContent.value = `Kamtibmas & Siskamling: ${report.securitySummary}`;
+    secContent.font = { name: 'Calibri', size: 10, italic: true };
+    secContent.alignment = { vertical: 'middle', wrapText: true };
+    worksheet.getRow(7).height = 24;
+  }
+
+  worksheet.addRow([]); // Blank row
+
+  // 3. Header Tabel Kegiatan
+  const tableHeaderRowIndex = report.securitySummary ? 9 : 8;
+  worksheet.mergeCells(`A${tableHeaderRowIndex}:G${tableHeaderRowIndex}`);
+  const actSection = worksheet.getCell(`A${tableHeaderRowIndex}`);
+  actSection.value = 'II. TABEL RINCIAN AGENDA & PERISTIWA LINGKUNGAN BULAN BERJALAN';
+  actSection.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+  actSection.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+  actSection.alignment = { vertical: 'middle', indent: 1 };
+  worksheet.getRow(tableHeaderRowIndex).height = 24;
+
+  const colHeaders = ['No', 'Tanggal', 'Jam (WITA)', 'Uraian Kegiatan', 'Lokasi Kegiatan', 'Koordinator / PIC', 'Keterangan & Hasil'];
+  const headerRow = worksheet.addRow(colHeaders);
+  headerRow.height = 26;
+  headerRow.eachCell((cell) => {
+    cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4338CA' } }; // Indigo-700
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+      bottom: { style: 'medium', color: { argb: 'FF0F172A' } },
+      left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+      right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+    };
+  });
+
+  // Sort activities chronologically
+  const sortedActivities = [...(report.activities || [])].sort((a: any, b: any) => {
+    const dateA = `${a.date || ''} ${a.startTime || '00:00'}`;
+    const dateB = `${b.date || ''} ${b.startTime || '00:00'}`;
+    return dateA.localeCompare(dateB);
+  });
+
+  if (sortedActivities.length === 0) {
+    const emptyRow = worksheet.addRow(['1', '-', '-', 'Tidak ada agenda kegiatan khusus pada bulan ini', '-', '-', '-']);
+    emptyRow.height = 22;
+    emptyRow.eachCell(c => {
+      c.alignment = { horizontal: 'center', vertical: 'middle' };
+      c.font = { italic: true, color: { argb: 'FF64748B' } };
+    });
+  } else {
+    sortedActivities.forEach((act: any, idx: number) => {
+      const timeStr = act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime}` : act.startTime) : '-';
+      let remarks = act.description || '-';
+      if (act.attendanceCount && act.attendanceCount > 0) remarks += ` | Kehadiran: ${act.attendanceCount} Warga`;
+      if (act.budgetSpent && act.budgetSpent > 0) remarks += ` | Biaya: Rp ${act.budgetSpent.toLocaleString('id-ID')}`;
+
+      const row = worksheet.addRow([
+        idx + 1,
+        act.date || '-',
+        timeStr,
+        act.title || '-',
+        act.location || 'Lingkungan RT 02',
+        act.picName || 'Pengurus RT',
+        remarks
+      ]);
+
+      row.height = 24;
+      const isEven = idx % 2 === 0;
+      row.eachCell((cell, colNumber) => {
+        cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1E293B' } };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: isEven ? 'FFFFFFFF' : 'FFF8FAFC' }
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+        };
+
+        if (colNumber === 1 || colNumber === 2 || colNumber === 3) {
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        } else {
+          cell.alignment = { vertical: 'middle', wrapText: true };
+        }
+      });
+    });
+  }
+
+  // Width formatting
+  worksheet.getColumn(1).width = 6;   // No
+  worksheet.getColumn(2).width = 15;  // Tanggal
+  worksheet.getColumn(3).width = 18;  // Jam
+  worksheet.getColumn(4).width = 32;  // Uraian Kegiatan
+  worksheet.getColumn(5).width = 28;  // Lokasi
+  worksheet.getColumn(6).width = 24;  // PIC
+  worksheet.getColumn(7).width = 45;  // Keterangan
+
+  worksheet.addRow([]); // Blank row
+
+  // 4. Pengesahan Tanda Tangan
+  const currentLastRow = worksheet.lastRow ? worksheet.lastRow.number + 1 : 20;
+  
+  worksheet.getCell(`B${currentLastRow}`).value = 'Dibuat oleh,';
+  worksheet.getCell(`B${currentLastRow}`).alignment = { horizontal: 'center' };
+  worksheet.getCell(`B${currentLastRow}`).font = { bold: true };
+
+  worksheet.getCell(`F${currentLastRow}`).value = 'Mengetahui,';
+  worksheet.getCell(`F${currentLastRow}`).alignment = { horizontal: 'center' };
+  worksheet.getCell(`F${currentLastRow}`).font = { bold: true };
+
+  worksheet.getCell(`B${currentLastRow + 1}`).value = `Sekretaris ${rtName}`;
+  worksheet.getCell(`B${currentLastRow + 1}`).alignment = { horizontal: 'center' };
+
+  worksheet.getCell(`F${currentLastRow + 1}`).value = `Ketua ${rtName}`;
+  worksheet.getCell(`F${currentLastRow + 1}`).alignment = { horizontal: 'center' };
+
+  worksheet.getCell(`B${currentLastRow + 5}`).value = report.preparedBy || 'Sekretaris RT 02';
+  worksheet.getCell(`B${currentLastRow + 5}`).alignment = { horizontal: 'center' };
+  worksheet.getCell(`B${currentLastRow + 5}`).font = { bold: true, underline: true };
+
+  worksheet.getCell(`F${currentLastRow + 5}`).value = report.approvedBy || pdfConfig?.rtChairman || 'Ketua RT 02';
+  worksheet.getCell(`F${currentLastRow + 5}`).alignment = { horizontal: 'center' };
+  worksheet.getCell(`F${currentLastRow + 5}`).font = { bold: true, underline: true };
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Laporan_Kegiatan_RT02_${monthLabel.replace(/\s+/g, '_')}.xlsx`);
+};
+
 export const parseIuranBatchExcel = async (file: File): Promise<Array<{
   block: string;
   number: string;
@@ -1460,4 +1649,5 @@ export const parseIuranBatchExcel = async (file: File): Promise<Array<{
 
   return results;
 };
+
 
