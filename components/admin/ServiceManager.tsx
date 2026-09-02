@@ -726,8 +726,38 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const newConfig = { ...pdfConfig, [field]: reader.result as string };
-        setPdfConfig(newConfig);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_DIMENSION = 500; // Cukup sangat tajam untuk kop surat & tanda tangan PDF
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_DIMENSION) {
+              height = Math.round((height * MAX_DIMENSION) / width);
+              width = MAX_DIMENSION;
+            }
+          } else {
+            if (height > MAX_DIMENSION) {
+              width = Math.round((width * MAX_DIMENSION) / height);
+              height = MAX_DIMENSION;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Gunakan format PNG terkompresi untuk menjaga transparansi stempel / tanda tangan
+            const compressedBase64 = canvas.toDataURL('image/png');
+            const newConfig = { ...pdfConfig, [field]: compressedBase64 };
+            setPdfConfig(newConfig);
+            toast.success(`Gambar ${field} berhasil dioptimasi & diperbarui!`);
+          }
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }

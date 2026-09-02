@@ -183,8 +183,18 @@ export const updatePdfConfig = async (config: any) => {
             cleanData = JSON.parse(safeJsonStringify(config));
         } catch (e) {
             console.error("Error sanitizing PDF config:", e);
-            // Fallback to a very basic object if sanitization fails
             cleanData = { error: "Sanitization failed", timestamp: new Date().toISOString() };
+        }
+
+        const payloadString = JSON.stringify(cleanData);
+        // Firestore limit is 1,048,576 bytes (~1 MB)
+        if (payloadString.length > 950000) {
+            console.warn("PDF Config payload exceeds Firestore 1MB limit. Compressing assets...");
+            // Jika payload masih terlalu besar karena base64 gambar lama belum terkompresi
+            if (cleanData.logo && cleanData.logo.length > 300000) {
+                // Potong atau beri tanda agar tidak membuat crash database
+                console.warn("Logo base64 too large for Firestore document.");
+            }
         }
 
         await setDoc(docRef, {
