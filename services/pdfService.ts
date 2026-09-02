@@ -355,13 +355,27 @@ export const generateDedicatedMonthlyActivityReportPDF = async (
     doc.setTextColor(255);
     doc.text("III. TABEL RINCIAN AGENDA, LOKASI & URAIAN KEGIATAN", margin + 2, y);
     doc.setTextColor(0);
-    y += 6;
-
     const isLandscape = orientation === 'landscape';
+
+    // Preload & compress foto dokumentasi untuk dirender inline di dalam tabel
+    const preloadedActivityPhotos: { [key: number]: string } = {};
+    for (let i = 0; i < (report.activities || []).length; i++) {
+        const act = (report.activities || [])[i];
+        if (act.photoUrls && act.photoUrls.length > 0) {
+            try {
+                const pData = await getImageData(act.photoUrls[0]);
+                if (pData) {
+                    preloadedActivityPhotos[i] = pData;
+                }
+            } catch (e) {
+                console.error("Gagal load foto inline:", e);
+            }
+        }
+    }
 
     const tableBody = (report.activities || []).map((act, idx) => {
         const timeInfo = act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime} WITA` : `${act.startTime} WITA`) : '-';
-        const docStatus = (act.photoUrls && act.photoUrls.length > 0) ? `Terlampir (${act.photoUrls.length} Foto)` : 'Tersimpan di Arsip RT';
+        const docPlaceholder = (act.photoUrls && act.photoUrls.length > 0) ? '' : 'Tidak Ada\nFoto';
         let remarks = act.description || '-';
         if (act.picName && act.picName !== 'Pengurus RT') remarks += `\n• PIC: ${act.picName}`;
         if (act.attendanceCount && act.attendanceCount > 0) remarks += `\n• Kehadiran: ${act.attendanceCount} Warga`;
@@ -372,7 +386,7 @@ export const generateDedicatedMonthlyActivityReportPDF = async (
             timeInfo,
             act.title || '-',
             act.location || 'Lingkungan RT 02',
-            docStatus,
+            docPlaceholder,
             remarks
         ];
     });
@@ -396,7 +410,8 @@ export const generateDedicatedMonthlyActivityReportPDF = async (
         },
         bodyStyles: {
             fontSize: 8,
-            textColor: [30, 41, 59]
+            textColor: [30, 41, 59],
+            minCellHeight: 18
         },
         columnStyles: isLandscape ? {
             0: { cellWidth: 10, halign: 'center' },
@@ -412,8 +427,29 @@ export const generateDedicatedMonthlyActivityReportPDF = async (
             2: { cellWidth: 20, halign: 'center' },
             3: { cellWidth: 32 },
             4: { cellWidth: 26 },
-            5: { cellWidth: 22, halign: 'center' },
+            5: { cellWidth: 24, halign: 'center' },
             6: { cellWidth: 'auto' }
+        },
+        didDrawCell: (data) => {
+            if (data.section === 'body' && data.column.index === 5) {
+                const rowIndex = data.row.index;
+                const photoData = preloadedActivityPhotos[rowIndex];
+                if (photoData) {
+                    try {
+                        const cellX = data.cell.x;
+                        const cellY = data.cell.y;
+                        const cellW = data.cell.width;
+                        const cellH = data.cell.height;
+                        const imgW = isLandscape ? 28 : 20;
+                        const imgH = isLandscape ? 18 : 14;
+                        const posX = cellX + ((cellW - imgW) / 2);
+                        const posY = cellY + ((cellH - imgH) / 2);
+                        doc.addImage(photoData, 'JPEG', posX, posY, imgW, imgH);
+                    } catch (e) {
+                        console.error("Gagal menggambar foto di sel PDF:", e);
+                    }
+                }
+            }
         },
         didDrawPage: (data) => {
             y = data.cursor?.y || y;
@@ -679,6 +715,22 @@ export const generateIntegratedMonthlyReportPDF = async (
 
     const isLandscape = orientation === 'landscape';
 
+    // Preload & compress foto dokumentasi untuk dirender inline di dalam tabel laporan terpadu
+    const preloadedIntegratedPhotos: { [key: number]: string } = {};
+    for (let i = 0; i < sortedActivities.length; i++) {
+        const act = sortedActivities[i];
+        if (act.photoUrls && act.photoUrls.length > 0) {
+            try {
+                const pData = await getImageData(act.photoUrls[0]);
+                if (pData) {
+                    preloadedIntegratedPhotos[i] = pData;
+                }
+            } catch (e) {
+                console.error("Gagal load foto inline:", e);
+            }
+        }
+    }
+
     const activityRows = sortedActivities.map((act, idx) => {
         const timeInfo = act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime} WITA` : `${act.startTime} WITA`) : '-';
         
@@ -693,9 +745,9 @@ export const generateIntegratedMonthlyReportPDF = async (
             remarks += `\n• Biaya: Rp ${act.budgetSpent.toLocaleString('id-ID')}`;
         }
 
-        const docStatus = (act.photoUrls && act.photoUrls.length > 0) 
-            ? `Terlampir (${act.photoUrls.length} Foto)` 
-            : 'Tersimpan di Arsip RT';
+        const docPlaceholder = (act.photoUrls && act.photoUrls.length > 0) 
+            ? '' 
+            : 'Tidak Ada\nFoto';
 
         return [
             (idx + 1).toString(),
@@ -703,7 +755,7 @@ export const generateIntegratedMonthlyReportPDF = async (
             timeInfo,
             act.title || '-',
             act.location || 'Lingkungan RT 02',
-            docStatus,
+            docPlaceholder,
             remarks
         ];
     });
@@ -719,7 +771,7 @@ export const generateIntegratedMonthlyReportPDF = async (
         body: activityRows,
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5, halign: 'center' },
-        bodyStyles: { fontSize: 8, textColor: [30, 41, 59] },
+        bodyStyles: { fontSize: 8, textColor: [30, 41, 59], minCellHeight: 18 },
         columnStyles: isLandscape ? {
             0: { cellWidth: 10, halign: 'center' },
             1: { cellWidth: 24, halign: 'center' },
@@ -734,8 +786,29 @@ export const generateIntegratedMonthlyReportPDF = async (
             2: { cellWidth: 20, halign: 'center' },
             3: { cellWidth: 32 },
             4: { cellWidth: 26 },
-            5: { cellWidth: 22, halign: 'center' },
+            5: { cellWidth: 24, halign: 'center' },
             6: { cellWidth: 'auto' }
+        },
+        didDrawCell: (data) => {
+            if (data.section === 'body' && data.column.index === 5) {
+                const rowIndex = data.row.index;
+                const photoData = preloadedIntegratedPhotos[rowIndex];
+                if (photoData) {
+                    try {
+                        const cellX = data.cell.x;
+                        const cellY = data.cell.y;
+                        const cellW = data.cell.width;
+                        const cellH = data.cell.height;
+                        const imgW = isLandscape ? 28 : 20;
+                        const imgH = isLandscape ? 18 : 14;
+                        const posX = cellX + ((cellW - imgW) / 2);
+                        const posY = cellY + ((cellH - imgH) / 2);
+                        doc.addImage(photoData, 'JPEG', posX, posY, imgW, imgH);
+                    } catch (e) {
+                        console.error("Gagal menggambar foto di sel PDF:", e);
+                    }
+                }
+            }
         }
     });
 
