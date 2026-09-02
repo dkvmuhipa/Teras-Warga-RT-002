@@ -357,43 +357,63 @@ export const generateDedicatedMonthlyActivityReportPDF = async (
     doc.setTextColor(0);
     y += 6;
 
-    const tableBody = (report.activities || []).map((act, idx) => [
-        (idx + 1).toString(),
-        act.date || '-',
-        act.title || '-',
-        act.location || 'Lingkungan RT 02',
-        act.picName || 'Pengurus RT',
-        act.description || '-'
-    ]);
+    const isLandscape = orientation === 'landscape';
+
+    const tableBody = (report.activities || []).map((act, idx) => {
+        const timeInfo = act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime} WITA` : `${act.startTime} WITA`) : '-';
+        const docStatus = (act.photoUrls && act.photoUrls.length > 0) ? `Terlampir (${act.photoUrls.length} Foto)` : 'Tersimpan di Arsip RT';
+        let remarks = act.description || '-';
+        if (act.picName && act.picName !== 'Pengurus RT') remarks += `\n• PIC: ${act.picName}`;
+        if (act.attendanceCount && act.attendanceCount > 0) remarks += `\n• Kehadiran: ${act.attendanceCount} Warga`;
+
+        return [
+            (idx + 1).toString(),
+            act.date || '-',
+            timeInfo,
+            act.title || '-',
+            act.location || 'Lingkungan RT 02',
+            docStatus,
+            remarks
+        ];
+    });
 
     if (tableBody.length === 0) {
-        tableBody.push(['1', '-', 'Tidak ada agenda kegiatan tercatat', '-', '-', '-']);
+        tableBody.push(['1', '-', '-', 'Tidak ada agenda kegiatan tercatat', '-', '-', '-']);
     }
 
     autoTable(doc, {
         startY: y,
         margin: { left: margin, right: margin },
-        head: [['No', 'Tanggal', 'Nama Kegiatan', 'Lokasi Kegiatan', 'Koordinator / PIC', 'Uraian Hasil & Catatan']],
+        head: [['No', 'Tanggal', 'Jam', 'Uraian Kegiatan', 'Lokasi Kegiatan', 'Dokumentasi Kegiatan', 'Keterangan']],
         body: tableBody,
         theme: 'grid',
         headStyles: {
             fillColor: [15, 23, 42],
             textColor: [255, 255, 255],
             fontStyle: 'bold',
-            fontSize: 9,
+            fontSize: 8.5,
             halign: 'center'
         },
         bodyStyles: {
-            fontSize: 8.5,
+            fontSize: 8,
             textColor: [30, 41, 59]
         },
-        columnStyles: {
+        columnStyles: isLandscape ? {
             0: { cellWidth: 10, halign: 'center' },
-            1: { cellWidth: 22, halign: 'center' },
-            2: { cellWidth: 35 },
-            3: { cellWidth: 30 },
-            4: { cellWidth: 25 },
-            5: { cellWidth: 'auto' }
+            1: { cellWidth: 24, halign: 'center' },
+            2: { cellWidth: 26, halign: 'center' },
+            3: { cellWidth: 50 },
+            4: { cellWidth: 38 },
+            5: { cellWidth: 34, halign: 'center' },
+            6: { cellWidth: 'auto' }
+        } : {
+            0: { cellWidth: 7, halign: 'center' },
+            1: { cellWidth: 18, halign: 'center' },
+            2: { cellWidth: 20, halign: 'center' },
+            3: { cellWidth: 32 },
+            4: { cellWidth: 26 },
+            5: { cellWidth: 22, halign: 'center' },
+            6: { cellWidth: 'auto' }
         },
         didDrawPage: (data) => {
             y = data.cursor?.y || y;
@@ -657,47 +677,65 @@ export const generateIntegratedMonthlyReportPDF = async (
         return dateA.localeCompare(dateB);
     });
 
+    const isLandscape = orientation === 'landscape';
+
     const activityRows = sortedActivities.map((act, idx) => {
-        const timeInfo = act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime} WITA` : `${act.startTime} WITA`) : '';
-        const dateAndWaktu = timeInfo ? `${act.date || '-'}\n(${timeInfo})` : (act.date || '-');
+        const timeInfo = act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime} WITA` : `${act.startTime} WITA`) : '-';
         
-        let resultDetails = act.description || '-';
+        let remarks = act.description || '-';
+        if (act.picName && act.picName !== 'Pengurus RT') {
+            remarks += `\n• PIC: ${act.picName}`;
+        }
         if (act.attendanceCount && act.attendanceCount > 0) {
-            resultDetails += `\n• Kehadiran: ${act.attendanceCount} Warga`;
+            remarks += `\n• Kehadiran: ${act.attendanceCount} Warga`;
         }
         if (act.budgetSpent && act.budgetSpent > 0) {
-            resultDetails += `\n• Biaya: Rp ${act.budgetSpent.toLocaleString('id-ID')}`;
+            remarks += `\n• Biaya: Rp ${act.budgetSpent.toLocaleString('id-ID')}`;
         }
+
+        const docStatus = (act.photoUrls && act.photoUrls.length > 0) 
+            ? `Terlampir (${act.photoUrls.length} Foto)` 
+            : 'Tersimpan di Arsip RT';
 
         return [
             (idx + 1).toString(),
-            dateAndWaktu,
+            act.date || '-',
+            timeInfo,
             act.title || '-',
             act.location || 'Lingkungan RT 02',
-            act.picName || 'Pengurus RT',
-            resultDetails
+            docStatus,
+            remarks
         ];
     });
 
     if (activityRows.length === 0) {
-        activityRows.push(['1', '-', 'Tidak ada agenda khusus tercatat pada periode bulan ini', '-', '-', '-']);
+        activityRows.push(['1', '-', '-', 'Tidak ada agenda khusus tercatat pada periode bulan ini', '-', '-', '-']);
     }
 
     autoTable(doc, {
         startY: y,
         margin: { left: margin, right: margin },
-        head: [['No', 'Tanggal & Waktu', 'Nama Kegiatan', 'Lokasi Acara', 'Koordinator / PIC', 'Uraian Hasil, Notulensi & Partisipasi']],
+        head: [['No', 'Tanggal', 'Jam', 'Uraian Kegiatan', 'Lokasi Kegiatan', 'Dokumentasi Kegiatan', 'Keterangan']],
         body: activityRows,
         theme: 'grid',
         headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5, halign: 'center' },
         bodyStyles: { fontSize: 8, textColor: [30, 41, 59] },
-        columnStyles: {
-            0: { cellWidth: 8, halign: 'center' },
-            1: { cellWidth: 26, halign: 'center' },
-            2: { cellWidth: 38 },
-            3: { cellWidth: 28 },
-            4: { cellWidth: 24 },
-            5: { cellWidth: 'auto' }
+        columnStyles: isLandscape ? {
+            0: { cellWidth: 10, halign: 'center' },
+            1: { cellWidth: 24, halign: 'center' },
+            2: { cellWidth: 26, halign: 'center' },
+            3: { cellWidth: 50 },
+            4: { cellWidth: 38 },
+            5: { cellWidth: 34, halign: 'center' },
+            6: { cellWidth: 'auto' }
+        } : {
+            0: { cellWidth: 7, halign: 'center' },
+            1: { cellWidth: 18, halign: 'center' },
+            2: { cellWidth: 20, halign: 'center' },
+            3: { cellWidth: 32 },
+            4: { cellWidth: 26 },
+            5: { cellWidth: 22, halign: 'center' },
+            6: { cellWidth: 'auto' }
         }
     });
 

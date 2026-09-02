@@ -407,11 +407,11 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                             <h5 className="font-black text-sm text-slate-900">{act.title}</h5>
                           </div>
                           <span className="text-[11px] font-mono font-bold text-slate-500">
-                            📅 {act.date}
+                            📅 {act.date} {act.startTime ? `• ⏰ ${act.startTime}${act.endTime ? ` - ${act.endTime}` : ''} WITA` : ''}
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 pt-1">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-600 pt-1">
                           <div className="flex items-center gap-1.5 font-medium">
                             <MapPin size={14} className="text-rose-500 shrink-0" />
                             <span className="line-clamp-1"><b>Lokasi:</b> {act.location}</span>
@@ -420,10 +420,16 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                             <User size={14} className="text-indigo-500 shrink-0" />
                             <span className="line-clamp-1"><b>Koordinator:</b> {act.picName}</span>
                           </div>
+                          <div className="flex items-center gap-1.5 font-medium">
+                            <span className="text-slate-400">📷</span>
+                            <span className="line-clamp-1 text-emerald-600 font-bold">
+                              {act.photoUrls && act.photoUrls.length > 0 ? `${act.photoUrls.length} Foto Terlampir` : 'Dokumentasi Arsip'}
+                            </span>
+                          </div>
                         </div>
 
                         <p className="text-xs text-slate-700 font-medium bg-white p-3 rounded-xl border border-slate-200/60 leading-relaxed mt-2">
-                          <b>Uraian / Hasil:</b> {act.description || '-'}
+                          <b>Keterangan:</b> {act.description || '-'}
                         </p>
                       </div>
                     ))
@@ -582,9 +588,9 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tanggal Pelaksanaan</label>
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tanggal</label>
                     <input
                       type="date"
                       value={act.date}
@@ -598,11 +604,38 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                   </div>
 
                   <div>
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Lokasi Pelaksanaan</label>
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Jam Pelaksanaan</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="time"
+                        value={act.startTime || ''}
+                        onChange={e => {
+                          const updated = [...form.activities];
+                          updated[index].startTime = e.target.value;
+                          setForm({ ...form, activities: updated });
+                        }}
+                        className="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500"
+                      />
+                      <span className="text-slate-400 text-xs font-bold">-</span>
+                      <input
+                        type="time"
+                        value={act.endTime || ''}
+                        onChange={e => {
+                          const updated = [...form.activities];
+                          updated[index].endTime = e.target.value;
+                          setForm({ ...form, activities: updated });
+                        }}
+                        className="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Lokasi Kegiatan</label>
                     <input
                       type="text"
                       required
-                      placeholder="mis: Pos Ronda RT 02 / Lapangan Fasum"
+                      placeholder="mis: Pos Ronda RT 02"
                       value={act.location}
                       onChange={e => {
                         const updated = [...form.activities];
@@ -630,10 +663,10 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                 </div>
 
                 <div>
-                  <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Uraian / Hasil / Catatan Kegiatan</label>
+                  <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Keterangan</label>
                   <textarea
                     rows={2}
-                    placeholder="mis: Pembersihan saluran air sepanjang Blok A-D, dihadiri 40 KK, situasi berjalan lancar."
+                    placeholder="Keterangan / Uraian hasil kegiatan, notulensi, dan catatan penting..."
                     value={act.description}
                     onChange={e => {
                       const updated = [...form.activities];
