@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   FileText, Calendar, MapPin, Plus, Download, Printer, Search, 
-  Trash2, Edit2, CheckCircle, Clock, ShieldCheck, Sparkles, Filter, ChevronRight, User, Users
+  Trash2, Edit2, CheckCircle, Clock, ShieldCheck, Sparkles, Filter, ChevronRight, User, Users,
+  Share2, FileSpreadsheet, Image as ImageIcon, AlertCircle, Upload
 } from 'lucide-react';
 import { MonthlyActivityReport, MonthlyActivityItem, PdfConfig, House } from '../../types';
 import { Button } from '../ui/Button';
@@ -18,6 +19,7 @@ import {
   generateDedicatedMonthlyActivityReportPDF, 
   generateIntegratedMonthlyReportPDF 
 } from '../../services/pdfService';
+import { sendWhatsAppMessage } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 import { useConfirm } from '../../context/ConfirmContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
@@ -216,6 +218,67 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
     (r.month || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleExportCSV = (report: MonthlyActivityReport) => {
+    if (!report.activities || report.activities.length === 0) {
+      toast.error('Belum ada agenda kegiatan untuk diekspor.');
+      return;
+    }
+
+    const headers = ['No', 'Tanggal', 'Jam', 'Uraian Kegiatan', 'Lokasi Kegiatan', 'Koordinator / PIC', 'Kehadiran (Warga)', 'Biaya (Rp)', 'Keterangan'];
+    const rows = report.activities.map((act, idx) => [
+      idx + 1,
+      `"${act.date || '-'}"`,
+      `"${act.startTime ? (act.endTime ? `${act.startTime} - ${act.endTime}` : act.startTime) : '-'}"`,
+      `"${(act.title || '').replace(/"/g, '""')}"`,
+      `"${(act.location || '').replace(/"/g, '""')}"`,
+      `"${(act.picName || '').replace(/"/g, '""')}"`,
+      act.attendanceCount || 0,
+      act.budgetSpent || 0,
+      `"${(act.description || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + 
+      [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Rekap_Kegiatan_RT02_${report.month || 'Bulanan'}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('File Rekap CSV / Excel berhasil diunduh!');
+  };
+
+  const handleBroadcastWhatsApp = (report: MonthlyActivityReport) => {
+    const monthLabel = getIndonesianMonthYear(report.month || '');
+    const actCount = report.activities?.length || 0;
+    
+    let msg = `📢 *RINGKASAN LAPORAN KEGIATAN BULANAN RT 02*\n`;
+    msg += `🗓️ *Periode:* ${monthLabel}\n\n`;
+    msg += `📝 *Situasi Lingkungan:*\n_${report.executiveSummary || 'Kondisi lingkungan berjalan tertib dan harmonis.'}_\n\n`;
+    
+    if (report.securitySummary) {
+      msg += `🛡️ *Kamtibmas:* ${report.securitySummary}\n\n`;
+    }
+
+    msg += `📌 *Agenda Terlaksana (${actCount} Kegiatan):*\n`;
+    (report.activities || []).forEach((act, idx) => {
+      const timeStr = act.startTime ? ` (${act.startTime} WITA)` : '';
+      msg += `${idx + 1}. *${act.title}* - ${act.date}${timeStr}\n   📍 Lokasi: ${act.location}\n`;
+    });
+
+    msg += `\nDokumen resmi lengkap dapat diakses melalui Aplikasi Teras Warga RT 02.\nTerima kasih atas partisipasi seluruh warga. 🙏`;
+
+    const targetPhone = pdfConfig?.whatsappGroupId || '';
+    sendWhatsAppMessage(targetPhone, msg);
+    toast.success('Ringkasan laporan siap dibagikan ke WhatsApp!');
+  };
+
+  const isEndOfMonth = new Date().getDate() >= 25;
+  const currentMonthKey = new Date().toISOString().slice(0, 7);
+  const isCurrentMonthReportCreated = reports.some(r => r.month === currentMonthKey);
+
   return (
     <div className="space-y-6">
       {/* Header Banner - Apple Minimalist Style */}
@@ -234,6 +297,26 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
           <Plus size={16} className="mr-2" /> Buat Laporan Bulan Ini
         </Button>
       </div>
+
+      {/* End of Month Reminder Banner */}
+      {isEndOfMonth && !isCurrentMonthReportCreated && (
+        <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-300/80 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
+              <AlertCircle size={20} />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-slate-900">Pengingat Laporan Akhir Bulan ({getIndonesianMonthYear(currentMonthKey)})</h4>
+              <p className="text-xs text-slate-600 font-medium mt-0.5">
+                Sudah memasuki akhir bulan. Silakan susun dan terbitkan Laporan Pertanggungjawaban Bulanan Terpadu RT 02.
+              </p>
+            </div>
+          </div>
+          <Button onClick={handleOpenCreateModal} className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shrink-0">
+            <Plus size={14} className="mr-1.5" /> Susun Sekarang
+          </Button>
+        </div>
+      )}
 
       {reports.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -352,6 +435,20 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                       title={`Download PDF Khusus Agenda format ${pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'}`}
                     >
                       <Download size={14} /> Khusus Agenda
+                    </button>
+                    <button
+                      onClick={() => handleExportCSV(activeReport)}
+                      className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-600/80 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-emerald-500/30"
+                      title="Ekspor Rekap Kegiatan ke Format Excel / CSV"
+                    >
+                      <FileSpreadsheet size={14} /> Excel / CSV
+                    </button>
+                    <button
+                      onClick={() => handleBroadcastWhatsApp(activeReport)}
+                      className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-emerald-500/30"
+                      title="Kirim Ringkasan Laporan ke WhatsApp Group RT"
+                    >
+                      <Share2 size={14} /> WhatsApp
                     </button>
                     <button 
                       onClick={() => handleEditReport(activeReport)}
@@ -675,6 +772,83 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                     }}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-indigo-500 resize-none"
                   />
+                </div>
+
+                {/* Upload Foto Dokumentasi Kegiatan (Maks 3 Foto) */}
+                <div className="pt-1">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase">
+                      Foto Dokumentasi Kegiatan (Opsional, Maks 3)
+                    </label>
+                    <span className="text-[9px] font-mono text-slate-400">
+                      {act.photoUrls?.length || 0}/3 Foto
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {(act.photoUrls || []).map((pUrl, pIdx) => (
+                      <div key={pIdx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 group/img">
+                        <img src={pUrl} alt="Dokumentasi" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = [...form.activities];
+                            const newPhotos = (updated[index].photoUrls || []).filter((_, i) => i !== pIdx);
+                            updated[index].photoUrls = newPhotos;
+                            setForm({ ...form, activities: updated });
+                          }}
+                          className="absolute inset-0 bg-rose-600/80 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+
+                    {(!act.photoUrls || act.photoUrls.length < 3) && (
+                      <label className="w-16 h-16 rounded-xl border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50 flex flex-col items-center justify-center cursor-pointer transition-colors">
+                        <Upload size={14} className="text-slate-400 mb-0.5" />
+                        <span className="text-[8px] font-bold text-slate-400">Upload</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const img = new Image();
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas');
+                                  const MAX_DIM = 400;
+                                  let w = img.width;
+                                  let h = img.height;
+                                  if (w > h) {
+                                    if (w > MAX_DIM) { h = Math.round((h * MAX_DIM) / w); w = MAX_DIM; }
+                                  } else {
+                                    if (h > MAX_DIM) { w = Math.round((w * MAX_DIM) / h); h = MAX_DIM; }
+                                  }
+                                  canvas.width = w;
+                                  canvas.height = h;
+                                  const ctx = canvas.getContext('2d');
+                                  if (ctx) {
+                                    ctx.drawImage(img, 0, 0, w, h);
+                                    const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                                    const updated = [...form.activities];
+                                    const currentPhotos = updated[index].photoUrls || [];
+                                    updated[index].photoUrls = [...currentPhotos, base64];
+                                    setForm({ ...form, activities: updated });
+                                  }
+                                };
+                                img.src = reader.result as string;
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

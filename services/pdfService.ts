@@ -779,6 +779,50 @@ export const generateIntegratedMonthlyReportPDF = async (
         }
     } catch (e) { console.error(e); }
 
+    // 6. Lembar Lampiran Foto Dokumentasi Kegiatan (Jika Tersedia)
+    const activitiesWithPhotos = (activityReport.activities || []).filter(a => a.photoUrls && a.photoUrls.length > 0);
+    if (activitiesWithPhotos.length > 0) {
+        doc.addPage();
+        let photoY = 20;
+        doc.setFillColor(15, 23, 42);
+        doc.rect(margin, photoY - 5, contentWidth, 7, 'F');
+        doc.setTextColor(255);
+        doc.setFont("times", "bold");
+        doc.setFontSize(9.5);
+        doc.text("V. LAMPIRAN DOKUMENTASI FOTO KEGIATAN LINGKUNGAN", margin + 2.5, photoY);
+        doc.setTextColor(0);
+        photoY += 10;
+
+        for (const act of activitiesWithPhotos) {
+            if (photoY > pageHeight - 65) {
+                doc.addPage();
+                photoY = 20;
+            }
+
+            doc.setFont("times", "bold");
+            doc.setFontSize(9);
+            doc.text(`• ${act.title} (${act.date}) - Lokasi: ${act.location}`, margin, photoY);
+            photoY += 4;
+
+            const photoWidth = isLandscape ? 58 : 50;
+            const photoHeight = isLandscape ? 40 : 35;
+            let currentX = margin;
+
+            for (const pUrl of (act.photoUrls || []).slice(0, 3)) {
+                try {
+                    const pData = await getImageData(pUrl);
+                    if (pData) {
+                        doc.addImage(pData, 'JPEG', currentX, photoY, photoWidth, photoHeight);
+                        currentX += photoWidth + 6;
+                    }
+                } catch (err) {
+                    console.error("Gagal memuat foto lampiran:", err);
+                }
+            }
+            photoY += photoHeight + 8;
+        }
+    }
+
     // Penomoran Halaman Terpadu
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
