@@ -635,10 +635,26 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
             </div>
             <button 
               onClick={copyCollectiveArrears}
-              className="flex items-center gap-2 px-6 py-2.5 bg-rose-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20 active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md active:scale-95"
             >
-              <ClipboardList size={16} /> Salin Daftar Penagihan
+              <ClipboardList size={15} /> Salin Teks
             </button>
+            {pdfConfig?.whatsappGroupId && (
+              <button 
+                onClick={async () => {
+                  const typeLabel = filterType === 'All' ? 'KEAMANAN & KEBERSIHAN' : filterType === 'Air' ? 'AIR' : 'SAMPAH';
+                  const header = `*REMINDER IURAN ${typeLabel} RT 02*\n*Per Tanggal:* ${new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}\n\n`;
+                  const list = arrearsData.map((item, i) => `${i + 1}. Blok ${item.house.block}-${item.house.number}: ${item.arrears.length} Bulan (Rp ${item.totalAmount.toLocaleString()})`).join('\n');
+                  const footer = `\n\nTotal Piutang: Rp ${arrearsData.reduce((acc, curr) => acc + curr.totalAmount, 0).toLocaleString()}\n\nMohon kesediaannya untuk menyelesaikan iuran demi kelancaran operasional lingkungan kita bersama. Terima kasih. 🙏`;
+                  const fullText = header + list + footer;
+
+                  window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+                }}
+                className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
+              >
+                <MessageCircle size={15} /> Broadcast Grup WA
+              </button>
+            )}
           </div>
         </div>
 
