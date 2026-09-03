@@ -314,11 +314,21 @@ export const PublicVoting: React.FC<PublicVotingProps> = ({ polls, houses = [], 
               }}
             >
               <option value="">-- Pilih Rumah Anda --</option>
-              {houses.filter(h => h.status === 'Occupied').map(h => (
-                <option key={h.id} value={h.id}>
-                  Blok {h.id} - Bpk/Ibu {h.headOfFamily}
-                </option>
-              ))}
+              {houses
+                .filter(h => h.status === 'Occupied')
+                .sort((a, b) => {
+                  const labelA = a.block && a.number ? `${a.block}-${a.number}` : a.id;
+                  const labelB = b.block && b.number ? `${b.block}-${b.number}` : b.id;
+                  return labelA.localeCompare(labelB, undefined, { numeric: true, sensitivity: 'base' });
+                })
+                .map(h => {
+                  const houseLabel = h.block && h.number ? `Blok ${h.block}-${h.number}` : `Blok ${h.id}`;
+                  return (
+                    <option key={h.id} value={h.id}>
+                      {houseLabel} - Bpk/Ibu {h.headOfFamily}
+                    </option>
+                  );
+                })}
             </select>
           </div>
         )}
