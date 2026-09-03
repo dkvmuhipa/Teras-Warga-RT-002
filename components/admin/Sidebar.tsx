@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert, AlertTriangle,
-  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car
+  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
@@ -121,6 +121,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'services', icon: FileText, label: 'Pusat Persuratan' },
         { id: 'laporan-kegiatan', icon: FileText, label: 'Laporan Kegiatan Bulanan' },
+        { id: 'lpj-tahunan', icon: Award, label: 'LPJ Tahunan & Semester' },
         { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
       ] 
@@ -156,11 +157,11 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       if (role === Role.ADMIN) {
         isAllowed = true;
       } else if (role === Role.TREASURER) {
-        isAllowed = ['overview', 'analytics', 'finance', 'settings', 'notifications'].includes(item.id);
+        isAllowed = ['overview', 'analytics', 'finance', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
       } else if (role === Role.SECRETARY) {
         isAllowed = [
           'overview', 'analytics', 'residents', 
-          'health', 'officials', 'services', 'laporan-kegiatan', 'reports-warga', 'documents', 'activities', 
+          'health', 'officials', 'services', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       }

@@ -3721,6 +3721,67 @@ export const deleteMonthlyActivityReportFromDb = async (id: string) => {
     }
 };
 
+// ===================================================
+// LAPORAN PERTANGGUNGJAWABAN (LPJ) TAHUNAN / SEMESTERAN RT
+// ===================================================
+const ANNUAL_LPJ_REPORTS_COL = "annualLPJReports";
+
+export const subscribeToAnnualLPJReports = (callback: (data: any[]) => void) => {
+    if (!isFirebaseConfigured || !db) {
+        console.warn(`Firebase not configured, skipping subscription to ${ANNUAL_LPJ_REPORTS_COL}`);
+        callback([]);
+        return () => {};
+    }
+    const q = collection(db, ANNUAL_LPJ_REPORTS_COL);
+    return onSnapshot(q, (snapshot) => {
+        const reps = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+        }));
+        reps.sort((a: any, b: any) => (b.year || 0) - (a.year || 0));
+        callback(reps);
+    }, (error) => {
+        console.warn("Firestore subscription error for annualLPJReports:", error);
+        callback([]);
+    });
+};
+
+export const addAnnualLPJReportToDb = async (reportData: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        await addDoc(collection(db, ANNUAL_LPJ_REPORTS_COL), {
+            ...reportData,
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, ANNUAL_LPJ_REPORTS_COL);
+    }
+};
+
+export const updateAnnualLPJReportInDb = async (id: string, updates: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, ANNUAL_LPJ_REPORTS_COL, id);
+        await updateDoc(docRef, {
+            ...updates,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${ANNUAL_LPJ_REPORTS_COL}/${id}`);
+    }
+};
+
+export const deleteAnnualLPJReportFromDb = async (id: string) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, ANNUAL_LPJ_REPORTS_COL, id);
+        await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${ANNUAL_LPJ_REPORTS_COL}/${id}`);
+    }
+};
+
+
 
 
 

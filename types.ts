@@ -773,6 +773,70 @@ export interface MonthlyActivityReport {
   updatedAt?: string;
 }
 
+// Laporan Pertanggungjawaban (LPJ) Akhir Tahun / Semesteran RT
+export interface AnnualLPJReport {
+  id: string;
+  periodType: 'Annual' | 'Semester 1' | 'Semester 2' | 'Custom';
+  year: number;
+  startDate: string;       // YYYY-MM-DD
+  endDate: string;         // YYYY-MM-DD
+  title: string;           // Laporan Pertanggungjawaban (LPJ) Pengurus RT 02 - Tahun 2026
+  theme?: string;          // Tema / Slogan Periode (mis: "Membangun Warga Rukun, Tangguh, dan Transparan")
+  executiveSummary: string;// Kata Pengantar & Ringkasan Kinerja Umum
+  
+  // Statistik Kependudukan (Hasil Kompilasi Otomatis)
+  populationSummary: {
+    totalHouses: number;
+    totalOccupiedHouses: number;
+    totalPopulation: number;
+    permanentCount: number;
+    seasonalCount: number;
+    maleCount: number;
+    femaleCount: number;
+    birthTotal: number;
+    deathTotal: number;
+    newcomerTotal: number;
+    movedOutTotal: number;
+  };
+
+  // Rekapitulasi Keuangan Kas & Iuran RT
+  financialSummary: {
+    startingBalance: number;
+    totalIncome: number;
+    totalExpense: number;
+    endingBalance: number;
+    iuranCollectionRate: number; // Persentase kelancaran iuran (%)
+    topExpenseCategories?: { category: string; amount: number }[];
+  };
+
+  // Ringkasan Program Kerja & Gotong Royong
+  activitySummary: {
+    totalEventsHeld: number;
+    communityWorksCount: number;
+    meetingsCount: number;
+    averageAttendanceRate?: number;
+    highlights: string[];
+  };
+
+  // Ringkasan Aset & Fasum Lingkungan
+  assetSummary: {
+    totalItemsCount: number;
+    goodConditionCount: number;
+    damagedCount: number;
+    notes?: string;
+  };
+
+  // Catatan Khusus, Evaluasi & Rekomendasi Pengurus
+  evaluationAndChallenges?: string;
+  futureWorkPlans?: string;
+
+  preparedBy: string;      // Sekretaris RT 02
+  treasurerName: string;   // Bendahara RT 02
+  approvedBy: string;      // Ketua RT 02
+  createdAt: string;
+  updatedAt?: string;
+}
+
 // Digital Guest Book & Presensi Kegiatan
 export interface Activity {
   id: string;

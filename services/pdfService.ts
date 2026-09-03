@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official, MonthlyActivityReport } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official, MonthlyActivityReport, AnnualLPJReport } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
 import { naturalSortBlockAndNumber } from "./excelService";
@@ -517,6 +517,339 @@ export const generateDedicatedMonthlyActivityReportPDF = async (
     const cleanMonth = (report.month || 'periode').replace(/[^a-zA-Z0-9_-]/g, '_');
     doc.save(`Laporan_Kegiatan_Bulanan_RT02_${cleanMonth}.pdf`);
 };
+
+// =========================================================================
+// LAPORAN PERTANGGUNGJAWABAN (LPJ) AKHIR TAHUN / SEMESTERAN RT (PDF BUNDLE)
+// =========================================================================
+export const generateAnnualLPJReportPDF = async (
+    report: AnnualLPJReport,
+    customConfig?: PdfConfig,
+    options?: {
+        includeStamp?: boolean;
+        includeSignature?: boolean;
+    }
+) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const includeStamp = options?.includeStamp !== undefined ? options.includeStamp : true;
+    const includeSignature = options?.includeSignature !== undefined ? options.includeSignature : true;
+
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    // --- 1. COVER PAGE / HALAMAN JUDUL RESMI ---
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', centerX - 18, 35, 36, 44);
+    }
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 92, { align: "center" });
+    doc.setFontSize(13);
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'} - KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 99, { align: "center" });
+    doc.setFontSize(15);
+    doc.text(`PENGURUS ${config.rtName.toUpperCase()}`, centerX, 107, { align: "center" });
+
+    doc.setLineWidth(1.2);
+    doc.line(centerX - 40, 113, centerX + 40, 113);
+
+    doc.setFontSize(18);
+    doc.setTextColor(30, 41, 59);
+    doc.text("LAPORAN PERTANGGUNGJAWABAN (LPJ)", centerX, 135, { align: "center" });
+    doc.setFontSize(14);
+    const periodLabel = report.periodType === 'Annual' ? `TAHUN ANGGARAN ${report.year}` : `${report.periodType.toUpperCase()} TAHUN ${report.year}`;
+    doc.text(`KINERJA PENGURUS RT & REALISASI ANGGARAN`, centerX, 143, { align: "center" });
+    doc.setFontSize(13);
+    doc.setTextColor(79, 70, 229);
+    doc.text(`PERIODE : ${periodLabel}`, centerX, 151, { align: "center" });
+
+    if (report.theme) {
+        doc.setFont("times", "italic");
+        doc.setFontSize(11);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`"${report.theme}"`, centerX, 162, { align: "center" });
+    }
+
+    // Cover Footer Info
+    doc.setFont("times", "normal");
+    doc.setFontSize(10.5);
+    doc.setTextColor(51, 65, 85);
+    doc.text(`Sekretariat : ${config.rtAddress}`, centerX, 235, { align: "center" });
+    doc.text(`Disampaikan pada Forum Musyawarah & Rembug Warga RT 02`, centerX, 242, { align: "center" });
+    doc.text(`Kota Palu, Sulawesi Tengah`, centerX, 248, { align: "center" });
+
+    // --- 2. HALAMAN KATA PENGANTAR & KINERJA UMUM ---
+    doc.addPage();
+    let y = 30;
+
+    // Kop Surat Minimalis di Halaman Isi
+    doc.setFont("times", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`LPJ PENGURUS ${config.rtName} - TAHUN ${report.year}`, margin, 18);
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Periode: ${report.startDate} s/d ${report.endDate}`, pageWidth - margin, 18, { align: "right" });
+    doc.setLineWidth(0.4);
+    doc.line(margin, 21, pageWidth - margin, 21);
+
+    // Section I: Kata Pengantar & Ringkasan Eksekutif
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
+    doc.text("BAB I. KATA PENGANTAR & RINGKASAN EKSEKUTIF", margin + 3, y);
+    doc.setTextColor(0);
+    y += 8;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9.5);
+    const execText = report.executiveSummary || 'Puji syukur kami panjatkan ke hadirat Tuhan Yang Maha Esa atas terselenggaranya seluruh program kerja dan pelayanan kemasyarakatan di lingkungan RT 02. Laporan Pertanggungjawaban ini disusun secara transparan sebagai wujud akuntabilitas pengurus kepada seluruh warga.';
+    const splitExec = doc.splitTextToSize(execText, contentWidth - 4);
+    doc.text(splitExec, margin + 2, y);
+    y += (splitExec.length * 4.5) + 8;
+
+    // Section II: Rekapitulasi Demografi Kependudukan
+    if (y > pageHeight - 70) { doc.addPage(); y = 30; }
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
+    doc.text("BAB II. REKAPITULASI DEMOGRAFI & MUTASI WARGA", margin + 3, y);
+    doc.setTextColor(0);
+    y += 6;
+
+    const pop = report.populationSummary;
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['Indikator Kependudukan', 'Jumlah / Angka', 'Keterangan Analisis']],
+        body: [
+            ['Total Rumah Terdata', `${pop.totalHouses} Unit`, `Rumah Terisi: ${pop.totalOccupiedHouses} KK`],
+            ['Total Populasi Penduduk', `${pop.totalPopulation} Jiwa`, `Laki-laki: ${pop.maleCount} | Perempuan: ${pop.femaleCount}`],
+            ['Status Domisili', `${pop.permanentCount} Tetap / ${pop.seasonalCount} Musiman`, `Persentase Warga Tetap: ${pop.totalPopulation > 0 ? ((pop.permanentCount/pop.totalPopulation)*100).toFixed(1) : 0}%`],
+            ['Pertumbuhan Alami', `+${pop.birthTotal} Lahir / -${pop.deathTotal} Meninggal`, `Pertumbuhan Bersih: ${pop.birthTotal - pop.deathTotal} Jiwa`],
+            ['Mutasi Warga (Migrasi)', `+${pop.newcomerTotal} Masuk / -${pop.movedOutTotal} Pindah`, `Migrasi Bersih: ${pop.newcomerTotal - pop.movedOutTotal} Jiwa`]
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59] },
+        columnStyles: {
+            0: { cellWidth: 55, fontStyle: 'bold' },
+            1: { cellWidth: 45, halign: 'center' },
+            2: { cellWidth: 'auto' }
+        },
+        didDrawPage: (data) => { y = data.cursor?.y || y; }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 10 : y + 15;
+
+    // Section III: Rekapitulasi Realisasi Keuangan & Kas RT
+    if (y > pageHeight - 75) { doc.addPage(); y = 30; }
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
+    doc.text("BAB III. REKAPITULASI REALISASI ANGGARAN & KAS RT", margin + 3, y);
+    doc.setTextColor(0);
+    y += 6;
+
+    const fin = report.financialSummary;
+    const formatRp = (val: number) => `Rp ${(val || 0).toLocaleString('id-ID')}`;
+
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['Pos Keuangan Kas RT', 'Nominal (Rp)', 'Persentase / Status']],
+        body: [
+            ['Saldo Kas Awal Periode', formatRp(fin.startingBalance), 'Saldo Awal Tahun'],
+            ['Total Penerimaan / Pemasukan Kas', formatRp(fin.totalIncome), `Kelancaran Iuran Warga: ${fin.iuranCollectionRate || 0}%`],
+            ['Total Pengeluaran Kas Operasional', formatRp(fin.totalExpense), 'Realisasi Belanja & Fasum'],
+            ['SALDO AKHIR KAS BERSIH', formatRp(fin.endingBalance), fin.endingBalance >= 0 ? 'Surplus / Kas Sehat' : 'Defisit Anggaran']
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59] },
+        columnStyles: {
+            0: { cellWidth: 65, fontStyle: 'bold' },
+            1: { cellWidth: 50, halign: 'right', fontStyle: 'bold' },
+            2: { cellWidth: 'auto' }
+        },
+        didDrawPage: (data) => { y = data.cursor?.y || y; }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 10 : y + 15;
+
+    // --- 3. HALAMAN PROGRAM KERJA, ASET & REKOMENDASI ---
+    if (y > pageHeight - 85) { doc.addPage(); y = 30; }
+
+    // Section IV: Program Kerja & Kegiatan Warga
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
+    doc.text("BAB IV. REALISASI PROGRAM KERJA & GOTONG ROYONG", margin + 3, y);
+    doc.setTextColor(0);
+    y += 8;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    const act = report.activitySummary;
+    doc.text(`• Total Kegiatan Terlaksana: ${act.totalEventsHeld || 0} Agenda (Kerja Bakti: ${act.communityWorksCount || 0}, Rapat/Musyawarah: ${act.meetingsCount || 0})`, margin + 3, y);
+    y += 5;
+    if (act.averageAttendanceRate) {
+        doc.text(`• Rata-rata Tingkat Partisipasi Warga: ${act.averageAttendanceRate}%`, margin + 3, y);
+        y += 5;
+    }
+
+    if (act.highlights && act.highlights.length > 0) {
+        doc.setFont("times", "bold");
+        doc.text("Pencapaian Utama Program Kerja:", margin + 3, y);
+        y += 4.5;
+        doc.setFont("times", "normal");
+        act.highlights.forEach((hl, i) => {
+            doc.text(`${i + 1}. ${hl}`, margin + 6, y);
+            y += 4.5;
+        });
+    }
+    y += 4;
+
+    // Section V: Inventaris & Aset RT
+    if (y > pageHeight - 65) { doc.addPage(); y = 30; }
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 6, contentWidth, 8, 'F');
+    doc.setTextColor(255);
+    doc.text("BAB V. INVENTARISASI ASET & FASILITAS UMUM RT", margin + 3, y);
+    doc.setTextColor(0);
+    y += 8;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    const ast = report.assetSummary;
+    doc.text(`• Total Unit Barang Inventaris: ${ast.totalItemsCount || 0} Unit (Kondisi Baik: ${ast.goodConditionCount || 0}, Perlu Perbaikan/Rusak: ${ast.damagedCount || 0})`, margin + 3, y);
+    y += 5;
+    if (ast.notes) {
+        doc.text(`• Catatan Aset: ${ast.notes}`, margin + 3, y);
+        y += 5;
+    }
+    y += 4;
+
+    // Section VI: Evaluasi & Rencana Mendatang
+    if (report.evaluationAndChallenges || report.futureWorkPlans) {
+        if (y > pageHeight - 60) { doc.addPage(); y = 30; }
+        doc.setFont("times", "bold");
+        doc.setFillColor(30, 41, 59);
+        doc.rect(margin, y - 6, contentWidth, 8, 'F');
+        doc.setTextColor(255);
+        doc.text("BAB VI. EVALUASI, TANTANGAN & RENCANA PROGRAM MENDATANG", margin + 3, y);
+        doc.setTextColor(0);
+        y += 8;
+
+        if (report.evaluationAndChallenges) {
+            doc.setFont("times", "bold");
+            doc.text("Evaluasi & Hambatan Kinerja:", margin + 3, y);
+            y += 4.5;
+            doc.setFont("times", "normal");
+            const splitEval = doc.splitTextToSize(report.evaluationAndChallenges, contentWidth - 6);
+            doc.text(splitEval, margin + 4, y);
+            y += (splitEval.length * 4.5) + 4;
+        }
+
+        if (report.futureWorkPlans) {
+            doc.setFont("times", "bold");
+            doc.text("Rencana & Rekomendasi Program Kerja Selanjutnya:", margin + 3, y);
+            y += 4.5;
+            doc.setFont("times", "normal");
+            const splitPlans = doc.splitTextToSize(report.futureWorkPlans, contentWidth - 6);
+            doc.text(splitPlans, margin + 4, y);
+            y += (splitPlans.length * 4.5) + 4;
+        }
+    }
+
+    // --- 4. SIGNATURES / LEMBAR PENGESAHAN TRI-PARTIT (Sekretaris, Bendahara, Ketua RT) ---
+    if (y > pageHeight - 55) {
+        doc.addPage();
+        y = 30;
+    }
+
+    y += 8;
+    const colW = contentWidth / 3;
+    const xSekretaris = margin + (colW * 0.5);
+    const xBendahara = margin + (colW * 1.5);
+    const xKetua = margin + (colW * 2.5);
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9.5);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, xKetua, y, { align: "center" });
+    y += 5;
+    doc.text(`Dibuat oleh,`, xSekretaris, y, { align: "center" });
+    doc.text(`Diverifikasi oleh,`, xBendahara, y, { align: "center" });
+    doc.text(`Disetujui & Ditetapkan,`, xKetua, y, { align: "center" });
+    y += 4.5;
+    doc.text(`Sekretaris RT`, xSekretaris, y, { align: "center" });
+    doc.text(`Bendahara RT`, xBendahara, y, { align: "center" });
+    doc.text(`Ketua ${config.rtName}`, xKetua, y, { align: "center" });
+
+    const signSpaceY = y + 2;
+    y += 24;
+
+    doc.setFont("times", "bold");
+    doc.text(report.preparedBy || 'Sekretaris RT 02', xSekretaris, y, { align: "center" });
+    doc.line(xSekretaris - 22, y + 1, xSekretaris + 22, y + 1);
+
+    doc.text(report.treasurerName || 'Bendahara RT 02', xBendahara, y, { align: "center" });
+    doc.line(xBendahara - 22, y + 1, xBendahara + 22, y + 1);
+
+    doc.text(report.approvedBy || config.rtChairman, xKetua, y, { align: "center" });
+    doc.line(xKetua - 22, y + 1, xKetua + 22, y + 1);
+
+    // Stempel & Tanda Tangan Digital Ketua RT
+    try {
+        if (includeSignature && config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', xKetua - 15, signSpaceY + 2, 30, 20);
+        }
+        if (includeStamp && config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', xKetua - 26, signSpaceY - 2, 22, 22);
+        }
+    } catch (e) { console.error(e); }
+
+    // Page Numbers
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFont("times", "italic");
+        doc.setFontSize(8);
+        doc.setTextColor(120);
+        doc.text(
+            `Halaman ${i} dari ${totalPages}  |  LPJ Pengurus RT 02 Huntap Tondo 2 Tahun ${report.year}`,
+            centerX,
+            pageHeight - 8,
+            { align: "center" }
+        );
+    }
+
+    doc.save(`LPJ_Pengurus_RT02_${report.year}_${report.periodType.replace(/\s+/g, '_')}.pdf`);
+};
+
 
 /**
  * =========================================================================================

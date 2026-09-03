@@ -330,6 +330,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Annual / Semester LPJ Reports (Laporan Pertanggungjawaban Tahunan RT)
+    match /annualLPJReports/{id} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;
