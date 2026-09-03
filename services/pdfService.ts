@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official, MonthlyActivityReport, AnnualLPJReport } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official, MonthlyActivityReport, AnnualLPJReport, Poll, PollCandidate } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
 import { naturalSortBlockAndNumber } from "./excelService";
@@ -852,6 +852,208 @@ export const generateAnnualLPJReportPDF = async (
 
     doc.save(`LPJ_Pengurus_RT02_${report.year}_${report.periodType.replace(/\s+/g, '_')}.pdf`);
 };
+
+// =========================================================================
+// BERITA ACARA HASIL PEMILIHAN KETUA RT / REMBUG WARGA (E-VOTING PDF)
+// =========================================================================
+export const generateElectionMinutesPDF = async (
+    poll: Poll,
+    customConfig?: PdfConfig,
+    options?: {
+        committeeChairman?: string; // Ketua Panitia Pemilihan RT
+        committeeSecretary?: string;// Sekretaris Panitia
+        witnessName?: string;       // Saksi Warga / Tokoh Masyarakat
+    }
+) => {
+    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const doc = new jsPDF({ 
+        orientation: "portrait", 
+        unit: "mm", 
+        format: "a4",
+        compress: true 
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    const centerX = pageWidth / 2;
+
+    // 1. Kop Surat Resmi Panitia Pemilihan
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) { console.error(e); }
+
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
+    }
+
+    doc.setFont("times", "normal"); 
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`PANITIA PEMILIHAN KETUA RT`, centerX, 14, { align: "center" });
+    doc.setFontSize(13);
+    doc.text(`PENGURUS ${config.rtName.toUpperCase()} KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 20, { align: "center" });
+    doc.setFontSize(11);
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'} - KOTA ${config.kota || 'PALU'}`, centerX, 26, { align: "center" });
+    doc.text(`Sekretariat: ${config.rtAddress}`, centerX, 32, { align: "center" });
+
+    doc.setLineWidth(1.0);
+    doc.line(20, 36, 190, 36);
+    doc.setLineWidth(0.3);
+    doc.line(20, 37, 190, 37);
+
+    // 2. Judul Berita Acara
+    doc.setFont("times", "bold");
+    doc.setFontSize(13);
+    doc.text("BERITA ACARA HASIL PEMUNGUTAN SUARA (E-VOTING)", centerX, 46, { align: "center" });
+    doc.setFontSize(10.5);
+    doc.text(`TENTANG : ${poll.title.toUpperCase()}`, centerX, 52, { align: "center" });
+
+    let y = 62;
+    doc.setFont("times", "normal");
+    doc.setFontSize(9.5);
+    const preamble = `Pada hari ini, ${new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}, telah dilaksanakan pemungutan suara secara digital (e-Voting) warga ${config.rtName} dengan rincian hasil rekapitulasi sebagai berikut:`;
+    const splitPreamble = doc.splitTextToSize(preamble, contentWidth);
+    doc.text(splitPreamble, margin, y);
+    y += (splitPreamble.length * 4.5) + 6;
+
+    // 3. Statistik Partisipasi Pemilih
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 5, contentWidth, 7, 'F');
+    doc.setTextColor(255);
+    doc.text("I. REKAPITULASI PARTISIPASI & HAK SUARA WARGA (1 KK = 1 SUARA)", margin + 3, y);
+    doc.setTextColor(0);
+    y += 6;
+
+    const dpt = poll.totalEligibleVoters || 50;
+    const totalSuaraMasuk = poll.totalVotes || 0;
+    const participationRate = dpt > 0 ? ((totalSuaraMasuk / dpt) * 100).toFixed(1) : '0';
+
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['Uraian Partisipasi Pemilih', 'Jumlah', 'Persentase / Keterangan']],
+        body: [
+            ['Daftar Pemilih Tetap (DPT / Total KK Terdaftar)', `${dpt} Rumah / KK`, '100% Hak Suara'],
+            ['Total Suara Masuk (Partisipasi)', `${totalSuaraMasuk} Suara`, `${participationRate}% Partisipasi Warga`],
+            ['Suara Belum Masuk / Abstain', `${Math.max(0, dpt - totalSuaraMasuk)} Suara`, `${(100 - parseFloat(participationRate)).toFixed(1)}% Abstain`],
+            ['Status Pemungutan Suara', poll.status === 'Closed' ? 'Selesai / Ditutup' : 'Sedang Berlangsung', 'Bilik Suara Digital RT 02']
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59] },
+        didDrawPage: (data) => { y = data.cursor?.y || y; }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 8 : y + 15;
+
+    // 4. Perolehan Suara Calon / Opsi
+    if (y > pageHeight - 75) { doc.addPage(); y = 30; }
+    doc.setFont("times", "bold");
+    doc.setFillColor(30, 41, 59);
+    doc.rect(margin, y - 5, contentWidth, 7, 'F');
+    doc.setTextColor(255);
+    doc.text("II. HASIL PEROLEHAN SUARA KANDIDAT / PILIHAN WARGA", margin + 3, y);
+    doc.setTextColor(0);
+    y += 6;
+
+    let candidateRows: any[] = [];
+    if (poll.candidates && poll.candidates.length > 0) {
+        candidateRows = poll.candidates.map((c) => {
+            const pct = totalSuaraMasuk > 0 ? ((c.votes / totalSuaraMasuk) * 100).toFixed(1) : '0';
+            return [
+                `No. ${c.candidateNumber}`,
+                c.name,
+                c.houseId ? `Warga Blok ${c.houseId}` : (c.profession || '-'),
+                `${c.votes} Suara`,
+                `${pct}%`
+            ];
+        });
+    } else {
+        candidateRows = (poll.options || []).map((opt, i) => {
+            const pct = totalSuaraMasuk > 0 ? ((opt.votes / totalSuaraMasuk) * 100).toFixed(1) : '0';
+            return [
+                `Opsi ${i + 1}`,
+                opt.text,
+                '-',
+                `${opt.votes} Suara`,
+                `${pct}%`
+            ];
+        });
+    }
+
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['No. Urut', 'Nama Calon / Pilihan', 'Latar Belakang / Blok', 'Perolehan Suara', 'Persentase']],
+        body: candidateRows,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59] },
+        columnStyles: {
+            0: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },
+            1: { cellWidth: 50, fontStyle: 'bold' },
+            2: { cellWidth: 45 },
+            3: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
+            4: { cellWidth: 'auto', halign: 'center' }
+        },
+        didDrawPage: (data) => { y = data.cursor?.y || y; }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 8 : y + 15;
+
+    // 5. Penetapan Hasil
+    if (y > pageHeight - 65) { doc.addPage(); y = 30; }
+    doc.setFont("times", "bold");
+    doc.setFontSize(9.5);
+    doc.text("III. PENETAPAN & KESIMPULAN RAPAT PLENO", margin, y);
+    y += 5;
+    doc.setFont("times", "normal");
+    
+    // Find winner
+    let winnerText = "Hasil keputusan pemungutan suara telah disahkan secara transparan melalui sistem bilik suara digital Teras Warga RT 02.";
+    if (poll.candidates && poll.candidates.length > 0) {
+        const sorted = [...poll.candidates].sort((a, b) => b.votes - a.votes);
+        if (sorted[0] && sorted[0].votes > 0) {
+            winnerText = `Berdasarkan perolehan suara terbanyak, maka ditetapkan Calon No. Urut ${sorted[0].candidateNumber} atas nama Sdr/Bpk. ${sorted[0].name.toUpperCase()} sebagai KETUA RT 02 TERPILIH dengan perolehan ${sorted[0].votes} suara.`;
+        }
+    }
+    const splitWinner = doc.splitTextToSize(winnerText, contentWidth);
+    doc.text(splitWinner, margin, y);
+    y += (splitWinner.length * 4.5) + 8;
+
+    // 6. Tanda Tangan Panitia Pemilihan & Saksi
+    if (y > pageHeight - 50) { doc.addPage(); y = 30; }
+    const colW = contentWidth / 3;
+    const xSekr = margin + (colW * 0.5);
+    const xSaksi = margin + (colW * 1.5);
+    const xKetua = margin + (colW * 2.5);
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(9);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, xKetua, y, { align: "center" });
+    y += 4.5;
+    doc.text(`Panitia Pemilihan (Sekretaris)`, xSekr, y, { align: "center" });
+    doc.text(`Saksi Perwakilan Warga`, xSaksi, y, { align: "center" });
+    doc.text(`Ketua Panitia Pemilihan`, xKetua, y, { align: "center" });
+
+    y += 22;
+    doc.setFont("times", "bold");
+    doc.text(options?.committeeSecretary || 'Sekretaris Panitia', xSekr, y, { align: "center" });
+    doc.line(xSekr - 20, y + 1, xSekr + 20, y + 1);
+
+    doc.text(options?.witnessName || 'Saksi Warga / Tokoh', xSaksi, y, { align: "center" });
+    doc.line(xSaksi - 20, y + 1, xSaksi + 20, y + 1);
+
+    doc.text(options?.committeeChairman || 'Ketua Panitia Pemilihan', xKetua, y, { align: "center" });
+    doc.line(xKetua - 20, y + 1, xKetua + 20, y + 1);
+
+    doc.save(`Berita_Acara_Pemilihan_RT02_${poll.id}.pdf`);
+};
+
 
 
 /**

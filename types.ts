@@ -558,7 +558,28 @@ export interface InventoryItem {
   maintenanceHistory?: MaintenanceLog[];
 }
 
-// E-Voting Types
+// E-Voting & Pemilihan Resmi RT Types
+export interface PollCandidate {
+  id: string;
+  name: string;               // Nama Calon Ketua RT / Opsi
+  candidateNumber: number;    // Nomor Urut (1, 2, 3, dst)
+  photoUrl?: string;          // Foto Calon
+  houseId?: string;           // Alamat Rumah / Blok Calon
+  profession?: string;        // Profesi / Latar Belakang
+  vision: string;             // Visi
+  missions: string[];         // Misi
+  votes: number;              // Jumlah Perolehan Suara
+}
+
+export interface PollVoteRecord {
+  id: string;
+  pollId: string;
+  voterHouseId: string;       // ID Rumah / KK yang menyalurkan hak suara (1 KK = 1 Suara)
+  voterName: string;          // Nama Kepala Keluarga / Perwakilan yang mencoblos
+  candidateId: string;        // ID Kandidat yang dipilih (dienkripsi/rahasia jika isSecret)
+  timestamp: string;          // ISO Date
+}
+
 export interface PollOption {
   id: string;
   text: string;
@@ -572,13 +593,18 @@ export interface Poll {
   date: string; // Creation date
   deadline: string;
   status: 'Open' | 'Closed';
+  type: 'Election' | 'Policy' | 'QuickPoll'; // Pemilihan Resmi RT vs Rembug Kebijakan vs Polling Opini
   options: PollOption[];
+  candidates?: PollCandidate[];             // Daftar Kandidat Resmi jika type === 'Election'
+  votedHouseIds?: string[];                 // Daftar ID Rumah yang sudah memilih (Mencegah double-voting 1 KK 1 Vote)
   totalVotes: number;
-  createdBy?: string; // Admin email/id
+  totalEligibleVoters?: number;             // Total DPT (Daftar Pemilih Tetap / Jumlah Rumah Terisi)
+  createdBy?: string;                       // Admin email/id
   category?: 'Kebijakan RT' | 'Pemilihan Pengurus' | 'Fasilitas' | 'Kegiatan/Acara';
   isSecret?: boolean;
   maxChoices?: number;
   isBroadcast?: boolean;
+  officialMinutesPdfUrl?: string;           // Link / Berita Acara Hasil Pemilihan
 }
 
 // Bursa Warga (Marketplace) Types
