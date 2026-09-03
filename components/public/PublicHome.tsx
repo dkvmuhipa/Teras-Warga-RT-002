@@ -5,10 +5,10 @@ import {
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
   Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare, Scale, HelpCircle,
-  BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign, Trash2, Recycle, Trophy, Award
+  BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign, Trash2, Recycle, Trophy, Award, Zap, Wrench, Hammer
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint } from '../../types';
+import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint, CommunitySkill, UtilityOutage } from '../../types';
 import { HeroSection } from '../HeroSection';
 import { DigitalSummary } from './DigitalSummary';
 import { ServiceStats } from '../ServiceStats';
@@ -17,7 +17,7 @@ import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { useFinancial } from '../../context/FinancialContext';
-import { addReportToDb, validateResidentAccess, formatHouseId } from '../../services/databaseService';
+import { addReportToDb, validateResidentAccess, formatHouseId, subscribeToCollection } from '../../services/databaseService';
 import { SmartImage } from '../SmartImage';
 
 interface PublicHomeProps {
@@ -39,6 +39,20 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   const contentRef = React.useRef<HTMLDivElement>(null);
   const { summaries, settings: financialSettings } = useFinancial();
   const [statusSearchId, setStatusSearchId] = React.useState('');
+  
+  const [communitySkills, setCommunitySkills] = React.useState<CommunitySkill[]>([]);
+  const [utilityOutages, setUtilityOutages] = React.useState<UtilityOutage[]>([]);
+  const [isSkillsModalOpen, setIsSkillsModalOpen] = React.useState(false);
+  const [isOutageModalOpen, setIsOutageModalOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const unsubSkills = subscribeToCollection('communitySkills', (data) => setCommunitySkills(data as CommunitySkill[]));
+    const unsubOutages = subscribeToCollection('utilityOutages', (data) => setUtilityOutages(data as UtilityOutage[]));
+    return () => {
+      unsubSkills();
+      unsubOutages();
+    };
+  }, []);
   
   const [isReportModalOpen, setIsReportModalOpen] = React.useState(false);
   const [isCleanlinessLeaderboardOpen, setIsCleanlinessLeaderboardOpen] = React.useState(false);
@@ -202,6 +216,24 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       link: '/voting',
       badge: 'PEMILU',
       badgeColor: 'bg-[#d946ef]'
+    },
+    { 
+      label: 'Jasa Warga', 
+      icon: Wrench, 
+      color: 'bg-[#f59e0b]', 
+      shadow: 'shadow-[#f59e0b]/30', 
+      action: () => setIsSkillsModalOpen(true),
+      badge: 'PRO',
+      badgeColor: 'bg-[#d97706]'
+    },
+    { 
+      label: 'Info PLN/Air', 
+      icon: Zap, 
+      color: 'bg-[#0284c7]', 
+      shadow: 'shadow-[#0284c7]/30', 
+      action: () => setIsOutageModalOpen(true),
+      badge: 'FASUM',
+      badgeColor: 'bg-[#0369a1]'
     },
     { 
       label: 'Lapor RT', 
@@ -1175,6 +1207,166 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
           <div className="p-4 bg-indigo-50/70 rounded-2xl border border-indigo-100 text-xs font-medium text-slate-600 leading-relaxed">
             💡 <strong className="text-indigo-900">Kriteria Penilaian Kebersihan RT 02:</strong> Kebersihan got/drainase (35%), kerapian pekarangan & sampah (35%), keasrian tanaman (30%). Evaluasi dilakukan pengurus setiap akhir bulan.
+          </div>
+        </div>
+      </Modal>
+
+      {/* Public Modal: Direktori Jasa & Keahlian Warga */}
+      <Modal
+        isOpen={isSkillsModalOpen}
+        onClose={() => setIsSkillsModalOpen(false)}
+        title="Direktori Jasa &amp; Keahlian Warga RT 02"
+        maxWidth="max-w-4xl"
+      >
+        <div className="space-y-6 p-2 text-left">
+          <div className="p-4 bg-amber-500/10 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-amber-500 text-white rounded-xl">
+                <Wrench size={22} />
+              </div>
+              <div>
+                <h4 className="font-black text-slate-900 text-sm">Gotong Royong Ekonomi &amp; Jasa Antar-Warga</h4>
+                <p className="text-xs text-slate-600 font-medium">Temukan teknisi, tukang, guru les, atau katering dari tetangga sendiri di lingkungan RT 02.</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => {
+                setIsSkillsModalOpen(false);
+                navigate('/resident');
+              }}
+              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-black uppercase tracking-wider py-2 px-4 rounded-xl shadow-md shrink-0"
+            >
+              + Pasang Jasa Saya
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-1">
+            {communitySkills.length > 0 ? (
+              communitySkills.map((item) => (
+                <Card key={item.id} className="p-5 bg-white border border-slate-200/80 shadow-xs hover:border-amber-300 transition-all flex flex-col justify-between">
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-lg text-[9px] font-black uppercase tracking-wider">
+                        {item.category}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400">
+                        Rumah: Blok {item.houseId}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="font-black text-slate-900 text-base">{item.title}</h4>
+                      <p className="text-xs text-slate-600 font-medium mt-1 line-clamp-3 leading-relaxed">{item.description}</p>
+                    </div>
+
+                    <div className="p-3 bg-slate-50 rounded-xl flex items-center justify-between">
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Penyedia Jasa</p>
+                        <p className="text-xs font-bold text-slate-800">{item.providerName}</p>
+                      </div>
+                      {item.rateInfo && (
+                        <span className="text-[11px] font-black text-emerald-600">💰 {item.rateInfo}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-slate-100">
+                    <button
+                      onClick={() => {
+                        const waPhone = (item.phone || '6285961194621').replace(/\D/g, '').replace(/^0/, '62');
+                        const msg = `Halo Bpk/Ibu ${item.providerName} (Blok ${item.houseId}), saya tetangga di RT 02 ingin menanyakan tentang jasa "${item.title}". Apakah sedang tersedia?`;
+                        window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                      }}
+                      className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
+                    >
+                      <Phone size={14} /> Hubungi via WhatsApp
+                    </button>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                <Wrench size={32} className="text-slate-300 mx-auto mb-2" />
+                <p className="text-xs font-bold text-slate-500">Belum ada daftar jasa tetangga yang dipublikasikan.</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Warga dapat mempromosikan keahlian mereka melalui Portal Mandiri Warga.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Public Modal: Papan Informasi Pemadaman PLN & PDAM */}
+      <Modal
+        isOpen={isOutageModalOpen}
+        onClose={() => setIsOutageModalOpen(false)}
+        title="Papan Informasi Pemadaman PLN &amp; Air Bersih"
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-5 p-2 text-left">
+          <div className="p-4 bg-sky-50 border border-sky-200 rounded-2xl flex items-center gap-3">
+            <div className="p-2.5 bg-sky-500 text-white rounded-xl">
+              <Zap size={22} />
+            </div>
+            <div>
+              <h4 className="font-black text-slate-900 text-sm">Status Jaringan Utilitas RT 02 Huntap Tondo 2</h4>
+              <p className="text-xs text-slate-600 font-medium">Informasi resmi pemeliharaan gardu listrik PLN dan jalur pipa air bersih RT.</p>
+            </div>
+          </div>
+
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            {utilityOutages.length > 0 ? (
+              utilityOutages.map((outage) => (
+                <div 
+                  key={outage.id} 
+                  className={`p-5 rounded-2xl border-2 transition-all ${
+                    outage.status === 'Ongoing' ? 'bg-amber-50/50 border-amber-400' : 'bg-white border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                      outage.type === 'PLN' ? 'bg-amber-100 text-amber-800' :
+                      outage.type === 'PDAM' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
+                    }`}>
+                      {outage.type === 'PLN' ? <Zap size={11} /> : <Droplets size={11} />} {outage.type}
+                    </span>
+
+                    <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
+                      outage.status === 'Ongoing' ? 'bg-rose-100 text-rose-700 animate-pulse font-black' :
+                      outage.status === 'Scheduled' ? 'bg-amber-100 text-amber-800 font-black' : 'bg-emerald-100 text-emerald-800 font-black'
+                    }`}>
+                      {outage.status === 'Ongoing' ? '⚠️ Sedang Berlangsung' : outage.status === 'Scheduled' ? '🗓️ Terjadwal' : '✓ Normal / Selesai'}
+                    </span>
+                  </div>
+
+                  <h5 className="font-black text-slate-900 text-base">{outage.title}</h5>
+                  <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">{outage.description}</p>
+
+                  <div className="mt-3 p-3 bg-slate-50 rounded-xl space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold uppercase text-[9px]">Wilayah Terdampak:</span>
+                      <span className="font-black text-slate-700">{outage.affectedBlocks?.join(', ') || 'Semua Blok'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold uppercase text-[9px]">Waktu:</span>
+                      <span className="font-bold text-slate-700">{outage.startTime} s.d {outage.endTime}</span>
+                    </div>
+                  </div>
+
+                  {outage.emergencyNotes && (
+                    <div className="mt-2.5 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 flex items-center gap-2">
+                      <Info size={13} className="text-amber-600 shrink-0" />
+                      <span>{outage.emergencyNotes}</span>
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="py-12 text-center bg-emerald-50/60 rounded-2xl border border-emerald-200">
+                <CheckCircle2 size={36} className="text-emerald-500 mx-auto mb-2" />
+                <h5 className="font-black text-slate-800 text-sm">Seluruh Jaringan Listrik &amp; Air Normal</h5>
+                <p className="text-xs text-slate-500 mt-0.5">Tidak ada jadwal pemadaman listrik PLN atau perbaikan air pipa yang tercatat saat ini.</p>
+              </div>
+            )}
           </div>
         </div>
       </Modal>
