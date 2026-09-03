@@ -101,27 +101,42 @@ export const formatUtilityOutageForWhatsApp = (
   endTime: string,
   affectedBlocks: string[],
   description: string,
-  emergencyNotes?: string
+  emergencyNotes?: string,
+  officialRefNumber?: string,
+  feederName?: string,
+  impactSeverity?: string,
+  contactCenter?: string,
+  date?: string
 ) => {
   const icon = type === 'PLN' ? '⚡' : type === 'PDAM' ? '💧' : '📡';
-  const header = `*PEMBERITAHUAN ${type === 'PLN' ? 'PEMADAMAN LISTRIK PLN' : type === 'PDAM' ? 'GANGGUAN ALIRAN AIR PDAM' : 'PEMELIHARAAN JARINGAN FASUM'}*`;
+  const header = `*PEMBERITAHUAN RESMI ${type === 'PLN' ? 'PEMADAMAN LISTRIK PLN' : type === 'PDAM' ? 'GANGGUAN ALIRAN AIR PDAM' : 'PEMELIHARAAN FASUM'}*`;
 
   let msg = `📢 ${header}
 Lingkungan RT 02 / RW 05 Huntap Tondo 2
-
-${icon} *Perihal:* ${title}
-🕒 *Waktu / Durasi:* ${startTime} s.d ${endTime}
+------------------------------------------
+${officialRefNumber ? `📄 *No. Surat/Edaran:* \`${officialRefNumber}\`\n` : ''}${feederName ? `🔌 *Penyulang / Gardu:* ${feederName}\n` : ''}${impactSeverity ? `⚠️ *Tingkat Dampak:* [${impactSeverity.toUpperCase()}]\n` : ''}${icon} *Perihal:* *${title}*
+📅 *Tanggal:* ${date ? new Date(date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Hari Ini'}
+🕒 *Waktu Padam:* *${startTime} s.d ${endTime}*
 📍 *Wilayah Terdampak:* ${affectedBlocks?.join(', ') || 'Semua Blok RT 02'}
 
-📝 *Keterangan:*
+📝 *Rincian Pekerjaan:*
 ${description}`;
 
   if (emergencyNotes) {
-    msg += `\n\n💡 *Bantuan / Catatan Darurat:*
+    msg += `\n\n💡 *Solusi / Dukungan Darurat RT:*
 ${emergencyNotes}`;
   }
 
-  msg += `\n\n🌐 *Pantau Status Terkini Lingkungan:*
+  msg += `\n\n🛡️ *Tips Kesiagaan Warga:*
+1. Simpan cadangan air bersih & isi penuh tandon.
+2. Cabut peralatan elektronik sensitif dari colokan.
+3. Pastikan baterai lampu darurat & HP terisi penuh.`;
+
+  if (contactCenter) {
+    msg += `\n\n📞 *Kontak Resmi Bantuan:* ${contactCenter}`;
+  }
+
+  msg += `\n\n🌐 *Pantau Status Real-Time Lingkungan:*
 👉 https://terasrt02.vercel.app/#/resident?tab=outages
 
 _Disiarkan secara resmi oleh Pengurus RT 02 Huntap Tondo 2_`;

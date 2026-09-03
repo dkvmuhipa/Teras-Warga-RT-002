@@ -335,13 +335,20 @@ export interface UtilityOutage {
   id: string;
   type: 'PLN' | 'PDAM' | 'Internet' | 'Fasum Lain';
   title: string;
-  description: string;
-  affectedBlocks: string[]; // e.g. ['Semua Blok', 'Blok A', 'Blok C']
-  startTime: string; // ISO format or datetime-local string
-  endTime: string;   // ISO format or datetime-local string
+  officialRefNumber?: string; // No. Surat / Edaran Resmi PLN/PDAM (e.g. 042/PLN-PALU/2026)
+  feederName?: string;        // Penyulang / Gardu Induk (e.g. Penyulang Tondo / Trafo TD-02)
+  impactSeverity?: 'Rendah' | 'Sedang' | 'Kritis'; // Tingkat Dampak
+  date?: string;              // Tanggal pelaksanaan (e.g. 2026-09-04)
+  startTime: string;          // Jam mulai (e.g. 09:00 WITA)
+  endTime: string;            // Estimasi selesai (e.g. 15:00 WITA)
+  affectedBlocks: string[];   // Blok terdampak
+  description: string;        // Rincian pekerjaan / penyebab
+  emergencyNotes?: string;    // Catatan bantuan darurat (e.g. Tandon air pos jaga dibuka)
+  preventiveTips?: string[];  // Tips siaga warga (e.g. Cabut colokan, tampung air)
+  contactCenter?: string;     // Call Center Darurat (123 / 0451-xxx)
   status: 'Scheduled' | 'Ongoing' | 'Resolved';
-  emergencyNotes?: string; // e.g. Tandon air darurat dibuka di Pos Satpam
   createdAt: string;
+  updatedAt?: string;
 }
 
 // New Notification Interface

@@ -2817,12 +2817,23 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
-                          outage.type === 'PLN' ? 'bg-amber-100 text-amber-800' :
-                          outage.type === 'PDAM' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
-                        }`}>
-                          {outage.type === 'PLN' ? <Zap size={12} /> : <Droplets size={12} />} {outage.type}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                            outage.type === 'PLN' ? 'bg-amber-100 text-amber-800' :
+                            outage.type === 'PDAM' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
+                          }`}>
+                            {outage.type === 'PLN' ? <Zap size={12} /> : <Droplets size={12} />} {outage.type}
+                          </span>
+
+                          {outage.impactSeverity && (
+                            <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
+                              outage.impactSeverity === 'Kritis' ? 'bg-rose-100 text-rose-700' :
+                              outage.impactSeverity === 'Sedang' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              Dampak: {outage.impactSeverity}
+                            </span>
+                          )}
+                        </div>
 
                         <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
                           outage.status === 'Ongoing' ? 'bg-rose-50 text-rose-600 animate-pulse' :
@@ -2832,18 +2843,33 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         </span>
                       </div>
 
-                      <h4 className="font-black text-slate-900 text-base">{outage.title}</h4>
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed">{outage.description}</p>
+                      <div>
+                        <h4 className="font-black text-slate-900 text-base">{outage.title}</h4>
+                        <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-slate-400 mt-1">
+                          {outage.officialRefNumber && <span>📄 No: {outage.officialRefNumber}</span>}
+                          {outage.feederName && <span>🔌 {outage.feederName}</span>}
+                        </div>
+                        <p className="text-xs text-slate-600 font-medium leading-relaxed mt-1.5">{outage.description}</p>
+                      </div>
 
-                      <div className="p-3.5 bg-slate-50 rounded-2xl space-y-1.5 text-xs">
+                      <div className="p-3.5 bg-slate-50 rounded-2xl space-y-1.5 text-xs border border-slate-100">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Tanggal &amp; Waktu:</span>
+                          <span className="font-bold text-slate-700">
+                            {outage.date ? `${new Date(outage.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} • ` : ''}
+                            {outage.startTime} s.d {outage.endTime}
+                          </span>
+                        </div>
                         <div className="flex justify-between">
                           <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Wilayah Terdampak:</span>
                           <span className="font-black text-slate-700">{outage.affectedBlocks?.join(', ') || 'Semua Blok'}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Waktu:</span>
-                          <span className="font-bold text-slate-700">{outage.startTime} s.d {outage.endTime}</span>
-                        </div>
+                        {outage.contactCenter && (
+                          <div className="flex justify-between border-t border-slate-200/50 pt-1 mt-1">
+                            <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Call Center:</span>
+                            <span className="font-bold text-indigo-600">{outage.contactCenter}</span>
+                          </div>
+                        )}
                       </div>
 
                       {outage.emergencyNotes && (
