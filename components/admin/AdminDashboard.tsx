@@ -313,7 +313,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             houses={houses} 
             cashFlow={cashFlow} 
             populationReports={populationReports} 
+            populationLogs={populationLogs}
+            events={events}
             inventory={inventory} 
+            iuranPayments={iuranPayments}
             pdfConfig={pdfConfig} 
           />
         );
