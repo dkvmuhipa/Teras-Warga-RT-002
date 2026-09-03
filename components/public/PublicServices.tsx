@@ -308,15 +308,16 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     'Surat Pengantar KTP': 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.',
     'Surat Pengantar KK': 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.',
     'Surat Keterangan Domisili': 'Keterangan domisili untuk keperluan melamar pekerjaan / pembukaan rekening bank.',
-    'Surat Keterangan Tidak Mampu': 'Persyaratan pengajuan bantuan sosial / beasiswa pendidikan / keringanan biaya medis.',
-    'Surat Izin Keramaian': 'Permohonan izin penyelenggaraan acara [Nama Acara] pada tanggal [Tanggal] di [Locasi].',
-    'Surat Keterangan Usaha': 'Persyaratan pengajuan modal usaha / pembuatan NPWP badan usaha.',
-    'Surat Keterangan Berkelakuan Baik': 'Persyaratan melamar pekerjaan / pendaftaran institusi pendidikan.',
-    'Surat Keterangan Kematian': 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan.',
+    'Surat Keterangan Domisili Usaha (SKDU)': 'Persyaratan penerbitan Surat Izin Usaha Perdagangan (NIB/SIUP), pengajuan legalitas UMKM, pembuatan NPWP Badan, serta pembukaan rekening operasional usaha di wilayah Kelurahan Tondo.',
+    'Surat Keterangan Tidak Mampu (SKTM)': 'Persyaratan pengajuan bantuan sosial (PKH/BPNT/PBI-JK), beasiswa pendidikan KIP Kuliah, atau keringanan biaya pengobatan medis di Rumah Sakit.',
+    'Surat Izin Keramaian': 'Permohonan izin penyelenggaraan acara syukuran/hajatan warga pada lingkungan RT 02.',
+    'Surat Keterangan Usaha': 'Persyaratan pengajuan modal usaha perbankan (KUR) atau legalitas usaha mikro warga.',
+    'Surat Keterangan Berkelakuan Baik': 'Persyaratan rekomendasi pengurusan SKCK di Kepolisian / pendaftaran seleksi kerja.',
+    'Surat Keterangan Kematian': 'Persyaratan permohonan akta kematian / pelaporan warga meninggal dunia ke Kantor Kelurahan Tondo.',
     'Surat Keterangan Kelahiran': 'Persyaratan pembuatan akta kelahiran anak baru / pendaftaran ke dalam Kartu Keluarga.',
     'Surat Keterangan Waris / Ahli Waris': 'Persyaratan administrasi pengurusan hak waris / pembagian harta waris keluarga.',
     'Surat Keterangan Pindah / Datang': 'Persyaratan pengurusan surat pindah domisili keluar daerah atau pelaporan kedatangan warga baru.',
-    'Surat Pengantar Nikah (N1 - N4)': 'Persyaratan rekomendasi pernikahan untuk pengurusan berkas administrasi N1 - N4 di Kantor Kelurahan.',
+    'Surat Pengantar Nikah (Model N1 - N4)': 'Persyaratan rekomendasi pernikahan untuk pengurusan blanko Model N1 (Keterangan Untuk Nikah), N2 (Asal-Usul), N4 (Izin Orang Tua), dan rekomendasi KUA di Kantor Kelurahan Tondo.',
   };
 
   const letterRequirements: Record<string, string[]> = {
@@ -324,14 +325,15 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     'Surat Pengantar KTP': ['Fotokopi Kartu Keluarga (KK)', 'KTP Lama (jika perpanjangan)', 'Pas Foto 3x4 (2 lembar)'],
     'Surat Pengantar KK': ['KK Asli', 'Surat Pindah (jika warga baru)', 'Akta Kelahiran/Nikah (jika tambah anggota)'],
     'Surat Keterangan Domisili': ['Fotokopi KTP', 'Fotokopi KK', 'Surat Keterangan Kerja (jika untuk melamar)'],
-    'Surat Keterangan Tidak Mampu': ['Fotokopi KK & KTP', 'Foto Rumah (tampak depan)', 'Surat Pernyataan Bermaterai'],
-    'Surat Keterangan Usaha': ['Fotokopi KTP', 'Foto Lokasi Usaha', 'Surat Pernyataan Usaha'],
-    'Surat Keterangan Berkelakuan Baik': ['Fotokopi KTP & KK', 'Pas Foto 4x6 (2 lembar)'],
+    'Surat Keterangan Domisili Usaha (SKDU)': ['Fotokopi KTP & KK Pemilik Usaha', 'Foto Lokasi Tempat Usaha / Toko', 'Surat Perjanjian Sewa / Bukti Kepemilikan Tempat', 'Bukti Lunas PBB Tahun Berjalan (jika ada)'],
+    'Surat Keterangan Tidak Mampu (SKTM)': ['Fotokopi KK & KTP Pemohon', 'Foto Rumah Tampak Depan', 'Surat Pernyataan Tidak Mampu Bermaterai Rp 10.000'],
+    'Surat Keterangan Usaha': ['Fotokopi KTP Pemilik Usaha', 'Foto Tempat Usaha', 'Surat Pernyataan Usaha Mandiri'],
+    'Surat Keterangan Berkelakuan Baik': ['Fotokopi KTP & KK', 'Pas Foto 4x6 Latar Merah (2 lembar)'],
     'Surat Keterangan Kematian': ['Surat Kematian dari RS / RT lama', 'Fotokopi KTP Alm/Almh', 'Fotokopi KK Terkait'],
-    'Surat Keterangan Kelahiran': ['Surat Bidan/Rumah Sakit', 'Fotokopi Buku Nikah', 'Fotokopi KK Orang Tua'],
-    'Surat Keterangan Waris / Ahli Waris': ['Surat Kematian Pewaris', 'Fotokopi KTP Semua Ahli Waris', 'Fotokopi KK Semua Ahli Waris'],
-    'Surat Keterangan Pindah / Datang': ['Surat Pindah dari asal (untuk datang)', 'Fotokopi KTP & KK Pemohon'],
-    'Surat Pengantar Nikah (N1 - N4)': ['Fotokopi KTP & KK Calon Pengantin', 'Fotokopi Akta Kelahiran / Surat Kelahiran', 'Fotokopi KTP & KK Orang Tua', 'Pas Foto Latar Biru (2x3 & 3x4)'],
+    'Surat Keterangan Kelahiran': ['Surat Keterangan Lahir dari Bidan/Rumah Sakit', 'Fotokopi Buku Nikah Orang Tua', 'Fotokopi KK Orang Tua'],
+    'Surat Keterangan Waris / Ahli Waris': ['Surat Kematian Pewaris', 'Fotokopi KTP Semua Ahli Waris', 'Fotokopi KK Semua Ahli Waris', 'Pernyataan Silsilah Keluarga Ahli Waris'],
+    'Surat Keterangan Pindah / Datang': ['Surat Pindah Resmi dari daerah asal (untuk datang)', 'Fotokopi KTP & KK Pemohon'],
+    'Surat Pengantar Nikah (Model N1 - N4)': ['Fotokopi KTP & KK Calon Pengantin', 'Fotokopi Akta Kelahiran / Ijazah', 'Fotokopi KTP & KK Orang Tua / Wali', 'Pas Foto Latar Biru (2x3 = 4 lbr, 3x4 = 2 lbr)', 'Surat Pernyataan Belum Pernah Menikah (Bermaterai)'],
   };
 
   const [reportPhoto, setReportPhoto] = useState<string | null>(null);
@@ -341,7 +343,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     'Surat Pengantar KTP': '1x24 Jam',
     'Surat Pengantar KK': '1-2 Hari Kerja',
     'Surat Keterangan Domisili': '1x24 Jam',
-    'Surat Keterangan Tidak Mampu': '2-3 Hari Kerja',
+    'Surat Keterangan Domisili Usaha (SKDU)': '1-2 Hari Kerja',
+    'Surat Keterangan Tidak Mampu (SKTM)': '1-2 Hari Kerja',
     'Surat Izin Keramaian': '1x24 Jam',
     'Surat Keterangan Usaha': '1-2 Hari Kerja',
     'Surat Keterangan Berkelakuan Baik': '1x24 Jam',
@@ -349,7 +352,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     'Surat Keterangan Kelahiran': '1x24 Jam',
     'Surat Keterangan Waris / Ahli Waris': '1-2 Hari Kerja',
     'Surat Keterangan Pindah / Datang': '1-2 Hari Kerja',
-    'Surat Pengantar Nikah (N1 - N4)': '1x24 Jam',
+    'Surat Pengantar Nikah (Model N1 - N4)': '1x24 Jam',
     'Lainnya': 'Menunggu Konfirmasi RT'
   };
 

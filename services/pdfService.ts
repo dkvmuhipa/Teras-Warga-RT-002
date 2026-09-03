@@ -1585,7 +1585,22 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.setLineWidth(0.3);
   doc.line(20, 43, 190, 43);
 
-  const title = letter.type === 'Surat Izin Keramaian' ? "SURAT IZIN KERAMAIAN" : "SURAT PENGANTAR";
+  const getDocumentTitle = (type: string) => {
+    const t = type.toUpperCase();
+    if (t.includes('KERAMAIAN')) return "SURAT IZIN KERAMAIAN";
+    if (t.includes('NIKAH') || t.includes('N1')) return "SURAT PENGANTAR NIKAH (MODEL N1 - N4)";
+    if (t.includes('USAHA') || t.includes('SKDU')) return "SURAT KETERANGAN DOMISILI USAHA (SKDU)";
+    if (t.includes('TIDAK MAMPU') || t.includes('SKTM')) return "SURAT KETERANGAN TIDAK MAMPU (SKTM)";
+    if (t.includes('KEMATIAN')) return "SURAT KETERANGAN KEMATIAN";
+    if (t.includes('KELAHIRAN')) return "SURAT KETERANGAN KELAHIRAN";
+    if (t.includes('DOMISILI')) return "SURAT KETERANGAN DOMISILI";
+    if (t.includes('PINDAH')) return "SURAT KETERANGAN PINDAH / DATANG";
+    if (t.includes('WARIS')) return "SURAT KETERANGAN AHLI WARIS";
+    if (t.includes('BERKELAKUAN BAIK')) return "SURAT KETERANGAN BERKELAKUAN BAIK";
+    return "SURAT PENGANTAR";
+  };
+
+  const title = getDocumentTitle(letter.type);
   
   doc.setFont("times", "bold");
   doc.setFontSize(12);
