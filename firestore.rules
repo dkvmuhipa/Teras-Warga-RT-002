@@ -336,6 +336,18 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Utility Outages (Info Pemadaman PLN, PDAM, Internet)
+    match /utilityOutages/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Community Skills (Direktori Jasa & Keahlian Warga)
+    match /communitySkills/{id} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;
