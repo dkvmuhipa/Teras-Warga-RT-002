@@ -245,7 +245,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
         totalActs += r.activities.length;
         r.activities.forEach(a => {
           if (a.category === 'Kerja Bakti') totalGotongRoyong++;
-          if (a.category === 'Rapat Warga' || a.category === 'Rapat') totalMeetings++;
+          if ((a.category as string) === 'Rapat Warga' || (a.category as string) === 'Rapat' || a.category === 'Keagamaan / Sosial') totalMeetings++;
           if (highlightsSet.length < 5 && a.title) {
             highlightsSet.push(`${a.title} (${a.location || 'Lingkungan RT 02'})`);
           }
@@ -268,8 +268,8 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
     }
 
     // 4. LIVE Inventaris & Aset RT Real-Time
-    const totalInventoryCount = (inventory || []).reduce((acc, i) => acc + (i.quantity || 1), 0);
-    const goodConditionCount = (inventory || []).filter(i => i.condition === 'Good').reduce((acc, i) => acc + (i.quantity || 1), 0);
+    const totalInventoryCount = (inventory || []).reduce((acc, i) => acc + (i.total || 1), 0);
+    const goodConditionCount = (inventory || []).filter(i => i.condition === 'Baik').reduce((acc, i) => acc + (i.total || 1), 0);
     const damagedCount = Math.max(0, totalInventoryCount - goodConditionCount);
 
     setForm(prev => ({

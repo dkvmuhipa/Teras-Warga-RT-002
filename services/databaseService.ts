@@ -25,6 +25,7 @@ import {
   limit,
   where,
   increment,
+  arrayUnion,
   startAt,
   endAt,
   startAfter

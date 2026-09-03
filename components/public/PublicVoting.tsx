@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Vote, PieChart, History, CheckCircle, AlertCircle, Clock, Award, 
-  ShieldCheck, Info, User, Check, Sparkles, ChevronRight, Lock
+  ShieldCheck, Info, User, Users, Check, Sparkles, ChevronRight, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';

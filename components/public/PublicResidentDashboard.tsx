@@ -672,8 +672,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         {[
           { id: 'eid', label: 'E-ID Warga', shortLabel: 'E-ID', icon: QrCode },
           { id: 'points', label: 'Poin & Teladan', shortLabel: 'Poin', icon: Trophy },
-          { id: 'skills', label: 'Jasa & Keahlian', shortLabel: 'Jasa', icon: Wrench },
-          { id: 'outages', label: 'Info Padam PLN/Air', shortLabel: 'PLN/Air', icon: Zap },
           { id: 'letters', label: 'Status Surat', shortLabel: 'Surat', icon: FileText },
           { id: 'assets', label: 'Pinjam Inventaris', shortLabel: 'Aset', icon: Box },
           { id: 'update', label: 'Update Data', shortLabel: 'Update', icon: FileEdit },

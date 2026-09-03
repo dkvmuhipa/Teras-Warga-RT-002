@@ -72,7 +72,11 @@ const QUICK_PRESETS = [
   }
 ];
 
-export const UtilityOutageManager: React.FC = () => {
+interface UtilityOutageManagerProps {
+  houses?: House[];
+}
+
+export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ houses = [] }) => {
   const confirm = useConfirm();
   const [outages, setOutages] = useState<UtilityOutage[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);

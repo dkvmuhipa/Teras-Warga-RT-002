@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote, Info, ChevronDown, ChevronUp, Minus, Search, Sparkles } from 'lucide-react';
+import { Wallet, ShieldCheck, Shield, ArrowUpRight, ArrowDownRight, Briefcase, Moon, Users, Home, Phone, CheckCircle, AlertTriangle, Target, Lightbulb, TrendingUp, Calendar, MapPin, Megaphone, Clock, Map as MapIcon, CheckCircle2, Image, HelpCircle, ArrowLeftRight, User, MessageSquare, Heart, Baby, Receipt, DollarSign, AlertCircle, X, Store, Trash2, Vote, Info, ChevronDown, ChevronUp, Minus, Search, Sparkles, Zap, Droplets } from 'lucide-react';
 import { QrReader } from 'react-qr-reader';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { 
@@ -7,8 +7,8 @@ import {
   generateMonthOptions, 
   isMonthMatch 
 } from '../../src/utils/dateUtils';
-import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, DonationCampaign, News } from '../../types';
-import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType, checkWasteRetribution, validateOfficerAccessByName } from '../../services/databaseService';
+import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, DonationCampaign, News, UtilityOutage } from '../../types';
+import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType, checkWasteRetribution, validateOfficerAccessByName, subscribeToCollection } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { EmergencyContacts } from './EmergencyContacts';
@@ -152,13 +152,19 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
     const [checkPin, setCheckPin] = useState('');
     const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
     const [scanMode, setScanMode] = useState<'camera' | 'simulate'>('camera');
-    // activePatrol is now a prop
+    const [utilityOutages, setUtilityOutages] = useState<UtilityOutage[]>([]);
 
     useEffect(() => {
         const unsubscribe = subscribeToCheckpoints((data) => {
             setCheckpoints(data);
         });
-        return () => unsubscribe();
+        const unsubOutages = subscribeToCollection('utilityOutages', (data) => {
+            setUtilityOutages(data as UtilityOutage[]);
+        });
+        return () => {
+            unsubscribe();
+            unsubOutages();
+        };
     }, []);
 
     // Status Check State
@@ -408,6 +414,99 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                     </div>
                 </motion.div>
             </div>
+
+            {/* Utility Outage Feed (Info Pemadaman PLN & Air) */}
+            {utilityOutages.length > 0 && (
+                <motion.div id="outages" variants={itemVariants} className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-amber-100 shadow-xl shadow-amber-500/5 space-y-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl border border-amber-200/80 shadow-xs">
+                                <Zap size={24} />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Papan Informasi Pemadaman PLN &amp; Air Bersih</h2>
+                                <p className="text-xs text-slate-500 font-medium">Jadwal resmi pemeliharaan jaringan listrik PLN, pipa PDAM, dan jaringan wilayah Huntap Tondo 2</p>
+                            </div>
+                        </div>
+                        <span className="px-3.5 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-200">
+                            ⚡ Utilitas RT 02
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {utilityOutages.map((outage) => (
+                            <div 
+                                key={outage.id} 
+                                className={`p-6 bg-white border-2 rounded-[2rem] shadow-sm flex flex-col justify-between ${
+                                    outage.status === 'Ongoing' ? 'border-amber-400 ring-4 ring-amber-50' : 'border-slate-100'
+                                }`}
+                            >
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                                                outage.type === 'PLN' ? 'bg-amber-100 text-amber-800' :
+                                                outage.type === 'PDAM' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
+                                            }`}>
+                                                {outage.type === 'PLN' ? <Zap size={12} /> : <Droplets size={12} />} {outage.type}
+                                            </span>
+
+                                            {outage.impactSeverity && (
+                                                <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
+                                                    outage.impactSeverity === 'Kritis' ? 'bg-rose-100 text-rose-700' :
+                                                    outage.impactSeverity === 'Sedang' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-700'
+                                                }`}>
+                                                    Dampak: {outage.impactSeverity}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
+                                            outage.status === 'Ongoing' ? 'bg-rose-50 text-rose-600 animate-pulse' :
+                                            outage.status === 'Scheduled' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
+                                        }`}>
+                                            {outage.status === 'Ongoing' ? '⚠️ Sedang Berlangsung' : outage.status === 'Scheduled' ? '🗓️ Terjadwal' : '✓ Normal / Selesai'}
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="font-black text-slate-900 text-base">{outage.title}</h4>
+                                        <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-slate-400 mt-1">
+                                            {outage.officialRefNumber && <span>📄 No: {outage.officialRefNumber}</span>}
+                                            {outage.feederName && <span>🔌 {outage.feederName}</span>}
+                                        </div>
+                                        <p className="text-xs text-slate-600 font-medium mt-2 leading-relaxed">{outage.description}</p>
+                                    </div>
+
+                                    <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-1.5 text-xs">
+                                        <div className="flex justify-between items-center text-slate-600">
+                                            <span className="font-bold text-[10px] text-slate-400 uppercase tracking-wider">Tanggal &amp; Waktu:</span>
+                                            <span className="font-black text-slate-800">{outage.date ? new Date(outage.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' • ' : ''}{outage.startTime} s.d {outage.endTime}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-slate-600">
+                                            <span className="font-bold text-[10px] text-slate-400 uppercase tracking-wider">Wilayah Terdampak:</span>
+                                            <span className="font-bold text-slate-800 text-right">{outage.affectedBlocks?.join(', ') || 'Semua Blok RT 02'}</span>
+                                        </div>
+                                        {outage.contactCenter && (
+                                            <div className="flex justify-between items-center text-slate-600">
+                                                <span className="font-bold text-[10px] text-slate-400 uppercase tracking-wider">Call Center:</span>
+                                                <span className="font-black text-amber-700">{outage.contactCenter}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {outage.emergencyNotes && (
+                                        <div className="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl text-[11px] text-amber-800 font-semibold flex items-start gap-2">
+                                            <span className="shrink-0 mt-0.5">ℹ️</span>
+                                            <span>{outage.emergencyNotes}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
 
             {/* News & Announcements Feed */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
