@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Megaphone, Vote, ShoppingBag, Image, BookOpen, Calendar, HelpCircle, Sparkles, Layers, ArrowRight } from 'lucide-react';
+import { Megaphone, Vote, ShoppingBag, Image, BookOpen, Calendar, HelpCircle, Sparkles, Layers, ArrowRight, Zap } from 'lucide-react';
 import { Announcement, News, Poll, UMKM, GalleryItem, AppEvent, FAQItem, House, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnnouncementManagement } from './AnnouncementManagement';
@@ -9,6 +9,7 @@ import { UmkmManagement } from './UmkmManagement';
 import { GalleryManagement } from './GalleryManagement';
 import { EventManager } from './EventManager';
 import { FAQManagement } from './FAQManagement';
+import { UtilityOutageManager } from './UtilityOutageManager';
 
 interface ContentManagerProps {
   announcements: Announcement[];
@@ -20,14 +21,14 @@ interface ContentManagerProps {
   faqItems: FAQItem[];
   houses: House[];
   pdfConfig: PdfConfig;
-  initialTab?: 'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq';
+  initialTab?: 'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages';
 }
 
 export const ContentManager: React.FC<ContentManagerProps> = ({ 
   announcements, news, polls, umkm, gallery, events, faqItems, houses, pdfConfig,
   initialTab = 'announcements'
 }) => {
-  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>(initialTab);
 
   React.useEffect(() => {
     if (initialTab) {
@@ -142,10 +143,11 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
           </div>
         </div>
 
-        {/* 7 Interactive Ultra-Modern Category Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+        {/* 8 Interactive Ultra-Modern Category Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
           {[
             { id: 'announcements', icon: Megaphone, label: 'Pengumuman', count: announcements.length, color: 'text-indigo-600' },
+            { id: 'outages', icon: Zap, label: 'Padam PLN/Air', count: 1, color: 'text-amber-600' },
             { id: 'news', icon: BookOpen, label: 'Berita', count: news.length, color: 'text-emerald-600' },
             { id: 'events', icon: Calendar, label: 'Acara RT', count: events.length, color: 'text-orange-600' },
             { id: 'polls', icon: Vote, label: 'Voting', count: polls.length, color: 'text-violet-600' },
@@ -193,6 +195,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
           {activeTab === 'announcements' && <AnnouncementManagement announcements={announcements} houses={houses} pdfConfig={pdfConfig} />}
+          {activeTab === 'outages' && <UtilityOutageManager houses={houses} />}
           {activeTab === 'news' && <NewsManagement news={news} />}
           {activeTab === 'polls' && <PollManagement polls={polls} houses={houses} pdfConfig={pdfConfig} />}
           {activeTab === 'umkm' && <UmkmManagement umkm={umkm} />}

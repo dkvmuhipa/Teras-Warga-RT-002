@@ -3823,6 +3823,44 @@ export const deleteAnnualLPJReportFromDb = async (id: string) => {
     }
 };
 
+// ==========================================
+// GENERIC FIRESTORE HELPERS
+// ==========================================
+export const addToCollection = async (collectionName: string, data: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        return await addDoc(collection(db, collectionName), {
+            ...data,
+            createdAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, collectionName);
+    }
+};
+
+export const updateDocumentInCollection = async (collectionName: string, id: string, updates: any) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, collectionName, id);
+        return await updateDoc(docRef, {
+            ...updates,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${collectionName}/${id}`);
+    }
+};
+
+export const deleteDocumentFromCollection = async (collectionName: string, id: string) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, collectionName, id);
+        return await deleteDoc(docRef);
+    } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `${collectionName}/${id}`);
+    }
+};
+
 
 
 

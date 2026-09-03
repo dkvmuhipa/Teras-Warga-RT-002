@@ -94,6 +94,41 @@ Terima kasih atas perhatiannya.
 _Pesan otomatis dari Pengurus RT 02_`;
 };
 
+export const formatUtilityOutageForWhatsApp = (
+  type: 'PLN' | 'PDAM' | 'Internet' | 'Fasum Lain',
+  title: string,
+  startTime: string,
+  endTime: string,
+  affectedBlocks: string[],
+  description: string,
+  emergencyNotes?: string
+) => {
+  const icon = type === 'PLN' ? '⚡' : type === 'PDAM' ? '💧' : '📡';
+  const header = `*PEMBERITAHUAN ${type === 'PLN' ? 'PEMADAMAN LISTRIK PLN' : type === 'PDAM' ? 'GANGGUAN ALIRAN AIR PDAM' : 'PEMELIHARAAN JARINGAN FASUM'}*`;
+
+  let msg = `📢 ${header}
+Lingkungan RT 02 / RW 05 Huntap Tondo 2
+
+${icon} *Perihal:* ${title}
+🕒 *Waktu / Durasi:* ${startTime} s.d ${endTime}
+📍 *Wilayah Terdampak:* ${affectedBlocks?.join(', ') || 'Semua Blok RT 02'}
+
+📝 *Keterangan:*
+${description}`;
+
+  if (emergencyNotes) {
+    msg += `\n\n💡 *Bantuan / Catatan Darurat:*
+${emergencyNotes}`;
+  }
+
+  msg += `\n\n🌐 *Pantau Status Terkini Lingkungan:*
+👉 https://terasrt02.vercel.app/#/resident?tab=outages
+
+_Disiarkan secara resmi oleh Pengurus RT 02 Huntap Tondo 2_`;
+
+  return msg;
+};
+
 export const formatLelayuForWhatsApp = (data: {
   deceasedName: string;
   deceasedAge?: string;
