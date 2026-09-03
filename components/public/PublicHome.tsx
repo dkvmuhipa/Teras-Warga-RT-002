@@ -5,10 +5,10 @@ import {
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
   Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare, Scale, HelpCircle,
-  BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign, Trash2, Recycle, Trophy, Award, Zap, Wrench, Hammer
+  BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign, Trash2, Recycle, Trophy, Award, Zap, Wrench, Hammer, PackageCheck, Package
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint, CommunitySkill, UtilityOutage } from '../../types';
+import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint, CommunitySkill, UtilityOutage, PackageDelivery } from '../../types';
 import { HeroSection } from '../HeroSection';
 import { DigitalSummary } from './DigitalSummary';
 import { ServiceStats } from '../ServiceStats';
@@ -42,15 +42,20 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   
   const [communitySkills, setCommunitySkills] = React.useState<CommunitySkill[]>([]);
   const [utilityOutages, setUtilityOutages] = React.useState<UtilityOutage[]>([]);
+  const [packages, setPackages] = React.useState<PackageDelivery[]>([]);
   const [isSkillsModalOpen, setIsSkillsModalOpen] = React.useState(false);
   const [isOutageModalOpen, setIsOutageModalOpen] = React.useState(false);
+  const [isPackagesModalOpen, setIsPackagesModalOpen] = React.useState(false);
+  const [packageSearchQuery, setPackageSearchQuery] = React.useState('');
 
   React.useEffect(() => {
     const unsubSkills = subscribeToCollection('communitySkills', (data) => setCommunitySkills(data as CommunitySkill[]));
     const unsubOutages = subscribeToCollection('utilityOutages', (data) => setUtilityOutages(data as UtilityOutage[]));
+    const unsubPackages = subscribeToCollection('packages', (data) => setPackages(data as PackageDelivery[]));
     return () => {
       unsubSkills();
       unsubOutages();
+      unsubPackages();
     };
   }, []);
   
@@ -234,6 +239,15 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       action: () => setIsOutageModalOpen(true),
       badge: 'FASUM',
       badgeColor: 'bg-[#0369a1]'
+    },
+    { 
+      label: 'Loker Paket', 
+      icon: PackageCheck, 
+      color: 'bg-[#8b5cf6]', 
+      shadow: 'shadow-[#8b5cf6]/30', 
+      action: () => setIsPackagesModalOpen(true),
+      badge: 'POS',
+      badgeColor: 'bg-[#7c3aed]'
     },
     { 
       label: 'Lapor RT', 
@@ -1365,6 +1379,100 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                 <CheckCircle2 size={36} className="text-emerald-500 mx-auto mb-2" />
                 <h5 className="font-black text-slate-800 text-sm">Seluruh Jaringan Listrik &amp; Air Normal</h5>
                 <p className="text-xs text-slate-500 mt-0.5">Tidak ada jadwal pemadaman listrik PLN atau perbaikan air pipa yang tercatat saat ini.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Public Modal: Loker Penitipan Paket Pos Satpam */}
+      <Modal
+        isOpen={isPackagesModalOpen}
+        onClose={() => setIsPackagesModalOpen(false)}
+        title="Loker Penitipan Paket Pos Satpam RT 02"
+        maxWidth="max-w-3xl"
+      >
+        <div className="space-y-5 p-2 text-left">
+          <div className="p-4 bg-purple-50 border border-purple-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-purple-600 text-white rounded-xl">
+                <PackageCheck size={22} />
+              </div>
+              <div>
+                <h4 className="font-black text-slate-900 text-sm">Log Titipan Paket Kurir Pos RT</h4>
+                <p className="text-xs text-slate-600 font-medium">Cari paket kurir yang dititipkan di pos ronda berdasarkan nomor blok rumah atau nama Anda.</p>
+              </div>
+            </div>
+            {packages.filter(p => p.status === 'Menunggu Diambil').length > 0 && (
+              <span className="px-3 py-1 bg-purple-600 text-white rounded-full text-xs font-black shrink-0">
+                {packages.filter(p => p.status === 'Menunggu Diambil').length} Paket Menunggu
+              </span>
+            )}
+          </div>
+
+          <div>
+            <input 
+              type="text"
+              placeholder="Ketik No. Blok (Contoh: A1-05) atau Nama Penerima..."
+              value={packageSearchQuery}
+              onChange={e => setPackageSearchQuery(e.target.value)}
+              className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:border-purple-500"
+            />
+          </div>
+
+          <div className="space-y-3 max-h-[55vh] overflow-y-auto pr-1">
+            {packages.filter(p => 
+              !packageSearchQuery || 
+              p.recipientHouseId?.toLowerCase().includes(packageSearchQuery.toLowerCase()) || 
+              p.recipientName?.toLowerCase().includes(packageSearchQuery.toLowerCase()) ||
+              p.trackingNumber?.toLowerCase().includes(packageSearchQuery.toLowerCase())
+            ).length > 0 ? (
+              packages
+                .filter(p => 
+                  !packageSearchQuery || 
+                  p.recipientHouseId?.toLowerCase().includes(packageSearchQuery.toLowerCase()) || 
+                  p.recipientName?.toLowerCase().includes(packageSearchQuery.toLowerCase()) ||
+                  p.trackingNumber?.toLowerCase().includes(packageSearchQuery.toLowerCase())
+                )
+                .map((pkg) => (
+                  <div key={pkg.id} className="p-4 bg-white border border-slate-200/80 rounded-2xl shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-3 rounded-xl shrink-0 ${
+                        pkg.status === 'Menunggu Diambil' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-400'
+                      }`}>
+                        <Package size={20} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded-md text-[9px] font-black uppercase">
+                            {pkg.courierName}
+                          </span>
+                          <span className="font-black text-slate-800 text-xs">
+                            Blok {pkg.recipientHouseId} ({pkg.recipientName})
+                          </span>
+                        </div>
+                        {pkg.trackingNumber && (
+                          <p className="text-[11px] font-mono font-bold text-slate-500 mt-0.5">Resi: {pkg.trackingNumber}</p>
+                        )}
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          Tiba: {new Date(pkg.receivedAt).toLocaleDateString('id-ID')} {new Date(pkg.receivedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} &bull; Petugas: {pkg.receivedBy}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${
+                        pkg.status === 'Menunggu Diambil' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      }`}>
+                        {pkg.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <div className="py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                <Package size={32} className="text-slate-300 mx-auto mb-2" />
+                <p className="text-xs font-bold text-slate-500">Tidak ada paket yang sesuai dengan pencarian.</p>
               </div>
             )}
           </div>

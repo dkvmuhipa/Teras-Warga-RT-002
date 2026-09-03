@@ -344,6 +344,22 @@ export interface UtilityOutage {
   createdAt: string;
 }
 
+// Feature: Loker Penitipan Paket Pos Satpam (Smart Package Delivery)
+export interface PackageDelivery {
+  id: string;
+  recipientHouseId: string; // e.g. 'A1-05'
+  recipientName: string;
+  courierName: 'Shopee Xpress' | 'J&T Express' | 'JNE' | 'SiCepat' | 'Ninja Xpress' | 'Anteraja' | 'Grab/Gojek' | 'Lainnya';
+  trackingNumber?: string;
+  notes?: string;
+  photoUrl?: string;
+  receivedAt: string;
+  receivedBy: string; // Petugas Satpam/Ronda
+  status: 'Menunggu Diambil' | 'Telah Diambil';
+  pickedUpAt?: string;
+  pickedUpBy?: string;
+}
+
 // New Notification Interface
 export interface AppNotification {
   id: string;
