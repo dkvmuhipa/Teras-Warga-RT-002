@@ -45,11 +45,13 @@ import {
   PackageCheck,
   Trophy,
   Sparkles,
-  Award
+  Award,
+  Zap,
+  Hammer
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
-import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, AssetBorrowRequest, InventoryItem } from '../../types';
+import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, AssetBorrowRequest, InventoryItem, CommunitySkill, UtilityOutage } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -84,7 +86,17 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [tempHouseId, setTempHouseId] = useState('');
   const [pinError, setPinError] = useState(false);
   
-  const [activeTab, setActiveTab] = useState<'eid' | 'update' | 'guests' | 'reports' | 'letters' | 'assets' | 'points'>('eid');
+  const [activeTab, setActiveTab] = useState<'eid' | 'points' | 'skills' | 'outages' | 'letters' | 'assets' | 'update' | 'guests' | 'reports'>('eid');
+  const [communitySkills, setCommunitySkills] = useState<CommunitySkill[]>([]);
+  const [utilityOutages, setUtilityOutages] = useState<UtilityOutage[]>([]);
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
+  const [skillForm, setSkillForm] = useState({
+    category: 'Pertukangan & Bangunan' as CommunitySkill['category'],
+    title: '',
+    description: '',
+    phone: '',
+    rateInfo: ''
+  });
   const [guestReports, setGuestReports] = useState<GuestReport[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -165,9 +177,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   useEffect(() => {
     const unsubPdfConfig = subscribeToPdfConfig(setPdfConfig);
     const unsubInv = subscribeToCollection('inventory', setInventoryList);
+    const unsubSkills = subscribeToCollection('communitySkills', (data) => setCommunitySkills(data as CommunitySkill[]));
+    const unsubOutages = subscribeToCollection('utilityOutages', (data) => setUtilityOutages(data as UtilityOutage[]));
     return () => {
       unsubPdfConfig();
       unsubInv();
+      unsubSkills();
+      unsubOutages();
     };
   }, []);
 
@@ -624,6 +640,8 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         {[
           { id: 'eid', label: 'E-ID Warga', shortLabel: 'E-ID', icon: QrCode },
           { id: 'points', label: 'Poin & Teladan', shortLabel: 'Poin', icon: Trophy },
+          { id: 'skills', label: 'Jasa & Keahlian', shortLabel: 'Jasa', icon: Wrench },
+          { id: 'outages', label: 'Info Padam PLN/Air', shortLabel: 'PLN/Air', icon: Zap },
           { id: 'letters', label: 'Status Surat', shortLabel: 'Surat', icon: FileText },
           { id: 'assets', label: 'Pinjam Inventaris', shortLabel: 'Aset', icon: Box },
           { id: 'update', label: 'Update Data', shortLabel: 'Update', icon: FileEdit },
@@ -2641,7 +2659,278 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             </div>
           </motion.div>
         )}
+
+        {activeTab === 'skills' && (
+          <motion.div 
+            key="skills"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6 text-left"
+          >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <Wrench size={18} />
+                  </span>
+                  <h3 className="text-xl font-black text-slate-800 tracking-tight">Direktori Jasa &amp; Keahlian Warga RT 02</h3>
+                </div>
+                <p className="text-xs text-slate-500 font-medium">Temukan tukang, teknisi, guru les, atau katering dari tetangga sendiri di lingkungan kita.</p>
+              </div>
+              <Button 
+                onClick={() => {
+                  setSkillForm({
+                    category: 'Pertukangan & Bangunan',
+                    title: '',
+                    description: '',
+                    phone: currentHouse?.phone || '',
+                    rateInfo: ''
+                  });
+                  setIsAddSkillModalOpen(true);
+                }}
+                className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 cursor-pointer"
+              >
+                <Plus size={16} className="mr-1.5" /> Promosikan Jasa / Keahlian
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {communitySkills.length > 0 ? (
+                communitySkills.map((item) => (
+                  <Card key={item.id} className="p-6 bg-white border-slate-100 shadow-sm hover:border-indigo-200 transition-all flex flex-col justify-between group">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-wider border border-indigo-100">
+                          {item.category}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400">
+                          Rumah: Blok {item.houseId}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{item.title}</h4>
+                        <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">{item.description}</p>
+                      </div>
+
+                      <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Penyedia Jasa</p>
+                        <p className="text-xs font-bold text-slate-800">{item.providerName}</p>
+                        {item.rateInfo && (
+                          <p className="text-[11px] font-semibold text-emerald-600 mt-1">💰 {item.rateInfo}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+                      <button
+                        onClick={() => {
+                          const waPhone = (item.phone || '6285961194621').replace(/\D/g, '').replace(/^0/, '62');
+                          const msg = `Halo Bpk/Ibu ${item.providerName} (Blok ${item.houseId}), saya tetangga di RT 02 ingin menanyakan tentang jasa "${item.title}". Apakah sedang tersedia?`;
+                          window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                        }}
+                        className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
+                      >
+                        <Phone size={14} /> Hubungi via WhatsApp
+                      </button>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-3 shadow-xs">
+                    <Wrench size={32} />
+                  </div>
+                  <h4 className="font-black text-slate-700 text-sm mb-1">Belum Ada Daftar Jasa Warga</h4>
+                  <p className="text-xs text-slate-400 font-medium max-w-sm mx-auto mb-4">Jadilah yang pertama mempromosikan keahlian pertukangan, servis, atau katering Anda!</p>
+                  <Button 
+                    onClick={() => setIsAddSkillModalOpen(true)}
+                    className="bg-indigo-600 text-white"
+                  >
+                    <Plus size={14} className="mr-1.5" /> Tambah Jasa Saya
+                  </Button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'outages' && (
+          <motion.div 
+            key="outages"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6 text-left"
+          >
+            <div className="flex items-center gap-3 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+              <span className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                <Zap size={22} />
+              </span>
+              <div>
+                <h3 className="text-xl font-black text-slate-800 tracking-tight">Papan Informasi Pemadaman PLN &amp; Air Bersih</h3>
+                <p className="text-xs text-slate-500 font-medium">Informasi resmi pemeliharaan jaringan listrik PLN dan perbaikan pipa saluran air bersih RT 02.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {utilityOutages.length > 0 ? (
+                utilityOutages.map((outage) => (
+                  <Card 
+                    key={outage.id} 
+                    className={`p-6 bg-white border-2 rounded-[2rem] shadow-sm flex flex-col justify-between ${
+                      outage.status === 'Ongoing' ? 'border-amber-400 ring-4 ring-amber-50' : 'border-slate-100'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                          outage.type === 'PLN' ? 'bg-amber-100 text-amber-800' :
+                          outage.type === 'PDAM' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
+                        }`}>
+                          {outage.type === 'PLN' ? <Zap size={12} /> : <Droplets size={12} />} {outage.type}
+                        </span>
+
+                        <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
+                          outage.status === 'Ongoing' ? 'bg-rose-50 text-rose-600 animate-pulse' :
+                          outage.status === 'Scheduled' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
+                        }`}>
+                          {outage.status === 'Ongoing' ? '⚠️ Sedang Berlangsung' : outage.status === 'Scheduled' ? '🗓️ Terjadwal' : '✓ Normal / Selesai'}
+                        </span>
+                      </div>
+
+                      <h4 className="font-black text-slate-900 text-base">{outage.title}</h4>
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed">{outage.description}</p>
+
+                      <div className="p-3.5 bg-slate-50 rounded-2xl space-y-1.5 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Wilayah Terdampak:</span>
+                          <span className="font-black text-slate-700">{outage.affectedBlocks?.join(', ') || 'Semua Blok'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Waktu:</span>
+                          <span className="font-bold text-slate-700">{outage.startTime} s.d {outage.endTime}</span>
+                        </div>
+                      </div>
+
+                      {outage.emergencyNotes && (
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 flex items-center gap-2">
+                          <Info size={14} className="text-amber-600 shrink-0" />
+                          <span>{outage.emergencyNotes}</span>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                  <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-3 shadow-xs">
+                    <CheckCircle size={32} />
+                  </div>
+                  <h4 className="font-black text-slate-800 text-sm mb-1">Kondisi Jaringan Listrik &amp; Air Normal</h4>
+                  <p className="text-xs text-slate-400 font-medium">Tidak ada jadwal pemadaman listrik PLN atau perbaikan air pipa yang tercatat saat ini.</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
+
+      {/* Modal Tambah Jasa & Keahlian Warga */}
+      <Modal isOpen={isAddSkillModalOpen} onClose={() => setIsAddSkillModalOpen(false)} title="Promosikan Jasa &amp; Keahlian Warga">
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          if (!skillForm.title || !skillForm.description || !skillForm.phone) {
+            return toast.error('Mohon lengkapi judul jasa, deskripsi, dan nomor WA.');
+          }
+
+          try {
+            await addReportToDb({
+              type: 'Keamanan' as any,
+              reporterName: currentHouse?.headOfFamily || 'Warga',
+              reporterHouseId: selectedHouseId,
+              date: new Date().toISOString(),
+              description: `[PROMOSI JASA] ${skillForm.category}: ${skillForm.title} - ${skillForm.description} (WA: ${skillForm.phone}, Tarif: ${skillForm.rateInfo || '-'})`,
+              status: 'Diproses'
+            });
+
+            toast.success('Promosi jasa Anda telah dikirim ke Pengurus RT untuk verifikasi tayang!');
+            setIsAddSkillModalOpen(false);
+          } catch (error) {
+            toast.error('Gagal mengirim data jasa.');
+          }
+        }} className="space-y-4 text-left">
+          <div>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Kategori Layanan / Jasa</label>
+            <select
+              value={skillForm.category}
+              onChange={e => setSkillForm({...skillForm, category: e.target.value as any})}
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+            >
+              <option value="Pertukangan & Bangunan">Pertukangan &amp; Bangunan</option>
+              <option value="Elektronik & Kelistrikan">Elektronik &amp; Kelistrikan (AC, Kulkas, Pompa Air)</option>
+              <option value="Pendidikan & Les">Pendidikan &amp; Les Privat Anak</option>
+              <option value="Katering & Kuliner">Katering &amp; Kuliner Rumahan</option>
+              <option value="Kecantikan & Jahit">Kecantikan &amp; Jahit Baju</option>
+              <option value="Otomotif & Transportasi">Otomotif &amp; Jasa Antar / Angkut</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Judul / Nama Jasa</label>
+            <input 
+              type="text" 
+              required
+              value={skillForm.title}
+              onChange={e => setSkillForm({...skillForm, title: e.target.value})}
+              placeholder="Contoh: Servis AC & Cuci AC Bersih"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Rincian Keahlian &amp; Pengalaman</label>
+            <textarea 
+              required
+              rows={3}
+              value={skillForm.description}
+              onChange={e => setSkillForm({...skillForm, description: e.target.value})}
+              placeholder="Jelaskan jenis pekerjaan yang bisa dibantu, garansi, atau ketersediaan waktu..."
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nomor WhatsApp</label>
+              <input 
+                type="text" 
+                required
+                value={skillForm.phone}
+                onChange={e => setSkillForm({...skillForm, phone: e.target.value})}
+                placeholder="0812xxxxxxxx"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Perkiraan Biaya / Tarif</label>
+              <input 
+                type="text" 
+                value={skillForm.rateInfo}
+                onChange={e => setSkillForm({...skillForm, rateInfo: e.target.value})}
+                placeholder="Contoh: Mulai Rp 50.000 / Nego"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <Button type="submit" className="w-full py-3.5 bg-indigo-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/20 mt-2">
+            Simpan &amp; Publikasikan Jasa
+          </Button>
+        </form>
+      </Modal>
 
       {/* Iuran Detail Modal */}
       <Modal isOpen={isIuranModalOpen} onClose={() => setIsIuranModalOpen(false)} title="Rincian Tagihan Iuran">

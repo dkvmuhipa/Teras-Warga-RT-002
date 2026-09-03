@@ -315,6 +315,35 @@ export interface News {
   isBroadcast?: boolean;
 }
 
+// Feature: Direktori Keahlian & Jasa Warga (Community Skill Exchange)
+export interface CommunitySkill {
+  id: string;
+  providerName: string;
+  houseId: string;
+  category: 'Pertukangan & Bangunan' | 'Elektronik & Kelistrikan' | 'Pendidikan & Les' | 'Katering & Kuliner' | 'Kecantikan & Jahit' | 'Otomotif & Transportasi' | 'Lainnya';
+  title: string;
+  description: string;
+  phone: string;
+  rateInfo?: string;
+  isAvailable: boolean;
+  rating?: number;
+  createdAt: string;
+}
+
+// Feature: Informasi Pemadaman PLN & PDAM (Utility Outage Notice)
+export interface UtilityOutage {
+  id: string;
+  type: 'PLN' | 'PDAM' | 'Internet' | 'Fasum Lain';
+  title: string;
+  description: string;
+  affectedBlocks: string[]; // e.g. ['Semua Blok', 'Blok A', 'Blok C']
+  startTime: string; // ISO format or datetime-local string
+  endTime: string;   // ISO format or datetime-local string
+  status: 'Scheduled' | 'Ongoing' | 'Resolved';
+  emergencyNotes?: string; // e.g. Tandon air darurat dibuka di Pos Satpam
+  createdAt: string;
+}
+
 // New Notification Interface
 export interface AppNotification {
   id: string;
