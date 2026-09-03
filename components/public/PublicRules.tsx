@@ -803,7 +803,7 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
                             <div className="flex items-center gap-3">
                               <div className="text-right font-serif hidden md:block">
                                 <p className="text-slate-700 font-medium text-xs md:text-sm">
-                                  1 Juni 2026
+                                  1 Februari 2026
                                 </p>
                                 <p className="text-[8px] text-emerald-600 font-black tracking-widest uppercase mt-0.5">
                                   SAH & BERLAKU
@@ -977,7 +977,7 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
                                   <div className="text-slate-800 font-bold">Naskah Asli (Belum Direvisi)</div>
                                   
                                   <div className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">BERLAKU SEJAK</div>
-                                  <div className="text-slate-800 font-bold">1 Juni 2026</div>
+                                  <div className="text-slate-800 font-bold">1 Februari 2026</div>
                                 </div>
 
                                 {/* Elegant Divider */}
