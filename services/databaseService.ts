@@ -2696,11 +2696,12 @@ export const subscribeToUMKMOrders = (callback: (data: any[]) => void) => {
   });
 };
 
-// --- 10. POLLS (E-VOTING) ---
+// --- 10. POLLS (E-VOTING & PEMILIHAN RESMI RT) ---
 export const addPollToDb = async (poll: any) => {
   try {
     const { id, ...data } = poll;
     await addDoc(collection(db, POLLS_COL), deepSanitize(data));
+    await logAction('Bilik E-Voting', `Menerbitkan agenda e-Voting / Pemilihan: ${data.title}`);
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, POLLS_COL);
   }
@@ -2709,6 +2710,7 @@ export const addPollToDb = async (poll: any) => {
 export const deletePollFromDb = async (id: string) => {
   try {
     await deleteDoc(doc(db, POLLS_COL, id));
+    await logAction('Hapus E-Voting', `Menghapus agenda e-Voting ID: ${id}`);
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, `${POLLS_COL}/${id}`);
   }
@@ -2717,33 +2719,73 @@ export const deletePollFromDb = async (id: string) => {
 export const updatePollStatus = async (id: string, status: string) => {
   try {
     await updateDoc(doc(db, POLLS_COL, id), { status });
+    await logAction('Status E-Voting', `Mengubah status voting ID: ${id} menjadi ${status}`);
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${POLLS_COL}/${id}`);
   }
 };
 
-export const submitVote = async (pollId: string, optionId: string, currentOptions: any[]) => {
+export const updatePollInDb = async (id: string, updates: any) => {
+  try {
+    const { id: _, ...data } = updates;
+    await updateDoc(doc(db, POLLS_COL, id), deepSanitize(data));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${POLLS_COL}/${id}`);
+  }
+};
+
+export const submitVote = async (
+  pollId: string, 
+  targetId: string, 
+  currentPoll: Poll,
+  voterInfo?: { houseId?: string; voterName?: string }
+) => {
   try {
     const pollRef = doc(db, POLLS_COL, pollId);
     
-    // Find option index
-    const optIndex = currentOptions.findIndex((o: any) => o.id === optionId);
-    if (optIndex === -1) return;
+    // Check double voting if houseId is provided
+    if (voterInfo?.houseId && currentPoll.votedHouseIds?.includes(voterInfo.houseId)) {
+      throw new Error(`Rumah / KK ${voterInfo.houseId} sudah menggunakan hak suara pada pemilihan ini.`);
+    }
 
-    // Create new options array
-    const newOptions = [...currentOptions];
-    newOptions[optIndex] = {
-      ...newOptions[optIndex],
-      votes: newOptions[optIndex].votes + 1
+    const updates: any = {
+      totalVotes: increment(1)
     };
 
-    await updateDoc(pollRef, {
-      options: newOptions,
-      totalVotes: increment(1)
-    });
+    if (voterInfo?.houseId) {
+      updates.votedHouseIds = arrayUnion(voterInfo.houseId);
+    }
 
+    // A. If this is an Official Election with Candidates
+    if (currentPoll.candidates && currentPoll.candidates.length > 0) {
+      const candIndex = currentPoll.candidates.findIndex(c => c.id === targetId);
+      if (candIndex !== -1) {
+        const newCandidates = [...currentPoll.candidates];
+        newCandidates[candIndex] = {
+          ...newCandidates[candIndex],
+          votes: (newCandidates[candIndex].votes || 0) + 1
+        };
+        updates.candidates = newCandidates;
+      }
+    } 
+    // B. If this is standard option polling
+    else if (currentPoll.options && currentPoll.options.length > 0) {
+      const optIndex = currentPoll.options.findIndex((o: any) => o.id === targetId);
+      if (optIndex !== -1) {
+        const newOptions = [...currentPoll.options];
+        newOptions[optIndex] = {
+          ...newOptions[optIndex],
+          votes: (newOptions[optIndex].votes || 0) + 1
+        };
+        updates.options = newOptions;
+      }
+    }
+
+    await updateDoc(pollRef, updates);
+    return true;
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${POLLS_COL}/${pollId}`);
+    throw error;
   }
 };
 

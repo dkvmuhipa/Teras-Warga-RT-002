@@ -194,7 +194,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
         >
           {activeTab === 'announcements' && <AnnouncementManagement announcements={announcements} houses={houses} pdfConfig={pdfConfig} />}
           {activeTab === 'news' && <NewsManagement news={news} />}
-          {activeTab === 'polls' && <PollManagement polls={polls} />}
+          {activeTab === 'polls' && <PollManagement polls={polls} houses={houses} pdfConfig={pdfConfig} />}
           {activeTab === 'umkm' && <UmkmManagement umkm={umkm} />}
           {activeTab === 'gallery' && <GalleryManagement gallery={gallery} />}
           {activeTab === 'events' && <EventManager events={events} />}
