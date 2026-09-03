@@ -11,6 +11,7 @@ import { Card } from '../ui/Card';
 import { toast } from 'sonner';
 import { 
   subscribeToAnnualLPJReports, 
+  subscribeToMonthlyActivityReports,
   addAnnualLPJReportToDb, 
   updateAnnualLPJReportInDb, 
   deleteAnnualLPJReportFromDb 
