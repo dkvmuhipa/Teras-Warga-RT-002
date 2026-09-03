@@ -54,9 +54,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       width: 'w-[480px] sm:w-[540px]',
       items: [
         { path: '/market', label: 'Pasar Warga', desc: 'Beli hasil dagangan warga lokal', icon: ShoppingBag, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
-        { path: '/umkm?tab=jasa', label: 'Jasa & Keahlian Warga', desc: 'Tukang, teknisi, guru les, & katering tetangga', icon: Wrench, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
+        { path: '/umkm', label: 'Direktori UMKM & Jasa', desc: 'Katalog usaha kreatif, produk & jasa warga', icon: Store, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
         { path: '/sampah', label: 'Bank Sampah', desc: 'Setor sampah anorganik jadi saldo digital', icon: Trash2, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
-        { path: '/umkm', label: 'Direktori UMKM', desc: 'Katalog usaha kreatif binaan kepengurusan', icon: Store, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
         { path: '/literasi', label: 'Taman Bacaan', desc: 'Tukar & baca buku digital warga', icon: BookOpen, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
       ]
     },
@@ -67,8 +66,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       columns: 2,
       width: 'w-[480px] sm:w-[540px]',
       items: [
-        { path: '/info', label: 'Info RT & Kas', desc: 'Metrik keuangan transparan terdistribusi', icon: LineChart, color: 'text-sky-600 bg-sky-50/70 border-sky-150' },
-        { path: '/info?section=outages', label: 'Info Padam PLN/Air', desc: 'Jadwal pemeliharaan listrik PLN & pipa PDAM', icon: Zap, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
+        { path: '/info', label: 'Info RT & Kas', desc: 'Metrik keuangan, kas, agenda & pemadaman PLN', icon: LineChart, color: 'text-sky-600 bg-sky-50/70 border-sky-150' },
         { path: '/about', label: 'Tentang Kami', desc: 'Sejarah, visi kepengurusan & biografi', icon: Info, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
         { path: '/rules', label: 'Peraturan RT 02', desc: 'Tata tertib resmi warga Huntap Tondo 2', icon: Scale, color: 'text-slate-700 bg-slate-50/70 border-slate-150' },
         { path: '/gempa', label: 'Monitor Gempa', desc: 'Siaga seismik regional & integrasi BMKG', icon: Activity, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
