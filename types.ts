@@ -291,7 +291,15 @@ export interface Announcement {
   title: string;
   content: string;
   date: string;
-  type: 'General' | 'Urgent' | 'Event';
+  type: 'General' | 'Urgent' | 'Event' | 'Lelayu';
+  // Tanggap Duka & Lelayu Spesifik (Opsional)
+  deceasedName?: string; // Nama Almarhum/Almarhumah
+  deceasedAge?: string; // Usia
+  deceasedHouseId?: string; // Blok Rumah Duka
+  funeralTime?: string; // Jam / Hari Pemakaman
+  funeralLocation?: string; // Lokasi TPU / Pemakaman
+  tazkiahSchedule?: string; // Waktu Takziah / Doa Bersama
+  bankAccount?: string; // Rekening Belasungkawa RT/Keluarga
 }
 
 export interface News {

@@ -94,6 +94,34 @@ Terima kasih atas perhatiannya.
 _Pesan otomatis dari Pengurus RT 02_`;
 };
 
+export const formatLelayuForWhatsApp = (data: {
+  deceasedName: string;
+  deceasedAge?: string;
+  deceasedHouseId?: string;
+  funeralTime?: string;
+  funeralLocation?: string;
+  tazkiahSchedule?: string;
+  bankAccount?: string;
+  content?: string;
+}) => {
+  return `🖤 *BERITA LELAYU / DUKA CITA RT 02* 🖤
+------------------------------------------
+_Innalillahi wa inna ilaihi raji'un_
+
+Telah berpulang ke Rahmatullah, warga/keluarga kita tercinta:
+
+👤 *Nama:* ${data.deceasedName} ${data.deceasedAge ? `(${data.deceasedAge} Tahun)` : ''}
+🏠 *Rumah Duka:* ${data.deceasedHouseId || '-'}
+⏰ *Waktu Pemakaman:* ${data.funeralTime || 'Menyusul'}
+📍 *Lokasi Pemakaman:* ${data.funeralLocation || '-'}
+${data.tazkiahSchedule ? `🤲 *Jadwal Takziah/Tahlil:* ${data.tazkiahSchedule}\n` : ''}${data.bankAccount ? `💳 *Rekening Tali Asih/Belasungkawa:*\n${data.bankAccount}\n` : ''}
+${data.content ? `${data.content}\n` : ''}
+------------------------------------------
+Semoga almarhum/almarhumah diampuni segala dosanya, diterima amal ibadahnya, dan keluarga yang ditinggalkan senantiasa diberi ketabahan & keikhlasan. Aamiin.
+
+_Disiarkan secara resmi oleh Pengurus RT 02 Huntap Tondo 2_`;
+};
+
 export const formatLetterStatusForWhatsApp = (
   name: string, 
   type: string, 

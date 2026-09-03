@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle, Sparkles, Send, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle, Sparkles, Send, AlertTriangle, CheckCircle2, Loader2, HeartHandshake } from 'lucide-react';
 import { Announcement, House, PdfConfig } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { addAnnouncementToDb, deleteAnnouncementFromDb, updateAnnouncementInDb, handleFirestoreError, OperationType } from '../../services/databaseService';
-import { sendWhatsAppMessage, formatAnnouncementForWhatsApp, broadcastWhatsApp } from '../../services/whatsappService';
+import { sendWhatsAppMessage, formatAnnouncementForWhatsApp, formatLelayuForWhatsApp, broadcastWhatsApp } from '../../services/whatsappService';
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -30,12 +30,19 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
   // Form State
   const [annTitle, setAnnTitle] = useState('');
   const [annContent, setAnnContent] = useState('');
-  const [annType, setAnnType] = useState('Info');
+  const [annType, setAnnType] = useState<'General' | 'Urgent' | 'Event' | 'Lelayu'>('General');
+  const [deceasedName, setDeceasedName] = useState('');
+  const [deceasedAge, setDeceasedAge] = useState('');
+  const [deceasedHouseId, setDeceasedHouseId] = useState('');
+  const [funeralTime, setFuneralTime] = useState('');
+  const [funeralLocation, setFuneralLocation] = useState('');
+  const [tazkiahSchedule, setTazkiahSchedule] = useState('');
+  const [bankAccount, setBankAccount] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
 
   const filteredAnnouncements = announcements.filter(a => 
     (filterType === 'All' || a.type === filterType) &&
-    (a.title.toLowerCase().includes(searchTerm.toLowerCase()) || a.content.toLowerCase().includes(searchTerm.toLowerCase()))
+    (a.title.toLowerCase().includes(searchTerm.toLowerCase()) || a.content.toLowerCase().includes(searchTerm.toLowerCase()) || (a.deceasedName && a.deceasedName.toLowerCase().includes(searchTerm.toLowerCase())))
   );
 
   const handleBroadcast = (ann: Announcement) => {
@@ -62,7 +69,18 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
     setIsBroadcasting(ann.id);
     setIsBroadcastModalOpen(false);
     
-    const message = formatAnnouncementForWhatsApp(ann.title, ann.content);
+    const message = ann.type === 'Lelayu'
+      ? formatLelayuForWhatsApp({
+          deceasedName: ann.deceasedName || ann.title,
+          deceasedAge: ann.deceasedAge,
+          deceasedHouseId: ann.deceasedHouseId,
+          funeralTime: ann.funeralTime,
+          funeralLocation: ann.funeralLocation,
+          tazkiahSchedule: ann.tazkiahSchedule,
+          bankAccount: ann.bankAccount,
+          content: ann.content
+        })
+      : formatAnnouncementForWhatsApp(ann.title, ann.content);
     
     try {
       let successCount = 0;
@@ -101,26 +119,40 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
   const resetForms = () => {
     setAnnTitle('');
     setAnnContent('');
-    setAnnType('Info');
+    setAnnType('General');
+    setDeceasedName('');
+    setDeceasedAge('');
+    setDeceasedHouseId('');
+    setFuneralTime('');
+    setFuneralLocation('');
+    setTazkiahSchedule('');
+    setBankAccount('');
     setEditingId(null);
   };
 
   const handleSaveAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload: any = {
+        title: annTitle,
+        content: annContent,
+        type: annType,
+        deceasedName: annType === 'Lelayu' ? deceasedName : null,
+        deceasedAge: annType === 'Lelayu' ? deceasedAge : null,
+        deceasedHouseId: annType === 'Lelayu' ? deceasedHouseId : null,
+        funeralTime: annType === 'Lelayu' ? funeralTime : null,
+        funeralLocation: annType === 'Lelayu' ? funeralLocation : null,
+        tazkiahSchedule: annType === 'Lelayu' ? tazkiahSchedule : null,
+        bankAccount: annType === 'Lelayu' ? bankAccount : null,
+      };
+
       if (editingId) {
-        await updateAnnouncementInDb(editingId, {
-          title: annTitle,
-          content: annContent,
-          type: annType as any
-        });
+        await updateAnnouncementInDb(editingId, payload);
         toast.success('Pengumuman berhasil diperbarui!');
       } else {
         await addAnnouncementToDb({
-          title: annTitle,
-          content: annContent,
-          date: new Date().toISOString(),
-          type: annType as any
+          ...payload,
+          date: new Date().toISOString()
         });
         toast.success('Pengumuman berhasil dibuat!');
       }
@@ -137,6 +169,13 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
     setAnnTitle(ann.title);
     setAnnContent(ann.content);
     setAnnType(ann.type);
+    setDeceasedName(ann.deceasedName || '');
+    setDeceasedAge(ann.deceasedAge || '');
+    setDeceasedHouseId(ann.deceasedHouseId || '');
+    setFuneralTime(ann.funeralTime || '');
+    setFuneralLocation(ann.funeralLocation || '');
+    setTazkiahSchedule(ann.tazkiahSchedule || '');
+    setBankAccount(ann.bankAccount || '');
     setIsModalOpen(true);
   };
 
@@ -402,30 +441,40 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
             
             <div className="space-y-2">
               <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Tipe / Kategori</label>
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {[
                   { id: 'General', label: 'Info Umum', desc: 'Informasi reguler', icon: <Info size={16} /> },
+                  { id: 'Lelayu', label: 'Lelayu / Duka', desc: 'Siaran kabar duka', icon: <HeartHandshake size={16} /> },
                   { id: 'Urgent', label: 'Penting', desc: 'Sifatnya mendesak', icon: <AlertTriangle size={16} /> },
                   { id: 'Event', label: 'Kegiatan', desc: 'Acara warga', icon: <CalendarDays size={16} /> }
                 ].map((type) => (
                   <button
                     key={type.id}
                     type="button"
-                    onClick={() => setAnnType(type.id as any)}
+                    onClick={() => {
+                      setAnnType(type.id as any);
+                      if (type.id === 'Lelayu' && !annTitle) {
+                        setAnnTitle('Berita Lelayu: Telah Berpulang ke Rahmatullah');
+                      }
+                    }}
                     className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden group ${
                       annType === type.id 
-                        ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20' 
+                        ? type.id === 'Lelayu' ? 'bg-slate-900 border-slate-900 text-white ring-2 ring-slate-900/30' : 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20' 
                         : 'bg-white border-slate-200 hover:bg-slate-50 hover:border-indigo-200 hover:shadow-sm'
                     }`}
                   >
-                    <div className={`mb-2 inline-block p-1.5 rounded-xl ${annType === type.id ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-500'} transition-colors`}>
+                    <div className={`mb-2 inline-block p-1.5 rounded-xl ${
+                      annType === type.id 
+                        ? type.id === 'Lelayu' ? 'bg-white/10 text-rose-300' : 'bg-indigo-100 text-indigo-600' 
+                        : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-500'
+                    } transition-colors`}>
                       {type.icon}
                     </div>
-                    <p className={`text-[11px] font-black ${annType === type.id ? 'text-indigo-700' : 'text-slate-700'}`}>{type.label}</p>
-                    <p className={`text-[8.5px] font-bold mt-0.5 ${annType === type.id ? 'text-indigo-500' : 'text-slate-400'}`}>{type.desc}</p>
+                    <p className={`text-[11px] font-black ${annType === type.id ? (type.id === 'Lelayu' ? 'text-white' : 'text-indigo-700') : 'text-slate-700'}`}>{type.label}</p>
+                    <p className={`text-[8.5px] font-bold mt-0.5 ${annType === type.id ? (type.id === 'Lelayu' ? 'text-slate-400' : 'text-indigo-500') : 'text-slate-400'}`}>{type.desc}</p>
                     
                     {annType === type.id && (
-                      <div className="absolute top-2.5 right-2.5 text-indigo-500">
+                      <div className={`absolute top-2.5 right-2.5 ${type.id === 'Lelayu' ? 'text-rose-400' : 'text-indigo-500'}`}>
                         <CheckCircle2 size={14} />
                       </div>
                     )}
@@ -433,6 +482,77 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                 ))}
               </div>
             </div>
+
+            {/* Khusus Formulir Lelayu / Tanggap Duka */}
+            {annType === 'Lelayu' && (
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <p className="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                  <HeartHandshake size={14} className="text-rose-500" /> Rincian Informasi Tanggap Duka &amp; Takziah
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Nama Almarhum/Almarhumah</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+                      value={deceasedName}
+                      onChange={e => setDeceasedName(e.target.value)}
+                      placeholder="Contoh: Bpk. H. Ahmad..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Usia (Tahun)</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+                      value={deceasedAge}
+                      onChange={e => setDeceasedAge(e.target.value)}
+                      placeholder="Contoh: 68"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Blok Rumah Duka</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+                      value={deceasedHouseId}
+                      onChange={e => setDeceasedHouseId(e.target.value)}
+                      placeholder="Contoh: Blok C5 No. 02"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Waktu &amp; Lokasi Pemakaman</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+                      value={funeralTime}
+                      onChange={e => setFuneralTime(e.target.value)}
+                      placeholder="Contoh: Ba'da Ashar di TPU Tondo"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Jadwal Takziah / Doa Bersama</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+                      value={tazkiahSchedule}
+                      onChange={e => setTazkiahSchedule(e.target.value)}
+                      placeholder="Contoh: Malam ini pukul 19:30 WITA di rumah duka"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Rekening Tali Asih / Belasungkawa RT</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
+                      value={bankAccount}
+                      onChange={e => setBankAccount(e.target.value)}
+                      placeholder="Contoh: BRI 1234-5678-90 a.n. Kas Sosial RT 02"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="pt-3 border-t border-slate-100">
               <Button type="submit" className="w-full py-3.5 text-xs font-black uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-500/20 flex justify-center items-center gap-2 group/submit">
