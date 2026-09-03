@@ -412,7 +412,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     setTimeout(() => setCopiedText(null), 2000);
   };
 
-  if (!selectedHouseId) {
+  if (!selectedHouseId && activeTab !== 'skills' && activeTab !== 'outages') {
     const sortedHouses = [...houses]
       .filter(h => h.status === 'Occupied')
       .sort((a, b) => {
@@ -632,20 +632,39 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-0.5">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Dashboard Portal Warga</h2>
-              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-indigo-100">
-                Blok {currentHouse?.block}-{currentHouse?.number}
-              </span>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+                {selectedHouseId ? 'Dashboard Portal Warga' : 'Pusat Jasa & Layanan Warga'}
+              </h2>
+              {selectedHouseId && (
+                <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                  Blok {currentHouse?.block}-{currentHouse?.number}
+                </span>
+              )}
             </div>
-            <p className="text-slate-400 text-xs font-semibold">Selamat datang, Bpk/Ibu <span className="text-slate-700 font-extrabold">{currentHouse?.headOfFamily}</span>.</p>
+            <p className="text-slate-400 text-xs font-semibold">
+              {selectedHouseId ? (
+                <>Selamat datang, Bpk/Ibu <span className="text-slate-700 font-extrabold">{currentHouse?.headOfFamily}</span>.</>
+              ) : (
+                <>Akses publik direktori keahlian warga dan papan informasi pemadaman PLN/PDAM RT 02.</>
+              )}
+            </p>
           </div>
         </div>
-        <button 
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-5 py-3 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-slate-200/60 hover:bg-rose-50 text-slate-600 hover:text-rose-600 hover:border-rose-100 hover:shadow-sm transition-all cursor-pointer"
-        >
-          <LogOut size={14} /> Keluar Sesi
-        </button>
+        {selectedHouseId ? (
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-5 py-3 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-slate-200/60 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 hover:shadow-sm transition-all cursor-pointer"
+          >
+            <LogOut size={14} /> Keluar Sesi
+          </button>
+        ) : (
+          <button 
+            onClick={() => setActiveTab('eid')}
+            className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+          >
+            <QrCode size={14} /> Masuk Portal Warga (PIN)
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
