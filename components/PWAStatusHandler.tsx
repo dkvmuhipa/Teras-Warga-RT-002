@@ -100,14 +100,24 @@ export const PWAStatusHandler: React.FC = () => {
 
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => updateServiceWorker(true)}
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-lg text-[10px] uppercase tracking-wider shadow-md transition-transform active:scale-95"
+                  onClick={async () => {
+                    try {
+                      await updateServiceWorker(true);
+                    } catch (err) {
+                      console.error("SW reload error", err);
+                    } finally {
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 200);
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-lg text-[10px] uppercase tracking-wider shadow-md transition-transform active:scale-95 cursor-pointer"
                 >
                   Muat Ulang
                 </button>
                 <button
                   onClick={() => setNeedRefresh(false)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
                 >
                   <X size={14} />
                 </button>
