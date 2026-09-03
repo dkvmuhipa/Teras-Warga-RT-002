@@ -552,37 +552,40 @@ export const generateAnnualLPJReportPDF = async (
         logoData = await getImageData(config.logo);
     } catch (e) { console.error(e); }
 
+    const logoW = 28;
+    const logoH = 35; // Proporsi 4:5 lambang garuda/pemerintah kota palu yang presisi
     if (logoData) {
-        doc.addImage(logoData, 'PNG', centerX - 18, 35, 36, 44);
+        doc.addImage(logoData, 'PNG', centerX - (logoW / 2), 35, logoW, logoH);
     }
 
+    const textStartY = 80;
     doc.setFont("times", "bold");
-    doc.setFontSize(16);
-    doc.setTextColor(15, 23, 42);
-    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 92, { align: "center" });
-    doc.setFontSize(13);
-    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'} - KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 99, { align: "center" });
     doc.setFontSize(15);
-    doc.text(`PENGURUS ${config.rtName.toUpperCase()}`, centerX, 107, { align: "center" });
+    doc.setTextColor(15, 23, 42);
+    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, textStartY, { align: "center" });
+    doc.setFontSize(12);
+    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'} - KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, textStartY + 6.5, { align: "center" });
+    doc.setFontSize(14);
+    doc.text(`PENGURUS ${config.rtName.toUpperCase()}`, centerX, textStartY + 14, { align: "center" });
 
-    doc.setLineWidth(1.2);
-    doc.line(centerX - 40, 113, centerX + 40, 113);
+    doc.setLineWidth(1.0);
+    doc.line(centerX - 45, textStartY + 19, centerX + 45, textStartY + 19);
 
     doc.setFontSize(18);
     doc.setTextColor(30, 41, 59);
-    doc.text("LAPORAN PERTANGGUNGJAWABAN (LPJ)", centerX, 135, { align: "center" });
-    doc.setFontSize(14);
-    const periodLabel = report.periodType === 'Annual' ? `TAHUN ANGGARAN ${report.year}` : `${report.periodType.toUpperCase()} TAHUN ${report.year}`;
-    doc.text(`KINERJA PENGURUS RT & REALISASI ANGGARAN`, centerX, 143, { align: "center" });
+    doc.text("LAPORAN PERTANGGUNGJAWABAN (LPJ)", centerX, textStartY + 38, { align: "center" });
     doc.setFontSize(13);
+    const periodLabel = report.periodType === 'Annual' ? `TAHUN ANGGARAN ${report.year}` : `${report.periodType.toUpperCase()} TAHUN ${report.year}`;
+    doc.text(`KINERJA PENGURUS RT & REALISASI ANGGARAN`, centerX, textStartY + 45, { align: "center" });
+    doc.setFontSize(12);
     doc.setTextColor(79, 70, 229);
-    doc.text(`PERIODE : ${periodLabel}`, centerX, 151, { align: "center" });
+    doc.text(`PERIODE : ${periodLabel}`, centerX, textStartY + 52, { align: "center" });
 
     if (report.theme) {
         doc.setFont("times", "italic");
-        doc.setFontSize(11);
+        doc.setFontSize(10.5);
         doc.setTextColor(100, 116, 139);
-        doc.text(`"${report.theme}"`, centerX, 162, { align: "center" });
+        doc.text(`"${report.theme}"`, centerX, textStartY + 62, { align: "center" });
     }
 
     // Cover Footer Info
