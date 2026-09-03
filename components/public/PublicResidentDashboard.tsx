@@ -51,7 +51,7 @@ import {
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
-import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, AssetBorrowRequest, InventoryItem, CommunitySkill, UtilityOutage, PackageDelivery } from '../../types';
+import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, AssetBorrowRequest, InventoryItem, CommunitySkill, UtilityOutage } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -75,19 +75,31 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 
+import { useSearchParams } from 'react-router-dom';
+
 interface PublicResidentDashboardProps {
   houses: House[];
 }
 
 export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = ({ houses }) => {
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') as any;
+
   const [selectedHouseId, setSelectedHouseId] = useState<string>(localStorage.getItem('resident_house_id') || '');
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [tempHouseId, setTempHouseId] = useState('');
   const [pinError, setPinError] = useState(false);
   
-  const [activeTab, setActiveTab] = useState<'eid' | 'points' | 'packages' | 'skills' | 'outages' | 'letters' | 'assets' | 'update' | 'guests' | 'reports'>('eid');
-  const [packages, setPackages] = useState<PackageDelivery[]>([]);
+  const [activeTab, setActiveTab] = useState<'eid' | 'points' | 'skills' | 'outages' | 'letters' | 'assets' | 'update' | 'guests' | 'reports'>(
+    (tabParam && ['eid', 'points', 'skills', 'outages', 'letters', 'assets', 'update', 'guests', 'reports'].includes(tabParam)) ? tabParam : 'eid'
+  );
+
+  useEffect(() => {
+    if (tabParam && ['eid', 'points', 'skills', 'outages', 'letters', 'assets', 'update', 'guests', 'reports'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
   const [communitySkills, setCommunitySkills] = useState<CommunitySkill[]>([]);
   const [utilityOutages, setUtilityOutages] = useState<UtilityOutage[]>([]);
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
@@ -199,10 +211,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       const filtered = all.filter(l => l.houseId === selectedHouseId || l.borrowerHouseId === selectedHouseId || l.borrowerHouseId?.includes(selectedHouseId));
       setAssetLoans(filtered);
     });
-    const unsubPackages = subscribeToCollection('packages', (all: any[]) => {
-      const filtered = all.filter(p => p.recipientHouseId === selectedHouseId || p.recipientHouseId?.replace(/\s+/g, '').toLowerCase() === selectedHouseId.replace(/\s+/g, '').toLowerCase());
-      setPackages(filtered as PackageDelivery[]);
-    });
     
     return () => {
       unsubGuests();
@@ -210,7 +218,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       unsubReports();
       unsubLetters();
       unsubLoans();
-      unsubPackages();
     };
   }, [selectedHouseId]);
 
@@ -645,7 +652,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       <div className="flex items-center gap-2 bg-slate-100/80 p-1.5 border border-slate-200/50 rounded-3xl mb-8 overflow-x-auto no-scrollbar">
         {[
           { id: 'eid', label: 'E-ID Warga', shortLabel: 'E-ID', icon: QrCode },
-          { id: 'packages', label: 'Loker Paket', shortLabel: 'Paket', icon: PackageCheck },
           { id: 'points', label: 'Poin & Teladan', shortLabel: 'Poin', icon: Trophy },
           { id: 'skills', label: 'Jasa & Keahlian', shortLabel: 'Jasa', icon: Wrench },
           { id: 'outages', label: 'Info Padam PLN/Air', shortLabel: 'PLN/Air', icon: Zap },
@@ -837,17 +843,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                               <Sparkles size={11} /> {currentPoints} Pts ({citizenTier.badge})
                             </span>
                           </div>
-                          {packages.filter(p => p.status === 'Menunggu Diambil').length > 0 && (
-                            <div>
-                              <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Paket di Pos</p>
-                              <span 
-                                onClick={() => setActiveTab('packages')}
-                                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-amber-500/80 text-white border-amber-300 cursor-pointer hover:bg-amber-600 transition-all animate-pulse"
-                              >
-                                <PackageCheck size={11} /> {packages.filter(p => p.status === 'Menunggu Diambil').length} Paket Menunggu
-                              </span>
-                            </div>
-                          )}
                         </div>
                       </div>
 
@@ -2515,91 +2510,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   >
                     <Box size={14} /> Lihat Katalog Inventaris
                   </a>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {activeTab === 'packages' && (
-          <motion.div 
-            key="packages"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6 text-left"
-          >
-            <div className="flex items-center justify-between bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-              <div className="flex items-center gap-3">
-                <span className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                  <PackageCheck size={24} />
-                </span>
-                <div>
-                  <h3 className="text-xl font-black text-slate-800 tracking-tight">Loker Penitipan Paket Pos Satpam</h3>
-                  <p className="text-xs text-slate-500 font-medium">Paket belanja online yang dititipkan kurir di Pos Ronda / Satpam RT 02.</p>
-                </div>
-              </div>
-
-              {packages.filter(p => p.status === 'Menunggu Diambil').length > 0 && (
-                <span className="px-3 py-1 bg-amber-500 text-white font-black text-xs rounded-full shadow-md animate-bounce">
-                  {packages.filter(p => p.status === 'Menunggu Diambil').length} Paket Menunggu
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              {packages.length > 0 ? (
-                packages.map((pkg) => (
-                  <Card key={pkg.id} className="p-6 bg-white border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start md:items-center gap-4">
-                      <div className={`p-4 rounded-2xl shrink-0 ${
-                        pkg.status === 'Menunggu Diambil' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-slate-100 text-slate-400'
-                      }`}>
-                        <PackageCheck size={26} />
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-black uppercase tracking-wider border border-indigo-100">
-                            {pkg.courierName}
-                          </span>
-                          <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest ${
-                            pkg.status === 'Menunggu Diambil' ? 'bg-amber-100 text-amber-800 font-black animate-pulse' : 'bg-emerald-50 text-emerald-700'
-                          }`}>
-                            {pkg.status}
-                          </span>
-                        </div>
-                        <h4 className="font-black text-slate-900 text-base">
-                          Penerima: {pkg.recipientName} (Blok {pkg.recipientHouseId})
-                        </h4>
-                        {pkg.trackingNumber && (
-                          <p className="text-xs font-mono font-bold text-slate-600">No. Resi: {pkg.trackingNumber}</p>
-                        )}
-                        <p className="text-[11px] text-slate-400 font-medium">
-                          Diterima Pos: {new Date(pkg.receivedAt).toLocaleString('id-ID')} oleh {pkg.receivedBy}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 self-end md:self-center">
-                      <button
-                        onClick={() => {
-                          const waMsg = `Halo Petugas Pos Satpam RT 02, saya ${pkg.recipientName} dari Blok ${pkg.recipientHouseId} ingin konfirmasi pengambilan paket ${pkg.courierName} (Resi: ${pkg.trackingNumber || '-'}). Terima kasih.`;
-                          window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(waMsg)}`, '_blank');
-                        }}
-                        className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
-                      >
-                        <Phone size={13} /> Chat Pos Satpam
-                      </button>
-                    </div>
-                  </Card>
-                ))
-              ) : (
-                <div className="py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-3 shadow-xs">
-                    <PackageCheck size={32} />
-                  </div>
-                  <h4 className="font-black text-slate-700 text-sm mb-1">Tidak Ada Paket di Pos</h4>
-                  <p className="text-xs text-slate-400 font-medium max-w-sm mx-auto">Semua paket kurir untuk rumah Anda telah diambil atau belum ada titipan baru.</p>
                 </div>
               )}
             </div>
