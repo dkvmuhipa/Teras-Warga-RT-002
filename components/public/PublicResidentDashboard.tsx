@@ -40,11 +40,13 @@ import {
   EyeOff,
   Download,
   Check,
-  ShieldCheck
+  ShieldCheck,
+  Box,
+  PackageCheck
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
-import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest } from '../../types';
+import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, AssetBorrowRequest, InventoryItem } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -58,7 +60,9 @@ import {
   handleFirestoreError,
   OperationType,
   subscribeToPdfConfig,
-  validateResidentAccess
+  validateResidentAccess,
+  subscribeToAssetBorrowRequests,
+  subscribeToCollection
 } from '../../services/databaseService';
 import { generateSuratPengantar } from '../../services/pdfService';
 import { NotificationToggle } from '../PushNotificationManager';
@@ -77,11 +81,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [tempHouseId, setTempHouseId] = useState('');
   const [pinError, setPinError] = useState(false);
   
-  const [activeTab, setActiveTab] = useState<'eid' | 'update' | 'guests' | 'reports' | 'letters'>('eid');
+  const [activeTab, setActiveTab] = useState<'eid' | 'update' | 'guests' | 'reports' | 'letters' | 'assets'>('eid');
   const [guestReports, setGuestReports] = useState<GuestReport[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [letters, setLetters] = useState<LetterRequest[]>([]);
+  const [assetLoans, setAssetLoans] = useState<AssetBorrowRequest[]>([]);
+  const [inventoryList, setInventoryList] = useState<InventoryItem[]>([]);
   const [pdfConfig, setPdfConfig] = useState<any>(null);
   
   // Data Privacy & Security Toggles
@@ -119,8 +125,10 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
   useEffect(() => {
     const unsubPdfConfig = subscribeToPdfConfig(setPdfConfig);
+    const unsubInv = subscribeToCollection('inventory', setInventoryList);
     return () => {
       unsubPdfConfig();
+      unsubInv();
     };
   }, []);
 
@@ -131,12 +139,17 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     const unsubUpdates = subscribeToHouseUpdateRequests(selectedHouseId, setUpdateRequests);
     const unsubReports = subscribeToHouseReports(selectedHouseId, setReports);
     const unsubLetters = subscribeToHouseLetters(selectedHouseId, setLetters);
+    const unsubLoans = subscribeToAssetBorrowRequests((all) => {
+      const filtered = all.filter(l => l.houseId === selectedHouseId || l.borrowerHouseId === selectedHouseId || l.borrowerHouseId?.includes(selectedHouseId));
+      setAssetLoans(filtered);
+    });
     
     return () => {
       unsubGuests();
       unsubUpdates();
       unsubReports();
       unsubLetters();
+      unsubLoans();
     };
   }, [selectedHouseId]);
 
@@ -572,6 +585,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         {[
           { id: 'eid', label: 'E-ID Warga', shortLabel: 'E-ID', icon: QrCode },
           { id: 'letters', label: 'Status Surat', shortLabel: 'Surat', icon: FileText },
+          { id: 'assets', label: 'Pinjam Inventaris', shortLabel: 'Aset', icon: Box },
           { id: 'update', label: 'Update Data', shortLabel: 'Update', icon: FileEdit },
           { id: 'guests', label: 'Log Tamu', shortLabel: 'Tamu', icon: History },
           { id: 'reports', label: 'Laporan', shortLabel: 'Aduan', icon: AlertTriangle }
@@ -2322,6 +2336,100 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 <div className="text-center py-20 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
                   <AlertTriangle size={48} className="mx-auto text-slate-200 mb-4" />
                   <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Belum ada laporan</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'assets' && (
+          <motion.div 
+            key="assets"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6"
+          >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                    <Box size={18} />
+                  </span>
+                  <h3 className="text-xl font-black text-slate-800 tracking-tight">Peminjaman Inventaris &amp; Alat RT</h3>
+                </div>
+                <p className="text-xs text-slate-500 font-medium">Pinjam kursi, tenda, sound system, genset, atau alat pertukangan RT secara mandiri.</p>
+              </div>
+              <a 
+                href="#/inventaris"
+                className="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all shadow-md shadow-amber-500/20"
+              >
+                <Box size={16} /> Ajukan Pinjam Barang
+              </a>
+            </div>
+
+            {/* Riwayat Peminjaman Warga */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Riwayat &amp; Status Pengajuan Peminjaman Rumah Anda</h4>
+              {assetLoans.length > 0 ? (
+                assetLoans.map((loan) => (
+                  <Card key={loan.id} className="p-6 bg-white border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:border-amber-200 transition-all">
+                    <div className="flex items-start md:items-center gap-4">
+                      <div className={`p-4 rounded-2xl shrink-0 ${
+                        loan.status === 'Disetujui' || loan.status === 'Dipinjam' ? 'bg-emerald-50 text-emerald-600' :
+                        loan.status === 'Dikembalikan' ? 'bg-slate-100 text-slate-500' :
+                        loan.status === 'Ditolak' ? 'bg-rose-50 text-rose-600' :
+                        'bg-amber-50 text-amber-600'
+                      }`}>
+                        <Box size={24} />
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <h4 className="font-black text-slate-800 text-base">{loan.itemName} ({loan.quantity} Unit)</h4>
+                          <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
+                            loan.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            loan.status === 'Dipinjam' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            loan.status === 'Dikembalikan' ? 'bg-slate-100 text-slate-600 border-slate-200' :
+                            loan.status === 'Ditolak' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                            'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}>
+                            {loan.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium">Keperluan: {loan.purpose || 'Kegiatan Warga'}</p>
+                        <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                          <span className="flex items-center gap-1"><Calendar size={12} /> Pinjam: {new Date(loan.borrowDate).toLocaleDateString('id-ID')}</span>
+                          <span className="flex items-center gap-1"><Clock size={12} /> Kembali: {new Date(loan.returnDate).toLocaleDateString('id-ID')}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end md:self-center">
+                      <button
+                        onClick={() => {
+                          const waMsg = `Halo Pengurus RT 02, saya ${loan.borrowerName} dari Blok ${selectedHouseId} ingin menanyakan status peminjaman inventaris ${loan.itemName} (${loan.quantity} unit) tanggal ${new Date(loan.borrowDate).toLocaleDateString('id-ID')}.`;
+                          window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(waMsg)}`, '_blank');
+                        }}
+                        className="px-4 py-2 bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                      >
+                        <Phone size={13} /> Chat Pengurus
+                      </button>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-3 shadow-xs">
+                    <Box size={32} />
+                  </div>
+                  <h4 className="font-black text-slate-700 text-sm mb-1">Belum Ada Riwayat Peminjaman</h4>
+                  <p className="text-xs text-slate-400 font-medium max-w-sm mx-auto mb-4">Rumah Anda belum pernah mengajukan peminjaman aset inventaris RT.</p>
+                  <a 
+                    href="#/inventaris"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-600 transition-all"
+                  >
+                    <Box size={14} /> Lihat Katalog Inventaris
+                  </a>
                 </div>
               )}
             </div>
