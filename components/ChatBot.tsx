@@ -23,12 +23,14 @@ interface Message {
 }
 
 const SUGGESTIONS = [
-  { text: 'Siapa jadwal ronda malam hari ini?', label: '👮 Ronda Malam Ini', color: 'bg-indigo-50/60 border-indigo-100 text-indigo-700 hover:bg-indigo-100/80 hover:text-indigo-800' },
-  { text: 'Blok mana yang jadi pemenang Blok Terbersih bulan ini?', label: '🏆 Blok Terbersih', color: 'bg-amber-50/60 border-amber-100 text-amber-700 hover:bg-amber-100/80 hover:text-amber-800' },
-  { text: 'Apa saja syarat mengurus Surat Pengantar RT?', label: '📋 Syarat Surat', color: 'bg-emerald-50/60 border-emerald-100 text-emerald-700 hover:bg-emerald-100/80 hover:text-emerald-800' },
-  { text: 'Berapa nominal iuran bulanan warga RT 02?', label: '💰 Iuran RT02', color: 'bg-indigo-50/60 border-indigo-100 text-indigo-700 hover:bg-indigo-100/80 hover:text-indigo-800' },
-  { text: 'Kapan jadwal pengangkutan sampah organik & plastik?', label: '🗑️ Jadwal Sampah', color: 'bg-rose-50/60 border-rose-100 text-rose-700 hover:bg-rose-100/80 hover:text-rose-800' },
-  { text: 'Bisa minta daftar kontak Pengurus RT yang aktif?', label: '📞 Kontak Pengurus', color: 'bg-sky-50/60 border-sky-100 text-sky-700 hover:bg-sky-100/80 hover:text-sky-800' },
+  { text: 'Apa saja syarat mengurus Surat Pengantar RT?', label: '📋 Syarat Surat RT', icon: 'FileText', color: 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300' },
+  { text: 'Apakah ada info pemadaman listrik PLN atau air PDAM hari ini?', label: '⚡ Info Pemadaman PLN', icon: 'Zap', color: 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 hover:border-amber-300' },
+  { text: 'Bisa carikan tukang bangunan atau teknisi AC di RT 02?', label: '🛠️ Cari Jasa & Tukang', icon: 'Wrench', color: 'bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100 hover:border-sky-300' },
+  { text: 'Berapa nominal iuran bulanan warga RT 02?', label: '💰 Iuran & Kas RT', icon: 'Wallet', color: 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300' },
+  { text: 'Siapa jadwal ronda malam hari ini?', label: '👮 Jadwal Ronda Malam', icon: 'Shield', color: 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:border-purple-300' },
+  { text: 'Kapan jadwal pengangkutan sampah lingkungan?', label: '🗑️ Jadwal Sampah', icon: 'Trash2', color: 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:border-rose-300' },
+  { text: 'Minta nomor telepon darurat & kontak Pengurus RT', label: '📞 Nomor Darurat & RT', icon: 'Phone', color: 'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:border-teal-300' },
+  { text: 'Bagaimana tata tertib tamu menginap lebih dari 24 jam?', label: '📑 Aturan Lapor Tamu', icon: 'BookOpen', color: 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200' },
 ];
 
 export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, officials, houses, cashFlow, reports, settings }) => {

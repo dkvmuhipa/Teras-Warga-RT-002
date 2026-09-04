@@ -163,28 +163,44 @@ const getClientRitFallbackAnswer = (question: string, systemInstruction: string)
   const q = question.toLowerCase().trim();
 
   if (q === 'hai' || q === 'halo' || q === 'hi' || q === 'p' || q === 'tes' || q.includes('kamu bisa') || q.includes('bisa apa')) {
-    return "Halo! Bisa banget dong, mau ngobrol santai atau cari info apa nih hari ini? 😊";
+    return "Halo! Saya **Rit**, asisten virtual warga RT 02 Huntap Tondo 2 😊✨\n\nSaya siap membantu menjawab pertanyaan seputar:\n- 📋 Syarat surat pengantar RT & kelurahan\n- ⚡ Info pemadaman listrik PLN / pipa PDAM\n- 🛠️ Kontak tukang & jasa keahlian tetangga\n- 💰 Cek kas & iuran bulanan\n- 👮 Jadwal ronda & siskamling\n- 📞 Nomor darurat Palu & pengurus RT\n\nSilakan tanyakan apa saja ya!";
   }
 
-  if (q.includes('ronda') || q.includes('siskamling')) {
-    return "👮 **Jadwal Ronda Malam RT 02:**\nUntuk jadwal dan anggota regu ronda malam lengkap, Bapak/Ibu dapat mengecek langsung di menu **Informasi Publik** atau hubungi Koordinator Keamanan RT ya!";
+  if (q.includes('pln') || q.includes('padam') || q.includes('listrik') || q.includes('air') || q.includes('pdam') || q.includes('mati lampu')) {
+    return "⚡ **Info Pemadaman PLN & Air Bersih:**\nJadwal pemeliharaan trafo PLN Area Palu dan perbaikan pipa PDAM Tondo dapat dipantau langsung di papan informasi real-time kami di menu **Informasi -> Info Padam PLN/Air** atau melalui tautan direktori publik.";
+  }
+
+  if (q.includes('tukang') || q.includes('jasa') || q.includes('servis') || q.includes('ac') || q.includes('keahlian') || q.includes('katering') || q.includes('les')) {
+    return "🛠️ **Direktori Jasa & Keahlian Warga RT 02:**\nDi lingkungan kita tersedia tetangga yang melayani:\n- Pertukangan & Bangunan\n- Servis AC & Kelistrikan\n- Katering & Pesanan Nasi Kotak\n- Guru Les Privat Anak\n- Jahit Baju & Rias\n\nBisa langsung dihubungi via WhatsApp di menu **Ekonomi & Sosial -> Jasa & Keahlian Warga**!";
+  }
+
+  if (q.includes('darurat') || q.includes('polisi') || q.includes('damkar') || q.includes('ambulans') || q.includes('kontak') || q.includes('telepon')) {
+    return "📞 **Nomor Telepon Darurat & Instansi Terdekat (Kota Palu):**\n- 🚨 **Call Center Polisi:** 110 / Polsek Palu Timur\n- 🚒 **Pemadam Kebakaran (Damkar Pos Tondo):** 113 / 0451-423113\n- 🏥 **IGD RS Undata Palu:** (0451) 421270\n- ⚡ **PLN Gangguan:** 123\n- 💧 **PDAM Kota Palu:** (0451) 421234\n- 👮 **Ketua RT 02:** Silakan klik menu Pengurus RT untuk chat langsung via WhatsApp.";
+  }
+
+  if (q.includes('tamu') || q.includes('menginap') || q.includes('lapor tamu')) {
+    return "📑 **Aturan Lapor Tamu 1x24 Jam:**\nSetiap tamu keluarga atau kerabat yang menginap lebih dari 24 jam wajib dilaporkan oleh tuan rumah demi keamanan lingkungan. Pengisian form lapor tamu digital dapat diakses 24 jam di menu **Layanan -> Lapor Tamu**.";
+  }
+
+  if (q.includes('ronda') || q.includes('siskamling') || q.includes('jadwal jaga')) {
+    return "👮 **Jadwal Ronda Malam RT 02:**\nRonda siskamling aktif setiap malam pukul 22.00 - 04.00 WITA. Bapak/Ibu dapat mengecek regu jaga malam ini atau mengajukan tukar jadwal di menu **Keamanan & Siskamling**!";
   }
 
   if (q.includes('bersih') || q.includes('juara') || q.includes('blok')) {
-    return "🏆 **Papan Kebersihan Blok RT 02:**\nPenilaian kebersihan got, pekarangan, dan tanaman blok dievaluasi rutin setiap bulan oleh pengurus RT. Detail juaranya ada di Beranda Utama!";
+    return "🏆 **Papan Kebersihan Blok RT 02:**\nPenilaian kebersihan got, pekarangan, dan tanaman blok dievaluasi rutin setiap bulan oleh pengurus RT. Detail peringkatnya tercantum di Beranda Utama!";
   }
 
   if (q.includes('iuran') || q.includes('bayar') || q.includes('kas')) {
-    return "💰 **Iuran Bulanan Warga RT 02:**\nIuran rutin sebesar **Rp 25.000/bulan** (Keamanan + Kebersihan Sampah). Pembayaran dapat diserahkan ke Bendahara RT atau via portal Kas Digital.";
+    return "💰 **Iuran Bulanan Warga RT 02:**\nIuran rutin sebesar **Rp 25.000/bulan** (Keamanan + Kebersihan Sampah). Pembayaran dapat diserahkan ke Bendahara RT atau ditransfer via Kas Digital di menu *Info Kas*.";
   }
 
-  if (q.includes('sampah') || q.includes('angkut')) {
-    return "🗑️ **Jadwal Angkut Sampah RT 02:**\n- **Sampah Organik:** Senin, Rabu & Sabtu Pagi (07.00 WITA)\n- **Anorganik / Plastik:** Selasa & Jumat Sore (15.30 WITA)";
+  if (q.includes('sampah') || q.includes('angkut') || q.includes('truk')) {
+    return "🗑️ **Jadwal Angkut Sampah RT 02:**\n- **Sampah Organik:** Senin, Rabu & Sabtu Pagi (07.00 WITA)\n- **Anorganik / Plastik:** Selasa & Jumat Sore (15.30 WITA)\n\nPastikan sampah telah diikat rapi di depan pagar rumah masing-masing ya!";
   }
 
-  if (q.includes('surat') || q.includes('syarat')) {
-    return "📋 **Syarat Surat Pengantar RT:**\n1. KTP Asli Warga\n2. Kartu Keluarga (KK) Asli\n3. Lunas Iuran Bulanan Berjalan\n\nBapak/Ibu juga bisa mengajukan **Surat Mandiri secara Digital** lewat menu *Layanan Warga*!";
+  if (q.includes('surat') || q.includes('syarat') || q.includes('pengantar')) {
+    return "📋 **Syarat & Alur Surat Pengantar RT:**\n1. KTP & Kartu Keluarga (KK) Warga\n2. Lunas Iuran Bulanan Berjalan\n\nBapak/Ibu bisa langsung mengisi permohonan surat secara online di menu **Layanan -> Persuratan**. Surat PDF resmi dengan barcode tanda tangan digital akan langsung terbit!";
   }
 
-  return "Halo! Ada yang bisa saya bantu terkait jadwal ronda, kas RT, iuran warga, surat pengantar, atau informasi lingkungan RT 02? Silakan tanyakan langsung ya! 😊";
+  return "Halo! Ada yang bisa saya bantu terkait jadwal pemadaman PLN, kontak tukang/jasa warga, jadwal ronda, kas RT, iuran bulanan, surat pengantar, atau nomor darurat lingkungan RT 02? Silakan tanyakan langsung ya! 😊";
 };
