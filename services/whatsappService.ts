@@ -76,6 +76,41 @@ export const getWhatsAppGroups = async () => {
   }
 };
 
+export const formatUMKMCartOrderForWhatsApp = (
+  sellerName: string,
+  umkmName: string,
+  customerName: string,
+  customerPhone: string,
+  customerAddress: string,
+  cartItems: { name: string; price: number; quantity: number }[],
+  totalPrice: number,
+  notes?: string
+) => {
+  let msg = `🛒 *PESANAN BARU DARI PASAR WARGA RT 02*
+------------------------------------------
+Yth. *${sellerName}* (*${umkmName}*)
+
+Halo, saya tetangga dari RT 02 ingin memesan produk berikut:
+
+👤 *Nama Pemesan:* ${customerName}
+📞 *No. HP:* ${customerPhone}
+📍 *Alamat Antar / Blok:* ${customerAddress}
+
+📦 *DAFTAR PESANAN:*
+${cartItems.map((item, idx) => `${idx + 1}. ${item.name} (${item.quantity}x) = Rp ${(item.price * item.quantity).toLocaleString('id-ID')}`).join('\n')}
+
+💰 *TOTAL TAGIHAN:* *Rp ${totalPrice.toLocaleString('id-ID')}*`;
+
+  if (notes) {
+    msg += `\n\n📝 *Catatan Khusus:*
+"${notes}"`;
+  }
+
+  msg += `\n\n_Pesanan dibuat otomatis melalui Website TERAS RT 02 Huntap Tondo 2. Mohon konfirmasi ketersediaan & metode pengantaran. Terima kasih!_`;
+
+  return msg;
+};
+
 export const formatAnnouncementForWhatsApp = (title: string, content: string) => {
   return `*PENGUMUMAN RESMI RT 02*
 ------------------------------------------

@@ -376,6 +376,25 @@ export interface Report {
   archived?: boolean; // NEW: Archive status
 }
 
+export interface UMKMMenuItem {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  image?: string;
+  isAvailable?: boolean;
+}
+
+export interface UMKMReview {
+  id: string;
+  umkmId: string;
+  reviewerName: string;
+  reviewerHouseId?: string; // e.g. "C-04"
+  rating: number; // 1 - 5
+  comment: string;
+  date: string;
+}
+
 export interface UMKM {
   id: string;
   name: string;
@@ -387,12 +406,18 @@ export interface UMKM {
   address?: string;
   houseId?: string;
   operatingHours?: string;
+  openTime?: string; // e.g. "08:00"
+  closeTime?: string; // e.g. "21:00"
+  isOpenAlways?: boolean;
+  isOpenToday?: boolean; // Manual override
   gallery?: string[];
   rating?: number;
   reviewsCount?: number;
   priceRange?: string;
   isVerified?: boolean;
   featuredProduct?: string;
+  menuItems?: UMKMMenuItem[]; // Catalog of items with prices for Cart
+  reviews?: UMKMReview[];
   socialMedia?: {
     platform: 'Instagram' | 'Facebook' | 'TikTok';
     url: string;
