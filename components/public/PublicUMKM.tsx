@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, User, MessageCircle, MapPin, Phone, Star, Clock, Instagram, Globe, 
   Plus, ChevronRight, ExternalLink, ShoppingBag, Info, Package, Send, CheckCircle2, 
-  Wrench, Store, Sparkles, ShoppingCart, Trash2, X, AlertCircle, ThumbsUp, Heart, Share2, Tag
+  Wrench, Store, Sparkles, ShoppingCart, Trash2, X, AlertCircle, ThumbsUp, Heart, Share2, Tag,
+  ShieldCheck, Award, Briefcase, Calendar, DollarSign, Check, HelpCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'react-router-dom';
@@ -57,12 +58,20 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
 
   const [skillForm, setSkillForm] = useState({
     providerName: '',
+    blockName: 'Blok C',
+    houseNumber: '',
     houseId: '',
     category: 'Pertukangan & Bangunan' as CommunitySkill['category'],
     title: '',
     description: '',
     phone: '',
-    rateInfo: ''
+    rateType: 'Mulai dari',
+    rateInfo: '',
+    experienceYears: '1 - 3 Tahun',
+    workingHours: 'Fleksibel (Sesuai Janji)',
+    hasWarranty: true,
+    serviceArea: 'Khusus Huntap Tondo 2 & Sekitarnya',
+    imageUrl: ''
   });
 
   useEffect(() => {
@@ -244,27 +253,65 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
 
   const handleAddSkillSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!skillForm.title || !skillForm.providerName || !skillForm.phone) {
-      toast.error('Mohon lengkapi nama penyedia, judul keahlian, dan nomor WhatsApp.');
+    if (!skillForm.title.trim() || !skillForm.providerName.trim() || !skillForm.phone.trim()) {
+      toast.error('Mohon lengkapi nama penyedia, nama layanan, dan nomor WhatsApp.');
       return;
     }
 
+    // Susun format blok rumah yang rapi dan konsisten
+    const compiledHouseId = skillForm.houseNumber.trim()
+      ? `${skillForm.blockName}-${skillForm.houseNumber.trim().toUpperCase()}`
+      : skillForm.houseId.trim() || skillForm.blockName;
+
+    // Format nomor WhatsApp dengan kode negara Indonesia
+    let cleanPhone = skillForm.phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62' + cleanPhone.slice(1);
+    } else if (!cleanPhone.startsWith('62')) {
+      cleanPhone = '62' + cleanPhone;
+    }
+
+    // Susun format tarif
+    const compiledRateInfo = skillForm.rateInfo.trim()
+      ? `${skillForm.rateType}: ${skillForm.rateInfo.trim()}`
+      : skillForm.rateType;
+
     try {
       await addToCollection('communitySkills', {
-        ...skillForm,
+        providerName: skillForm.providerName.trim(),
+        houseId: compiledHouseId,
+        category: skillForm.category,
+        title: skillForm.title.trim(),
+        description: skillForm.description.trim(),
+        phone: cleanPhone,
+        rateInfo: compiledRateInfo,
+        experienceYears: skillForm.experienceYears,
+        workingHours: skillForm.workingHours,
+        hasWarranty: skillForm.hasWarranty,
+        serviceArea: skillForm.serviceArea,
+        imageUrl: skillForm.imageUrl.trim() || undefined,
         isAvailable: true,
+        rating: 5.0,
         createdAt: new Date().toISOString()
       });
-      toast.success('Keahlian & Jasa Anda berhasil didaftarkan di direktori warga!');
+      toast.success('Keahlian & Jasa Anda berhasil dipromosikan ke seluruh warga!');
       setIsAddSkillModalOpen(false);
       setSkillForm({
         providerName: '',
+        blockName: 'Blok C',
+        houseNumber: '',
         houseId: '',
         category: 'Pertukangan & Bangunan',
         title: '',
         description: '',
         phone: '',
-        rateInfo: ''
+        rateType: 'Mulai dari',
+        rateInfo: '',
+        experienceYears: '1 - 3 Tahun',
+        workingHours: 'Fleksibel (Sesuai Janji)',
+        hasWarranty: true,
+        serviceArea: 'Khusus Huntap Tondo 2 & Sekitarnya',
+        imageUrl: ''
       });
     } catch (err) {
       toast.error('Gagal mendaftarkan jasa. Silakan coba lagi.');
@@ -560,11 +607,42 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                     </p>
                   </div>
 
-                  <div className="p-3.5 bg-slate-50 rounded-2xl space-y-1 border border-slate-100/80 text-xs">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Penyedia Jasa (Warga RT 02)</p>
-                    <p className="font-bold text-slate-800">{skill.providerName}</p>
+                  {/* Badges Keunggulan: Garansi, Jam Terbang, Jam Siaga */}
+                  {(skill.hasWarranty || skill.experienceYears || skill.workingHours) && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {skill.hasWarranty && (
+                        <span className="inline-flex items-center gap-1 text-[9.5px] font-black px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                          <ShieldCheck size={11} className="text-emerald-600" /> Bergaransi
+                        </span>
+                      )}
+                      {skill.experienceYears && (
+                        <span className="inline-flex items-center gap-1 text-[9.5px] font-black px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
+                          <Award size={11} className="text-blue-600" /> {skill.experienceYears}
+                        </span>
+                      )}
+                      {skill.workingHours && (
+                        <span className="inline-flex items-center gap-1 text-[9.5px] font-black px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                          <Clock size={11} className="text-slate-500" /> {skill.workingHours}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="p-3.5 bg-slate-50 rounded-2xl space-y-1.5 border border-slate-100/80 text-xs">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Penyedia Jasa (Warga)</p>
+                      {skill.serviceArea && (
+                        <span className="text-[9px] font-bold text-slate-400">📍 {skill.serviceArea}</span>
+                      )}
+                    </div>
+                    <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <User size={13} className="text-slate-400" /> {skill.providerName}
+                    </p>
                     {skill.rateInfo && (
-                      <p className="text-[11px] font-bold text-emerald-600 mt-1">💰 Tarif: {skill.rateInfo}</p>
+                      <div className="pt-1 border-t border-slate-200/60 flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-slate-500">Estimasi Biaya</span>
+                        <span className="text-xs font-black text-emerald-600">💰 {skill.rateInfo}</span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -891,104 +969,321 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
         </form>
       </Modal>
 
-      {/* Modal Tambah Jasa & Keahlian Warga */}
+      {/* Modal Tambah Jasa & Keahlian Warga (Modern & Profesional) */}
       <Modal
         isOpen={isAddSkillModalOpen}
         onClose={() => setIsAddSkillModalOpen(false)}
-        title="Promosikan Jasa &amp; Keahlian Warga"
+        title="Promosikan Jasa & Keahlian Warga"
+        maxWidth="max-w-2xl"
       >
-        <form onSubmit={handleAddSkillSubmit} className="space-y-4 text-left p-1">
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleAddSkillSubmit} className="space-y-6 text-left p-1">
+          {/* Header Banner Informatif */}
+          <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-indigo-500/10 border border-amber-200/70 shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/25 mt-0.5">
+              <Sparkles size={18} />
+            </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nama Penyedia Jasa</label>
-              <input 
-                type="text"
+              <h4 className="text-xs font-black text-slate-900 tracking-tight">
+                Direktori Keahlian &amp; Jasa Komunitas Warga Huntap Tondo 2
+              </h4>
+              <p className="text-[11px] text-slate-600 font-medium leading-relaxed mt-1">
+                Bantu tetangga memenuhi kebutuhan harian sekaligus tingkatkan pendapatan keluarga Anda. Transaksi 100% langsung antar-warga tanpa potongan komisi RT.
+              </p>
+            </div>
+          </div>
+
+          {/* SEKSI 1: IDENTITAS PENYEDIA & DOMISILI */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+              <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black">1</span>
+              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Identitas Penyedia &amp; Lokasi Rumah</h4>
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                Nama Lengkap / Nama Panggilan <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text"
+                  required
+                  placeholder="Contoh: Bpk. Joko Supriyadi / Mas Rizal"
+                  value={skillForm.providerName}
+                  onChange={e => setSkillForm({ ...skillForm, providerName: e.target.value })}
+                  className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                  Blok Kawasan <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={skillForm.blockName}
+                  onChange={e => setSkillForm({ ...skillForm, blockName: e.target.value })}
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                >
+                  <option value="Blok A">Blok A (RW 19 / RT 01)</option>
+                  <option value="Blok B">Blok B (RW 19 / RT 02)</option>
+                  <option value="Blok C">Blok C (RW 19 RT 03 &amp; RW 20 RT 02)</option>
+                  <option value="Blok D">Blok D (RW 20 / RT 01)</option>
+                  <option value="Blok E">Blok E (RW 20 / RT 03)</option>
+                  <option value="Blok F">Blok F (RW 20 / RT 01 &amp; RT 03)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                  Nomor Rumah (Opsional)
+                </label>
+                <input 
+                  type="text"
+                  placeholder="Contoh: 07 / 12B"
+                  value={skillForm.houseNumber}
+                  onChange={e => setSkillForm({ ...skillForm, houseNumber: e.target.value })}
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                Nomor WhatsApp Aktif <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-xs font-black text-slate-500 flex items-center gap-1">
+                  <span>🇮🇩</span> +62
+                </span>
+                <input 
+                  type="tel"
+                  required
+                  placeholder="812-3456-7890"
+                  value={skillForm.phone.replace(/^62|^0/, '')}
+                  onChange={e => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    setSkillForm({ ...skillForm, phone: raw });
+                  }}
+                  className="w-full pl-18 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium mt-1 pl-1">
+                💡 Calon pelanggan tetangga akan langsung menghubungi WhatsApp ini saat memesan.
+              </p>
+            </div>
+          </div>
+
+          {/* SEKSI 2: KATEGORI & SPESIFIKASI LAYANAN */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+              <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-black">2</span>
+              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Kategori &amp; Nama Keahlian</h4>
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                Kategori Bidang Keahlian <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={skillForm.category}
+                onChange={e => setSkillForm({ ...skillForm, category: e.target.value as any })}
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+              >
+                <option value="Pertukangan & Bangunan">🔨 Pertukangan &amp; Bangunan (Renovasi, Cat, Plafon, Keramik)</option>
+                <option value="Elektronik & Kelistrikan">⚡ Elektronik &amp; Kelistrikan (Servis AC, Pompa Air, Kulkas, Lampu)</option>
+                <option value="Pipa & Sanitasi">🚰 Pipa, Ledeng &amp; Sanitasi Air (Saluran Mampet, Tandon, Kran Bocor)</option>
+                <option value="Pendidikan & Les">📚 Pendidikan &amp; Les Privat (Bimbel SD-SMA, Mengaji, Bahasa Asing)</option>
+                <option value="Katering & Kuliner">🍲 Katering &amp; Pesanan Kuliner (Nasi Kotak, Snack Box, Tumpeng)</option>
+                <option value="Kecantikan & Jahit">✂️ Jahit Pakaian, Vermak &amp; Rias Busana (Jahit Baju, Permak, MUA)</option>
+                <option value="Otomotif & Transportasi">🏍️ Otomotif &amp; Kendaraan (Servis Motor Panggilan, Cuci, Ganti Oli)</option>
+                <option value="IT, Komputer & Cetak">💻 Komputer, IT &amp; Desain (Install Laptop, Servis PC, Desain, Cetak)</option>
+                <option value="Taman & Kebersihan">🌿 Taman &amp; Kebersihan (Potong Rumput, Pangkas Dahan, Kuras Toren)</option>
+                <option value="Lainnya">🛠️ Keahlian &amp; Layanan Khusus Lainnya</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                Nama Layanan / Judul Promosi <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Wrench size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text"
+                  required
+                  placeholder="Contoh: Servis AC Bergaransi, Cuci AC &amp; Pasang Instalasi Rumah"
+                  value={skillForm.title}
+                  onChange={e => setSkillForm({ ...skillForm, title: e.target.value })}
+                  className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                Deskripsi Lengkap Keahlian &amp; Jangkauan Layanan <span className="text-rose-500">*</span>
+              </label>
+              <textarea 
+                rows={4}
                 required
-                placeholder="Contoh: Bpk. Joko"
-                value={skillForm.providerName}
-                onChange={e => setSkillForm({ ...skillForm, providerName: e.target.value })}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Blok Rumah</label>
-              <input 
-                type="text"
-                placeholder="Contoh: Blok B-07"
-                value={skillForm.houseId}
-                onChange={e => setSkillForm({ ...skillForm, houseId: e.target.value })}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
+                placeholder="Jelaskan secara rinci pengalaman kerja, peralatan yang Anda gunakan, garansi pengerjaan, respon panggilan, dan keunggulan jasa Anda agar tetangga semakin yakin..."
+                value={skillForm.description}
+                onChange={e => setSkillForm({ ...skillForm, description: e.target.value })}
+                className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all resize-none leading-relaxed"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nomor WhatsApp Aktif</label>
-            <input 
-              type="tel"
-              required
-              placeholder="Contoh: 081234567890"
-              value={skillForm.phone}
-              onChange={e => setSkillForm({ ...skillForm, phone: e.target.value })}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
-            />
-          </div>
+          {/* SEKSI 3: PENGALAMAN, WAKTU & JAMINAN */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+              <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">3</span>
+              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Pengalaman, Waktu &amp; Jaminan</h4>
+            </div>
 
-          <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Kategori Keahlian</label>
-            <select
-              value={skillForm.category}
-              onChange={e => setSkillForm({ ...skillForm, category: e.target.value as any })}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                  Pengalaman Kerja
+                </label>
+                <div className="relative">
+                  <Award size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <select
+                    value={skillForm.experienceYears}
+                    onChange={e => setSkillForm({ ...skillForm, experienceYears: e.target.value })}
+                    className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                  >
+                    <option value="< 1 Tahun">&lt; 1 Tahun (Pemula / Mandiri)</option>
+                    <option value="1 - 3 Tahun">1 - 3 Tahun (Cukup Berpengalaman)</option>
+                    <option value="3 - 5 Tahun">3 - 5 Tahun (Berpengalaman)</option>
+                    <option value="> 5 Tahun">&gt; 5 Tahun (Senior / Teknisi Ahli)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                  Waktu Siaga Layanan
+                </label>
+                <div className="relative">
+                  <Clock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <select
+                    value={skillForm.workingHours}
+                    onChange={e => setSkillForm({ ...skillForm, workingHours: e.target.value })}
+                    className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                  >
+                    <option value="Fleksibel (Sesuai Janji)">Fleksibel (Sesuai Janji / Janjian Dulu)</option>
+                    <option value="Pagi & Siang (08.00 - 17.00 WITA)">Pagi &amp; Siang (08.00 - 17.00 WITA)</option>
+                    <option value="Malam (Setelah Jam Kantor)">Malam Hari (Setelah Jam Kerja / 17.00+)</option>
+                    <option value="Siaga Panggilan 24 Jam">Siaga Panggilan Darurat 24 Jam</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive Toggle Garansi Pengerjaan */}
+            <div 
+              onClick={() => setSkillForm({ ...skillForm, hasWarranty: !skillForm.hasWarranty })}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                skillForm.hasWarranty 
+                  ? 'bg-emerald-50/80 border-emerald-300/80 shadow-xs' 
+                  : 'bg-white border-slate-200 hover:border-slate-300'
+              }`}
             >
-              <option value="Pertukangan & Bangunan">🔨 Pertukangan &amp; Bangunan</option>
-              <option value="Elektronik & Kelistrikan">⚡ Elektronik &amp; Kelistrikan</option>
-              <option value="Pendidikan & Les">📚 Pendidikan &amp; Les Privat</option>
-              <option value="Katering & Kuliner">🍲 Katering &amp; Pesanan Makanan</option>
-              <option value="Kecantikan & Jahit">✂️ Jahit Pakaian &amp; Rias</option>
-              <option value="Otomotif & Transportasi">🏍️ Servis Motor / Cuci Mobil</option>
-              <option value="Lainnya">🛠️ Keahlian Lainnya</option>
-            </select>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                  skillForm.hasWarranty ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400'
+                }`}>
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <p className="text-xs font-black text-slate-800">Menyediakan Garansi / Jaminan Kerapian</p>
+                  <p className="text-[10.5px] text-slate-500 font-medium">
+                    Servis atau perbaikan ulang jika timbul kendala pasca pengerjaan
+                  </p>
+                </div>
+              </div>
+
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-all ${
+                skillForm.hasWarranty 
+                  ? 'bg-emerald-600 border-emerald-600 text-white' 
+                  : 'border-slate-300 bg-white'
+              }`}>
+                {skillForm.hasWarranty && <Check size={14} className="stroke-[3]" />}
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nama Layanan / Keahlian</label>
-            <input 
-              type="text"
-              required
-              placeholder="Contoh: Servis AC &amp; Kelistrikan Rumah"
-              value={skillForm.title}
-              onChange={e => setSkillForm({ ...skillForm, title: e.target.value })}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
-            />
+          {/* SEKSI 4: TARIF & PORTOFOLIO */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+              <span className="w-6 h-6 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center text-xs font-black">4</span>
+              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Skema Tarif &amp; Portofolio (Opsional)</h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                  Tipe Tarif
+                </label>
+                <select
+                  value={skillForm.rateType}
+                  onChange={e => setSkillForm({ ...skillForm, rateType: e.target.value })}
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                >
+                  <option value="Mulai dari">Mulai dari</option>
+                  <option value="Tarif Per Jam / Harian">Tarif Per Jam / Harian</option>
+                  <option value="Sistem Borongan">Sistem Borongan / Paket</option>
+                  <option value="Sesuai Kesepakatan">Sesuai Kesepakatan (Cek Lokasi Dulu)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                  Nominal / Keterangan Biaya
+                </label>
+                <input 
+                  type="text"
+                  placeholder="Contoh: Rp 65.000 / cuci AC atau Menyesuaikan"
+                  value={skillForm.rateInfo}
+                  onChange={e => setSkillForm({ ...skillForm, rateInfo: e.target.value })}
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                Link Foto Portofolio / Hasil Kerja (Opsional)
+              </label>
+              <input 
+                type="url"
+                placeholder="https://... (Link foto pengerjaan, akun Instagram usaha, atau portofolio)"
+                value={skillForm.imageUrl}
+                onChange={e => setSkillForm({ ...skillForm, imageUrl: e.target.value })}
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Deskripsi Layanan</label>
-            <textarea 
-              rows={3}
-              required
-              placeholder="Jelaskan detail keahlian, pengalaman, garansi, atau jangkauan layanan..."
-              value={skillForm.description}
-              onChange={e => setSkillForm({ ...skillForm, description: e.target.value })}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-amber-500 resize-none"
-            />
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsAddSkillModalOpen(false)}
+              className="w-full sm:w-1/3 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xs uppercase tracking-wider rounded-2xl transition-all cursor-pointer"
+            >
+              Batalkan
+            </button>
+            <Button 
+              type="submit" 
+              className="w-full sm:w-2/3 py-4 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 hover:from-amber-700 hover:to-orange-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-amber-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
+            >
+              <CheckCircle2 size={16} /> Promosikan Jasa Sekarang
+            </Button>
           </div>
-
-          <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Estimasi Tarif / Biaya (Opsional)</label>
-            <input 
-              type="text" 
-              placeholder="Contoh: Mulai Rp 50.000 / cuci AC atau Menyesuaikan"
-              value={skillForm.rateInfo}
-              onChange={e => setSkillForm({ ...skillForm, rateInfo: e.target.value })}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
-            />
-          </div>
-
-          <Button type="submit" className="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-amber-600/20 cursor-pointer">
-            Daftarkan Jasa Sekarang
-          </Button>
         </form>
       </Modal>
     </motion.div>

@@ -320,7 +320,7 @@ export interface CommunitySkill {
   id: string;
   providerName: string;
   houseId: string;
-  category: 'Pertukangan & Bangunan' | 'Elektronik & Kelistrikan' | 'Pendidikan & Les' | 'Katering & Kuliner' | 'Kecantikan & Jahit' | 'Otomotif & Transportasi' | 'Lainnya';
+  category: 'Pertukangan & Bangunan' | 'Elektronik & Kelistrikan' | 'Pendidikan & Les' | 'Katering & Kuliner' | 'Kecantikan & Jahit' | 'Otomotif & Transportasi' | 'Lainnya' | string;
   title: string;
   description: string;
   phone: string;
@@ -328,6 +328,11 @@ export interface CommunitySkill {
   isAvailable: boolean;
   rating?: number;
   createdAt: string;
+  experienceYears?: string;
+  workingHours?: string;
+  hasWarranty?: boolean;
+  serviceArea?: string;
+  imageUrl?: string;
 }
 
 // Feature: Informasi Pemadaman PLN & PDAM (Utility Outage Notice)
