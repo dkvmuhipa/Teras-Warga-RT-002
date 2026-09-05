@@ -1533,7 +1533,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
               <span className="text-[10px] text-indigo-400 font-extrabold tracking-widest font-mono uppercase block mb-2">POS LAJU SESAR AKTIF MITIGASI</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Pos Siaga &amp; <span className="font-serif italic text-indigo-300">Lapangan Evakuasi Warga</span></h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Pos Siaga &amp; <span className="font-serif italic text-indigo-300">Titik Evakuasi Warga</span></h2>
               <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
                 Mengingat Huntap Tondo II berdiri di radius proksimitas pengaruh letupan tektonik Sesar Palu-Koro yang aktif secara berulang, kami membangun kesiapsiagaan darurat terdigitalisasi secara saksama.
               </p>
@@ -1545,7 +1545,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   </div>
                   <div>
                     <p className="text-white font-extrabold">Titik Kumpul Evakuasi Utama</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Lapangan Terbuka Utama depan Masjid Agung Al-Ikhlas Huntap Tondo 2.</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Area Terbuka Jalan Utama Huntap Tondo 2.</p>
                   </div>
                 </div>
 
@@ -1565,7 +1565,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               <h4 className="text-xs font-black text-rose-400 tracking-wider uppercase font-mono mb-4">📢 PETUNJUK KESELAMATAN SEBARAN SESAR</h4>
               <ul className="space-y-2.5 text-[11px] text-slate-300 font-medium leading-relaxed list-disc pl-4">
                 <li>Saat lindu terasa, segera beralih menuju kolong meja kokoh atau lindungi kepala Anda dengan bantal/buku tebal.</li>
-                <li>Setelah getaran reda, segera evakuasi keluarga secara beruntun lewat pintu keluar darurat luar rumah menuju lapangan luas.</li>
+                <li>Setelah getaran reda, segera evakuasi keluarga secara beruntun lewat pintu keluar darurat luar rumah menuju area jalan utama yang terbuka.</li>
                 <li>Haramkan mempercayai kabar burung desas-desus non-resmi BMKG atau isu tsunami tsunami palsu.</li>
                 <li>Tekan tombol **PANIC BUTTON** merah di bagian bawah dashboard jika Anda atau tetangga terjebak reruntuhan.</li>
               </ul>

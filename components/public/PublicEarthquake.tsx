@@ -8,6 +8,7 @@ import {
   AlertCircle, FileCheck, ExternalLink, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { InteractiveHuntapMap } from '../InteractiveHuntapMap';
 // Coordinates for Huntap Tondo 2, Palu, Sulawesi Tengah
 const TONDO_LAT = -0.8511763897139419;
 const TONDO_LON = 119.904426820635;
@@ -1069,7 +1070,7 @@ export const PublicEarthquake: React.FC = () => {
                   <div>
                     <h4 className="text-xs font-extrabold text-slate-800">Titik Kumpul Utama (Assembly Point)</h4>
                     <p className="text-[11px] text-slate-500 font-semibold leading-normal mt-0.5">
-                      Lapangan Fasilitas Umum (Depan Masjid Al-Ikhlas) Huntap Tondo 2. Area lapang terjauh dari kemungkinan runtuhan bangunan berlantai.
+                      Area Terbuka Jalan Utama Huntap Tondo 2. Area jalan poros terbuka yang aman dan berjarak aman dari kemungkinan runtuhan bangunan berlantai.
                     </p>
                   </div>
                 </div>
@@ -1205,7 +1206,7 @@ export const PublicEarthquake: React.FC = () => {
                     <ShieldCheck size={14} /> Titik Kumpul Resmi Terverifikasi
                   </div>
                   <h2 className="text-2xl md:text-3xl font-black tracking-tight">
-                    Lapangan Terbuka Fasum Blok C &amp; Gerbang Utama RT 02
+                    Area Terbuka Jalan Utama Kawasan &amp; Gerbang Utama RT 02
                   </h2>
                   <p className="text-xs md:text-sm text-slate-300 max-w-2xl leading-relaxed">
                     Zona lapang terbuka bebas dari ancaman robohan tiang listrik, dinding bata tinggi, dan kanopi parkir. Gunakan rute evakuasi terdekat dari blok hunian Anda saat guncangan gempa telah reda.
@@ -1224,6 +1225,112 @@ export const PublicEarthquake: React.FC = () => {
               </div>
             </div>
 
+            {/* PETA VEKTOR DIGITAL REMAKE INTERAKTIF */}
+            <InteractiveHuntapMap />
+
+            {/* PETA WILAYAH SITE PLAN HUNTAP TONDO 2 (ORIGINAL SCAN) */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-150">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
+                    <MapPin size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                      Peta Zonasi Wilayah &amp; Blok Huntap Tondo 2
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Site Plan pembagian wilayah RT dan RW serta sebaran blok perumahan Huntap Tondo II
+                    </p>
+                  </div>
+                </div>
+
+                <a
+                  href="/peta-wilayah-huntap-tondo-2.png"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-black uppercase tracking-wider transition-all self-start sm:self-auto cursor-pointer"
+                >
+                  <ExternalLink size={14} /> Buka Ukuran Penuh (HD)
+                </a>
+              </div>
+
+              {/* Map Preview Image */}
+              <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-950/5 group shadow-inner">
+                <img 
+                  src="/peta-wilayah-huntap-tondo-2.png" 
+                  alt="Peta Wilayah Huntap Tondo 2" 
+                  className="w-full h-auto max-h-[550px] object-contain mx-auto transition-transform duration-500 group-hover:scale-101"
+                />
+                <div className="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border border-white/10 shadow-lg">
+                  🔍 Klik Kanan / Tahan Gambar untuk Simpan
+                </div>
+              </div>
+
+              {/* Legenda Blok & Pembagian Wilayah */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+                <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200/80 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-blue-500 border border-white shadow-xs" />
+                    <p className="text-xs font-black text-blue-900">RW-19 / RT - 02 (119 KK)</p>
+                  </div>
+                  <p className="text-[11px] text-slate-600 font-medium pl-5">
+                    Zona Blok B1, B2, B3, B4, B5, B6, B7, D1 (Garis Putus-Putus Biru)
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200/80 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-sky-400 border border-white shadow-xs" />
+                    <p className="text-xs font-black text-sky-900">RW-19 / RT - 01 (110 KK)</p>
+                  </div>
+                  <p className="text-[11px] text-slate-600 font-medium pl-5">
+                    Zona Blok A1, A2, A3, A4, A5, A6 (Garis Sisi Barat)
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-emerald-500 border border-white shadow-xs" />
+                    <p className="text-xs font-black text-emerald-900">RW-19 / RT - 03 (127 KK)</p>
+                  </div>
+                  <p className="text-[11px] text-slate-600 font-medium pl-5">
+                    Zona Blok C1, C2, C3, C4, C6, A7 (Garis Hijau Sisi Selatan)
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-amber-500 border border-white shadow-xs" />
+                    <p className="text-xs font-black text-amber-900">RW-20 / RT - 02 (129 KK)</p>
+                  </div>
+                  <p className="text-[11px] text-slate-600 font-medium pl-5">
+                    Zona Blok C5, C7, C8, C9, C10, C11, C12 (Garis Oranye)
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/80 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-rose-500 border border-white shadow-xs" />
+                    <p className="text-xs font-black text-rose-900">RW-20 / RT - 03 (128 KK)</p>
+                  </div>
+                  <p className="text-[11px] text-slate-600 font-medium pl-5">
+                    Zona Blok E1 s/d E9, F4 (Garis Merah Sisi Timur)
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-indigo-600 border border-white shadow-xs" />
+                    <p className="text-xs font-black text-indigo-900">RW-20 / RT - 01 (137 KK)</p>
+                  </div>
+                  <p className="text-[11px] text-slate-600 font-medium pl-5">
+                    Zona Blok D2, D3, D4, F1, F2, F3 (Sisi Utara Timur)
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* 3 Zone Evacuation Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4 hover:border-indigo-300 transition-all">
@@ -1234,7 +1341,7 @@ export const PublicEarthquake: React.FC = () => {
                   <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600">ZONA BLOK A &amp; B</span>
                   <h3 className="text-base font-black text-slate-900 mt-1">Jalur Koridor Timur ➡️ Titik Kumpul 1</h3>
                   <p className="text-xs text-slate-500 font-medium mt-2 leading-relaxed">
-                    Keluar melalui jalan poros depan blok B menuju ke arah Lapangan Fasum Utama. Hindari melintasi gang sempit berkanopi besi.
+                    Keluar melalui jalan poros depan blok B menuju ke arah Area Jalan Utama Kawasan. Hindari melintasi gang sempit berkanopi besi.
                   </p>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl text-[11px] font-bold text-slate-600 flex items-center gap-2 border border-slate-150">
@@ -1314,7 +1421,7 @@ export const PublicEarthquake: React.FC = () => {
                   <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">LANGKAH 4</p>
                   <h4 className="font-extrabold text-slate-800 text-sm">Melapor ke Titik Kumpul</h4>
                   <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                    Tiba di lapangan titik kumpul, segera lakukan presensi anggota keluarga ke Pengurus RT / Satgas agar terdata apakah ada yang tertinggal.
+                    Tiba di area titik kumpul jalan utama, segera lakukan presensi anggota keluarga ke Pengurus RT / Satgas agar terdata apakah ada yang tertinggal.
                   </p>
                 </div>
               </div>
