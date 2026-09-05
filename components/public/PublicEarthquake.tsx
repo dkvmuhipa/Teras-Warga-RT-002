@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEarthquake, EarthquakeInfo } from '../../hooks/useEarthquake';
 import { 
   Activity, AlertTriangle, ShieldCheck, MapPin, Radio, Compass, Clock, 
   HelpCircle, Waves, Phone, ChevronRight, Share2, Info, ArrowRight,
-  ShieldAlert, Sparkles, BookOpen, HeartHandshake, Eye
+  ShieldAlert, Sparkles, BookOpen, HeartHandshake, Eye, Navigation,
+  Backpack, Flame, Droplets, CheckSquare, Heart, Shield, Check,
+  AlertCircle, FileCheck, ExternalLink, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 // Coordinates for Huntap Tondo 2, Palu, Sulawesi Tengah
@@ -37,14 +39,57 @@ const parseCoordinates = (coordStr: string) => {
   return null;
 };
 
+// Tas Siaga Checklist Data
+const SURVIVAL_ITEMS = [
+  { id: 'dokumen', category: 'Dokumen Penting', name: 'Fotokopi KTP, KK, Akta & Buku Tabungan (dalam plastik kedap air)', essential: true },
+  { id: 'air', category: 'Kebutuhan Dasar', name: 'Air mineral botol untuk 3 hari (minimal 2-3 liter per orang)', essential: true },
+  { id: 'makanan', category: 'Kebutuhan Dasar', name: 'Makanan instan / biskuit / ransum kaleng tahan lama & bergizi', essential: true },
+  { id: 'p3k', category: 'Medis & Obat', name: 'Kotak P3K (perban, antiseptik, plester) & obat resep rutin keluarga', essential: true },
+  { id: 'senter', category: 'Peralatan Taktis', name: 'Senter LED + baterai cadangan atau lampu solar darurat', essential: true },
+  { id: 'peluit', category: 'Peralatan Taktis', name: 'Peluit darurat (untuk tanda minta tolong saat tertimpa reruntuhan)', essential: true },
+  { id: 'powerbank', category: 'Komunikasi', name: 'Power bank kapasitas besar dalam kondisi terisi 100% + kabel cas', essential: true },
+  { id: 'pakaian', category: 'Sandang', name: 'Pakaian ganti (kaos, celana panjang, jaket hangat & jas hujan)', essential: false },
+  { id: 'masker', category: 'Sanitasi & Kebersihan', name: 'Masker penutup hidung & debu (N95 / bedah) + tisu basah', essential: false },
+  { id: 'uang', category: 'Keuangan', name: 'Uang tunai pecahan kecil (Rp 10.000 / Rp 20.000 / Rp 50.000)', essential: true },
+  { id: 'perlengkapan_bayi', category: 'Kebutuhan Khusus', name: 'Susu formula / pampers / makanan bayi (jika ada balita)', essential: false },
+  { id: 'selimut', category: 'Sandang', name: 'Selimut darurat / emergency foil blanket', essential: false },
+];
+
 export const PublicEarthquake: React.FC = () => {
   const { data, loading, error, refetch } = useEarthquake();
+  const [mainDisasterTab, setMainDisasterTab] = useState<'seismic' | 'evacuation' | 'survival' | 'contacts'>('seismic');
   const [activeTab, setActiveTab] = useState<'m5' | 'felt'>('m5');
   const [copiedInfo, setCopiedInfo] = useState<string | null>(null);
   const [onlySulawesi, setOnlySulawesi] = useState(true);
   const [visualizationMode, setVisualizationMode] = useState<'radar' | 'map'>('radar');
   const [mapFocus, setMapFocus] = useState<'epicenter' | 'huntap' | 'mid'>('mid');
   const [mapProvider, setMapProvider] = useState<'osm' | 'google-sat'>('osm');
+
+  // Survival Kit LocalStorage State
+  const [checkedSurvivalItems, setCheckedSurvivalItems] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('teras_survival_kit_items');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleSurvivalItem = (id: string) => {
+    setCheckedSurvivalItems(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      try {
+        localStorage.setItem('teras_survival_kit_items', JSON.stringify(next));
+      } catch (err) {
+        console.error(err);
+      }
+      return next;
+    });
+  };
+
+  const survivalProgress = Math.round(
+    (Object.values(checkedSurvivalItems).filter(Boolean).length / SURVIVAL_ITEMS.length) * 100
+  );
 
   // Helper check if earthquake is in Sulawesi region
   const isSulawesi = (rule: EarthquakeInfo) => {
@@ -143,19 +188,19 @@ export const PublicEarthquake: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb / Top Header badge */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse" />
               <p className="text-[10px] md:text-xs font-extrabold text-slate-500 uppercase tracking-widest font-mono">
-                Pusat Seismologi & Mitigasi Huntap Tondo 2
+                Pusat Tanggap Darurat &amp; Mitigasi Huntap Tondo 2
               </p>
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight font-serif">
-              Siaga Gempa <span className="text-indigo-650">BMKG</span>
+            <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+              Siaga Bencana &amp; <span className="text-rose-600 font-serif italic">Titik Kumpul</span>
             </h1>
-            <p className="text-sm font-medium text-slate-500 mt-1 max-w-xl">
-              Integrasi sistem data seismik nasional real-time BMKG guna deteksi dini, pemetaan jarak episentrum, serta prosedur darurat warga RT 02.
+            <p className="text-sm font-medium text-slate-500 mt-2 max-w-2xl leading-relaxed">
+              Pusat komando keselamatan lingkungan RT 02 Huntap Tondo 2: pemantauan gempa bumi BMKG, rute evakuasi warga, panduan tas darurat 72 jam, serta direktori donor darah sukarela.
             </p>
           </div>
 
@@ -163,15 +208,66 @@ export const PublicEarthquake: React.FC = () => {
             <button
               onClick={() => refetch()}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-black shadow-sm hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-black shadow-sm hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
             >
-              <Activity size={14} className={`${loading ? 'animate-spin text-indigo-500' : 'text-slate-500'}`} />
-              {loading ? 'MENYEGARKAN...' : 'SEGARKAN DATA'}
+              <RefreshCw size={14} className={`${loading ? 'animate-spin text-rose-500' : 'text-slate-500'}`} />
+              {loading ? 'MENYEGARKAN...' : 'SEGARKAN BMKG'}
             </button>
           </div>
         </div>
 
-        {error && (
+        {/* 4 Main Disaster Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-8 border-b border-slate-200/80">
+          <button
+            onClick={() => setMainDisasterTab('seismic')}
+            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+              mainDisasterTab === 'seismic'
+                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 scale-102'
+                : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
+            }`}
+          >
+            <Activity size={16} className={mainDisasterTab === 'seismic' ? 'text-rose-400' : 'text-slate-400'} />
+            Live Radar &amp; Gempa BMKG
+          </button>
+
+          <button
+            onClick={() => setMainDisasterTab('evacuation')}
+            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+              mainDisasterTab === 'evacuation'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 scale-102'
+                : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
+            }`}
+          >
+            <Navigation size={16} className={mainDisasterTab === 'evacuation' ? 'text-white' : 'text-indigo-500'} />
+            Peta Titik Kumpul &amp; Evakuasi
+          </button>
+
+          <button
+            onClick={() => setMainDisasterTab('survival')}
+            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+              mainDisasterTab === 'survival'
+                ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20 scale-102'
+                : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
+            }`}
+          >
+            <Backpack size={16} className={mainDisasterTab === 'survival' ? 'text-white' : 'text-amber-500'} />
+            Tas Siaga Bencana ({survivalProgress}%)
+          </button>
+
+          <button
+            onClick={() => setMainDisasterTab('contacts')}
+            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+              mainDisasterTab === 'contacts'
+                ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20 scale-102'
+                : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
+            }`}
+          >
+            <Heart size={16} className={mainDisasterTab === 'contacts' ? 'text-white' : 'text-rose-500'} />
+            Donor Darah &amp; Siaga Medis
+          </button>
+        </div>
+
+        {error && mainDisasterTab === 'seismic' && (
           <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-sm flex items-start gap-3">
             <AlertTriangle className="shrink-0 text-amber-600 mt-0.5" size={18} />
             <div>
@@ -183,7 +279,8 @@ export const PublicEarthquake: React.FC = () => {
           </div>
         )}
 
-        {/* Dashboard Grid */}
+        {/* TAB 1: SEISMIC RADAR & LIVE BMKG */}
+        {mainDisasterTab === 'seismic' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Main Content (Hero & Map Radar) */}
@@ -1094,6 +1191,355 @@ export const PublicEarthquake: React.FC = () => {
           </div>
 
         </div>
+        )}
+
+        {/* TAB 2: PETA TITIK KUMPUL & EVAKUASI HUNTAP TONDO 2 */}
+        {mainDisasterTab === 'evacuation' && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Assembly Point Hero Alert */}
+            <div className="bg-gradient-to-r from-indigo-900 to-slate-900 text-white rounded-3xl p-6 md:p-8 border border-indigo-700/50 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black uppercase tracking-wider">
+                    <ShieldCheck size={14} /> Titik Kumpul Resmi Terverifikasi
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-black tracking-tight">
+                    Lapangan Terbuka Fasum Blok C &amp; Gerbang Utama RT 02
+                  </h2>
+                  <p className="text-xs md:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                    Zona lapang terbuka bebas dari ancaman robohan tiang listrik, dinding bata tinggi, dan kanopi parkir. Gunakan rute evakuasi terdekat dari blok hunian Anda saat guncangan gempa telah reda.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                  <a
+                    href="https://maps.google.com/?q=-0.851176,119.904426"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+                  >
+                    <MapPin size={16} /> Buka Google Maps
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* 3 Zone Evacuation Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4 hover:border-indigo-300 transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-lg border border-indigo-100">
+                  1
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600">ZONA BLOK A &amp; B</span>
+                  <h3 className="text-base font-black text-slate-900 mt-1">Jalur Koridor Timur ➡️ Titik Kumpul 1</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-2 leading-relaxed">
+                    Keluar melalui jalan poros depan blok B menuju ke arah Lapangan Fasum Utama. Hindari melintasi gang sempit berkanopi besi.
+                  </p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl text-[11px] font-bold text-slate-600 flex items-center gap-2 border border-slate-150">
+                  <Clock size={14} className="text-indigo-500 shrink-0" />
+                  Waktu Evakuasi Jalan Kaki: ± 1 - 2 Menit
+                </div>
+              </div>
+
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4 hover:border-indigo-300 transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-lg border border-emerald-100">
+                  2
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600">ZONA BLOK C &amp; D</span>
+                  <h3 className="text-base font-black text-slate-900 mt-1">Jalur Koridor Barat ➡️ Halaman Posko RT</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-2 leading-relaxed">
+                    Warga Blok C &amp; D langsung menuju halaman lapang terbuka di samping pos kamling RT 02. Area steril dari kabel tegangan menengah PLN.
+                  </p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl text-[11px] font-bold text-slate-600 flex items-center gap-2 border border-slate-150">
+                  <Clock size={14} className="text-emerald-500 shrink-0" />
+                  Waktu Evakuasi Jalan Kaki: ± 45 Detik
+                </div>
+              </div>
+
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4 hover:border-rose-300 transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black text-lg border border-rose-100">
+                  3
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-600">LANSIA, IBU HAMIL &amp; BALITA</span>
+                  <h3 className="text-base font-black text-slate-900 mt-1">Prioritas Pendampingan Satgas RT</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-2 leading-relaxed">
+                    Keluarga dengan lansia atau anak kecil segera beri isyarat tanda tiup peluit atau hubungi Satgas RT agar segera dipandu evakuasi menggunakan kursi roda/tandu darurat.
+                  </p>
+                </div>
+                <div className="p-3 bg-rose-50 rounded-xl text-[11px] font-bold text-rose-700 flex items-center gap-2 border border-rose-150">
+                  <ShieldAlert size={14} className="text-rose-600 shrink-0" />
+                  Tim Satgas RT Langsung Meluncur ke Lokasi
+                </div>
+              </div>
+            </div>
+
+            {/* SOP Evakuasi Langkah Demi Langkah */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight mb-6 flex items-center gap-2">
+                <Navigation size={20} className="text-indigo-600" />
+                Standar Operasional Prosedur (SOP) Evakuasi Mandiri RT 02
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-150 space-y-2">
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">LANGKAH 1</p>
+                  <h4 className="font-extrabold text-slate-800 text-sm">Jangan Panik &amp; Lindungi Kepala</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Saat guncangan terjadi, segera lindungi kepala dengan bantal, helm, atau lengan. Matikan kompor gas jika memungkinkan tanpa membahayakan diri.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-150 space-y-2">
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">LANGKAH 2</p>
+                  <h4 className="font-extrabold text-slate-800 text-sm">Matikan MCB Listrik Utama</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Segera turunkan saklar sekring MCB PLN di depan rumah guna mencegah percikan korsleting dan kebakaran pasca-gempa.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-150 space-y-2">
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">LANGKAH 3</p>
+                  <h4 className="font-extrabold text-slate-800 text-sm">Bawa Tas Siaga Bencana</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Raih Tas Siaga 72 Jam yang diletakkan di dekat pintu keluar. Jangan membuang waktu mengemasi barang-barang berat lainnya.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-150 space-y-2">
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">LANGKAH 4</p>
+                  <h4 className="font-extrabold text-slate-800 text-sm">Melapor ke Titik Kumpul</h4>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Tiba di lapangan titik kumpul, segera lakukan presensi anggota keluarga ke Pengurus RT / Satgas agar terdata apakah ada yang tertinggal.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: CHECKLIST TAS SIAGA BENCANA 72 JAM */}
+        {mainDisasterTab === 'survival' && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Survival Kit Header Bar */}
+            <div className="bg-amber-500 text-slate-950 rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950 text-white text-[10px] font-black uppercase tracking-wider">
+                    <Backpack size={14} className="text-amber-400" /> Panduan Ketahanan Mandiri 72 Jam
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-black tracking-tight">
+                    Checklist Tas Siaga Bencana (TSB) Keluarga
+                  </h2>
+                  <p className="text-xs md:text-sm font-semibold text-slate-900 max-w-2xl leading-relaxed">
+                    Tas siaga dipersiapkan untuk bertahan hidup mandiri selama minimal 3 hari (72 jam) pertama setelah bencana sebelum bantuan logistik eksternal tiba.
+                  </p>
+                </div>
+
+                {/* Progress Circle & Counter */}
+                <div className="bg-slate-950 text-white p-5 rounded-2xl flex items-center gap-4 shrink-0 shadow-lg border border-white/10">
+                  <div className="text-center">
+                    <p className="text-3xl font-black text-amber-400">{survivalProgress}%</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Kesiapan</p>
+                  </div>
+                  <div className="h-10 w-[1px] bg-slate-800" />
+                  <div>
+                    <p className="text-xs font-bold text-white">
+                      {Object.values(checkedSurvivalItems).filter(Boolean).length} dari {SURVIVAL_ITEMS.length} Barang
+                    </p>
+                    <p className="text-[10px] text-slate-400">Tersimpan di browser Anda</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Checklist Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {SURVIVAL_ITEMS.map(item => {
+                const isChecked = !!checkedSurvivalItems[item.id];
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => toggleSurvivalItem(item.id)}
+                    className={`p-4 rounded-2xl border transition-all duration-200 flex items-start gap-3.5 cursor-pointer select-none ${
+                      isChecked
+                        ? 'bg-emerald-50/70 border-emerald-300 shadow-sm'
+                        : 'bg-white border-slate-200/80 hover:border-amber-400 hover:bg-slate-50/50'
+                    }`}
+                  >
+                    <div className={`w-6 h-6 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                      isChecked ? 'bg-emerald-600 text-white' : 'border-2 border-slate-300 bg-white'
+                    }`}>
+                      {isChecked && <Check size={15} strokeWidth={3} />}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                          {item.category}
+                        </span>
+                        {item.essential && (
+                          <span className="text-[9px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-md">
+                            WAJIB
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-xs md:text-sm font-bold leading-snug ${isChecked ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                        {item.name}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Tips Penempatan Tas */}
+            <div className="p-5 bg-amber-50 rounded-2xl border border-amber-200 text-amber-950 flex items-start gap-3">
+              <AlertCircle className="text-amber-600 shrink-0 mt-0.5" size={18} />
+              <div>
+                <h4 className="font-extrabold text-xs uppercase tracking-wider mb-1">💡 Tips Penempatan Tas Siaga</h4>
+                <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                  Letakkan tas ransel siaga bencana di tempat yang mudah dijangkau saat panik (misal: di dekat pintu utama atau bawah tempat tidur). Pastikan seluruh anggota keluarga mengetahui letak tas tersebut. Periksa tanggal kedaluwarsa obat &amp; makanan kaleng setiap 6 bulan sekali.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: DONOR DARAH SUKARELA & KONTAK GAWAT DARURAT */}
+        {mainDisasterTab === 'contacts' && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Header Direct Contacts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Emergency Hotline Palu */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-slate-150">
+                  <div className="p-2.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200">
+                    <Phone size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-lg text-slate-900">Panggilan Darurat Kota Palu</h3>
+                    <p className="text-xs text-slate-400 font-medium">Nomor bebas pulsa &amp; instansi resmi 24 jam</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 font-sans">
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                      <p className="text-xs font-black text-slate-800">BPBD Kota Palu (Posko Siaga)</p>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">(0451) 421255 / Tanggap Darurat</p>
+                    </div>
+                    <a href="tel:0451421255" className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-rose-500 transition-all">
+                      Panggil
+                    </a>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                      <p className="text-xs font-black text-slate-800">Basarnas Palu (Pencarian &amp; Pertolongan)</p>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">(0451) 481110</p>
+                    </div>
+                    <a href="tel:0451481110" className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-rose-500 transition-all">
+                      Panggil
+                    </a>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                      <p className="text-xs font-black text-slate-800">Ambulans Gawat Darurat Palu</p>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">Layanan 118 / 119</p>
+                    </div>
+                    <a href="tel:118" className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-rose-500 transition-all">
+                      Panggil
+                    </a>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                      <p className="text-xs font-black text-slate-800">Pemadam Kebakaran (Damkar) Palu</p>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">(0451) 421113</p>
+                    </div>
+                    <a href="tel:0451421113" className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-rose-500 transition-all">
+                      Panggil
+                    </a>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                      <p className="text-xs font-black text-slate-800">RSUD Undata Palu</p>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">(0451) 421270</p>
+                    </div>
+                    <a href="tel:0451421270" className="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-indigo-500 transition-all">
+                      Panggil
+                    </a>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-200">
+                    <div>
+                      <p className="text-xs font-black text-indigo-900">Satgas Bencana RT 02 (Ketua RT)</p>
+                      <p className="text-[10px] text-indigo-600 font-mono mt-0.5">WhatsApp Tanggap Warga</p>
+                    </div>
+                    <a
+                      href="https://wa.me/6285961194621?text=Halo Pengurus RT 02, ada kondisi darurat membutuhkan bantuan segera di rumah saya."
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-emerald-500 transition-all flex items-center gap-1.5"
+                    >
+                      WhatsApp
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Siaga Donor Darah Warga RT 02 */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-4 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 pb-3 border-b border-slate-150">
+                    <div className="p-2.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200">
+                      <Heart size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-lg text-slate-900">Siaga Donor Darah Antar-Tetangga</h3>
+                      <p className="text-xs text-slate-400 font-medium">Bantuan transfusi darah kilat untuk warga sakit</p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed mt-4">
+                    Kerap kali tetangga di lingkungan RT kita memerlukan transfusi darah darurat di rumah sakit dan stok PMI sedang menipis. Melalui pangkalan data warga RT 02, warga yang bersedia menjadi relawan donor darah dapat segera dihubungi.
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-3 mt-6">
+                    <div className="p-4 bg-rose-50/80 rounded-2xl border border-rose-100 text-center">
+                      <p className="text-2xl font-black text-rose-600">A / B</p>
+                      <p className="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider mt-1">Golongan A &amp; B</p>
+                    </div>
+                    <div className="p-4 bg-rose-50/80 rounded-2xl border border-rose-100 text-center">
+                      <p className="text-2xl font-black text-rose-600">AB / O</p>
+                      <p className="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider mt-1">Golongan AB &amp; O</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-100">
+                  <a
+                    href="https://wa.me/6285961194621?text=Halo Pengurus RT, saya bersedia didaftarkan sebagai sukarelawan pendonor darah aktif warga RT 02."
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 transition-all cursor-pointer"
+                  >
+                    <Heart size={16} /> Daftarkan Diri Jadi Relawan Donor
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

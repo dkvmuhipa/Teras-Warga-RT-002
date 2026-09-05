@@ -69,7 +69,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
         { path: '/info', label: 'Info RT & Kas', desc: 'Metrik keuangan, kas, agenda & pemadaman PLN', icon: LineChart, color: 'text-sky-600 bg-sky-50/70 border-sky-150' },
         { path: '/about', label: 'Tentang Kami', desc: 'Sejarah, visi kepengurusan & biografi', icon: Info, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
         { path: '/rules', label: 'Peraturan RT 02', desc: 'Tata tertib resmi warga Huntap Tondo 2', icon: Scale, color: 'text-slate-700 bg-slate-50/70 border-slate-150' },
-        { path: '/gempa', label: 'Monitor Gempa', desc: 'Siaga seismik regional & integrasi BMKG', icon: Activity, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
+        { path: '/gempa', label: 'Siaga Bencana & Gempa', desc: 'Peta evakuasi, titik kumpul & live BMKG', icon: Activity, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
         { path: '/faq', label: 'E-FAQ RT', desc: 'Solusi mandiri kebingungan harian warga', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/70 border-violet-150' },
         { path: '/kegiatan', label: 'Jadwal Agenda', desc: 'Jadwal kerja bakti, ronda & posyandu', icon: Calendar, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
       ]
