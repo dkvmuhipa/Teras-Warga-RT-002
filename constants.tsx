@@ -1,5 +1,4 @@
-import React from 'react';
-import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, Poll, RondaCheckLog, MarketItem, GalleryItem, Checkpoint, FAQItem, Document, Bill, AppEvent, MapPoint, WastePrice } from './types';
+import { House, PaymentStatus, Announcement, UMKM, Report, LetterRequest, RondaSchedule, CashFlow, Official, PdfConfig, InventoryItem, RondaCheckLog, GalleryItem, Checkpoint, FAQItem, Document, Bill, AppEvent, MapPoint, WastePrice } from './types';
 import { Home, Users, TreePine } from 'lucide-react';
 
 export const APP_NAME = "TERAS";
@@ -221,8 +220,6 @@ export const MOCK_INVENTORY: InventoryItem[] = [
     { id: '1', name: 'Tenda Terpal 4x6', total: 2, available: 2, condition: 'Baik', category: 'Perlengkapan Acara' },
 ];
 
-export const MOCK_POLLS: Poll[] = [];
-export const MOCK_MARKET_ITEMS: MarketItem[] = [];
 export const MOCK_RONDA_LOGS: RondaCheckLog[] = [];
 export const MOCK_GALLERY: GalleryItem[] = [
   { id: '1', title: 'Kerja Bakti Blok C', image: 'https://images.unsplash.com/photo-1558036117-15db5275d42b?auto=format&fit=crop&q=80', date: '2023-10-25' },

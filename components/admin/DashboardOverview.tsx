@@ -369,13 +369,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               subTab: 'announcements'
             },
             { 
-              label: 'E-Voting', 
-              icon: CheckSquare, 
+              label: 'LPJ & Laporan', 
+              icon: FileText, 
               color: 'bg-[#5c72e6]', 
               shadow: 'shadow-[#5c72e6]/30', 
-              tab: 'content', 
-              subTab: 'polls',
-              badge: 'PEMILU',
+              tab: 'reports', 
+              subTab: 'monthly',
+              badge: 'RESMI',
               badgeColor: 'bg-[#5c72e6]'
             },
             { 

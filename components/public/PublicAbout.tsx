@@ -1571,7 +1571,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               </ul>
               
               <button 
-                onClick={() => navigate('/gempa')}
+                onClick={() => navigate('/peta?tab=gempa')}
                 className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs tracking-wider uppercase rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <Activity size={14} className="animate-pulse" />

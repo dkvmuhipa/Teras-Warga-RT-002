@@ -7,7 +7,7 @@ import {
   generateMonthOptions, 
   isMonthMatch 
 } from '../../src/utils/dateUtils';
-import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, Poll, DonationCampaign, News, UtilityOutage } from '../../types';
+import { Official, CashFlow, RondaSchedule, RondaCheckLog, House, Announcement, PatrolSession, GalleryItem, FAQItem, RondaSwapRequest, Checkpoint, PaymentStatus, AppEvent, UMKM, Document, DonationCampaign, News, UtilityOutage } from '../../types';
 import { addRondaLog, startPatrolSession, visitCheckpoint, finishPatrolSession, subscribeToActivePatrols, addRondaSwapRequest, subscribeToCheckpoints, getHouseDisplayLabel, handleFirestoreError, OperationType, checkWasteRetribution, validateOfficerAccessByName, subscribeToCollection } from '../../services/databaseService';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -33,7 +33,6 @@ interface PublicInfoProps {
   news: News[];
   umkmData: UMKM[];
   documents: Document[];
-  polls?: Poll[];
   donationCampaigns: DonationCampaign[];
   wasteDeposits: any[];
 }
@@ -41,7 +40,7 @@ interface PublicInfoProps {
 export const PublicInfo: React.FC<PublicInfoProps> = ({ 
   officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, 
   houses, announcements, galleryItems, faqItems, activePatrol,
-  events, news, umkmData, documents, polls = [], donationCampaigns, wasteDeposits
+  events, news, umkmData, documents, donationCampaigns, wasteDeposits
 }) => {
     const { summaries, getPaymentStatus, selectedMonth, setSelectedMonth } = useFinancial();
     const [searchParams] = useSearchParams();
@@ -121,7 +120,6 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 3);
 
-    const activePolls = polls.filter(p => p.status === 'Open');
     const activeDonations = donationCampaigns.filter(c => c.status === 'Aktif');
     const featuredUMKM = umkmData.slice(0, 4);
 

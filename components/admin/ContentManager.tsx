@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Megaphone, ShoppingBag, Image, BookOpen, Calendar, HelpCircle, Sparkles, Layers, ArrowRight, Zap } from 'lucide-react';
-import { Announcement, News, Poll, UMKM, GalleryItem, AppEvent, FAQItem, House, PdfConfig } from '../../types';
+import { Announcement, News, UMKM, GalleryItem, AppEvent, FAQItem, House, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnnouncementManagement } from './AnnouncementManagement';
 import { NewsManagement } from './NewsManagement';
@@ -13,7 +13,6 @@ import { UtilityOutageManager } from './UtilityOutageManager';
 interface ContentManagerProps {
   announcements: Announcement[];
   news: News[];
-  polls?: Poll[];
   umkm: UMKM[];
   gallery: GalleryItem[];
   events: AppEvent[];
@@ -24,7 +23,7 @@ interface ContentManagerProps {
 }
 
 export const ContentManager: React.FC<ContentManagerProps> = ({ 
-  announcements, news, polls = [], umkm, gallery, events, faqItems, houses, pdfConfig,
+  announcements, news, umkm, gallery, events, faqItems, houses, pdfConfig,
   initialTab = 'announcements'
 }) => {
   const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>(initialTab);
@@ -74,7 +73,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
               Pusat Informasi & Studio Penyiaran Digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-violet-300">RT 02</span>
             </h1>
             <p className="text-slate-400 text-xs md:text-sm max-w-2xl font-medium leading-relaxed">
-              Portal berita resmi warga RT 02 untuk siaran pengumuman darurat, artikel berita lingkungan, polling musyawarah mufakat, katalog UMKM warga, dan galeri dokumentasi kegiatan.
+              Portal berita resmi warga RT 02 untuk siaran pengumuman darurat, artikel berita lingkungan, katalog UMKM warga, dan galeri dokumentasi kegiatan.
             </p>
           </div>
           

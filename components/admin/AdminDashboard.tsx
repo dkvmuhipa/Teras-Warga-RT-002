@@ -16,7 +16,7 @@ import {
 } from '../../services/databaseService';
 import { 
   House, Announcement, News, CashFlow, Official, Report, LetterRequest, 
-  RondaSchedule, InventoryItem, UMKM, Poll, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, MarketItem, PanicAlert, UpdateRequest, RondaAttendance, Role
+  RondaSchedule, InventoryItem, UMKM, Bill, RondaCheckLog, PdfConfig, GalleryItem, AppNotification, Document, PopulationReport, PopulationChangeLog, AppEvent, RondaSwapRequest, MapPoint, PatrolSession, ResidentRegistration, FAQItem, PanicAlert, UpdateRequest, RondaAttendance, Role
 } from '../../types';
 import { AdminSidebar } from './Sidebar';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -59,7 +59,6 @@ interface AdminDashboardProps {
   ronda: RondaSchedule[];
   inventory: InventoryItem[];
   umkm: UMKM[];
-  polls: Poll[];
   bills: Bill[];
   rondaLogs: RondaCheckLog[];
   rondaSwapRequests: RondaSwapRequest[];
@@ -81,7 +80,6 @@ interface AdminDashboardProps {
   guestReports: any[];
   inventoryLogs: any[];
   auditLogs: any[];
-  marketItems: MarketItem[];
   faqItems: FAQItem[];
   updateRequests: UpdateRequest[];
   incomingMails?: any[];
@@ -92,7 +90,7 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   role,
   houses, announcements, news, cashFlow, officials, reports, letters, 
-  ronda, rondaAttendance, inventory, umkm, polls, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, marketItems, faqItems, updateRequests, incomingMails = [], settings, onUpdateSettings
+  ronda, rondaAttendance, inventory, umkm, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, faqItems, updateRequests, incomingMails = [], settings, onUpdateSettings
 }) => {
   const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState('overview');
@@ -325,7 +323,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <ContentManager 
             announcements={announcements} 
             news={news} 
-            polls={polls} 
             umkm={umkm} 
             gallery={gallery} 
             events={events} 
@@ -376,9 +373,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             ronda={ronda}
             inventory={inventory}
             umkm={umkm}
-            polls={polls}
             rondaLogs={rondaLogs}
-            marketItems={marketItems}
             notifications={notifications}
             settings={settings}
             onUpdateSettings={onUpdateSettings}

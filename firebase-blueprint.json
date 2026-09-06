@@ -111,18 +111,6 @@
       },
       "required": ["houseId", "residentName", "location", "timestamp", "status"]
     },
-    "Poll": {
-      "title": "Poll",
-      "description": "Pemungutan suara digital",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "status": { "type": "string", "enum": ["Open", "Closed"] },
-        "deadline": { "type": "string" }
-      },
-      "required": ["title", "description", "status", "deadline"]
-    },
     "WasteDeposit": {
       "title": "WasteDeposit",
       "description": "Setoran bank sampah",
@@ -183,13 +171,11 @@
     "/umkm/{id}": { "schema": "UMKM", "description": "Produk UMKM" },
     "/umkmOrders/{id}": { "schema": "UMKMOrder", "description": "Pesanan UMKM" },
     "/panicAlerts/{id}": { "schema": "PanicAlert", "description": "Sinyal darurat" },
-    "/polls/{id}": { "schema": "Poll", "description": "E-Voting" },
     "/wasteBankDeposits/{id}": { "schema": "WasteDeposit", "description": "Bank Sampah" },
     "/notifications/{id}": { "schema": "object", "description": "Notifikasi sistem" },
     "/auditLogs/{id}": { "schema": "object", "description": "Log audit" },
     "/faq/{id}": { "schema": "object", "description": "FAQ" },
     "/gallery/{id}": { "schema": "object", "description": "Galeri foto" },
-    "/marketItems/{id}": { "schema": "object", "description": "Bursa warga" },
     "/residentRegistrations/{id}": { "schema": "object", "description": "Pendaftaran warga" },
     "/guestReports/{id}": { "schema": "object", "description": "Laporan tamu" },
     "/updateRequests/{id}": { "schema": "object", "description": "Update data warga" },

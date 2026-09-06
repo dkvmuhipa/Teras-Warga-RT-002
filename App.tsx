@@ -39,8 +39,8 @@ const ScrollToTop = () => {
 
 // Components & Services
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_POLLS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
-import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, Poll, PollOption, RondaCheckLog, MarketItem, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
+import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
+import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, RondaCheckLog, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
 import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
@@ -95,9 +95,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToWasteDeposits,
   subscribeToNews,
   subscribeToEvents,
-  subscribeToPolls,
   subscribeToUMKM,
-  subscribeToMarketItems,
   subscribeToPdfConfig,
   updatePdfConfig,
   subscribeToIncomingMails,
@@ -136,19 +134,12 @@ import { subscribeToMapPoints, subscribeToCollection,
   ensureMosqueExists,
   updateAdminPassword,
   addNotificationToDb,
-  addPollToDb,
-  deletePollFromDb,
-  updatePollStatus,
-  submitVote,
   saveFCMToken,
   getFCMTokens,
   addRondaLog,
   subscribeToRondaLogs,
   subscribeToRondaSwapRequests,
   validateResidentAccess,
-  addMarketItem,
-  deleteMarketItem,
-  updateMarketItemStatus,
   subscribeToBills,
   addBillToDb,
   updateBillInDb,
@@ -222,12 +213,10 @@ export const App = () => {
   const [ronda, setRonda] = useState<RondaSchedule[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [umkm, setUmkm] = useState<UMKM[]>([]);
-  const [polls, setPolls] = useState<Poll[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
   const [rondaLogs, setRondaLogs] = useState<RondaCheckLog[]>([]);
   const [rondaAttendance, setRondaAttendance] = useState<RondaAttendance[]>([]);
   const [rondaSwapRequests, setRondaSwapRequests] = useState<RondaSwapRequest[]>([]);
-  const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [mapPoints, setMapPoints] = useState<MapPoint[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -320,12 +309,10 @@ export const App = () => {
     const unsubRonda = subscribeToCollection('ronda', (data) => setRonda(data));
     const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data));
     const unsubUmkm = subscribeToCollection('umkm', (data) => setUmkm(data));
-    const unsubPolls = subscribeToCollection('polls', (data) => setPolls(data));
     const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
     const unsubIuranPayments = subscribeToCollection('iuranPayments', (data) => setIuranPayments(data));
     const unsubGuestReports = subscribeToGuestReports((data) => setGuestReports(data));
     const unsubInventoryLogs = subscribeToCollection('inventoryLogs', (data) => setInventoryLogs(data));
-    const unsubMarket = subscribeToMarketItems((data) => setMarketItems(data));
     const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
     const unsubDocuments = subscribeToDocuments((data) => setDocuments(data));
     const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
@@ -357,7 +344,7 @@ export const App = () => {
     return () => {
       unsubHouses(); unsubAnnouncements(); unsubNews(); unsubOfficials(); 
       unsubReports(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
-      unsubUmkm(); unsubPolls(); unsubPopulationReports(); unsubIuranPayments(); unsubGuestReports(); unsubInventoryLogs(); unsubMarket(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
+      unsubUmkm(); unsubPopulationReports(); unsubIuranPayments(); unsubGuestReports(); unsubInventoryLogs(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubPdfConfig(); unsubWasteDeposits();
     };
   }, []);
@@ -459,7 +446,6 @@ export const App = () => {
                                     rondaAttendance={rondaAttendance}
                                     inventory={inventory} 
                                     umkm={umkm} 
-                                    polls={polls} 
                                     bills={bills} 
                                     rondaLogs={rondaLogs} 
                                     rondaSwapRequests={rondaSwapRequests} 
@@ -482,7 +468,6 @@ export const App = () => {
                                     guestReports={guestReports} 
                                     inventoryLogs={inventoryLogs} 
                                     auditLogs={auditLogs} 
-                                    marketItems={marketItems}
                                     faqItems={faqItems} 
                                     settings={settings}
                                     onUpdateSettings={handleUpdateSettings}
@@ -522,9 +507,7 @@ export const App = () => {
                         <div className="pb-24 md:pb-0">
                             <Routes>
                                 <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} mapPoints={mapPoints} />} />
-                                <Route path="/voting" element={<Navigate to="/info" replace />} />
                                 <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
-                                <Route path="/market" element={<Navigate to="/umkm" replace />} />
                                 <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
                                 <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
                                 <Route path="/layanan" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
@@ -550,7 +533,6 @@ export const App = () => {
                                     news={news}
                                     umkmData={umkm}
                                     documents={documents}
-                                    polls={polls}
                                     donationCampaigns={donationCampaigns}
                                     wasteDeposits={wasteDeposits}
                                 />} />
@@ -561,10 +543,6 @@ export const App = () => {
                                 <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
                                 <Route path="/faq" element={<PublicFAQ faqItems={faqItems} />} />
                                 <Route path="/rules" element={<PublicRules pdfConfig={pdfConfig} />} />
-                                <Route path="/gempa" element={<Navigate to="/peta?tab=gempa" replace />} />
-                                <Route path="/literasi" element={<Navigate to="/dokumen" replace />} />
-                                <Route path="/inventaris" element={<Navigate to="/layanan" replace />} />
-                                <Route path="/forum" element={<Navigate to="/info" replace />} />
                                 <Route path="/about" element={
                                     <PublicAbout 
                                         officials={officials} 

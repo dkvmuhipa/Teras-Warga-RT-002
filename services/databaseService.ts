@@ -35,7 +35,7 @@ import {
   signOut, 
   updatePassword
 } from "firebase/auth";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, Poll, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, Book, BookExchangeRequest, ForumIdea, ForumComment } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, Book, BookExchangeRequest, ForumIdea, ForumComment } from "../types";
 import { toast } from "sonner";
 
 export { OperationType, isFirebaseConfigured };
@@ -75,10 +75,8 @@ const INVENTORY_COL = "inventory";
 const UMKM_COL = "umkm"; 
 const UMKM_ORDERS_COL = "umkmOrders";
 const NOTIFICATIONS_COL = "notifications";
-const POLLS_COL = "polls";
 const RONDA_LOGS_COL = "rondaLogs";
 const PATROL_SESSIONS_COL = "patrolSessions";
-const MARKET_COL = "marketItems";
 const BILLS_COL = "bills";
 const NEWS_COL = "news";
 const CHECKPOINTS_COL = "checkpoints";
@@ -2697,100 +2695,6 @@ export const subscribeToUMKMOrders = (callback: (data: any[]) => void) => {
   });
 };
 
-// --- 10. POLLS (E-VOTING & PEMILIHAN RESMI RT) ---
-export const addPollToDb = async (poll: any) => {
-  try {
-    const { id, ...data } = poll;
-    await addDoc(collection(db, POLLS_COL), deepSanitize(data));
-    await logAction('Bilik E-Voting', `Menerbitkan agenda e-Voting / Pemilihan: ${data.title}`);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, POLLS_COL);
-  }
-};
-
-export const deletePollFromDb = async (id: string) => {
-  try {
-    await deleteDoc(doc(db, POLLS_COL, id));
-    await logAction('Hapus E-Voting', `Menghapus agenda e-Voting ID: ${id}`);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `${POLLS_COL}/${id}`);
-  }
-};
-
-export const updatePollStatus = async (id: string, status: string) => {
-  try {
-    await updateDoc(doc(db, POLLS_COL, id), { status });
-    await logAction('Status E-Voting', `Mengubah status voting ID: ${id} menjadi ${status}`);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, `${POLLS_COL}/${id}`);
-  }
-};
-
-export const updatePollInDb = async (id: string, updates: any) => {
-  try {
-    const { id: _, ...data } = updates;
-    await updateDoc(doc(db, POLLS_COL, id), deepSanitize(data));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, `${POLLS_COL}/${id}`);
-  }
-};
-
-export const submitVote = async (
-  pollId: string, 
-  targetId: string, 
-  currentPoll: Poll,
-  voterInfo?: { houseId?: string; voterName?: string }
-) => {
-  try {
-    const pollRef = doc(db, POLLS_COL, pollId);
-    
-    // Check double voting if houseId is provided
-    if (voterInfo?.houseId && currentPoll.votedHouseIds?.includes(voterInfo.houseId)) {
-      throw new Error(`Rumah / KK ${voterInfo.houseId} sudah menggunakan hak suara pada pemilihan ini.`);
-    }
-
-    const updates: any = {
-      totalVotes: increment(1)
-    };
-
-    if (voterInfo?.houseId) {
-      updates.votedHouseIds = arrayUnion(voterInfo.houseId);
-    }
-
-    // A. If this is an Official Election with Candidates
-    if (currentPoll.candidates && currentPoll.candidates.length > 0) {
-      const candIndex = currentPoll.candidates.findIndex(c => c.id === targetId);
-      if (candIndex !== -1) {
-        const newCandidates = [...currentPoll.candidates];
-        newCandidates[candIndex] = {
-          ...newCandidates[candIndex],
-          votes: (newCandidates[candIndex].votes || 0) + 1
-        };
-        updates.candidates = newCandidates;
-      }
-    } 
-    // B. If this is standard option polling
-    else if (currentPoll.options && currentPoll.options.length > 0) {
-      const optIndex = currentPoll.options.findIndex((o: any) => o.id === targetId);
-      if (optIndex !== -1) {
-        const newOptions = [...currentPoll.options];
-        newOptions[optIndex] = {
-          ...newOptions[optIndex],
-          votes: (newOptions[optIndex].votes || 0) + 1
-        };
-        updates.options = newOptions;
-      }
-    }
-
-    await updateDoc(pollRef, updates);
-    return true;
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, `${POLLS_COL}/${pollId}`);
-    throw error;
-  }
-};
-
-
 // --- 11. RONDA LOGS (DIGITAL SISKAMLING) ---
 export const addRondaLog = async (log: any) => {
   try {
@@ -2878,47 +2782,6 @@ export const subscribeToActivePatrols = (callback: (data: any[]) => void) => {
     });
 };
 
-// --- 12. BURSA WARGA (COMMUNITY MARKET) ---
-export const addMarketItem = async (item: any) => {
-  try {
-    const { id, ...data } = item;
-    await addDoc(collection(db, MARKET_COL), deepSanitize(data));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, MARKET_COL);
-  }
-};
-
-export const deleteMarketItem = async (id: string) => {
-  try {
-    await deleteDoc(doc(db, MARKET_COL, id));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `${MARKET_COL}/${id}`);
-  }
-};
-
-export const updateMarketItemStatus = async (id: string, status: string) => {
-  try {
-    await updateDoc(doc(db, MARKET_COL, id), { status });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, `${MARKET_COL}/${id}`);
-  }
-};
-
-export const subscribeToMarketItems = (callback: (data: any[]) => void) => {
-  if (!isFirebaseConfigured || !db) return () => {};
-  const q = query(collection(db, MARKET_COL));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(doc => ({
-      ...doc.data(), 
-      id: doc.id 
-    }));
-    callback(data);
-  }, (error) => {
-    handleFirestoreError(error, OperationType.LIST, MARKET_COL);
-  });
-};
-
-
 // --- 13. GALLERY ---
 const GALLERY_COL = "gallery";
 
@@ -2996,16 +2859,6 @@ export const subscribeToNews = (callback: (data: any[]) => void) => {
 
 // --- SEEDING & AUTO-MIGRATION ---
 // --- WASTE BANK SERVICES ---
-export const subscribeToPolls = (callback: (data: Poll[]) => void) => {
-    if (!isFirebaseConfigured || !db) return () => {};
-    return onSnapshot(collection(db, POLLS_COL), (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Poll));
-        callback(data);
-    }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, POLLS_COL);
-    });
-};
-
 export const subscribeToUMKM = (callback: (data: UMKM[]) => void) => {
     if (!isFirebaseConfigured || !db) return () => {};
     return onSnapshot(collection(db, UMKM_COL), (snapshot) => {
@@ -3232,30 +3085,12 @@ export const seedDatabase = async (initialData?: any) => {
           }
       }
 
-      // Seed Polls
-      const pollsSnap = await getDocs(collection(db, POLLS_COL));
-      if (pollsSnap.empty && initialData.polls && initialData.polls.length > 0) {
-          for (const p of initialData.polls) {
-              const { id, ...data } = p;
-              await addDoc(collection(db, POLLS_COL), deepSanitize(data));
-          }
-      }
-
       // Seed Ronda Logs
       const logsSnap = await getDocs(collection(db, RONDA_LOGS_COL));
       if (logsSnap.empty && initialData.rondaLogs && initialData.rondaLogs.length > 0) {
           for (const l of initialData.rondaLogs) {
               const { id, ...data } = l;
               await addDoc(collection(db, RONDA_LOGS_COL), deepSanitize(data));
-          }
-      }
-
-      // Seed Market Items (New)
-      const marketSnap = await getDocs(collection(db, MARKET_COL));
-      if (marketSnap.empty && initialData.marketItems && initialData.marketItems.length > 0) {
-          for (const m of initialData.marketItems) {
-              const { id, ...data } = m;
-              await addDoc(collection(db, MARKET_COL), deepSanitize(data));
           }
       }
 

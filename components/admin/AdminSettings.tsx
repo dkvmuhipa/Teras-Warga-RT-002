@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, Lock, Eye, EyeOff, Database, Download, Upload, AlertTriangle, Trash, Wallet, ShieldCheck, CheckCircle2, MessageSquare, Radio, RefreshCw, Key, ShieldAlert } from 'lucide-react';
 import { updatePassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
-import { House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, Poll, RondaCheckLog, MarketItem, AppNotification } from '../../types';
+import { House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, RondaCheckLog, AppNotification } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { seedDatabase, deepSanitize, safeJsonStringify, handleFirestoreError, OperationType } from '../../services/databaseService';
@@ -19,9 +19,7 @@ interface AdminSettingsProps {
   ronda: RondaSchedule[];
   inventory: InventoryItem[];
   umkm: UMKM[];
-  polls: Poll[];
   rondaLogs: RondaCheckLog[];
-  marketItems: MarketItem[];
   notifications: AppNotification[];
   settings: any;
   onUpdateSettings: (settings: any) => void;
@@ -29,7 +27,7 @@ interface AdminSettingsProps {
 
 export const AdminSettings: React.FC<AdminSettingsProps> = ({ 
   houses, announcements, cashFlow, officials, 
-  reports, letters, ronda, inventory, umkm, polls, rondaLogs, marketItems, notifications,
+  reports, letters, ronda, inventory, umkm, rondaLogs, notifications,
   settings, onUpdateSettings
 }) => {
   const confirm = useConfirm();
@@ -149,7 +147,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     try {
       const data = {
         houses, announcements, cashFlow, officials, reports, letters, 
-        ronda, inventory, umkm, polls, rondaLogs, marketItems, notifications
+        ronda, inventory, umkm, rondaLogs, notifications
       };
       const blob = new Blob([safeJsonStringify(data, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);

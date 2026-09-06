@@ -91,13 +91,6 @@ service cloud.firestore {
       allow create: if isAdmin();
     }
 
-    // Polls
-    match /polls/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-      allow update: if true;
-    }
-
     // Ronda Logs
     match /rondaLogs/{id} {
       allow read: if true;
@@ -106,12 +99,6 @@ service cloud.firestore {
 
     // Patrol Sessions
     match /patrolSessions/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
-    }
-
-    // Market Items
-    match /marketItems/{id} {
       allow read, create, update: if true;
       allow delete: if isAdmin();
     }
