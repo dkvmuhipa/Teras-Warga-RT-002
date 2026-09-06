@@ -3766,6 +3766,54 @@ export const batchSaveWaterMeterReadings = async (readings: Omit<WaterMeterReadi
   }
 };
 
+export const calculateWaterUtilityBill = (
+  usage: number,
+  config?: Partial<WaterUtilitySettings>
+) => {
+  const mode = config?.billingMode || 'pdam';
+  const baseQuota = config?.baseQuotaM3 ?? 10;
+  const baseFee = config?.baseFee ?? 35000;
+  const ratePerM3 = config?.ratePerM3 ?? 3500;
+  const maintenance = config?.maintenanceFee ?? 0;
+
+  if (mode === 'flat') {
+    return {
+      totalAmount: baseFee + maintenance,
+      baseFee,
+      excessUsage: 0,
+      excessFee: 0,
+      ratePerM3,
+      maintenanceFee: maintenance
+    };
+  }
+
+  if (mode === 'pdam') {
+    // Skema PDAM: Rp 35.000 untuk 10 m³ pertama
+    const excessUsage = Math.max(0, usage - baseQuota);
+    const excessFee = excessUsage * ratePerM3;
+    const totalAmount = baseFee + excessFee + maintenance;
+    return {
+      totalAmount,
+      baseFee,
+      excessUsage,
+      excessFee,
+      ratePerM3,
+      maintenanceFee: maintenance
+    };
+  }
+
+  // Mode metered standar
+  const totalAmount = (usage * ratePerM3) + maintenance;
+  return {
+    totalAmount,
+    baseFee: 0,
+    excessUsage: usage,
+    excessFee: usage * ratePerM3,
+    ratePerM3,
+    maintenanceFee: maintenance
+  };
+};
+
 
 
 

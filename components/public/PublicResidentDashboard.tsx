@@ -69,7 +69,8 @@ import {
   subscribeToCollection,
   subscribeToHouseWaterMeterReadings,
   addWaterMeterReading,
-  subscribeToSettings
+  subscribeToSettings,
+  calculateWaterUtilityBill
 } from '../../services/databaseService';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -122,9 +123,12 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   // Water Meter States
   const [houseWaterReadings, setHouseWaterReadings] = useState<WaterMeterReading[]>([]);
   const [waterUtilityConfig, setWaterUtilityConfig] = useState<WaterUtilitySettings>({
-    billingMode: 'metered',
-    ratePerM3: 3000,
-    maintenanceFee: 10000,
+    billingMode: 'pdam',
+    providerName: 'PDAM Kota Palu',
+    baseQuotaM3: 10,
+    baseFee: 35000,
+    ratePerM3: 3500,
+    maintenanceFee: 0,
     readingDueDate: 20
   });
   const [isWaterModalOpen, setIsWaterModalOpen] = useState(false);
@@ -208,11 +212,14 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     const unsubSettings = subscribeToSettings((data) => {
       if (data?.waterUtility) {
         setWaterUtilityConfig({
-          billingMode: data.waterUtility.billingMode ?? 'metered',
-          ratePerM3: data.waterUtility.ratePerM3 ?? 3000,
-          maintenanceFee: data.waterUtility.maintenanceFee ?? 10000,
+          billingMode: data.waterUtility.billingMode ?? 'pdam',
+          providerName: data.waterUtility.providerName ?? 'PDAM Kota Palu',
+          baseQuotaM3: data.waterUtility.baseQuotaM3 ?? 10,
+          baseFee: data.waterUtility.baseFee ?? 35000,
+          ratePerM3: data.waterUtility.ratePerM3 ?? 3500,
+          maintenanceFee: data.waterUtility.maintenanceFee ?? 0,
           readingDueDate: data.waterUtility.readingDueDate ?? 20,
-          minUsageM3: data.waterUtility.minUsageM3 ?? 0,
+          minUsageM3: data.waterUtility.minUsageM3 ?? 10,
           autoSyncToBills: data.waterUtility.autoSyncToBills ?? true
         });
       }
@@ -320,9 +327,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     setIsSubmittingWater(true);
     try {
       const usage = Math.max(0, currentVal - prevVal);
-      const totalAmount = waterUtilityConfig.billingMode === 'flat'
-        ? waterUtilityConfig.maintenanceFee
-        : (usage * waterUtilityConfig.ratePerM3) + waterUtilityConfig.maintenanceFee;
+      const bill = calculateWaterUtilityBill(usage, waterUtilityConfig);
 
       await addWaterMeterReading({
         houseId: houseIdentifier,
@@ -332,7 +337,10 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         usage,
         ratePerM3: waterUtilityConfig.ratePerM3,
         maintenanceFee: waterUtilityConfig.maintenanceFee,
-        totalAmount,
+        baseFee: bill.baseFee,
+        excessUsage: bill.excessUsage,
+        excessFee: bill.excessFee,
+        totalAmount: bill.totalAmount,
         photoUrl: waterPhoto || '',
         recordedBy: 'Warga',
         recordedByName: currentHouseData ? currentHouseData.headOfFamily : 'Warga Mandiri',
@@ -1626,13 +1634,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 <div className="space-y-2">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-cyan-100">
                     <Droplets className="w-3.5 h-3.5 animate-pulse" />
-                    Utilitas Air Bersih Hunian RT 002
+                    Utilitas Air Bersih PDAM • RT 002
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                    Catat Meter Air Mandiri
+                    Catat Meter Air Mandiri (PDAM)
                   </h3>
                   <p className="text-cyan-100 text-xs sm:text-sm max-w-xl">
-                    Kirimkan foto dan angka meteran fisik rumah Anda secara transparan setiap bulan sebelum tanggal {waterUtilityConfig.readingDueDate} untuk menjaga akurasi tagihan air keluarga.
+                    Pengelolaan air bersih kini resmi dikelola oleh <strong>PDAM Kota Palu</strong> dengan skema iuran <strong>Rp 35.000 / 10 m³ pertama</strong> (+ Rp 3.500/m³ kelebihan pemakaian). Kirim angka meteran sebelum tanggal {waterUtilityConfig.readingDueDate} setiap bulan.
                   </p>
                 </div>
 
@@ -1716,14 +1724,18 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                     Rp {currentWaterReading ? currentWaterReading.totalAmount.toLocaleString('id-ID') : 0}
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    {waterUtilityConfig.billingMode === 'flat' 
+                    {waterUtilityConfig.billingMode === 'pdam'
+                      ? `Paket Dasar PDAM (10 m³: Rp ${(waterUtilityConfig.baseFee || 35000).toLocaleString('id-ID')})`
+                      : waterUtilityConfig.billingMode === 'flat' 
                       ? 'Tarif flat lingkungan' 
-                      : `Kubikasi (${waterUtilityConfig.ratePerM3}/m³) + Beban Pompa`}
+                      : `Kubikasi (${waterUtilityConfig.ratePerM3}/m³)`}
                   </p>
                 </div>
                 <div className="text-[11px] text-slate-500 border-t border-slate-100 pt-2 flex justify-between">
-                  <span>Beban Pompa:</span>
-                  <span className="font-bold text-slate-700">Rp {waterUtilityConfig.maintenanceFee.toLocaleString('id-ID')}</span>
+                  <span>Kelebihan Pemakaian:</span>
+                  <span className="font-bold text-slate-700">
+                    {currentWaterReading ? `${currentWaterReading.excessUsage || 0} m³ (Rp ${(currentWaterReading.excessFee || 0).toLocaleString('id-ID')})` : '-'}
+                  </span>
                 </div>
               </Card>
             </div>
@@ -3535,34 +3547,48 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             </div>
 
             {/* Live Calculation Preview */}
-            {waterInputReading !== '' && Number(waterInputReading) >= previousReadingNumber && (
-              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-mono space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Estimasi Pemakaian:</span>
-                  <span className="font-bold text-blue-600">
-                    {Math.max(0, Number(waterInputReading) - previousReadingNumber)} m³
-                  </span>
+            {waterInputReading !== '' && Number(waterInputReading) >= previousReadingNumber && (() => {
+              const usage = Math.max(0, Number(waterInputReading) - previousReadingNumber);
+              const preview = calculateWaterUtilityBill(usage, waterUtilityConfig);
+
+              return (
+                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-mono space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Estimasi Pemakaian:</span>
+                    <span className="font-bold text-blue-600">{usage} m³</span>
+                  </div>
+                  {waterUtilityConfig.billingMode === 'pdam' ? (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Paket Dasar PDAM (s/d {waterUtilityConfig.baseQuotaM3 || 10} m³):</span>
+                        <span>Rp {(preview.baseFee).toLocaleString('id-ID')}</span>
+                      </div>
+                      {preview.excessUsage > 0 && (
+                        <div className="flex justify-between text-blue-600">
+                          <span>Kelebihan ({preview.excessUsage} m³ × Rp {waterUtilityConfig.ratePerM3}):</span>
+                          <span>Rp {preview.excessFee.toLocaleString('id-ID')}</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Tarif per m³:</span>
+                      <span>Rp {waterUtilityConfig.ratePerM3.toLocaleString('id-ID')}</span>
+                    </div>
+                  )}
+                  {waterUtilityConfig.maintenanceFee > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Beban Admin:</span>
+                      <span>Rp {waterUtilityConfig.maintenanceFee.toLocaleString('id-ID')}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between pt-1.5 border-t border-slate-200 font-bold text-emerald-600 text-sm">
+                    <span>Estimasi Total Tagihan:</span>
+                    <span>Rp {preview.totalAmount.toLocaleString('id-ID')}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Tarif per m³:</span>
-                  <span>Rp {waterUtilityConfig.ratePerM3.toLocaleString('id-ID')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Beban Pompa & Tandon:</span>
-                  <span>Rp {waterUtilityConfig.maintenanceFee.toLocaleString('id-ID')}</span>
-                </div>
-                <div className="flex justify-between pt-1.5 border-t border-slate-200 font-bold text-emerald-600 text-sm">
-                  <span>Estimasi Total Tagihan:</span>
-                  <span>
-                    Rp {(
-                      waterUtilityConfig.billingMode === 'flat'
-                        ? waterUtilityConfig.maintenanceFee
-                        : (Math.max(0, Number(waterInputReading) - previousReadingNumber) * waterUtilityConfig.ratePerM3) + waterUtilityConfig.maintenanceFee
-                    ).toLocaleString('id-ID')}
-                  </span>
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Upload Foto Meteran Fisik */}
             <div>

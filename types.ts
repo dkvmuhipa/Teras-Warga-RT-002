@@ -1158,7 +1158,10 @@ export interface WaterMeterReading {
   currentReading: number;       // Angka meteran akhir/bulan ini (m³)
   usage: number;                // currentReading - previousReading (m³)
   ratePerM3: number;            // Tarif per m³ saat pencatatan
-  maintenanceFee: number;       // Biaya beban/abonemen pompa
+  maintenanceFee: number;       // Biaya administrasi / beban
+  baseFee?: number;             // Biaya kuota dasar PDAM (Rp 35.000 / 10 m³)
+  excessUsage?: number;         // Kelebihan pemakaian di atas kuota dasar (m³)
+  excessFee?: number;           // Total biaya kelebihan kubikasi
   totalAmount: number;          // Total rupiah tagihan air
   photoUrl?: string;            // Foto angka meter fisik
   recordedBy: 'Warga' | 'Petugas RT';
@@ -1171,10 +1174,13 @@ export interface WaterMeterReading {
 }
 
 export interface WaterUtilitySettings {
-  billingMode: 'metered' | 'flat'; // Meteran kubikasi vs flat rate
-  ratePerM3: number;            // Misal: 3000 (Rp 3.000 / m³)
-  maintenanceFee: number;       // Misal: 10000 (Rp 10.000 beban pompa/tandon)
-  minUsageM3?: number;          // Minimum pemakaian (misal: 0 atau 5 m³)
+  billingMode: 'pdam' | 'metered' | 'flat'; // PDAM (35rb/10m³), meteran standar, atau flat
+  providerName?: string;        // Default: "PDAM Kota Palu"
+  baseQuotaM3?: number;         // Kuota dasar pemakaian PDAM, misal: 10 m³
+  baseFee?: number;             // Tarif paket dasar, misal: 35000 (Rp 35.000)
+  ratePerM3: number;            // Tarif per m³ (kelebihan di atas kuota dasar), misal: 3500 (Rp 3.500 / m³)
+  maintenanceFee: number;       // Biaya beban/administrasi meteran (default: 0)
+  minUsageM3?: number;          // Minimum pemakaian
   readingDueDate?: number;      // Batas tgl catat mandiri (misal: tgl 20)
   autoSyncToBills?: boolean;    // Otomatis update tagihan bulanan
 }

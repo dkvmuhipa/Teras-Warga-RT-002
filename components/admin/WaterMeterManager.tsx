@@ -19,7 +19,8 @@ import {
   batchSaveWaterMeterReadings, 
   verifyWaterMeterReading,
   subscribeToSettings,
-  updateSettings
+  updateSettings,
+  calculateWaterUtilityBill
 } from '../../services/databaseService';
 import { useConfirm } from '../../context/ConfirmContext';
 import { motion, AnimatePresence } from 'motion/react';
@@ -48,10 +49,13 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
 
   // Settings State
   const [waterSettings, setWaterSettings] = useState<WaterUtilitySettings>({
-    billingMode: 'metered',
-    ratePerM3: 3000,
-    maintenanceFee: 10000,
-    minUsageM3: 0,
+    billingMode: 'pdam',
+    providerName: 'PDAM Kota Palu',
+    baseQuotaM3: 10,
+    baseFee: 35000,
+    ratePerM3: 3500,
+    maintenanceFee: 0,
+    minUsageM3: 10,
     readingDueDate: 20,
     autoSyncToBills: true
   });
@@ -97,10 +101,13 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     const unsubSettings = subscribeToSettings((settingsData) => {
       if (settingsData?.waterUtility) {
         setWaterSettings({
-          billingMode: settingsData.waterUtility.billingMode ?? 'metered',
-          ratePerM3: settingsData.waterUtility.ratePerM3 ?? 3000,
-          maintenanceFee: settingsData.waterUtility.maintenanceFee ?? 10000,
-          minUsageM3: settingsData.waterUtility.minUsageM3 ?? 0,
+          billingMode: settingsData.waterUtility.billingMode ?? 'pdam',
+          providerName: settingsData.waterUtility.providerName ?? 'PDAM Kota Palu',
+          baseQuotaM3: settingsData.waterUtility.baseQuotaM3 ?? 10,
+          baseFee: settingsData.waterUtility.baseFee ?? 35000,
+          ratePerM3: settingsData.waterUtility.ratePerM3 ?? 3500,
+          maintenanceFee: settingsData.waterUtility.maintenanceFee ?? 0,
+          minUsageM3: settingsData.waterUtility.minUsageM3 ?? 10,
           readingDueDate: settingsData.waterUtility.readingDueDate ?? 20,
           autoSyncToBills: settingsData.waterUtility.autoSyncToBills ?? true
         });
@@ -282,12 +289,13 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     if (!editingReading) return;
 
     const usage = Math.max(0, editingReading.currentReading - editingReading.previousReading);
-    let total = 0;
-    if (waterSettings.billingMode === 'flat') {
-      total = waterSettings.maintenanceFee;
-    } else {
-      total = (usage * editingReading.ratePerM3) + editingReading.maintenanceFee;
-    }
+    const bill = calculateWaterUtilityBill(usage, {
+      billingMode: waterSettings.billingMode,
+      baseQuotaM3: waterSettings.baseQuotaM3,
+      baseFee: waterSettings.baseFee,
+      ratePerM3: editingReading.ratePerM3,
+      maintenanceFee: editingReading.maintenanceFee
+    });
 
     try {
       await addWaterMeterReading({
@@ -298,7 +306,10 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         usage,
         ratePerM3: Number(editingReading.ratePerM3),
         maintenanceFee: Number(editingReading.maintenanceFee),
-        totalAmount: total,
+        baseFee: bill.baseFee,
+        excessUsage: bill.excessUsage,
+        excessFee: bill.excessFee,
+        totalAmount: bill.totalAmount,
         photoUrl: editingReading.photoUrl || '',
         recordedBy: editingReading.recordedBy,
         recordedByName: editingReading.recordedByName || 'Petugas RT',
@@ -344,9 +355,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       Object.entries(batchInputs).forEach(([houseId, input]) => {
         if (input.currentReading > 0 || input.prevReading > 0) {
           const usage = Math.max(0, input.currentReading - input.prevReading);
-          const totalAmount = waterSettings.billingMode === 'flat' 
-            ? waterSettings.maintenanceFee 
-            : (usage * waterSettings.ratePerM3) + waterSettings.maintenanceFee;
+          const bill = calculateWaterUtilityBill(usage, waterSettings);
 
           recordsToSave.push({
             houseId,
@@ -356,7 +365,10 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
             usage,
             ratePerM3: waterSettings.ratePerM3,
             maintenanceFee: waterSettings.maintenanceFee,
-            totalAmount,
+            baseFee: bill.baseFee,
+            excessUsage: bill.excessUsage,
+            excessFee: bill.excessFee,
+            totalAmount: bill.totalAmount,
             recordedBy: 'Petugas RT',
             recordedByName: 'Petugas RT Keliling',
             recordedAt: new Date().toISOString(),
@@ -411,12 +423,21 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     text += `Periode Tagihan: *${formattedPeriodName}*\n\n`;
 
     if (reading) {
-      text += `📊 *Rincian Pemakaian Air:*\n`;
+      text += `📊 *Rincian Pemakaian & Tagihan Air PDAM:*\n`;
       text += `• Angka Awal (Bulan Lalu) : ${reading.previousReading} m³\n`;
       text += `• Angka Akhir (Bulan Ini) : ${reading.currentReading} m³\n`;
       text += `• Total Pemakaian : *${reading.usage} m³*\n`;
-      text += `• Tarif per m³ : Rp ${reading.ratePerM3.toLocaleString('id-ID')}\n`;
-      text += `• Beban Pemeliharaan : Rp ${reading.maintenanceFee.toLocaleString('id-ID')}\n`;
+      if (waterSettings.billingMode === 'pdam') {
+        text += `• Paket Dasar PDAM (s/d ${waterSettings.baseQuotaM3 || 10} m³) : Rp ${(reading.baseFee ?? waterSettings.baseFee ?? 35000).toLocaleString('id-ID')}\n`;
+        if ((reading.excessUsage || 0) > 0) {
+          text += `• Kelebihan Pemakaian (${reading.excessUsage} m³ × Rp ${reading.ratePerM3.toLocaleString('id-ID')}) : Rp ${(reading.excessFee || 0).toLocaleString('id-ID')}\n`;
+        }
+      } else {
+        text += `• Tarif per m³ : Rp ${reading.ratePerM3.toLocaleString('id-ID')}\n`;
+      }
+      if (reading.maintenanceFee > 0) {
+        text += `• Beban Pemeliharaan/Admin : Rp ${reading.maintenanceFee.toLocaleString('id-ID')}\n`;
+      }
       text += `------------------------------------\n`;
       text += `*TOTAL TAGIHAN AIR : Rp ${reading.totalAmount.toLocaleString('id-ID')}*\n`;
       text += `------------------------------------\n`;
@@ -936,7 +957,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                     const hid = `${house.block}-${house.number}`;
                     const val = batchInputs[hid] || { currentReading: 0, prevReading: 0 };
                     const usage = Math.max(0, val.currentReading - val.prevReading);
-                    const estTotal = (usage * waterSettings.ratePerM3) + waterSettings.maintenanceFee;
+                    const estTotal = calculateWaterUtilityBill(usage, waterSettings).totalAmount;
 
                     return (
                       <tr key={hid} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
@@ -1012,7 +1033,9 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
             {/* Bottom Floating Action */}
             <div className="p-4 bg-slate-50 dark:bg-slate-800/70 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
               <span className="text-xs text-slate-500">
-                Tarif aktif: Rp {waterSettings.ratePerM3.toLocaleString('id-ID')}/m³ + Beban Rp {waterSettings.maintenanceFee.toLocaleString('id-ID')}
+                {waterSettings.billingMode === 'pdam' 
+                  ? `Skema PDAM: Rp ${(waterSettings.baseFee || 35000).toLocaleString('id-ID')} / ${waterSettings.baseQuotaM3 || 10} m³ (+ Rp ${waterSettings.ratePerM3.toLocaleString('id-ID')}/m³ kelebihan)`
+                  : `Tarif aktif: Rp ${waterSettings.ratePerM3.toLocaleString('id-ID')}/m³`}
               </span>
               <Button
                 onClick={handleSaveBatch}
@@ -1134,7 +1157,23 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2">
                 Skema Penagihan Air
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setWaterSettings(s => ({ ...s, billingMode: 'pdam' }))}
+                  className={`p-3.5 rounded-xl border text-left transition-all ${
+                    waterSettings.billingMode === 'pdam'
+                      ? 'border-cyan-500 bg-cyan-50/70 dark:bg-cyan-900/20 text-cyan-800 dark:text-cyan-200 ring-2 ring-cyan-500/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="font-bold text-sm flex items-center gap-1.5">
+                    <Droplets className="w-4 h-4 text-cyan-600" />
+                    Skema PDAM
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">Rp 35.000 / 10 m³ pertama, selebihnya per m³.</div>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setWaterSettings(s => ({ ...s, billingMode: 'metered' }))}
@@ -1144,8 +1183,8 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                       : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <div className="font-bold text-sm">Mode Kubikasi (Meteran)</div>
-                  <div className="text-xs text-slate-500 mt-1">Dihitung dari selisih angka meteran × tarif per m³ + abonemen.</div>
+                  <div className="font-bold text-sm">Kubikasi Murni</div>
+                  <div className="text-xs text-slate-500 mt-1">Volume pemakaian murni × tarif per m³.</div>
                 </button>
 
                 <button
@@ -1157,13 +1196,72 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                       : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <div className="font-bold text-sm">Mode Flat (Tarif Tetap)</div>
-                  <div className="text-xs text-slate-500 mt-1">Setiap rumah dikenakan tarif iuran air tetap per bulan.</div>
+                  <div className="font-bold text-sm">Mode Flat (Tetap)</div>
+                  <div className="text-xs text-slate-500 mt-1">Iuran air tetap setiap bulan tanpa meteran.</div>
                 </button>
               </div>
             </div>
 
-            {/* Rate Per M3 */}
+            {/* PDAM Scheme Settings */}
+            {waterSettings.billingMode === 'pdam' && (
+              <div className="p-4 bg-cyan-50/50 dark:bg-cyan-950/20 border border-cyan-100 dark:border-cyan-900/40 rounded-2xl space-y-3">
+                <div className="font-bold text-xs uppercase tracking-wider text-cyan-800 dark:text-cyan-300 flex items-center gap-1.5">
+                  <Droplets className="w-3.5 h-3.5" />
+                  Konfigurasi Paket PDAM (Pengelolaan Resmi)
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                      Kuota Dasar Pemakaian (m³)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={waterSettings.baseQuotaM3 ?? 10}
+                      onChange={(e) => setWaterSettings(s => ({ ...s, baseQuotaM3: Number(e.target.value) }))}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-0.5">Standar PDAM: 10 m³</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                      Tarif Kuota Dasar (Rp)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1000"
+                      value={waterSettings.baseFee ?? 35000}
+                      onChange={(e) => setWaterSettings(s => ({ ...s, baseFee: Number(e.target.value) }))}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-0.5">Standar PDAM: Rp 35.000</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                    Tarif Kelebihan di Atas Kuota Dasar (per m³)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="500"
+                      value={waterSettings.ratePerM3}
+                      onChange={(e) => setWaterSettings(s => ({ ...s, ratePerM3: Number(e.target.value) }))}
+                      className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Dikenakan untuk setiap m³ pemakaian di atas {waterSettings.baseQuotaM3 || 10} m³ (misal Rp 3.500/m³).</p>
+                </div>
+              </div>
+            )}
+
+            {/* Rate Per M3 for Standard Metered */}
             {waterSettings.billingMode === 'metered' && (
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
@@ -1180,14 +1278,14 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Misal: Rp 3.000 / m³.</p>
+                <p className="text-[11px] text-slate-400 mt-1">Misal: Rp 3.500 / m³.</p>
               </div>
             )}
 
-            {/* Maintenance / Abonemen Fee */}
+            {/* Maintenance / Admin Fee */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
-                Biaya Beban / Pemeliharaan Pompa & Tandon Bersama
+                Biaya Administrasi / Beban Meteran Tambahan (Opsional)
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
@@ -1201,7 +1299,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 />
               </div>
               <p className="text-[11px] text-slate-400 mt-1">
-                Biaya operasional listrik pompa submersible & perawatan pipa (misal: Rp 10.000 / bulan).
+                Biaya administrasi pemeliharaan pipa meteran warga (default: Rp 0 jika sudah terintegrasi tarif PDAM).
               </p>
             </div>
 
@@ -1284,31 +1382,58 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
             </div>
 
             {/* Live Calculation Preview */}
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl space-y-1.5 text-xs font-mono">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Volume Pemakaian:</span>
-                <span className="font-bold text-slate-800 dark:text-white">
-                  {Math.max(0, editingReading.currentReading - editingReading.previousReading)} m³
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Tarif per m³:</span>
-                <span>Rp {editingReading.ratePerM3.toLocaleString('id-ID')}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Beban Pompa:</span>
-                <span>Rp {editingReading.maintenanceFee.toLocaleString('id-ID')}</span>
-              </div>
-              <div className="flex justify-between pt-1.5 border-t border-slate-200 dark:border-slate-700 font-bold text-sm text-emerald-600">
-                <span>Estimasi Total:</span>
-                <span>
-                  Rp {(
-                    (Math.max(0, editingReading.currentReading - editingReading.previousReading) * editingReading.ratePerM3) + 
-                    editingReading.maintenanceFee
-                  ).toLocaleString('id-ID')}
-                </span>
-              </div>
-            </div>
+            {(() => {
+              const usage = Math.max(0, editingReading.currentReading - editingReading.previousReading);
+              const previewBill = calculateWaterUtilityBill(usage, {
+                billingMode: waterSettings.billingMode,
+                baseQuotaM3: waterSettings.baseQuotaM3,
+                baseFee: waterSettings.baseFee,
+                ratePerM3: editingReading.ratePerM3,
+                maintenanceFee: editingReading.maintenanceFee
+              });
+
+              return (
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl space-y-1.5 text-xs font-mono">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Volume Pemakaian:</span>
+                    <span className="font-bold text-slate-800 dark:text-white">
+                      {usage} m³
+                    </span>
+                  </div>
+                  {waterSettings.billingMode === 'pdam' ? (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Paket Dasar (s/d {waterSettings.baseQuotaM3 || 10} m³):</span>
+                        <span>Rp {(previewBill.baseFee).toLocaleString('id-ID')}</span>
+                      </div>
+                      {previewBill.excessUsage > 0 && (
+                        <div className="flex justify-between text-blue-600 dark:text-blue-400">
+                          <span>Kelebihan ({previewBill.excessUsage} m³ × Rp {editingReading.ratePerM3}):</span>
+                          <span>Rp {previewBill.excessFee.toLocaleString('id-ID')}</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Tarif per m³:</span>
+                      <span>Rp {editingReading.ratePerM3.toLocaleString('id-ID')}</span>
+                    </div>
+                  )}
+                  {editingReading.maintenanceFee > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Beban Admin:</span>
+                      <span>Rp {editingReading.maintenanceFee.toLocaleString('id-ID')}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between pt-1.5 border-t border-slate-200 dark:border-slate-700 font-bold text-sm text-emerald-600">
+                    <span>Estimasi Total:</span>
+                    <span>
+                      Rp {previewBill.totalAmount.toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Status Select */}
             <div>
