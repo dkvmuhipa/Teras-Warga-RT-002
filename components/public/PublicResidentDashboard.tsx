@@ -51,7 +51,7 @@ import {
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
-import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, AssetBorrowRequest, InventoryItem, CommunitySkill, UtilityOutage } from '../../types';
+import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, InventoryItem, CommunitySkill, UtilityOutage } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -66,7 +66,6 @@ import {
   OperationType,
   subscribeToPdfConfig,
   validateResidentAccess,
-  subscribeToAssetBorrowRequests,
   subscribeToCollection
 } from '../../services/databaseService';
 import { generateSuratPengantar } from '../../services/pdfService';

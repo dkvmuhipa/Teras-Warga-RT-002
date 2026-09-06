@@ -1069,64 +1069,6 @@ export interface UpdateRequest {
   updatedAt?: string;
 }
 
-export interface Book {
-  id: string;
-  title: string;
-  author: string;
-  category: string;
-  synopsis: string;
-  status: 'Tersedia' | 'Dipinjam' | 'Digital Only';
-  ownerName: string;
-  ownerHouseId?: string;
-  digitalUrl?: string; // If present, it can be read digitally
-  coverUrl?: string; // Optional cover image URL
-  rating?: number;
-  reviews?: {
-    reviewerName: string;
-    rating: number;
-    comment: string;
-    date: string;
-  }[];
-  createdAt: string;
-}
-
-export interface BookExchangeRequest {
-  id: string;
-  bookId: string;
-  bookTitle: string;
-  requesterName: string;
-  requesterHouseId: string;
-  requesterPhone: string;
-  status: 'Pending' | 'Disetujui' | 'Ditolak' | 'Selesai';
-  requestType: 'Pinjam Fisik' | 'Donasi Buku';
-  requestDate: string;
-  notes?: string;
-}
-
-export interface ForumComment {
-  id: string;
-  authorName: string;
-  authorHouseId: string;
-  content: string;
-  date: string;
-}
-
-export interface ForumIdea {
-  id: string;
-  title: string;
-  description: string;
-  category: 'Fasilitas' | 'Kegiatan' | 'Keamanan' | 'Sosial' | 'Ide Kreatif' | 'Lainnya';
-  authorName: string;
-  authorHouseId: string;
-  date: string;
-  upvotes: string[]; // List of house IDs (or voter identifiers)
-  downvotes: string[]; // List of house IDs
-  status: 'Aspirasi' | 'Ditinjau' | 'Disetujui' | 'Direalisasikan' | 'Ditolak';
-  comments: ForumComment[];
-  adminNotes?: string;
-  createdAt?: string;
-}
-
 export interface ResidentVehicle {
   id: string;
   houseId: string;

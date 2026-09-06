@@ -35,7 +35,7 @@ import {
   signOut, 
   updatePassword
 } from "firebase/auth";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, Book, BookExchangeRequest, ForumIdea, ForumComment } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter } from "../types";
 import { toast } from "sonner";
 
 export { OperationType, isFirebaseConfigured };
@@ -105,8 +105,6 @@ const UPDATE_REQUESTS_COL = "updateRequests";
 const OFFICIAL_LETTERS_COL = "officialLetters";
 const FCM_TOKENS_COL = "fcmTokens";
 const CONFIGS_COL = "configs";
-const BOOKS_COL = "books";
-const BOOK_REQUESTS_COL = "bookExchangeRequests";
 
 // --- FCM TOKEN SERVICES ---
 export const saveFCMToken = async (userId: string, token: string) => {
@@ -3158,86 +3156,6 @@ export const seedDatabase = async (initialData?: any) => {
     }
 };
 
-// --- BOOK & MICRO-LIBRARY SERVICES ---
-export const subscribeToBooks = (callback: (books: Book[]) => void) => {
-    if (!isFirebaseConfigured || !db) return () => {};
-    const q = query(collection(db, BOOKS_COL), orderBy("createdAt", "desc"));
-    return onSnapshot(q, (snapshot) => {
-        const books: Book[] = [];
-        snapshot.forEach((doc) => {
-            books.push({ id: doc.id, ...doc.data() } as Book);
-        });
-        callback(books);
-    }, (error) => {
-        handleFirestoreError(error, OperationType.GET, BOOKS_COL);
-    });
-};
-
-export const subscribeToBookRequests = (callback: (requests: BookExchangeRequest[]) => void) => {
-    if (!isFirebaseConfigured || !db) return () => {};
-    const q = query(collection(db, BOOK_REQUESTS_COL), orderBy("requestDate", "desc"));
-    return onSnapshot(q, (snapshot) => {
-        const requests: BookExchangeRequest[] = [];
-        snapshot.forEach((doc) => {
-            requests.push({ id: doc.id, ...doc.data() } as BookExchangeRequest);
-        });
-        callback(requests);
-    }, (error) => {
-        handleFirestoreError(error, OperationType.GET, BOOK_REQUESTS_COL);
-    });
-};
-
-export const addBook = async (book: Omit<Book, 'id'>) => {
-    try {
-        const data = {
-            ...book,
-            createdAt: new Date().toISOString()
-        };
-        await addDoc(collection(db, BOOKS_COL), data);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, BOOKS_COL);
-    }
-};
-
-export const updateBook = async (id: string, updates: Partial<Book>) => {
-    try {
-        const docRef = doc(db, BOOKS_COL, id);
-        await updateDoc(docRef, updates);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, `${BOOKS_COL}/${id}`);
-    }
-};
-
-export const deleteBook = async (id: string) => {
-    try {
-        const docRef = doc(db, BOOKS_COL, id);
-        await deleteDoc(docRef);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, `${BOOKS_COL}/${id}`);
-    }
-};
-
-export const addBookRequest = async (req: Omit<BookExchangeRequest, 'id'>) => {
-    try {
-        const data = {
-            ...req,
-            requestDate: new Date().toISOString()
-        };
-        await addDoc(collection(db, BOOK_REQUESTS_COL), data);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, BOOK_REQUESTS_COL);
-    }
-};
-
-export const updateBookRequest = async (id: string, updates: Partial<BookExchangeRequest>) => {
-    try {
-        const docRef = doc(db, BOOK_REQUESTS_COL, id);
-        await updateDoc(docRef, updates);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, `${BOOK_REQUESTS_COL}/${id}`);
-    }
-};
-
 // --- PAGINATED AND SCALABLE FIRESTORE QUERIES ---
 
 export const getPaginatedAuditLogs = async (pageSize: number = 15, lastVisibleDoc: any = null) => {
@@ -3302,57 +3220,6 @@ export const getPaginatedCashFlow = async (pageSize: number = 15, lastVisibleDoc
         handleFirestoreError(error, OperationType.LIST, CASHFLOW_COL);
         return { transactions: [], lastDoc: null, hasMore: false };
     }
-};
-
-// --- FORUM / MUSYAWARAH DIGITAL OPERATIONS ---
-const FORUM_IDEAS_COL = "forumIdeas";
-
-export const addForumIdea = async (idea: Omit<ForumIdea, 'id'>) => {
-    try {
-        const data = {
-            ...idea,
-            createdAt: new Date().toISOString()
-        };
-        await addDoc(collection(db, FORUM_IDEAS_COL), data);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, FORUM_IDEAS_COL);
-    }
-};
-
-export const updateForumIdea = async (id: string, updates: Partial<ForumIdea>) => {
-    try {
-        const docRef = doc(db, FORUM_IDEAS_COL, id);
-        await updateDoc(docRef, updates);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, `${FORUM_IDEAS_COL}/${id}`);
-    }
-};
-
-export const deleteForumIdea = async (id: string) => {
-    try {
-        const docRef = doc(db, FORUM_IDEAS_COL, id);
-        await deleteDoc(docRef);
-    } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, `${FORUM_IDEAS_COL}/${id}`);
-    }
-};
-
-export const subscribeToForumIdeas = (callback: (data: ForumIdea[]) => void) => {
-    if (!isFirebaseConfigured || !db) {
-        console.warn(`Firebase not configured, skipping subscription to ${FORUM_IDEAS_COL}`);
-        return () => {};
-    }
-    // Order by date descending by default
-    const q = query(collection(db, FORUM_IDEAS_COL), orderBy("date", "desc"));
-    return onSnapshot(q, (snapshot) => {
-        const ideas = snapshot.docs.map(doc => ({
-            ...doc.data(),
-            id: doc.id
-        })) as ForumIdea[];
-        callback(ideas);
-    }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, FORUM_IDEAS_COL);
-    });
 };
 
 // ==========================================
