@@ -33,7 +33,7 @@ interface PublicInfoProps {
   news: News[];
   umkmData: UMKM[];
   documents: Document[];
-  polls: Poll[];
+  polls?: Poll[];
   donationCampaigns: DonationCampaign[];
   wasteDeposits: any[];
 }
@@ -41,7 +41,7 @@ interface PublicInfoProps {
 export const PublicInfo: React.FC<PublicInfoProps> = ({ 
   officials, cashFlow, ronda, rondaLogs, rondaSwapRequests, 
   houses, announcements, galleryItems, faqItems, activePatrol,
-  events, news, umkmData, documents, polls, donationCampaigns, wasteDeposits
+  events, news, umkmData, documents, polls = [], donationCampaigns, wasteDeposits
 }) => {
     const { summaries, getPaymentStatus, selectedMonth, setSelectedMonth } = useFinancial();
     const [searchParams] = useSearchParams();
@@ -652,75 +652,41 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                 </motion.div>
             </div>
 
-            {/* Polls, Forum & Donations Summary */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Active Polls */}
-                <motion.div variants={itemVariants} className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
-                            <div className="p-2 bg-purple-50 text-purple-600 rounded-2xl border border-purple-100/80"><Vote size={20}/></div>
-                            E-Voting Active
-                        </h2>
-                        <Link to="/voting" className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Ikut Memilih</Link>
-                    </div>
-                    <div className="space-y-4">
-                        {activePolls.slice(0, 2).map(poll => (
-                            <div key={poll.id} className="p-4 bg-slate-50/80 rounded-2xl border border-slate-100">
-                                <h4 className="font-black text-slate-900 text-sm mb-3 leading-snug">{poll.title}</h4>
-                                <div className="space-y-2">
-                                    {poll.options.slice(0, 2).map(opt => {
-                                        const percentage = poll.totalVotes > 0 ? Math.round((opt.votes / poll.totalVotes) * 100) : 0;
-                                        return (
-                                            <div key={opt.id} className="space-y-1">
-                                                <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                                                    <span>{opt.text}</span>
-                                                    <span>{percentage}%</span>
-                                                </div>
-                                                <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-purple-600" style={{ width: `${percentage}%` }}></div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                        {activePolls.length === 0 && <p className="text-xs text-slate-400 font-medium italic">Tidak ada voting aktif.</p>}
-                    </div>
-                </motion.div>
-
-                {/* Active Donations */}
-                <motion.div variants={itemVariants} className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
-                            <div className="p-2 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/80"><Heart size={20}/></div>
-                            Donasi Sosial
-                        </h2>
-                        <Link to="/donasi" className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Donasi</Link>
-                    </div>
-                    <div className="space-y-4">
-                        {activeDonations.slice(0, 2).map(campaign => {
-                            const progress = campaign.targetAmount ? Math.min(100, Math.round((campaign.currentAmount / campaign.targetAmount) * 100)) : 100;
-                            return (
-                                <div key={campaign.id} className="p-4 bg-rose-50/30 rounded-2xl border border-rose-100">
-                                    <h4 className="font-bold text-slate-900 text-sm mb-2 line-clamp-1">{campaign.title}</h4>
-                                    <div className="flex justify-between text-[10px] font-black text-rose-600 mb-1">
-                                        <span>Rp {campaign.currentAmount.toLocaleString('id-ID')}</span>
-                                        <span>{progress}%</span>
+            {/* Donations Summary */}
+            {activeDonations.length > 0 && (
+                <div className="grid grid-cols-1 gap-8">
+                    {/* Active Donations */}
+                    <motion.div variants={itemVariants} className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border border-slate-100/90 shadow-xl shadow-slate-200/40">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
+                                <div className="p-2 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/80"><Heart size={20}/></div>
+                                Donasi Sosial Warga
+                            </h2>
+                            <Link to="/donasi" className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline">Lihat Semua</Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {activeDonations.slice(0, 2).map(campaign => {
+                                const progress = campaign.targetAmount ? Math.min(100, Math.round((campaign.currentAmount / campaign.targetAmount) * 100)) : 100;
+                                return (
+                                    <div key={campaign.id} className="p-4 bg-rose-50/30 rounded-2xl border border-rose-100">
+                                        <h4 className="font-bold text-slate-900 text-sm mb-2 line-clamp-1">{campaign.title}</h4>
+                                        <div className="flex justify-between text-[10px] font-black text-rose-600 mb-1">
+                                            <span>Rp {campaign.currentAmount.toLocaleString('id-ID')}</span>
+                                            <span>{progress}%</span>
+                                        </div>
+                                        <div className="h-1.5 bg-rose-100 rounded-full overflow-hidden">
+                                            <div className="h-full bg-rose-500" style={{ width: `${progress}%` }}></div>
+                                        </div>
                                     </div>
-                                    <div className="h-1.5 bg-rose-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-rose-500" style={{ width: `${progress}%` }}></div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                        {activeDonations.length === 0 && <p className="text-xs text-slate-400 font-medium italic">Tidak ada kampanye donasi aktif.</p>}
-                    </div>
-                </motion.div>
-            </div>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                </div>
+            )}
 
             {/* Digital Services Section */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Link to="/kegiatan" className="group relative bg-white/95 backdrop-blur-md p-7 rounded-[2.5rem] border border-slate-100/90 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex items-center gap-5">
                     <div className="p-4 bg-indigo-50 text-indigo-600 rounded-3xl group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-xs border border-indigo-100/80">
                         <CheckCircle2 size={30} />
@@ -739,34 +705,13 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                         <p className="text-slate-500 text-xs font-medium leading-relaxed">Monitoring kesehatan balita, lansia & ibu hamil.</p>
                     </div>
                 </Link>
-
-                <Link to="/forum" className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <MessageSquare size={120} />
+                <Link to="/donasi" className="group relative bg-white/95 backdrop-blur-md p-7 rounded-[2.5rem] border border-slate-100/90 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex items-center gap-5">
+                    <div className="p-4 bg-emerald-50 text-emerald-600 rounded-3xl group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300 shadow-xs border border-emerald-100/80">
+                        <Heart size={30} />
                     </div>
-                    <div className="relative z-10 flex items-center gap-6">
-                        <div className="p-4 bg-amber-50 text-amber-600 rounded-3xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                            <Lightbulb size={32} />
-                        </div>
-                        <div>
-                            <h3 className="text-2xl font-black text-slate-800 mb-1">Musyawarah Digital</h3>
-                            <p className="text-slate-500 text-sm font-medium">Sampaikan ide, usulan, dan aspirasi Anda untuk kemajuan RT 02 secara terbuka.</p>
-                        </div>
-                    </div>
-                </Link>
-
-                <Link to="/donasi" className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <DollarSign size={120} />
-                    </div>
-                    <div className="relative z-10 flex items-center gap-6">
-                        <div className="p-4 bg-emerald-50 text-emerald-600 rounded-3xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                            <Heart size={32} />
-                        </div>
-                        <div>
-                            <h3 className="text-2xl font-black text-slate-800 mb-1">Donasi Sosial</h3>
-                            <p className="text-slate-500 text-sm font-medium">Salurkan bantuan sosial, kas kematian, dan donasi darurat untuk warga yang membutuhkan.</p>
-                        </div>
+                    <div>
+                        <h3 className="text-xl font-black text-slate-900 mb-1 tracking-tight">Donasi Sosial</h3>
+                        <p className="text-slate-500 text-xs font-medium leading-relaxed">Salurkan bantuan sosial & donasi darurat warga.</p>
                     </div>
                 </Link>
             </motion.div>

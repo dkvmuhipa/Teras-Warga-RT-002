@@ -731,7 +731,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
             <div className="mt-6 text-center">
               <button 
-                onClick={() => navigate('/market')}
+                onClick={() => navigate('/umkm')}
                 className="inline-flex items-center gap-2 text-xs font-extrabold text-emerald-600 hover:text-emerald-800 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 MASUK PASAR UMKM DIGITAL WARGA ({totalUMKMCount} Unit Terdaftar)

@@ -17,7 +17,7 @@ import {
 import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from 'recharts';
 
 // Destructure React Router DOM components
-const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams } = ReactRouterDOM;
+const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams, Navigate } = ReactRouterDOM;
 
 const ScrollToTop = () => {
   const { pathname, hash } = useLocation();
@@ -58,8 +58,6 @@ import { PWAStatusHandler } from './components/PWAStatusHandler';
 import { PublicHeader } from './components/PublicHeader';
 import { HeroSection } from './components/HeroSection';
 import { PublicHome } from './components/public/PublicHome';
-import { PublicVoting } from './components/public/PublicVoting';
-import { PublicMarket } from './components/public/PublicMarket';
 import { PublicServices } from './components/public/PublicServices';
 import { PublicVerification } from './components/public/PublicVerification';
 import { PublicLetterDownload } from './components/public/PublicLetterDownload';
@@ -74,11 +72,7 @@ import { PublicHealth } from './components/public/PublicHealth';
 import PublicDonations from './components/public/PublicDonations';
 import { PublicFAQ } from './components/public/PublicFAQ';
 import { PublicRules } from './components/public/PublicRules';
-import { PublicEarthquake } from './components/public/PublicEarthquake';
 import { PublicAbout } from './components/public/PublicAbout';
-import { PublicLibrary } from './components/public/PublicLibrary';
-import { PublicInventory } from './components/public/PublicInventory';
-import { PublicForum } from './components/public/PublicForum';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -528,9 +522,9 @@ export const App = () => {
                         <div className="pb-24 md:pb-0">
                             <Routes>
                                 <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} mapPoints={mapPoints} />} />
-                                <Route path="/voting" element={<PublicVoting polls={polls} houses={houses} />} />
+                                <Route path="/voting" element={<Navigate to="/info" replace />} />
                                 <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
-                                <Route path="/market" element={<PublicMarket items={marketItems} />} />
+                                <Route path="/market" element={<Navigate to="/umkm" replace />} />
                                 <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
                                 <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
                                 <Route path="/layanan" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
@@ -567,10 +561,10 @@ export const App = () => {
                                 <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
                                 <Route path="/faq" element={<PublicFAQ faqItems={faqItems} />} />
                                 <Route path="/rules" element={<PublicRules pdfConfig={pdfConfig} />} />
-                                <Route path="/gempa" element={<PublicEarthquake />} />
-                                <Route path="/literasi" element={<PublicLibrary />} />
-                                <Route path="/inventaris" element={<PublicInventory inventory={inventory} houses={houses} />} />
-                                <Route path="/forum" element={<PublicForum houses={houses} isAdmin={isAdmin} />} />
+                                <Route path="/gempa" element={<Navigate to="/peta?tab=gempa" replace />} />
+                                <Route path="/literasi" element={<Navigate to="/dokumen" replace />} />
+                                <Route path="/inventaris" element={<Navigate to="/layanan" replace />} />
+                                <Route path="/forum" element={<Navigate to="/info" replace />} />
                                 <Route path="/about" element={
                                     <PublicAbout 
                                         officials={officials} 

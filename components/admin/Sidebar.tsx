@@ -120,8 +120,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Layanan & Pelaporan", 
       items: [
         { id: 'services', icon: FileText, label: 'Pusat Persuratan' },
-        { id: 'laporan-kegiatan', icon: FileText, label: 'Laporan Kegiatan Bulanan' },
-        { id: 'lpj-tahunan', icon: Award, label: 'LPJ Tahunan & Semester' },
+        { id: 'reports-lpj', icon: Award, label: 'Laporan & LPJ RT' },
         { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
       ] 
@@ -132,7 +131,6 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan' },
         { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
         { id: 'kerja-bakti', icon: Users, label: 'Kerja Bakti & Gotong Royong' },
-        { id: 'vehicles', icon: Car, label: 'Stiker Kendaraan Satpam' },
         { id: 'panic-logs', icon: ShieldAlert, label: 'Log Panic Button SOS' },
         { id: 'content', icon: Megaphone, label: 'Pusat Informasi' },
         { id: 'activities', icon: Calendar, label: 'Agenda & Presensi' },
@@ -157,11 +155,11 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       if (role === Role.ADMIN) {
         isAllowed = true;
       } else if (role === Role.TREASURER) {
-        isAllowed = ['overview', 'analytics', 'finance', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
+        isAllowed = ['overview', 'analytics', 'finance', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
       } else if (role === Role.SECRETARY) {
         isAllowed = [
           'overview', 'analytics', 'residents', 
-          'health', 'officials', 'services', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
+          'health', 'officials', 'services', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       }

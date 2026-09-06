@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Megaphone, Vote, ShoppingBag, Image, BookOpen, Calendar, HelpCircle, Sparkles, Layers, ArrowRight, Zap } from 'lucide-react';
+import { Megaphone, ShoppingBag, Image, BookOpen, Calendar, HelpCircle, Sparkles, Layers, ArrowRight, Zap } from 'lucide-react';
 import { Announcement, News, Poll, UMKM, GalleryItem, AppEvent, FAQItem, House, PdfConfig } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnnouncementManagement } from './AnnouncementManagement';
 import { NewsManagement } from './NewsManagement';
-import { PollManagement } from './PollManagement';
 import { UmkmManagement } from './UmkmManagement';
 import { GalleryManagement } from './GalleryManagement';
 import { EventManager } from './EventManager';
@@ -14,21 +13,21 @@ import { UtilityOutageManager } from './UtilityOutageManager';
 interface ContentManagerProps {
   announcements: Announcement[];
   news: News[];
-  polls: Poll[];
+  polls?: Poll[];
   umkm: UMKM[];
   gallery: GalleryItem[];
   events: AppEvent[];
   faqItems: FAQItem[];
   houses: House[];
   pdfConfig: PdfConfig;
-  initialTab?: 'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages';
+  initialTab?: 'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages';
 }
 
 export const ContentManager: React.FC<ContentManagerProps> = ({ 
-  announcements, news, polls, umkm, gallery, events, faqItems, houses, pdfConfig,
+  announcements, news, polls = [], umkm, gallery, events, faqItems, houses, pdfConfig,
   initialTab = 'announcements'
 }) => {
-  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>(initialTab);
 
   React.useEffect(() => {
     if (initialTab) {
@@ -45,7 +44,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
     return [
       { label: 'Pengumuman Resmi', count: announcements.length, color: 'text-indigo-600 bg-indigo-50 border-indigo-100', icon: Megaphone, desc: 'Informasi warga penting' },
       { label: 'Kanal Berita', count: news.length, color: 'text-emerald-600 bg-emerald-50 border-emerald-100', icon: BookOpen, desc: 'Artikel & liputan warga' },
-      { label: 'Voting / Polls', count: polls.length, color: 'text-violet-600 bg-violet-50 border-violet-100', icon: Vote, desc: 'Aspirasi & mufakat' },
+      { label: 'Agenda & Acara', count: events.length, color: 'text-orange-600 bg-orange-50 border-orange-100', icon: Calendar, desc: 'Jadwal kegiatan warga' },
       { label: 'Mitra UMKM', count: umkm.length, color: 'text-amber-600 bg-amber-50 border-amber-100', icon: ShoppingBag, desc: 'Ekonomi kreatif lokal' },
     ];
   };
@@ -118,7 +117,6 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
             <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl shadow-md shadow-indigo-100 shrink-0">
               {activeTab === 'announcements' && <Megaphone size={18} />}
               {activeTab === 'news' && <BookOpen size={18} />}
-              {activeTab === 'polls' && <Vote size={18} />}
               {activeTab === 'umkm' && <ShoppingBag size={18} />}
               {activeTab === 'gallery' && <Image size={18} />}
               {activeTab === 'events' && <Calendar size={18} />}
@@ -128,7 +126,6 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
               <h2 className="text-base font-black text-slate-900 tracking-tight leading-snug">
                 {activeTab === 'announcements' && 'Pengumuman Resmi & Broadcast WA'}
                 {activeTab === 'news' && 'Kanal Berita & Artikel Lingkungan'}
-                {activeTab === 'polls' && 'Voting & Musyawarah Mufakat'}
                 {activeTab === 'umkm' && 'Katalog Ekonomi UMKM Warga'}
                 {activeTab === 'gallery' && 'Dokumentasi & Galeri Foto'}
                 {activeTab === 'events' && 'Agenda & Kalender Kegiatan RT'}
@@ -143,14 +140,13 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
           </div>
         </div>
 
-        {/* 8 Interactive Ultra-Modern Category Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+        {/* 7 Interactive Ultra-Modern Category Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
           {[
             { id: 'announcements', icon: Megaphone, label: 'Pengumuman', count: announcements.length, color: 'text-indigo-600' },
             { id: 'outages', icon: Zap, label: 'Padam PLN/Air', count: 1, color: 'text-amber-600' },
             { id: 'news', icon: BookOpen, label: 'Berita', count: news.length, color: 'text-emerald-600' },
             { id: 'events', icon: Calendar, label: 'Acara RT', count: events.length, color: 'text-orange-600' },
-            { id: 'polls', icon: Vote, label: 'Voting', count: polls.length, color: 'text-violet-600' },
             { id: 'umkm', icon: ShoppingBag, label: 'UMKM', count: umkm.length, color: 'text-amber-600' },
             { id: 'gallery', icon: Image, label: 'Galeri', count: gallery.length, color: 'text-pink-600' },
             { id: 'faq', icon: HelpCircle, label: 'FAQ', count: faqItems.length, color: 'text-sky-600' }
@@ -197,7 +193,6 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
           {activeTab === 'announcements' && <AnnouncementManagement announcements={announcements} houses={houses} pdfConfig={pdfConfig} />}
           {activeTab === 'outages' && <UtilityOutageManager houses={houses} />}
           {activeTab === 'news' && <NewsManagement news={news} />}
-          {activeTab === 'polls' && <PollManagement polls={polls} houses={houses} pdfConfig={pdfConfig} />}
           {activeTab === 'umkm' && <UmkmManagement umkm={umkm} />}
           {activeTab === 'gallery' && <GalleryManagement gallery={gallery} />}
           {activeTab === 'events' && <EventManager events={events} />}

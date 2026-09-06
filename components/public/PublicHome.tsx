@@ -184,11 +184,11 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       link: '/register' 
     },
     { 
-      label: 'Pasar Warga', 
+      label: 'UMKM Warga', 
       icon: ShoppingCart, 
       color: 'bg-[#00c781]', 
       shadow: 'shadow-[#00c781]/30', 
-      link: '/market',
+      link: '/umkm',
       badge: 'UMKM',
       badgeColor: 'bg-[#e13f70]'
     },
@@ -207,15 +207,6 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       link: '/rules',
       badge: '13 BAB',
       badgeColor: 'bg-[#059669]'
-    },
-    { 
-      label: 'E-Voting', 
-      icon: CheckSquare, 
-      color: 'bg-[#5c72e6]', 
-      shadow: 'shadow-[#5c72e6]/30', 
-      link: '/voting',
-      badge: 'PEMILU',
-      badgeColor: 'bg-[#d946ef]'
     },
     { 
       label: 'Jasa Warga', 

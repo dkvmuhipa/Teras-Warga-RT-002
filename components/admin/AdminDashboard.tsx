@@ -35,11 +35,9 @@ const AuditLogManager = React.lazy(() => import('./AuditLogManager').then(m => (
 const NotificationCombined = React.lazy(() => import('./NotificationCombined').then(m => ({ default: m.NotificationCombined })));
 const AdminAnalytics = React.lazy(() => import('./AdminAnalytics').then(m => ({ default: m.AdminAnalytics })));
 const IncomingMailManager = React.lazy(() => import('./IncomingMailManager').then(m => ({ default: m.IncomingMailManager })));
-const VehicleManager = React.lazy(() => import('./VehicleManager').then(m => ({ default: m.VehicleManager })));
 const PanicAlertLogs = React.lazy(() => import('./PanicAlertLogs').then(m => ({ default: m.PanicAlertLogs })));
 const CommunityWorkManager = React.lazy(() => import('./CommunityWorkManager').then(m => ({ default: m.CommunityWorkManager })));
-const MonthlyActivityReportManager = React.lazy(() => import('./MonthlyActivityReportManager').then(m => ({ default: m.MonthlyActivityReportManager })));
-const AnnualLPJManager = React.lazy(() => import('./AnnualLPJManager').then(m => ({ default: m.AnnualLPJManager })));
+const ReportManager = React.lazy(() => import('./ReportManager').then(m => ({ default: m.ReportManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -98,7 +96,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState('overview');
-  const [contentSubTab, setContentSubTab] = useState<'announcements' | 'news' | 'polls' | 'umkm' | 'gallery' | 'events' | 'faq'>('announcements');
+  const [contentSubTab, setContentSubTab] = useState<'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>('announcements');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
   const navigate = useNavigate();
@@ -298,32 +296,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         );
       case 'facilities':
         return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaAttendance={rondaAttendance} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
+      case 'reports-lpj':
       case 'laporan-kegiatan':
-        return (
-          <MonthlyActivityReportManager 
-            houses={houses} 
-            pdfConfig={pdfConfig} 
-            cashFlow={cashFlow} 
-            populationReports={populationReports} 
-          />
-        );
       case 'lpj-tahunan':
         return (
-          <AnnualLPJManager 
+          <ReportManager 
             houses={houses} 
+            pdfConfig={pdfConfig} 
             cashFlow={cashFlow} 
             populationReports={populationReports} 
             populationLogs={populationLogs}
             events={events}
             inventory={inventory} 
             iuranPayments={iuranPayments}
-            pdfConfig={pdfConfig} 
+            initialSubTab={activeTab === 'lpj-tahunan' ? 'annual' : 'monthly'}
           />
         );
       case 'kerja-bakti':
         return <CommunityWorkManager houses={houses} />;
-      case 'vehicles':
-        return <VehicleManager houses={houses} />;
       case 'panic-logs':
         return <PanicAlertLogs houses={houses} />;
       case 'assets':

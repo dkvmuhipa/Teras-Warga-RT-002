@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useEarthquake, EarthquakeInfo } from '../../hooks/useEarthquake';
 import { 
   Activity, AlertTriangle, ShieldCheck, MapPin, Radio, Compass, Clock, 
@@ -56,9 +57,35 @@ const SURVIVAL_ITEMS = [
   { id: 'selimut', category: 'Sandang', name: 'Selimut darurat / emergency foil blanket', essential: false },
 ];
 
-export const PublicEarthquake: React.FC = () => {
+interface PublicEarthquakeProps {
+  defaultTab?: 'seismic' | 'evacuation' | 'survival' | 'contacts';
+}
+
+export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab }) => {
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const getInitialTab = (): 'seismic' | 'evacuation' | 'survival' | 'contacts' => {
+    if (tabParam === 'gempa' || tabParam === 'seismic') return 'seismic';
+    if (tabParam === 'denah' || tabParam === 'peta' || tabParam === 'evakuasi' || tabParam === 'evacuation') return 'evacuation';
+    if (tabParam === 'survival' || tabParam === 'tas') return 'survival';
+    if (tabParam === 'contacts' || tabParam === 'kontak') return 'contacts';
+    return defaultTab || 'evacuation';
+  };
+
   const { data, loading, error, refetch } = useEarthquake();
-  const [mainDisasterTab, setMainDisasterTab] = useState<'seismic' | 'evacuation' | 'survival' | 'contacts'>('seismic');
+  const [mainDisasterTab, setMainDisasterTab] = useState<'seismic' | 'evacuation' | 'survival' | 'contacts'>(getInitialTab);
+
+  useEffect(() => {
+    if (tabParam === 'gempa' || tabParam === 'seismic') {
+      setMainDisasterTab('seismic');
+    } else if (tabParam === 'denah' || tabParam === 'peta' || tabParam === 'evakuasi' || tabParam === 'evacuation') {
+      setMainDisasterTab('evacuation');
+    } else if (tabParam === 'survival' || tabParam === 'tas') {
+      setMainDisasterTab('survival');
+    } else if (tabParam === 'contacts' || tabParam === 'kontak') {
+      setMainDisasterTab('contacts');
+    }
+  }, [tabParam]);
   const [activeTab, setActiveTab] = useState<'m5' | 'felt'>('m5');
   const [copiedInfo, setCopiedInfo] = useState<string | null>(null);
   const [onlySulawesi, setOnlySulawesi] = useState(true);
@@ -192,16 +219,16 @@ export const PublicEarthquake: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse" />
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <p className="text-[10px] md:text-xs font-extrabold text-slate-500 uppercase tracking-widest font-mono">
-                Pusat Tanggap Darurat &amp; Mitigasi Huntap Tondo 2
+                Pusat Geospasial &amp; Mitigasi Huntap Tondo 2
               </p>
             </div>
             <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
-              Siaga Bencana &amp; <span className="text-rose-600 font-serif italic">Titik Kumpul</span>
+              Peta Wilayah &amp; <span className="text-rose-600 font-serif italic">Mitigasi Bencana</span>
             </h1>
             <p className="text-sm font-medium text-slate-500 mt-2 max-w-2xl leading-relaxed">
-              Pusat komando keselamatan lingkungan RT 02 Huntap Tondo 2: pemantauan gempa bumi BMKG, rute evakuasi warga, panduan tas darurat 72 jam, serta direktori donor darah sukarela.
+              Pusat informasi geospasial RT 002 RW 20 Huntap Tondo 2: denah blok hunian interaktif, jalur evakuasi gempa bumi Sesar Palu-Koro, live sensor BMKG, serta panduan keselamatan darurat warga.
             </p>
           </div>
 
@@ -220,6 +247,18 @@ export const PublicEarthquake: React.FC = () => {
         {/* 4 Main Disaster Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-8 border-b border-slate-200/80">
           <button
+            onClick={() => setMainDisasterTab('evacuation')}
+            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+              mainDisasterTab === 'evacuation'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 scale-102'
+                : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
+            }`}
+          >
+            <Navigation size={16} className={mainDisasterTab === 'evacuation' ? 'text-white' : 'text-indigo-500'} />
+            Peta Wilayah &amp; Jalur Evakuasi
+          </button>
+
+          <button
             onClick={() => setMainDisasterTab('seismic')}
             className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
               mainDisasterTab === 'seismic'
@@ -229,18 +268,6 @@ export const PublicEarthquake: React.FC = () => {
           >
             <Activity size={16} className={mainDisasterTab === 'seismic' ? 'text-rose-400' : 'text-slate-400'} />
             Live Radar &amp; Gempa BMKG
-          </button>
-
-          <button
-            onClick={() => setMainDisasterTab('evacuation')}
-            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
-              mainDisasterTab === 'evacuation'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 scale-102'
-                : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
-            }`}
-          >
-            <Navigation size={16} className={mainDisasterTab === 'evacuation' ? 'text-white' : 'text-indigo-500'} />
-            Peta Titik Kumpul &amp; Evakuasi
           </button>
 
           <button
@@ -264,7 +291,7 @@ export const PublicEarthquake: React.FC = () => {
             }`}
           >
             <Heart size={16} className={mainDisasterTab === 'contacts' ? 'text-white' : 'text-rose-500'} />
-            Donor Darah &amp; Siaga Medis
+            Kontak Darurat &amp; Siaga Medis
           </button>
         </div>
 
