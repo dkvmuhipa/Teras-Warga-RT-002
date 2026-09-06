@@ -1149,5 +1149,35 @@ export interface CommunityWork {
   createdAt: string;
 }
 
+// --- WATER METER & UTILITY BILLING ---
+export interface WaterMeterReading {
+  id: string;
+  houseId: string;              // Blok & No Rumah, misal: "B-04"
+  period: string;               // "YYYY-MM", misal: "2026-09"
+  previousReading: number;      // Angka meteran awal/bulan lalu (m³)
+  currentReading: number;       // Angka meteran akhir/bulan ini (m³)
+  usage: number;                // currentReading - previousReading (m³)
+  ratePerM3: number;            // Tarif per m³ saat pencatatan
+  maintenanceFee: number;       // Biaya beban/abonemen pompa
+  totalAmount: number;          // Total rupiah tagihan air
+  photoUrl?: string;            // Foto angka meter fisik
+  recordedBy: 'Warga' | 'Petugas RT';
+  recordedByName?: string;
+  recordedAt: string;           // ISO timestamp
+  status: 'Menunggu Verifikasi' | 'Terverifikasi' | 'Ditolak';
+  adminNotes?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
+}
+
+export interface WaterUtilitySettings {
+  billingMode: 'metered' | 'flat'; // Meteran kubikasi vs flat rate
+  ratePerM3: number;            // Misal: 3000 (Rp 3.000 / m³)
+  maintenanceFee: number;       // Misal: 10000 (Rp 10.000 beban pompa/tandon)
+  minUsageM3?: number;          // Minimum pemakaian (misal: 0 atau 5 m³)
+  readingDueDate?: number;      // Batas tgl catat mandiri (misal: tgl 20)
+  autoSyncToBills?: boolean;    // Otomatis update tagihan bulanan
+}
+
 
 

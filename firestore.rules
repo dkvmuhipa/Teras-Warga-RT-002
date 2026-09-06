@@ -329,6 +329,12 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Water Meter Readings (Catat Meter Air Mandiri & Utilitas)
+    match /waterMeterReadings/{id} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;

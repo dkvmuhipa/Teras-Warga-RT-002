@@ -51,7 +51,7 @@ import {
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
-import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, InventoryItem, CommunitySkill, UtilityOutage } from '../../types';
+import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, InventoryItem, CommunitySkill, UtilityOutage, WaterMeterReading, WaterUtilitySettings } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -66,8 +66,12 @@ import {
   OperationType,
   subscribeToPdfConfig,
   validateResidentAccess,
-  subscribeToCollection
+  subscribeToCollection,
+  subscribeToHouseWaterMeterReadings,
+  addWaterMeterReading,
+  subscribeToSettings
 } from '../../services/databaseService';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { generateSuratPengantar } from '../../services/pdfService';
 import { NotificationToggle } from '../PushNotificationManager';
 import { motion, AnimatePresence } from 'motion/react';
@@ -90,12 +94,12 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [tempHouseId, setTempHouseId] = useState('');
   const [pinError, setPinError] = useState(false);
   
-  const [activeTab, setActiveTab] = useState<'eid' | 'points' | 'skills' | 'outages' | 'letters' | 'update' | 'guests' | 'reports'>(
-    (tabParam && ['eid', 'points', 'skills', 'outages', 'letters', 'update', 'guests', 'reports'].includes(tabParam)) ? tabParam as any : 'eid'
+  const [activeTab, setActiveTab] = useState<'eid' | 'water' | 'points' | 'skills' | 'outages' | 'letters' | 'update' | 'guests' | 'reports'>(
+    (tabParam && ['eid', 'water', 'points', 'skills', 'outages', 'letters', 'update', 'guests', 'reports'].includes(tabParam)) ? tabParam as any : 'eid'
   );
 
   useEffect(() => {
-    if (tabParam && ['eid', 'points', 'skills', 'outages', 'letters', 'update', 'guests', 'reports'].includes(tabParam)) {
+    if (tabParam && ['eid', 'water', 'points', 'skills', 'outages', 'letters', 'update', 'guests', 'reports'].includes(tabParam)) {
       setActiveTab(tabParam as any);
     }
   }, [tabParam]);
@@ -114,6 +118,19 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [reports, setReports] = useState<Report[]>([]);
   const [letters, setLetters] = useState<LetterRequest[]>([]);
   const [pdfConfig, setPdfConfig] = useState<any>(null);
+
+  // Water Meter States
+  const [houseWaterReadings, setHouseWaterReadings] = useState<WaterMeterReading[]>([]);
+  const [waterUtilityConfig, setWaterUtilityConfig] = useState<WaterUtilitySettings>({
+    billingMode: 'metered',
+    ratePerM3: 3000,
+    maintenanceFee: 10000,
+    readingDueDate: 20
+  });
+  const [isWaterModalOpen, setIsWaterModalOpen] = useState(false);
+  const [waterInputReading, setWaterInputReading] = useState<number | ''>('');
+  const [waterPhoto, setWaterPhoto] = useState<string>('');
+  const [isSubmittingWater, setIsSubmittingWater] = useState(false);
   
   // Data Privacy & Security Toggles
   const [showFullNiks, setShowFullNiks] = useState<Record<string, boolean>>({});
@@ -188,10 +205,24 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     const unsubPdfConfig = subscribeToPdfConfig(setPdfConfig);
     const unsubSkills = subscribeToCollection('communitySkills', (data) => setCommunitySkills(data as CommunitySkill[]));
     const unsubOutages = subscribeToCollection('utilityOutages', (data) => setUtilityOutages(data as UtilityOutage[]));
+    const unsubSettings = subscribeToSettings((data) => {
+      if (data?.waterUtility) {
+        setWaterUtilityConfig({
+          billingMode: data.waterUtility.billingMode ?? 'metered',
+          ratePerM3: data.waterUtility.ratePerM3 ?? 3000,
+          maintenanceFee: data.waterUtility.maintenanceFee ?? 10000,
+          readingDueDate: data.waterUtility.readingDueDate ?? 20,
+          minUsageM3: data.waterUtility.minUsageM3 ?? 0,
+          autoSyncToBills: data.waterUtility.autoSyncToBills ?? true
+        });
+      }
+    });
+
     return () => {
       unsubPdfConfig();
       unsubSkills();
       unsubOutages();
+      unsubSettings();
     };
   }, []);
 
@@ -202,14 +233,125 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     const unsubUpdates = subscribeToHouseUpdateRequests(selectedHouseId, setUpdateRequests);
     const unsubReports = subscribeToHouseReports(selectedHouseId, setReports);
     const unsubLetters = subscribeToHouseLetters(selectedHouseId, setLetters);
+
+    const currentH = houses.find(h => h.id === selectedHouseId);
+    const houseIdentifier = currentH ? `${currentH.block}-${currentH.number}` : selectedHouseId;
+    const unsubWater = subscribeToHouseWaterMeterReadings(houseIdentifier, (data) => {
+      const sorted = [...data].sort((a, b) => b.period.localeCompare(a.period));
+      setHouseWaterReadings(sorted);
+    });
     
     return () => {
       unsubGuests();
       unsubUpdates();
       unsubReports();
       unsubLetters();
+      unsubWater();
     };
-  }, [selectedHouseId]);
+  }, [selectedHouseId, houses]);
+
+  // Current active period and meter values
+  const currentWaterPeriod = (() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  })();
+
+  const currentWaterReading = houseWaterReadings.find(r => r.period === currentWaterPeriod);
+  const previousWaterReading = houseWaterReadings.find(r => r.period < currentWaterPeriod);
+  const previousReadingNumber = previousWaterReading ? previousWaterReading.currentReading : 0;
+
+  // Handle Water Meter Photo with Client Canvas Compression
+  const handleWaterPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const maxDimension = 1000;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          setWaterPhoto(canvas.toDataURL('image/jpeg', 0.75));
+        } else {
+          setWaterPhoto(event.target?.result as string);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Submit Water Meter Reading
+  const handleSubmitWaterMeter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedHouseId || waterInputReading === '') {
+      toast.error('Harap masukkan angka meteran air.');
+      return;
+    }
+
+    const currentHouseData = houses.find(h => h.id === selectedHouseId);
+    const houseIdentifier = currentHouseData ? `${currentHouseData.block}-${currentHouseData.number}` : selectedHouseId;
+    const currentVal = Number(waterInputReading);
+    const prevVal = Number(previousReadingNumber);
+
+    if (currentVal < prevVal) {
+      toast.error(`Angka meteran (${currentVal} m³) tidak boleh lebih rendah dari bulan lalu (${prevVal} m³).`);
+      return;
+    }
+
+    setIsSubmittingWater(true);
+    try {
+      const usage = Math.max(0, currentVal - prevVal);
+      const totalAmount = waterUtilityConfig.billingMode === 'flat'
+        ? waterUtilityConfig.maintenanceFee
+        : (usage * waterUtilityConfig.ratePerM3) + waterUtilityConfig.maintenanceFee;
+
+      await addWaterMeterReading({
+        houseId: houseIdentifier,
+        period: currentWaterPeriod,
+        previousReading: prevVal,
+        currentReading: currentVal,
+        usage,
+        ratePerM3: waterUtilityConfig.ratePerM3,
+        maintenanceFee: waterUtilityConfig.maintenanceFee,
+        totalAmount,
+        photoUrl: waterPhoto || '',
+        recordedBy: 'Warga',
+        recordedByName: currentHouseData ? currentHouseData.headOfFamily : 'Warga Mandiri',
+        recordedAt: new Date().toISOString(),
+        status: 'Menunggu Verifikasi',
+        adminNotes: ''
+      });
+
+      toast.success('Pencatatan meter air mandiri berhasil dikirim! Menunggu verifikasi pengurus RT.');
+      setIsWaterModalOpen(false);
+      setWaterInputReading('');
+      setWaterPhoto('');
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal mengirim catatan meter air.');
+    } finally {
+      setIsSubmittingWater(false);
+    }
+  };
 
   const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -661,6 +803,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       <div className="flex items-center gap-2 bg-slate-100/80 p-1.5 border border-slate-200/50 rounded-3xl mb-8 overflow-x-auto no-scrollbar">
         {[
           { id: 'eid', label: 'E-ID Warga', shortLabel: 'E-ID', icon: QrCode },
+          { id: 'water', label: 'Meter Air Mandiri', shortLabel: 'Air Bersih', icon: Droplets },
           { id: 'points', label: 'Poin & Teladan', shortLabel: 'Poin', icon: Trophy },
           { id: 'letters', label: 'Status Surat', shortLabel: 'Surat', icon: FileText },
           { id: 'update', label: 'Update Data', shortLabel: 'Update', icon: FileEdit },
@@ -697,7 +840,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             className="space-y-8"
           >
             {/* Bento Grid Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
               {/* Card 1: Iuran */}
               <motion.div 
                 whileHover={{ y: -3 }}
@@ -731,7 +874,36 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 </p>
               </motion.div>
 
-              {/* Card 2: Pengajuan Aktif */}
+              {/* Card 2: Meter Air Mandiri */}
+              <motion.div 
+                whileHover={{ y: -3 }}
+                onClick={() => setActiveTab('water')}
+                className="p-6 rounded-[2rem] bg-gradient-to-br from-cyan-50/60 via-blue-50/40 to-white border border-cyan-100/80 hover:border-cyan-200 hover:shadow-lg hover:shadow-cyan-100/30 cursor-pointer transition-all"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-3 bg-cyan-500/10 text-cyan-600 rounded-2xl">
+                    <Droplets size={20} />
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+                    currentWaterReading 
+                      ? (currentWaterReading.status === 'Terverifikasi' 
+                          ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' 
+                          : 'bg-amber-500/20 text-amber-700 border-amber-500/30')
+                      : 'bg-rose-500/20 text-rose-700 border-rose-500/30'
+                  }`}>
+                    {currentWaterReading ? currentWaterReading.status : 'Belum Catat'}
+                  </span>
+                </div>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Meter Air Bersih</h4>
+                <p className="text-xl font-black text-slate-800">
+                  {currentWaterReading ? `${currentWaterReading.usage} m³ • Rp ${currentWaterReading.totalAmount.toLocaleString('id-ID')}` : 'Catat Mandiri'}
+                </p>
+                <p className="text-[11px] text-cyan-700 font-semibold mt-1 flex items-center gap-1">
+                  Buka Portal Meter Air →
+                </p>
+              </motion.div>
+
+              {/* Card 3: Pengajuan Aktif */}
               <motion.div 
                 whileHover={{ y: -3 }}
                 onClick={() => {
@@ -764,7 +936,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 </p>
               </motion.div>
 
-              {/* Card 3: Profil Demografi */}
+              {/* Card 4: Profil Demografi */}
               <motion.div 
                 whileHover={{ y: -3 }}
                 onClick={() => setActiveTab('update')}
@@ -1436,6 +1608,248 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 );
               })()}
             </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'water' && (
+          <motion.div
+            key="water"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6 text-left"
+          >
+            {/* Hero Header Air Bersih */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-800 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl">
+              <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl -translate-y-12 translate-x-12 pointer-events-none" />
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-cyan-100">
+                    <Droplets className="w-3.5 h-3.5 animate-pulse" />
+                    Utilitas Air Bersih Hunian RT 002
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                    Catat Meter Air Mandiri
+                  </h3>
+                  <p className="text-cyan-100 text-xs sm:text-sm max-w-xl">
+                    Kirimkan foto dan angka meteran fisik rumah Anda secara transparan setiap bulan sebelum tanggal {waterUtilityConfig.readingDueDate} untuk menjaga akurasi tagihan air keluarga.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setWaterInputReading(currentWaterReading ? currentWaterReading.currentReading : '');
+                      setWaterPhoto(currentWaterReading?.photoUrl || '');
+                      setIsWaterModalOpen(true);
+                    }}
+                    className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-blue-700 hover:bg-cyan-50 font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-black/10 transition-all cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4" />
+                    {currentWaterReading ? 'Update Catatan Meter' : 'Catat Meter Bulan Ini'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Month Status Card */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Box 1: Status Bulan Ini */}
+              <Card className="p-6 border-slate-100 rounded-[2rem] bg-white shadow-sm space-y-4">
+                <div className="flex justify-between items-start">
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Periode Tagihan</span>
+                  <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider border ${
+                    currentWaterReading 
+                      ? (currentWaterReading.status === 'Terverifikasi' 
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                          : 'bg-amber-50 text-amber-700 border-amber-200')
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                  }`}>
+                    {currentWaterReading ? currentWaterReading.status : 'Belum Dicatat'}
+                  </span>
+                </div>
+
+                <div>
+                  <div className="text-2xl font-black text-slate-800">
+                    {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Batas catat mandiri: <strong className="text-blue-600">Tgl {waterUtilityConfig.readingDueDate} {new Date().toLocaleDateString('id-ID', { month: 'short' })}</strong>
+                  </p>
+                </div>
+
+                {currentWaterReading?.adminNotes && (
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600">
+                    <span className="font-bold block text-slate-700 mb-0.5">Catatan Pengurus RT:</span>
+                    {currentWaterReading.adminNotes}
+                  </div>
+                )}
+              </Card>
+
+              {/* Box 2: Kubikasi Pemakaian */}
+              <Card className="p-6 border-slate-100 rounded-[2rem] bg-white shadow-sm space-y-4">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest block">Volume Pemakaian</span>
+                <div>
+                  <div className="text-3xl font-black text-blue-600 flex items-baseline gap-1">
+                    {currentWaterReading ? currentWaterReading.usage : 0}
+                    <span className="text-sm font-bold text-slate-400">m³</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {currentWaterReading ? (
+                      `Meter Lalu: ${currentWaterReading.previousReading} m³ → Baru: ${currentWaterReading.currentReading} m³`
+                    ) : (
+                      `Meter Terakhir: ${previousReadingNumber} m³`
+                    )}
+                  </p>
+                </div>
+                <div className="text-[11px] text-slate-400 border-t border-slate-100 pt-2 flex justify-between">
+                  <span>Dicatat oleh:</span>
+                  <span className="font-bold text-slate-700">{currentWaterReading?.recordedByName || (currentWaterReading ? 'Warga' : '-')}</span>
+                </div>
+              </Card>
+
+              {/* Box 3: Total Tagihan */}
+              <Card className="p-6 border-slate-100 rounded-[2rem] bg-gradient-to-br from-emerald-50/50 to-white shadow-sm space-y-4 border-emerald-100">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest block">Total Tagihan Air</span>
+                <div>
+                  <div className="text-3xl font-black text-emerald-600">
+                    Rp {currentWaterReading ? currentWaterReading.totalAmount.toLocaleString('id-ID') : 0}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {waterUtilityConfig.billingMode === 'flat' 
+                      ? 'Tarif flat lingkungan' 
+                      : `Kubikasi (${waterUtilityConfig.ratePerM3}/m³) + Beban Pompa`}
+                  </p>
+                </div>
+                <div className="text-[11px] text-slate-500 border-t border-slate-100 pt-2 flex justify-between">
+                  <span>Beban Pompa:</span>
+                  <span className="font-bold text-slate-700">Rp {waterUtilityConfig.maintenanceFee.toLocaleString('id-ID')}</span>
+                </div>
+              </Card>
+            </div>
+
+            {/* Photo Evidence Card (if recorded) */}
+            {currentWaterReading?.photoUrl && (
+              <Card className="p-6 border-slate-100 rounded-[2rem] bg-white shadow-sm">
+                <h4 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-blue-600" />
+                  Foto Bukti Angka Meteran Bulan Ini
+                </h4>
+                <div className="max-w-md rounded-2xl overflow-hidden border border-slate-200 bg-slate-900">
+                  <img
+                    src={currentWaterReading.photoUrl}
+                    alt="Foto Meteran Air"
+                    className="w-full h-56 object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              </Card>
+            )}
+
+            {/* Historical Usage Chart */}
+            <Card className="p-6 sm:p-8 border-slate-100 rounded-[2.5rem] bg-white shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                <div>
+                  <h4 className="text-base font-black text-slate-800 tracking-tight flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-blue-600" />
+                    Tren Pemakaian Air Keluarga (m³)
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-0.5">Grafik riwayat kubikasi meteran air dari bulan ke bulan.</p>
+                </div>
+              </div>
+
+              {houseWaterReadings.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-xs">
+                  <Droplets className="w-10 h-10 mx-auto mb-2 text-slate-300 opacity-50" />
+                  Belum ada rekaman riwayat meter air sebelumnya.
+                </div>
+              ) : (
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={[...houseWaterReadings].reverse().map(r => ({
+                        period: r.period,
+                        usage: r.usage,
+                        total: r.totalAmount
+                      }))}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="waterGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#0284c7" stopOpacity={0.4}/>
+                          <stop offset="95%" stopColor="#0284c7" stopOpacity={0.0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                      <XAxis dataKey="period" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                      <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
+                        formatter={(val: any) => [`${val} m³`, 'Pemakaian']}
+                        labelFormatter={(label) => `Periode: ${label}`}
+                      />
+                      <Area type="monotone" dataKey="usage" stroke="#0284c7" strokeWidth={3} fillOpacity={1} fill="url(#waterGradient)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </Card>
+
+            {/* History Table */}
+            <Card className="p-6 border-slate-100 rounded-[2.5rem] bg-white shadow-sm overflow-hidden">
+              <h4 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4">
+                Riwayat Pencatatan Terdahulu
+              </h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-100">
+                    <tr>
+                      <th className="py-3 px-4">Periode</th>
+                      <th className="py-3 px-4 text-center">Meter Awal</th>
+                      <th className="py-3 px-4 text-center">Meter Akhir</th>
+                      <th className="py-3 px-4 text-center">Pemakaian</th>
+                      <th className="py-3 px-4 text-right">Tagihan</th>
+                      <th className="py-3 px-4 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {houseWaterReadings.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-slate-400">
+                          Belum ada riwayat pencatatan.
+                        </td>
+                      </tr>
+                    ) : (
+                      houseWaterReadings.map(r => (
+                        <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="py-3 px-4 font-mono font-bold text-slate-700">{r.period}</td>
+                          <td className="py-3 px-4 text-center font-mono">{r.previousReading} m³</td>
+                          <td className="py-3 px-4 text-center font-mono font-bold text-slate-800">{r.currentReading} m³</td>
+                          <td className="py-3 px-4 text-center">
+                            <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                              {r.usage} m³
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right font-bold text-emerald-600">
+                            Rp {r.totalAmount.toLocaleString('id-ID')}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              r.status === 'Terverifikasi' 
+                                ? 'bg-emerald-100 text-emerald-700' 
+                                : r.status === 'Ditolak' 
+                                ? 'bg-rose-100 text-rose-700'
+                                : 'bg-amber-100 text-amber-700'
+                            }`}>
+                              {r.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           </motion.div>
         )}
 
@@ -3076,6 +3490,126 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           </div>
         )}
       </Modal>
+
+      {/* MODAL CATAT METER AIR MANDIRI */}
+      {isWaterModalOpen && (
+        <Modal
+          isOpen={isWaterModalOpen}
+          onClose={() => setIsWaterModalOpen(false)}
+          title="Catat Meter Air Mandiri Bulan Ini"
+        >
+          <form onSubmit={handleSubmitWaterMeter} className="space-y-4 text-left">
+            <div className="p-3.5 bg-blue-50 text-blue-700 rounded-2xl text-xs space-y-1">
+              <div className="font-bold flex items-center gap-1.5">
+                <Droplets className="w-4 h-4" />
+                Periode: {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+              </div>
+              <p className="text-[11px] text-blue-600/90">
+                Angka meteran bulan lalu tercatat: <strong>{previousReadingNumber} m³</strong>.
+              </p>
+            </div>
+
+            {/* Input Angka Meteran */}
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                Angka Meteran Saat Ini (m³) <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="any"
+                  min={previousReadingNumber}
+                  required
+                  placeholder={`Contoh: ${previousReadingNumber + 12}`}
+                  value={waterInputReading}
+                  onChange={(e) => setWaterInputReading(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-base font-bold font-mono focus:ring-2 focus:ring-blue-500 outline-none text-slate-800"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                  m³
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                Catat seluruh digit hitam pada meteran air fisik di depan rumah Anda.
+              </p>
+            </div>
+
+            {/* Live Calculation Preview */}
+            {waterInputReading !== '' && Number(waterInputReading) >= previousReadingNumber && (
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-mono space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Estimasi Pemakaian:</span>
+                  <span className="font-bold text-blue-600">
+                    {Math.max(0, Number(waterInputReading) - previousReadingNumber)} m³
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Tarif per m³:</span>
+                  <span>Rp {waterUtilityConfig.ratePerM3.toLocaleString('id-ID')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Beban Pompa & Tandon:</span>
+                  <span>Rp {waterUtilityConfig.maintenanceFee.toLocaleString('id-ID')}</span>
+                </div>
+                <div className="flex justify-between pt-1.5 border-t border-slate-200 font-bold text-emerald-600 text-sm">
+                  <span>Estimasi Total Tagihan:</span>
+                  <span>
+                    Rp {(
+                      waterUtilityConfig.billingMode === 'flat'
+                        ? waterUtilityConfig.maintenanceFee
+                        : (Math.max(0, Number(waterInputReading) - previousReadingNumber) * waterUtilityConfig.ratePerM3) + waterUtilityConfig.maintenanceFee
+                    ).toLocaleString('id-ID')}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Upload Foto Meteran Fisik */}
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                Foto Bukti Angka Meteran Fisik (Opsional / Disarankan)
+              </label>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleWaterPhotoUpload}
+                  className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                />
+                {waterPhoto && (
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 max-h-48">
+                    <img src={waterPhoto} alt="Preview Meter" className="w-full h-48 object-contain" />
+                    <button
+                      type="button"
+                      onClick={() => setWaterPhoto('')}
+                      className="absolute top-2 right-2 bg-rose-600 text-white p-1 rounded-full text-xs shadow-md"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                Foto akan otomatis dikompresi agar hemat kuota ponsel Anda.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsWaterModalOpen(false)}>
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmittingWater || waterInputReading === ''}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-blue-600/20"
+              >
+                {isSubmittingWater ? 'Mengirim Data...' : 'Kirim Catatan Meter'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 };

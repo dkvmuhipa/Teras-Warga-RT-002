@@ -124,6 +124,26 @@
         "status": { "type": "string", "enum": ["Pending", "Confirmed", "Menunggu", "Disetujui", "Ditolak"] }
       },
       "required": ["houseId", "residentName", "type", "weight", "totalValue", "status"]
+    },
+    "WaterMeterReading": {
+      "title": "WaterMeterReading",
+      "description": "Pencatatan meter air dan kalkulator tagihan utilitas",
+      "type": "object",
+      "properties": {
+        "houseId": { "type": "string" },
+        "period": { "type": "string" },
+        "previousReading": { "type": "number" },
+        "currentReading": { "type": "number" },
+        "usage": { "type": "number" },
+        "ratePerM3": { "type": "number" },
+        "maintenanceFee": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "photoUrl": { "type": "string" },
+        "recordedBy": { "type": "string", "enum": ["Warga", "Petugas RT"] },
+        "recordedAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["Menunggu Verifikasi", "Terverifikasi", "Ditolak"] }
+      },
+      "required": ["houseId", "period", "previousReading", "currentReading", "usage", "totalAmount", "status"]
     }
   },
   "firestore": {
@@ -136,6 +156,7 @@
     "/umkmOrders/{id}": { "schema": "UMKMOrder", "description": "Pesanan UMKM" },
     "/panicAlerts/{id}": { "schema": "PanicAlert", "description": "Sinyal darurat" },
     "/wasteBankDeposits/{id}": { "schema": "WasteDeposit", "description": "Bank Sampah" },
+    "/waterMeterReadings/{id}": { "schema": "WaterMeterReading", "description": "Catat meter air mandiri & tagihan" },
     "/notifications/{id}": { "schema": "object", "description": "Notifikasi sistem" },
     "/auditLogs/{id}": { "schema": "object", "description": "Log audit" },
     "/faq/{id}": { "schema": "object", "description": "FAQ" },

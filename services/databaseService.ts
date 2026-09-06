@@ -35,7 +35,7 @@ import {
   signOut, 
   updatePassword
 } from "firebase/auth";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, WaterMeterReading, WaterUtilitySettings } from "../types";
 import { toast } from "sonner";
 
 export { OperationType, isFirebaseConfigured };
@@ -105,6 +105,7 @@ const UPDATE_REQUESTS_COL = "updateRequests";
 const OFFICIAL_LETTERS_COL = "officialLetters";
 const FCM_TOKENS_COL = "fcmTokens";
 const CONFIGS_COL = "configs";
+export const WATER_METER_READINGS_COL = "waterMeterReadings";
 
 // --- FCM TOKEN SERVICES ---
 export const saveFCMToken = async (userId: string, token: string) => {
@@ -3562,6 +3563,207 @@ export const deleteDocumentFromCollection = async (collectionName: string, id: s
     } catch (error) {
         handleFirestoreError(error, OperationType.DELETE, `${collectionName}/${id}`);
     }
+};
+
+// ==========================================
+// WATER METER & UTILITY BILLING SERVICES
+// ==========================================
+
+export const subscribeToWaterMeterReadings = (
+  callback: (readings: WaterMeterReading[]) => void,
+  period?: string
+) => {
+  if (!isFirebaseConfigured || !db) return () => {};
+  try {
+    let q;
+    if (period) {
+      q = query(
+        collection(db, WATER_METER_READINGS_COL),
+        where("period", "==", period),
+        orderBy("houseId", "asc")
+      );
+    } else {
+      q = query(
+        collection(db, WATER_METER_READINGS_COL),
+        orderBy("period", "desc"),
+        orderBy("houseId", "asc")
+      );
+    }
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const readings: WaterMeterReading[] = [];
+        snapshot.forEach((doc) => {
+          readings.push({ id: doc.id, ...doc.data() } as WaterMeterReading);
+        });
+        callback(readings);
+      },
+      (error) => {
+        console.error("Error subscribing to water meter readings:", error);
+        callback([]);
+      }
+    );
+  } catch (error) {
+    console.error("Error setting up water meter subscription:", error);
+    return () => {};
+  }
+};
+
+export const subscribeToHouseWaterMeterReadings = (
+  houseId: string,
+  callback: (readings: WaterMeterReading[]) => void
+) => {
+  if (!isFirebaseConfigured || !db) return () => {};
+  try {
+    const q = query(
+      collection(db, WATER_METER_READINGS_COL),
+      where("houseId", "==", houseId),
+      orderBy("period", "desc")
+    );
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const readings: WaterMeterReading[] = [];
+        snapshot.forEach((doc) => {
+          readings.push({ id: doc.id, ...doc.data() } as WaterMeterReading);
+        });
+        callback(readings);
+      },
+      (error) => {
+        console.error(`Error subscribing to water meter readings for house ${houseId}:`, error);
+        callback([]);
+      }
+    );
+  } catch (error) {
+    console.error("Error setting up house water meter subscription:", error);
+    return () => {};
+  }
+};
+
+export const getLatestWaterMeterReading = async (houseId: string): Promise<WaterMeterReading | null> => {
+  if (!isFirebaseConfigured || !db) return null;
+  try {
+    const q = query(
+      collection(db, WATER_METER_READINGS_COL),
+      where("houseId", "==", houseId),
+      orderBy("period", "desc"),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const docData = snap.docs[0];
+    return { id: docData.id, ...docData.data() } as WaterMeterReading;
+  } catch (error) {
+    console.error("Error getting latest water meter reading:", error);
+    return null;
+  }
+};
+
+export const addWaterMeterReading = async (reading: Omit<WaterMeterReading, "id">) => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const existingQ = query(
+      collection(db, WATER_METER_READINGS_COL),
+      where("houseId", "==", reading.houseId),
+      where("period", "==", reading.period),
+      limit(1)
+    );
+    const existingSnap = await getDocs(existingQ);
+
+    if (!existingSnap.empty) {
+      const existingDoc = existingSnap.docs[0];
+      await updateDoc(doc(db, WATER_METER_READINGS_COL, existingDoc.id), {
+        ...reading,
+        updatedAt: new Date().toISOString()
+      });
+      return existingDoc.id;
+    }
+
+    const docRef = await addDoc(collection(db, WATER_METER_READINGS_COL), {
+      ...reading,
+      createdAt: new Date().toISOString()
+    });
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, WATER_METER_READINGS_COL);
+  }
+};
+
+export const updateWaterMeterReading = async (id: string, updates: Partial<WaterMeterReading>) => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const docRef = doc(db, WATER_METER_READINGS_COL, id);
+    await updateDoc(docRef, {
+      ...updates,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${WATER_METER_READINGS_COL}/${id}`);
+  }
+};
+
+export const deleteWaterMeterReading = async (id: string) => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const docRef = doc(db, WATER_METER_READINGS_COL, id);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${WATER_METER_READINGS_COL}/${id}`);
+  }
+};
+
+export const verifyWaterMeterReading = async (
+  id: string,
+  status: 'Terverifikasi' | 'Ditolak',
+  adminNotes?: string,
+  verifiedBy?: string
+) => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const docRef = doc(db, WATER_METER_READINGS_COL, id);
+    await updateDoc(docRef, {
+      status,
+      adminNotes: adminNotes || "",
+      verifiedBy: verifiedBy || auth.currentUser?.email || "Pengurus RT",
+      verifiedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${WATER_METER_READINGS_COL}/${id}`);
+  }
+};
+
+export const batchSaveWaterMeterReadings = async (readings: Omit<WaterMeterReading, "id">[]) => {
+  if (!isFirebaseConfigured || !db || readings.length === 0) return;
+  try {
+    const batch = writeBatch(db);
+    for (const r of readings) {
+      const existingQ = query(
+        collection(db, WATER_METER_READINGS_COL),
+        where("houseId", "==", r.houseId),
+        where("period", "==", r.period),
+        limit(1)
+      );
+      const snap = await getDocs(existingQ);
+      if (!snap.empty) {
+        const docRef = doc(db, WATER_METER_READINGS_COL, snap.docs[0].id);
+        batch.update(docRef, {
+          ...r,
+          updatedAt: new Date().toISOString()
+        });
+      } else {
+        const newDocRef = doc(collection(db, WATER_METER_READINGS_COL));
+        batch.set(newDocRef, {
+          ...r,
+          createdAt: new Date().toISOString()
+        });
+      }
+    }
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, WATER_METER_READINGS_COL);
+  }
 };
 
 

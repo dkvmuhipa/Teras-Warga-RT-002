@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert, AlertTriangle,
-  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award
+  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
@@ -129,6 +129,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Operasional & Keuangan", 
       items: [
         { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan' },
+        { id: 'water-meter', icon: Droplets, label: 'Meter Air & Utilitas' },
         { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
         { id: 'kerja-bakti', icon: Users, label: 'Kerja Bakti & Gotong Royong' },
         { id: 'panic-logs', icon: ShieldAlert, label: 'Log Panic Button SOS' },
@@ -155,12 +156,12 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       if (role === Role.ADMIN) {
         isAllowed = true;
       } else if (role === Role.TREASURER) {
-        isAllowed = ['overview', 'analytics', 'finance', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
+        isAllowed = ['overview', 'analytics', 'finance', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
       } else if (role === Role.SECRETARY) {
         isAllowed = [
           'overview', 'analytics', 'residents', 
           'health', 'officials', 'services', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
-          'assets', 'content', 'audit', 'notifications', 'settings'
+          'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       }
 

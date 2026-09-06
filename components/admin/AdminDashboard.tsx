@@ -38,6 +38,7 @@ const IncomingMailManager = React.lazy(() => import('./IncomingMailManager').the
 const PanicAlertLogs = React.lazy(() => import('./PanicAlertLogs').then(m => ({ default: m.PanicAlertLogs })));
 const CommunityWorkManager = React.lazy(() => import('./CommunityWorkManager').then(m => ({ default: m.CommunityWorkManager })));
 const ReportManager = React.lazy(() => import('./ReportManager').then(m => ({ default: m.ReportManager })));
+const WaterMeterManager = React.lazy(() => import('./WaterMeterManager').then(m => ({ default: m.WaterMeterManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -233,6 +234,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             initialSubTab={activeTab === 'waste-bank' ? 'wastebank' : 'cashflow'}
           />
         );
+      case 'water-meter':
+        return <WaterMeterManager houses={houses} />;
       case 'services':
       case 'official-letters':
       case 'incoming_mails':
