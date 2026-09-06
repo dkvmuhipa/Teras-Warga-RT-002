@@ -3984,7 +3984,7 @@ export const generateResidentCardPDF = async (house: House, customConfig?: PdfCo
     doc.text(`NIK: ${house.nik || '-'}`, 6, 22);
     doc.text(`No. KK: ${house.kkNumber || '-'}`, 6, 25.5);
     doc.text(`Status Kepenghunian: ${house.residenceType || 'Tetap'} (${house.status === 'Occupied' ? 'Dihuni' : 'Kosong'})`, 6, 29);
-    doc.text(`Alamat KTP: ${house.addressKtp ? house.addressKtp.substring(0, 32) : 'RT 02 RW 01'}`, 6, 32.5);
+    doc.text(`Alamat KTP: ${house.addressKtp ? house.addressKtp.substring(0, 32) : 'RT 02 RW 020'}`, 6, 32.5);
 
     // QR Code Generation for Verification
     try {
@@ -4478,7 +4478,7 @@ export const generateOfficialStructurePDF = async (officials: Official[], custom
     doc.setFont("times", "bold");
     doc.setFontSize(14);
     doc.setTextColor(15, 23, 42);
-    doc.text(config.rtName || "RUKUN TETANGGA 02 / RW 01", centerX, currentY + 2, { align: "center" });
+    doc.text(config.rtName || "RUKUN TETANGGA 02 / RW 020", centerX, currentY + 2, { align: "center" });
 
     doc.setFontSize(11);
     const subHeaderStr = `KELURAHAN ${config.kelurahan || 'TONDO'}, KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`;
@@ -4541,7 +4541,7 @@ export const generateOfficialStructurePDF = async (officials: Official[], custom
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59);
     doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, sigX, finalY);
-    doc.text("Ketua RT 02 / RW 01,", sigX, finalY + 5);
+    doc.text("Ketua RT 02 / RW 020,", sigX, finalY + 5);
 
     doc.setFont("times", "bold");
     const chairman = officials.find(o => o.role.toLowerCase().includes('ketua'))?.name || config.rtChairman || "Irfan Arianto";

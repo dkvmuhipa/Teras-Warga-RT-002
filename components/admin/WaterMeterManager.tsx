@@ -462,13 +462,13 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     const cleanPhone = house.phone.replace(/[^0-9]/g, '');
     const targetPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
 
-    let text = `*PEMBERITAHUAN TAGIHAN AIR RT 002 HUNTAP TONDO 2*\n`;
+    let text = `*PEMBERITAHUAN TAGIHAN AIR RT 002 / RW 020 HUNTAP TONDO 2*\n`;
     text += `====================================\n`;
     text += `Yth. Bpk/Ibu *${house.headOfFamily}* (Rumah *${house.block}-${house.number}*)\n`;
     text += `Periode Tagihan: *${formattedPeriodName}*\n\n`;
 
     if (reading) {
-      text += `📊 *Rincian Pemakaian & Tagihan Air PDAM:*\n`;
+      text += `*Rincian Pemakaian & Tagihan Air PDAM:*\n`;
       text += `• Angka Awal (Bulan Lalu) : ${reading.previousReading} m³\n`;
       text += `• Angka Akhir (Bulan Ini) : ${reading.currentReading} m³\n`;
       text += `• Total Pemakaian : *${reading.usage} m³*\n`;
@@ -488,13 +488,13 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       text += `------------------------------------\n`;
       text += `Status Catatan: _${reading.status}_\n\n`;
     } else {
-      text += `⚠️ *Perhatian:* Angka meteran air untuk rumah Anda bulan ini belum tercatat.\n`;
+      text += `*Perhatian:* Angka meteran air untuk rumah Anda bulan ini belum tercatat.\n`;
       text += `Mohon segera melakukan catat meter mandiri lewat Aplikasi Portal Warga RT 002 sebelum batas tanggal ${waterSettings.readingDueDate}.\n\n`;
     }
 
     text += `Pembayaran dapat dilakukan bersamaan dengan Iuran Bulanan RT via transfer Bank/QRIS atau tunai ke Bendahara RT 002.\n`;
-    text += `Terima kasih atas kerja samanya menjaga kelancaran pasokan air bersih lingkungan kita. 🙏💧\n\n`;
-    text += `_Pengurus RT 002 / RW 001 Kelurahan Tondo_`;
+    text += `Terima kasih atas kerja samanya menjaga kelancaran pasokan air bersih lingkungan kita.\n\n`;
+    text += `_Pengurus RT 002 / RW 020 Kelurahan Tondo_`;
 
     window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`, '_blank');
   };
