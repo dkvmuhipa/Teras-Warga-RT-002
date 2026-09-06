@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, Calendar, Clock, MapPin, Wrench, CheckCircle, Plus, Search, Trash2, 
-  CheckSquare, AlertCircle, Coffee, Check, X, ArrowRight, Shield, Download, Sparkles 
+  CheckSquare, AlertCircle, Coffee, Check, X, ArrowRight, Shield, Download, Sparkles,
+  CheckCircle2, Info, Tag, FileText
 } from 'lucide-react';
 import { House, CommunityWork, CommunityWorkTask, CommunityWorkAttendance } from '../../types';
 import { Button } from '../ui/Button';
@@ -438,79 +439,439 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
       )}
 
       {/* Modal Add Agenda Kerja Bakti */}
-      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Buat Agenda Kerja Bakti RT 02">
-        <form onSubmit={handleCreateWork} className="space-y-4">
-          <div>
-            <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Judul Kegiatan Kerja Bakti</label>
-            <input 
-              type="text"
-              required
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-              value={form.title}
-              onChange={e => setForm({...form, title: e.target.value})}
-              placeholder="Kerja Bakti Akbar Bersih Lingkungan RT 02"
-            />
-          </div>
+      <Modal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        title="Buat Agenda Kerja Bakti RT 02 / RW 020"
+        maxWidth="max-w-4xl"
+      >
+        {(() => {
+          const occupiedHousesCount = houses.filter(h => h.status === 'Occupied').length;
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Tanggal Pelaksanaan</label>
-              <input 
-                type="date"
-                required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                value={form.date}
-                onChange={e => setForm({...form, date: e.target.value})}
-              />
-            </div>
+          // Preset Templates
+          const templates = [
+            {
+              label: 'Pembersihan Selokan & Drainase',
+              icon: '🧹',
+              title: 'Kerja Bakti Pembersihan Saluran Air & Drainase RT 02',
+              tools: 'Cangkul, Sekop, Karung Sampah, Sarung Tangan, Sapu Lidi',
+              desc: 'Pembersihan endapan sedimentasi lumpur, sampah saluran air, dan gulma sepanjang selokan utama Blok A–G demi mengantisipasi genangan air hujan dan jentik nyamuk.',
+              assembly: 'Pos Ronda RT 02 / Lapangan Fasum'
+            },
+            {
+              label: 'Babat Semak & Jalan Lingkungan',
+              icon: '🌿',
+              title: 'Gotong Royong Perapian Rumput & Jalan Lingkungan RT 02',
+              tools: 'Sabit, Mesin Rumput, Sapu Lidi, Karung Sampah, Gunting Dahan',
+              desc: 'Perapian semak belukar liar, pemotongan ranting pohon yang menutupi penerangan jalan umum, dan pembersihan jalan poros blok RT 02.',
+              assembly: 'Gerbang Utama Huntap Tondo 2'
+            },
+            {
+              label: 'Perawatan & Pengecatan Fasum',
+              icon: '🎨',
+              title: 'Kerja Bakti Perawatan & Pengecatan Fasilitas Umum RT 02',
+              tools: 'Kuas Cat, Rol Cat, Ember, Kape/Scraper, Kain Lap, Sapu Lidi',
+              desc: 'Pengecatan ulang pos ronda, pembenahan area bermain anak lapangan fasum, dan perapian perlengkapan umum RT 02.',
+              assembly: 'Pos Ronda RT 02 / Lapangan Fasum'
+            },
+            {
+              label: 'Kerja Bakti Akbar Lingkungan',
+              icon: '🇮🇩',
+              title: 'Kerja Bakti Akbar Bersih Lingkungan RT 02 / RW 020',
+              tools: 'Cangkul, Sabit, Sapu Lidi, Karung Sampah, Sarung Tangan, Gerobak Sorong',
+              desc: 'Aksi gotong royong massal serentak seluruh warga RT 02 RW 020 membersihkan fasilitas umum, selokan, dan jalan blok demi mewujudkan lingkungan asri, bersih, dan guyub rukun.',
+              assembly: 'Pos Ronda RT 02 / Lapangan Fasum'
+            }
+          ];
 
-            <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Jam Mulai - Selesai</label>
-              <div className="flex gap-2">
-                <input 
-                  type="text"
-                  className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white outline-none"
-                  value={form.startTime}
-                  onChange={e => setForm({...form, startTime: e.target.value})}
-                  placeholder="07:30"
-                />
-                <input 
-                  type="text"
-                  className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white outline-none"
-                  value={form.endTime}
-                  onChange={e => setForm({...form, endTime: e.target.value})}
-                  placeholder="11:00"
-                />
+          const quickTools = [
+            'Cangkul', 'Sabit', 'Sapu Lidi', 'Karung Sampah',
+            'Sarung Tangan', 'Gerobak Sorong', 'Kuas Cat', 'Sekop', 'Ember'
+          ];
+
+          const toggleTool = (tool: string) => {
+            const currentList = form.toolsNeeded
+              ? form.toolsNeeded.split(',').map(t => t.trim()).filter(Boolean)
+              : [];
+            if (currentList.includes(tool)) {
+              setForm({ ...form, toolsNeeded: currentList.filter(t => t !== tool).join(', ') });
+            } else {
+              setForm({ ...form, toolsNeeded: [...currentList, tool].join(', ') });
+            }
+          };
+
+          const quickLocations = [
+            'Pos Ronda RT 02 / Lapangan Fasum',
+            'Gerbang Utama Huntap Tondo 2',
+            'Sepanjang Jalan Blok A–G'
+          ];
+
+          const quickTimes = [
+            { label: 'Pagi 07:00 - 10:00', start: '07:00', end: '10:00' },
+            { label: 'Pagi 07:30 - 11:00 (Standar)', start: '07:30', end: '11:00' },
+            { label: 'Sore 15:30 - 17:30', start: '15:30', end: '17:30' }
+          ];
+
+          return (
+            <form onSubmit={handleCreateWork} className="space-y-5 text-left">
+              {/* Top Hero Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 p-4.5 text-white shadow-lg shadow-emerald-600/15">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-inner shrink-0 mt-0.5">
+                      <Users className="w-7 h-7 text-emerald-100" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">Gotong Royong</span>
+                        <span className="bg-white/20 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded">RT 002 / RW 020</span>
+                        <span className="bg-black/20 text-emerald-100 text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/10">
+                          {occupiedHousesCount} KK Terdaftar
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-black tracking-tight text-white mt-0.5">
+                        Publikasi Agenda Kerja Bakti Warga
+                      </h4>
+                      <p className="text-xs text-emerald-100 mt-0.5">
+                        Jadwal otomatis disiarkan ke Dasbor Portal Warga & Lembar Presensi Kehadiran
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-left sm:text-right shrink-0">
+                    <span className="inline-flex items-center gap-1.5 bg-white text-emerald-900 text-xs font-black px-3 py-1.5 rounded-xl shadow-sm">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      Kelurahan Tondo
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div>
-            <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Titik Kumpul / Lokasi</label>
-            <input 
-              type="text"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white outline-none"
-              value={form.assemblyPoint}
-              onChange={e => setForm({...form, assemblyPoint: e.target.value})}
-              placeholder="Pos Ronda RT 02 / Lapangan Fasum"
-            />
-          </div>
+              {/* Template Cepat */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-emerald-600" />
+                    Pilih Template Kegiatan (Klik untuk Isi Cepat):
+                  </span>
+                  <span className="text-[10px] text-slate-400">Autofill praktis</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {templates.map((tpl, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setForm({
+                          ...form,
+                          title: tpl.title,
+                          toolsNeeded: tpl.tools,
+                          description: tpl.desc,
+                          assemblyPoint: tpl.assembly
+                        });
+                        toast.info(`Template '${tpl.label}' berhasil diterapkan!`);
+                      }}
+                      className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-left hover:border-emerald-500 hover:shadow-sm transition-all group"
+                    >
+                      <span className="text-lg block mb-1">{tpl.icon}</span>
+                      <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block group-hover:text-emerald-600">
+                        {tpl.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Alat yang Perlu Dibawa (Pisahkan koma)</label>
-            <input 
-              type="text"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white outline-none"
-              value={form.toolsNeeded}
-              onChange={e => setForm({...form, toolsNeeded: e.target.value})}
-              placeholder="Cangkul, Sabit, Sapu Lidi, Karung Sampah"
-            />
-          </div>
+              {/* 2-Column Responsive Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                {/* Left Column: Form Controls (7 cols) */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Judul Kegiatan */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                      Judul Kegiatan Kerja Bakti <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input 
+                        type="text"
+                        required
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                        value={form.title}
+                        onChange={e => setForm({...form, title: e.target.value})}
+                        placeholder="Contoh: Kerja Bakti Akbar Bersih Lingkungan RT 02"
+                      />
+                    </div>
+                  </div>
 
-          <Button type="submit" className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-600/20 mt-2">
-            Terbitkan Jadwal Kerja Bakti
-          </Button>
-        </form>
+                  {/* Deskripsi & Sasaran */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                      Deskripsi & Sasaran Kegiatan (Opsional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                      value={form.description}
+                      onChange={e => setForm({...form, description: e.target.value})}
+                      placeholder="Jelaskan fokus pembersihan, target gorong-gorong, serta imbauan untuk seluruh kepala keluarga RT 02..."
+                    />
+                  </div>
+
+                  {/* Tanggal & Waktu */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                        Tanggal Pelaksanaan <span className="text-rose-500">*</span>
+                      </label>
+                      <input 
+                        type="date"
+                        required
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                        value={form.date}
+                        onChange={e => setForm({...form, date: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                        Jam Pelaksanaan (Mulai - Selesai)
+                      </label>
+                      <div className="flex gap-2 items-center">
+                        <input 
+                          type="text"
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-800 dark:text-white focus:bg-white outline-none text-center"
+                          value={form.startTime}
+                          onChange={e => setForm({...form, startTime: e.target.value})}
+                          placeholder="07:30"
+                        />
+                        <span className="text-xs font-bold text-slate-400">-</span>
+                        <input 
+                          type="text"
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-800 dark:text-white focus:bg-white outline-none text-center"
+                          value={form.endTime}
+                          onChange={e => setForm({...form, endTime: e.target.value})}
+                          placeholder="11:00"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preset Jam Cepat */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <span className="text-slate-400 text-[10px]">Waktu:</span>
+                    {quickTimes.map((qt, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setForm({ ...form, startTime: qt.start, endTime: qt.end })}
+                        className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono transition-all ${
+                          form.startTime === qt.start && form.endTime === qt.end
+                            ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold'
+                            : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
+                        }`}
+                      >
+                        {qt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Titik Kumpul */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                      Titik Kumpul / Lokasi Kegiatan
+                    </label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                      value={form.assemblyPoint}
+                      onChange={e => setForm({...form, assemblyPoint: e.target.value})}
+                      placeholder="Pos Ronda RT 02 / Lapangan Fasum"
+                    />
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      {quickLocations.map((loc, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setForm({ ...form, assemblyPoint: loc })}
+                          className="text-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 hover:text-emerald-700 px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-400 transition-colors"
+                        >
+                          + {loc}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Peralatan yang Perlu Dibawa */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                      <Wrench className="w-3.5 h-3.5 text-emerald-600" />
+                      Alat yang Perlu Dibawa Warga
+                    </label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                      value={form.toolsNeeded}
+                      onChange={e => setForm({...form, toolsNeeded: e.target.value})}
+                      placeholder="Cangkul, Sabit, Sapu Lidi, Karung Sampah"
+                    />
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      {quickTools.map((tool, idx) => {
+                        const active = form.toolsNeeded.toLowerCase().includes(tool.toLowerCase());
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => toggleTool(tool)}
+                            className={`text-[10px] px-2 py-0.5 rounded-lg border font-medium transition-all ${
+                              active
+                                ? 'bg-emerald-600 text-white border-emerald-600 font-bold'
+                                : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-emerald-400'
+                            }`}
+                          >
+                            {active ? '✓ ' : '+ '} {tool}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Seksi Konsumsi */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                      <Coffee className="w-3.5 h-3.5 text-amber-600" />
+                      Seksi Konsumsi & Logistik (Opsional)
+                    </label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                      value={form.snackPIC}
+                      onChange={e => setForm({...form, snackPIC: e.target.value})}
+                      placeholder="Contoh: Ibu-ibu PKK RT 02 / Disediakan Kopi & Snack Pengurus RT"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column: Live Announcement Preview (5 cols) */}
+                <div className="lg:col-span-5 space-y-4">
+                  {/* Live Announcement Card Preview */}
+                  <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md bg-white dark:bg-slate-900">
+                    <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-3.5 text-white flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-emerald-200" />
+                        <span className="text-xs font-black uppercase tracking-wider">Pratinjau Pengumuman Warga</span>
+                      </div>
+                      <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">
+                        RT 02 / RW 020
+                      </span>
+                    </div>
+
+                    <div className="p-4 space-y-3.5">
+                      <div>
+                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block">
+                          Agenda Resmi Mendatang
+                        </span>
+                        <h5 className="text-base font-black text-slate-900 dark:text-white leading-tight mt-0.5">
+                          {form.title || 'Judul Kegiatan Kerja Bakti...'}
+                        </h5>
+                      </div>
+
+                      {form.description && (
+                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                          {form.description}
+                        </p>
+                      )}
+
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                          <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>
+                            <strong>{new Date(form.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                          <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Pukul <strong>{form.startTime} - {form.endTime} WITA</strong></span>
+                        </div>
+
+                        <div className="flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                          <MapPin className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                          <span>Kumpul: <strong>{form.assemblyPoint || '-'}</strong></span>
+                        </div>
+                      </div>
+
+                      {/* Alat */}
+                      {form.toolsNeeded && (
+                        <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                            Perlengkapan yang Dibawa:
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {form.toolsNeeded.split(',').map((t, idx) => (
+                              <span key={idx} className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                                {t.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Konsumsi */}
+                      {form.snackPIC && (
+                        <div className="p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800/60 flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300">
+                          <Coffee className="w-4 h-4 shrink-0 text-amber-600" />
+                          <span>Konsumsi: <strong>{form.snackPIC}</strong></span>
+                        </div>
+                      )}
+
+                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Sasaran Partisipasi:</span>
+                        <strong className="text-slate-700 dark:text-slate-200">{occupiedHousesCount} Rumah Tangga RT 02</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informasi Presensi Otomatis */}
+                  <div className="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 text-xs text-blue-900 dark:text-blue-300 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                      Presensi Kehadiran Otomatis
+                    </div>
+                    <p className="text-[11px] text-blue-700/90 dark:text-blue-400">
+                      Sistem akan membuat lembar daftar hadir otomatis untuk seluruh {occupiedHousesCount} KK berpenghuni. Petugas tinggal mencatat status (Hadir, Diwakilkan, Kompensasi, Alpha) saat pelaksanaan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
+                  Agenda: <strong>{form.title || 'Agenda Baru'}</strong> • Tanggal <strong>{form.date}</strong>
+                </div>
+
+                <div className="flex items-center gap-2.5 ml-auto">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="rounded-xl px-4 py-2.5 text-xs font-bold"
+                  >
+                    Batal
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-emerald-600/25 flex items-center gap-2 transition-all"
+                  >
+                    <Check className="w-4 h-4" />
+                    Terbitkan Jadwal Kerja Bakti
+                  </Button>
+                </div>
+              </div>
+            </form>
+          );
+        })()}
       </Modal>
 
       {/* Modal Add Task Zone */}
