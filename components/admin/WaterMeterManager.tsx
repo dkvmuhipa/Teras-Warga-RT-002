@@ -5,7 +5,8 @@ import {
   Settings, Save, RefreshCw, ChevronRight, ChevronLeft, 
   Sliders, Calendar, Check, AlertCircle, ArrowUpDown, 
   TrendingUp, DollarSign, Home, User, Edit2, Trash2,
-  ShieldCheck, Sparkles, FileText, ArrowRight
+  ShieldCheck, Sparkles, FileText, ArrowRight,
+  Phone, Users, ExternalLink, X
 } from 'lucide-react';
 import { House, WaterMeterReading, WaterUtilitySettings } from '../../types';
 import { Card } from '../ui/Card';
@@ -282,6 +283,49 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       });
     }
     setIsModalOpen(true);
+  };
+
+  // Photo upload handler with canvas compression for single edit modal
+  const handlePhotoUploadForEdit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1000;
+        const MAX_HEIGHT = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.75);
+          setEditingReading(r => r ? { ...r, photoUrl: compressed } : null);
+        } else {
+          setEditingReading(r => r ? { ...r, photoUrl: event.target?.result as string } : null);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   // Save Single Reading
@@ -1339,160 +1383,339 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       )}
 
       {/* MODAL: SINGLE EDIT / INPUT METER */}
-      {isModalOpen && editingReading && (
-        <Modal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          title={`Catat Meter Air: Rumah ${editingReading.houseId}`}
-          maxWidth="max-w-lg"
-        >
-          <form onSubmit={handleSaveSingleReading} className="space-y-4">
-            {/* Header Card: House & Provider Info */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-sky-500 p-4 text-white shadow-lg shadow-blue-500/15">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-inner">
-                    <Droplets className="w-6 h-6 text-sky-200" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200">Unit Hunian</span>
-                      <span className="bg-white/20 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded">RT 002</span>
+      {isModalOpen && editingReading && (() => {
+        const targetHouse = houses.find(h => `${h.block}-${h.number}` === editingReading.houseId);
+        const usage = Math.max(0, editingReading.currentReading - editingReading.previousReading);
+        const previewBill = calculateWaterUtilityBill(usage, {
+          billingMode: waterSettings.billingMode,
+          baseQuotaM3: waterSettings.baseQuotaM3,
+          baseFee: waterSettings.baseFee,
+          ratePerM3: editingReading.ratePerM3,
+          maintenanceFee: editingReading.maintenanceFee
+        });
+        const quota = waterSettings.baseQuotaM3 || 10;
+        const isWithinQuota = usage <= quota;
+        const progressPercent = Math.min(100, Math.round((usage / quota) * 100));
+
+        // Quick presets
+        const quickDeltas = [5, 8, 10, 12, 15, 20, 25];
+
+        return (
+          <Modal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            title={`Catat Meter Air: Rumah ${editingReading.houseId}`}
+            maxWidth="max-w-4xl"
+          >
+            <form onSubmit={handleSaveSingleReading} className="space-y-5">
+              {/* Header Card: House, Resident & Provider Info */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-sky-500 p-4.5 text-white shadow-lg shadow-blue-500/15">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-inner shrink-0 mt-0.5">
+                      <Droplets className="w-7 h-7 text-sky-200" />
                     </div>
-                    <h4 className="text-xl font-black tracking-tight text-white">
-                      Rumah {editingReading.houseId}
-                    </h4>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200">Unit Hunian</span>
+                        <span className="bg-white/20 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded">RT 002</span>
+                        {targetHouse?.status && (
+                          <span className="bg-black/20 text-sky-100 text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/10">
+                            {targetHouse.status === 'Occupied' ? 'Dihuni' : targetHouse.status === 'Empty' ? 'Kosong' : targetHouse.status}
+                            {targetHouse.occupants ? ` (${targetHouse.occupants} Jiwa)` : ''}
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
+                        Rumah {editingReading.houseId}
+                      </h4>
+                      <p className="text-xs text-sky-100 mt-0.5">
+                        Kepala Keluarga: <strong className="text-white">{targetHouse?.headOfFamily || 'Warga RT 002'}</strong>
+                        {targetHouse?.phone && (
+                          <span className="ml-2 inline-flex items-center gap-1 text-[11px] text-sky-200">
+                            <Phone className="w-3 h-3" /> {targetHouse.phone}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-left sm:text-right shrink-0">
+                    <span className="text-[10px] uppercase font-bold text-sky-200 tracking-wider block">Pengelola Resmi Air</span>
+                    <span className="inline-flex items-center gap-1.5 bg-white text-blue-900 text-xs font-black px-3 py-1.5 rounded-xl shadow-sm">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      {waterSettings.providerName || 'PDAM Kota Palu'}
+                    </span>
+                    <span className="text-[11px] text-sky-100 block mt-1">
+                      Paket Kuota Dasar: <strong className="text-white">{quota} m³</strong> (Rp 35.000)
+                    </span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold text-sky-200 tracking-wider block">Pengelola Air</span>
-                  <span className="inline-flex items-center gap-1.5 bg-white text-blue-900 text-xs font-black px-2.5 py-1 rounded-xl shadow-sm">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    {waterSettings.providerName || 'PDAM Kota Palu'}
+
+                <div className="mt-3.5 pt-2.5 border-t border-white/20 flex flex-wrap items-center justify-between gap-2 text-xs text-sky-100">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-sky-200" />
+                    Periode Tagihan: <strong className="text-white">{formattedPeriodName}</strong> ({selectedPeriod})
+                  </span>
+                  <span className="text-[11px] font-medium bg-black/20 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-white/10">
+                    Batas Pencatatan: Tgl {waterSettings.readingDueDate || 20} setiap bulan
                   </span>
                 </div>
               </div>
 
-              <div className="mt-3.5 pt-2.5 border-t border-white/20 flex items-center justify-between text-xs text-sky-100">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-sky-200" />
-                  Periode: <strong className="text-white">{formattedPeriodName}</strong> ({selectedPeriod})
-                </span>
-                <span className="text-[11px] font-semibold bg-black/20 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-white/10">
-                  Paket Dasar: {waterSettings.baseQuotaM3 || 10} m³
-                </span>
-              </div>
-            </div>
-
-            {/* Dual Meter Inputs */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Meter Bulan Lalu */}
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Meter Bulan Lalu
-                  </label>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                    Awal
-                  </span>
-                </div>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="any"
-                    min="0"
-                    required
-                    value={editingReading.previousReading}
-                    onChange={(e) => setEditingReading(r => r ? { ...r, previousReading: parseFloat(e.target.value) || 0 } : null)}
-                    className="w-full pl-3.5 pr-9 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-base font-bold font-mono text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                    m³
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-1">Stand pembacaan lalu</p>
-              </div>
-
-              {/* Meter Bulan Ini */}
-              <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-2xl border-2 border-blue-400/80 dark:border-blue-700/80 shadow-sm shadow-blue-500/5">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">
-                    Meter Bulan Ini
-                  </label>
-                  <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-600 text-white animate-pulse">
-                    Terkini
-                  </span>
-                </div>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="any"
-                    min="0"
-                    required
-                    value={editingReading.currentReading}
-                    onChange={(e) => setEditingReading(r => r ? { ...r, currentReading: parseFloat(e.target.value) || 0 } : null)}
-                    className="w-full pl-3.5 pr-9 py-2.5 bg-white dark:bg-slate-900 border-2 border-blue-500 dark:border-blue-400 rounded-xl text-base font-black font-mono text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-blue-600 dark:text-blue-400">
-                    m³
-                  </span>
-                </div>
-                <p className="text-[10px] text-blue-600/80 dark:text-blue-400/80 mt-1">Angka meteran fisik sekarang</p>
-              </div>
-            </div>
-
-            {/* Live Calculation Preview - High-End Billing Card */}
-            {(() => {
-              const usage = Math.max(0, editingReading.currentReading - editingReading.previousReading);
-              const previewBill = calculateWaterUtilityBill(usage, {
-                billingMode: waterSettings.billingMode,
-                baseQuotaM3: waterSettings.baseQuotaM3,
-                baseFee: waterSettings.baseFee,
-                ratePerM3: editingReading.ratePerM3,
-                maintenanceFee: editingReading.maintenanceFee
-              });
-              const quota = waterSettings.baseQuotaM3 || 10;
-              const isWithinQuota = usage <= quota;
-              const progressPercent = Math.min(100, Math.round((usage / quota) * 100));
-
-              return (
-                <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white p-4 shadow-xl border border-slate-700/80 space-y-3">
-                  {/* Top: Net Volume & Status Pill */}
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-sky-400 flex items-center justify-center border border-blue-500/30">
-                        <Droplets className="w-4 h-4" />
+              {/* 2-Column Responsive Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                {/* Left Column: Inputs, Presets, Efficiency, Status (7 cols) */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Dual Meter Inputs */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Meter Bulan Lalu */}
+                    <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          Meter Bulan Lalu
+                        </label>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                          Awal
+                        </span>
                       </div>
-                      <div>
-                        <span className="text-[11px] font-bold text-slate-400 block">Volume Pemakaian Bersih</span>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-xl font-black font-mono text-white">{usage}</span>
-                          <span className="text-xs font-bold text-slate-400">m³</span>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="any"
+                          min="0"
+                          required
+                          value={editingReading.previousReading}
+                          onChange={(e) => setEditingReading(r => r ? { ...r, previousReading: parseFloat(e.target.value) || 0 } : null)}
+                          className="w-full pl-3.5 pr-9 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-base font-bold font-mono text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                          m³
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">Stand meter periode lalu</p>
+                    </div>
+
+                    {/* Meter Bulan Ini */}
+                    <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-2xl border-2 border-blue-400/80 dark:border-blue-700/80 shadow-sm shadow-blue-500/5">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[11px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">
+                          Meter Bulan Ini
+                        </label>
+                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-600 text-white animate-pulse">
+                          Terkini
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="any"
+                          min={editingReading.previousReading}
+                          required
+                          value={editingReading.currentReading}
+                          onChange={(e) => setEditingReading(r => r ? { ...r, currentReading: parseFloat(e.target.value) || 0 } : null)}
+                          className="w-full pl-3.5 pr-9 py-2.5 bg-white dark:bg-slate-900 border-2 border-blue-500 dark:border-blue-400 rounded-xl text-base font-black font-mono text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-blue-600 dark:text-blue-400">
+                          m³
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-blue-600/80 dark:text-blue-400/80 mt-1">Angka meteran fisik sekarang</p>
+                    </div>
+                  </div>
+
+                  {/* Quick Delta Helper Buttons */}
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                        Preset Cepat Tambah Pemakaian (+ m³):
+                      </span>
+                      <span className="text-[10px] text-slate-400">Klik untuk input instan</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {quickDeltas.map(delta => (
+                        <button
+                          key={delta}
+                          type="button"
+                          onClick={() => setEditingReading(r => r ? { ...r, currentReading: r.previousReading + delta } : null)}
+                          className={`px-2.5 py-1 text-xs font-mono font-bold rounded-lg border transition-all ${
+                            usage === delta
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600'
+                          }`}
+                        >
+                          +{delta} m³
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Usage Efficiency Category */}
+                  <div className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
+                    usage === 0
+                      ? 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-800/60 dark:border-slate-700 dark:text-slate-400'
+                      : usage <= quota
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300'
+                      : usage <= 25
+                      ? 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/40 dark:border-blue-800 dark:text-blue-300'
+                      : 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300'
+                  }`}>
+                    {usage <= quota ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <TrendingUp className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <strong className="block font-bold">
+                        {usage === 0 
+                          ? 'Nol Kubikasi (0 m³)'
+                          : usage <= quota 
+                          ? 'Konsumsi Hemat (Dalam Kuota Minimum PDAM 10 m³)'
+                          : usage <= 25
+                          ? `Konsumsi Normal Rumah Tangga (+${usage - quota} m³ kelebihan)`
+                          : `Konsumsi Tinggi (+${usage - quota} m³ di atas kuota)`}
+                      </strong>
+                      <span className="text-[11px] opacity-90">
+                        {usage <= quota
+                          ? 'Biaya tetap berlaku flat Rp 35.000 karena berada dalam batas kuota dasar resmi.'
+                          : `Dikenakan biaya kelebihan pemakaian Rp ${editingReading.ratePerM3.toLocaleString('id-ID')} per m³ untuk ${previewBill.excessUsage} m³ kelebihan.`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Metode & Petugas Pencatat */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                      Metode & Petugas Pencatat
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingReading(r => r ? { ...r, recordedBy: 'Petugas RT', recordedByName: 'Petugas RT Keliling' } : null)}
+                        className={`p-2 rounded-xl border text-xs font-bold text-center transition-all ${
+                          editingReading.recordedBy === 'Petugas RT'
+                            ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/50 dark:border-blue-500 dark:text-blue-300 ring-1 ring-blue-500'
+                            : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        Petugas RT (Keliling)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingReading(r => r ? { ...r, recordedBy: 'Warga', recordedByName: targetHouse?.headOfFamily || 'Mandiri Warga' } : null)}
+                        className={`p-2 rounded-xl border text-xs font-bold text-center transition-all ${
+                          editingReading.recordedBy === 'Warga'
+                            ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-950/50 dark:border-indigo-500 dark:text-indigo-300 ring-1 ring-indigo-500'
+                            : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        Mandiri Warga (Self-Report)
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Interactive Status Selector */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                      Status Verifikasi Pembacaan
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingReading(r => r ? { ...r, status: 'Terverifikasi' } : null)}
+                        className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                          editingReading.status === 'Terverifikasi'
+                            ? 'bg-emerald-50 border-emerald-500 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-500 dark:text-emerald-300 ring-2 ring-emerald-500/20 font-bold shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
+                        }`}
+                      >
+                        <CheckCircle2 className={`w-4 h-4 ${editingReading.status === 'Terverifikasi' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
+                        <span className="text-xs">Disetujui</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setEditingReading(r => r ? { ...r, status: 'Menunggu Verifikasi' } : null)}
+                        className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                          editingReading.status === 'Menunggu Verifikasi'
+                            ? 'bg-amber-50 border-amber-500 text-amber-800 dark:bg-amber-950/40 dark:border-amber-500 dark:text-amber-300 ring-2 ring-amber-500/20 font-bold shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
+                        }`}
+                      >
+                        <Clock className={`w-4 h-4 ${editingReading.status === 'Menunggu Verifikasi' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'}`} />
+                        <span className="text-xs">Menunggu</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setEditingReading(r => r ? { ...r, status: 'Ditolak' } : null)}
+                        className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                          editingReading.status === 'Ditolak'
+                            ? 'bg-rose-50 border-rose-500 text-rose-800 dark:bg-rose-950/40 dark:border-rose-500 dark:text-rose-300 ring-2 ring-rose-500/20 font-bold shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
+                        }`}
+                      >
+                        <AlertCircle className={`w-4 h-4 ${editingReading.status === 'Ditolak' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                        <span className="text-xs">Ditolak</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Catatan Pengurus */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                      Catatan Petugas / Pengurus RT (Opsional)
+                    </label>
+                    <div className="relative">
+                      <FileText className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type="text"
+                        placeholder="Misal: Angka fisik cocok sesuai foto meteran kran depan"
+                        value={editingReading.adminNotes || ''}
+                        onChange={(e) => setEditingReading(r => r ? { ...r, adminNotes: e.target.value } : null)}
+                        className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Billing Card, Photo, WhatsApp (5 cols) */}
+                <div className="lg:col-span-5 space-y-4">
+                  {/* Smart Billing Receipt Card */}
+                  <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white p-4 shadow-xl border border-slate-700/80 space-y-3">
+                    {/* Top Header of Billing */}
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-sky-400 flex items-center justify-center border border-blue-500/30">
+                          <Droplets className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span className="text-[11px] font-bold text-slate-400 block">Pemakaian Bersih</span>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-xl font-black font-mono text-white">{usage}</span>
+                            <span className="text-xs font-bold text-slate-400">m³</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div>
-                      {waterSettings.billingMode === 'pdam' && (
-                        isWithinQuota ? (
-                          <span className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold px-2.5 py-1 rounded-full">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                            Dalam Kuota Dasar (≤ 10 m³)
+                      <div>
+                        {isWithinQuota ? (
+                          <span className="inline-flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            ≤ 10 m³ Kuota
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold px-2.5 py-1 rounded-full">
-                            <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
-                            +{previewBill.excessUsage} m³ Kelebihan
+                          <span className="inline-flex items-center gap-1 bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                            <TrendingUp className="w-3 h-3 text-amber-400" />
+                            +{previewBill.excessUsage} m³ Lebih
                           </span>
-                        )
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Visual Quota Gauge (PDAM) */}
-                  {waterSettings.billingMode === 'pdam' && (
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[11px]">
+                    {/* Visual Quota Gauge Bar */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px]">
                         <span className="text-slate-400">
                           Kuota Paket: <strong className="text-white">{usage}</strong> / {quota} m³
                         </span>
@@ -1500,7 +1723,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                           {isWithinQuota ? `${progressPercent}% kuota terpakai` : `100% + ${previewBill.excessUsage} m³ kelebihan`}
                         </span>
                       </div>
-                      <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex p-0.5 border border-slate-700/50">
+                      <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden flex p-0.5 border border-slate-700/50">
                         <div 
                           className={`h-full rounded-full transition-all duration-300 ${isWithinQuota ? 'bg-emerald-500' : 'bg-emerald-400'}`}
                           style={{ width: `${Math.min(100, (Math.min(usage, quota) / quota) * 100)}%` }}
@@ -1513,160 +1736,171 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                         )}
                       </div>
                     </div>
-                  )}
 
-                  {/* Itemized Calculation */}
-                  <div className="pt-2 border-t border-slate-800 space-y-2 text-xs">
-                    {waterSettings.billingMode === 'pdam' ? (
-                      <>
-                        <div className="flex justify-between items-center text-slate-300">
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                            Paket Dasar PDAM (s/d {waterSettings.baseQuotaM3 || 10} m³)
-                          </span>
-                          <span className="font-mono font-bold text-white">
-                            Rp {(previewBill.baseFee).toLocaleString('id-ID')}
-                          </span>
-                        </div>
-
-                        {previewBill.excessUsage > 0 && (
-                          <div className="flex justify-between items-center text-amber-300">
-                            <span className="flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                              Kelebihan ({previewBill.excessUsage} m³ × Rp {editingReading.ratePerM3.toLocaleString('id-ID')})
-                            </span>
-                            <span className="font-mono font-bold">
-                              + Rp {previewBill.excessFee.toLocaleString('id-ID')}
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="flex justify-between items-center text-slate-300">
-                        <span>Tarif Kubikasi ({usage} m³ × Rp {editingReading.ratePerM3.toLocaleString('id-ID')})</span>
-                        <span className="font-mono font-bold text-white">
-                          Rp {(usage * editingReading.ratePerM3).toLocaleString('id-ID')}
-                        </span>
-                      </div>
-                    )}
-
-                    {editingReading.maintenanceFee > 0 && (
+                    {/* Itemized Calculation */}
+                    <div className="pt-2 border-t border-slate-800 space-y-2 text-xs">
                       <div className="flex justify-between items-center text-slate-300">
                         <span className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                          Beban Admin / Pemeliharaan
+                          <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                          Paket Dasar (1 s/d {quota} m³)
                         </span>
                         <span className="font-mono font-bold text-white">
-                          + Rp {editingReading.maintenanceFee.toLocaleString('id-ID')}
+                          Rp {(previewBill.baseFee).toLocaleString('id-ID')}
+                        </span>
+                      </div>
+
+                      {previewBill.excessUsage > 0 ? (
+                        <div className="flex justify-between items-center text-amber-300">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                            Kelebihan ({previewBill.excessUsage} m³ × Rp {editingReading.ratePerM3.toLocaleString('id-ID')})
+                          </span>
+                          <span className="font-mono font-bold">
+                            + Rp {previewBill.excessFee.toLocaleString('id-ID')}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center text-slate-500 text-[11px]">
+                          <span>Kelebihan Pemakaian (0 m³)</span>
+                          <span className="font-mono">Rp 0</span>
+                        </div>
+                      )}
+
+                      {editingReading.maintenanceFee > 0 && (
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                            Beban Admin RT
+                          </span>
+                          <span className="font-mono font-bold text-white">
+                            + Rp {editingReading.maintenanceFee.toLocaleString('id-ID')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Total Tagihan Box */}
+                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between bg-slate-950/60 -mx-4 -mb-4 p-3 px-4 rounded-b-2xl">
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                          Total Estimasi Tagihan
+                        </span>
+                        <span className="text-[10px] text-slate-500">
+                          Resmi {waterSettings.providerName || 'PDAM Kota Palu'}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-black font-mono text-emerald-400 tracking-tight">
+                          Rp {previewBill.totalAmount.toLocaleString('id-ID')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Foto Bukti Fisik Meteran */}
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-blue-600" />
+                        Foto Bukti Fisik
+                      </span>
+                      {editingReading.photoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingReading(r => r ? { ...r, photoUrl: '' } : null)}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-700"
+                        >
+                          Hapus Foto
+                        </button>
+                      )}
+                    </div>
+
+                    {editingReading.photoUrl ? (
+                      <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-950 max-h-40">
+                        <img 
+                          src={editingReading.photoUrl} 
+                          alt={`Meteran ${editingReading.houseId}`} 
+                          className="w-full h-40 object-contain" 
+                        />
+                      </div>
+                    ) : (
+                      <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-3 text-center hover:border-blue-400 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handlePhotoUploadForEdit}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                        <Camera className="w-6 h-6 mx-auto mb-1 text-slate-400" />
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-300 block">
+                          Ambil / Unggah Foto Meteran
+                        </span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                          Format JPG/PNG • Otomatis dikompres
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* Total Tagihan Result */}
-                  <div className="pt-2 border-t border-slate-800 flex items-center justify-between bg-slate-950/50 -mx-4 -mb-4 p-3.5 px-4 rounded-b-2xl">
-                    <div>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                        Estimasi Total Tagihan
-                      </span>
-                      <span className="text-[10px] text-slate-500">
-                        Tarif resmi {waterSettings.providerName || 'PDAM Kota Palu'}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-black font-mono text-emerald-400 tracking-tight">
-                        Rp {previewBill.totalAmount.toLocaleString('id-ID')}
-                      </div>
-                    </div>
-                  </div>
+                  {/* WhatsApp Quick Dispatch */}
+                  {targetHouse?.phone && (
+                    <button
+                      type="button"
+                      onClick={() => handleSendWhatsApp(targetHouse, {
+                        id: '',
+                        houseId: editingReading.houseId,
+                        period: selectedPeriod,
+                        previousReading: editingReading.previousReading,
+                        currentReading: editingReading.currentReading,
+                        usage,
+                        ratePerM3: editingReading.ratePerM3,
+                        maintenanceFee: editingReading.maintenanceFee,
+                        baseFee: previewBill.baseFee,
+                        excessUsage: previewBill.excessUsage,
+                        excessFee: previewBill.excessFee,
+                        totalAmount: previewBill.totalAmount,
+                        recordedBy: editingReading.recordedBy,
+                        recordedAt: new Date().toISOString(),
+                        status: editingReading.status
+                      })}
+                      className="w-full py-2.5 px-3 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 hover:bg-emerald-100 transition-colors shadow-sm"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      Kirim Rincian Tagihan ke WA Warga
+                    </button>
+                  )}
                 </div>
-              );
-            })()}
-
-            {/* Interactive Status Selector */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2">
-                Status Verifikasi Pembacaan
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingReading(r => r ? { ...r, status: 'Terverifikasi' } : null)}
-                  className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
-                    editingReading.status === 'Terverifikasi'
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-500 dark:text-emerald-300 ring-2 ring-emerald-500/20 font-bold shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <CheckCircle2 className={`w-4 h-4 ${editingReading.status === 'Terverifikasi' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
-                  <span className="text-xs">Disetujui</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setEditingReading(r => r ? { ...r, status: 'Menunggu Verifikasi' } : null)}
-                  className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
-                    editingReading.status === 'Menunggu Verifikasi'
-                      ? 'bg-amber-50 border-amber-500 text-amber-800 dark:bg-amber-950/40 dark:border-amber-500 dark:text-amber-300 ring-2 ring-amber-500/20 font-bold shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <Clock className={`w-4 h-4 ${editingReading.status === 'Menunggu Verifikasi' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'}`} />
-                  <span className="text-xs">Menunggu</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setEditingReading(r => r ? { ...r, status: 'Ditolak' } : null)}
-                  className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
-                    editingReading.status === 'Ditolak'
-                      ? 'bg-rose-50 border-rose-500 text-rose-800 dark:bg-rose-950/40 dark:border-rose-500 dark:text-rose-300 ring-2 ring-rose-500/20 font-bold shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <AlertCircle className={`w-4 h-4 ${editingReading.status === 'Ditolak' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <span className="text-xs">Ditolak</span>
-                </button>
               </div>
-            </div>
 
-            {/* Catatan Pengurus */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
-                Catatan Pengurus / Petugas (Opsional)
-              </label>
-              <div className="relative">
-                <FileText className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="text"
-                  placeholder="Misal: Angka fisik sesuai foto meteran kran depan"
-                  value={editingReading.adminNotes || ''}
-                  onChange={(e) => setEditingReading(r => r ? { ...r, adminNotes: e.target.value } : null)}
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-slate-200"
-                />
+              {/* Modal Footer Action Bar */}
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
+                  Unit <strong>{editingReading.houseId}</strong> • Pemakaian <strong>{usage} m³</strong> • Tagihan <strong>Rp {previewBill.totalAmount.toLocaleString('id-ID')}</strong>
+                </div>
+
+                <div className="flex items-center gap-2.5 ml-auto">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsModalOpen(false)}
+                    className="rounded-xl px-4 py-2.5 text-xs font-bold"
+                  >
+                    Batal
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-2 transition-all"
+                  >
+                    <Check className="w-4 h-4" />
+                    Simpan Catatan
+                  </Button>
+                </div>
               </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-xl px-4 py-2.5 text-xs font-bold"
-              >
-                Batal
-              </Button>
-              <Button 
-                type="submit" 
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-1.5 transition-all"
-              >
-                <Check className="w-4 h-4" />
-                Simpan Catatan
-              </Button>
-            </div>
-          </form>
-        </Modal>
-      )}
+            </form>
+          </Modal>
+        );
+      })()}
 
       {/* MODAL: VERIFIKASI FOTO METERAN WARGA */}
       {verifyingItem && (
