@@ -5,7 +5,8 @@ import {
   FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
   Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare, Scale, HelpCircle,
-  BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign, Trash2, Recycle, Trophy, Award, Zap, Wrench, Hammer
+  BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign, Trash2, Recycle, Trophy, Award, Zap, Wrench, Hammer,
+  Share2, MapPin, ExternalLink
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint, CommunitySkill, UtilityOutage } from '../../types';
@@ -152,9 +153,13 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     visible: { opacity: 1, y: 0 }
   };
 
+  type ServiceCategory = 'all' | 'admin' | 'security' | 'community';
+  const [activeServiceCategory, setActiveServiceCategory] = React.useState<ServiceCategory>('all');
+
   const quickActions = React.useMemo(() => [
     { 
       label: 'Profil Warga', 
+      category: 'admin' as ServiceCategory,
       icon: User, 
       color: 'bg-[#5856d6]', 
       shadow: 'shadow-[#5856d6]/30', 
@@ -162,6 +167,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Buat Surat', 
+      category: 'admin' as ServiceCategory,
       icon: FileText, 
       color: 'bg-[#00a2e0]', 
       shadow: 'shadow-[#00a2e0]/30', 
@@ -169,6 +175,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Lapor Tamu', 
+      category: 'security' as ServiceCategory,
       icon: Shield, 
       color: 'bg-[#ff6200]', 
       shadow: 'shadow-[#ff6200]/30', 
@@ -178,6 +185,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Daftar Warga', 
+      category: 'admin' as ServiceCategory,
       icon: UserPlus, 
       color: 'bg-[#af52de]', 
       shadow: 'shadow-[#af52de]/30', 
@@ -185,6 +193,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'UMKM Warga', 
+      category: 'community' as ServiceCategory,
       icon: ShoppingCart, 
       color: 'bg-[#00c781]', 
       shadow: 'shadow-[#00c781]/30', 
@@ -194,6 +203,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Warta RT', 
+      category: 'community' as ServiceCategory,
       icon: Megaphone, 
       color: 'bg-[#00b2cc]', 
       shadow: 'shadow-[#00b2cc]/30', 
@@ -201,6 +211,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Peraturan RT', 
+      category: 'security' as ServiceCategory,
       icon: BookOpen, 
       color: 'bg-[#10b981]', 
       shadow: 'shadow-[#10b981]/30', 
@@ -210,6 +221,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Jasa Warga', 
+      category: 'community' as ServiceCategory,
       icon: Wrench, 
       color: 'bg-[#f59e0b]', 
       shadow: 'shadow-[#f59e0b]/30', 
@@ -219,6 +231,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Info PLN/Air', 
+      category: 'security' as ServiceCategory,
       icon: Zap, 
       color: 'bg-[#0284c7]', 
       shadow: 'shadow-[#0284c7]/30', 
@@ -228,6 +241,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Lapor RT', 
+      category: 'admin' as ServiceCategory,
       icon: AlertTriangle, 
       color: 'bg-[#ff3b30]', 
       shadow: 'shadow-[#ff3b30]/30', 
@@ -235,18 +249,24 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     },
     { 
       label: 'Kontak Darurat', 
+      category: 'security' as ServiceCategory,
       icon: PhoneCall, 
       color: 'bg-[#dc2626]', 
       shadow: 'shadow-[#dc2626]/30', 
       action: () => {
-        toast.info("Kontak Darurat RT 02 Huntap Tondo 2", {
-          description: "Ketua RT: +62 859-6119-4621 | Satpam Pos: +62 812-4455-8800 | Pemadam: 113 | Ambulans: 118"
+        toast.info("Kontak Darurat RT 002 / RW 020 Huntap Tondo", {
+          description: "Ketua RT: +62 859-6119-4621 | Satpam Pos: +62 812-4455-8800 | Bhabinkamtibmas: 110 | Pemadam: 113 | Ambulans: 118"
         });
       },
       badge: '24 JAM',
       badgeColor: 'bg-[#991b1b]'
     }
   ], []);
+
+  const filteredQuickActions = React.useMemo(() => {
+    if (activeServiceCategory === 'all') return quickActions;
+    return quickActions.filter(action => action.category === activeServiceCategory);
+  }, [quickActions, activeServiceCategory]);
 
   const [filterType, setFilterType] = React.useState<'All' | 'General' | 'Urgent' | 'Event' | 'Lelayu'>('All');
 
@@ -317,20 +337,58 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         variants={itemVariants}
         className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2.5rem] p-6 md:p-10 shadow-xl shadow-slate-200/30 relative z-10"
       >
-        <div className="mb-8">
-          <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight">
-            Layanan <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
-          </h3>
-          <p className="text-slate-400 font-medium text-xs md:text-sm mt-1 max-w-xl">
-            Semua urusan warga dan administrasi kini serba praktis dalam satu ketukan.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-700">SUPER-APP RT 002 / RW 020</span>
+            </div>
+            <h3 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight leading-tight">
+              Layanan <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
+            </h3>
+            <p className="text-slate-400 font-medium text-xs md:text-sm mt-1 max-w-xl">
+              Semua urusan administrasi, keamanan, gotong royong, dan usaha warga kini serba praktis dalam satu ketukan.
+            </p>
+          </div>
+
+          {/* Quick Category Filter Pills */}
+          <div className="flex items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 overflow-x-auto no-scrollbar shrink-0">
+            {[
+              { id: 'all' as ServiceCategory, label: 'Semua', count: quickActions.length },
+              { id: 'admin' as ServiceCategory, label: 'Surat & Admin', count: quickActions.filter(a => a.category === 'admin').length },
+              { id: 'security' as ServiceCategory, label: 'Keamanan & Fasum', count: quickActions.filter(a => a.category === 'security').length },
+              { id: 'community' as ServiceCategory, label: 'Komunitas & UMKM', count: quickActions.filter(a => a.category === 'community').length },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveServiceCategory(tab.id)}
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  activeServiceCategory === tab.id
+                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60 font-black'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span className={`text-[8px] px-1.5 py-0.2 rounded-full font-black ${
+                  activeServiceCategory === tab.id ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Grid layout matching Gojek/Grab/Citizen apps exactly: 4 columns on mobile, 8 columns on desktop */}
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-y-8 gap-x-2 md:gap-x-8 w-full max-w-5xl">
-          {quickActions.map((action, idx) => (
+        {/* Grid layout matching Gojek/Grab/Citizen apps: 4 columns on mobile, 6 to 8 columns on desktop */}
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-7 gap-x-3 md:gap-x-8 w-full max-w-6xl">
+          {filteredQuickActions.map((action, idx) => (
             <motion.button
-              key={idx}
+              key={action.label}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
               whileHover={{ y: -4, scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={action.action || (() => navigate(action.link!))}
@@ -338,7 +396,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             >
               {/* Beautiful Badges directly layered on top of squircles */}
               {action.badge && (
-                <span className={`absolute -top-1 md:-top-1.5 right-[5%] sm:right-[15%] md:right-[20%] z-20 text-[6px] md:text-[8px] font-black uppercase tracking-widest ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 md:px-2 py-[1px] md:py-0.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)] animate-pulse select-none scale-95`}>
+                <span className={`absolute -top-1 md:-top-1.5 right-[5%] sm:right-[12%] md:right-[16%] z-20 text-[6px] md:text-[8px] font-black uppercase tracking-widest ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 md:px-2 py-[1px] md:py-0.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)] animate-pulse select-none scale-95`}>
                   {action.badge}
                 </span>
               )}
@@ -356,7 +414,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               </div>
 
               {/* Service Label */}
-              <span className="font-extrabold text-slate-700 text-[11px] md:text-sm tracking-tight leading-snug mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[85px] md:max-w-none">
+              <span className="font-extrabold text-slate-700 text-[11px] md:text-xs tracking-tight leading-snug mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[85px] md:max-w-none">
                 {action.label}
               </span>
             </motion.button>
@@ -645,18 +703,33 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           
           <div className="flex flex-col md:flex-row gap-6 items-center">
             <div className="flex-1 w-full">
-              <p className="text-sm text-slate-500 font-medium mb-6 leading-relaxed">
+              <p className="text-sm text-slate-500 font-medium mb-4 leading-relaxed">
                 Masukkan nomor rumah Anda untuk melihat rincian tagihan iuran air dan sampah yang belum terbayar.
               </p>
+              
+              <div className="flex items-center gap-1.5 flex-wrap mb-4">
+                <span className="text-[10px] font-bold text-slate-400">Pilih Cepat:</span>
+                {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(blockPrefix => (
+                  <button
+                    key={blockPrefix}
+                    type="button"
+                    onClick={() => setStatusSearchId(`${blockPrefix}-`)}
+                    className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer border border-slate-200/60"
+                  >
+                    Blok {blockPrefix}
+                  </button>
+                ))}
+              </div>
+
               <form onSubmit={handleCheckStatus} className="flex gap-3">
                 <input 
                   type="text" 
-                  placeholder="No. Rumah (A1-01)" 
+                  placeholder="No. Rumah (Contoh: A1-01)" 
                   className="flex-1 px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
                   value={statusSearchId}
                   onChange={e => setStatusSearchId(e.target.value)}
                 />
-                <Button type="submit" className="px-8 rounded-2xl">
+                <Button type="submit" className="px-8 rounded-2xl cursor-pointer shadow-md">
                   Cek
                 </Button>
               </form>
@@ -849,6 +922,81 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         />
       </motion.div>
 
+      {/* Spotlight Agenda Terdekat Warga RT 002 */}
+      {(() => {
+        const upcomingEvent = announcements.find(a => a.type === 'Event') || {
+          id: 'agenda-gotong-royong',
+          title: 'Gotong Royong & Pembersihan Saluran Drainase Blok RT 002',
+          content: 'Kegiatan kerja bakti berkala warga RT 002 / RW 020 untuk menjaga kelancaran saluran drainase, pembersihan rumput liar, dan penataan pekarangan menjelang musim hujan.',
+          date: new Date(Date.now() + 86400000 * 3).toISOString(),
+          type: 'Event' as const
+        };
+        const eventDate = new Date(upcomingEvent.date);
+        const eventDateFormatted = eventDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const diffDays = Math.ceil((eventDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        const countdownLabel = diffDays > 1 ? `${diffDays} Hari Lagi` : diffDays === 1 ? 'Besok Pagi' : diffDays === 0 ? 'Hari Ini' : 'Terlaksana';
+
+        const handleShareAgendaWA = () => {
+          const text = `📅 *AGENDA KEGIATAN RT 002 / RW 020*\n\n*${upcomingEvent.title}*\n🗓️ Tanggal: ${eventDateFormatted}\n📍 Lokasi: Lingkungan RT 002 Huntap Tondo 2\n\n${upcomingEvent.content}\n\n_Mari berpartisipasi dan menjaga kerukunan warga bersama!_\n🌐 Info Lengkap: ${window.location.origin}`;
+          window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+        };
+
+        return (
+          <motion.div 
+            variants={itemVariants} 
+            className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 rounded-[2.8rem] p-7 md:p-10 text-white border border-indigo-500/30 shadow-2xl relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+            
+            <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="space-y-3 max-w-2xl">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                    <Sparkles size={11} className="text-amber-400 animate-spin-slow" /> AGENDA TERDEKAT WARGA
+                  </span>
+                  <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                    <Clock size={11} /> {countdownLabel}
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                    <Calendar size={12} className="text-indigo-400" /> {eventDateFormatted}
+                  </span>
+                </div>
+
+                <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                  {upcomingEvent.title}
+                </h3>
+
+                <p className="text-xs md:text-sm text-slate-300 font-medium leading-relaxed">
+                  {upcomingEvent.content}
+                </p>
+
+                <div className="flex items-center gap-2 pt-1 text-[11px] font-bold text-slate-400">
+                  <MapPin size={13} className="text-rose-400 shrink-0" />
+                  <span>Titik Kumpul: Wilayah RT 002 / RW 020 Kelurahan Tondo, Palu</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full sm:w-auto">
+                <button
+                  onClick={handleShareAgendaWA}
+                  className="px-5 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95"
+                >
+                  <Share2 size={15} />
+                  <span>Bagikan ke WhatsApp RT</span>
+                </button>
+                <button
+                  onClick={() => navigate('/info')}
+                  className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all border border-white/10 cursor-pointer"
+                >
+                  <span>Lihat Semua Agenda</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })()}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Announcements - Editorial Style (Left Column - 2 Cols Wide) */}
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
@@ -966,6 +1114,26 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                       }`}>
                         {ann.content}
                       </p>
+
+                      {/* Announcement Quick Action Footer */}
+                      <div className="pt-2 flex items-center gap-2 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const text = `📢 *WARTA RESMI RT 002 / RW 020*\n\n*${ann.title}*\n📅 Tanggal: ${new Date(ann.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}\n\n${ann.content}\n\n_Diterbitkan oleh Pengurus RT 002 / RW 020 Kelurahan Tondo_\n🌐 Buka Portal Warga: ${window.location.origin}`;
+                            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+                          }}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs ${
+                            isLelayu 
+                              ? 'bg-rose-500/20 text-rose-200 hover:bg-rose-500/30 border border-rose-500/30' 
+                              : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80'
+                          }`}
+                        >
+                          <Share2 size={12} />
+                          <span>Bagikan ke WhatsApp RT</span>
+                        </button>
+                      </div>
                     </div>
                     <div className="shrink-0 self-end md:self-start">
                       <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm border ${

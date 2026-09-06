@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles, Building2, Lock, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles, Building2, Lock, Shield, Search, Wallet, Droplet } from 'lucide-react';
 import { motion } from 'motion/react';
 import { RT_NAME } from '../constants';
 import { toast } from 'sonner';
@@ -10,26 +11,14 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = ({ onExplore }: HeroSectionProps) => {
+    const navigate = useNavigate();
     const [date, setDate] = useState(new Date());
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const [searchTerm, setSearchTerm] = useState('');
     const { weather } = useWeather();
 
     useEffect(() => { 
         const timer = setInterval(() => setDate(new Date()), 1000); 
-        const handleMouseMove = (e: MouseEvent) => {
-            const rect = document.getElementById('hero-container')?.getBoundingClientRect();
-            if (rect) {
-                setMousePos({
-                    x: e.clientX - rect.left,
-                    y: e.clientY - rect.top
-                });
-            }
-        };
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => {
-            clearInterval(timer);
-            window.removeEventListener('mousemove', handleMouseMove);
-        };
+        return () => clearInterval(timer);
     }, []);
 
     const getWeatherIcon = (code: number | undefined) => {
@@ -45,9 +34,20 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
     };
 
     const handleSmartEnvClick = () => {
-        toast.info("🌱 Status Lingkungan Cerdas (Smart Env) RT 02", {
-            description: `Kondisi Udara: ${weather ? weather.condition : 'Cerah Bersahabat'} | Suhu: ${weather ? weather.temp : '31'}°C | Kualitas Udara (AQI): ${weather?.aqi || '42'} (Sangat Baik & Bebas Polusi)`
+        toast.info("🌱 Status Lingkungan Cerdas (Smart Env) RT 002 / RW 020", {
+            description: `Kondisi: ${weather ? weather.condition : 'Cerah Bersahabat'} | Suhu: ${weather ? weather.temp : '31'}°C | Kualitas Udara (AQI): ${weather?.aqi || '42'} (Sangat Baik & Bebas Polusi) | Wilayah: Kel. Tondo, Palu`
         });
+    };
+
+    const handleOmniSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!searchTerm.trim()) {
+            toast.info("Ketik kata kunci pencarian", {
+                description: "Contoh: nomor blok (B-12), surat, ronda, atau aturan RT"
+            });
+            return;
+        }
+        navigate(`/info?search=${encodeURIComponent(searchTerm.trim())}`);
     };
 
     return (
@@ -56,25 +56,26 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative bg-white rounded-3xl md:rounded-[2.5rem] overflow-hidden mb-6 md:mb-12 shadow-sm border border-slate-200/70 group min-h-0 md:min-h-[340px] flex items-center"
+        className="relative bg-white rounded-3xl md:rounded-[2.8rem] overflow-hidden mb-6 md:mb-12 shadow-xl shadow-slate-200/40 border border-slate-200/80 group min-h-0 md:min-h-[380px] flex items-center"
       >
-        {/* Subtle Ambient Glow */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-50/70 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-50/60 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient Subtle Glow */}
+        <div className="absolute top-0 right-0 w-[420px] h-[420px] bg-gradient-to-br from-amber-100/60 via-orange-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[420px] h-[420px] bg-gradient-to-tr from-emerald-100/50 via-teal-100/25 to-transparent rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative w-full px-6 py-8 md:px-14 md:py-12 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10 z-10">
           <div className="text-center lg:text-left max-w-2xl z-10 w-full space-y-4 md:space-y-5">
+            {/* Wilayah Badge */}
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-amber-50 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] border border-amber-200/70 text-amber-800 shadow-xs"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.22em] border border-emerald-200/80 text-emerald-800 shadow-2xs"
             >
-              <div className="relative flex h-2 w-2">
+              <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </div>
-              <span>Sistem Informasi Digital • Online</span>
+              </span>
+              <span>RT 002 / RW 020 • Kelurahan Tondo</span>
             </motion.div>
             
             <div className="space-y-2 md:space-y-3">
@@ -84,9 +85,9 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="text-3xl md:text-5xl lg:text-6xl font-sans font-black leading-tight tracking-tight text-slate-900"
               >
-                TERAS <br className="hidden md:block"/>
-                <span className="text-amber-600 font-serif italic font-bold">
-                  {RT_NAME}
+                TERAS WARGA <br className="hidden md:block"/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 font-serif italic font-bold">
+                  RT 002 / RW 020
                 </span>
               </motion.h1>
               
@@ -96,40 +97,69 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 transition={{ delay: 0.4 }}
                 className="text-slate-500 text-xs md:text-sm font-medium leading-relaxed max-w-lg"
               >
-                Harmoni warga dalam satu genggaman. Platform digital modern untuk mewujudkan <span className="text-slate-800 font-black">RT 02 yang Sinergis, Aman, dan Transparan.</span>
+                Harmoni warga dalam satu genggaman. Portal digital resmi Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu untuk mewujudkan lingkungan yang sinergis, aman, dan transparan.
               </motion.p>
             </div>
 
-            {/* 3 Quick Stat Pills */}
+            {/* 4 Smart Pulse Pills */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
               className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1"
             >
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/60 rounded-xl text-[11px] font-bold text-slate-700">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10px] md:text-[11px] font-bold text-slate-700 shadow-2xs">
                 <Building2 size={13} className="text-amber-500" />
-                <span>120+ Hunian</span>
+                <span>120+ Hunian Aktif</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/60 rounded-xl text-[11px] font-bold text-slate-700">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10px] md:text-[11px] font-bold text-slate-700 shadow-2xs">
                 <Shield size={13} className="text-emerald-500" />
-                <span>24 Jam Siskamling</span>
+                <span>Siskamling 24 Jam</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/60 rounded-xl text-[11px] font-bold text-slate-700">
-                <Lock size={13} className="text-indigo-500" />
-                <span>Data Terenkripsi</span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10px] md:text-[11px] font-bold text-slate-700 shadow-2xs">
+                <Droplet size={13} className="text-blue-500" />
+                <span>Air PDAM Rp35rb/10m³</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10px] md:text-[11px] font-bold text-slate-700 shadow-2xs">
+                <Wallet size={13} className="text-indigo-500" />
+                <span>Kas Terbuka & Akuntabel</span>
               </span>
             </motion.div>
 
+            {/* Omni Search Bar Warga */}
+            <motion.form 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              onSubmit={handleOmniSearch}
+              className="relative max-w-md w-full pt-1"
+            >
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input 
+                type="text"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="Cari nomor blok rumah, layanan, agenda, info..."
+                className="w-full pl-11 pr-24 py-3 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all shadow-xs"
+              />
+              <button 
+                type="submit"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95"
+              >
+                Cari
+              </button>
+            </motion.form>
+
+            {/* Action Buttons */}
             <motion.div 
               initial={{ y: 15, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-row flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-4 w-full pt-2"
+              transition={{ delay: 0.55 }}
+              className="flex flex-row flex-wrap items-center justify-center lg:justify-start gap-3 w-full pt-1"
             >
               <button 
                 onClick={onExplore}
-                className="flex items-center gap-2 px-6 py-3 md:px-7 md:py-3.5 text-xs font-black uppercase tracking-wider bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer hover:scale-105"
+                className="flex items-center gap-2 px-6 py-3 text-xs font-black uppercase tracking-wider bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer hover:scale-105"
               >
                 <span>Mulai Jelajahi</span>
                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -137,10 +167,10 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               
               <button 
                 onClick={handleSmartEnvClick}
-                className="flex items-center gap-2 px-6 py-3 md:px-7 md:py-3.5 text-xs font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-800 rounded-2xl transition-all cursor-pointer font-sans"
+                className="flex items-center gap-2 px-5 py-3 text-xs font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-800 rounded-2xl transition-all cursor-pointer font-sans"
               >
-                <ShieldCheck size={16} className="text-emerald-400 animate-pulse" />
-                <span>Smart Env</span>
+                <ShieldCheck size={16} className="text-emerald-500 animate-pulse" />
+                <span>Smart Env Tondo</span>
               </button>
             </motion.div>
           </div>
