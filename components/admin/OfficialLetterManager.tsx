@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Filter, Edit2, Trash2, Printer, Send, Eye, X, Save, Calendar, User, MessageSquare, Upload, Download, File as FileIcon, RefreshCw } from 'lucide-react';
+import { FileText, Plus, Search, Filter, Edit2, Trash2, Printer, Send, Eye, X, Save, Calendar, User, MessageSquare, Upload, Download, File as FileIcon, RefreshCw, CheckCircle2, ShieldCheck, Tag, Sparkles, Building2 } from 'lucide-react';
 import { OfficialLetter, PdfConfig, LetterRequest } from '../../types';
 import { subscribeToOfficialLetters, addOfficialLetterToDb, updateOfficialLetterInDb, deleteOfficialLetterFromDb, uploadFile, updatePdfConfig } from '../../services/databaseService';
 import { generateOfficialLetterPDF } from '../../services/pdfService';
@@ -138,6 +138,46 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
     setTempSignature(null);
     setSelectedFile(null);
     setIsModalOpen(true);
+  };
+
+  const applyOfficialLetterTemplate = (templateType: 'gotong-royong' | 'rapat' | 'ronda' | 'iuran') => {
+    if (templateType === 'gotong-royong') {
+      setFormData(prev => ({
+        ...prev,
+        type: 'Himbauan',
+        subject: 'Himbauan Kerja Bakti & Kebersihan Lingkungan RT 002 / RW 020',
+        recipient: 'Seluruh Warga RT 002 / RW 020',
+        content: '<p>Dengan hormat,</p><p>Dalam rangka menjaga kebersihan, kerapian, serta kenyamanan lingkungan bersama di wilayah <strong>RT 002 / RW 020 Kelurahan Tondo</strong>, pengurus RT mengimbau kepada seluruh bapak/ibu warga untuk dapat berpartisipasi aktif dalam kegiatan kerja bakti lingkungan.</p><p><strong>Fokus Kegiatan:</strong> Pembersihan saluran drainase, pemotongan rumput liar, serta penataan area fasilitas umum.</p><p>Setiap rumah dimohon mengirimkan perwakilan serta membawa peralatan kerja secukupnya. Atas perhatian dan kepedulian seluruh warga, kami sampaikan terima kasih.</p>'
+      }));
+      toast.success('Template Kerja Bakti diterapkan');
+    } else if (templateType === 'rapat') {
+      setFormData(prev => ({
+        ...prev,
+        type: 'Undangan',
+        subject: 'Undangan Musyawarah Warga & Koordinasi Lingkungan RT 002',
+        recipient: 'Bapak/Ibu Kepala Keluarga RT 002 / RW 020',
+        content: '<p>Dengan hormat,</p><p>Sehubungan dengan agenda evaluasi ketertiban lingkungan dan pembahasan rencana program kerja RT 002 / RW 020 Kelurahan Tondo, kami mengundang Bapak/Ibu untuk hadir dalam rapat musyawarah warga pada:</p><p><strong>Hari/Tanggal:</strong> Sabtu (Menyesuaikan)<br/><strong>Waktu:</strong> 19.30 WITA s/d Selesai (Ba\'da Isya)<br/><strong>Tempat:</strong> Pos Kamling RT 02 / Balai Pertemuan Warga<br/><strong>Agenda:</strong> Evaluasi Keamanan Ronda, Pengelolaan Air PDAM, dan Kas Lingkungan</p><p>Mengingat pentingnya musyawarah ini bagi kemajuan lingkungan kita, kami sangat mengharapkan kehadiran Bapak/Ibu tepat pada waktunya. Terima kasih.</p>'
+      }));
+      toast.success('Template Undangan Rapat diterapkan');
+    } else if (templateType === 'ronda') {
+      setFormData(prev => ({
+        ...prev,
+        type: 'Pemberitahuan',
+        subject: 'Surat Edaran Peningkatan Kewaspadaan & Jadwal Siskamling',
+        recipient: 'Seluruh Warga & Petugas Siskamling RT 002 / RW 020',
+        content: '<p>Dengan hormat,</p><p>Guna menjaga ketertiban, keamanan, dan ketenteraman lingkungan di wilayah RT 002 / RW 020 Kelurahan Tondo, pengurus RT menyampaikan surat edaran sebagai berikut:</p><ol><li>Wajib lapor 1x24 jam bagi warga yang kedatangan tamu menginap melalui portal Teras Warga atau pos kamling.</li><li>Petugas ronda malam dimohon disiplin hadir sesuai jadwal giliran jaga.</li><li>Seluruh warga diharapkan memastikan kendaraan terkunci ganda dan pagar tertutup saat malam hari.</li></ol><p>Demikian surat edaran ini disampaikan untuk dilaksanakan bersama dengan penuh tanggung jawab. Terima kasih.</p>'
+      }));
+      toast.success('Template Edaran Ronda diterapkan');
+    } else if (templateType === 'iuran') {
+      setFormData(prev => ({
+        ...prev,
+        type: 'Pemberitahuan',
+        subject: 'Pemberitahuan Pembayaran Iuran Kebersihan & Pengelolaan Air PDAM',
+        recipient: 'Seluruh Kepala Keluarga RT 002 / RW 020',
+        content: '<p>Dengan hormat,</p><p>Disampaikan kepada seluruh warga RT 002 / RW 020 Kelurahan Tondo perihal pembayaran iuran bulanan kebersihan lingkungan serta tagihan air PDAM (tarif dasar Rp35.000 / 10 m³ pertama).</p><p>Pembayaran dapat dilakukan melalui transfer kas RT atau disetorkan langsung ke bendahara RT sebelum tanggal 10 setiap bulannya. Status lunas dapat dicek secara transparan di aplikasi Teras Warga.</p><p>Atas kerjasama dan kedisiplinan bapak/ibu warga dalam mendukung kelancaran operasional fasilitas lingkungan, kami ucapkan terima kasih.</p>'
+      }));
+      toast.success('Template Iuran & Air PDAM diterapkan');
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -440,211 +480,412 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
         </div>
       )}
 
-      {/* Create/Edit Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingLetter ? 'Edit Surat Resmi' : 'Buat Surat Resmi Baru'}>
+      {/* Modal Surat Resmi Widescreen 2-Kolom RT 002 / RW 020 */}
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title={editingLetter ? 'Edit Surat Resmi RT 002 / RW 020' : 'Buat Surat Resmi Baru RT 002 / RW 020'}
+        maxWidth="max-w-5xl"
+      >
         <form onSubmit={handleSave} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Jenis Surat</label>
-              <select 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value as any})}
-              >
-                <option value="Himbauan">Himbauan</option>
-                <option value="Undangan">Undangan</option>
-                <option value="Pemberitahuan">Pemberitahuan</option>
-                <option value="Lainnya">Lainnya</option>
-              </select>
+          {/* Header Identitas Resmi RT 002 / RW 020 */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-violet-50 via-slate-50 to-violet-50/30 border border-violet-100/80 rounded-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+                <FileText size={16} />
+              </div>
+              <div>
+                <p className="text-[11px] font-black text-slate-800 tracking-tight leading-tight">
+                  Sistem Tata Naskah Surat Dinas Resmi RT 002 / RW 020
+                </p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu
+                </p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tanggal Surat</label>
-              <input 
-                type="date"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-                value={formData.date}
-                onChange={e => setFormData({...formData, date: e.target.value})}
-              />
-            </div>
+            <span className="text-[10px] font-black uppercase tracking-wider bg-violet-100/80 text-violet-700 px-3 py-1 rounded-lg border border-violet-200">
+              Format Standar Baku RT
+            </span>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between items-center mb-1.5 ml-1">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Nomor Surat</label>
-              <button 
-                type="button" 
-                onClick={generateAutoLetterNumber}
-                className="flex items-center gap-1 text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-700 transition-colors"
+          {/* Quick Template Bar (4 Pilihan Instan) */}
+          <div className="space-y-1.5 p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-2xl">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+              <Sparkles size={12} className="text-violet-600" />
+              Template Surat Cepat (1-Klik Isi Form & Format Baku)
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => applyOfficialLetterTemplate('gotong-royong')}
+                className="p-2.5 bg-white hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 rounded-xl text-left transition-all group"
               >
-                <RefreshCw size={10} /> Buat Otomatis
+                <p className="text-xs font-black text-slate-800 group-hover:text-emerald-700">🧹 Kerja Bakti</p>
+                <p className="text-[9px] text-slate-400 leading-tight mt-0.5">Himbauan kebersihan lingkungan</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => applyOfficialLetterTemplate('rapat')}
+                className="p-2.5 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-xl text-left transition-all group"
+              >
+                <p className="text-xs font-black text-slate-800 group-hover:text-indigo-700">👥 Rapat Warga</p>
+                <p className="text-[9px] text-slate-400 leading-tight mt-0.5">Undangan musyawarah RT</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => applyOfficialLetterTemplate('ronda')}
+                className="p-2.5 bg-white hover:bg-rose-50 hover:border-rose-300 border border-slate-200 rounded-xl text-left transition-all group"
+              >
+                <p className="text-xs font-black text-slate-800 group-hover:text-rose-700">🛡️ Edaran Ronda</p>
+                <p className="text-[9px] text-slate-400 leading-tight mt-0.5">Keamanan & wajib lapor tamu</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => applyOfficialLetterTemplate('iuran')}
+                className="p-2.5 bg-white hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded-xl text-left transition-all group"
+              >
+                <p className="text-xs font-black text-slate-800 group-hover:text-sky-700">💧 Iuran & Air PDAM</p>
+                <p className="text-[9px] text-slate-400 leading-tight mt-0.5">Pemberitahuan tagihan resmi</p>
               </button>
             </div>
-            <input 
-              type="text"
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-              value={formData.letterNumber}
-              onChange={e => setFormData({...formData, letterNumber: e.target.value})}
-              placeholder="Contoh: HIM/001/RT02/IV/2024"
-            />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Perihal / Subjek</label>
-            <input 
-              type="text"
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-              value={formData.subject}
-              onChange={e => setFormData({...formData, subject: e.target.value})}
-              placeholder="Contoh: Himbauan Kerja Bakti"
-            />
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Kolom Kiri: Form Input Data Surat (7 Kolom) */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Jenis Surat *</label>
+                  <select 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all cursor-pointer"
+                    value={formData.type}
+                    onChange={e => setFormData({...formData, type: e.target.value as any})}
+                  >
+                    <option value="Himbauan">📢 Himbauan</option>
+                    <option value="Undangan">✉️ Undangan</option>
+                    <option value="Pemberitahuan">📋 Pemberitahuan</option>
+                    <option value="Lainnya">📝 Lainnya</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal Surat *</label>
+                  <input 
+                    type="date"
+                    required
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all cursor-pointer"
+                    value={formData.date}
+                    onChange={e => setFormData({...formData, date: e.target.value})}
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Penerima (Yth.)</label>
-            <input 
-              type="text"
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-              value={formData.recipient}
-              onChange={e => setFormData({...formData, recipient: e.target.value})}
-              placeholder="Contoh: Seluruh Warga RT 02"
-            />
-          </div>
+              {/* Nomor Surat dengan Tombol Auto-Generate */}
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Nomor Surat Resmi *</label>
+                  <button 
+                    type="button" 
+                    onClick={generateAutoLetterNumber}
+                    className="flex items-center gap-1 text-[10px] font-black text-violet-600 uppercase tracking-widest hover:text-violet-700 transition-colors"
+                  >
+                    <RefreshCw size={11} /> Buat Format Otomatis
+                  </button>
+                </div>
+                <input 
+                  type="text"
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all"
+                  value={formData.letterNumber}
+                  onChange={e => setFormData({...formData, letterNumber: e.target.value})}
+                  placeholder="Contoh: HIM/001/RT02/IX/2026"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
-              Lampiran Surat (Opsional)
-            </label>
-            <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all ${
-              selectedFile ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-200 bg-slate-50 hover:border-indigo-300'
-            }`}>
-              <input 
-                type="file" 
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                onChange={e => setSelectedFile(e.target.files?.[0] || null)}
-                accept=".pdf,image/*"
-              />
-              <div className="flex flex-col items-center justify-center gap-2">
-                {selectedFile ? (
-                  <>
-                    <FileIcon className="text-indigo-600" size={32} />
-                    <span className="text-sm font-bold text-indigo-600 truncate max-w-full px-4">{selectedFile.name}</span>
-                    <button 
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); setSelectedFile(null); }}
-                      className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline"
-                    >
-                      Hapus
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="text-slate-400" size={32} />
-                    <span className="text-xs font-bold text-slate-500">Klik atau seret file PDF/Gambar di sini</span>
-                    <span className="text-[10px] text-slate-400">Maksimal 5MB</span>
-                  </>
+              {/* Perihal / Subjek */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Perihal / Hal *</label>
+                <input 
+                  type="text"
+                  required
+                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all"
+                  value={formData.subject}
+                  onChange={e => setFormData({...formData, subject: e.target.value})}
+                  placeholder="Contoh: Himbauan Kerja Bakti Bersama RT 002"
+                />
+              </div>
+
+              {/* Penerima (Yth.) */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Penerima (Yth.) *</label>
+                <input 
+                  type="text"
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all"
+                  value={formData.recipient}
+                  onChange={e => setFormData({...formData, recipient: e.target.value})}
+                  placeholder="Contoh: Seluruh Warga RT 002 / RW 020"
+                />
+              </div>
+
+              {/* Upload Lampiran File */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Lampiran Dokumen / Berkas (Opsional)
+                </label>
+                <div className={`relative border-2 border-dashed rounded-2xl p-4 transition-all ${
+                  selectedFile ? 'border-violet-500 bg-violet-50/40' : 'border-slate-200 bg-slate-50 hover:border-violet-300'
+                }`}>
+                  <input 
+                    type="file" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={e => setSelectedFile(e.target.files?.[0] || null)}
+                    accept=".pdf,image/*"
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      {selectedFile ? (
+                        <FileIcon className="text-violet-600" size={22} />
+                      ) : (
+                        <Upload className="text-slate-400" size={22} />
+                      )}
+                      <div>
+                        <p className="text-xs font-bold text-slate-700 truncate max-w-[240px]">
+                          {selectedFile ? selectedFile.name : 'Pilih Berkas PDF / Gambar'}
+                        </p>
+                        <p className="text-[9px] text-slate-400 font-medium">Maksimal 5MB</p>
+                      </div>
+                    </div>
+                    {selectedFile && (
+                      <button 
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); setSelectedFile(null); }}
+                        className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline relative z-10"
+                      >
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {formData.attachmentUrl && !selectedFile && (
+                  <div className="flex items-center justify-between p-2.5 bg-emerald-50 rounded-xl border border-emerald-100 text-xs">
+                    <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                      <FileIcon size={14} className="text-emerald-600" />
+                      <span>Lampiran aktif tersimpan di cloud</span>
+                    </div>
+                    <a href={formData.attachmentUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">
+                      Lihat File
+                    </a>
+                  </div>
                 )}
               </div>
-            </div>
-            {formData.attachmentUrl && !selectedFile && (
-              <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                <FileIcon size={14} className="text-emerald-600" />
-                <span className="text-xs font-bold text-emerald-700 flex-1 truncate">File sudah terunggah</span>
-                <a href={formData.attachmentUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">Lihat</a>
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Isi Surat</label>
-            <div className="quill-editor-container">
-              <ReactQuill 
-                theme="snow"
-                value={formData.content}
-                onChange={content => setFormData({...formData, content})}
-                placeholder="Tuliskan isi surat secara lengkap di sini..."
-                className="bg-white rounded-2xl overflow-hidden border border-slate-200"
-                modules={{
-                  toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['clean']
-                  ],
-                }}
-              />
-            </div>
-            <style>{`
-              .quill-editor-container .ql-toolbar {
-                border-top-left-radius: 1rem;
-                border-top-right-radius: 1rem;
-                border-color: #e2e8f0;
-                background: #f8fafc;
-              }
-              .quill-editor-container .ql-container {
-                border-bottom-left-radius: 1rem;
-                border-bottom-right-radius: 1rem;
-                border-color: #e2e8f0;
-                min-height: 200px;
-                font-family: inherit;
-              }
-              .quill-editor-container .ql-editor {
-                font-size: 0.875rem;
-                line-height: 1.5;
-              }
-            `}</style>
-          </div>
-
-          <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <p className="text-xs font-bold text-slate-500">Status:</p>
-            <div className="flex gap-2">
-              <button 
-                type="button"
-                onClick={() => setFormData({...formData, status: 'Draft'})}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                  formData.status === 'Draft' ? 'bg-slate-800 text-white' : 'bg-white text-slate-400 border border-slate-200'
-                }`}
-              >
-                Draft
-              </button>
-              <button 
-                type="button"
-                onClick={() => setFormData({...formData, status: 'Published'})}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                  formData.status === 'Published' ? 'bg-emerald-600 text-white' : 'bg-white text-slate-400 border border-slate-200'
-                }`}
-              >
-                Published (Siap Cetak)
-              </button>
-            </div>
-          </div>
-
-          {formData.status === 'Published' && (
-            <div className="space-y-4 p-6 bg-indigo-50/50 rounded-[2rem] border border-indigo-100">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
-                  <Edit2 size={16} />
+              {/* Editor Isi Surat */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Isi Surat Lengkap *
+                </label>
+                <div className="quill-editor-container">
+                  <ReactQuill 
+                    theme="snow"
+                    value={formData.content}
+                    onChange={content => setFormData({...formData, content})}
+                    placeholder="Tuliskan isi surat secara lengkap di sini..."
+                    className="bg-white rounded-2xl overflow-hidden border border-slate-200"
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                      ],
+                    }}
+                  />
                 </div>
+                <style>{`
+                  .quill-editor-container .ql-toolbar {
+                    border-top-left-radius: 1rem;
+                    border-top-right-radius: 1rem;
+                    border-color: #e2e8f0;
+                    background: #f8fafc;
+                  }
+                  .quill-editor-container .ql-container {
+                    border-bottom-left-radius: 1rem;
+                    border-bottom-right-radius: 1rem;
+                    border-color: #e2e8f0;
+                    min-height: 160px;
+                    font-family: inherit;
+                  }
+                  .quill-editor-container .ql-editor {
+                    font-size: 0.85rem;
+                    line-height: 1.5;
+                  }
+                `}</style>
+              </div>
+
+              {/* Status Publikasi */}
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <span className="text-xs font-bold text-slate-600">Status Dokumen:</span>
+                <div className="flex gap-2">
+                  <button 
+                    type="button"
+                    onClick={() => setFormData({...formData, status: 'Draft'})}
+                    className={`px-3.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      formData.status === 'Draft' ? 'bg-slate-800 text-white shadow-xs' : 'bg-white text-slate-400 border border-slate-200'
+                    }`}
+                  >
+                    Draft
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setFormData({...formData, status: 'Published'})}
+                    className={`px-3.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      formData.status === 'Published' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-400 border border-slate-200'
+                    }`}
+                  >
+                    Published (Siap Cetak)
+                  </button>
+                </div>
+              </div>
+
+              {formData.status === 'Published' && (
+                <div className="space-y-3 p-4 bg-violet-50/50 rounded-2xl border border-violet-100">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-violet-100 text-violet-600 rounded-lg">
+                      <Edit2 size={14} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-violet-900">Tanda Tangan Digital Khusus</h4>
+                      <p className="text-[9px] font-bold text-violet-500 uppercase">Tanda tangan khusus untuk surat ini (Opsional)</p>
+                    </div>
+                  </div>
+                  <SignaturePad 
+                    initialValue={tempSignature || pdfConfig.signature}
+                    onSave={(dataUrl) => {
+                      setTempSignature(dataUrl);
+                      toast.success("Tanda tangan khusus disimpan.");
+                    }}
+                  />
+                  <p className="text-[9px] text-slate-400 italic">Jika tidak diisi, menggunakan tanda tangan default sistem.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Kolom Kanan: Live Official Letter Print Preview (5 Kolom) */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <Eye size={13} className="text-violet-600" />
+                  Pratinjau Cetak Surat Resmi (A4)
+                </span>
+                <span className="text-[9px] font-black text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60 uppercase">
+                  Kop RT 002 / RW 020
+                </span>
+              </div>
+
+              {/* Lembar Surat Format A4 Resmi */}
+              <div className="bg-white shadow-xl rounded-2xl p-5 sm:p-6 border border-slate-300/80 text-slate-900 space-y-3.5 min-h-[580px] flex flex-col justify-between text-[11px] leading-relaxed relative overflow-hidden">
+                {/* Kop Surat Resmi RT 002 / RW 020 */}
                 <div>
-                  <h4 className="text-sm font-black text-indigo-900">Tanda Tangan Digital</h4>
-                  <p className="text-[10px] font-bold text-indigo-500 uppercase">Gunakan tanda tangan khusus untuk surat ini (Opsional)</p>
+                  <div className="text-center pb-2">
+                    <p className="font-serif font-black text-[12px] tracking-wide text-slate-900 uppercase">
+                      PENGURUS RUKUN TETANGGA 002 / RW 020
+                    </p>
+                    <p className="font-serif font-bold text-[10px] text-slate-700 uppercase">
+                      KELURAHAN TONDO, KECAMATAN MANTIKULORE
+                    </p>
+                    <p className="font-serif text-[9px] text-slate-500">
+                      KOTA PALU, SULAWESI TENGAH 94119
+                    </p>
+                  </div>
+                  {/* Garis Ganda Kop Surat */}
+                  <div className="border-b-2 border-slate-900 pb-0.5">
+                    <div className="border-b border-slate-900"></div>
+                  </div>
+                </div>
+
+                {/* Nomor, Lampiran, Perihal, & Tanggal */}
+                <div className="space-y-1 pt-1 font-serif text-[10px]">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-0.5">
+                      <p><span className="w-16 inline-block font-semibold">Nomor</span>: <span className="font-mono font-bold">{formData.letterNumber || '.../SR/RT002/RW020/...'}</span></p>
+                      <p><span className="w-16 inline-block font-semibold">Lampiran</span>: {selectedFile ? selectedFile.name : (formData.attachmentUrl ? '1 (Satu) Berkas' : '-')}</p>
+                      <p><span className="w-16 inline-block font-semibold">Perihal</span>: <span className="font-bold">{formData.subject || '(Belum diisi)'}</span></p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-sans text-[9px] text-slate-500 font-bold">
+                        Palu, {formData.date ? new Date(formData.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tujuan Surat (Kepada Yth.) */}
+                <div className="pt-2 font-serif text-[10px]">
+                  <p>Kepada Yth,</p>
+                  <p className="font-bold">{formData.recipient || 'Bapak/Ibu Warga RT 002 / RW 020'}</p>
+                  <p>Di Tempat</p>
+                </div>
+
+                {/* Konten Surat */}
+                <div className="flex-1 py-2 font-serif text-[10px] leading-relaxed border-t border-dashed border-slate-200">
+                  <div 
+                    dangerouslySetInnerHTML={{ 
+                      __html: formData.content || '<p class="italic text-slate-400 font-sans">Ketikkan isi surat resmi pada formulir sebelah kiri...</p>' 
+                    }} 
+                  />
+                </div>
+
+                {/* Kolom Tanda Tangan & Stempel Resmi */}
+                <div className="pt-3 border-t border-slate-100 flex justify-end text-right font-serif text-[10px]">
+                  <div className="space-y-1 text-center min-w-[170px]">
+                    <p>Pengurus RT 002 / RW 020</p>
+                    <p className="font-bold">Ketua RT 002,</p>
+                    <div className="h-16 flex items-center justify-center relative py-1">
+                      {tempSignature || pdfConfig.signature ? (
+                        <img 
+                          src={tempSignature || pdfConfig.signature} 
+                          alt="Tanda Tangan" 
+                          className="h-14 max-w-full object-contain relative z-10" 
+                        />
+                      ) : (
+                        <span className="text-[9px] text-slate-300 italic font-sans">[Tanda Tangan Digital]</span>
+                      )}
+                      {/* Stempel Digital */}
+                      {pdfConfig.stamp && (
+                        <img 
+                          src={pdfConfig.stamp} 
+                          alt="Stempel" 
+                          className="h-14 absolute opacity-70 mix-blend-multiply" 
+                        />
+                      )}
+                    </div>
+                    <p className="font-bold underline text-[10px]">
+                      {pdfConfig.signatoryName || 'Muhammad Irfan, S.Kom.'}
+                    </p>
+                    <p className="text-[8px] text-slate-400 font-sans uppercase tracking-wider">
+                      Ketua RT 002 / RW 020 Tondo
+                    </p>
+                  </div>
                 </div>
               </div>
-              <SignaturePad 
-                initialValue={tempSignature || pdfConfig.signature}
-                onSave={(dataUrl) => {
-                  setTempSignature(dataUrl);
-                  toast.success("Tanda tangan khusus disimpan untuk surat ini.");
-                }}
-              />
-              <p className="text-[10px] text-slate-400 italic">Jika tidak diisi, akan menggunakan tanda tangan default dari pengaturan.</p>
             </div>
-          )}
+          </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1">
+          {/* Action Footer Buttons */}
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsModalOpen(false)} 
+              className="flex-1 py-3.5 rounded-2xl text-xs font-bold"
+            >
               Batal
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
-              {isLoading ? 'Menyimpan...' : (editingLetter ? 'Simpan Perubahan' : 'Buat Surat')}
+            <Button 
+              type="submit" 
+              disabled={isLoading} 
+              className="flex-[2] py-3.5 rounded-2xl text-xs font-black shadow-lg bg-violet-600 hover:bg-violet-700 shadow-violet-600/25 text-white transition-all"
+            >
+              {isLoading ? 'Menyimpan...' : (editingLetter ? 'Simpan Perubahan Surat' : 'Terbitkan Surat Resmi')}
             </Button>
           </div>
         </form>

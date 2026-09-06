@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldAlert, User, Calendar, Clock, Phone, Trash2, CheckCircle, ExternalLink, MapPin, History, Info, FileText, Car, UserCheck, Download, Plus, X, FileUp } from 'lucide-react';
+import { ShieldAlert, User, Calendar, Clock, Phone, Trash2, CheckCircle, ExternalLink, MapPin, History, Info, FileText, Car, UserCheck, Download, Plus, X, FileUp, ShieldCheck, Sparkles, Building2, CheckCircle2 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { updateGuestReportStatus, deleteGuestReportFromDb, addGuestReportToDb } from '../../services/databaseService';
@@ -513,123 +513,277 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
         type={confirmDialog.type}
       />
 
-      {/* Modal Form Catat Tamu Baru (Admin) */}
+      {/* Modal Form Catat Tamu Baru Widescreen 2-Kolom RT 002 / RW 020 */}
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title="Pencatatan Wajib Lapor Tamu 24 Jam"
+        title="Pencatatan Wajib Lapor Tamu 24 Jam RT 002 / RW 020"
+        maxWidth="max-w-4xl"
       >
-        <form onSubmit={handleAddGuestSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Lengkap Tamu *</label>
-              <input 
-                type="text"
-                required
-                placeholder="Contoh: Ahmad Subagja"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
-                value={addFormData.guestName}
-                onChange={e => setAddFormData(prev => ({ ...prev, guestName: e.target.value }))}
-              />
+        <form onSubmit={handleAddGuestSubmit} className="space-y-5">
+          {/* Header Identitas Resmi RT 002 / RW 020 */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-rose-50 via-slate-50 to-rose-50/30 border border-rose-100/80 rounded-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+                <ShieldAlert size={16} />
+              </div>
+              <div>
+                <p className="text-[11px] font-black text-slate-800 tracking-tight leading-tight">
+                  Sistem Registrasi Wajib Lapor 1x24 Jam RT 002 / RW 020
+                </p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">No. Telp / WhatsApp Tamu</label>
-              <input 
-                type="text"
-                placeholder="0812xxxxxxx"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
-                value={addFormData.phone}
-                onChange={e => setAddFormData(prev => ({ ...prev, phone: e.target.value }))}
-              />
+            <span className="text-[10px] font-black uppercase tracking-wider bg-rose-100/80 text-rose-700 px-3 py-1 rounded-lg border border-rose-200">
+              Ketertiban & Siskamling
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Kolom Kiri: Form Input Tamu (7 Kolom) */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Nama Lengkap Tamu *
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                    <input 
+                      type="text"
+                      required
+                      placeholder="Contoh: Ahmad Subagja"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                      value={addFormData.guestName}
+                      onChange={e => setAddFormData(prev => ({ ...prev, guestName: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    No. Telp / WhatsApp Tamu
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                    <input 
+                      type="text"
+                      placeholder="0812xxxxxxx"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                      value={addFormData.phone}
+                      onChange={e => setAddFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    ID Kavling / Blok Rumah *
+                  </label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="Contoh: B-12 atau Blok C No. 5"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                    value={addFormData.residentHouseId}
+                    onChange={e => setAddFormData(prev => ({ ...prev, residentHouseId: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Nama Tuan Rumah (Warga) *
+                  </label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="Nama pemilik rumah..."
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                    value={addFormData.residentName}
+                    onChange={e => setAddFormData(prev => ({ ...prev, residentName: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {/* Hubungan */}
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Hubungan dengan Tuan Rumah
+                </label>
+                <select
+                  className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all cursor-pointer"
+                  value={addFormData.relationship}
+                  onChange={e => setAddFormData(prev => ({ ...prev, relationship: e.target.value }))}
+                >
+                  <option value="Kerabat / Saudara">Kerabat / Saudara</option>
+                  <option value="Teman / Rekan Kerja">Teman / Rekan Kerja</option>
+                  <option value="Orang Tua / Keluarga Inti">Orang Tua / Keluarga Inti</option>
+                  <option value="Tamu Kedinasan / Kerja">Tamu Kedinasan / Kerja</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+                {/* Quick Relationship Chips */}
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {['Orang Tua / Keluarga Inti', 'Kerabat / Saudara', 'Teman / Rekan Kerja', 'Tamu Kedinasan / Kerja'].map(rel => (
+                    <button
+                      key={rel}
+                      type="button"
+                      onClick={() => setAddFormData(prev => ({ ...prev, relationship: rel }))}
+                      className={`px-2.5 py-1 rounded-lg text-[9px] font-black transition-all ${
+                        addFormData.relationship === rel 
+                          ? 'bg-rose-600 text-white shadow-xs' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {rel}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Durasi Menginap & Tanggal Kedatangan */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Rencana Durasi Menginap *
+                  </label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="Contoh: 2 Hari / 1 Minggu"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                    value={addFormData.stayDuration}
+                    onChange={e => setAddFormData(prev => ({ ...prev, stayDuration: e.target.value }))}
+                  />
+                  {/* Quick Durasi Chips */}
+                  <div className="flex flex-wrap gap-1 pt-0.5">
+                    {['1 Hari (Singgah)', '2-3 Hari', '1 Minggu', '2 Minggu+'].map(dur => (
+                      <button
+                        key={dur}
+                        type="button"
+                        onClick={() => setAddFormData(prev => ({ ...prev, stayDuration: dur }))}
+                        className="px-2 py-0.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 rounded text-[9px] font-bold text-slate-600"
+                      >
+                        {dur}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Tgl Kedatangan *
+                  </label>
+                  <input 
+                    type="date"
+                    required
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all cursor-pointer"
+                    value={addFormData.arrivalDate}
+                    onChange={e => setAddFormData(prev => ({ ...prev, arrivalDate: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {/* Keperluan Kunjungan */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Keperluan / Maksud Kunjungan *
+                </label>
+                <textarea 
+                  rows={2}
+                  required
+                  placeholder="Jelaskan secara singkat alasan kunjungan/menginap..."
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all resize-none"
+                  value={addFormData.purpose}
+                  onChange={e => setAddFormData(prev => ({ ...prev, purpose: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Kolom Kanan: Live Digital Visitor Card Preview (5 Kolom) */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <UserCheck size={13} className="text-rose-600" />
+                  Pratinjau Kartu Izin Tamu Digital
+                </span>
+                <span className="text-[9px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/60 uppercase">
+                  Wajib Lapor
+                </span>
+              </div>
+
+              {/* Kartu Izin Tamu RT 002 / RW 020 */}
+              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-slate-200/50 space-y-3.5 relative overflow-hidden text-xs">
+                {/* Header Kartu */}
+                <div className="text-center pb-2.5 border-b border-dashed border-slate-200">
+                  <p className="text-[10px] font-black text-slate-800 uppercase tracking-wider">
+                    SURAT KETERANGAN TAMU SEMENTARA
+                  </p>
+                  <p className="text-[9px] font-bold text-slate-400">
+                    RT 002 / RW 020 Kelurahan Tondo, Palu
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Nama Tamu</span>
+                    <span className="font-bold text-slate-800 text-right">{addFormData.guestName || 'Nama Tamu'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Kontak</span>
+                    <span className="font-mono font-bold text-slate-700">{addFormData.phone || '-'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Tujuan Rumah</span>
+                    <span className="font-bold text-rose-700">{addFormData.residentHouseId || 'Belum diisi'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Tuan Rumah</span>
+                    <span className="font-bold text-slate-800">{addFormData.residentName || '-'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Hubungan</span>
+                    <span className="font-bold text-slate-700">{addFormData.relationship}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Durasi / Tgl</span>
+                    <span className="font-bold text-slate-800">{addFormData.stayDuration || '-'} ({addFormData.arrivalDate})</span>
+                  </div>
+                  <div className="py-1">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase block mb-0.5">Keperluan</span>
+                    <p className="text-[11px] text-slate-600 italic bg-slate-100/80 p-2 rounded-xl">
+                      "{addFormData.purpose || 'Belum diisi'}"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-400">
+                  <span className="text-emerald-600 font-bold flex items-center gap-1">
+                    <ShieldCheck size={12} />
+                    Dicatat Pos Keamanan
+                  </span>
+                  <span className="font-mono">TAMU-RT002-RW020</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">ID Kavling / Rumah Tujuan *</label>
-              <input 
-                type="text"
-                required
-                placeholder="Contoh: C5 atau C12"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
-                value={addFormData.residentHouseId}
-                onChange={e => setAddFormData(prev => ({ ...prev, residentHouseId: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Tuan Rumah (Warga)</label>
-              <input 
-                type="text"
-                placeholder="Nama pemilik rumah"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
-                value={addFormData.residentName}
-                onChange={e => setAddFormData(prev => ({ ...prev, residentName: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Hubungan</label>
-              <select
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
-                value={addFormData.relationship}
-                onChange={e => setAddFormData(prev => ({ ...prev, relationship: e.target.value }))}
-              >
-                <option value="Kerabat / Saudara">Kerabat / Saudara</option>
-                <option value="Teman / Rekan Kerja">Teman / Rekan Kerja</option>
-                <option value="Orang Tua / Keluarga Inti">Orang Tua / Keluarga Inti</option>
-                <option value="Tamu Kedinasan / Kerja">Tamu Kedinasan / Kerja</option>
-                <option value="Lainnya">Lainnya</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Lama Menginap</label>
-              <input 
-                type="text"
-                placeholder="1-3 Hari"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
-                value={addFormData.stayDuration}
-                onChange={e => setAddFormData(prev => ({ ...prev, stayDuration: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tgl Kedatangan</label>
-              <input 
-                type="date"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
-                value={addFormData.arrivalDate}
-                onChange={e => setAddFormData(prev => ({ ...prev, arrivalDate: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Keperluan Kunjungan</label>
-            <textarea 
-              rows={2}
-              placeholder="Jelaskan secara singkat alasan kunjungan/menginap..."
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all resize-none"
-              value={addFormData.purpose}
-              onChange={e => setAddFormData(prev => ({ ...prev, purpose: e.target.value }))}
-            />
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
+          <div className="flex gap-3 pt-3 border-t border-slate-100">
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setIsAddModalOpen(false)}
-              className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+              className="flex-1 py-3.5 rounded-2xl text-xs font-bold"
             >
               Batal
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-[2] py-3.5 bg-rose-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all"
+              className="flex-[2] py-3.5 rounded-2xl text-xs font-black shadow-lg bg-rose-600 hover:bg-rose-700 shadow-rose-600/25 text-white transition-all"
             >
-              Simpan Laporan Tamu
-            </button>
+              {isSubmitting ? 'Menyimpan...' : 'Simpan & Daftarkan Laporan Tamu'}
+            </Button>
           </div>
         </form>
       </Modal>

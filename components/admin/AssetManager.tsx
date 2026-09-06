@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Plus, Edit2, Trash2, Box, CheckCircle2, History, User, Calendar, Clock, CheckCircle, Trash, Filter, Wrench, DollarSign, ClipboardList } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, Box, CheckCircle2, History, User, Calendar, Clock, CheckCircle, Trash, Filter, Wrench, DollarSign, ClipboardList, ShieldCheck, Tag, Sparkles, Building2, Phone, AlertTriangle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -368,59 +368,357 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         </div>
       </div>
 
-      {/* Add/Edit Asset Modal */}
-      <Modal isOpen={isInvModalOpen} onClose={() => setIsInvModalOpen(false)} title={editingInvId ? "Edit Aset" : "Tambah Aset Baru"}>
-        <form onSubmit={handleSaveInventory} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Aset</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invName} onChange={e => setInvName(e.target.value)} />
+      {/* Modal Tambah/Edit Aset Widescreen 2-Kolom RT 002 / RW 020 */}
+      <Modal 
+        isOpen={isInvModalOpen} 
+        onClose={() => setIsInvModalOpen(false)} 
+        title={editingInvId ? "Edit Aset Inventaris RT 002 / RW 020" : "Tambah Aset Inventaris Baru RT 002 / RW 020"}
+        maxWidth="max-w-4xl"
+      >
+        <form onSubmit={handleSaveInventory} className="space-y-5">
+          {/* Header Identitas Resmi RT 002 / RW 020 */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-cyan-50 via-slate-50 to-cyan-50/30 border border-cyan-100/80 rounded-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+                <Box size={16} />
+              </div>
+              <div>
+                <p className="text-[11px] font-black text-slate-800 tracking-tight leading-tight">
+                  Buku Induk Aset & Fasilitas Inventaris RT 002 / RW 020
+                </p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-wider bg-cyan-100/80 text-cyan-700 px-3 py-1 rounded-lg border border-cyan-200">
+              Registrasi Aset Lingkungan
+            </span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kategori</label>
-                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invCategory} onChange={e => setInvCategory(e.target.value as any)}>
-                   {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                 </select>
-             </div>
-             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Kondisi</label>
-                <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invCondition} onChange={e => setInvCondition(e.target.value as any)}>
-                   <option value="Baik">Baik</option>
-                   <option value="Perlu Perbaikan">Perlu Perbaikan</option>
-                   <option value="Rusak">Rusak</option>
-                 </select>
-             </div>
+
+          {/* Quick Preset Barang Umum RT */}
+          <div className="space-y-1.5 p-3 bg-slate-50/80 border border-slate-200/80 rounded-2xl">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+              <Sparkles size={12} className="text-cyan-600" />
+              Pilihan Cepat Barang Umum RT (1-Klik Isi)
+            </p>
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              {[
+                { name: 'Tenda Lipat 3x3 Meter', cat: 'Perlengkapan Acara', qty: '2' },
+                { name: 'Kursi Plastik Napolly', cat: 'Perlengkapan Acara', qty: '50' },
+                { name: 'Sound Portable + Mic Wireless', cat: 'Perlengkapan Acara', qty: '1' },
+                { name: 'Mesin Potong Rumput Gendong', cat: 'Alat Kebersihan', qty: '1' },
+                { name: 'Gerobak Sorong Artco', cat: 'Alat Kebersihan', qty: '2' },
+                { name: 'Rompi & Senter Ronda Cas', cat: 'Keamanan', qty: '4' },
+                { name: 'Tangga Lipat Aluminium 3M', cat: 'Peralatan Tukang', qty: '1' }
+              ].map(preset => (
+                <button
+                  key={preset.name}
+                  type="button"
+                  onClick={() => {
+                    setInvName(preset.name);
+                    setInvCategory(preset.cat as any);
+                    setInvTotal(preset.qty);
+                    setInvCondition('Baik');
+                  }}
+                  className="px-2.5 py-1 bg-white hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-300 border border-slate-200 text-slate-700 rounded-lg text-[10px] font-black transition-all active:scale-95"
+                >
+                  {preset.name}
+                </button>
+              ))}
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Total</label>
-            <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={invTotal} onChange={e => setInvTotal(e.target.value)} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Kolom Kiri: Form Input Aset (7 Kolom) */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Nama Aset / Barang *
+                </label>
+                <input 
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-all" 
+                  value={invName} 
+                  onChange={e => setInvName(e.target.value)} 
+                  placeholder="Contoh: Tenda Acara 3x3, Kursi Plastik..."
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Kategori Aset *
+                  </label>
+                  <select 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-all cursor-pointer" 
+                    value={invCategory} 
+                    onChange={e => setInvCategory(e.target.value as any)}
+                  >
+                    {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Kondisi Barang *
+                  </label>
+                  <select 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-all cursor-pointer" 
+                    value={invCondition} 
+                    onChange={e => setInvCondition(e.target.value as any)}
+                  >
+                    <option value="Baik">🟢 Baik (Siap Digunakan)</option>
+                    <option value="Perlu Perbaikan">🟡 Perlu Perbaikan / Servis</option>
+                    <option value="Rusak">🔴 Rusak (Tidak Siap Pakai)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Jumlah Total Unit *
+                </label>
+                <input 
+                  type="number" 
+                  min="1"
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-all" 
+                  value={invTotal} 
+                  onChange={e => setInvTotal(e.target.value)} 
+                  placeholder="Jumlah unit..."
+                />
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-[10px] text-slate-500 space-y-1">
+                <p className="font-bold text-slate-700 flex items-center gap-1">
+                  <ShieldCheck size={12} className="text-cyan-600" />
+                  Penyimpanan & Hak Pakai
+                </p>
+                <p>Aset ini dialokasikan untuk kepentingan seluruh warga RT 002 / RW 020 Kelurahan Tondo dan wajib dicatat peminjamannya saat digunakan.</p>
+              </div>
+            </div>
+
+            {/* Kolom Kanan: Live Asset Card Preview (5 Kolom) */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <Box size={13} className="text-cyan-600" />
+                  Pratinjau Kartu Aset RT
+                </span>
+                <span className="text-[9px] font-black text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200/60 uppercase">
+                  Inventaris
+                </span>
+              </div>
+
+              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-slate-200/50 space-y-3.5 relative overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                    invCondition === 'Baik' 
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                      : invCondition === 'Perlu Perbaikan'
+                      ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                      : 'bg-rose-100 text-rose-800 border border-rose-200'
+                  }`}>
+                    {invCondition}
+                  </span>
+                  <span className="text-[9px] font-mono text-slate-400 font-bold">RT 002 / RW 020</span>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest">{invCategory}</p>
+                  <h4 className="text-lg font-black text-slate-900 leading-snug">
+                    {invName || 'Nama Aset Baru'}
+                  </h4>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-center">
+                  <div className="p-2.5 bg-slate-100/70 rounded-xl">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total Aset</p>
+                    <p className="text-base font-black text-slate-800">{invTotal || '0'} Unit</p>
+                  </div>
+                  <div className="p-2.5 bg-cyan-50/70 rounded-xl border border-cyan-100">
+                    <p className="text-[9px] font-bold text-cyan-600 uppercase tracking-wider">Lokasi Simpan</p>
+                    <p className="text-[11px] font-black text-cyan-900 mt-0.5">Pos Kamling RT 02</p>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-400 font-medium">
+                  <span>Status: Siap Registrasi</span>
+                  <span className="font-mono">AST-RT002-TONDO</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <Button type="submit" className="w-full py-3 mt-2">{editingInvId ? 'Simpan Perubahan' : 'Simpan Aset'}</Button>
+
+          <div className="flex gap-3 pt-3 border-t border-slate-100">
+            <Button type="button" variant="outline" className="flex-1 py-3 rounded-2xl text-xs font-bold" onClick={() => setIsInvModalOpen(false)}>
+              Batal
+            </Button>
+            <Button type="submit" className="flex-[2] py-3 rounded-2xl text-xs font-black shadow-lg bg-cyan-600 hover:bg-cyan-700 shadow-cyan-600/25 text-white">
+              {editingInvId ? 'Simpan Perubahan Aset' : 'Daftarkan Aset ke Inventaris'}
+            </Button>
+          </div>
         </form>
       </Modal>
 
-      {/* Borrow Modal */}
-      <Modal isOpen={isBorrowModalOpen} onClose={() => setIsBorrowModalOpen(false)} title={`Pinjamkan: ${selectedAsset?.name}`}>
-        <form onSubmit={handleBorrow} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Nama Peminjam</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={borrowerName} onChange={e => setBorrowerName(e.target.value)} placeholder="Nama lengkap warga..." />
+      {/* Modal Pinjam Aset Widescreen 2-Kolom RT 002 / RW 020 */}
+      <Modal 
+        isOpen={isBorrowModalOpen} 
+        onClose={() => setIsBorrowModalOpen(false)} 
+        title={`Peminjaman Aset Fasilitas: ${selectedAsset?.name}`}
+        maxWidth="max-w-4xl"
+      >
+        <form onSubmit={handleBorrow} className="space-y-5">
+          {/* Header Pinjam */}
+          <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs">
+                <ClipboardList size={16} />
+              </div>
+              <div>
+                <p className="text-xs font-black text-slate-800 leading-tight">
+                  Formulir Peminjaman Sarana RT 002 / RW 020
+                </p>
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                  Barang: {selectedAsset?.name} (Stok Siap: {selectedAsset?.available} Unit)
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg border border-indigo-200">
+              Wajib Lapor RT
+            </span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Jumlah Pinjam</label>
-                <input type="number" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={borrowAmount} onChange={e => setBorrowAmount(e.target.value)} min="1" max={selectedAsset?.total} />
-             </div>
-             <div>
-                <label className="block text-xs font-bold mb-1.5 text-slate-700">Tanggal Pinjam</label>
-                <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={borrowDate} onChange={e => setBorrowDate(e.target.value)} />
-             </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Form Input Pinjam (7 Kolom) */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Nama Warga Peminjam *
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                  <input 
+                    required
+                    className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={borrowerName} 
+                    onChange={e => setBorrowerName(e.target.value)} 
+                    placeholder="Nama lengkap warga / Kepala Keluarga..." 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Jumlah Unit Pinjam *
+                  </label>
+                  <input 
+                    type="number" 
+                    required
+                    min="1" 
+                    max={selectedAsset?.available || selectedAsset?.total || 1}
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={borrowAmount} 
+                    onChange={e => setBorrowAmount(e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Tanggal Mulai Pinjam *
+                  </label>
+                  <input 
+                    type="date" 
+                    required
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                    value={borrowDate} 
+                    onChange={e => setBorrowDate(e.target.value)} 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Estimasi Pengembalian (Opsional)
+                </label>
+                <input 
+                  type="date" 
+                  className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                  value={returnDate} 
+                  onChange={e => setReturnDate(e.target.value)} 
+                />
+              </div>
+
+              {/* Ketentuan Peminjaman */}
+              <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-[10px] text-amber-900 space-y-1">
+                <p className="font-black flex items-center gap-1 text-amber-800">
+                  <AlertTriangle size={12} />
+                  Tata Tertib Peminjaman Sarana RT 002 / RW 020
+                </p>
+                <p>Barang wajib dirawat dengan baik dan dikembalikan dalam kondisi bersih seperti semula ke pos kamling / pengurus inventaris.</p>
+              </div>
+            </div>
+
+            {/* Kolom Kanan: Pratinjau Surat Pinjam (5 Kolom) */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <FileText size={13} className="text-indigo-600" />
+                  Pratinjau Bukti Peminjaman
+                </span>
+                <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60 uppercase">
+                  Log Peminjaman
+                </span>
+              </div>
+
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-slate-200/50 space-y-3 relative text-xs">
+                <div className="text-center pb-2 border-b border-dashed border-slate-200">
+                  <p className="text-[10px] font-black text-slate-800 uppercase">BUKTI PINJAM SARANA RT 002</p>
+                  <p className="text-[9px] text-slate-400">RW 020 Kelurahan Tondo, Palu</p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Barang</span>
+                    <span className="font-bold text-slate-800 text-right">{selectedAsset?.name}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Jumlah</span>
+                    <span className="font-bold text-indigo-600">{borrowAmount} Unit</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Peminjam</span>
+                    <span className="font-bold text-slate-800">{borrowerName || 'Warga RT 002'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Mulai Pinjam</span>
+                    <span className="font-bold text-slate-800">{borrowDate}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Batas Kembali</span>
+                    <span className="font-bold text-slate-800">{returnDate || 'Belum Ditentukan'}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-400">
+                  <span className="text-emerald-600 font-bold flex items-center gap-1">
+                    <CheckCircle2 size={12} />
+                    Dicatat Pengurus
+                  </span>
+                  <span className="font-mono">LOG-AST-RT02</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-bold mb-1.5 text-slate-700">Estimasi Pengembalian (Opsional)</label>
-            <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" value={returnDate} onChange={e => setReturnDate(e.target.value)} />
+
+          <div className="flex gap-3 pt-3 border-t border-slate-100">
+            <Button type="button" variant="outline" className="flex-1 py-3 rounded-2xl text-xs font-bold" onClick={() => setIsBorrowModalOpen(false)}>
+              Batal
+            </Button>
+            <Button type="submit" className="flex-[2] py-3 rounded-2xl text-xs font-black shadow-lg bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/25 text-white">
+              Konfirmasi & Catat Peminjaman
+            </Button>
           </div>
-          <Button type="submit" className="w-full py-3 mt-2">Konfirmasi Pinjaman</Button>
         </form>
       </Modal>
       {/* Maintenance Modal */}

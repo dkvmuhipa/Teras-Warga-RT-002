@@ -1943,7 +1943,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       </AnimatePresence>
 
       {/* Letter Detail Modal */}
-      <Modal isOpen={!!selectedLetter} onClose={() => setSelectedLetter(null)} title="Detail Permohonan Surat" maxWidth="max-w-3xl">
+      <Modal isOpen={!!selectedLetter} onClose={() => setSelectedLetter(null)} title="Detail Permohonan Surat Warga RT 002 / RW 020" maxWidth="max-w-4xl">
             {selectedLetter && (
               <div className="space-y-6">
                 {/* Modern Navigation Tab Bar */}
@@ -3115,69 +3115,137 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         </form>
       </Modal>
 
-      {/* Report Detail Modal */}
-      <Modal isOpen={!!selectedReport} onClose={() => setSelectedReport(null)} title="Detail Aspirasi & Pengaduan" maxWidth="max-w-lg">
-        {selectedReport && (
-          <div className="space-y-6">
-            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`p-3 rounded-xl ${
-                  selectedReport.type === 'Keamanan' ? 'bg-rose-100 text-rose-600' :
-                  selectedReport.type === 'Kebersihan' ? 'bg-emerald-100 text-emerald-600' :
-                  'bg-blue-100 text-blue-600'
-                }`}>
-                  <AlertTriangle size={24} />
-                </div>
-                <div>
-                  <h4 className="font-black text-slate-800 text-lg">{selectedReport.type}</h4>
-                  <p className="text-xs font-medium text-slate-500">{new Date(selectedReport.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                </div>
-              </div>
-              
-              <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Isi Laporan/Aspirasi</p>
-                <p className="font-medium text-slate-800 bg-white p-4 rounded-xl border border-slate-200 leading-relaxed">
-                  "{selectedReport.description}"
+      {/* Report Detail Modal Widescreen & Status Tracker RT 002 / RW 020 */}
+      <Modal 
+        isOpen={!!selectedReport} 
+        onClose={() => setSelectedReport(null)} 
+        title="Detail Aspirasi & Pengaduan Warga RT 002 / RW 020" 
+        maxWidth="max-w-3xl"
+      >
+        {selectedReport && (() => {
+          const reporterHouse = houses.find(h => h.id === selectedReport.houseId || h.id === selectedReport.reporterHouseId);
+          const reporterPhone = (selectedReport as any).reporterPhone || reporterHouse?.phone;
+          const statusSteps = ['Baru', 'Diproses', 'Selesai'];
+          const currentStepIdx = statusSteps.indexOf(selectedReport.status);
+
+          return (
+            <div className="space-y-6">
+              {/* Header Status Stepper Tracker */}
+              <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+                  Status Penanganan Aduan Lingkungan
                 </p>
+                <div className="grid grid-cols-3 gap-2 relative">
+                  {statusSteps.map((st, idx) => {
+                    const isDone = currentStepIdx >= idx;
+                    const isCurrent = currentStepIdx === idx;
+                    return (
+                      <div 
+                        key={st} 
+                        className={`p-2.5 rounded-xl border text-center transition-all ${
+                          isCurrent 
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20' 
+                            : isDone
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-bold'
+                            : 'bg-white text-slate-400 border-slate-200'
+                        }`}
+                      >
+                        <p className="text-[9px] font-mono font-bold uppercase tracking-wider">Tahap {idx + 1}</p>
+                        <p className="text-xs font-black">{st}</p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pelapor</p>
-                  <p className="font-bold text-slate-800">{selectedReport.reporterName}</p>
+              {/* Detail Aduan Card */}
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-3 rounded-2xl ${
+                      selectedReport.type === 'Keamanan' ? 'bg-rose-100 text-rose-600' :
+                      selectedReport.type === 'Kebersihan' ? 'bg-emerald-100 text-emerald-600' :
+                      'bg-blue-100 text-blue-600'
+                    }`}>
+                      <AlertTriangle size={22} />
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Kategori Laporan</span>
+                      <h4 className="font-black text-slate-800 text-base leading-tight">{selectedReport.type}</h4>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tanggal Lapor</span>
+                    <p className="text-xs font-bold text-slate-700">
+                      {new Date(selectedReport.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Lokasi/Unit</p>
-                  <p className="font-bold text-slate-800">
-                    {(() => {
-                      const house = houses.find(h => h.id === selectedReport.houseId || h.id === selectedReport.reporterHouseId);
-                      return house ? `${house.block}-${house.number}` : (selectedReport.houseId || '-');
-                    })()}
+                
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Uraian Aspirasi / Keluhan Warga</p>
+                  <p className="font-medium text-slate-800 bg-white p-4 rounded-2xl border border-slate-200 leading-relaxed text-sm">
+                    "{selectedReport.description}"
                   </p>
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200 text-xs">
+                  <div className="p-3 bg-white rounded-xl border border-slate-100">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Identitas Pelapor</p>
+                    <p className="font-bold text-slate-800">{selectedReport.reporterName}</p>
+                    {reporterPhone && (
+                      <p className="text-[11px] font-mono text-slate-500 mt-0.5">{reporterPhone}</p>
+                    )}
+                  </div>
+                  <div className="p-3 bg-white rounded-xl border border-slate-100">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Lokasi / Blok Rumah</p>
+                    <p className="font-bold text-indigo-700">
+                      {reporterHouse ? `Blok ${reporterHouse.block} No. ${reporterHouse.number}` : (selectedReport.houseId || 'Warga RT 002')}
+                    </p>
+                    <p className="text-[10px] text-slate-400">RT 002 / RW 020 Tondo</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {selectedReport.status === 'Baru' && (
+                    <Button 
+                      onClick={() => handleUpdateReportStatus(selectedReport.id, 'Diproses')}
+                      className="col-span-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 text-xs font-black"
+                    >
+                      <Clock size={16} className="mr-2" /> Tindak Lanjuti & Tandai Sedang Diproses
+                    </Button>
+                  )}
+                  {selectedReport.status === 'Diproses' && (
+                    <Button 
+                      onClick={() => handleUpdateReportStatus(selectedReport.id, 'Selesai')}
+                      className="col-span-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 text-xs font-black"
+                    >
+                      <CheckCircle2 size={16} className="mr-2" /> Tandai Penanganan Selesai (Tuntas)
+                    </Button>
+                  )}
+                </div>
+
+                {reporterPhone && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cleaned = reporterPhone.replace(/\D/g, '').replace(/^0/, '62');
+                      const text = `Halo Bapak/Ibu ${selectedReport.reporterName},\n\nLaporan aspirasi/pengaduan Anda mengenai "${selectedReport.description.slice(0, 50)}..." telah ditindaklanjuti oleh Pengurus RT 002 / RW 020 Kelurahan Tondo dengan status terkini: *${selectedReport.status}*.\n\nTerima kasih atas kepedulian Anda menjaga lingkungan kita bersama.`;
+                      window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(text)}`, '_blank');
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold transition-all"
+                  >
+                    <Phone size={14} className="text-emerald-600" />
+                    <span>Kirim Pesan Konfirmasi Progres ke WhatsApp Warga</span>
+                  </button>
+                )}
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {selectedReport.status === 'Baru' && (
-                <Button 
-                  onClick={() => handleUpdateReportStatus(selectedReport.id, 'Diproses')}
-                  className="col-span-2 bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200"
-                >
-                  <Clock size={18} className="mr-2" /> Tandai Sedang Diproses
-                </Button>
-              )}
-              {selectedReport.status === 'Diproses' && (
-                <Button 
-                  onClick={() => handleUpdateReportStatus(selectedReport.id, 'Selesai')}
-                  className="col-span-2 bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
-                >
-                  <CheckCircle2 size={18} className="mr-2" /> Tandai Selesai
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </Modal>
     </motion.div>
   );

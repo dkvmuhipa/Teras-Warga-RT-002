@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { DollarSign, Box, Plus, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Filter, Search, Download, PieChart, Wallet, User, CreditCard, Upload, X, Eye, FileText, CheckCircle2, AlertCircle, Trash2, RefreshCw } from 'lucide-react';
+import { DollarSign, Box, Plus, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Filter, Search, Download, PieChart, Wallet, User, CreditCard, Upload, X, Eye, FileText, CheckCircle2, AlertCircle, Trash2, RefreshCw, Receipt, ShieldCheck, Tag, Building2, Sparkles } from 'lucide-react';
 import { WasteBankManager } from './WasteBankManager';
 import { ResidentIuranManager } from './resident/ResidentIuranManager';
 import { PaymentModal, EditPaymentModal } from './resident/ResidentModals';
@@ -566,114 +566,439 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
         </div>
       </motion.div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Transaksi" : "Catat Transaksi Baru"} maxWidth="max-w-3xl">
-         <form onSubmit={handleSave} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Keterangan Transaksi</label>
-                   <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={desc} onChange={e => setDesc(e.target.value)} placeholder="Contoh: Pembelian Lampu Jalan..." />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                   <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Nominal (Rp)</label>
-                      <input type="number" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0" />
-                   </div>
-                   <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Tipe</label>
-                      <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={type} onChange={e => setType(e.target.value as any)}>
-                         <option value="Income">Pemasukan (+)</option>
-                         <option value="Expense">Pengeluaran (-)</option>
-                      </select>
-                   </div>
-                </div>
+      {/* Modal Transaksi Kas Widescreen 2-Kolom RT 002 / RW 020 */}
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title={editingId ? "Edit Transaksi Kas RT 002 / RW 020" : "Catat Transaksi Kas Baru RT 002 / RW 020"} 
+        maxWidth="max-w-5xl"
+      >
+        <form onSubmit={handleSave} className="space-y-6">
+          {/* Header Identitas Resmi RT 002 / RW 020 */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-indigo-50 via-slate-50 to-indigo-50/30 border border-indigo-100/80 rounded-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+                RT
+              </div>
+              <div>
+                <p className="text-[11px] font-black text-slate-800 tracking-tight leading-tight">
+                  Buku Kas Umum Kas RT 002 / RW 020
+                </p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-indigo-100 rounded-lg text-[10px] font-bold text-indigo-700 shadow-xs">
+              <Wallet size={12} className="text-indigo-600" />
+              <span>Saldo Kas: Rp {balance.toLocaleString('id-ID')}</span>
+            </div>
+          </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Tanggal</label>
-                    <input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={date} onChange={e => setDate(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Metode</label>
-                    <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={method} onChange={e => setMethod(e.target.value as any)}>
-                      <option value="Tunai">Tunai</option>
-                      <option value="Transfer">Transfer</option>
-                      <option value="Lainnya">Lainnya</option>
-                    </select>
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Kolom Kiri: Form Input Transaksi (7 Kolom) */}
+            <div className="lg:col-span-7 space-y-4">
+              {/* Segmented Toggle: Pemasukan vs Pengeluaran */}
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">
+                  Jenis Transaksi Kas *
+                </label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/80">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setType('Income');
+                      if (category === 'Operasional RT' || category === 'Perbaikan Fasum & Lampu') setCategory('Iuran Warga');
+                    }}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-xs transition-all ${
+                      type === 'Income'
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    }`}
+                  >
+                    <ArrowDownRight size={15} />
+                    <span>Pemasukan (+)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setType('Expense');
+                      if (category === 'Iuran Warga' || category === 'Setoran Iuran Air (PDAM)') setCategory('Operasional RT');
+                    }}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-xs transition-all ${
+                      type === 'Expense'
+                        ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    }`}
+                  >
+                    <ArrowUpRight size={15} />
+                    <span>Pengeluaran (-)</span>
+                  </button>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Pihak (Penerima/Penyetor)</label>
-                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                    <input className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={payerReceiver} onChange={e => setPayerReceiver(e.target.value)} placeholder="Nama warga / Toko..." />
-                   </div>
+              {/* Nominal Input & Quick Buttons */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Nominal Transaksi (Rp) *
+                  </label>
+                  {amount && parseInt(amount) > 0 && (
+                    <span className="text-[10px] font-black text-indigo-600">
+                      Rp {parseInt(amount).toLocaleString('id-ID')}
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm text-slate-400">
+                    Rp
+                  </span>
+                  <input 
+                    type="number" 
+                    required
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-base font-black text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={amount} 
+                    onChange={e => setAmount(e.target.value)} 
+                    placeholder="0" 
+                  />
+                </div>
+                {/* Quick Nominal Chips */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[10000, 25000, 50000, 100000, 250000, 500000, 1000000].map(val => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => {
+                        const currentVal = parseInt(amount) || 0;
+                        setAmount((currentVal + val).toString());
+                      }}
+                      className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 border border-slate-200/80 rounded-lg text-[10px] font-black transition-all active:scale-95"
+                    >
+                      +{val >= 1000000 ? `${val / 1000000} Jt` : `${val / 1000}rb`}
+                    </button>
+                  ))}
+                  {amount && parseInt(amount) > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setAmount('')}
+                      className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 rounded-lg text-[10px] font-black transition-all"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Keterangan Transaksi */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Uraian / Keterangan Transaksi *
+                </label>
+                <input 
+                  required
+                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                  value={desc} 
+                  onChange={e => setDesc(e.target.value)} 
+                  placeholder={type === 'Income' ? "Contoh: Setoran iuran warga Blok B, donasi gotong royong..." : "Contoh: Pembelian lampu jalan, perbaikan pipa fasum..."} 
+                />
+              </div>
+
+              {/* Kategori & Quick Chips */}
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Kategori Kas RT *
+                </label>
+                <input 
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                  value={category} 
+                  onChange={e => setCategory(e.target.value)} 
+                  list="cat-suggestions" 
+                  placeholder="Pilih atau ketik kategori..." 
+                />
+                <datalist id="cat-suggestions">
+                  <option value="Iuran Warga"/>
+                  <option value="Setoran Iuran Air (PDAM)"/>
+                  <option value="Setoran Iuran Kebersihan"/>
+                  <option value="Sumbangan & Donasi"/>
+                  <option value="Operasional RT"/>
+                  <option value="Perbaikan Fasum & Lampu"/>
+                  <option value="Kegiatan Warga & Sosial"/>
+                  <option value="Listrik & Air Fasum"/>
+                  <option value="Keamanan Lingkungan"/>
+                  <option value="Pengeluaran Lainnya"/>
+                </datalist>
+                {/* Quick Category Chips */}
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {(type === 'Income'
+                    ? ['Iuran Warga', 'Setoran Iuran Air (PDAM)', 'Setoran Iuran Kebersihan', 'Sumbangan & Donasi']
+                    : ['Operasional RT', 'Perbaikan Fasum & Lampu', 'Kegiatan Warga & Sosial', 'Listrik & Air Fasum']
+                  ).map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setCategory(cat)}
+                      className={`px-2.5 py-1 rounded-lg text-[9px] font-black transition-all ${
+                        category === cat 
+                          ? 'bg-indigo-600 text-white shadow-xs' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Grid 2 Kolom: Pihak & Metode */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    {type === 'Income' ? 'Pihak Penyetor / Warga' : 'Pihak Penerima / Toko'}
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                    <input 
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                      value={payerReceiver} 
+                      onChange={e => setPayerReceiver(e.target.value)} 
+                      placeholder={type === 'Income' ? "Nama warga..." : "Toko / Vendor..."} 
+                    />
+                  </div>
                 </div>
 
-                <div>
-                   <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Kategori</label>
-                   <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={category} onChange={e => setCategory(e.target.value)} list="cat-suggestions" placeholder="Pilih atau ketik..." />
-                   <datalist id="cat-suggestions">
-                      <option value="Setoran Iuran Sampah (Kolektif)"/>
-                      <option value="Setoran Iuran Air (Kolektif)"/>
-                      <option value="Setoran Iuran Kebersihan"/>
-                      <option value="Iuran Warga"/>
-                      <option value="Sumbangan & Donasi"/>
-                      <option value="Pembangunan"/>
-                      <option value="Operasional RT"/>
-                      <option value="Kegiatan Sosial"/>
-                      <option value="Listrik & Air Fasum"/>
-                      <option value="Keamanan Lingkungan"/>
-                   </datalist>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">Bukti Transaksi (Foto/Nota)</label>
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`w-full p-4 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
-                      evidenceUrl ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50'
-                    }`}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Metode Pembayaran
+                  </label>
+                  <select 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                    value={method} 
+                    onChange={e => setMethod(e.target.value as any)}
                   >
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                    <option value="Tunai">💵 Tunai (Cash Kasir RT)</option>
+                    <option value="Transfer">💳 Transfer Bank / QRIS</option>
+                    <option value="Lainnya">📝 Lainnya / Pemindahbukuan</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Grid 2 Kolom: Tanggal & No. Referensi */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Tanggal Transaksi
+                  </label>
+                  <input 
+                    type="date" 
+                    required
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                    value={date} 
+                    onChange={e => setDate(e.target.value)} 
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    No. Referensi / Nota (Opsional)
+                  </label>
+                  <input 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    value={referenceNumber} 
+                    onChange={e => setReferenceNumber(e.target.value)} 
+                    placeholder="Contoh: NOTA-0921" 
+                  />
+                </div>
+              </div>
+
+              {/* Upload Bukti Nota/Struk */}
+              <div className="space-y-1 pt-1">
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Bukti Nota / Kwitansi / Struk (Opsional)
+                </label>
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`w-full p-3.5 border-2 border-dashed rounded-2xl flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                    evidenceUrl 
+                      ? 'border-emerald-300 bg-emerald-50/50' 
+                      : 'border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/30'
+                  }`}
+                >
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                  <div className="flex items-center gap-2.5">
                     {isUploading ? (
-                      <RefreshCw className="animate-spin text-indigo-600" size={24} />
+                      <RefreshCw className="animate-spin text-indigo-600" size={18} />
                     ) : evidenceUrl ? (
-                      <>
-                        <CheckCircle2 className="text-emerald-600" size={24} />
-                        <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Bukti Terunggah</span>
-                      </>
+                      <CheckCircle2 className="text-emerald-600" size={18} />
                     ) : (
-                      <>
-                        <Upload className="text-slate-400" size={24} />
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Klik untuk Unggah</span>
-                      </>
+                      <Upload className="text-slate-400" size={18} />
                     )}
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-700">
+                        {isUploading ? 'Sedang Mengunggah...' : evidenceUrl ? 'Bukti Transaksi Terunggah' : 'Unggah Foto Bukti / Struk'}
+                      </p>
+                      <p className="text-[9px] text-slate-400 font-medium">Format JPG, PNG, atau WebP</p>
+                    </div>
                   </div>
                   {evidenceUrl && (
                     <button 
                       type="button" 
                       onClick={(e) => { e.stopPropagation(); setEvidenceUrl(''); }}
-                      className="mt-2 text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline"
+                      className="px-2.5 py-1 bg-white border border-rose-200 rounded-lg text-[10px] font-black text-rose-600 hover:bg-rose-50 transition-all"
                     >
-                      Hapus Bukti
+                      Hapus
                     </button>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" className="flex-1 py-4 rounded-2xl" onClick={() => setIsModalOpen(false)}>Batal</Button>
-              <Button type="submit" className="flex-[2] py-4 rounded-2xl shadow-lg shadow-indigo-200" disabled={isUploading}>
-                {editingId ? 'Simpan Perubahan' : 'Catat Transaksi'}
-              </Button>
+            {/* Kolom Kanan: Live Digital Voucher / Kwitansi Kas RT 002 / RW 020 (5 Kolom) */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <Receipt size={13} className="text-indigo-600" />
+                  Pratinjau Voucher Kas Digital
+                </span>
+                <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60 uppercase">
+                  Real-Time
+                </span>
+              </div>
+
+              {/* Kartu Kwitansi Resmi RT 002 / RW 020 */}
+              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-slate-200/50 relative overflow-hidden space-y-4">
+                {/* Pita status tipe transaksi */}
+                <div className={`flex items-center justify-between p-2.5 rounded-2xl ${
+                  type === 'Income' 
+                    ? 'bg-emerald-500 text-white' 
+                    : 'bg-rose-500 text-white'
+                }`}>
+                  <div className="flex items-center gap-1.5">
+                    {type === 'Income' ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                      {type === 'Income' ? 'Bukti Penerimaan Kas (BKM)' : 'Bukti Pengeluaran Kas (BKK)'}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-mono font-bold bg-white/20 px-2 py-0.5 rounded-full">
+                    RT 002 / RW 020
+                  </span>
+                </div>
+
+                {/* Kop Mini Resmi */}
+                <div className="text-center pb-3 border-b border-dashed border-slate-200">
+                  <p className="text-[10px] font-black text-slate-800 uppercase tracking-wider">
+                    PENGURUS RUKUN TETANGGA 002 / RW 020
+                  </p>
+                  <p className="text-[9px] font-bold text-slate-500">
+                    Kelurahan Tondo, Kec. Mantikulore, Kota Palu
+                  </p>
+                </div>
+
+                {/* Display Nominal */}
+                <div className="text-center py-2 bg-slate-100/70 rounded-2xl border border-slate-200/60">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Jumlah Transaksi</p>
+                  <p className={`text-2xl font-black tracking-tight ${
+                    type === 'Income' ? 'text-emerald-700' : 'text-rose-700'
+                  }`}>
+                    {type === 'Income' ? '+ ' : '- '}
+                    Rp {(parseInt(amount) || 0).toLocaleString('id-ID')}
+                  </p>
+                </div>
+
+                {/* Data Rincian Kwitansi */}
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Uraian</span>
+                    <span className="font-bold text-slate-800 text-right max-w-[65%] truncate">
+                      {desc || '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Kategori</span>
+                    <span className="font-bold text-indigo-700">{category || '-'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">
+                      {type === 'Income' ? 'Penyetor' : 'Penerima'}
+                    </span>
+                    <span className="font-bold text-slate-800">{payerReceiver || 'Warga RT 002'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase">Tanggal & Metode</span>
+                    <span className="font-bold text-slate-800">
+                      {date ? new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'} ({method})
+                    </span>
+                  </div>
+                  {referenceNumber && (
+                    <div className="flex justify-between py-1 border-b border-slate-100">
+                      <span className="text-slate-400 font-bold text-[10px] uppercase">No. Ref / Nota</span>
+                      <span className="font-mono font-bold text-slate-700">{referenceNumber}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Dampak Saldo Kas RT */}
+                <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-2xl space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-indigo-900">
+                    <span className="text-slate-500">Saldo Kas Saat Ini:</span>
+                    <span>Rp {balance.toLocaleString('id-ID')}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] font-black">
+                    <span className="text-indigo-950">Estimasi Saldo Baru:</span>
+                    <span className={type === 'Income' ? 'text-emerald-700 font-mono' : 'text-rose-700 font-mono'}>
+                      Rp {(type === 'Income' 
+                        ? balance + (parseInt(amount) || 0) 
+                        : balance - (parseInt(amount) || 0)
+                      ).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Pratinjau Foto Bukti Mini (jika ada) */}
+                {evidenceUrl && (
+                  <div className="pt-1">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Foto Bukti Terlampir</p>
+                    <div className="h-24 w-full rounded-xl overflow-hidden border border-slate-200">
+                      <img src={evidenceUrl} alt="Bukti Kas" className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Stempel & Badge Verifikasi Bendahara */}
+                <div className="pt-2 flex items-center justify-between border-t border-slate-200/80 text-[9px] text-slate-400">
+                  <div className="flex items-center gap-1 text-emerald-600 font-bold">
+                    <ShieldCheck size={13} />
+                    <span>Tervalidasi Digital RT 002</span>
+                  </div>
+                  <span className="font-mono text-slate-400">KAS-RT002-RW020</span>
+                </div>
+              </div>
             </div>
-         </form>
+          </div>
+
+          {/* Action Footer Buttons */}
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1 py-3.5 rounded-2xl text-xs font-bold" 
+              onClick={() => setIsModalOpen(false)}
+            >
+              Batal
+            </Button>
+            <Button 
+              type="submit" 
+              className={`flex-[2] py-3.5 rounded-2xl text-xs font-black shadow-lg text-white transition-all ${
+                type === 'Income' 
+                  ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25' 
+                  : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/25'
+              }`} 
+              disabled={isUploading}
+            >
+              {editingId ? 'Simpan Perubahan Transaksi' : `Catat ${type === 'Income' ? 'Pemasukan' : 'Pengeluaran'} Kas`}
+            </Button>
+          </div>
+        </form>
       </Modal>
 
       {/* Payment Modal */}
