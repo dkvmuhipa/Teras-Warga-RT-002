@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   X, Phone, MapPin, FileText, CreditCard, DollarSign, 
   LayoutList, Droplets, Trash2, Users, Activity, Shield, User,
-  ShieldCheck, Calendar, AlertCircle
+  ShieldCheck, Calendar, AlertCircle, Printer
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
+import { KartuKeluargaModal } from './KartuKeluargaModal';
 
 interface ResidentDetailDrawerProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
   handleDelete,
 }) => {
   const { getPaymentStatus, getArrearsForHouse } = useFinancial();
+  const [isKkModalOpen, setIsKkModalOpen] = useState(false);
 
   if (!isOpen || !selectedResident) return null;
 
@@ -85,7 +87,14 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
               >
                 <X size={16} />
               </button>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setIsKkModalOpen(true)}
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  title="Lihat & Cetak Blanko Kartu Keluarga (KK)"
+                >
+                  <Printer size={13} /> Blanko KK
+                </button>
                 <button 
                   onClick={() => { onClose(); handleOpenEdit(selectedResident); }}
                   className="px-3.5 py-1.5 bg-white text-slate-800 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm"
@@ -234,9 +243,17 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 <div className="space-y-3 pt-4 border-t border-slate-100">
                   <div className="flex justify-between items-center">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pohon Silsilah Keluarga</p>
-                    <span className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 text-[#475569] rounded-[4px] text-[9px] font-bold">
-                      {(selectedResident.familyMembers?.length || 0) + 1} Jiwa
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsKkModalOpen(true)}
+                        className="text-[10px] text-indigo-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <FileText size={11} /> Format KK Resmi
+                      </button>
+                      <span className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 text-[#475569] rounded-[4px] text-[9px] font-bold">
+                        {(selectedResident.familyMembers?.length || 0) + 1} Jiwa
+                      </span>
+                    </div>
                   </div>
                   
                   {/* Root: Head of Family */}
@@ -407,6 +424,13 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
           </div>
         </div>
       </motion.div>
+
+      {/* Official Kartu Keluarga Modal */}
+      <KartuKeluargaModal 
+        isOpen={isKkModalOpen} 
+        onClose={() => setIsKkModalOpen(false)} 
+        house={selectedResident} 
+      />
     </div>
   );
 };

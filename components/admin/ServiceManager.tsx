@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw, Phone, Hash, Briefcase, BookOpen, Heart, Mail, CreditCard, UserCheck, MapPin, Info, Calendar, ChevronRight, ClipboardList, Users, Flag } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw, Phone, Hash, Briefcase, BookOpen, Heart, Mail, CreditCard, UserCheck, MapPin, Info, Calendar, ChevronRight, ClipboardList, Users, Flag, Download } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig, OfficialLetter, House } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb, subscribeToOfficialLetters } from '../../services/databaseService';
@@ -2981,19 +2981,60 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               </div>
             )}
           </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button 
-              variant="secondary" 
-              onClick={() => {
-                setShowPdfPreviewModal(false);
-                if (previewPdfBlobUrl) {
-                  URL.revokeObjectURL(previewPdfBlobUrl);
-                  setPreviewPdfBlobUrl(null);
-                }
-              }}
-            >
-              Tutup Pratinjau
-            </Button>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2">
+            <div className="text-xs text-slate-500 font-medium">
+              * Dokumen telah diselaraskan dengan Kop Surat, NIK, Penomoran RT & Tanda Tangan Resmi.
+            </div>
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              {selectedLetter && (
+                <>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (selectedLetter) {
+                        const letterData = { ...selectedLetter, ...editLetterData, letterNumber: letterNumberInput || selectedLetter.letterNumber };
+                        const configToUse = tempSignature ? { ...pdfConfig, signature: tempSignature } : pdfConfig;
+                        generateSuratPengantar(letterData as LetterRequest, configToUse, false);
+                        toast.success("Dokumen PDF surat berhasil diunduh.");
+                      }
+                    }}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4"
+                  >
+                    <Download size={14} className="mr-1.5 shrink-0" /> Unduh PDF
+                  </Button>
+                  {selectedLetter.phone && (
+                    <Button
+                      type="button"
+                      onClick={() => sendWhatsAppMessage(
+                        selectedLetter.phone,
+                        formatLetterStatusForWhatsApp(
+                          selectedLetter.applicantName,
+                          selectedLetter.type,
+                          selectedLetter.status,
+                          selectedLetter.id,
+                          letterNumberInput || selectedLetter.letterNumber
+                        )
+                      )}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 shadow-sm"
+                    >
+                      <MessageCircle size={14} className="mr-1.5 shrink-0" /> Kirim WhatsApp Warga
+                    </Button>
+                  )}
+                </>
+              )}
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  setShowPdfPreviewModal(false);
+                  if (previewPdfBlobUrl) {
+                    URL.revokeObjectURL(previewPdfBlobUrl);
+                    setPreviewPdfBlobUrl(null);
+                  }
+                }}
+              >
+                Tutup
+              </Button>
+            </div>
           </div>
         </div>
       </Modal>

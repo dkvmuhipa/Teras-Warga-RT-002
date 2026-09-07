@@ -13,6 +13,7 @@ import { generateSuratPengantar, generateReportReceiptPDF } from '../../services
 import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, safeJsonStringify, checkWasteRetribution, handleFirestoreError, OperationType, getLetterById, getReportById, getGuestReportById, getPopulationLogById, getRequestsByPhoneOrHouse } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
+import { Modal } from '../ui/Modal';
 import { GuestReportForm } from '../GuestReportForm';
 
 interface PublicServicesProps {
@@ -39,6 +40,37 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [searchPhone, setSearchPhone] = useState('');
   const [searchHouseId, setSearchHouseId] = useState('');
   const [phoneSearchResults, setPhoneSearchResults] = useState<any[] | null>(null);
+  const [previewPdfBlobUrl, setPreviewPdfBlobUrl] = useState<string | null>(null);
+  const [showPdfPreviewModal, setShowPdfPreviewModal] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  const handleOpenPdfPreview = async (letterData: any) => {
+    try {
+      setPreviewLoading(true);
+      setShowPdfPreviewModal(true);
+      const { jsPDF } = await import('jspdf');
+      const originalSave = jsPDF.prototype.save;
+      let blobUrl = '';
+
+      jsPDF.prototype.save = function(this: any) {
+        const blob = this.output('blob');
+        blobUrl = URL.createObjectURL(blob);
+        return this;
+      } as any;
+
+      await generateSuratPengantar(letterData, pdfConfig, false);
+      jsPDF.prototype.save = originalSave;
+
+      if (blobUrl) {
+        setPreviewPdfBlobUrl(blobUrl);
+      }
+    } catch (e) {
+      console.error("Gagal memuat pratinjau surat:", e);
+      toast.error("Gagal memuat pratinjau surat.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   const handleSearchByPhoneOrHouse = async () => {
     if (!searchPhone.trim() && !searchHouseId.trim()) {
@@ -2870,23 +2902,33 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                       <p className="text-xs text-emerald-100 font-medium">Lengkap dengan Tanda Tangan Digital &amp; Stempel Sah RT 02.</p>
                                     </div>
                                   </div>
-                                  <button 
-                                    onClick={async () => {
-                                      try {
-                                        toast.info('Menyiapkan berkas PDF resmi...');
-                                        await generateSuratPengantar(searchResult, pdfConfig, false);
-                                        toast.success('Surat digital berhasil diunduh.');
-                                      } catch (err) {
-                                        console.error(err);
-                                        toast.error('Gagal mengunduh dokumen.');
-                                      }
-                                    }}
-                                    className="w-full md:w-auto px-8 py-4 bg-white hover:bg-emerald-50 text-emerald-800 font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0"
-                                  >
-                                    <Download size={16} /> Unduh PDF Resmi Sekarang
-                                  </button>
-                                </div>
-                              )}
+                                   <div className="flex flex-wrap gap-2.5 w-full md:w-auto shrink-0">
+                                     <>
+                                       <button 
+                                         onClick={() => handleOpenPdfPreview(searchResult)}
+                                         className="flex items-center gap-2 px-6 py-4 bg-slate-800 hover:bg-slate-900 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md active:scale-95 cursor-pointer"
+                                       >
+                                         <Eye size={16} /> Pratinjau Dokumen
+                                       </button>
+                                       <button 
+                                         onClick={async () => {
+                                           try {
+                                             toast.info('Menyiapkan berkas PDF resmi...');
+                                             await generateSuratPengantar(searchResult, pdfConfig, false);
+                                             toast.success('Surat digital berhasil diunduh.');
+                                           } catch (err) {
+                                             console.error(err);
+                                             toast.error('Gagal mengunduh dokumen.');
+                                           }
+                                         }}
+                                         className="flex items-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer animate-pulse"
+                                       >
+                                         <Download size={16} /> Unduh Surat Resmi (PDF)
+                                       </button>
+                                     </>
+                                   </div>
+                                 </div>
+                               )}
 
                               {/* BENTO GRID DETAILS */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
@@ -3198,6 +3240,58 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
           );
         })()}
       </AnimatePresence>
+
+      {/* Modal Pratinjau Surat PDF Resmi Warga */}
+      <Modal
+        isOpen={showPdfPreviewModal}
+        onClose={() => {
+          setShowPdfPreviewModal(false);
+          if (previewPdfBlobUrl) {
+            URL.revokeObjectURL(previewPdfBlobUrl);
+            setPreviewPdfBlobUrl(null);
+          }
+        }}
+        title="Pratinjau Lembar Surat Resmi (A4)"
+        maxWidth="max-w-4xl"
+      >
+        <div className="space-y-4">
+          <div className="bg-slate-100 rounded-2xl p-2 h-[70vh] w-full overflow-hidden border border-slate-200 flex items-center justify-center">
+            {previewLoading ? (
+              <div className="text-center p-8">
+                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-sm font-bold text-slate-600">Menyusun dokumen surat PDF...</p>
+              </div>
+            ) : previewPdfBlobUrl ? (
+              <iframe
+                src={previewPdfBlobUrl}
+                className="w-full h-full rounded-xl border-none"
+                title="Pratinjau Surat PDF"
+              />
+            ) : (
+              <div className="text-center p-8">
+                <p className="text-sm font-bold text-rose-500">Gagal memuat pratinjau surat.</p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-between items-center pt-2">
+            <p className="text-xs text-slate-400 font-medium">
+              * Dokumen ini telah diverifikasi & disahkan oleh Pengurus RT 002.
+            </p>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowPdfPreviewModal(false);
+                if (previewPdfBlobUrl) {
+                  URL.revokeObjectURL(previewPdfBlobUrl);
+                  setPreviewPdfBlobUrl(null);
+                }
+              }}
+            >
+              Tutup Pratinjau
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </motion.div>
   );
 };
