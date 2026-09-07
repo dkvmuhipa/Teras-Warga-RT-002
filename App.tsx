@@ -507,7 +507,7 @@ export const App = () => {
                         <div className="pb-24 md:pb-0">
                             <Routes>
                                 <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} mapPoints={mapPoints} />} />
-                                <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm onClose={() => window.history.back()} /></div>} />
+                                <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm houses={houses} onClose={() => window.history.back()} /></div>} />
                                 <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
                                 <Route path="/services" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
                                 <Route path="/layanan" element={<PublicServices pdfConfig={pdfConfig} houses={houses} />} />
