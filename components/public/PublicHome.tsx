@@ -20,6 +20,7 @@ import { Button } from '../ui/Button';
 import { useFinancial } from '../../context/FinancialContext';
 import { addReportToDb, validateResidentAccess, formatHouseId, subscribeToCollection } from '../../services/databaseService';
 import { SmartImage } from '../SmartImage';
+import { UtilityOutageTrackerModal } from './UtilityOutageTrackerModal';
 
 interface PublicHomeProps {
   houses: House[];
@@ -291,6 +292,47 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       <HeroSection onExplore={handleExplore} />
+
+      {/* Live Active Utility Outage Alert Banner */}
+      {utilityOutages.some(o => o.status === 'Ongoing') && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white rounded-3xl p-4 md:p-5 shadow-lg shadow-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/20"
+        >
+          <div className="flex items-center gap-3.5 w-full sm:w-auto">
+            <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl shrink-0 animate-pulse">
+              <Zap size={22} className="text-amber-200" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-black/30 rounded-md text-[9px] font-black uppercase tracking-wider text-amber-200">
+                  Siaga Utilitas Aktif
+                </span>
+                <span className="text-[10px] font-bold text-amber-100">
+                  {utilityOutages.find(o => o.status === 'Ongoing')?.type} • Waktu: {utilityOutages.find(o => o.status === 'Ongoing')?.startTime} - {utilityOutages.find(o => o.status === 'Ongoing')?.endTime}
+                </span>
+              </div>
+              <h4 className="font-black text-sm md:text-base leading-snug">
+                {utilityOutages.find(o => o.status === 'Ongoing')?.title}
+              </h4>
+              <p className="text-xs text-amber-100/90 font-medium line-clamp-1">
+                Wilayah Terdampak: {utilityOutages.find(o => o.status === 'Ongoing')?.affectedBlocks?.join(', ') || 'Semua Blok Huntap'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+            <button
+              onClick={() => setIsOutageModalOpen(true)}
+              className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-amber-50 text-slate-900 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>Detail &amp; Lapor Cepat</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Modern Live Info Marquee Banner */}
       <motion.div 
@@ -1454,81 +1496,12 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         </div>
       </Modal>
 
-      {/* Public Modal: Papan Informasi Pemadaman PLN & PDAM */}
-      <Modal
+      {/* Public Modal: Papan Informasi & Pantau Utilitas Huntap (PLN, Air, & Lapor Warga) */}
+      <UtilityOutageTrackerModal
         isOpen={isOutageModalOpen}
         onClose={() => setIsOutageModalOpen(false)}
-        title="Papan Informasi Pemadaman PLN &amp; Air Bersih"
-        maxWidth="max-w-2xl"
-      >
-        <div className="space-y-5 p-2 text-left">
-          <div className="p-4 bg-sky-50 border border-sky-200 rounded-2xl flex items-center gap-3">
-            <div className="p-2.5 bg-sky-500 text-white rounded-xl">
-              <Zap size={22} />
-            </div>
-            <div>
-              <h4 className="font-black text-slate-900 text-sm">Status Jaringan Utilitas RT 02 Huntap Tondo 2</h4>
-              <p className="text-xs text-slate-600 font-medium">Informasi resmi pemeliharaan gardu listrik PLN dan jalur pipa air bersih RT.</p>
-            </div>
-          </div>
-
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-            {utilityOutages.length > 0 ? (
-              utilityOutages.map((outage) => (
-                <div 
-                  key={outage.id} 
-                  className={`p-5 rounded-2xl border-2 transition-all ${
-                    outage.status === 'Ongoing' ? 'bg-amber-50/50 border-amber-400' : 'bg-white border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
-                      outage.type === 'PLN' ? 'bg-amber-100 text-amber-800' :
-                      outage.type === 'PDAM' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
-                    }`}>
-                      {outage.type === 'PLN' ? <Zap size={11} /> : <Droplets size={11} />} {outage.type}
-                    </span>
-
-                    <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
-                      outage.status === 'Ongoing' ? 'bg-rose-100 text-rose-700 animate-pulse font-black' :
-                      outage.status === 'Scheduled' ? 'bg-amber-100 text-amber-800 font-black' : 'bg-emerald-100 text-emerald-800 font-black'
-                    }`}>
-                      {outage.status === 'Ongoing' ? '⚠️ Sedang Berlangsung' : outage.status === 'Scheduled' ? '🗓️ Terjadwal' : '✓ Normal / Selesai'}
-                    </span>
-                  </div>
-
-                  <h5 className="font-black text-slate-900 text-base">{outage.title}</h5>
-                  <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">{outage.description}</p>
-
-                  <div className="mt-3 p-3 bg-slate-50 rounded-xl space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold uppercase text-[9px]">Wilayah Terdampak:</span>
-                      <span className="font-black text-slate-700">{outage.affectedBlocks?.join(', ') || 'Semua Blok'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold uppercase text-[9px]">Waktu:</span>
-                      <span className="font-bold text-slate-700">{outage.startTime} s.d {outage.endTime}</span>
-                    </div>
-                  </div>
-
-                  {outage.emergencyNotes && (
-                    <div className="mt-2.5 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 flex items-center gap-2">
-                      <Info size={13} className="text-amber-600 shrink-0" />
-                      <span>{outage.emergencyNotes}</span>
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="py-12 text-center bg-emerald-50/60 rounded-2xl border border-emerald-200">
-                <CheckCircle2 size={36} className="text-emerald-500 mx-auto mb-2" />
-                <h5 className="font-black text-slate-800 text-sm">Seluruh Jaringan Listrik &amp; Air Normal</h5>
-                <p className="text-xs text-slate-500 mt-0.5">Tidak ada jadwal pemadaman listrik PLN atau perbaikan air pipa yang tercatat saat ini.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </Modal>
+        outages={utilityOutages}
+      />
     </motion.div>
   );
 };

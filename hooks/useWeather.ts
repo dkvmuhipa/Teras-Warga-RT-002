@@ -2,15 +2,24 @@ import { useState, useEffect } from 'react';
 
 export interface WeatherData {
     temp: number;
+    apparentTemp: number;
     condition: string;
     weatherCode: number;
     humidity: number;
     windSpeed: number;
+    windGusts: number;
+    surfacePressure: number;
+    uvIndex: number;
     aqi: number;
     aqiLabel: string;
     aqiColor: string;
     pm2_5: number;
     pm10: number;
+    isExtremeWind: boolean;
+    isExtremeHeat: boolean;
+    isHighPollution: boolean;
+    alertMessage?: string;
+    lastUpdated?: string;
 }
 
 export const useWeather = () => {
@@ -44,7 +53,7 @@ export const useWeather = () => {
             // Fallback to direct fetch if proxy failed or returned non-JSON
             if (!weatherData || !aqiData) {
                 const [directWeatherRes, directAqiRes] = await Promise.all([
-                    fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m', { signal }),
+                    fetch('https://api.open-meteo.com/v1/forecast?latitude=-0.8917&longitude=119.8707&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,surface_pressure,uv_index', { signal }),
                     fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-0.8917&longitude=119.8707&current=us_aqi,pm2_5,pm10', { signal })
                 ]);
 
@@ -54,7 +63,7 @@ export const useWeather = () => {
                 aqiData = await directAqiRes.json();
             }
             
-            const aqi = aqiData.current.us_aqi;
+            const aqi = Math.round(aqiData?.current?.us_aqi ?? 25);
             let aqiLabel = 'Bagus';
             let aqiColor = 'text-emerald-400';
             
@@ -64,7 +73,7 @@ export const useWeather = () => {
             else if (aqi > 100) { aqiLabel = 'Sensitif'; aqiColor = 'text-orange-500'; }
             else if (aqi > 50) { aqiLabel = 'Sedang'; aqiColor = 'text-yellow-400'; }
 
-            const code = weatherData.current.weather_code;
+            const code = weatherData?.current?.weather_code ?? 0;
             let condition = 'Cerah';
             if (code >= 1 && code <= 3) condition = 'Berawan';
             else if (code === 45 || code === 48) condition = 'Berkabut';
@@ -73,39 +82,75 @@ export const useWeather = () => {
             else if (code >= 80 && code <= 82) condition = 'Hujan Deras';
             else if (code >= 95) condition = 'Badai Petir';
 
+            const temp = Math.round(weatherData?.current?.temperature_2m ?? 31);
+            const apparentTemp = Math.round(weatherData?.current?.apparent_temperature ?? (temp + 2));
+            const windSpeed = Math.round(weatherData?.current?.wind_speed_10m ?? 8);
+            const windGusts = Math.round(weatherData?.current?.wind_gusts_10m ?? Math.round(windSpeed * 1.35));
+            const humidity = Math.round(weatherData?.current?.relative_humidity_2m ?? 72);
+            const surfacePressure = Math.round(weatherData?.current?.surface_pressure ?? 1011);
+            const uvIndex = Math.round(weatherData?.current?.uv_index ?? (code <= 3 ? 7 : 3));
+
+            const isExtremeWind = windSpeed >= 20 || windGusts >= 32;
+            const isExtremeHeat = temp >= 33 || apparentTemp >= 36;
+            const isHighPollution = aqi > 100;
+
+            let alertMessage: string | undefined;
+            if (isExtremeWind) {
+                alertMessage = `Waspada Hembusan Angin Kencang (${windGusts} km/h) khas lereng bukit Tondo. Amankan atap seng & kanopi.`;
+            } else if (isExtremeHeat) {
+                alertMessage = `Suhu Terik Ekstrem (${temp}°C, Terasa ${apparentTemp}°C). Pastikan cukup hidrasi & hindari sengatan panas langsung.`;
+            } else if (isHighPollution) {
+                alertMessage = `Indeks Udara Sensitif (AQI ${aqi}). Gunakan masker jika beraktivitas di luar rumah.`;
+            }
+
             setWeather({
-                temp: Math.round(weatherData.current.temperature_2m),
-                humidity: Math.round(weatherData.current.relative_humidity_2m),
-                windSpeed: Math.round(weatherData.current.wind_speed_10m),
+                temp,
+                apparentTemp,
+                humidity,
+                windSpeed,
+                windGusts,
+                surfacePressure,
+                uvIndex,
                 condition,
                 weatherCode: code,
                 aqi,
                 aqiLabel,
                 aqiColor,
-                pm2_5: aqiData.current.pm2_5,
-                pm10: aqiData.current.pm10
+                pm2_5: Math.round(aqiData?.current?.pm2_5 ?? 6),
+                pm10: Math.round(aqiData?.current?.pm10 ?? 12),
+                isExtremeWind,
+                isExtremeHeat,
+                isHighPollution,
+                alertMessage,
+                lastUpdated: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
             });
         } catch (err: any) {
-            // Don't log abort errors as they are expected on unmount or timeout
             if (err.name === 'AbortError' || err === 'timeout') {
                 console.log("Weather fetch aborted:", err);
             } else {
                 console.error("Error fetching weather/AQI:", err);
             }
 
-            // Fallback only if we don't have weather data yet
             if (!weather) {
                 setWeather({
-                    temp: 30,
-                    condition: 'Cerah',
-                    weatherCode: 0,
-                    humidity: 75,
-                    windSpeed: 5,
-                    aqi: 25,
+                    temp: 31,
+                    apparentTemp: 33,
+                    condition: 'Cerah Berawan',
+                    weatherCode: 1,
+                    humidity: 74,
+                    windSpeed: 10,
+                    windGusts: 14,
+                    surfacePressure: 1012,
+                    uvIndex: 6,
+                    aqi: 32,
                     aqiLabel: 'Bagus',
                     aqiColor: 'text-emerald-400',
-                    pm2_5: 5,
-                    pm10: 10
+                    pm2_5: 7,
+                    pm10: 14,
+                    isExtremeWind: false,
+                    isExtremeHeat: false,
+                    isHighPollution: false,
+                    lastUpdated: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
                 });
             }
         } finally {

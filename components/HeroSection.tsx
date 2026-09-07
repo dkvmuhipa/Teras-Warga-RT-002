@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles, Building2, Lock, Shield, Search, Wallet, Droplet } from 'lucide-react';
+import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles, Building2, Lock, Shield, Search, Wallet, Droplet, AlertTriangle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { RT_NAME } from '../constants';
 import { toast } from 'sonner';
 import { useWeather } from '../hooks/useWeather';
+import { WeatherDetailModal } from './public/WeatherDetailModal';
 
 interface HeroSectionProps {
     onExplore?: () => void;
@@ -14,7 +15,8 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
     const navigate = useNavigate();
     const [date, setDate] = useState(new Date());
     const [searchTerm, setSearchTerm] = useState('');
-    const { weather } = useWeather();
+    const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
+    const { weather, loading, refresh } = useWeather();
 
     useEffect(() => { 
         const timer = setInterval(() => setDate(new Date()), 1000); 
@@ -34,9 +36,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
     };
 
     const handleSmartEnvClick = () => {
-        toast.info("🌱 Status Lingkungan Cerdas (Smart Env) RT 002 / RW 020", {
-            description: `Kondisi: ${weather ? weather.condition : 'Cerah Bersahabat'} | Suhu: ${weather ? weather.temp : '31'}°C | Kualitas Udara (AQI): ${weather?.aqi || '42'} (Sangat Baik & Bebas Polusi) | Wilayah: Kel. Tondo, Palu`
-        });
+        setIsWeatherModalOpen(true);
     };
 
     const handleOmniSearch = (e: React.FormEvent) => {
@@ -205,26 +205,54 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                   </div>
 
                   <div className="flex flex-col items-end gap-2.5 shrink-0">
-                    <motion.div 
+                    <motion.button 
+                      type="button"
+                      onClick={() => setIsWeatherModalOpen(true)}
                       whileHover={{ scale: 1.1, rotate: 6 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                      className="p-4 bg-slate-900 text-amber-400 rounded-3xl shadow-lg border border-slate-800 shrink-0 cursor-pointer"
+                      className="p-4 bg-slate-900 hover:bg-slate-800 text-amber-400 rounded-3xl shadow-lg border border-slate-800 shrink-0 cursor-pointer transition-colors"
+                      title="Buka Stasiun Cuaca & AQI Huntap"
                     >
                       {getWeatherIcon(weather?.weatherCode)}
-                    </motion.div>
+                    </motion.button>
                     {weather?.aqi !== undefined && (
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50/80 rounded-xl border border-amber-200/70 shrink-0 shadow-2xs">
+                      <button 
+                        type="button"
+                        onClick={() => setIsWeatherModalOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1 bg-amber-50/80 hover:bg-amber-100/80 rounded-xl border border-amber-200/70 shrink-0 shadow-2xs cursor-pointer transition-colors"
+                      >
                         <Activity size={12} className="text-amber-600" />
                         <span className="text-[10px] font-black uppercase tracking-wider text-amber-900">AQI {weather.aqi}</span>
-                      </div>
+                      </button>
                     )}
                   </div>
                 </div>
 
+                {/* Extreme Weather / Environmental Alert Banner */}
+                {weather?.alertMessage && (
+                  <button
+                    type="button"
+                    onClick={() => setIsWeatherModalOpen(true)}
+                    className="w-full text-left p-2.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300/80 rounded-2xl flex items-center gap-2 hover:border-amber-400 transition-all cursor-pointer group/alert shadow-2xs"
+                  >
+                    <AlertTriangle size={15} className="text-amber-600 shrink-0 animate-bounce" />
+                    <span className="text-[10.5px] font-bold text-amber-950 truncate flex-1">
+                      {weather.alertMessage}
+                    </span>
+                    <span className="text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-200/60 px-2 py-0.5 rounded-lg group-hover/alert:bg-amber-200 shrink-0">
+                      Detail
+                    </span>
+                  </button>
+                )}
+
                 <div className="h-px bg-slate-100" />
 
                 {/* 4 Weather Parameter Cards Grid */}
-                <div className="grid grid-cols-2 gap-3">
+                <div 
+                  onClick={() => setIsWeatherModalOpen(true)}
+                  className="grid grid-cols-2 gap-3 cursor-pointer group/grid"
+                  title="Klik untuk melihat detail stasiun cuaca & kualitas udara lengkap"
+                >
                   <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                     <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl border border-rose-100/80 shrink-0 shadow-2xs">
                       <Thermometer size={16} />
@@ -269,6 +297,15 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
             </div>
           </motion.div>
         </div>
+
+        {/* Modal Stasiun Cuaca & Kualitas Udara Huntap */}
+        <WeatherDetailModal 
+          isOpen={isWeatherModalOpen}
+          onClose={() => setIsWeatherModalOpen(false)}
+          weather={weather}
+          loading={loading}
+          onRefresh={refresh}
+        />
       </motion.div>
     );
 };

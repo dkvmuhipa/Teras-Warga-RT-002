@@ -17,6 +17,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useFinancial } from '../../context/FinancialContext';
 import { toast } from 'sonner';
 import { SmartImage } from '../SmartImage';
+import { UtilityOutageTrackerModal } from './UtilityOutageTrackerModal';
 
 interface PublicInfoProps {
   officials: Official[];
@@ -151,6 +152,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
     const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
     const [scanMode, setScanMode] = useState<'camera' | 'simulate'>('camera');
     const [utilityOutages, setUtilityOutages] = useState<UtilityOutage[]>([]);
+    const [isOutageModalOpen, setIsOutageModalOpen] = useState(false);
 
     useEffect(() => {
         const unsubscribe = subscribeToCheckpoints((data) => {
@@ -426,9 +428,18 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 <p className="text-xs text-slate-500 font-medium">Jadwal resmi pemeliharaan jaringan listrik PLN, pipa PDAM, dan jaringan wilayah Huntap Tondo 2</p>
                             </div>
                         </div>
-                        <span className="px-3.5 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-200">
-                            ⚡ Utilitas RT 02
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsOutageModalOpen(true)}
+                                className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-1.5"
+                            >
+                                <AlertTriangle size={12} />
+                                <span>Lapor Gangguan &amp; Posko</span>
+                            </button>
+                            <span className="px-3.5 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-200">
+                                ⚡ Utilitas RT 02
+                            </span>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1891,6 +1902,13 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                     <Button onClick={() => setFoundHouse(null)} className="w-full py-3 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border-none">Tutup Detail</Button>
                 </div>
             </Modal>
+
+            {/* Modal Lapor & Pantau Utilitas Huntap */}
+            <UtilityOutageTrackerModal 
+                isOpen={isOutageModalOpen}
+                onClose={() => setIsOutageModalOpen(false)}
+                outages={utilityOutages}
+            />
         </motion.div>
     );
 };

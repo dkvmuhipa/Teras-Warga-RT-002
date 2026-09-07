@@ -80,6 +80,7 @@ import { NotificationToggle } from '../PushNotificationManager';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
+import { UtilityOutageTrackerModal } from './UtilityOutageTrackerModal';
 
 import { useSearchParams } from 'react-router-dom';
 
@@ -93,6 +94,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
   const [selectedHouseId, setSelectedHouseId] = useState<string>(localStorage.getItem('resident_house_id') || '');
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [isOutageModalOpen, setIsOutageModalOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [tempHouseId, setTempHouseId] = useState('');
   const [pinError, setPinError] = useState(false);
@@ -3132,14 +3134,23 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             exit={{ opacity: 0, y: -20 }}
             className="space-y-6 text-left"
           >
-            <div className="flex items-center gap-3 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-              <span className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
-                <Zap size={22} />
-              </span>
-              <div>
-                <h3 className="text-xl font-black text-slate-800 tracking-tight">Papan Informasi Pemadaman PLN &amp; Air Bersih</h3>
-                <p className="text-xs text-slate-500 font-medium">Informasi resmi pemeliharaan jaringan listrik PLN dan perbaikan pipa saluran air bersih RT 02.</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                  <Zap size={22} />
+                </span>
+                <div>
+                  <h3 className="text-xl font-black text-slate-800 tracking-tight">Papan Informasi Pemadaman PLN &amp; Air Bersih</h3>
+                  <p className="text-xs text-slate-500 font-medium">Informasi resmi pemeliharaan jaringan listrik PLN dan perbaikan pipa saluran air bersih RT 02.</p>
+                </div>
               </div>
+              <button
+                onClick={() => setIsOutageModalOpen(true)}
+                className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-md active:scale-95 flex items-center gap-1.5"
+              >
+                <AlertTriangle size={14} />
+                <span>Lapor Gangguan &amp; Posko</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -3811,6 +3822,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           </form>
         </Modal>
       )}
+
+      {/* Modal Lapor & Pantau Utilitas Huntap */}
+      <UtilityOutageTrackerModal 
+        isOpen={isOutageModalOpen}
+        onClose={() => setIsOutageModalOpen(false)}
+        outages={utilityOutages}
+      />
     </div>
   );
 };
