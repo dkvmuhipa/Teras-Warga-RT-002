@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, Calendar, Clock, MapPin, Wrench, CheckCircle, Plus, Search, Trash2, 
   CheckSquare, AlertCircle, Coffee, Check, X, ArrowRight, Shield, Download, Sparkles,
-  CheckCircle2, Info, Tag, FileText
+  CheckCircle2, Info, Tag, FileText, Printer, Share2, Copy, MessageCircle
 } from 'lucide-react';
 import { House, CommunityWork, CommunityWorkTask, CommunityWorkAttendance } from '../../types';
 import { Button } from '../ui/Button';
@@ -177,8 +177,38 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
 
   const hadirCount = activeWork?.attendances?.filter(a => a.status === 'Hadir').length || 0;
   const izinCount = activeWork?.attendances?.filter(a => a.status === 'Izin / Diwakilkan' || a.status === 'Kompensasi').length || 0;
+  const alphaCount = activeWork?.attendances?.filter(a => a.status === 'Alpha').length || 0;
   const totalWarga = activeWork?.attendances?.length || 0;
   const tasksDoneCount = activeWork?.tasks?.filter(t => t.isDone).length || 0;
+
+  const copyBroadcastInvitation = () => {
+    if (!activeWork) return;
+    const formattedDate = new Date(activeWork.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const text = `📢 *UNDANGAN GOTONG ROYONG / KERJA BAKTI RT 002*\n\nKepada Yth.\nBapak/Ibu/Sdr. Seluruh Warga RT 002 / RW 020\nDi Tempat\n\nDalam rangka menjaga kebersihan, kesehatan, dan kenyamanan lingkungan kita bersama, Pengurus RT mengundang seluruh warga untuk berpartisipasi dalam agenda Kerja Bakti:\n\n📌 *Agenda:* ${activeWork.title}\n📅 *Hari / Tanggal:* ${formattedDate}\n⏰ *Waktu:* Pkl ${activeWork.startTime} - ${activeWork.endTime} WITA\n📍 *Titik Kumpul:* ${activeWork.assemblyPoint}\n\n🛠️ *Peralatan yang Disarankan:* ${activeWork.toolsNeeded?.join(', ') || 'Cangkul, Sapu Lidi, Sabit, Karung Sampah'}\n☕ *Konsumsi / Snack:* Dikoordinir oleh ${activeWork.snackPIC || 'Ibu-ibu PKK RT 02'}\n\n${activeWork.description ? `📝 *Catatan:* ${activeWork.description}\n\n` : ''}Mari kita luangkan waktu demi lingkungan RT yang bersih, asri, dan terhindar dari penyakit. Kehadiran Bapak/Ibu sangat berarti bagi rukun tetangga kita. 🙏\n\n_Pengurus RT 002 / RW 020 - Kelurahan Tondo_`;
+    navigator.clipboard.writeText(text);
+    toast.success('Format Undangan WhatsApp berhasil disalin ke clipboard!');
+  };
+
+  const shareToWhatsAppGroup = () => {
+    if (!activeWork) return;
+    const formattedDate = new Date(activeWork.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const text = `📢 *UNDANGAN GOTONG ROYONG / KERJA BAKTI RT 002*\n\nKepada Yth. Seluruh Warga RT 002\n\n📌 *Agenda:* ${activeWork.title}\n📅 *Tanggal:* ${formattedDate}\n⏰ *Waktu:* Pkl ${activeWork.startTime} - ${activeWork.endTime} WITA\n📍 *Titik Kumpul:* ${activeWork.assemblyPoint}\n🛠️ *Peralatan:* ${activeWork.toolsNeeded?.join(', ') || 'Cangkul, Sapu, Sabit'}\n\nMohon kehadiran dan partisipasi aktif seluruh warga. Terima kasih! 🙏`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const copyAttendanceRecap = () => {
+    if (!activeWork) return;
+    const formattedDate = new Date(activeWork.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const header = `📋 *REKAPITULASI PRESENSI KERJA BAKTI RT 002*\n📌 *Kegiatan:* ${activeWork.title}\n📅 *Tanggal:* ${formattedDate}\n👥 *Partisipasi:* ${hadirCount} Hadir | ${izinCount} Izin | ${alphaCount} Absen (Total: ${totalWarga} Rumah)\n\n`;
+    const list = (activeWork.attendances || []).map((a, idx) => {
+      const houseLabel = getHouseLabel(a.houseId);
+      const mark = a.status === 'Hadir' ? '✅ Hadir' : a.status === 'Izin / Diwakilkan' ? '⚠️ Izin' : '❌ Absen';
+      return `${idx + 1}. Blok ${houseLabel} - ${a.headOfFamily}: ${mark}`;
+    }).join('\n');
+    const fullText = header + list + `\n\n_Dicatat melalui Aplikasi Teras Warga RT 002_`;
+    navigator.clipboard.writeText(fullText);
+    toast.success('Rekap Presensi berhasil disalin!');
+  };
 
   return (
     <div className="space-y-6">
@@ -250,7 +280,23 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                     <p className="text-xs text-white/80 font-medium mt-1">{activeWork.description}</p>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={copyBroadcastInvitation}
+                      className="px-3.5 py-2 bg-white/15 hover:bg-white/25 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                      title="Salin Teks Undangan Kerja Bakti ke WhatsApp"
+                    >
+                      <Copy size={14} /> Salin Undangan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={shareToWhatsAppGroup}
+                      className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md active:scale-95"
+                      title="Buka WhatsApp untuk Broadcast"
+                    >
+                      <MessageCircle size={14} /> Kirim ke WA
+                    </button>
                     <button 
                       onClick={() => handleDeleteWork(activeWork.id)}
                       className="p-2.5 bg-white/15 hover:bg-rose-600 text-white rounded-2xl transition-all"
@@ -359,13 +405,23 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
               {/* Tab Content: Attendance Checklist */}
               {activeTab === 'attendance' && (
                 <div className="bg-white rounded-[2rem] border border-slate-200/80 shadow-sm overflow-hidden">
-                  <div className="p-4 bg-slate-50/80 border-b border-slate-100 flex justify-between items-center">
-                    <h4 className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">
-                      PRESENSI PER KELUARGA / RUMAH
-                    </h4>
-                    <span className="text-xs font-mono font-black text-emerald-600">
-                      Tingkat Partisipasi: {totalWarga > 0 ? Math.round((hadirCount / totalWarga) * 100) : 0}%
-                    </span>
+                  <div className="p-4 bg-slate-50/80 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
+                    <div>
+                      <h4 className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">
+                        PRESENSI PER KELUARGA / RUMAH
+                      </h4>
+                      <span className="text-xs font-mono font-black text-emerald-600">
+                        Tingkat Partisipasi: {totalWarga > 0 ? Math.round((hadirCount / totalWarga) * 100) : 0}% ({hadirCount} Hadir, {izinCount} Izin, {alphaCount} Absen)
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={copyAttendanceRecap}
+                      className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                      title="Salin Rincian Presensi ke Clipboard"
+                    >
+                      <Copy size={13} /> Salin Rekap Presensi
+                    </button>
                   </div>
 
                   <div className="max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
