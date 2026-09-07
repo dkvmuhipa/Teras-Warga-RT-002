@@ -975,41 +975,44 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               <div className="lg:col-span-2">
                 <motion.div 
                   whileHover={{ y: -4, scale: 1.005 }}
-                  className="relative group overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 text-white border border-indigo-500/30 hover:border-indigo-400/50 shadow-[0_20px_50px_rgba(79,70,229,0.15)] hover:shadow-[0_20px_50px_rgba(79,70,229,0.3)] rounded-[2.5rem] p-0 min-h-[350px] transition-all id-card-printable"
+                  className="relative group overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-700 to-slate-950 text-white border border-indigo-400/40 hover:border-indigo-300 shadow-[0_20px_60px_rgba(79,70,229,0.25)] rounded-[2.5rem] p-0 min-h-[360px] transition-all id-card-printable relative"
                 >
-                  {/* Decorative elements */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
+                  {/* Holographic Sheen Animated Light Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-400/15 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-400/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
                   
                   <div className="relative h-full flex flex-col p-8 md:p-12 justify-between">
-                    <div className="flex justify-between items-start mb-12">
+                    <div className="flex justify-between items-start mb-8">
                       <div>
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-wider mb-2 backdrop-blur-md">
-                          <CheckCircle size={10} className="text-emerald-450" />
-                          <span>E-ID Aktif</span>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 rounded-full text-[9px] font-black uppercase tracking-wider mb-2 backdrop-blur-md border border-white/20">
+                          <CheckCircle size={10} className="text-emerald-400" />
+                          <span>E-ID RESMI • TERAS RT 02</span>
                         </div>
                         <h3 className="text-xl md:text-2xl font-black tracking-tighter uppercase whitespace-nowrap">Kartu Warga Digital</h3>
-                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] opacity-60">Rukun Tetangga 02 / RW 05</p>
+                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] opacity-60">Rukun Tetangga 002 / RW 020 • Tondo</p>
                       </div>
-                      <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shrink-0">
-                        <Home size={32} className="text-white/80" />
+                      <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shrink-0 shadow-lg">
+                        <Home size={32} className="text-white/90" />
                       </div>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-8 mt-auto">
-                      <div className="space-y-4 md:space-y-6 text-left w-full md:w-auto">
+                      <div className="space-y-4 md:space-y-5 text-left w-full md:w-auto">
                         <div>
-                          <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Nama Kepala Keluarga / Penghuni</p>
-                          <p className="text-2xl md:text-3.5xl font-black tracking-tight">{currentHouse?.headOfFamily}</p>
+                          <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-0.5">Kepala Keluarga / Penghuni Utama</p>
+                          <p className="text-2xl md:text-3.5xl font-black tracking-tight text-white">{currentHouse?.headOfFamily}</p>
                         </div>
-                        <div className="flex flex-wrap gap-4 md:gap-12">
+                        <div className="flex flex-wrap gap-4 md:gap-10">
                           <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">ID Rumah</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">ID Hunian</p>
                             <span 
                               onClick={() => currentHouse?.id && handleCopyToClipboard(currentHouse.id, 'houseId')}
-                              className="text-lg md:text-xl font-black hover:text-indigo-200 hover:underline cursor-pointer flex items-center gap-1.5"
+                              className="text-lg md:text-xl font-black hover:text-indigo-200 hover:underline cursor-pointer flex items-center gap-1.5 text-amber-300"
                             >
-                              {currentHouse?.block}-{currentHouse?.number}
+                              Blok {currentHouse?.block}-{currentHouse?.number}
                             </span>
                           </div>
                           <div>
@@ -1023,7 +1026,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                             </span>
                           </div>
                           <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Skor Keaktifan</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Poin Keaktifan</p>
                             <span 
                               onClick={() => setActiveTab('points')}
                               className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-white/20 text-amber-300 border-white/30 cursor-pointer hover:bg-white/30 transition-all"
@@ -1034,10 +1037,10 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         </div>
                       </div>
 
-                      <div className="bg-white p-3.5 rounded-2xl shadow-2xl self-start md:self-auto flex-shrink-0 animate-fade-in">
+                      <div className="bg-white p-3.5 rounded-2xl shadow-2xl self-start md:self-auto flex-shrink-0 animate-fade-in text-center">
                         <QRCodeSVG 
                           value={`RESIDENT:${selectedHouseId}`} 
-                          size={110} 
+                          size={105} 
                           level="H"
                           includeMargin={false}
                         />
@@ -1050,11 +1053,23 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                             includeMargin={false}
                           />
                         </div>
-                        <p className="text-[8px] font-black tracking-widest uppercase text-slate-400 text-center mt-2.5">Klik Verifikasi</p>
+                        <p className="text-[8px] font-black tracking-widest uppercase text-slate-400 mt-2">Scan Barcode</p>
                       </div>
                     </div>
                   </div>
                 </motion.div>
+
+                {/* E-ID Card Action Button */}
+                <div className="flex items-center gap-3 mt-4">
+                  <Button
+                    onClick={() => {
+                      window.print();
+                    }}
+                    className="py-3 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer"
+                  >
+                    <Download size={15} /> Cetak / Unduh E-ID Digital
+                  </Button>
+                </div>
               </div>
 
               {/* Quick Info Sidebar */}

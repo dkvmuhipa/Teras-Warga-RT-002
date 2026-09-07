@@ -76,6 +76,7 @@ export const InteractiveHuntapMap: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>('ALL');
   const [hoveredBlock, setHoveredBlock] = useState<BlockZone | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [blockSearch, setBlockSearch] = useState<string>('');
 
   const filterOptions = [
     { id: 'ALL', label: 'Semua Wilayah', color: 'bg-slate-900 text-white' },
@@ -86,6 +87,10 @@ export const InteractiveHuntapMap: React.FC = () => {
     { id: 'RW20-RT01', label: 'RW-20 / RT-01', color: 'bg-indigo-600 text-white' },
     { id: 'RW20-RT03', label: 'RW-20 / RT-03', color: 'bg-rose-600 text-white' },
   ];
+
+  const searchedBlock = blockSearch.trim() 
+    ? BLOCKS.find(b => b.name.toLowerCase().includes(blockSearch.toLowerCase()) || b.id.toLowerCase() === blockSearch.toLowerCase()) 
+    : null;
 
   return (
     <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
@@ -137,21 +142,53 @@ export const InteractiveHuntapMap: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Tabs by RT */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-        {filterOptions.map(f => (
-          <button
-            key={f.id}
-            onClick={() => setSelectedFilter(f.id)}
-            className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
-              selectedFilter === f.id
-                ? `${f.color} shadow-md scale-102`
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      {/* Search & Filter Tabs by RT */}
+      <div className="space-y-3">
+        {/* Quick Search Input */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="relative max-w-sm w-full">
+            <input
+              type="text"
+              placeholder="Cari nomor blok (contoh: C5, A3, B2)..."
+              value={blockSearch}
+              onChange={e => setBlockSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+            />
+            <Compass size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            {blockSearch && (
+              <button 
+                onClick={() => setBlockSearch('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {searchedBlock && (
+            <div className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-black text-amber-800 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              <span>Ditemukan: <strong>{searchedBlock.name}</strong> • {searchedBlock.rtLabel}</span>
+            </div>
+          )}
+        </div>
+
+        {/* RT Filter Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          {filterOptions.map(f => (
+            <button
+              key={f.id}
+              onClick={() => setSelectedFilter(f.id)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
+                selectedFilter === f.id
+                  ? `${f.color} shadow-md scale-102`
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Interactive SVG Map Canvas */}
@@ -359,6 +396,7 @@ export const InteractiveHuntapMap: React.FC = () => {
             {BLOCKS.map(block => {
               const isMatch = selectedFilter === 'ALL' || selectedFilter === block.rt;
               const isHovered = hoveredBlock?.id === block.id;
+              const isSearched = searchedBlock?.id === block.id;
 
               return (
                 <g 
@@ -376,7 +414,9 @@ export const InteractiveHuntapMap: React.FC = () => {
                     height={block.h}
                     rx="5"
                     className={`transition-all duration-300 ${block.color} ${block.borderColor} ${
-                      !isMatch 
+                      isSearched
+                        ? 'opacity-100 fill-amber-400/60 stroke-amber-300 stroke-[3.5px] filter drop-shadow(0 0 16px rgba(251,191,36,1))'
+                        : !isMatch 
                         ? 'opacity-20' 
                         : isHovered 
                         ? 'opacity-100 stroke-[3px] filter drop-shadow(0 0 12px rgba(255,255,255,0.75))' 
@@ -390,7 +430,7 @@ export const InteractiveHuntapMap: React.FC = () => {
                     y={block.y + block.h / 2 + 3}
                     textAnchor="middle"
                     className={`text-[9px] font-black pointer-events-none transition-all ${
-                      isMatch ? 'fill-white' : 'fill-slate-500'
+                      isSearched ? 'fill-amber-900 font-extrabold' : isMatch ? 'fill-white' : 'fill-slate-500'
                     }`}
                   >
                     {block.id}
