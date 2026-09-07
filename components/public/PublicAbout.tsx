@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Shield, 
   Users, 
@@ -65,7 +65,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
   donationCampaigns = []
 }) => {
   const navigate = useNavigate();
-  const [activeGeoTab, setActiveGeoTab] = useState<'hunian' | 'ekonomi' | 'kerentanan' | 'inventaris' | 'birokrasi'>('hunian');
+  const [activeGeoTab, setActiveGeoTab] = useState<'hunian' | 'ekonomi' | 'kerentanan' | 'demografi' | 'birokrasi'>('hunian');
 
   // Calculating Real Dynamic Statistics
   const totalKK = houses.length;
@@ -75,6 +75,49 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
     const baseOccupants = h.occupants || 1;
     return sum + Math.max(baseOccupants, 1 + familyMembersCount);
   }, 0);
+
+  // Demographics calculation for PublicAbout
+  const demoStats = useMemo(() => {
+    let males = 0;
+    let females = 0;
+    let productive = 0;
+    let young = 0;
+    let senior = 0;
+
+    houses.forEach(h => {
+      if (h.status === 'Occupied') {
+        // HoF
+        if (h.gender === 'Perempuan' || h.gender === 'Wanita') females++;
+        else males++;
+
+        const birth = h.birthDate ? new Date(h.birthDate) : null;
+        const age = birth && !isNaN(birth.getTime()) ? (new Date().getFullYear() - birth.getFullYear()) : 35;
+        if (age < 15) young++;
+        else if (age >= 60) senior++;
+        else productive++;
+
+        // Family members
+        if (h.familyMembers && Array.isArray(h.familyMembers)) {
+          h.familyMembers.forEach(m => {
+            if (!m) return;
+            if (m.gender === 'Perempuan' || m.gender === 'Wanita') females++;
+            else males++;
+
+            const mBirth = m.birthDate ? new Date(m.birthDate) : null;
+            const mAge = mBirth && !isNaN(mBirth.getTime()) ? (new Date().getFullYear() - mBirth.getFullYear()) : 20;
+            if (mAge < 15) young++;
+            else if (mAge >= 60) senior++;
+            else productive++;
+          });
+        }
+      }
+    });
+
+    const sexRatio = females > 0 ? ((males / females) * 100).toFixed(1) : '100.0';
+    const depRatio = productive > 0 ? (((young + senior) / productive) * 100).toFixed(1) : '0';
+
+    return { males, females, productive, young, senior, sexRatio, depRatio };
+  }, [houses]);
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const emptyHouses = houses.filter(h => h.status === 'Empty').length;
   const businessHouses = houses.filter(h => h.status === 'Business').length;
@@ -499,6 +542,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   Rentan
                 </button>
                 <button 
+                  onClick={() => setActiveGeoTab('demografi')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-all text-[10px] tracking-wide ${activeGeoTab === 'demografi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
+                >
+                  Piramida
+                </button>
+                <button 
                   onClick={() => setActiveGeoTab('birokrasi')}
                   className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-all text-[10px] tracking-wide ${activeGeoTab === 'birokrasi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
                 >
@@ -508,6 +557,31 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
               {/* Tab Content Display */}
               <div className="space-y-4">
+                {activeGeoTab === 'demografi' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <span className="text-xs font-semibold text-slate-600">Rasio Jenis Kelamin (Sex Ratio)</span>
+                      <span className="text-xs font-black text-blue-700 font-mono bg-blue-50 px-2 py-0.5 rounded-lg">{demoStats.sexRatio}</span>
+                    </div>
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <span className="text-xs font-semibold text-slate-600">Komposisi Gender</span>
+                      <span className="text-xs font-black text-slate-800 font-mono">
+                        {demoStats.males} L &bull; {demoStats.females} P
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <span className="text-xs font-semibold text-slate-600">Usia Produktif (15-59 Thn)</span>
+                      <span className="text-xs font-black text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{demoStats.productive} Jiwa</span>
+                    </div>
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <span className="text-xs font-semibold text-slate-600">Rasio Ketergantungan BPS</span>
+                      <span className="text-xs font-black text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{demoStats.depRatio}%</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
+                      *Struktur penduduk didominasi usia produktif (bonus demografi) mendukung sinergi gotong royong dan kemandirian kawasan Huntap 2.
+                    </p>
+                  </div>
+                )}
                 {activeGeoTab === 'hunian' && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">

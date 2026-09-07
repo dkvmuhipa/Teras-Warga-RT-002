@@ -6,8 +6,10 @@ import {
 import { 
   Users, Baby, User, UserCheck, Heart, TrendingUp, 
   BookOpen, Car, GraduationCap, Briefcase, MapPin, 
-  ChevronRight, Info, Sparkles, FileText, AlertTriangle, Activity, DollarSign
+  ChevronRight, Info, Sparkles, FileText, AlertTriangle, Activity, DollarSign,
+  Copy, CheckCircle2, Share2, Printer, Layers, ShieldCheck
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { House, CashFlow, Report, PdfConfig } from '../../types';
 import { generateDemographicAnalyticsReportPDF } from '../../services/pdfService';
@@ -316,6 +318,133 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
 
   const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
+  // Population Pyramid State
+  const [pyramidDisplayMode, setPyramidDisplayMode] = useState<'count' | 'percent'>('count');
+  const [hoveredCohort, setHoveredCohort] = useState<string | null>(null);
+
+  // Accurate BPS-Standard Cohorts for Huntap 2 Tondo
+  const pyramidCohorts = useMemo(() => {
+    const definitions = [
+      { key: '60+', label: '60+ Thn', fullLabel: 'Lansia (60 tahun ke atas)', min: 60, max: 150, category: 'Lansia', color: '#f59e0b' },
+      { key: '50-59', label: '50-59 Thn', fullLabel: 'Pra-Lansia (50-59 tahun)', min: 50, max: 59, category: 'Produktif', color: '#6366f1' },
+      { key: '40-49', label: '40-49 Thn', fullLabel: 'Dewasa Madya (40-49 tahun)', min: 40, max: 49, category: 'Produktif', color: '#6366f1' },
+      { key: '30-39', label: '30-39 Thn', fullLabel: 'Dewasa (30-39 tahun)', min: 30, max: 39, category: 'Produktif', color: '#6366f1' },
+      { key: '20-29', label: '20-29 Thn', fullLabel: 'Pemuda (20-29 tahun)', min: 20, max: 29, category: 'Produktif', color: '#6366f1' },
+      { key: '15-19', label: '15-19 Thn', fullLabel: 'Remaja (15-19 tahun)', min: 15, max: 19, category: 'Produktif', color: '#8b5cf6' },
+      { key: '10-14', label: '10-14 Thn', fullLabel: 'Pra-Remaja (10-14 tahun)', min: 10, max: 14, category: 'Muda', color: '#06b6d4' },
+      { key: '5-9', label: '5-9 Thn', fullLabel: 'Anak-anak (5-9 tahun)', min: 5, max: 9, category: 'Muda', color: '#10b981' },
+      { key: '0-4', label: '0-4 Thn', fullLabel: 'Balita (0-4 tahun)', min: 0, max: 4, category: 'Muda', color: '#14b8a6' }
+    ];
+
+    const totalPop = allResidents.length || 1;
+
+    return definitions.map(def => {
+      const male = allResidents.filter(r => (r.gender === 'Laki-laki' || r.gender === 'Pria') && r.age >= def.min && r.age <= def.max).length;
+      const female = allResidents.filter(r => (r.gender === 'Perempuan' || r.gender === 'Wanita') && r.age >= def.min && r.age <= def.max).length;
+      const total = male + female;
+      const malePct = (male / totalPop) * 100;
+      const femalePct = (female / totalPop) * 100;
+      const totalPct = (total / totalPop) * 100;
+
+      return {
+        ...def,
+        male,
+        female,
+        total,
+        malePct,
+        femalePct,
+        totalPct
+      };
+    });
+  }, [allResidents]);
+
+  // Max value for scaling pyramid bars
+  const maxCohortVal = useMemo(() => {
+    let max = 1;
+    pyramidCohorts.forEach(c => {
+      if (c.male > max) max = c.male;
+      if (c.female > max) max = c.female;
+    });
+    return max;
+  }, [pyramidCohorts]);
+
+  // Demographic Indicators for Kelurahan / BPS Standard
+  const totalMale = useMemo(() => allResidents.filter(r => r.gender === 'Laki-laki' || r.gender === 'Pria').length, [allResidents]);
+  const totalFemale = useMemo(() => allResidents.filter(r => r.gender === 'Perempuan' || r.gender === 'Wanita').length, [allResidents]);
+  const sexRatio = useMemo(() => totalFemale > 0 ? ((totalMale / totalFemale) * 100).toFixed(1) : '100.0', [totalMale, totalFemale]);
+  
+  const youngDependents = useMemo(() => allResidents.filter(r => r.age < 15).length, [allResidents]);
+  const productiveAge = useMemo(() => allResidents.filter(r => r.age >= 15 && r.age <= 59).length, [allResidents]);
+  const elderlyDependents = useMemo(() => allResidents.filter(r => r.age >= 60).length, [allResidents]);
+  
+  const dependencyRatio = useMemo(() => productiveAge > 0 ? (((youngDependents + elderlyDependents) / productiveAge) * 100).toFixed(1) : '0', [youngDependents, elderlyDependents, productiveAge]);
+  const ageingIndex = useMemo(() => youngDependents > 0 ? ((elderlyDependents / youngDependents) * 100).toFixed(1) : '0', [youngDependents, elderlyDependents]);
+  const averageSoulPerKK = useMemo(() => totalOccupied > 0 ? (totalSoul / totalOccupied).toFixed(1) : '0', [totalSoul, totalOccupied]);
+
+  // Block Population Distribution (Huntap Blok A s/d F)
+  const blockDistribution = useMemo(() => {
+    const blocks = ['A', 'B', 'C', 'D', 'E', 'F'];
+    return blocks.map(b => {
+      const blockHouses = houses.filter(h => h.block === b || h.number?.startsWith(b));
+      const occupied = blockHouses.filter(h => h.status === 'Occupied').length;
+      const soul = blockHouses.reduce((sum, h) => {
+        if (h.status !== 'Occupied') return sum;
+        const occupantsCount = Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0));
+        return sum + occupantsCount;
+      }, 0);
+      return {
+        block: `Blok ${b}`,
+        houses: blockHouses.length,
+        occupied,
+        empty: blockHouses.length - occupied,
+        soul
+      };
+    });
+  }, [houses]);
+
+  const handleCopyKelurahanSummary = () => {
+    const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const text = `📋 LAPORAN DEMOGRAFI & KEPENDUDUKAN RT 002 / RW 020
+Wilayah: Hunian Tetap (Huntap) 2 Tondo, Kel. Tondo, Kec. Mantikulore, Kota Palu
+Tanggal Pembaruan: ${dateStr}
+Filter Wilayah: ${selectedBlock === 'ALL' ? 'Semua Blok (A - F)' : `Blok ${selectedBlock}`}
+
+1. STATISTIK KEPALA KELUARGA & HUNIAN:
+   • Total KK Aktif: ${totalOccupied} KK
+   • Total Jiwa Penduduk: ${totalSoul} Jiwa
+   • Rata-rata Jiwa per KK: ${averageSoulPerKK} Jiwa/KK
+   • Total Kendaraan Warga: ${totalVehicles} Unit
+
+2. KOMPOSISI JENIS KELAMIN (SEX RATIO):
+   • Laki-laki: ${totalMale} Jiwa (${totalResidents > 0 ? ((totalMale / totalResidents) * 100).toFixed(1) : 0}%)
+   • Perempuan: ${totalFemale} Jiwa (${totalResidents > 0 ? ((totalFemale / totalResidents) * 100).toFixed(1) : 0}%)
+   • Rasio Jenis Kelamin (Sex Ratio): ${sexRatio} (Terdapat ~${Math.round(Number(sexRatio))} pria per 100 wanita)
+
+3. STRUKTUR USIA & RASIO KETERGANTUNGAN (BPS):
+   • Kelompok Usia Muda (0-14 Thn): ${youngDependents} Jiwa (${totalResidents > 0 ? ((youngDependents / totalResidents) * 100).toFixed(1) : 0}%)
+   • Kelompok Usia Produktif (15-59 Thn): ${productiveAge} Jiwa (${totalResidents > 0 ? ((productiveAge / totalResidents) * 100).toFixed(1) : 0}%)
+   • Kelompok Lansia (60+ Thn): ${elderlyDependents} Jiwa (${totalResidents > 0 ? ((elderlyDependents / totalResidents) * 100).toFixed(1) : 0}%)
+   • Rasio Ketergantungan (Dependency Ratio): ${dependencyRatio}%
+   • Indeks Penuaan Penduduk: ${ageingIndex}%
+
+4. KELOMPOK RENTAN & BANTUAN SOSIAL:
+   • Balita & Anak: ${totalToddlers + totalChildren} Jiwa
+   • Ibu Hamil: ${totalPregnant} Jiwa
+   • Disabilitas: ${totalDisability} Jiwa
+   • Penerima PKH: ${totalPKH} KK | Penerima BLT: ${totalBLT} KK
+
+Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+      toast.success("Format Laporan Kelurahan Disalin!", {
+        description: "Teks berhasil disalin ke clipboard, siap dikirim via WhatsApp atau dilampirkan ke surat pengantar."
+      });
+    } else {
+      toast.info("Ringkasan Data Siap", { description: text.slice(0, 100) + '...' });
+    }
+  };
+
   // Advanced Analytics Data
   const missingPhoneCount = houses.filter(h => !h.phone || h.phone === '-').length;
   const unverifiedHousesCount = houses.filter(h => !h.isVerified).length;
@@ -397,6 +526,27 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
+            {/* Action Buttons for Kelurahan & PDF */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleCopyKelurahanSummary}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95"
+                title="Salin ringkasan data kependudukan untuk laporan Kelurahan Tondo"
+              >
+                <Copy size={14} />
+                <span className="hidden sm:inline">Salin Format Kelurahan</span>
+              </button>
+              <button
+                onClick={handlePrintReport}
+                disabled={isPrinting}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
+                title="Cetak dokumen laporan analitik demografi resmi"
+              >
+                <Printer size={14} />
+                <span className="hidden sm:inline">{isPrinting ? 'Menyiapkan...' : 'Cetak PDF'}</span>
+              </button>
+            </div>
+
             {/* Block Filter Dropdown */}
             <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
               <MapPin size={14} className="text-slate-400 ml-2" />
@@ -471,6 +621,263 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
                 </motion.div>
               ))}
             </div>
+
+            {/* KELURAHAN TONDO COMPREHENSIVE INDICATORS CARD */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6 md:p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-slate-800"
+            >
+              <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="relative z-10 space-y-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-5">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-wider text-indigo-300 backdrop-blur-md mb-2">
+                      <ShieldCheck size={12} className="text-emerald-400" />
+                      STANDAR BPS & KELURAHAN TONDO
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-black tracking-tight">
+                      Indikator Utama Kependudukan & Rasio Demografi
+                    </h3>
+                    <p className="text-xs text-slate-400 font-medium">
+                      Parameter resmi demografi kependudukan kawasan Huntap 2 Tondo, Kecamatan Mantikulore, Kota Palu.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleCopyKelurahanSummary}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md active:scale-95"
+                    >
+                      <Share2 size={14} />
+                      <span>Kirim ke Kelurahan</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
+                    <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Rasio Jenis Kelamin</p>
+                    <p className="text-2xl md:text-3xl font-black text-white mt-1">{sexRatio}</p>
+                    <p className="text-[10px] text-slate-400 font-medium mt-1">
+                      {totalMale} L : {totalFemale} P (per 100 wanita)
+                    </p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
+                    <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Rasio Ketergantungan</p>
+                    <p className="text-2xl md:text-3xl font-black text-white mt-1">{dependencyRatio}%</p>
+                    <p className="text-[10px] text-slate-400 font-medium mt-1">
+                      Tanggungan per 100 usia produktif
+                    </p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
+                    <p className="text-[10px] font-black text-teal-300 uppercase tracking-widest">Indeks Penuaan</p>
+                    <p className="text-2xl md:text-3xl font-black text-white mt-1">{ageingIndex}%</p>
+                    <p className="text-[10px] text-slate-400 font-medium mt-1">
+                      {elderlyDependents} Lansia vs {youngDependents} Anak
+                    </p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
+                    <p className="text-[10px] font-black text-rose-300 uppercase tracking-widest">Rata-rata Jiwa / KK</p>
+                    <p className="text-2xl md:text-3xl font-black text-white mt-1">{averageSoulPerKK}</p>
+                    <p className="text-[10px] text-slate-400 font-medium mt-1">
+                      Kepadatan hunian aktif
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* INTERACTIVE POPULATION PYRAMID (PIRAMIDA PENDUDUK BPS) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-6 md:p-10 rounded-[3rem] border border-slate-200/80 shadow-sm relative overflow-hidden"
+            >
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600">Visualisasi BPS Interaktif</span>
+                  </div>
+                  <h3 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">
+                    Piramida Penduduk <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-pink-600">RT 002 / RW 020</span>
+                  </h3>
+                  <p className="text-xs font-medium text-slate-500 mt-1 max-w-xl">
+                    Distribusi simetris struktur demografi warga berdasarkan kelompok umur standar BPS dan jenis kelamin.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {/* Mode Toggle (Count vs Percent) */}
+                  <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-[11px] font-black">
+                    <button
+                      onClick={() => setPyramidDisplayMode('count')}
+                      className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                        pyramidDisplayMode === 'count'
+                          ? 'bg-white text-slate-900 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      Jiwa
+                    </button>
+                    <button
+                      onClick={() => setPyramidDisplayMode('percent')}
+                      className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                        pyramidDisplayMode === 'percent'
+                          ? 'bg-white text-slate-900 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      Persen (%)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Legend Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-4 p-4 mb-6 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 shadow-xs" />
+                    <span className="text-xs font-black text-slate-800">Laki-laki ({totalMale} Jiwa)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 shadow-xs" />
+                    <span className="text-xs font-black text-slate-800">Perempuan ({totalFemale} Jiwa)</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500">
+                  <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-teal-500" /> Muda (0-14)</span>
+                  <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-500" /> Produktif (15-59)</span>
+                  <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Lansia (60+)</span>
+                </div>
+              </div>
+
+              {/* Dual Sided Horizontal Bar Pyramid */}
+              <div className="space-y-2.5 max-w-4xl mx-auto py-2">
+                {pyramidCohorts.map((cohort) => {
+                  const isHovered = hoveredCohort === cohort.key;
+                  const maleWidthPct = (cohort.male / maxCohortVal) * 100;
+                  const femaleWidthPct = (cohort.female / maxCohortVal) * 100;
+
+                  return (
+                    <div
+                      key={cohort.key}
+                      onMouseEnter={() => setHoveredCohort(cohort.key)}
+                      onMouseLeave={() => setHoveredCohort(null)}
+                      className={`grid grid-cols-12 items-center gap-2 md:gap-4 p-1.5 rounded-2xl transition-all ${
+                        isHovered ? 'bg-indigo-50/70 scale-[1.01]' : 'hover:bg-slate-50/60'
+                      }`}
+                    >
+                      {/* Left: Male Bar (Right Aligned) */}
+                      <div className="col-span-5 flex items-center justify-end gap-2">
+                        <span className="text-[11px] md:text-xs font-black text-slate-700 w-12 text-right">
+                          {pyramidDisplayMode === 'count' ? cohort.male : `${cohort.malePct.toFixed(1)}%`}
+                        </span>
+                        <div className="flex-1 bg-slate-100 h-6 md:h-7 rounded-xl overflow-hidden flex justify-end">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${maleWidthPct}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="h-full bg-gradient-to-l from-blue-600 via-indigo-600 to-cyan-500 rounded-xl flex items-center justify-start pl-2 shadow-xs"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Center: Cohort Label */}
+                      <div className="col-span-2 text-center">
+                        <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider ${
+                          cohort.category === 'Muda' 
+                            ? 'bg-teal-100 text-teal-800' 
+                            : cohort.category === 'Produktif'
+                            ? 'bg-indigo-100 text-indigo-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {cohort.label}
+                        </span>
+                      </div>
+
+                      {/* Right: Female Bar (Left Aligned) */}
+                      <div className="col-span-5 flex items-center justify-start gap-2">
+                        <div className="flex-1 bg-slate-100 h-6 md:h-7 rounded-xl overflow-hidden flex justify-start">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${femaleWidthPct}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="h-full bg-gradient-to-r from-pink-500 via-rose-500 to-rose-400 rounded-xl flex items-center justify-end pr-2 shadow-xs"
+                          />
+                        </div>
+                        <span className="text-[11px] md:text-xs font-black text-slate-700 w-12 text-left">
+                          {pyramidDisplayMode === 'count' ? cohort.female : `${cohort.femalePct.toFixed(1)}%`}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Pyramid Interpretation Insight Card */}
+              <div className="mt-8 p-5 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md">
+                      Interpretasi Struktur Demografi
+                    </span>
+                    <span className="text-xs font-black text-slate-800">
+                      Tipe: Piramida Konstruktif / Bonus Demografi
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 font-medium">
+                    Populasi didominasi usia produktif (15-59 tahun) sebesar {totalResidents > 0 ? Math.round((productiveAge / totalResidents) * 100) : 0}%, ideal untuk pengembangan ekonomi lokal, kegiatan gotong royong, dan siskamling lingkungan.
+                  </p>
+                </div>
+                <button
+                  onClick={handleCopyKelurahanSummary}
+                  className="shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                >
+                  <Copy size={13} />
+                  <span>Salin Analisis</span>
+                </button>
+              </div>
+            </motion.div>
+
+            {/* SEBARAN KEPENDUDUKAN PER BLOK HUNTAP 2 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-6 md:p-8 rounded-[3rem] border border-slate-200/80 shadow-sm"
+            >
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Sebaran Penduduk per Blok Huntap</h3>
+                  <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Komparasi Hunian Blok A s/d Blok F</p>
+                </div>
+                <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">
+                  Total 6 Blok Hunian
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {blockDistribution.map((b) => (
+                  <div
+                    key={b.block}
+                    onClick={() => setSelectedBlock(b.block.replace('Blok ', ''))}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                      selectedBlock === b.block.replace('Blok ', '')
+                        ? 'bg-indigo-50/80 border-indigo-300 shadow-sm ring-2 ring-indigo-500/20'
+                        : 'bg-slate-50/80 border-slate-200/80 hover:bg-white hover:shadow-md'
+                    }`}
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">{b.block}</p>
+                    <p className="text-xl font-black text-slate-900 mt-1">{b.soul} <span className="text-[10px] text-slate-500 font-bold">Jiwa</span></p>
+                    <div className="mt-2 text-[10px] font-medium text-slate-500 space-y-0.5">
+                      <p>✅ {b.occupied} Terisi</p>
+                      <p>⚪ {b.empty} Kosong</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
 
             {/* Main Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
