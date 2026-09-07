@@ -1979,6 +1979,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         handleSaveHouse={handleSaveHouse}
         activeFormTab={activeFormTab}
         setActiveFormTab={setActiveFormTab}
+        houses={houses}
       />
 
       {/* Customizable Export Modal */}

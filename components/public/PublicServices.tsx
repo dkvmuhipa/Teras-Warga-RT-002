@@ -1901,6 +1901,26 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   animate={{ opacity: 1, x: 0 }}
                   className="space-y-6"
                 >
+                  {/* Banner Pendaftaran Warga Baru Resmi */}
+                  <div className="p-4 bg-gradient-to-r from-indigo-50 to-sky-50 border border-indigo-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-xs shrink-0">
+                        <Home size={18} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-indigo-950 uppercase tracking-wider">Warga Baru Menempati Rumah / Kavling?</h4>
+                        <p className="text-[11px] text-indigo-700/80 font-medium">Jika Anda baru pindah dan ingin mendaftarkan unit rumah pada denah RT 02, silakan gunakan Formulir Registrasi Resmi.</p>
+                      </div>
+                    </div>
+                    <a 
+                      href="/register" 
+                      className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-xs"
+                    >
+                      <span>Daftar Rumah Baru</span>
+                      <ArrowRight size={13} />
+                    </a>
+                  </div>
+
                   <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                     <div className="w-7 h-7 bg-slate-900 text-white rounded-lg flex items-center justify-center text-xs font-black">1</div>
                     <div>

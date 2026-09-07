@@ -72,7 +72,8 @@ import {
   subscribeToHouseWaterMeterReadings,
   addWaterMeterReading,
   subscribeToSettings,
-  calculateWaterUtilityBill
+  calculateWaterUtilityBill,
+  checkNikDuplicate
 } from '../../services/databaseService';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -532,6 +533,35 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const cleanHeadNik = (currentHouse?.nik || '').replace(/\D/g, '');
+      const seenNiks = new Set<string>();
+
+      for (let i = 0; i < (updateForm.familyMembers || []).length; i++) {
+        const m = updateForm.familyMembers[i];
+        const mNik = (m.nik || '').replace(/\D/g, '');
+        if (mNik) {
+          if (mNik.length !== 16) {
+            toast.error(`NIK anggota ke-${i + 1} (${m.name || 'Anggota'}) harus 16 digit angka.`);
+            return;
+          }
+          if (cleanHeadNik && mNik === cleanHeadNik) {
+            toast.error(`NIK anggota ke-${i + 1} (${m.name || 'Anggota'}) tidak boleh sama dengan NIK Kepala Keluarga.`);
+            return;
+          }
+          if (seenNiks.has(mNik)) {
+            toast.error(`NIK anggota ke-${i + 1} (${m.name || 'Anggota'}) kembar dengan anggota keluarga lain.`);
+            return;
+          }
+          seenNiks.add(mNik);
+
+          const dup = checkNikDuplicate(mNik, selectedHouseId, houses);
+          if (dup.isDuplicate) {
+            toast.error(`NIK anggota ke-${i + 1} (${m.name || 'Anggota'}) sudah terdaftar atas nama ${dup.residentName} di Unit ${dup.houseId}.`);
+            return;
+          }
+        }
+      }
+
       await addUpdateRequest({
         houseId: selectedHouseId,
         ...updateForm

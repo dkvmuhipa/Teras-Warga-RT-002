@@ -3846,8 +3846,61 @@ export const calculateWaterUtilityBill = (
   };
 };
 
+// --- VALIDASI ANTI-DUPLIKASI NIK ---
+export interface NikDuplicateResult {
+  isDuplicate: boolean;
+  houseId?: string;
+  residentName?: string;
+  role?: string;
+}
 
+/**
+ * Memeriksa apakah NIK sudah digunakan oleh warga lain (Kepala Keluarga atau Anggota Keluarga)
+ */
+export const checkNikDuplicate = (
+  nik: string,
+  currentHouseId?: string,
+  houses?: any[]
+): NikDuplicateResult => {
+  const cleanNik = (nik || "").toString().trim().replace(/[^0-9]/g, '');
+  if (!cleanNik || cleanNik.length < 10 || cleanNik === '0000000000000000' || !houses || !Array.isArray(houses)) {
+    return { isDuplicate: false };
+  }
 
+  const currentFormatted = currentHouseId ? formatHouseId(currentHouseId) : null;
 
+  for (const house of houses) {
+    const houseFormatted = formatHouseId(house.id);
+    const isSameHouse = Boolean(currentFormatted && houseFormatted === currentFormatted);
 
+    // 1. Cek NIK Kepala Keluarga (hanya jika bukan rumah yang sama yang sedang diedit)
+    if (!isSameHouse) {
+      const headNik = (house.nik || "").toString().trim().replace(/[^0-9]/g, '');
+      if (headNik && headNik === cleanNik) {
+        return {
+          isDuplicate: true,
+          houseId: houseFormatted,
+          residentName: house.headOfFamily || 'Warga',
+          role: 'Kepala Keluarga'
+        };
+      }
+    }
 
+    // 2. Cek Anggota Keluarga
+    if (Array.isArray(house.familyMembers)) {
+      for (const member of house.familyMembers) {
+        const mNik = (member.nik || "").toString().trim().replace(/[^0-9]/g, '');
+        if (mNik && mNik === cleanNik) {
+          return {
+            isDuplicate: true,
+            houseId: houseFormatted,
+            residentName: member.name || 'Anggota Keluarga',
+            role: member.relation || member.relationship || 'Anggota Keluarga'
+          };
+        }
+      }
+    }
+  }
+
+  return { isDuplicate: false };
+};

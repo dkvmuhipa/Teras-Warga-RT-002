@@ -13,6 +13,7 @@ import {
   generateMonthOptions, 
   isMonthMatch 
 } from '../../../src/utils/dateUtils';
+import { checkNikDuplicate } from '../../../services/databaseService';
 
 import { toast } from 'sonner';
 
@@ -26,6 +27,7 @@ interface AddEditResidentModalProps {
   handleSaveHouse: (e: React.FormEvent) => void;
   activeFormTab: 'basic' | 'demographics' | 'family';
   setActiveFormTab: (tab: 'basic' | 'demographics' | 'family') => void;
+  houses?: House[];
 }
 
 export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
@@ -37,7 +39,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
   setFormData,
   handleSaveHouse,
   activeFormTab,
-  setActiveFormTab
+  setActiveFormTab,
+  houses = []
 }) => {
   const validateTab = (tab: 'basic' | 'demographics' | 'family') => {
     const isAdmin = role === Role.ADMIN;
@@ -71,15 +74,24 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
             return false;
           }
         }
+      }
 
-        if (formData.nik && formData.nik.length !== 16) {
-          toast.error('NIK harus 16 digit.');
+      if (formData.nik && formData.nik.trim()) {
+        const cleanNik = formData.nik.trim().replace(/\D/g, '');
+        if (cleanNik.length !== 16) {
+          toast.error('NIK Kepala Keluarga harus 16 digit angka.');
           return false;
         }
-        if (formData.kkNumber && formData.kkNumber.length !== 16) {
-          toast.error('Nomor KK harus 16 digit.');
+        const dupCheck = checkNikDuplicate(cleanNik, editingHouseId || undefined, houses);
+        if (dupCheck.isDuplicate) {
+          toast.error(`NIK Kepala Keluarga sudah terdaftar atas nama ${dupCheck.residentName} (${dupCheck.role}) di Unit ${dupCheck.houseId}.`);
           return false;
         }
+      }
+
+      if (formData.kkNumber && formData.kkNumber.trim() && formData.kkNumber.trim().length !== 16) {
+        toast.error('Nomor KK harus 16 digit.');
+        return false;
       }
     } else if (tab === 'demographics') {
       const requiredFields = [
@@ -97,11 +109,32 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
         }
       }
     } else if (tab === 'family') {
-      for (let i = 0; i < formData.familyMembers.length; i++) {
+      const cleanHeadNik = (formData.nik || '').toString().trim().replace(/\D/g, '');
+      const seenMemberNiks = new Set<string>();
+
+      for (let i = 0; i < (formData.familyMembers || []).length; i++) {
         const member = formData.familyMembers[i];
-        if (member.nik && member.nik.trim() !== "" && member.nik.trim().length !== 16) {
-          toast.error(`NIK anggota keluarga ke-${i + 1} harus 16 digit.`);
-          return false;
+        const memberNik = (member.nik || '').toString().trim().replace(/\D/g, '');
+        if (memberNik) {
+          if (memberNik.length !== 16) {
+            toast.error(`NIK anggota keluarga ke-${i + 1} (${member.name || 'Anggota'}) harus 16 digit.`);
+            return false;
+          }
+          if (cleanHeadNik && memberNik === cleanHeadNik) {
+            toast.error(`NIK anggota ke-${i + 1} (${member.name || 'Anggota'}) tidak boleh sama dengan NIK Kepala Keluarga.`);
+            return false;
+          }
+          if (seenMemberNiks.has(memberNik)) {
+            toast.error(`NIK anggota ke-${i + 1} (${member.name || 'Anggota'}) kembar dengan anggota keluarga lain dalam rumah ini.`);
+            return false;
+          }
+          seenMemberNiks.add(memberNik);
+
+          const dupCheck = checkNikDuplicate(memberNik, editingHouseId || undefined, houses);
+          if (dupCheck.isDuplicate) {
+            toast.error(`NIK anggota ke-${i + 1} (${member.name || 'Anggota'}) sudah terdaftar atas nama ${dupCheck.residentName} di Unit ${dupCheck.houseId}.`);
+            return false;
+          }
         }
       }
     }

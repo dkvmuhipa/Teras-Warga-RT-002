@@ -11,7 +11,7 @@ import { Button } from './ui/Button';
 import { 
   addResidentRegistrationToDb, uploadImageToStorage, checkHouseOccupied, 
   formatHouseId, handleFirestoreError, OperationType, isFirebaseConfigured,
-  subscribeToCollection, isHouseTrulyOccupied 
+  subscribeToCollection, isHouseTrulyOccupied, checkNikDuplicate 
 } from '../services/databaseService';
 import { House } from '../types';
 import { toast } from 'sonner';
@@ -272,9 +272,8 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
   };
 
   const addFamilyMember = () => {
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: [
+    setFormData(prev => {
+      const updatedMembers = [
         ...prev.familyMembers,
         {
           id: Math.random().toString(36).substr(2, 9),
@@ -286,14 +285,23 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
           job: 'Ibu Rumah Tangga',
           bpjsStatus: 'PPU'
         }
-      ]
-    }));
+      ];
+      return {
+        ...prev,
+        familyMembers: updatedMembers,
+        occupants: 1 + updatedMembers.length
+      };
+    });
   };
 
   const removeFamilyMember = (index: number) => {
     const newList = [...formData.familyMembers];
     newList.splice(index, 1);
-    setFormData({ ...formData, familyMembers: newList });
+    setFormData({ 
+      ...formData, 
+      familyMembers: newList,
+      occupants: 1 + newList.length 
+    });
   };
 
   const updateFamilyMember = (index: number, field: string, value: string) => {
@@ -319,14 +327,40 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         errors.nik = 'NIK wajib diisi';
       } else if (!/^\d{16}$/.test(formData.nik.trim())) {
         errors.nik = 'NIK harus tepat 16 digit angka';
+      } else {
+        // Validasi anti-duplikasi NIK Kepala Keluarga
+        const dupCheck = checkNikDuplicate(formData.nik, undefined, loadedHouses);
+        if (dupCheck.isDuplicate) {
+          errors.nik = `NIK ini sudah terdaftar atas nama ${dupCheck.residentName} (${dupCheck.role}) di Unit ${dupCheck.houseId}`;
+        }
       }
       if (!formData.birthDate) errors.birthDate = 'Tanggal lahir wajib diisi';
       if (!formData.education.trim()) errors.education = 'Pendidikan terakhir wajib diisi';
       if (!formData.jobCategory.trim()) errors.jobCategory = 'Pekerjaan wajib diisi';
     } else if (currentStep === 2) {
+      const cleanHeadNik = formData.nik.trim().replace(/\D/g, '');
+      const seenMemberNiks = new Set<string>();
+
       formData.familyMembers.forEach((member, idx) => {
         if (!member.name.trim()) {
           errors[`member_${idx}_name`] = 'Nama anggota wajib diisi';
+        }
+
+        const cleanMemberNik = (member.nik || '').trim().replace(/\D/g, '');
+        if (cleanMemberNik) {
+          if (cleanMemberNik.length !== 16) {
+            errors[`member_${idx}_nik`] = 'NIK anggota harus 16 digit angka';
+          } else if (cleanHeadNik && cleanMemberNik === cleanHeadNik) {
+            errors[`member_${idx}_nik`] = 'NIK tidak boleh sama dengan NIK Kepala Keluarga';
+          } else if (seenMemberNiks.has(cleanMemberNik)) {
+            errors[`member_${idx}_nik`] = 'NIK kembar dengan anggota keluarga lain di formulir ini';
+          } else {
+            seenMemberNiks.add(cleanMemberNik);
+            const dupCheck = checkNikDuplicate(cleanMemberNik, undefined, loadedHouses);
+            if (dupCheck.isDuplicate) {
+              errors[`member_${idx}_nik`] = `NIK ini sudah terdaftar atas nama ${dupCheck.residentName} di Unit ${dupCheck.houseId}`;
+            }
+          }
         }
       });
     } else if (currentStep === 3) {
@@ -1342,10 +1376,20 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                               required 
                               type="text" 
                               placeholder="Nama lengkap"
-                              className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500" 
+                              className={`w-full px-3.5 py-2 bg-white border rounded-xl text-xs font-bold outline-none focus:border-indigo-500 ${
+                                validationErrors[`member_${idx}_name`] ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200'
+                              }`} 
                               value={member.name} 
-                              onChange={e => updateFamilyMember(idx, 'name', e.target.value)} 
+                              onChange={e => {
+                                updateFamilyMember(idx, 'name', e.target.value);
+                                if (validationErrors[`member_${idx}_name`]) {
+                                  setValidationErrors(prev => ({ ...prev, [`member_${idx}_name`]: '' }));
+                                }
+                              }} 
                             />
+                            {validationErrors[`member_${idx}_name`] && (
+                              <p className="text-[9px] font-bold text-rose-500 ml-1">{validationErrors[`member_${idx}_name`]}</p>
+                            )}
                           </div>
 
                           <div className="space-y-1">
@@ -1381,15 +1425,32 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">NIK (16 Digit)</label>
+                            <div className="flex items-center justify-between">
+                              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">NIK (16 Digit)</label>
+                              {member.nik && (
+                                <span className={`text-[8px] font-mono font-bold ${member.nik.length === 16 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                  {member.nik.length}/16
+                                </span>
+                              )}
+                            </div>
                             <input 
                               type="text" 
                               maxLength={16}
                               placeholder="16 digit angka"
-                              className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold outline-none" 
+                              className={`w-full px-3.5 py-2 bg-white border rounded-xl text-xs font-mono font-bold outline-none ${
+                                validationErrors[`member_${idx}_nik`] ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200 focus:border-indigo-500'
+                              }`} 
                               value={member.nik || ''} 
-                              onChange={e => updateFamilyMember(idx, 'nik', e.target.value.replace(/\D/g, ''))} 
+                              onChange={e => {
+                                updateFamilyMember(idx, 'nik', e.target.value.replace(/\D/g, ''));
+                                if (validationErrors[`member_${idx}_nik`]) {
+                                  setValidationErrors(prev => ({ ...prev, [`member_${idx}_nik`]: '' }));
+                                }
+                              }} 
                             />
+                            {validationErrors[`member_${idx}_nik`] && (
+                              <p className="text-[9px] font-bold text-rose-500 ml-1 leading-tight">{validationErrors[`member_${idx}_nik`]}</p>
+                            )}
                           </div>
 
                           <div className="space-y-1">
