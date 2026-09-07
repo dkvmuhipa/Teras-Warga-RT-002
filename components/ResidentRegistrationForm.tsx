@@ -38,6 +38,22 @@ const DEFAULT_BLOCKS = [
   { code: 'C12', start: 1, end: 15 },
 ];
 
+export const isHouseTrulyOccupied = (house?: House | null): boolean => {
+  if (!house) return false;
+  if (house.status === 'Empty' || (house.status as string) === 'Vacant') return false;
+
+  const head = (house.headOfFamily || '').trim().toLowerCase();
+  if (!head || head === '-' || head === 'kosong' || head === 'belum ada' || head === 'belum berpenghuni' || head === 'tidak ada' || head === 'n/a') {
+    return false;
+  }
+
+  if (house.occupants === 0 && house.status !== 'Business') {
+    return false;
+  }
+
+  return house.status === 'Occupied' || house.status === 'Business' || house.status === 'Visiting';
+};
+
 export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> = ({ onClose, houses = [] }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -57,7 +73,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
   // Block & Unit Availability Selector States
   const [selectedBlock, setSelectedBlock] = useState<string>('C10');
   const [inputMode, setInputMode] = useState<'picker' | 'manual'>('picker');
-  const [unitFilter, setUnitFilter] = useState<'available' | 'all'>('available');
+  const [unitFilter, setUnitFilter] = useState<'available' | 'occupied' | 'all'>('available');
   const [unitSearch, setUnitSearch] = useState<string>('');
 
   // Upload and preview states
@@ -191,17 +207,12 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         return hNum === numStr || (h.number || '').trim() === numStr || parseInt(h.number || '0', 10) === parseInt(numStr, 10);
       });
 
-      const isOccupied = Boolean(
-        existing && (
-          (existing.status === 'Occupied' && Boolean(existing.headOfFamily?.trim())) ||
-          Boolean(existing.headOfFamily?.trim())
-        )
-      );
+      const isOccupied = isHouseTrulyOccupied(existing);
 
       return {
         number: numStr,
         isOccupied,
-        headOfFamily: existing?.headOfFamily || '',
+        headOfFamily: existing?.headOfFamily && existing.headOfFamily !== '-' ? existing.headOfFamily : '',
         status: existing?.status || 'Empty'
       };
     });
@@ -225,7 +236,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
       const existing = housesInBlock.find(
         h => (h.number || '').trim().padStart(2, '0') === num || (h.number || '').trim() === num
       );
-      if (existing && ((existing.status === 'Occupied' && existing.headOfFamily?.trim()) || existing.headOfFamily?.trim())) {
+      if (isHouseTrulyOccupied(existing)) {
         occupied++;
       }
     });
@@ -239,6 +250,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
   const displayedUnits = useMemo(() => {
     return blockUnits.filter(u => {
       if (unitFilter === 'available' && u.isOccupied) return false;
+      if (unitFilter === 'occupied' && !u.isOccupied) return false;
       if (unitSearch.trim() && !u.number.includes(unitSearch.trim())) return false;
       return true;
     });
@@ -337,6 +349,24 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
   const handleNext = () => {
     if (validateCurrentStep()) {
+      if (currentStep === 0) {
+        const formattedBlock = formData.block.trim().toUpperCase();
+        const formattedNum = formData.number.trim().padStart(2, '0');
+        const existing = loadedHouses.find(h => {
+          const hBlock = (h.block || '').trim().toUpperCase();
+          const hNum = (h.number || '').trim().padStart(2, '0');
+          return hBlock === formattedBlock && (hNum === formattedNum || (h.number || '').trim() === formData.number.trim());
+        });
+
+        if (isHouseTrulyOccupied(existing)) {
+          toast.warning(`Unit Blok ${formData.block} No. ${formData.number} Sudah Berpenghuni`, {
+            description: `Unit ini telah terdaftar atas nama Keluarga Bpk/Ibu ${existing?.headOfFamily && existing.headOfFamily !== '-' ? existing.headOfFamily : 'Warga'}. Harap pilih unit yang belum berpenghuni atau kosong.`,
+            position: 'top-center'
+          });
+          return;
+        }
+      }
+
       setCurrentStep(prev => Math.min(prev + 1, STEPS.length - 1));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -614,33 +644,42 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
                           <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            2. Pilih Unit Tersedia di Blok {selectedBlock}:
+                            2. Pilih Unit di Blok {selectedBlock}:
                           </label>
                           <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[9px] font-black uppercase">
-                            {displayedUnits.filter(u => !u.isOccupied).length} Unit Siap Dihuni
+                            {getBlockStats(selectedBlock).available} Unit Kosong
                           </span>
                         </div>
 
                         {/* Filter & Search Bar */}
                         <div className="flex items-center gap-2">
-                          <div className="flex bg-white p-1 rounded-xl border border-slate-200 shrink-0">
+                          <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200 shrink-0">
                             <button
                               type="button"
                               onClick={() => setUnitFilter('available')}
-                              className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase transition-all cursor-pointer ${
-                                unitFilter === 'available' ? 'bg-emerald-500 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+                              className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase transition-all cursor-pointer ${
+                                unitFilter === 'available' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                               }`}
                             >
-                              🟢 Hanya Kosong
+                              🟢 Kosong ({getBlockStats(selectedBlock).available})
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setUnitFilter('occupied')}
+                              className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase transition-all cursor-pointer ${
+                                unitFilter === 'occupied' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                              }`}
+                            >
+                              🔒 Terisi ({getBlockStats(selectedBlock).occupied})
                             </button>
                             <button
                               type="button"
                               onClick={() => setUnitFilter('all')}
-                              className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase transition-all cursor-pointer ${
-                                unitFilter === 'all' ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+                              className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase transition-all cursor-pointer ${
+                                unitFilter === 'all' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                               }`}
                             >
-                              Semua Unit
+                              Semua ({getBlockStats(selectedBlock).total})
                             </button>
                           </div>
 

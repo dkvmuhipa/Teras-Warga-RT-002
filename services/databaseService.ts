@@ -1398,8 +1398,21 @@ export const checkHouseOccupied = async (houseId: string): Promise<boolean> => {
         const snapshot = await getDoc(docRef);
         if (snapshot.exists()) {
             const data = snapshot.data();
-            // A house is considered occupied if it has a headOfFamily or an accessCode
-            return !!(data.headOfFamily || data.accessCode);
+            // Rumah berstatus Empty atau Vacant adalah KOSONG / BELUM DITEMPATI
+            if (data.status === 'Empty' || data.status === 'Vacant') return false;
+
+            const head = (data.headOfFamily || '').trim().toLowerCase();
+            // Jika nama kepala keluarga kosong, '-', 'kosong', atau 'belum berpenghuni' -> KOSONG
+            if (!head || head === '-' || head === 'kosong' || head === 'belum ada' || head === 'belum berpenghuni' || head === 'tidak ada') {
+                return false;
+            }
+
+            // Jika jumlah penghuni 0 dan bukan tempat usaha -> KOSONG
+            if (data.occupants === 0 && data.status !== 'Business') {
+                return false;
+            }
+
+            return data.status === 'Occupied' || data.status === 'Business' || data.status === 'Visiting';
         }
         return false;
     } catch (error) {
