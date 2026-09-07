@@ -4,7 +4,7 @@ import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, Doll
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId } from '../services/databaseService';
+import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId, isHouseTrulyOccupied } from '../services/databaseService';
 import { useFinancial } from '../context/FinancialContext';
 
 interface HouseMapProps {
@@ -139,13 +139,13 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                     <div className="absolute bottom-6 left-8 text-white z-10">
                         <div className="flex items-center gap-2 mb-2">
                             <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${
-                              house.status === 'Occupied' ? 'bg-emerald-500' : 
-                              house.status === 'Empty' ? 'bg-slate-500' : 
-                              house.status === 'Business' ? 'bg-purple-500' : 'bg-sky-500'
+                              !isHouseTrulyOccupied(house) ? 'bg-slate-500' : 
+                              house.status === 'Business' ? 'bg-purple-500' : 
+                              house.status === 'Visiting' ? 'bg-sky-500' : 'bg-emerald-500'
                             }`}>
-                                {house.status === 'Occupied' ? 'Dihuni' : 
-                                 house.status === 'Empty' ? 'Kosong' : 
-                                 house.status === 'Business' ? 'Usaha' : 'Mengunjungi'}
+                                {!isHouseTrulyOccupied(house) ? 'Kosong' : 
+                                 house.status === 'Business' ? 'Usaha' : 
+                                 house.status === 'Visiting' ? 'Mengunjungi' : 'Dihuni'}
                             </span>
                             {officialData && <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest bg-indigo-500">Pengurus</span>}
                         </div>
@@ -396,7 +396,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
 
     const getHouseColor = () => {
         if (showHeatmap) {
-          const occupants = house.status === 'Occupied' ? (house.occupants || 1) : (house.occupants || 0);
+          const occupants = isHouseTrulyOccupied(house) ? (house.occupants || 1) : (house.occupants || 0);
           if (occupants > 5) return "bg-rose-500 border-rose-700 text-white";
           if (occupants > 3) return "bg-orange-400 border-orange-600 text-white";
           if (occupants > 0) return "bg-emerald-400 border-emerald-600 text-white";
@@ -405,7 +405,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
 
         if (hasIssue && activeLayers.includes('Security')) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
         if (officialRole) return "bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 border-amber-400 text-white shadow-lg shadow-indigo-500/40 z-10 ring-2 ring-amber-300";
-        if (house.status === 'Empty') return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
+        if (!isHouseTrulyOccupied(house)) return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
         if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
         if (house.status === 'Visiting') return "bg-gradient-to-br from-sky-50 to-indigo-150 border-indigo-400 text-indigo-900";
         if (house.residenceType === 'Sewa') return "bg-gradient-to-br from-amber-100 to-orange-200 border-amber-500 text-amber-900";
@@ -459,8 +459,8 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
                     <div className="flex items-center gap-2">
                         <span className="font-black text-sm text-amber-300">{house.block}-{house.number}</span>
-                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${house.status === 'Occupied' ? 'bg-emerald-500' : 'bg-slate-500'}`}>
-                            {house.status === 'Occupied' ? 'Dihuni' : 'Kosong'}
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${isHouseTrulyOccupied(house) ? 'bg-emerald-500' : 'bg-slate-500'}`}>
+                            {isHouseTrulyOccupied(house) ? 'Dihuni' : 'Kosong'}
                         </span>
                     </div>
                     {officialRole && (
@@ -471,7 +471,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 <div className="space-y-1.5 text-left text-xs">
                     <p className="font-bold text-slate-200 truncate flex items-center gap-1.5">
                         <User size={12} className="text-indigo-400 shrink-0" />
-                        <span>{house.headOfFamily || 'Belum Terisi'}</span>
+                        <span>{isHouseTrulyOccupied(house) ? (house.headOfFamily || 'Warga') : 'Belum Berpenghuni (Kosong)'}</span>
                     </p>
                     <p className="text-[10px] text-slate-400 flex items-center justify-between">
                         <span>Total Penghuni:</span>
@@ -530,7 +530,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                      <h3 className="text-xl md:text-2xl font-black tracking-tighter drop-shadow-md text-amber-300">BLOK {blockCode}</h3>
                  </div>
                  <span className="relative z-10 text-[9px] font-black uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded-full border border-white/20 text-slate-200">
-                     {houses.length} Rumah
+                     {houses.length} Rumah &bull; {houses.filter(h => !isHouseTrulyOccupied(h)).length} Kosong
                  </span>
             </div>
             <div className="flex-1 bg-slate-50/50 p-3 relative">
@@ -623,7 +623,7 @@ interface MapLayoutProps {
 }
 
 export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], officials = [], isAdmin = false, iuranPayments = [], activePanicAlerts = [], onSelect = () => {}, renderBlock, className, showHeatmap, activeLayers, mapPoints = [], highlightedId }) => {
-    const getBlockHouses = (code: string) => houses.filter(h => h.block === code);
+    const getBlockHouses = (code: string) => houses.filter(h => (h.block || '').trim().toUpperCase() === code.toUpperCase());
     const securityPost = mapPoints.find(p => p.type === 'Security');
     
     return (
@@ -805,7 +805,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   };
 
   const totalHouses = houses.length;
-  const totalOccupied = houses.filter(h => h.status === 'Occupied').length;
+  const totalOccupied = houses.filter(h => isHouseTrulyOccupied(h)).length;
+  const totalEmpty = houses.filter(h => !isHouseTrulyOccupied(h)).length;
   const totalIssues = reports.filter(r => r.status !== 'Selesai').length;
   
   // Demografi Totals
@@ -876,11 +877,11 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
 
     // Filter berdasarkan status filter chip jika dipilih
     if (statusFilter === 'Occupied') {
-      result = result.filter(h => h.status === 'Occupied');
+      result = result.filter(h => isHouseTrulyOccupied(h));
     } else if (statusFilter === 'Sewa') {
-      result = result.filter(h => h.residenceType === 'Sewa' || h.status === 'Business' || h.status === 'Visiting');
+      result = result.filter(h => isHouseTrulyOccupied(h) && (h.residenceType === 'Sewa' || h.status === 'Business' || h.status === 'Visiting'));
     } else if (statusFilter === 'Empty') {
-      result = result.filter(h => h.status === 'Empty');
+      result = result.filter(h => !isHouseTrulyOccupied(h));
     }
 
     // Filter berdasarkan kata kunci pencarian teks (jika ada)
@@ -978,19 +979,19 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                   onClick={() => setStatusFilter('Occupied')}
                   className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Occupied' ? 'bg-emerald-600 text-white shadow-sm font-black' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Dihuni ({houses.filter(h => h.status === 'Occupied').length})
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Dihuni ({totalOccupied})
                 </button>
                 <button 
                   onClick={() => setStatusFilter('Sewa')}
                   className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Sewa' ? 'bg-amber-600 text-white shadow-sm font-black' : 'text-amber-700 bg-amber-50 hover:bg-amber-100'}`}
                 >
-                  <Key size={10} /> Kontrak/Sewa ({houses.filter(h => h.residenceType === 'Sewa' || h.status === 'Business' || h.status === 'Visiting').length})
+                  <Key size={10} /> Kontrak/Sewa ({houses.filter(h => isHouseTrulyOccupied(h) && (h.residenceType === 'Sewa' || h.status === 'Business' || h.status === 'Visiting')).length})
                 </button>
                 <button 
                   onClick={() => setStatusFilter('Empty')}
                   className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Empty' ? 'bg-slate-700 text-white shadow-sm font-black' : 'text-slate-600 bg-slate-200/60 hover:bg-slate-200'}`}
                 >
-                  <Home size={10} /> Kosong ({houses.filter(h => h.status === 'Empty').length})
+                  <Home size={10} /> Kosong ({totalEmpty})
                 </button>
                 <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-l border-slate-200 whitespace-nowrap cursor-pointer ${showCheckpoints ? 'text-indigo-600 font-black' : 'text-slate-500'}`}>
                     <ShieldCheck size={12}/> Patroli

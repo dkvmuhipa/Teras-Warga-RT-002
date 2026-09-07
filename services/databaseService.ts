@@ -1391,6 +1391,25 @@ export const getHouseDisplayLabel = (houseId: string, houses?: any[]): string =>
     return `Blok ${formattedId}`;
 };
 
+export const isHouseTrulyOccupied = (house?: any | null): boolean => {
+    if (!house) return false;
+    // Status eksplisit Empty atau Vacant
+    if (house.status === 'Empty' || house.status === 'Vacant') return false;
+
+    const head = (house.headOfFamily || '').trim().toLowerCase();
+    // Jika nama kepala keluarga kosong atau bernilai placeholder
+    if (!head || head === '-' || head === 'kosong' || head === 'belum ada' || head === 'belum berpenghuni' || head === 'tidak ada' || head === 'n/a') {
+        return false;
+    }
+
+    // Jika jumlah penghuni 0 dan bukan tempat usaha
+    if (house.occupants === 0 && house.status !== 'Business') {
+        return false;
+    }
+
+    return house.status === 'Occupied' || house.status === 'Business' || house.status === 'Visiting';
+};
+
 export const checkHouseOccupied = async (houseId: string): Promise<boolean> => {
     try {
         const formattedHouseId = formatHouseId(houseId);
@@ -1398,21 +1417,7 @@ export const checkHouseOccupied = async (houseId: string): Promise<boolean> => {
         const snapshot = await getDoc(docRef);
         if (snapshot.exists()) {
             const data = snapshot.data();
-            // Rumah berstatus Empty atau Vacant adalah KOSONG / BELUM DITEMPATI
-            if (data.status === 'Empty' || data.status === 'Vacant') return false;
-
-            const head = (data.headOfFamily || '').trim().toLowerCase();
-            // Jika nama kepala keluarga kosong, '-', 'kosong', atau 'belum berpenghuni' -> KOSONG
-            if (!head || head === '-' || head === 'kosong' || head === 'belum ada' || head === 'belum berpenghuni' || head === 'tidak ada') {
-                return false;
-            }
-
-            // Jika jumlah penghuni 0 dan bukan tempat usaha -> KOSONG
-            if (data.occupants === 0 && data.status !== 'Business') {
-                return false;
-            }
-
-            return data.status === 'Occupied' || data.status === 'Business' || data.status === 'Visiting';
+            return isHouseTrulyOccupied(data);
         }
         return false;
     } catch (error) {

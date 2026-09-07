@@ -11,7 +11,7 @@ import { Button } from './ui/Button';
 import { 
   addResidentRegistrationToDb, uploadImageToStorage, checkHouseOccupied, 
   formatHouseId, handleFirestoreError, OperationType, isFirebaseConfigured,
-  subscribeToCollection 
+  subscribeToCollection, isHouseTrulyOccupied 
 } from '../services/databaseService';
 import { House } from '../types';
 import { toast } from 'sonner';
@@ -37,22 +37,6 @@ const DEFAULT_BLOCKS = [
   { code: 'C11', start: 1, end: 18 },
   { code: 'C12', start: 1, end: 15 },
 ];
-
-export const isHouseTrulyOccupied = (house?: House | null): boolean => {
-  if (!house) return false;
-  if (house.status === 'Empty' || (house.status as string) === 'Vacant') return false;
-
-  const head = (house.headOfFamily || '').trim().toLowerCase();
-  if (!head || head === '-' || head === 'kosong' || head === 'belum ada' || head === 'belum berpenghuni' || head === 'tidak ada' || head === 'n/a') {
-    return false;
-  }
-
-  if (house.occupants === 0 && house.status !== 'Business') {
-    return false;
-  }
-
-  return house.status === 'Occupied' || house.status === 'Business' || house.status === 'Visiting';
-};
 
 export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> = ({ onClose, houses = [] }) => {
   const [currentStep, setCurrentStep] = useState(0);
