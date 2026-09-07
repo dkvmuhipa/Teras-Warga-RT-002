@@ -5,7 +5,7 @@ import {
   GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, 
   FileText, Camera, ShieldCheck, MapPin, Calendar, Check, AlertCircle, Info,
   ShieldAlert, Search, Sparkles, Building, Lock, CheckSquare, Eye, ExternalLink,
-  Shield, CheckCheck, HelpCircle, X
+  Shield, CheckCheck, HelpCircle, X, Clock
 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { 
@@ -192,11 +192,13 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
       });
 
       const isOccupied = isHouseTrulyOccupied(existing);
+      const isVisiting = existing?.status === 'Visiting';
 
       return {
         number: numStr,
         isOccupied,
-        headOfFamily: existing?.headOfFamily && existing.headOfFamily !== '-' ? existing.headOfFamily : '',
+        isVisiting,
+        headOfFamily: existing?.headOfFamily && existing.headOfFamily !== '-' ? existing.headOfFamily : (existing?.ownerName || ''),
         status: existing?.status || 'Empty'
       };
     });
@@ -240,8 +242,14 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     });
   }, [blockUnits, unitFilter, unitSearch]);
 
-  const handleSelectUnit = (unitNumber: string, isOccupied: boolean, headOfFamily?: string) => {
+  const handleSelectUnit = (unitNumber: string, isOccupied: boolean, isVisiting?: boolean, headOfFamily?: string) => {
     if (isOccupied) {
+      if (isVisiting) {
+        toast.warning(`Unit Blok ${selectedBlock} No. ${unitNumber} Memiliki Pemilik (Rumah Singgah)`, {
+          description: `Unit ini telah terdaftar atas nama Bpk/Ibu ${headOfFamily || 'Warga'} dengan status Rutin Dikunjungi. Jika Anda pemilik yang ingin mendaftar ulang atau mutasi, silakan hubungi pengurus RT.`
+        });
+        return;
+      }
       toast.warning(`Unit Blok ${selectedBlock} No. ${unitNumber} Sudah Berpenghuni`, {
         description: `Unit ini telah terdaftar atas nama Keluarga Bpk/Ibu ${headOfFamily || 'Warga'}. Jika Anda mutasi atau anggota keluarga baru, silakan gunakan menu Mutasi atau hubungi pengurus RT.`
       });
@@ -696,21 +704,29 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                             <button
                               key={unit.number}
                               type="button"
-                              onClick={() => handleSelectUnit(unit.number, unit.isOccupied, unit.headOfFamily)}
+                              onClick={() => handleSelectUnit(unit.number, unit.isOccupied, unit.isVisiting, unit.headOfFamily)}
                               className={`p-3 rounded-xl text-center border transition-all cursor-pointer relative group flex flex-col justify-between min-h-[70px] ${
                                 isSelected
                                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-4 ring-emerald-500/20'
-                                  : unit.isOccupied
-                                    ? 'bg-slate-100/70 border-slate-200/60 opacity-60 hover:opacity-80'
-                                    : 'bg-emerald-50/60 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 hover:scale-[1.02]'
+                                  : unit.isVisiting
+                                    ? 'bg-sky-50/80 border-sky-300 text-sky-900 opacity-80 hover:opacity-95 hover:border-sky-400'
+                                    : unit.isOccupied
+                                      ? 'bg-slate-100/70 border-slate-200/60 opacity-60 hover:opacity-80'
+                                      : 'bg-emerald-50/60 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 hover:scale-[1.02]'
                               }`}
                             >
                               <div className="flex items-center justify-between w-full">
-                                <span className={`text-[8px] font-black uppercase ${isSelected ? 'text-emerald-100' : unit.isOccupied ? 'text-slate-400' : 'text-emerald-600'}`}>
-                                  {unit.isOccupied ? 'Terisi' : 'Kosong'}
+                                <span className={`text-[8px] font-black uppercase ${
+                                  isSelected ? 'text-emerald-100' :
+                                  unit.isVisiting ? 'text-sky-700' :
+                                  unit.isOccupied ? 'text-slate-400' : 'text-emerald-600'
+                                }`}>
+                                  {unit.isVisiting ? 'Singgah' : unit.isOccupied ? 'Terisi' : 'Kosong'}
                                 </span>
                                 {isSelected ? (
                                   <Check size={12} className="text-white stroke-[3]" />
+                                ) : unit.isVisiting ? (
+                                  <Clock size={10} className="text-sky-600" />
                                 ) : unit.isOccupied ? (
                                   <Lock size={10} className="text-slate-400" />
                                 ) : (
@@ -718,12 +734,21 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                                 )}
                               </div>
 
-                              <span className={`text-base font-black ${isSelected ? 'text-white' : unit.isOccupied ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
+                              <span className={`text-base font-black ${
+                                isSelected ? 'text-white' :
+                                unit.isVisiting ? 'text-sky-950 font-black' :
+                                unit.isOccupied ? 'text-slate-500 line-through' : 'text-slate-900'
+                              }`}>
                                 No. {unit.number}
                               </span>
 
-                              <span className={`text-[8px] font-bold truncate max-w-full ${isSelected ? 'text-emerald-100' : unit.isOccupied ? 'text-slate-400' : 'text-emerald-700'}`}>
-                                {unit.isOccupied ? (unit.headOfFamily ? `Klg. ${unit.headOfFamily.split(' ')[0]}` : 'Berpenghuni') : 'Siap Dihuni'}
+                              <span className={`text-[8px] font-bold truncate max-w-full ${
+                                isSelected ? 'text-emerald-100' :
+                                unit.isVisiting ? 'text-sky-800 font-extrabold' :
+                                unit.isOccupied ? 'text-slate-400' : 'text-emerald-700'
+                              }`}>
+                                {unit.isVisiting ? (unit.headOfFamily ? `Klg. ${unit.headOfFamily.split(' ')[0]}` : 'Rutin Dikunjungi') :
+                                 unit.isOccupied ? (unit.headOfFamily ? `Klg. ${unit.headOfFamily.split(' ')[0]}` : 'Berpenghuni') : 'Siap Dihuni'}
                               </span>
                             </button>
                           );

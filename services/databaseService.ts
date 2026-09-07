@@ -1396,18 +1396,32 @@ export const isHouseTrulyOccupied = (house?: any | null): boolean => {
     // Status eksplisit Empty atau Vacant
     if (house.status === 'Empty' || house.status === 'Vacant') return false;
 
-    const head = (house.headOfFamily || '').trim().toLowerCase();
+    // Jika rumah berstatus 'Visiting' (Rumah Singgah / Rutin Dikunjungi Pemilik)
+    // Meskipun penghuni harian 0 jiwa, rumah ini SUDAH ADA PEMILIKNYA & BUKAN kavling kosong terlantar.
+    if (house.status === 'Visiting') {
+        const owner = (house.headOfFamily || house.ownerName || '').trim().toLowerCase();
+        if (owner && owner !== '-' && owner !== 'kosong' && owner !== 'belum ada') {
+            return true;
+        }
+    }
+
+    const head = (house.headOfFamily || house.ownerName || '').trim().toLowerCase();
     // Jika nama kepala keluarga kosong atau bernilai placeholder
     if (!head || head === '-' || head === 'kosong' || head === 'belum ada' || head === 'belum berpenghuni' || head === 'tidak ada' || head === 'n/a') {
         return false;
     }
 
-    // Jika jumlah penghuni 0 dan bukan tempat usaha
-    if (house.occupants === 0 && house.status !== 'Business') {
+    // Tempat usaha aktif
+    if (house.status === 'Business') {
+        return true;
+    }
+
+    // Jika jumlah penghuni 0 dan bukan tempat usaha atau visiting -> KOSONG
+    if (house.occupants === 0) {
         return false;
     }
 
-    return house.status === 'Occupied' || house.status === 'Business' || house.status === 'Visiting';
+    return house.status === 'Occupied';
 };
 
 export const checkHouseOccupied = async (houseId: string): Promise<boolean> => {

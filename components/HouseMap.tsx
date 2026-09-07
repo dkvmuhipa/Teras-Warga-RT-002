@@ -145,7 +145,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             }`}>
                                 {!isHouseTrulyOccupied(house) ? 'Kosong' : 
                                  house.status === 'Business' ? 'Usaha' : 
-                                 house.status === 'Visiting' ? 'Mengunjungi' : 'Dihuni'}
+                                 house.status === 'Visiting' ? 'Rutin Dikunjungi (Singgah)' : 'Dihuni'}
                             </span>
                             {officialData && <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest bg-indigo-500">Pengurus</span>}
                         </div>
@@ -405,9 +405,9 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
 
         if (hasIssue && activeLayers.includes('Security')) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
         if (officialRole) return "bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 border-amber-400 text-white shadow-lg shadow-indigo-500/40 z-10 ring-2 ring-amber-300";
+        if (house.status === 'Visiting') return "bg-gradient-to-br from-sky-50 to-indigo-150 border-sky-400 text-sky-900 shadow-2xs";
         if (!isHouseTrulyOccupied(house)) return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
         if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
-        if (house.status === 'Visiting') return "bg-gradient-to-br from-sky-50 to-indigo-150 border-indigo-400 text-indigo-900";
         if (house.residenceType === 'Sewa') return "bg-gradient-to-br from-amber-100 to-orange-200 border-amber-500 text-amber-900";
         return "bg-gradient-to-br from-emerald-100 to-teal-200 border-emerald-500 text-emerald-900";
     };
@@ -459,8 +459,12 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
                     <div className="flex items-center gap-2">
                         <span className="font-black text-sm text-amber-300">{house.block}-{house.number}</span>
-                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${isHouseTrulyOccupied(house) ? 'bg-emerald-500' : 'bg-slate-500'}`}>
-                            {isHouseTrulyOccupied(house) ? 'Dihuni' : 'Kosong'}
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
+                          house.status === 'Visiting' ? 'bg-sky-500 text-white' :
+                          isHouseTrulyOccupied(house) ? 'bg-emerald-500 text-white' : 'bg-slate-500 text-white'
+                        }`}>
+                            {house.status === 'Visiting' ? 'Rutin Dikunjungi' : 
+                             isHouseTrulyOccupied(house) ? 'Dihuni' : 'Kosong'}
                         </span>
                     </div>
                     {officialRole && (
@@ -471,7 +475,11 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                 <div className="space-y-1.5 text-left text-xs">
                     <p className="font-bold text-slate-200 truncate flex items-center gap-1.5">
                         <User size={12} className="text-indigo-400 shrink-0" />
-                        <span>{isHouseTrulyOccupied(house) ? (house.headOfFamily || 'Warga') : 'Belum Berpenghuni (Kosong)'}</span>
+                        <span>{house.status === 'Visiting' ? `Pemilik: ${house.headOfFamily || house.ownerName || 'Warga'}` : isHouseTrulyOccupied(house) ? (house.headOfFamily || 'Warga') : 'Belum Berpenghuni (Kosong)'}</span>
+                    </p>
+                    <p className="text-[10px] text-slate-400 flex items-center justify-between">
+                        <span>{house.status === 'Visiting' ? 'Status Hunian:' : 'Total Penghuni:'}</span>
+                        <span className="font-black text-white">{house.status === 'Visiting' ? 'Rumah Singgah / Pemantauan Rutin' : `${house.occupants || 0} Jiwa`}</span>
                     </p>
                     <p className="text-[10px] text-slate-400 flex items-center justify-between">
                         <span>Total Penghuni:</span>
@@ -806,6 +814,9 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
 
   const totalHouses = houses.length;
   const totalOccupied = houses.filter(h => isHouseTrulyOccupied(h)).length;
+  const totalVisiting = houses.filter(h => h.status === 'Visiting').length;
+  const totalPermanent = houses.filter(h => isHouseTrulyOccupied(h) && h.status === 'Occupied' && h.residenceType !== 'Sewa').length;
+  const totalSewa = houses.filter(h => isHouseTrulyOccupied(h) && (h.residenceType === 'Sewa' || h.status === 'Business')).length;
   const totalEmpty = houses.filter(h => !isHouseTrulyOccupied(h)).length;
   const totalIssues = reports.filter(r => r.status !== 'Selesai').length;
   
@@ -870,16 +881,18 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
     }
   };
 
-  const [statusFilter, setStatusFilter] = useState<'All' | 'Occupied' | 'Sewa' | 'Empty'>('All');
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Occupied' | 'Visiting' | 'Sewa' | 'Empty'>('All');
 
   const filteredHouses = useMemo(() => {
     let result = houses;
 
     // Filter berdasarkan status filter chip jika dipilih
     if (statusFilter === 'Occupied') {
-      result = result.filter(h => isHouseTrulyOccupied(h));
+      result = result.filter(h => isHouseTrulyOccupied(h) && h.status === 'Occupied' && h.residenceType !== 'Sewa');
+    } else if (statusFilter === 'Visiting') {
+      result = result.filter(h => h.status === 'Visiting');
     } else if (statusFilter === 'Sewa') {
-      result = result.filter(h => isHouseTrulyOccupied(h) && (h.residenceType === 'Sewa' || h.status === 'Business' || h.status === 'Visiting'));
+      result = result.filter(h => isHouseTrulyOccupied(h) && (h.residenceType === 'Sewa' || h.status === 'Business'));
     } else if (statusFilter === 'Empty') {
       result = result.filter(h => !isHouseTrulyOccupied(h));
     }
@@ -973,25 +986,31 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                   onClick={() => setStatusFilter('All')}
                   className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${statusFilter === 'All' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200/50'}`}
                 >
-                  Semua Rumah ({houses.length})
+                  Semua ({houses.length})
                 </button>
                 <button 
                   onClick={() => setStatusFilter('Occupied')}
                   className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Occupied' ? 'bg-emerald-600 text-white shadow-sm font-black' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Dihuni ({totalOccupied})
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Dihuni Tetap ({totalPermanent})
+                </button>
+                <button 
+                  onClick={() => setStatusFilter('Visiting')}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Visiting' ? 'bg-sky-600 text-white shadow-sm font-black' : 'text-sky-700 bg-sky-50 hover:bg-sky-100'}`}
+                >
+                  <Clock size={10} /> Rutin Dikunjungi ({totalVisiting})
                 </button>
                 <button 
                   onClick={() => setStatusFilter('Sewa')}
                   className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Sewa' ? 'bg-amber-600 text-white shadow-sm font-black' : 'text-amber-700 bg-amber-50 hover:bg-amber-100'}`}
                 >
-                  <Key size={10} /> Kontrak/Sewa ({houses.filter(h => isHouseTrulyOccupied(h) && (h.residenceType === 'Sewa' || h.status === 'Business' || h.status === 'Visiting')).length})
+                  <Key size={10} /> Sewa/Usaha ({totalSewa})
                 </button>
                 <button 
                   onClick={() => setStatusFilter('Empty')}
                   className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${statusFilter === 'Empty' ? 'bg-slate-700 text-white shadow-sm font-black' : 'text-slate-600 bg-slate-200/60 hover:bg-slate-200'}`}
                 >
-                  <Home size={10} /> Kosong ({totalEmpty})
+                  <Home size={10} /> Benar-benar Kosong ({totalEmpty})
                 </button>
                 <button onClick={() => setShowCheckpoints(!showCheckpoints)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-l border-slate-200 whitespace-nowrap cursor-pointer ${showCheckpoints ? 'text-indigo-600 font-black' : 'text-slate-500'}`}>
                     <ShieldCheck size={12}/> Patroli
@@ -1093,12 +1112,16 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                   <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">RUMAH TETAP (TERISI)</span>
                 </div>
                 <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs">
+                  <div className="w-4 h-4 rounded-md bg-sky-500/20 border-2 border-sky-500 shrink-0" />
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">RUTIN DIKUNJUNGI (SINGGAH)</span>
+                </div>
+                <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs">
                   <div className="w-4 h-4 rounded-md bg-amber-500/20 border-2 border-amber-500 shrink-0" />
                   <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">RUMAH SEWA / KONTRAK</span>
                 </div>
                 <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200/60 shadow-2xs">
                   <div className="w-4 h-4 rounded-md bg-slate-100 border-2 border-dashed border-slate-400 shrink-0" />
-                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">RUMAH KOSONG</span>
+                  <span className="text-[10px] font-extrabold text-slate-800 tracking-tight">RUMAH KOSONG (BELUM DIHUNI)</span>
                 </div>
               </div>
             </div>
@@ -1289,9 +1312,10 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                 <div>
                                     <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Status Hunian</h4>
                                     <div className="space-y-2">
-                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-100 border border-emerald-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Tetap</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-100 border border-emerald-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Tetap (Dihuni)</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-sky-100 border border-sky-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rutin Dikunjungi / Singgah</span></div>
                                         <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-amber-100 border border-amber-500"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Sewa / Kontrak</span></div>
-                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-100 border border-slate-300 border-dashed"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kosong</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-100 border border-slate-300 border-dashed"></div> <span className="text-[10px] font-bold text-slate-600 uppercase">Rumah Kosong (Belum Dihuni)</span></div>
                                     </div>
                                 </div>
                                 <div>
