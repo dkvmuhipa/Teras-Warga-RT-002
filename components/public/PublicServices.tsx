@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { PdfConfig, LetterRequest, Report, House } from '../../types';
 import { generateSuratPengantar, generateReportReceiptPDF } from '../../services/pdfService';
-import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, safeJsonStringify, checkWasteRetribution, handleFirestoreError, OperationType, getLetterById, getReportById, getGuestReportById, getPopulationLogById, getRequestsByPhoneOrHouse } from '../../services/databaseService';
+import { addLetterToDb, addReportToDb, addPopulationLogToDb, validateResidentAccess, formatHouseId, deepSanitize, safeJsonStringify, checkWasteRetribution, handleFirestoreError, OperationType, getLetterById, getReportById, getGuestReportById, getPopulationLogById, getRequestsByPhoneOrHouse, addToCollection } from '../../services/databaseService';
 import { HouseMap } from '../HouseMap';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -24,10 +24,11 @@ interface PublicServicesProps {
 export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, houses = [] }) => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') === 'lapor' ? 'lapor' : 
-                     searchParams.get('tab') === 'tamu' ? 'tamu' : 'surat';
+                     searchParams.get('tab') === 'tamu' ? 'tamu' : 
+                     searchParams.get('tab') === 'sewa' ? 'sewa' : 'surat';
   const initialHouseId = searchParams.get('houseId') || '';
   
-  const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'tamu' | 'mutasi' | 'history'>(initialTab as any);
+  const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'tamu' | 'mutasi' | 'sewa' | 'history'>(initialTab as any);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [statusSearchId, setStatusSearchId] = useState('');
   const [searchResult, setSearchResult] = useState<any>(null);
@@ -756,6 +757,106 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     }
   };
 
+  // Lapor Sewa / Kontrakan States
+  const [rentalReporterType, setRentalReporterType] = useState<'Penyewa' | 'Pemilik'>('Penyewa');
+  const [rentalHouseId, setRentalHouseId] = useState('');
+  const [rentalOwnerName, setRentalOwnerName] = useState('');
+  const [rentalOwnerPhone, setRentalOwnerPhone] = useState('');
+  const [rentalOwnerAddress, setRentalOwnerAddress] = useState('');
+  const [rentalTenantName, setRentalTenantName] = useState('');
+  const [rentalTenantPhone, setRentalTenantPhone] = useState('');
+  const [rentalTenantNik, setRentalTenantNik] = useState('');
+  const [rentalOccupantsCount, setRentalOccupantsCount] = useState(1);
+  const [rentalOriginCity, setRentalOriginCity] = useState('');
+  const [rentalWorkOrStudy, setRentalWorkOrStudy] = useState('');
+  const [rentalStartDate, setRentalStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [rentalEndDate, setRentalEndDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]);
+  const [rentalRentType, setRentalRentType] = useState<'Tahunan' | 'Bulanan' | 'Semesteran'>('Tahunan');
+  const [rentalNotes, setRentalNotes] = useState('');
+  const [isSubmittingRental, setIsSubmittingRental] = useState(false);
+
+  const handleSubmitRental = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rentalHouseId.trim() || !rentalOwnerName.trim() || !rentalTenantName.trim()) {
+      toast.error("Validasi Gagal", { description: "Nomor rumah, nama pemilik, dan nama penyewa wajib diisi." });
+      return;
+    }
+
+    setIsSubmittingRental(true);
+    try {
+      const formatted = formatHouseId(rentalHouseId);
+      const parts = formatted.split('-');
+      const newContractId = `rent-${Date.now()}`;
+
+      const newRental: any = {
+        id: newContractId,
+        houseId: formatted,
+        block: parts[0] || 'C10',
+        number: parts[1] || '01',
+        ownerName: rentalOwnerName,
+        ownerPhone: rentalOwnerPhone,
+        ownerAddress: rentalOwnerAddress,
+        tenantName: rentalTenantName,
+        tenantPhone: rentalTenantPhone,
+        tenantNik: rentalTenantNik,
+        occupantsCount: Number(rentalOccupantsCount) || 1,
+        originCity: rentalOriginCity,
+        workOrStudy: rentalWorkOrStudy,
+        startDate: rentalStartDate,
+        endDate: rentalEndDate,
+        rentType: rentalRentType,
+        status: 'Aktif',
+        verificationStatus: 'Menunggu Verifikasi',
+        reportedBy: rentalReporterType,
+        reporterName: rentalReporterType === 'Penyewa' ? rentalTenantName : rentalOwnerName,
+        reporterPhone: rentalReporterType === 'Penyewa' ? rentalTenantPhone : rentalOwnerPhone,
+        notes: rentalNotes,
+        createdAt: new Date().toISOString()
+      };
+
+      await addToCollection('rentalContracts', newRental);
+
+      const historyItem = {
+        id: newContractId,
+        category: 'Sewa',
+        title: `Lapor Kontrakan: Blok ${formatted} (${rentalTenantName})`,
+        status: 'Menunggu Verifikasi',
+        date: new Date().toISOString()
+      };
+      saveToHistory(historyItem);
+
+      toast.success("Laporan Hunian Sewa Berhasil Dikirim!", {
+        description: `Pengurus RT 002 akan memverifikasi berkas Anda. Terima kasih atas tertib lapor 1x24 jam.`,
+        action: {
+          label: "Konfirmasi ke WA RT",
+          onClick: () => {
+            const msg = `Halo Pak RT, saya telah mengirimkan Laporan Hunian Sewa/Kontrakan untuk Blok ${formatted} atas nama Penyewa: ${rentalTenantName}. Mohon bantuannya untuk verifikasi buku kependudukan RT 02. Terima kasih.`;
+            window.open(`https://api.whatsapp.com/send?phone=6285961194621&text=${encodeURIComponent(msg)}`, '_blank');
+          }
+        },
+        duration: 10000
+      });
+
+      // Reset
+      setRentalHouseId('');
+      setRentalOwnerName('');
+      setRentalOwnerPhone('');
+      setRentalOwnerAddress('');
+      setRentalTenantName('');
+      setRentalTenantPhone('');
+      setRentalTenantNik('');
+      setRentalOccupantsCount(1);
+      setRentalOriginCity('');
+      setRentalWorkOrStudy('');
+      setRentalNotes('');
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal mengirim laporan hunian sewa.");
+    } finally {
+      setIsSubmittingRental(false);
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
@@ -862,6 +963,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             { id: 'tamu', label: 'Lapor Tamu', icon: ShieldAlert },
             { id: 'lapor', label: 'Aduan Warga', icon: AlertTriangle },
             { id: 'mutasi', label: 'Mutasi Warga', icon: UserPlus },
+            { id: 'sewa', label: 'Lapor Sewa', icon: Building },
             { id: 'history', label: 'Cek Status', icon: History }
           ].map(tab => {
             const isActive = activeTab === tab.id;
@@ -2438,6 +2540,306 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
           </motion.div>
         )}
 
+        {activeTab === 'sewa' && (
+          <motion.div
+            key="sewa"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            className="bg-white p-6 md:p-12 rounded-[2.5rem] border border-slate-200/80 shadow-sm overflow-hidden"
+          >
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-6 border-b border-slate-100">
+              <div className="flex items-center gap-4">
+                <div className="p-3.5 bg-teal-50 text-teal-600 rounded-2xl border border-teal-100 shrink-0">
+                  <Building size={28} strokeWidth={2} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] block mb-0.5">
+                    Tertib Hunian Sewa RT 02
+                  </span>
+                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+                    Lapor Rumah Sewa &amp; Kontrakan
+                  </h2>
+                  <p className="text-slate-500 text-xs font-medium mt-0.5">
+                    Pencatatan resmi warga kontrakan baru (wajib lapor 1x24 jam) atau laporan dari pemilik rumah (induk semang).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Informative Banner */}
+            <div className="mb-8 p-5 bg-gradient-to-r from-teal-50 to-emerald-50/70 border border-teal-200/70 rounded-[2rem] flex items-start gap-4 shadow-xs">
+              <div className="p-2.5 bg-white text-teal-600 rounded-xl shadow-xs shrink-0">
+                <ShieldCheck size={20} />
+              </div>
+              <div className="text-xs space-y-1">
+                <p className="font-black text-teal-900 uppercase tracking-wider text-[11px]">
+                  Kewajiban Lapor 1x24 Jam Hunian Sewa
+                </p>
+                <p className="text-teal-800/90 leading-relaxed font-medium">
+                  Sesuai Peraturan Lingkungan RT 002 Huntap Tondo 2 (BAB I Ketentuan Hunian), setiap penyewa baru atau pemilik yang menyewakan rumah wajib melaporkan identitas dan masa kontrak ke pengurus RT demi keamanan dan ketertiban lingkungan.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmitRental} className="space-y-6">
+              {/* Pilihan Peran Pelapor */}
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-wider text-slate-600 block">
+                  Saya Melaporkan Sebagai:
+                </label>
+                <div className="grid grid-cols-2 gap-3 max-w-md">
+                  <button
+                    type="button"
+                    onClick={() => setRentalReporterType('Penyewa')}
+                    className={`p-3.5 rounded-2xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      rentalReporterType === 'Penyewa'
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02]'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Users size={16} />
+                    <span>Penyewa Baru</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRentalReporterType('Pemilik')}
+                    className={`p-3.5 rounded-2xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      rentalReporterType === 'Pemilik'
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02]'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Home size={16} />
+                    <span>Pemilik Rumah</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Section 1: Rumah & Pemilik */}
+              <div className="p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl space-y-4">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                  <Home size={15} className="text-teal-600" />
+                  1. Data Unit Rumah &amp; Pemilik Asli (Induk Semang)
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Nomor Rumah yang Disewa *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: C10-05"
+                      value={rentalHouseId}
+                      onChange={(e) => setRentalHouseId(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 uppercase focus:ring-2 focus:ring-teal-500 outline-none"
+                    />
+                    <span className="text-[10px] text-slate-400">Format: Blok-Nomor (C10-08)</span>
+                  </div>
+
+                  <div className="space-y-1.5 md:col-span-2">
+                    <label className="text-xs font-bold text-slate-700">Nama Pemilik Rumah Asli *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nama Bapak/Ibu Pemilik Rumah"
+                      value={rentalOwnerName}
+                      onChange={(e) => setRentalOwnerName(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">No. WhatsApp Pemilik Rumah *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="08xxxxxxxx"
+                      value={rentalOwnerPhone}
+                      onChange={(e) => setRentalOwnerPhone(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 md:col-span-2">
+                    <label className="text-xs font-bold text-slate-700">Alamat Tempat Tinggal Pemilik Saat Ini</label>
+                    <input
+                      type="text"
+                      placeholder="Domisili pemilik jika tidak tinggal di RT 02"
+                      value={rentalOwnerAddress}
+                      onChange={(e) => setRentalOwnerAddress(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Data Penyewa */}
+              <div className="p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl space-y-4">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                  <Users size={15} className="text-indigo-600" />
+                  2. Identitas Penyewa (Penanggung Jawab Hunian)
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Nama Lengkap Kepala Keluarga Penyewa *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Sesuai KTP"
+                      value={rentalTenantName}
+                      onChange={(e) => setRentalTenantName(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">No. WhatsApp Aktif Penyewa *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="08xxxxxxxx"
+                      value={rentalTenantPhone}
+                      onChange={(e) => setRentalTenantPhone(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">NIK KTP Penyewa</label>
+                    <input
+                      type="text"
+                      maxLength={16}
+                      placeholder="16 Digit NIK KTP"
+                      value={rentalTenantNik}
+                      onChange={(e) => setRentalTenantNik(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Jumlah Jiwa Yang Menempati *</label>
+                    <input
+                      type="number"
+                      min={1}
+                      required
+                      value={rentalOccupantsCount}
+                      onChange={(e) => setRentalOccupantsCount(Number(e.target.value))}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                    <span className="text-[10px] text-slate-400">Termasuk anggota keluarga / anak</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Kota / Daerah Asal</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Kab. Tolitoli / Makassar"
+                      value={rentalOriginCity}
+                      onChange={(e) => setRentalOriginCity(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Pekerjaan / Tempat Bekerja / Kampus</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Karyawan BUMN / Mahasiswa UNTAD"
+                      value={rentalWorkOrStudy}
+                      onChange={(e) => setRentalWorkOrStudy(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Periode Masa Kontrak */}
+              <div className="p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl space-y-4">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                  <Calendar size={15} className="text-amber-600" />
+                  3. Periode Kontrak &amp; Catatan
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Tanggal Mulai Sewa *</label>
+                    <input
+                      type="date"
+                      required
+                      value={rentalStartDate}
+                      onChange={(e) => setRentalStartDate(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Tanggal Selesai Sewa *</label>
+                    <input
+                      type="date"
+                      required
+                      value={rentalEndDate}
+                      onChange={(e) => setRentalEndDate(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Jangka Waktu Sewa</label>
+                    <select
+                      value={rentalRentType}
+                      onChange={(e: any) => setRentalRentType(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none"
+                    >
+                      <option value="Tahunan">Tahunan</option>
+                      <option value="Bulanan">Bulanan</option>
+                      <option value="Semesteran">Semesteran (6 Bulan)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 md:col-span-3">
+                    <label className="text-xs font-bold text-slate-700">Catatan Tambahan (Opsional)</label>
+                    <textarea
+                      rows={2}
+                      placeholder="Informasi kendaraan yang dibawa, perjanjian khusus, atau hal penting lainnya..."
+                      value={rentalNotes}
+                      onChange={(e) => setRentalNotes(e.target.value)}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  disabled={isSubmittingRental}
+                  className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all"
+                >
+                  {isSubmittingRental ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                      <span>Mengirim Laporan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send size={16} />
+                      <span>Kirim Laporan Hunian Sewa RT 02</span>
+                    </>
+                  )}
+                </Button>
+                <p className="text-[11px] text-slate-400 text-center mt-3">
+                  Setelah dikirim, data akan diverifikasi oleh Pengurus RT 002 Huntap Tondo 2 dan tercatat pada buku registrasi resmi.
+                </p>
+              </div>
+            </form>
+          </motion.div>
+        )}
+
         {activeTab === 'history' && (() => {
           // Calculate filtered history list inside an IIFE to isolate scope
           const filteredHistory = localHistory.filter(item => {
@@ -2522,6 +2924,23 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 statusColor = "rose";
                 statusLabel = "Berkas Ditolak";
                 statusDesc = "Data gagal diverifikasi karena berkas mutasi kependudukan rujukan tidak cocok.";
+              }
+            } else if (category === 'Sewa') {
+              if (['terverifikasi', 'disetujui', 'aktif'].includes(rawStatus)) {
+                currentStep = 3;
+                statusColor = "emerald";
+                statusLabel = "Terverifikasi Sah";
+                statusDesc = "Data hunian sewa Anda telah diverifikasi dan dicatatkan resmi di Buku Kontrakan RT 02.";
+              } else if (['menunggu verifikasi', 'pending', 'baru'].includes(rawStatus) || !rawStatus) {
+                currentStep = 2;
+                statusColor = "indigo";
+                statusLabel = "Verifikasi Pengurus RT";
+                statusDesc = "Pengurus RT sedang memeriksa kesesuaian data penyewa dan induk semang.";
+              } else if (['ditolak', 'rejected'].includes(rawStatus)) {
+                currentStep = 3;
+                statusColor = "rose";
+                statusLabel = "Laporan Ditolak";
+                statusDesc = "Data hunian sewa tidak lolos verifikasi. Silakan hubungi Ketua RT / Sekretaris.";
               }
             }
             
@@ -3143,11 +3562,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           { id: 'Surat', label: 'Surat' },
                           { id: 'Laporan', label: 'Aduan' },
                           { id: 'Tamu', label: 'Tamu' },
-                          { id: 'Mutasi', label: 'Mutasi' }
+                          { id: 'Mutasi', label: 'Mutasi' },
+                          { id: 'Sewa', label: 'Sewa' }
                         ] as const).map(tabOpt => (
                           <button
                             key={tabOpt.id}
-                            onClick={() => setHistoryFilter(tabOpt.id)}
+                            onClick={() => setHistoryFilter(tabOpt.id as any)}
                             className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all tracking-wider ${
                               historyFilter === tabOpt.id 
                                 ? 'bg-white text-indigo-600 shadow-sm' 
@@ -3165,7 +3585,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 {filteredHistory.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredHistory.map((item, idx) => {
-                      const isProcessed = ['disetujui', 'selesai', 'approved', 'tuntas', 'completed'].includes((item.status || '').toLowerCase().trim());
+                      const isProcessed = ['disetujui', 'selesai', 'approved', 'tuntas', 'completed', 'terverifikasi', 'aktif'].includes((item.status || '').toLowerCase().trim());
                       const isRejected = ['ditolak', 'rejected', 'ditangguhkan'].includes((item.status || '').toLowerCase().trim());
                       
                       return (
@@ -3183,12 +3603,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                               <div className={`p-3.5 rounded-2xl shadow-sm ${
                                 item.category === 'Surat' ? 'bg-indigo-600 text-white' :
                                 item.category === 'Laporan' ? 'bg-amber-600 text-white' :
-                                item.category === 'Tamu' ? 'bg-emerald-600 text-white' : 'bg-pink-600 text-white'
+                                item.category === 'Tamu' ? 'bg-emerald-600 text-white' :
+                                item.category === 'Sewa' ? 'bg-teal-600 text-white' : 'bg-pink-600 text-white'
                               }`}>
                                 {item.category === 'Surat' && <FileText size={20}/>}
                                 {item.category === 'Laporan' && <AlertTriangle size={20}/>}
                                 {item.category === 'Tamu' && <UserCheck size={20}/>}
                                 {item.category === 'Mutasi' && <Users size={20}/>}
+                                {item.category === 'Sewa' && <Building size={20}/>}
                               </div>
                               <div className="flex flex-col items-end gap-1.5">
                                 <span className={`px-3.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${

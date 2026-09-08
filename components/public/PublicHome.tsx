@@ -6,7 +6,7 @@ import {
   Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
   Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare, Scale, HelpCircle,
   BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign, Trash2, Recycle, Trophy, Award, Zap, Wrench, Hammer,
-  Share2, MapPin, ExternalLink
+  Share2, MapPin, ExternalLink, Building
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint, CommunitySkill, UtilityOutage } from '../../types';
@@ -183,6 +183,16 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       link: '/services?tab=tamu',
       badge: 'PENTING',
       badgeColor: 'bg-[#ff3b30]'
+    },
+    { 
+      label: 'Lapor Sewa', 
+      category: 'security' as ServiceCategory,
+      icon: Building, 
+      color: 'bg-[#0d9488]', 
+      shadow: 'shadow-[#0d9488]/30', 
+      link: '/services?tab=sewa',
+      badge: '1x24 JAM',
+      badgeColor: 'bg-[#0f766e]'
     },
     { 
       label: 'Daftar Warga', 

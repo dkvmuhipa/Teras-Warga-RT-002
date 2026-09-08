@@ -1214,5 +1214,45 @@ export interface MeetingMinute {
   updatedAt?: string;
 }
 
-
-
+export interface RentalContract {
+  id: string;
+  houseId: string; // Contoh: "C10-08"
+  block: string;
+  number: string;
+  
+  // Pemilik Asli / Induk Semang
+  ownerName: string;
+  ownerPhone: string;
+  ownerAddress?: string; // Alamat tempat tinggal pemilik jika tinggal di luar RT
+  
+  // Penyewa Aktif
+  tenantName: string; // Kepala Keluarga / Penanggung Jawab Sewa
+  tenantPhone: string;
+  tenantNik?: string;
+  tenantKkNumber?: string;
+  occupantsCount: number; // Jumlah jiwa yang menempati
+  originCity?: string; // Kota / Daerah Asal
+  workOrStudy?: string; // Pekerjaan / Tempat Bekerja / Kampus
+  ktpUrl?: string;
+  kkUrl?: string;
+  
+  // Periode & Ketentuan Sewa
+  startDate: string; // YYYY-MM-DD
+  endDate: string;   // YYYY-MM-DD
+  rentType: 'Bulanan' | 'Tahunan' | 'Semesteran';
+  rentPrice?: number; // Opsional
+  depositAmount?: number; // Opsional
+  
+  // Status Kontrak & Verifikasi
+  status: 'Aktif' | 'Mendekati Habis' | 'Habis' | 'Kosong' | 'Pindah';
+  verificationStatus: 'Terverifikasi' | 'Menunggu Verifikasi' | 'Ditolak';
+  
+  // Pelapor jika diajukan via portal publik
+  reportedBy?: 'Pemilik' | 'Penyewa' | 'Pengurus RT';
+  reporterName?: string;
+  reporterPhone?: string;
+  
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
