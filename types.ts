@@ -1185,5 +1185,34 @@ export interface WaterUtilitySettings {
   autoSyncToBills?: boolean;    // Otomatis update tagihan bulanan
 }
 
+// --- MEETING MINUTES & COMMUNITY BYLAWS (NOTULA MUSYAWARAH RT) ---
+export interface MeetingDecision {
+  id: string;
+  title: string;
+  description: string;
+  category: 'Keamanan' | 'Kebersihan' | 'Keuangan & Iuran' | 'Fasum & Pembangunan' | 'Ketertiban & Sosial' | 'Lainnya';
+  status: 'Aktif' | 'Uji Coba' | 'Diarsipkan';
+  effectiveDate?: string;
+}
+
+export interface MeetingMinute {
+  id: string;
+  title: string;
+  meetingType: 'Musyawarah Warga' | 'Rapat Pengurus' | 'Rapat Darurat Fasum' | 'Rapat LPJ & Keuangan';
+  date: string; // YYYY-MM-DD
+  time: string; // misal: "20:00 - 22:30 WITA"
+  location: string;
+  leader: string;
+  notetaker: string;
+  attendeesCount: number;
+  agenda: string[];
+  summary: string;
+  decisions: MeetingDecision[];
+  documentationUrls?: string[];
+  status: 'Draft' | 'Disahkan' | 'Diarsipkan';
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 
 

@@ -221,6 +221,16 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       badgeColor: 'bg-[#059669]'
     },
     { 
+      label: 'Notula Musyawarah', 
+      category: 'admin' as ServiceCategory,
+      icon: Scale, 
+      color: 'bg-[#6366f1]', 
+      shadow: 'shadow-[#6366f1]/30', 
+      link: '/rules?tab=minutes',
+      badge: 'MUFAKAT',
+      badgeColor: 'bg-[#4338ca]'
+    },
+    { 
       label: 'Jasa Warga', 
       category: 'community' as ServiceCategory,
       icon: Wrench, 

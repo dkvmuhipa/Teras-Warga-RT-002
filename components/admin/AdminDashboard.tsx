@@ -39,11 +39,12 @@ const PanicAlertLogs = React.lazy(() => import('./PanicAlertLogs').then(m => ({ 
 const CommunityWorkManager = React.lazy(() => import('./CommunityWorkManager').then(m => ({ default: m.CommunityWorkManager })));
 const ReportManager = React.lazy(() => import('./ReportManager').then(m => ({ default: m.ReportManager })));
 const WaterMeterManager = React.lazy(() => import('./WaterMeterManager').then(m => ({ default: m.WaterMeterManager })));
+const MeetingMinutesManager = React.lazy(() => import('./MeetingMinutesManager').then(m => ({ default: m.MeetingMinutesManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle,
-  LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid
+  LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid, BookOpen
 } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 import { toast } from 'sonner';
@@ -107,6 +108,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'health', icon: Activity, label: 'Posyandu Digital', desc: 'Pemantauan kesehatan & lansia', color: 'bg-teal-50 text-teal-600 border-teal-100/60 hover:bg-teal-100/50' },
     { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan', desc: 'Pengelolaan keuangan & iuran warga', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
     { id: 'services', icon: FileText, label: 'Pusat Persuratan', desc: 'Surat pengantar warga, surat resmi RT, & surat masuk', color: 'bg-violet-50 text-violet-600 border-violet-100/60 hover:bg-violet-100/50' },
+    { id: 'meeting-minutes', icon: BookOpen, label: 'Notula Musyawarah', desc: 'Buku notula & kesepakatan rapat warga', color: 'bg-amber-50 text-amber-700 border-amber-100/60 hover:bg-amber-100/50' },
     { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu', desc: 'Aspirasi, pengaduan warga, & log wajib lapor tamu', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
     { id: 'documents', icon: FileText, label: 'Arsip Dokumen', desc: 'Penyimpanan regulasi & AD/ART', color: 'bg-purple-50 text-purple-600 border-purple-100/60 hover:bg-purple-100/50' },
     { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda', desc: 'Jadwal ronda & alarm darurat', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
@@ -130,7 +132,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (role === Role.SECRETARY) {
       const allowed = [
         'overview', 'analytics', 'residents', 
-        'health', 'officials', 'services', 'reports-warga', 'documents', 'activities', 
+        'health', 'officials', 'services', 'meeting-minutes', 'reports-warga', 'documents', 'activities', 
         'assets', 'content', 'audit', 'notifications', 'settings'
       ];
       return allowed.includes(item.id);
@@ -362,6 +364,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         );
       case 'documents':
         return <DocumentManager documents={documents} />;
+      case 'meeting-minutes':
+        return <MeetingMinutesManager />;
       case 'activities':
         return <ActivityManagement houses={houses} />;
       case 'settings':

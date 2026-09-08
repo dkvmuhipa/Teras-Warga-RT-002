@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check, Printer, Download, BookOpen, Hammer, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check, Printer, Download, BookOpen, Hammer, Zap, Clock, MapPin, CheckSquare, Bookmark, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { generateRulesPDF, generateAllRulesPDF } from '../../services/pdfService';
 import { toast } from 'sonner';
+import { MeetingMinute } from '../../types';
+import { subscribeToCollection } from '../../services/databaseService';
+import { INITIAL_MEETING_MINUTES } from '../admin/MeetingMinutesManager';
+import { Modal } from '../ui/Modal';
 
 interface PublicRulesProps {
   pdfConfig?: any;
@@ -12,10 +16,34 @@ interface PublicRulesProps {
 export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab');
+  const [mainTab, setMainTab] = useState<'rules' | 'minutes'>(tabFromUrl === 'minutes' ? 'minutes' : 'rules');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedRules, setExpandedRules] = useState<Record<string, boolean>>({});
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
+  
+  // Meeting Minutes States
+  const [minutes, setMinutes] = useState<MeetingMinute[]>(INITIAL_MEETING_MINUTES);
+  const [minutesSearch, setMinutesSearch] = useState('');
+  const [selectedMinuteForPrint, setSelectedMinuteForPrint] = useState<MeetingMinute | null>(null);
+
+  useEffect(() => {
+    if (tabFromUrl === 'minutes') {
+      setMainTab('minutes');
+    }
+  }, [tabFromUrl]);
+
+  useEffect(() => {
+    const unsub = subscribeToCollection('meetingMinutes', (data) => {
+      if (data && data.length > 0) {
+        setMinutes(data as MeetingMinute[]);
+      } else {
+        setMinutes(INITIAL_MEETING_MINUTES);
+      }
+    });
+    return () => unsub();
+  }, []);
   
   const categories = [
     { id: 'all', label: 'Semua Peraturan', desc: 'Seluruh tata tertib dan peraturan lingkungan RT 02 Huntap Tondo 2' },
@@ -551,6 +579,48 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
 
   const activeCategoryDesc = categories.find(c => c.id === selectedCategory)?.desc || '';
 
+  const handleShareMinuteWhatsApp = (m: MeetingMinute) => {
+    const decisionList = m.decisions.map((d, i) => 
+      `${i + 1}. *${d.title}* (${d.category})\n   _${d.description}_\n`
+    ).join('\n');
+
+    const message = 
+`📜 *HASIL NOTULA & KESEPAKATAN MUSYAWARAH RT 02*
+*RT 002 / RW 020 Kelurahan Tondo, Kota Palu*
+───────────────────────
+📌 *Agenda*: ${m.title}
+🗓️ *Tanggal*: ${new Date(m.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+⏰ *Waktu*: ${m.time}
+📍 *Tempat*: ${m.location}
+👥 *Kehadiran*: ${m.attendeesCount} Kepala Keluarga
+👤 *Pimpinan*: ${m.leader}
+
+📋 *POIN KEPUTUSAN YANG DISEPAKATI:*
+${decisionList || '-'}
+
+💬 *Ringkasan*:
+${m.summary}
+
+───────────────────────
+_Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
+📲 Akses notula lengkap di: https://teraswarga02.web.app/rules?tab=minutes`;
+
+    const encoded = encodeURIComponent(message);
+    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+  };
+
+  const filteredMinutesForPublic = minutes.filter((m) => {
+    const q = minutesSearch.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      m.title.toLowerCase().includes(q) ||
+      m.meetingType.toLowerCase().includes(q) ||
+      m.summary.toLowerCase().includes(q) ||
+      m.agenda.some(a => a.toLowerCase().includes(q)) ||
+      m.decisions.some(d => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q) || d.category.toLowerCase().includes(q))
+    );
+  });
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
@@ -570,11 +640,46 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
       {/* Back Button */}
       <motion.button 
         onClick={() => navigate('/')}
-        className="mb-8 flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs font-black uppercase tracking-wider transition-all bg-slate-50 hover:bg-slate-100/80 px-4 py-2.5 rounded-xl border border-slate-100 cursor-pointer"
+        className="mb-6 flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs font-black uppercase tracking-wider transition-all bg-slate-50 hover:bg-slate-100/80 px-4 py-2.5 rounded-xl border border-slate-100 cursor-pointer"
       >
         <ArrowLeft size={16} strokeWidth={2.5} /> Kembali ke Beranda
       </motion.button>
 
+      {/* Main Tab Switcher: 13 BAB Rules vs Meeting Minutes */}
+      <div className="flex justify-center mb-8">
+        <div className="bg-slate-100/90 p-1.5 rounded-3xl flex flex-wrap items-center justify-center gap-1.5 border border-slate-200 shadow-inner max-w-2xl w-full">
+          <button
+            type="button"
+            onClick={() => setMainTab('rules')}
+            className={`flex-1 min-w-[200px] flex items-center justify-center gap-2.5 py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              mainTab === 'rules'
+                ? 'bg-white text-slate-900 shadow-md scale-[1.02]'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+            }`}
+          >
+            <Scale size={16} className={mainTab === 'rules' ? 'text-emerald-600' : ''} />
+            <span>13 BAB Peraturan Lingkungan</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('minutes')}
+            className={`flex-1 min-w-[200px] flex items-center justify-center gap-2.5 py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              mainTab === 'minutes'
+                ? 'bg-white text-slate-900 shadow-md scale-[1.02]'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+            }`}
+          >
+            <BookOpen size={16} className={mainTab === 'minutes' ? 'text-indigo-600' : ''} />
+            <span>Buku Notula &amp; Kesepakatan</span>
+            <span className="px-2 py-0.5 bg-amber-100 text-amber-900 text-[10px] font-black rounded-lg">
+              {minutes.length} Sidang
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {mainTab === 'rules' ? (
       <div id="rules" className="bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-slate-100/40">
         {/* Header section with rich design */}
         <div className="text-center mb-12 relative">
@@ -1081,6 +1186,363 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
             </AnimatePresence>
           </motion.div>
         </div>
+      </div>
+      ) : (
+        /* Minutes Tab View */
+        <div id="minutes" className="bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-slate-100/40">
+          {/* Header section */}
+          <div className="text-center mb-10 relative">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-900 text-[11px] font-black uppercase tracking-widest mb-4">
+              <BookOpen size={14} className="text-amber-600" />
+              <span>Buku Notula Musyawarah RT 02</span>
+            </div>
+            
+            <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight font-serif">
+              Hasil Musyawarah &amp; Kesepakatan Warga
+            </h1>
+            
+            <p className="text-slate-600 text-xs md:text-sm max-w-2xl mx-auto mt-2 leading-relaxed font-sans">
+              Arsip transparan seluruh hasil rapat RT 02 Huntap Tondo 2, Berita Acara musyawarah mufakat warga, dan aturan kesepakatan resmi yang disahkan bersama.
+            </p>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mt-6">
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Musyawarah</span>
+                <span className="text-xl font-black text-slate-800 mt-0.5 block">{minutes.length} Sidang</span>
+              </div>
+              <div className="p-3.5 bg-amber-50/50 rounded-2xl border border-amber-100 text-center">
+                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Aturan Disepakati</span>
+                <span className="text-xl font-black text-amber-900 mt-0.5 block">
+                  {minutes.reduce((acc, m) => acc + (m.decisions?.length || 0), 0)} Kesepakatan
+                </span>
+              </div>
+              <div className="p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-center col-span-2 sm:col-span-1">
+                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Status Legitimasi</span>
+                <span className="text-xl font-black text-emerald-900 mt-0.5 block">Kuorum Sah</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Bar for Minutes */}
+          <div className="mb-8">
+            <div className="relative max-w-xl mx-auto">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input
+                type="text"
+                placeholder="Cari kata kunci keputusan (misal: portal, siskamling, sampah, tenda, iuran)..."
+                value={minutesSearch}
+                onChange={(e) => setMinutesSearch(e.target.value)}
+                className="w-full pl-11 pr-10 py-3 bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all shadow-inner"
+              />
+              {minutesSearch && (
+                <button
+                  type="button"
+                  onClick={() => setMinutesSearch('')}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Minutes Cards List */}
+          <div className="space-y-6">
+            {filteredMinutesForPublic.length > 0 ? (
+              filteredMinutesForPublic.map((m) => (
+                <motion.div
+                  key={m.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all overflow-hidden"
+                >
+                  {/* Top Bar / Meta */}
+                  <div className="p-5 md:p-6 pb-4 border-b border-slate-100 bg-gradient-to-r from-slate-50/70 to-white flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div className="space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                          m.meetingType === 'Musyawarah Warga' ? 'bg-amber-100 text-amber-900 border border-amber-200' :
+                          m.meetingType === 'Rapat Pengurus' ? 'bg-indigo-100 text-indigo-900 border border-indigo-200' :
+                          m.meetingType === 'Rapat Darurat Fasum' ? 'bg-rose-100 text-rose-900 border border-rose-200' :
+                          'bg-emerald-100 text-emerald-900 border border-emerald-200'
+                        }`}>
+                          {m.meetingType}
+                        </span>
+
+                        <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                          <Check size={12} strokeWidth={3} /> {m.status || 'Disahkan'}
+                        </span>
+                      </div>
+
+                      <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight font-serif pt-1">
+                        {m.title}
+                      </h3>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500">
+                      <span className="px-3 py-1 bg-white border border-slate-200 rounded-xl flex items-center gap-1.5 shadow-2xs">
+                        <Calendar size={13} className="text-amber-600" />
+                        {new Date(m.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                      <span className="px-3 py-1 bg-white border border-slate-200 rounded-xl flex items-center gap-1.5 shadow-2xs">
+                        <Clock size={13} className="text-slate-400" />
+                        {m.time}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-5 md:p-6 space-y-5">
+                    {/* Location & Attendees Bar */}
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin size={14} className="text-rose-500 shrink-0" />
+                        <span className="font-bold">{m.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Users size={14} className="text-indigo-500 shrink-0" />
+                        <span>Kehadiran: <strong className="text-slate-900">{m.attendeesCount} KK</strong> (Kuorum Sah)</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Scale size={14} className="text-slate-400 shrink-0" />
+                        <span>Pimpinan: <strong className="text-slate-800">{m.leader}</strong></span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <FileText size={14} className="text-slate-400 shrink-0" />
+                        <span>Notulis: <strong className="text-slate-800">{m.notetaker}</strong></span>
+                      </div>
+                    </div>
+
+                    {/* Agenda Tags */}
+                    {m.agenda && m.agenda.length > 0 && (
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                          Agenda Yang Dibahas:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {m.agenda.map((ag, i) => (
+                            <span key={i} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-xl text-[11px] font-medium transition-colors">
+                              • {ag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Summary */}
+                    {m.summary && (
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                          Latar Belakang &amp; Ringkasan Musyawarah:
+                        </span>
+                        <p className="text-xs text-slate-700 leading-relaxed bg-amber-50/30 p-3.5 rounded-2xl border border-amber-100/60 font-sans">
+                          {m.summary}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Decisions Box */}
+                    <div className="space-y-2.5 pt-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-serif">
+                          <CheckSquare size={15} className="text-emerald-600" />
+                          Poin Keputusan yang Disepakati Bersama ({m.decisions?.length || 0}):
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2.5">
+                        {m.decisions.map((dec, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3.5 bg-slate-50/80 hover:bg-slate-50 border border-slate-200/70 rounded-2xl space-y-1.5 transition-colors"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[9px] font-black uppercase tracking-wider">
+                                {dec.category}
+                              </span>
+                              {dec.effectiveDate && (
+                                <span className="text-[10px] text-slate-400 font-bold">
+                                  Mulai berlaku: {new Date(dec.effectiveDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </span>
+                              )}
+                            </div>
+
+                            <h4 className="font-bold text-xs md:text-sm text-slate-900 font-serif">
+                              {idx + 1}. {dec.title}
+                            </h4>
+
+                            <p className="text-xs text-slate-600 leading-relaxed font-sans pl-3 border-l-2 border-indigo-200">
+                              {dec.description}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Bar: WhatsApp Broadcast & Print A4 */}
+                    <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-end gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => handleShareMinuteWhatsApp(m)}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                      >
+                        <MessageCircle size={14} />
+                        <span>Bagikan ke Grup WA</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMinuteForPrint(m)}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                      >
+                        <Printer size={14} />
+                        <span>Lembar Berita Acara A4</span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="p-12 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                <BookOpen size={40} className="text-slate-300 mx-auto mb-3" />
+                <h4 className="font-bold text-slate-800 text-sm">Tidak Ada Notula yang Cocok</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                  Kata kunci "{minutesSearch}" tidak ditemukan. Silakan bersihkan pencarian untuk melihat semua hasil musyawarah warga.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setMinutesSearch('')}
+                  className="mt-4 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all cursor-pointer"
+                >
+                  Tampilkan Semua Notula
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Cetak Berita Acara A4 Notula Musyawarah untuk Warga */}
+      {selectedMinuteForPrint && (
+        <Modal
+          isOpen={!!selectedMinuteForPrint}
+          onClose={() => setSelectedMinuteForPrint(null)}
+          title="Salinan Berita Acara Musyawarah RT 002"
+          maxWidth="max-w-3xl"
+        >
+          <div className="space-y-6 p-2 text-left">
+            {/* Printable Paper Canvas */}
+            <div id="print-canvas-resident" className="p-6 md:p-8 bg-white border border-slate-300 rounded-2xl shadow-sm text-slate-900 space-y-6 font-serif">
+              {/* Kop Surat RT */}
+              <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
+                <h2 className="text-base sm:text-lg font-black tracking-wider uppercase">
+                  RUKUN TETANGGA 002 / RUKUN WARGA 020
+                </h2>
+                <h3 className="text-xs sm:text-sm font-bold tracking-wide uppercase">
+                  KELURAHAN TONDO • KECAMATAN MANTIKULORE • KOTA PALU
+                </h3>
+                <p className="text-[11px] text-slate-600 font-sans">
+                  Kawasan Hunian Tetap (Huntap) Tondo 2, Kode Pos 94119 • Narahubung: +62 859-6119-4621
+                </p>
+              </div>
+
+              {/* Title */}
+              <div className="text-center space-y-1">
+                <h4 className="text-sm font-black uppercase underline tracking-wider font-sans">
+                  BERITA ACARA &amp; SALINAN NOTULA HASIL MUSYAWARAH WARGA
+                </h4>
+                <p className="text-xs font-bold font-sans text-slate-600">
+                  Nomor Berkas: BA-{selectedMinuteForPrint.date.replace(/-/g, '')}/RT02-TND/2026
+                </p>
+              </div>
+
+              {/* Detail Meeting Info */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans space-y-1.5">
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="text-slate-500">Agenda Musyawarah:</span>
+                  <span className="col-span-2 font-bold">{selectedMinuteForPrint.title}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="text-slate-500">Hari, Tanggal &amp; Waktu:</span>
+                  <span className="col-span-2 font-bold">
+                    {new Date(selectedMinuteForPrint.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • {selectedMinuteForPrint.time}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="text-slate-500">Tempat Pelaksanaan:</span>
+                  <span className="col-span-2 font-bold">{selectedMinuteForPrint.location}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="text-slate-500">Pimpinan &amp; Notulis:</span>
+                  <span className="col-span-2 font-bold">{selectedMinuteForPrint.leader} / {selectedMinuteForPrint.notetaker}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="text-slate-500">Tingkat Kehadiran:</span>
+                  <span className="col-span-2 font-bold">{selectedMinuteForPrint.attendeesCount} Kepala Keluarga (Kuorum Musyawarah Sah)</span>
+                </div>
+              </div>
+
+              {/* Agreed Decisions */}
+              <div className="space-y-3 font-sans">
+                <h5 className="font-black text-xs uppercase tracking-wider border-b pb-1">
+                  POIN-POIN KEPUTUSAN YANG DISEPAKATI &amp; BERLAKU:
+                </h5>
+                <ol className="space-y-3 text-xs">
+                  {selectedMinuteForPrint.decisions.map((dec, idx) => (
+                    <li key={idx} className="space-y-1">
+                      <p className="font-bold text-slate-900">
+                        {idx + 1}. {dec.title} <span className="text-[10px] text-slate-500 font-normal">({dec.category})</span>
+                      </p>
+                      <p className="text-slate-700 leading-relaxed pl-4">
+                        {dec.description}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {/* Signatures */}
+              <div className="pt-8 grid grid-cols-2 text-center text-xs font-sans gap-8">
+                <div className="space-y-16">
+                  <p>Notulis Musyawarah,</p>
+                  <div>
+                    <p className="font-bold underline">{selectedMinuteForPrint.notetaker}</p>
+                    <p className="text-[10px] text-slate-500">Sekretaris RT 002</p>
+                  </div>
+                </div>
+
+                <div className="space-y-16">
+                  <p>Mengetahui &amp; Mengesahkan,<br/>Ketua RT 002 / RW 020</p>
+                  <div>
+                    <p className="font-bold underline">{selectedMinuteForPrint.leader}</p>
+                    <p className="text-[10px] text-slate-500">Ketua RT 002 Kel. Tondo</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Print Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedMinuteForPrint(null)}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer"
+              >
+                <Printer size={14} />
+                <span>Cetak Lembar A4</span>
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
         {/* Footer info banner */}
         <div className="mt-12 p-8 bg-gradient-to-br from-indigo-900 via-slate-900 to-[#041410] rounded-[2.5rem] text-center relative overflow-hidden shadow-lg shadow-indigo-950/25">
@@ -1099,7 +1561,6 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
             </div>
           </div>
         </div>
-      </div>
-    </motion.div>
-  );
-};
+      </motion.div>
+    );
+  };

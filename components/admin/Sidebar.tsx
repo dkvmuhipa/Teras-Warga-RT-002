@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert, AlertTriangle,
-  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets
+  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
@@ -120,6 +120,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Layanan & Pelaporan", 
       items: [
         { id: 'services', icon: FileText, label: 'Pusat Persuratan' },
+        { id: 'meeting-minutes', icon: BookOpen, label: 'Notula Musyawarah' },
         { id: 'reports-lpj', icon: Award, label: 'Laporan & LPJ RT' },
         { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
@@ -160,7 +161,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       } else if (role === Role.SECRETARY) {
         isAllowed = [
           'overview', 'analytics', 'residents', 
-          'health', 'officials', 'services', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
+          'health', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       }
