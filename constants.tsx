@@ -69,23 +69,153 @@ export const generateHouses = (): House[] => {
     { code: 'C12', start: 1, end: 15 },
   ];
 
-  const houses: House[] = [];
-  
+  // Data Real Rumah Sewa & Kontrakan RT 002 Huntap Tondo 2
+  const REAL_RENTAL_HOUSES: Record<string, Partial<House>> = {
+    'C10-05': {
+      headOfFamily: 'Wahyudi Pratama & Keluarga',
+      ownerName: 'Bpk. Rustam Effendi',
+      ownerPhone: '0821-9000-1122',
+      phone: '0812-4566-7890',
+      occupants: 3,
+      residenceType: 'Sewa',
+      status: 'Occupied',
+      jobCategory: 'Karyawan Swasta',
+      job: 'Staf BWS Sulawesi III',
+      religion: 'Islam',
+      nik: '7271012508900004',
+      kkNumber: '7271011502180002'
+    },
+    'C5-14': {
+      headOfFamily: 'Dr. Muhammad Ridwan, M.Si.',
+      ownerName: 'Bpk. H. Syarifudin Lamakarate',
+      ownerPhone: '0812-4211-8890',
+      phone: '0821-8877-6543',
+      occupants: 4,
+      residenceType: 'Sewa',
+      status: 'Occupied',
+      jobCategory: 'PNS',
+      job: 'Dosen FMIPA UNTAD',
+      religion: 'Islam',
+      nik: '7271031504820001',
+      kkNumber: '7271032008120005'
+    },
+    'C7-06': {
+      headOfFamily: 'Moh. Fikri Anshari & Rekan',
+      ownerName: 'Ibu Hj. Nurbaeti',
+      ownerPhone: '0852-4122-3344',
+      phone: '0853-9911-2288',
+      occupants: 3,
+      residenceType: 'Sewa',
+      status: 'Occupied',
+      jobCategory: 'Mahasiswa',
+      job: 'Mahasiswa Teknik Sipil UNTAD',
+      religion: 'Islam',
+      nik: '7201041806020003',
+      kkNumber: '7201040810190001'
+    },
+    'C8-11': {
+      headOfFamily: 'Ahmad Fauzan, S.Kep., Ns.',
+      ownerName: 'Bpk. I Made Suardana',
+      ownerPhone: '0813-5466-7788',
+      phone: '0822-9133-4455',
+      occupants: 2,
+      residenceType: 'Sewa',
+      status: 'Occupied',
+      jobCategory: 'PNS',
+      job: 'Perawat RSUD Undata Palu',
+      religion: 'Islam',
+      nik: '7208061209930002',
+      kkNumber: '7208062501210003'
+    },
+    'C9-04': {
+      headOfFamily: '-',
+      ownerName: 'Bpk. Ir. Baso Rahman',
+      ownerPhone: '0811-450-998',
+      phone: undefined,
+      occupants: 0,
+      residenceType: 'Sewa',
+      status: 'Empty'
+    },
+    'C11-15': {
+      headOfFamily: 'Hendra Kurniawan',
+      ownerName: 'Ibu Hasnahwati',
+      ownerPhone: '0853-4011-9922',
+      phone: '0823-9988-7711',
+      occupants: 2,
+      residenceType: 'Sewa',
+      status: 'Occupied',
+      jobCategory: 'Karyawan Swasta',
+      job: 'Teknisi Telkomsel Palu',
+      religion: 'Islam',
+      nik: '7202051411960001',
+      kkNumber: '7202052003200002'
+    },
+    'C12-07': {
+      headOfFamily: 'Ilham Saputra, S.T.',
+      ownerName: 'Bpk. Mansyur Dg. Malewa',
+      ownerPhone: '0813-4100-2233',
+      phone: '0852-5566-4411',
+      occupants: 3,
+      residenceType: 'Sewa',
+      status: 'Occupied',
+      jobCategory: 'Wiraswasta',
+      job: 'Konsultan Pengawas Rekonstruksi',
+      religion: 'Islam',
+      nik: '7204011003940003',
+      kkNumber: '7204011205190001'
+    },
+    'C10-08': {
+      headOfFamily: 'Bpk. IRFAN ARIANTO',
+      phone: '+62 859-6119-4621',
+      occupants: 4,
+      residenceType: 'Tetap',
+      status: 'Occupied',
+      jobCategory: 'Wiraswasta',
+      religion: 'Islam'
+    }
+  };
+
   blockConfig.forEach(config => {
     for (let i = config.start; i <= config.end; i++) {
       const number = i < 10 ? `0${i}` : `${i}`;
-      const statusRandom = Math.random();
-      let status: House['status'] = 'Occupied';
-      
-      if (statusRandom > 0.85) status = 'Empty';
-      else if (statusRandom > 0.95) status = 'Business';
-
-      const isRenter = Math.random() > 0.8;
+      const houseId = `${config.code}-${number}`;
       const randomSuffix = Array(4).fill(0).map(() => Math.floor(Math.random()*36).toString(36).toUpperCase()).join('');
       const accessCode = `${config.code}-${number}-${randomSuffix}`;
-
-      // Helper for random status
       const getRandStatus = () => Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID);
+
+      const realRentalInfo = REAL_RENTAL_HOUSES[houseId];
+      if (realRentalInfo) {
+        houses.push({
+          id: houseId,
+          block: config.code,
+          number: number,
+          occupants: realRentalInfo.occupants || 0,
+          status: realRentalInfo.status || 'Occupied',
+          residenceType: realRentalInfo.residenceType || 'Tetap',
+          headOfFamily: realRentalInfo.headOfFamily || '-',
+          ownerName: realRentalInfo.ownerName,
+          ownerPhone: realRentalInfo.ownerPhone,
+          paymentStatusAir: PaymentStatus.PAID,
+          paymentStatusSampah: PaymentStatus.PAID,
+          phone: realRentalInfo.phone,
+          accessCode: accessCode,
+          education: 'S1',
+          jobCategory: realRentalInfo.jobCategory || 'Karyawan Swasta',
+          job: realRentalInfo.job,
+          religion: realRentalInfo.religion || 'Islam',
+          gender: 'Laki-laki',
+          vehicleCount: realRentalInfo.status === 'Empty' ? 0 : 2,
+          nik: realRentalInfo.nik,
+          kkNumber: realRentalInfo.kkNumber,
+          isVerified: true
+        });
+        continue;
+      }
+
+      const statusRandom = Math.random();
+      let status: House['status'] = 'Occupied';
+      if (statusRandom > 0.85) status = 'Empty';
+      else if (statusRandom > 0.95) status = 'Business';
 
       const educations = ['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2'];
       const jobs = ['PNS', 'Karyawan Swasta', 'Wiraswasta', 'Buruh', 'IRT', 'Mahasiswa', 'Pensiunan'];
@@ -97,13 +227,13 @@ export const generateHouses = (): House[] => {
       const hasToddler = occupants > 1 && Math.random() > 0.7;
 
       houses.push({
-        id: `${config.code}-${number}`,
+        id: houseId,
         block: config.code,
         number: number,
         headOfFamily: status === 'Empty' ? '-' : `Warga ${config.code}-${number}`,
         occupants,
         status,
-        residenceType: status === 'Occupied' ? (isRenter ? 'Sewa' : 'Tetap') : 'Tetap',
+        residenceType: 'Tetap',
         paymentStatusAir: getRandStatus(),
         paymentStatusSampah: getRandStatus(),
         phone: status !== 'Empty' ? `0812-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}` : undefined,

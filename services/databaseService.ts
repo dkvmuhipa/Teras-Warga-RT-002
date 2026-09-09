@@ -1309,7 +1309,7 @@ export const updateHouseData = async (id: string, updates: any) => {
       const cleanUpdates = deepSanitize(updates);
       cleanUpdates.updatedAt = new Date().toISOString();
       const houseRef = doc(db, HOUSES_COL, id);
-      await updateDoc(houseRef, cleanUpdates);
+      await setDoc(houseRef, cleanUpdates, { merge: true });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `${HOUSES_COL}/${id}`);
     }
@@ -3594,6 +3594,19 @@ export const deleteDocumentFromCollection = async (collectionName: string, id: s
         return await deleteDoc(docRef);
     } catch (error) {
         handleFirestoreError(error, OperationType.DELETE, `${collectionName}/${id}`);
+    }
+};
+
+export const setDocumentInCollection = async (collectionName: string, id: string, data: any, merge: boolean = true) => {
+    if (!isFirebaseConfigured || !db) return;
+    try {
+        const docRef = doc(db, collectionName, id);
+        return await setDoc(docRef, {
+            ...data,
+            updatedAt: new Date().toISOString()
+        }, { merge });
+    } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `${collectionName}/${id}`);
     }
 };
 

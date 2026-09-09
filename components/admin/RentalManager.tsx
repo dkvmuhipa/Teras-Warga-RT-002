@@ -12,6 +12,7 @@ import {
   addToCollection, 
   updateDocumentInCollection, 
   deleteDocumentFromCollection,
+  setDocumentInCollection,
   updateHouseData
 } from '../../services/databaseService';
 import { generateHouses, RT_NAME } from '../../constants';
@@ -200,6 +201,81 @@ export const REAL_RENTAL_CONTRACTS: RentalContract[] = [
 
 export const INITIAL_RENTAL_CONTRACTS = REAL_RENTAL_CONTRACTS;
 
+const VALID_RT02_BLOCKS = ['C5', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12'];
+
+export const isObsoleteOrDummyRental = (r: any): boolean => {
+  if (!r) return true;
+  const houseId = (r.houseId || '').trim().toUpperCase();
+  if (!houseId) return true;
+
+  // Extract block prefix
+  const blockPart = (r.block || houseId.split('-')[0] || '').trim().toUpperCase();
+  if (!VALID_RT02_BLOCKS.includes(blockPart)) {
+    return true; // Outside RT 02 (e.g. B04, A02, D03, C08, etc.)
+  }
+
+  // Check known obsolete dummy markers
+  const owner = (r.ownerName || '').toLowerCase();
+  const address = (r.ownerAddress || '').toLowerCase();
+  const tenant = (r.tenantName || '').toLowerCase();
+
+  if (
+    address.includes('jakarta') || 
+    address.includes('melati') || 
+    address.includes('garuda') || 
+    owner.includes('bambang') || 
+    owner.includes('abdullah') ||
+    tenant.includes('budi santoso') || 
+    tenant.includes('siti aminah')
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+// Compute live dynamic status based on dates
+export const calculateEffectiveStatus = (r: RentalContract): 'Aktif' | 'Mendekati Habis' | 'Habis' | 'Kosong' | 'Pindah' => {
+  if (r.status === 'Kosong' || r.status === 'Pindah') return r.status;
+  if (!r.endDate) return r.status;
+
+  const now = new Date();
+  const end = new Date(r.endDate);
+  const diffTime = end.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return 'Habis';
+  if (diffDays <= 30) return 'Mendekati Habis';
+  return 'Aktif';
+};
+
+// Sync a single rental record to houses collection in database
+export const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVacant: boolean = false) => {
+  if (!rental.houseId) return false;
+  try {
+    const houseUpdates: Partial<House> = {
+      residenceType: 'Sewa',
+      ownerName: rental.ownerName || '',
+      ownerPhone: rental.ownerPhone || '',
+      status: isVacant || rental.status === 'Kosong' ? 'Empty' : 'Occupied',
+      headOfFamily: isVacant || rental.status === 'Kosong' ? '-' : (rental.tenantName || '-'),
+      phone: isVacant || rental.status === 'Kosong' ? '' : (rental.tenantPhone || ''),
+      occupants: isVacant || rental.status === 'Kosong' ? 0 : (Number(rental.occupantsCount) || 1),
+    };
+    if (rental.tenantNik) {
+      houseUpdates.nik = rental.tenantNik;
+    }
+    if (rental.tenantKkNumber) {
+      houseUpdates.kkNumber = rental.tenantKkNumber;
+    }
+    await updateHouseData(rental.houseId, houseUpdates);
+    return true;
+  } catch (e) {
+    console.error('Failed to sync house with rental data:', e);
+    return false;
+  }
+};
+
 interface RentalManagerProps {
   houses?: House[];
 }
@@ -209,6 +285,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [activeTab, setActiveTab] = useState<'contracts' | 'integration'>('contracts');
+  const [cleanedOnce, setCleanedOnce] = useState(false);
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -246,32 +323,61 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     notes: ''
   });
 
-  // Real-time subscription to rentalContracts collection
+  // Real-time subscription to rentalContracts collection with auto-cleanup & auto-seeding
   useEffect(() => {
-    const unsub = subscribeToCollection('rentalContracts', (data) => {
+    const unsub = subscribeToCollection('rentalContracts', async (data) => {
       if (data && data.length > 0) {
-        setRentals(data as RentalContract[]);
+        // Filter out obsolete/dummy items
+        const obsoleteDocs = data.filter(isObsoleteOrDummyRental);
+        const validDocs = (data as RentalContract[]).filter(r => !isObsoleteOrDummyRental(r));
+
+        // Purge obsolete dummy documents from Firestore
+        if (obsoleteDocs.length > 0 && !cleanedOnce) {
+          setCleanedOnce(true);
+          console.warn(`[RentalManager] Menghapus ${obsoleteDocs.length} data kontrakan dummy usang dari database...`);
+          for (const obs of obsoleteDocs) {
+            if (obs.id) {
+              await deleteDocumentFromCollection('rentalContracts', obs.id);
+            }
+          }
+        }
+
+        // If no valid real docs, seed REAL_RENTAL_CONTRACTS and sync to houses
+        if (validDocs.length === 0) {
+          setRentals(REAL_RENTAL_CONTRACTS);
+          for (const item of REAL_RENTAL_CONTRACTS) {
+            await setDocumentInCollection('rentalContracts', item.id, item);
+            const eff = calculateEffectiveStatus(item);
+            await syncRentalWithHouse(item, eff === 'Kosong');
+          }
+        } else {
+          // Check if any authentic RT 02 contracts are missing from validDocs
+          const existingHouseIds = new Set(validDocs.map(r => r.houseId.toUpperCase()));
+          const missingReal = REAL_RENTAL_CONTRACTS.filter(r => !existingHouseIds.has(r.houseId.toUpperCase()));
+
+          if (missingReal.length > 0) {
+            for (const item of missingReal) {
+              await setDocumentInCollection('rentalContracts', item.id, item);
+              const eff = calculateEffectiveStatus(item);
+              await syncRentalWithHouse(item, eff === 'Kosong');
+            }
+            setRentals([...validDocs, ...missingReal]);
+          } else {
+            setRentals(validDocs);
+          }
+        }
       } else {
-        setRentals(INITIAL_RENTAL_CONTRACTS);
+        // Initial empty collection: seed authentic real contracts and sync
+        setRentals(REAL_RENTAL_CONTRACTS);
+        for (const item of REAL_RENTAL_CONTRACTS) {
+          await setDocumentInCollection('rentalContracts', item.id, item);
+          const eff = calculateEffectiveStatus(item);
+          await syncRentalWithHouse(item, eff === 'Kosong');
+        }
       }
     });
     return () => unsub();
-  }, []);
-
-  // Compute live dynamic status based on dates
-  const calculateEffectiveStatus = (r: RentalContract): 'Aktif' | 'Mendekati Habis' | 'Habis' | 'Kosong' | 'Pindah' => {
-    if (r.status === 'Kosong' || r.status === 'Pindah') return r.status;
-    if (!r.endDate) return r.status;
-
-    const now = new Date();
-    const end = new Date(r.endDate);
-    const diffTime = end.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) return 'Habis';
-    if (diffDays <= 30) return 'Mendekati Habis';
-    return 'Aktif';
-  };
+  }, [cleanedOnce]);
 
   // KPIs
   const stats = useMemo(() => {
@@ -345,33 +451,6 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     return effectiveHouses.filter((h) => h.residenceType === 'Sewa');
   }, [effectiveHouses]);
 
-  // Sync a single rental record to houses collection in database
-  const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVacant: boolean = false) => {
-    if (!rental.houseId) return false;
-    try {
-      const houseUpdates: Partial<House> = {
-        residenceType: 'Sewa',
-        ownerName: rental.ownerName || '',
-        ownerPhone: rental.ownerPhone || '',
-        status: isVacant || rental.status === 'Kosong' ? 'Empty' : 'Occupied',
-        headOfFamily: isVacant || rental.status === 'Kosong' ? '-' : (rental.tenantName || '-'),
-        phone: isVacant || rental.status === 'Kosong' ? '' : (rental.tenantPhone || ''),
-        occupants: isVacant || rental.status === 'Kosong' ? 0 : (Number(rental.occupantsCount) || 1),
-      };
-      if (rental.tenantNik) {
-        houseUpdates.nik = rental.tenantNik;
-      }
-      if (rental.tenantKkNumber) {
-        houseUpdates.kkNumber = rental.tenantKkNumber;
-      }
-      await updateHouseData(rental.houseId, houseUpdates);
-      return true;
-    } catch (e) {
-      console.error('Failed to sync house with rental data:', e);
-      return false;
-    }
-  };
-
   // Batch sync all rental contracts to resident registry
   const handleBatchSyncToResidents = async () => {
     if (rentals.length === 0) {
@@ -392,17 +471,25 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
 
   // Apply authentic RT 02 Huntap Tondo 2 data & sync directly
   const handleApplyRealData = async () => {
-    if (!window.confirm('Muat data real 7 rumah sewa & kontrakan RT 002 Huntap Tondo 2 dan sinkronkan langsung ke database warga?')) return;
+    if (!window.confirm('Muat ulang data real 7 rumah sewa & kontrakan RT 002 Huntap Tondo 2 dan bersihkan data dummy?')) return;
     try {
       toast.loading('Menerapkan data real RT 02 Huntap Tondo 2...', { id: 'seed-rentals' });
+
+      // Clean up any obsolete dummy contracts first
+      for (const r of rentals) {
+        if (isObsoleteOrDummyRental(r) && r.id) {
+          await deleteDocumentFromCollection('rentalContracts', r.id);
+        }
+      }
+
       for (const item of REAL_RENTAL_CONTRACTS) {
-        await updateDocumentInCollection('rentalContracts', item.id, item);
+        await setDocumentInCollection('rentalContracts', item.id, item);
         const eff = calculateEffectiveStatus(item);
         await syncRentalWithHouse(item, eff === 'Kosong');
       }
       setRentals(REAL_RENTAL_CONTRACTS);
       toast.dismiss('seed-rentals');
-      toast.success('Data real kontrakan RT 02 Huntap Tondo 2 berhasil dimuat dan terintegrasi penuh!');
+      toast.success('Data real 7 kontrakan RT 02 Huntap Tondo 2 berhasil dimuat dan terintegrasi penuh!');
     } catch (err) {
       toast.dismiss('seed-rentals');
       console.error(err);
@@ -467,12 +554,13 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
 
     try {
       if (editingRental) {
-        await updateDocumentInCollection('rentalContracts', editingRental.id, payload);
+        await setDocumentInCollection('rentalContracts', editingRental.id, payload);
         toast.success('Data rumah sewa berhasil diperbarui!');
       } else {
-        payload.id = `rent-${Date.now()}`;
+        const id = `rent-${Date.now()}`;
+        payload.id = id;
         payload.createdAt = new Date().toISOString();
-        await addToCollection('rentalContracts', payload as RentalContract);
+        await setDocumentInCollection('rentalContracts', id, payload as RentalContract);
         toast.success('Data rumah sewa baru berhasil ditambahkan!');
       }
 
@@ -504,7 +592,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
   // Verify / Approve self-reported rental
   const handleVerifyStatus = async (rental: RentalContract, status: 'Terverifikasi' | 'Ditolak') => {
     try {
-      await updateDocumentInCollection('rentalContracts', rental.id, {
+      await setDocumentInCollection('rentalContracts', rental.id, {
         verificationStatus: status,
         updatedAt: new Date().toISOString()
       });
