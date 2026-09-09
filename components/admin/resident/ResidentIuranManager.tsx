@@ -79,15 +79,15 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
     return houses.filter(h => {
       const isOccupied = h.status === 'Occupied';
       const matchesSearch = 
-        h.headOfFamily.toLowerCase().includes(searchLower) || 
-        h.block.toLowerCase().includes(searchLower) ||
-        h.number.toLowerCase().includes(searchLower) ||
+        (h.headOfFamily || '').toLowerCase().includes(searchLower) || 
+        (h.block || '').toLowerCase().includes(searchLower) ||
+        (h.number || '').toLowerCase().includes(searchLower) ||
         (h.ownerName && h.ownerName.toLowerCase().includes(searchLower));
       return isOccupied && matchesSearch;
     }).sort((a, b) => {
-      const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
+      const blockCompare = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true });
       if (blockCompare !== 0) return blockCompare;
-      return a.number.localeCompare(b.number, undefined, { numeric: true });
+      return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true });
     });
   }, [houses, searchLower]);
 
@@ -95,15 +95,15 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
     return iuranPayments.filter(p => {
       const matchesMonth = isMonthMatch(p.month, selectedMonth);
       const matchesSearch = 
-        p.headOfFamily.toLowerCase().includes(searchLower) || 
-        p.block.toLowerCase().includes(searchLower) ||
-        p.number.toLowerCase().includes(searchLower);
+        (p.headOfFamily || '').toLowerCase().includes(searchLower) || 
+        (p.block || '').toLowerCase().includes(searchLower) ||
+        (p.number || '').toLowerCase().includes(searchLower);
       const matchesType = filterType === 'All' || p.type === filterType || p.type === 'Both';
       return matchesMonth && matchesSearch && matchesType;
     }).sort((a, b) => {
-      const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
+      const blockCompare = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true });
       if (blockCompare !== 0) return blockCompare;
-      return a.number.localeCompare(b.number, undefined, { numeric: true });
+      return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true });
     });
   }, [iuranPayments, selectedMonth, searchLower, filterType]);
 

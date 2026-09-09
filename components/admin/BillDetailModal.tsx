@@ -13,7 +13,7 @@ interface BillDetailModalProps {
 
 export const BillDetailModal: React.FC<BillDetailModalProps> = ({ house, bills, onClose }) => {
   const confirm = useConfirm();
-  const houseBills = bills.filter(b => b.houseId === house.id).sort((a, b) => b.month.localeCompare(a.month));
+  const houseBills = bills.filter(b => b.houseId === house.id).sort((a, b) => (b.month || '').localeCompare(a.month || ''));
 
   const handleMarkAsPaid = async (billId: string, itemId: string) => {
     const bill = houseBills.find(b => b.id === billId);

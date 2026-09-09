@@ -638,7 +638,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           
           if (newcomerLogs.length > movedOutLogs.length) {
              // Find the latest newcomer log to get the name and details
-             const latestNewcomer = newcomerLogs.sort((a, b) => b.date.localeCompare(a.date))[0];
+             const latestNewcomer = newcomerLogs.sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
              
              const newLog = {
               id: Date.now().toString() + Math.random().toString(36).substring(7),
@@ -783,7 +783,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     
     // 2. Second priority: Latest report strictly before targetMonth if exact previous month report doesn't exist
     if (!lastMonthReport) {
-      const priorReports = reports.filter(r => r.month < targetMonth).sort((a, b) => b.month.localeCompare(a.month));
+      const priorReports = reports.filter(r => r.month < targetMonth).sort((a, b) => (b.month || '').localeCompare(a.month || ''));
       if (priorReports.length > 0) {
         lastMonthReport = priorReports[0];
       }
@@ -1104,7 +1104,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
   };
 
   const chartData = useMemo(() => {
-    return [...reports].sort((a, b) => a.month.localeCompare(b.month)).map(r => ({
+    return [...reports].sort((a, b) => (a.month || '').localeCompare(b.month || '')).map(r => ({
       name: r.month,
       total: r.initialPopulation + r.birthCount + r.newcomerCount - r.movedOutCount - (r.deathCount || 0),
       mutasi: r.birthCount + r.newcomerCount - r.movedOutCount - (r.deathCount || 0)
@@ -1151,7 +1151,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       }
       
       return matchesSearch && matchesFilter && matchesStatus && matchesVerification && matchesDate;
-    }).sort((a, b) => b.date.localeCompare(a.date));
+    }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   }, [populationLogs, logSearchTerm, logTypeFilter, logStatusFilter, verificationFilter, startDateFilter, endDateFilter]);
 
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;

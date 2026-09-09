@@ -75,13 +75,14 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
 
   // Group by block
   const groupedHouses = filteredHouses.reduce((acc, house) => {
-    if (!acc[house.block]) acc[house.block] = [];
-    acc[house.block].push(house);
+    const blockKey = house.block || (house.id && house.id.includes('-') ? house.id.split('-')[0] : 'Lainnya');
+    if (!acc[blockKey]) acc[blockKey] = [];
+    acc[blockKey].push(house);
     return acc;
   }, {} as Record<string, House[]>);
 
   const sortedBlocks = Object.entries(groupedHouses).sort(([a], [b]) => 
-    a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+    (a || '').localeCompare(b || '', undefined, { numeric: true, sensitivity: 'base' })
   );
 
   const renderSortIcon = (field: typeof sortField) => {

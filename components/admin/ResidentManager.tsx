@@ -1270,12 +1270,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     return houses.filter(h => {
       const searchLower = debouncedSearchTerm.toLowerCase();
       const matchesSearch = 
-        h.headOfFamily.toLowerCase().includes(searchLower) || 
-        h.block.toLowerCase().includes(searchLower) ||
-        h.number.toLowerCase().includes(searchLower) ||
-        (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) ||
-        (h.phone && h.phone.toLowerCase().includes(searchLower)) ||
-        (h.familyMembers && h.familyMembers.some(m => m.name.toLowerCase().includes(searchLower)));
+        (h.headOfFamily || '').toLowerCase().includes(searchLower) || 
+        (h.block || '').toLowerCase().includes(searchLower) || 
+        (h.number || '').toLowerCase().includes(searchLower) || 
+        (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) || 
+        (h.phone && h.phone.toLowerCase().includes(searchLower)) || 
+        (h.familyMembers && h.familyMembers.some(m => (m?.name || '').toLowerCase().includes(searchLower)));
       
       const statusSampah = getPaymentStatus(h, 'Sampah');
       const statusAir = getPaymentStatus(h, 'Air');
@@ -1303,15 +1303,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
       let matchesBlock = true;
       if (filterBlock !== 'all') {
-        matchesBlock = h.block === filterBlock;
+        matchesBlock = (h.block || '') === filterBlock;
       }
 
       return matchesSearch && matchesStatus && matchesResidenceType && matchesBlock;
     }).sort((a, b) => {
-      if (sortBy === 'name') return a.headOfFamily.localeCompare(b.headOfFamily);
-      const blockCompare = a.block.localeCompare(b.block, undefined, { numeric: true });
+      if (sortBy === 'name') return (a.headOfFamily || '').localeCompare(b.headOfFamily || '');
+      const blockA = a.block || (a.id && a.id.includes('-') ? a.id.split('-')[0] : (a.id || ''));
+      const blockB = b.block || (b.id && b.id.includes('-') ? b.id.split('-')[0] : (b.id || ''));
+      const blockCompare = blockA.localeCompare(blockB, undefined, { numeric: true });
       if (blockCompare !== 0) return blockCompare;
-      return a.number.localeCompare(b.number, undefined, { numeric: true });
+      const numA = a.number || (a.id && a.id.includes('-') ? a.id.split('-')[1] : (a.id || ''));
+      const numB = b.number || (b.id && b.id.includes('-') ? b.id.split('-')[1] : (b.id || ''));
+      return numA.localeCompare(numB, undefined, { numeric: true });
     });
   }, [houses, debouncedSearchTerm, filterStatus, filterResidenceType, filterBlock, sortBy, selectedMonth, getPaymentStatus, getArrearsForHouse]);
 
