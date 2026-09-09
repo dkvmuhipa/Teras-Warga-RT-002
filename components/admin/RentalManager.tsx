@@ -1160,7 +1160,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                         <td className="p-2 border border-slate-300 font-semibold">{r.tenantName || '-'}</td>
                         <td className="p-2 border border-slate-300 text-center">{r.occupantsCount || 0}</td>
                         <td className="p-2 border border-slate-300 text-[10px]">
-                          {new Date(r.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2y' })} - {new Date(r.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2y' })}
+                          {new Date(r.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2-digit' })} - {new Date(r.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2-digit' })}
                         </td>
                         <td className="p-2 border border-slate-300 text-center">
                           <span className="font-bold text-[10px]">{eff}</span>
