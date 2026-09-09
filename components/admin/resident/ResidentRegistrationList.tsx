@@ -16,7 +16,7 @@ interface ResidentRegistrationListProps {
   residentRegistrations: ResidentRegistration[];
   searchTerm: string;
   updateResidentRegistrationInDb: (id: string, data: Partial<ResidentRegistration>) => Promise<void>;
-  addHouse: (house: Omit<House, 'id'>) => Promise<void>;
+  addHouse: (house: any) => Promise<void>;
   addPopulationLogToDb?: (log: any) => Promise<void>;
 }
 
@@ -74,7 +74,9 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
     setActionLoadingId(reg.id);
     try {
       // 1. Add to houses database
+      const houseId = formatHouseId(`${reg.block}-${reg.number}`);
       await addHouse({
+        id: houseId,
         headOfFamily: reg.headOfFamily,
         gender: reg.gender,
         birthDate: reg.birthDate,
