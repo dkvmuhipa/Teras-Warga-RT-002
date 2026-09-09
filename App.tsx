@@ -301,7 +301,35 @@ export const App = () => {
 
   // Public Subscriptions
   useEffect(() => {
-    const unsubHouses = subscribeToCollection('houses', (data) => setHouses(data));
+    const unsubHouses = subscribeToCollection('houses', (data) => {
+      if (Array.isArray(data)) {
+        const map = new Map<string, House>();
+        data.forEach((h: House) => {
+          const key = (h.block && h.number)
+            ? `${h.block.toUpperCase()}-${h.number.toString().padStart(2, '0')}`
+            : (h.id || '').toUpperCase();
+          const existing = map.get(key);
+          if (!existing) {
+            map.set(key, h);
+          } else {
+            const existingScore = (existing.accessCode ? 10 : 0) + 
+                                  (existing.familyMembers && existing.familyMembers.length > 0 ? 5 : 0) + 
+                                  (existing.residenceType === 'Rumah Keluarga' ? 20 : 0) + 
+                                  Object.keys(existing).length;
+            const currentScore = (h.accessCode ? 10 : 0) + 
+                                 (h.familyMembers && h.familyMembers.length > 0 ? 5 : 0) + 
+                                 (h.residenceType === 'Rumah Keluarga' ? 20 : 0) + 
+                                 Object.keys(h).length;
+            if (currentScore > existingScore) {
+              map.set(key, h);
+            }
+          }
+        });
+        setHouses(Array.from(map.values()));
+      } else {
+        setHouses(data || []);
+      }
+    });
     const unsubAnnouncements = subscribeToCollection('announcements', (data) => setAnnouncements(data));
     const unsubNews = subscribeToNews((data) => setNews(data));
     const unsubOfficials = subscribeToCollection('officials', (data) => setOfficials(data));

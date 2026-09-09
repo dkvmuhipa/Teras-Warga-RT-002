@@ -1308,8 +1308,38 @@ export const updateHouseData = async (id: string, updates: any) => {
     try {
       const cleanUpdates = deepSanitize(updates);
       cleanUpdates.updatedAt = new Date().toISOString();
-      const houseRef = doc(db, HOUSES_COL, id);
-      await setDoc(houseRef, cleanUpdates, { merge: true });
+      
+      // 1. Direct doc reference check
+      const directRef = doc(db, HOUSES_COL, id);
+      const directSnap = await getDoc(directRef);
+      if (directSnap.exists()) {
+        await setDoc(directRef, cleanUpdates, { merge: true });
+        return;
+      }
+
+      // 2. If direct doc does not exist, try resolving by block and number (e.g. C10-16)
+      const parts = id.split('-');
+      if (parts.length >= 2) {
+        const block = parts[0].trim().toUpperCase();
+        const number = parts[1].trim();
+        const numClean = number.replace(/^0+/, '');
+        const numPadded = number.padStart(2, '0');
+
+        const q = query(collection(db, HOUSES_COL), where("block", "==", block));
+        const qSnap = await getDocs(q);
+        const match = qSnap.docs.find(d => {
+          const dNum = (d.data().number || '').toString();
+          return dNum === number || dNum === numClean || dNum === numPadded;
+        });
+
+        if (match) {
+          await setDoc(doc(db, HOUSES_COL, match.id), cleanUpdates, { merge: true });
+          return;
+        }
+      }
+
+      // 3. Fallback: write to directRef
+      await setDoc(directRef, cleanUpdates, { merge: true });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `${HOUSES_COL}/${id}`);
     }

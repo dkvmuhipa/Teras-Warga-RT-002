@@ -32,8 +32,11 @@ export const getOccupancyType = (
   rental?: Partial<RentalContract> | null,
   house?: Partial<House> | null
 ): 'Keluarga' | 'Individu' | 'Rumah Keluarga' => {
-  if (rental?.occupancyType) return rental.occupancyType;
+  // CRITICAL: If the house in the citizen registry is designated as 'Rumah Keluarga',
+  // it must take precedence over any legacy rental contract occupancy type.
   if (house?.residenceType === 'Rumah Keluarga') return 'Rumah Keluarga';
+  if (rental?.occupancyType === 'Rumah Keluarga') return 'Rumah Keluarga';
+  if (rental?.occupancyType) return rental.occupancyType;
 
   const occupants = Number(rental?.occupantsCount ?? (house?.occupants ?? 1));
   const hasFamilyMembers = Boolean(house?.familyMembers && house.familyMembers.length > 0);
@@ -46,6 +49,8 @@ export const getOccupancyType = (
 // Compute live dynamic status based on dates
 export const calculateEffectiveStatus = (r: RentalContract): 'Aktif' | 'Mendekati Habis' | 'Habis' | 'Kosong' | 'Pindah' => {
   if (r.status === 'Kosong' || r.status === 'Pindah') return r.status;
+  // Rumah Keluarga is non-commercial and does not have an expiring lease
+  if (r.occupancyType === 'Rumah Keluarga' || r.rentType === 'Bukan Kontrak (Keluarga)') return 'Aktif';
   if (!r.endDate) return r.status || 'Aktif';
 
   const now = new Date();
@@ -59,10 +64,10 @@ export const calculateEffectiveStatus = (r: RentalContract): 'Aktif' | 'Mendekat
 };
 
 // Sync a single rental record to houses collection in database
-export const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVacant: boolean = false) => {
+export const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVacant: boolean = false, targetHouse?: Partial<House> | null) => {
   if (!rental.houseId) return false;
   try {
-    const isRumahKeluarga = rental.occupancyType === 'Rumah Keluarga';
+    const isRumahKeluarga = rental.occupancyType === 'Rumah Keluarga' || targetHouse?.residenceType === 'Rumah Keluarga';
     const houseUpdates: Partial<House> = {
       residenceType: isRumahKeluarga ? 'Rumah Keluarga' : 'Sewa',
       ownerName: rental.ownerName || '',
@@ -78,7 +83,8 @@ export const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVac
     if (rental.tenantKkNumber) {
       houseUpdates.kkNumber = rental.tenantKkNumber;
     }
-    await updateHouseData(rental.houseId, houseUpdates);
+    const idToUpdate = targetHouse?.id || rental.houseId;
+    await updateHouseData(idToUpdate, houseUpdates);
     return true;
   } catch (e) {
     console.error('Failed to sync house with rental data:', e);
@@ -146,9 +152,30 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     return () => unsub();
   }, []);
 
-  // Effective Houses directly from resident database (props)
+  // Effective Houses directly from resident database (props) with deduplication
   const effectiveHouses = useMemo(() => {
-    return houses && houses.length > 0 ? houses : [];
+    if (!houses || houses.length === 0) return [];
+    const map = new Map<string, House>();
+    houses.forEach((h: House) => {
+      const key = getNormalizedHouseId(h);
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, h);
+      } else {
+        const existingScore = (existing.accessCode ? 10 : 0) + 
+                              (existing.familyMembers && existing.familyMembers.length > 0 ? 5 : 0) + 
+                              (existing.residenceType === 'Rumah Keluarga' ? 20 : 0) + 
+                              Object.keys(existing).length;
+        const currentScore = (h.accessCode ? 10 : 0) + 
+                             (h.familyMembers && h.familyMembers.length > 0 ? 5 : 0) + 
+                             (h.residenceType === 'Rumah Keluarga' ? 20 : 0) + 
+                             Object.keys(h).length;
+        if (currentScore > existingScore) {
+          map.set(key, h);
+        }
+      }
+    });
+    return Array.from(map.values());
   }, [houses]);
 
   // Houses that are marked as 'Sewa', 'Rumah Keluarga', or have a distinct owner name in citizen registry
@@ -182,10 +209,15 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       seenHouseIds.add(normId);
       const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === normId || h.id === r.houseId);
       const autoOcc = getOccupancyType(r, linkedH);
+      const isRumahKel = autoOcc === 'Rumah Keluarga' || linkedH?.residenceType === 'Rumah Keluarga';
+
       list.push({
         ...r,
         houseId: normId,
-        occupancyType: r.occupancyType || autoOcc
+        occupancyType: isRumahKel ? 'Rumah Keluarga' : autoOcc,
+        rentType: isRumahKel ? 'Bukan Kontrak (Keluarga)' : r.rentType,
+        rentPrice: isRumahKel ? 0 : (r.rentPrice || 0),
+        notes: r.notes || (isRumahKel ? 'Rumah Keluarga / Ikut Saudara (Basis Data Warga)' : undefined)
       });
     });
 
@@ -195,6 +227,8 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       if (!seenHouseIds.has(normId)) {
         seenHouseIds.add(normId);
         const autoOcc = getOccupancyType({}, h);
+        const isRumahKel = autoOcc === 'Rumah Keluarga' || h.residenceType === 'Rumah Keluarga';
+
         list.push({
           id: `house-db-${h.id || normId}`,
           houseId: normId,
@@ -208,18 +242,18 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
           tenantNik: h.nik || '',
           tenantKkNumber: h.kkNumber || '',
           occupantsCount: Number(h.occupants) || 1,
-          occupancyType: autoOcc,
+          occupancyType: isRumahKel ? 'Rumah Keluarga' : autoOcc,
           originCity: '',
           workOrStudy: h.job || h.jobCategory || '',
           startDate: h.joiningDate || h.createdAt?.split('T')[0] || '2026-01-01',
-          endDate: '2026-12-31',
-          rentType: 'Tahunan',
+          endDate: isRumahKel ? '2099-12-31' : '2026-12-31',
+          rentType: isRumahKel ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
           rentPrice: 0,
           depositAmount: 0,
           status: h.status === 'Empty' ? 'Kosong' : 'Aktif',
           verificationStatus: h.isVerified ? 'Terverifikasi' : 'Terverifikasi',
           reportedBy: 'Pengurus RT',
-          notes: h.specialNotes || (h.residenceType === 'Rumah Keluarga' ? 'Rumah Keluarga / Ikut Saudara (Basis Data Warga)' : 'Terhubung langsung dari Basis Data Kependudukan Warga RT 02')
+          notes: h.specialNotes || (isRumahKel ? 'Rumah Keluarga / Ikut Saudara (Basis Data Kependudukan Warga RT 02)' : 'Terhubung langsung dari Basis Data Kependudukan Warga RT 02')
         });
       }
     });
@@ -441,7 +475,8 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     for (const r of rentals) {
       const eff = calculateEffectiveStatus(r);
       const isVacant = eff === 'Kosong' || r.status === 'Kosong';
-      const ok = await syncRentalWithHouse(r, isVacant);
+      const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === r.houseId?.toUpperCase() || h.id === r.houseId);
+      const ok = await syncRentalWithHouse(r, isVacant, linkedH);
       if (ok) successCount++;
     }
     toast.dismiss('sync-rentals');
@@ -474,7 +509,8 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
 
       if (syncWithResidents && payload.houseId) {
         const eff = calculateEffectiveStatus(payload as RentalContract);
-        await syncRentalWithHouse(payload, eff === 'Kosong');
+        const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === payload.houseId?.toUpperCase() || h.id === payload.houseId);
+        await syncRentalWithHouse(payload, eff === 'Kosong', linkedH);
         toast.success(`Data kependudukan rumah ${normId} otomatis disinkronkan ke daftar warga!`);
       }
 
@@ -882,22 +918,34 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               filteredRentals.map((r) => {
                 const effStatus = calculateEffectiveStatus(r);
                 const isPending = r.verificationStatus === 'Menunggu Verifikasi';
-                const linkedHouse = effectiveHouses.find(h => h.id === r.houseId);
+                const linkedHouse = effectiveHouses.find(h => getNormalizedHouseId(h) === r.houseId?.toUpperCase() || h.id === r.houseId);
+                const occ = getOccupancyType(r, linkedHouse);
+                const isRumahKel = occ === 'Rumah Keluarga' || linkedHouse?.residenceType === 'Rumah Keluarga' || r.occupancyType === 'Rumah Keluarga';
                 
                 return (
                   <div
                     key={r.id}
-                    className="bg-white rounded-[2rem] border border-slate-200/90 shadow-sm p-5 sm:p-6 space-y-4 hover:border-slate-300 transition-all flex flex-col justify-between"
+                    className={`rounded-[2rem] border shadow-xs p-5 sm:p-6 space-y-4 transition-all flex flex-col justify-between ${
+                      isRumahKel 
+                        ? 'bg-gradient-to-b from-purple-50/50 via-white to-white border-purple-200/90 hover:border-purple-300' 
+                        : 'bg-white border-slate-200/90 hover:border-slate-300'
+                    }`}
                   >
                     <div>
                       {/* Top Bar: Unit & Statuses */}
                       <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
                         <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-sm">
+                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm ${
+                            isRumahKel ? 'bg-purple-100 text-purple-800' : 'bg-indigo-50 text-indigo-700'
+                          }`}>
                             {r.houseId}
                           </div>
                           <div>
-                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Unit Sewa RT 02</span>
+                            <span className={`text-[10px] font-black uppercase tracking-wider block ${
+                              isRumahKel ? 'text-purple-600' : 'text-slate-400'
+                            }`}>
+                              {isRumahKel ? '🏠 Rumah Keluarga / Kerabat' : 'Unit Sewa RT 02'}
+                            </span>
                             <h4 className="font-black text-slate-900 text-sm font-serif">
                               Blok {r.block} No. {r.number}
                             </h4>
@@ -912,28 +960,31 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                           )}
 
                           <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
-                            effStatus === 'Aktif' ? 'bg-emerald-100 text-emerald-800' :
-                            effStatus === 'Mendekati Habis' ? 'bg-amber-100 text-amber-900' :
-                            effStatus === 'Habis' ? 'bg-rose-100 text-rose-800' :
-                            effStatus === 'Kosong' ? 'bg-slate-100 text-slate-700' : 'bg-indigo-100 text-indigo-800'
+                            isRumahKel ? (
+                              effStatus === 'Kosong' ? 'bg-slate-100 text-slate-700' : 'bg-purple-100 text-purple-800 border border-purple-200'
+                            ) : (
+                              effStatus === 'Aktif' ? 'bg-emerald-100 text-emerald-800' :
+                              effStatus === 'Mendekati Habis' ? 'bg-amber-100 text-amber-900' :
+                              effStatus === 'Habis' ? 'bg-rose-100 text-rose-800' :
+                              effStatus === 'Kosong' ? 'bg-slate-100 text-slate-700' : 'bg-indigo-100 text-indigo-800'
+                            )
                           }`}>
-                            {effStatus}
+                            {isRumahKel ? (effStatus === 'Kosong' ? 'Kosong' : 'Dihuni Kerabat') : effStatus}
                           </span>
                         </div>
                       </div>
 
                       {/* Kategori Hunian Badge (Keluarga vs Individu/Kos vs Rumah Kerabat) */}
                       {(() => {
-                        const occ = getOccupancyType(r, linkedHouse);
-                        if (occ === 'Rumah Keluarga') {
+                        if (isRumahKel) {
                           return (
-                            <div className="mt-2.5 flex items-center justify-between px-3 py-1.5 bg-amber-50/90 rounded-xl border border-amber-200/80 text-[10px]">
-                              <span className="text-amber-800 font-bold flex items-center gap-1.5">
-                                <Home size={12} className="text-amber-600" />
+                            <div className="mt-2.5 flex items-center justify-between px-3 py-1.5 bg-purple-50/90 rounded-xl border border-purple-200/80 text-[10px]">
+                              <span className="text-purple-800 font-bold flex items-center gap-1.5">
+                                <Home size={12} className="text-purple-600" />
                                 Kategori Hunian:
                               </span>
-                              <span className="font-black text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                🏠 Rumah Kerabat / Keluarga
+                              <span className="font-black text-purple-900 bg-purple-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                🏠 Rumah Keluarga / Kerabat (Bukan Kontrak)
                               </span>
                             </div>
                           );
@@ -967,15 +1018,15 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                       {/* Resident Registry Sync Status Badge */}
                       <div className="mt-1.5 flex items-center justify-between px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200/70 text-[10px]">
                         <span className="text-slate-500 font-bold flex items-center gap-1.5">
-                          <Link2 size={12} className={linkedHouse?.residenceType === 'Sewa' ? 'text-emerald-600' : 'text-amber-500'} />
+                          <Link2 size={12} className={isRumahKel ? 'text-purple-600' : (linkedHouse?.residenceType === 'Sewa' ? 'text-emerald-600' : 'text-amber-500')} />
                           Status Kependudukan:
                         </span>
                         <span className="font-bold text-slate-800">
                           {linkedHouse ? (
-                            linkedHouse.residenceType === 'Sewa' ? (
+                            isRumahKel || linkedHouse.residenceType === 'Rumah Keluarga' ? (
+                              <span className="text-purple-700">✓ Tercatat (Rumah Keluarga RT 02)</span>
+                            ) : linkedHouse.residenceType === 'Sewa' ? (
                               <span className="text-emerald-700">✓ Terintegrasi (Kategori Sewa)</span>
-                            ) : linkedHouse.residenceType === 'Rumah Keluarga' ? (
-                              <span className="text-amber-700">✓ Tercatat (Rumah Keluarga)</span>
                             ) : (
                               <span className="text-indigo-700">Tercatat ({linkedHouse.residenceType || 'Tetap'})</span>
                             )
@@ -987,13 +1038,13 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
                       {/* Tenant and Owner Info Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
-                        {/* Penyewa */}
+                        {/* Penghuni / Penyewa */}
                         <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100/80 space-y-1">
                           <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-1">
-                            <Users size={11} /> Penyewa / Penghuni:
+                            <Users size={11} /> {isRumahKel ? 'Kepala Keluarga (Kerabat):' : 'Penyewa / Penghuni:'}
                           </span>
                           <p className="text-xs font-bold text-slate-900 truncate">
-                            {r.tenantName || '(Belum Ada Penyewa)'}
+                            {r.tenantName || '(Belum Ada Penghuni)'}
                           </p>
                           <p className="text-[11px] text-slate-500 font-medium">
                             {r.occupantsCount ? `${r.occupantsCount} Jiwa Penghuni` : '-'}
@@ -1020,10 +1071,10 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                           )}
                         </div>
 
-                        {/* Pemilik / Induk Semang */}
+                        {/* Pemilik Rumah */}
                         <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100/80 space-y-1">
                           <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
-                            <Home size={11} /> Pemilik (Induk Semang):
+                            <Home size={11} /> {isRumahKel ? 'Pemilik Rumah (Kerabat):' : 'Pemilik (Induk Semang):'}
                           </span>
                           <p className="text-xs font-bold text-slate-900 truncate">
                             {r.ownerName}
@@ -1040,20 +1091,37 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                       </div>
 
                       {/* Contract Timeline */}
-                      <div className="mt-3 p-3 bg-indigo-50/40 rounded-2xl border border-indigo-100/60 flex flex-wrap items-center justify-between text-xs gap-2">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={13} className="text-indigo-600" />
-                          <div>
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Masa Kontrak</span>
-                            <span className="font-bold text-slate-800 text-[11px]">
-                              {new Date(r.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} s/d {new Date(r.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                            </span>
+                      {isRumahKel ? (
+                        <div className="mt-3 p-3 bg-purple-50/60 rounded-2xl border border-purple-100/80 flex flex-wrap items-center justify-between text-xs gap-2">
+                          <div className="flex items-center gap-2">
+                            <Home size={13} className="text-purple-600" />
+                            <div>
+                              <span className="text-[9px] font-bold text-purple-600 uppercase tracking-wider block">Status Kepenghunian</span>
+                              <span className="font-bold text-slate-800 text-[11px]">
+                                Menghuni Rumah Keluarga / Ikut Kerabat
+                              </span>
+                            </div>
                           </div>
+                          <span className="text-[10px] font-black px-2.5 py-1 bg-white rounded-lg text-purple-800 border border-purple-200">
+                            Bukan Kontrak Sewa
+                          </span>
                         </div>
-                        <span className="text-[10px] font-black px-2 py-0.5 bg-white rounded-lg text-indigo-700 border border-indigo-100">
-                          {r.rentType}
-                        </span>
-                      </div>
+                      ) : (
+                        <div className="mt-3 p-3 bg-indigo-50/40 rounded-2xl border border-indigo-100/60 flex flex-wrap items-center justify-between text-xs gap-2">
+                          <div className="flex items-center gap-2">
+                            <Calendar size={13} className="text-indigo-600" />
+                            <div>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Masa Kontrak</span>
+                              <span className="font-bold text-slate-800 text-[11px]">
+                                {new Date(r.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} s/d {new Date(r.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-black px-2 py-0.5 bg-white rounded-lg text-indigo-700 border border-indigo-100">
+                            {r.rentType}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Notes */}
                       {r.notes && (
@@ -1225,9 +1293,9 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                         </td>
                         <td className="p-3">
                           {occ === 'Rumah Keluarga' ? (
-                            <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
-                              <Home size={10} className="text-amber-600" />
-                              Rumah Kerabat
+                            <span className="px-2.5 py-1 bg-purple-50 text-purple-900 border border-purple-200 rounded-lg text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
+                              <Home size={10} className="text-purple-600" />
+                              Rumah Keluarga
                             </span>
                           ) : occ === 'Keluarga' ? (
                             <span className="px-2.5 py-1 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-lg text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
@@ -1257,7 +1325,11 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                           )}
                         </td>
                         <td className="p-3 text-center">
-                          {matchContract ? (
+                          {occ === 'Rumah Keluarga' ? (
+                            <span className="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200">
+                              🏠 Rumah Keluarga
+                            </span>
+                          ) : matchContract ? (
                             <span className="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800">
                               ✓ Terdaftar ({calculateEffectiveStatus(matchContract)})
                             </span>
@@ -1273,14 +1345,14 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                               onClick={() => handleOpenEdit(matchContract)}
                               className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
                             >
-                              Edit Kontrak
+                              {occ === 'Rumah Keluarga' ? 'Kelola Unit' : 'Edit Kontrak'}
                             </button>
                           ) : (
                             <button
                               onClick={() => handleOpenAdd(h.id)}
                               className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm transition-all cursor-pointer"
                             >
-                              + Buat Kontrak
+                              {occ === 'Rumah Keluarga' ? '+ Registrasi Unit' : '+ Buat Kontrak'}
                             </button>
                           )}
                         </td>
@@ -1451,17 +1523,25 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 <label className="text-[11px] font-bold text-slate-600">Kategori / Bentuk Hunian</label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
-                    { id: 'Keluarga', label: '👨‍👩‍👧 Dihuni Keluarga', desc: 'Berkeluarga (KK & Istri/Anak/Anggota)' },
-                    { id: 'Individu', label: '👤 Individu / Kos', desc: 'Sendiri / Mahasiswa / Pekerja Bujang' },
-                    { id: 'Rumah Keluarga', label: '🏠 Rumah Kerabat', desc: 'Menempati rumah milik kerabat/ortu' },
+                    { id: 'Keluarga', label: '👨‍👩‍👧 Sewa Keluarga', desc: 'Kontrak komersial untuk 1 keluarga' },
+                    { id: 'Individu', label: '👤 Sewa Individu / Kos', desc: 'Sendiri / Mahasiswa / Pekerja Bujang' },
+                    { id: 'Rumah Keluarga', label: '🏠 Rumah Kerabat / Keluarga', desc: 'Menempati rumah milik kerabat (Non-Komersial)' },
                   ].map((cat) => (
                     <button
                       key={cat.id}
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, occupancyType: cat.id as any }))}
+                      onClick={() => {
+                        const isRK = cat.id === 'Rumah Keluarga';
+                        setFormData(prev => ({
+                          ...prev,
+                          occupancyType: cat.id as any,
+                          rentType: isRK ? 'Bukan Kontrak (Keluarga)' : (prev.rentType === 'Bukan Kontrak (Keluarga)' ? 'Tahunan' : prev.rentType),
+                          rentPrice: isRK ? 0 : prev.rentPrice
+                        }));
+                      }}
                       className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                         (formData.occupancyType || 'Individu') === cat.id
-                          ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20 text-indigo-950 font-bold'
+                          ? (cat.id === 'Rumah Keluarga' ? 'bg-purple-50 border-purple-500 ring-2 ring-purple-500/20 text-purple-950 font-bold' : 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20 text-indigo-950 font-bold')
                           : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-medium'
                       }`}
                     >
@@ -1470,10 +1550,19 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                     </button>
                   ))}
                 </div>
+                {formData.occupancyType === 'Rumah Keluarga' && (
+                  <div className="mt-2.5 p-3 bg-purple-50 rounded-2xl border border-purple-200 text-xs text-purple-900 font-medium">
+                    <span className="font-bold block text-purple-950 flex items-center gap-1.5 mb-0.5">
+                      <Home size={14} className="text-purple-600" />
+                      Status: Rumah Kerabat / Keluarga (Bukan Kontrak Sewa)
+                    </span>
+                    Unit ini dihuni oleh sanak kerabat / keluarga pemilik tanpa ikatan sewa komersial. Data akan otomatis disinkronkan ke profil warga sebagai <strong>Rumah Keluarga</strong>.
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">Nama Kepala Keluarga Penyewa</label>
+                <label className="text-[11px] font-bold text-slate-600">Nama Kepala Keluarga Penghuni</label>
                 <input
                   type="text"
                   placeholder="Kosongkan jika rumah kosong"
@@ -1484,7 +1573,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">No. HP / WA Penyewa</label>
+                <label className="text-[11px] font-bold text-slate-600">No. HP / WA Penghuni</label>
                 <input
                   type="text"
                   placeholder="08xxxxxxxx"
@@ -1495,7 +1584,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">NIK KTP Penyewa</label>
+                <label className="text-[11px] font-bold text-slate-600">NIK KTP Penghuni</label>
                 <input
                   type="text"
                   maxLength={16}
@@ -1557,7 +1646,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">Tgl Mulai Sewa *</label>
+                <label className="text-[11px] font-bold text-slate-600">Tgl Mulai *</label>
                 <input
                   type="date"
                   required
@@ -1568,7 +1657,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">Tgl Akhir Sewa *</label>
+                <label className="text-[11px] font-bold text-slate-600">Tgl Akhir *</label>
                 <input
                   type="date"
                   required
@@ -1579,15 +1668,16 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">Periode Pembayaran</label>
+                <label className="text-[11px] font-bold text-slate-600">Periode Pembayaran / Jenis</label>
                 <select
-                  value={formData.rentType || 'Tahunan'}
+                  value={formData.rentType || (formData.occupancyType === 'Rumah Keluarga' ? 'Bukan Kontrak (Keluarga)' : 'Tahunan')}
                   onChange={(e: any) => setFormData({ ...formData, rentType: e.target.value })}
                   className="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                 >
                   <option value="Tahunan">Tahunan</option>
                   <option value="Bulanan">Bulanan</option>
                   <option value="Semesteran">Semesteran (6 Bulan)</option>
+                  <option value="Bukan Kontrak (Keluarga)">Bukan Kontrak (Keluarga)</option>
                 </select>
               </div>
 
@@ -1601,7 +1691,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   <option value="Aktif">🟢 Aktif Ditempati</option>
                   <option value="Mendekati Habis">🟡 Mendekati Habis</option>
                   <option value="Habis">🔴 Masa Sewa Habis</option>
-                  <option value="Kosong">⚪ Rumah Kontrak Kosong</option>
+                  <option value="Kosong">⚪ Rumah Kosong</option>
                   <option value="Pindah">📦 Sudah Pindah Keluar</option>
                 </select>
               </div>
@@ -1610,7 +1700,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 <label className="text-[11px] font-bold text-slate-600">Catatan Khusus / Perjanjian</label>
                 <input
                   type="text"
-                  placeholder="Misal: Sudah serah KTP, kunci di pos ronda, dsb."
+                  placeholder="Misal: Ikut saudara, serah KTP, kunci di pos ronda, dsb."
                   value={formData.notes || ''}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
@@ -1632,7 +1722,9 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               <span className="font-bold block text-emerald-900">
                 Sinkronkan Otomatis ke Data Induk Kependudukan Warga RT (Koleksi 'houses')
               </span>
-              Perubahan pada form ini akan otomatis memperbarui status kepenghunian (Sewa), nama pemilik, serta data penghuni pada profil rumah warga RT 02.
+              {formData.occupancyType === 'Rumah Keluarga'
+                ? 'Perubahan ini akan otomatis mencatat kepenghunian rumah sebagai "Rumah Keluarga" pada profil warga di database RT 02.'
+                : 'Perubahan pada form ini akan otomatis memperbarui status kepenghunian (Sewa), nama pemilik, serta data penghuni pada profil rumah warga RT 02.'}
             </label>
           </div>
 

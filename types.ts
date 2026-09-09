@@ -1240,7 +1240,7 @@ export interface RentalContract {
   // Periode & Ketentuan Sewa
   startDate: string; // YYYY-MM-DD
   endDate: string;   // YYYY-MM-DD
-  rentType: 'Bulanan' | 'Tahunan' | 'Semesteran';
+  rentType: 'Bulanan' | 'Tahunan' | 'Semesteran' | 'Bukan Kontrak (Keluarga)';
   rentPrice?: number; // Opsional
   depositAmount?: number; // Opsional
   
