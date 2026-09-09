@@ -148,6 +148,9 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     });
   }, [effectiveHouses]);
 
+  // Alias for compatibility with integration tab
+  const residentSewaHouses = sewaHouses;
+
   // Unified rentals: merges formal contracts from Firestore with all live rental houses from citizen database
   const rentals = useMemo(() => {
     const list: RentalContract[] = [];
@@ -1012,13 +1015,14 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {residentSewaHouses.map((h, i) => {
-                    const matchContract = rentals.find(r => r.houseId === h.id);
+                    const normId = getNormalizedHouseId(h);
+                    const matchContract = rentals.find(r => r.houseId?.toUpperCase() === normId.toUpperCase() || r.houseId === h.id);
                     return (
                       <tr key={h.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="p-3 text-center font-bold text-slate-400">{i + 1}</td>
                         <td className="p-3 font-black text-slate-900">
                           <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold">
-                            {h.id}
+                            {normId}
                           </span>
                         </td>
                         <td className="p-3 font-bold text-slate-800">
