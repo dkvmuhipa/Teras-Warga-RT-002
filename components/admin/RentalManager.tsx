@@ -19,225 +19,18 @@ import { generateHouses, RT_NAME } from '../../constants';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
 
-export const REAL_RENTAL_CONTRACTS: RentalContract[] = [
-  {
-    id: 'rent-tondo-01',
-    houseId: 'C10-05',
-    block: 'C10',
-    number: '05',
-    ownerName: 'Bpk. Rustam Effendi',
-    ownerPhone: '082190001122',
-    ownerAddress: 'Hunian Tetap Tondo 1 Blok B, Palu',
-    tenantName: 'Wahyudi Pratama & Keluarga',
-    tenantPhone: '081245667890',
-    tenantNik: '7271012508900004',
-    tenantKkNumber: '7271011502180002',
-    occupantsCount: 3,
-    originCity: 'Kota Palu (Kec. Palu Selatan)',
-    workOrStudy: 'Staf BWS (Balai Wilayah Sungai) Sulawesi III',
-    startDate: '2025-10-01',
-    endDate: '2026-09-30',
-    rentType: 'Tahunan',
-    rentPrice: 12000000,
-    depositAmount: 1000000,
-    status: 'Mendekati Habis',
-    verificationStatus: 'Terverifikasi',
-    reportedBy: 'Pengurus RT',
-    notes: 'Masa sewa berakhir akhir bulan ini. Koordinasi perpanjangan kontrak sedang berjalan.',
-    createdAt: '2025-10-01T08:00:00.000Z'
-  },
-  {
-    id: 'rent-tondo-02',
-    houseId: 'C5-14',
-    block: 'C5',
-    number: '14',
-    ownerName: 'Bpk. H. Syarifudin Lamakarate',
-    ownerPhone: '081242118890',
-    ownerAddress: 'Jl. Diponegoro No. 82, Kel. Siranindi, Palu Barat',
-    tenantName: 'Dr. Muhammad Ridwan, M.Si.',
-    tenantPhone: '082188776543',
-    tenantNik: '7271031504820001',
-    tenantKkNumber: '7271032008120005',
-    occupantsCount: 4,
-    originCity: 'Kota Palu',
-    workOrStudy: 'Dosen FMIPA Universitas Tadulako (UNTAD)',
-    startDate: '2026-01-15',
-    endDate: '2027-01-14',
-    rentType: 'Tahunan',
-    rentPrice: 12500000,
-    depositAmount: 1000000,
-    status: 'Aktif',
-    verificationStatus: 'Terverifikasi',
-    reportedBy: 'Pengurus RT',
-    notes: 'Keluarga dosen UNTAD. Berkas fotokopi KTP dan Kartu Keluarga lengkap diarsipkan di sekretariat RT 02.',
-    createdAt: '2026-01-15T09:30:00.000Z'
-  },
-  {
-    id: 'rent-tondo-03',
-    houseId: 'C7-06',
-    block: 'C7',
-    number: '06',
-    ownerName: 'Ibu Hj. Nurbaeti',
-    ownerPhone: '085241223344',
-    ownerAddress: 'Jl. RE Martadinata, Tondo, Palu',
-    tenantName: 'Moh. Fikri Anshari & Rekan',
-    tenantPhone: '085399112288',
-    tenantNik: '7201041806020003',
-    tenantKkNumber: '7201040810190001',
-    occupantsCount: 3,
-    originCity: 'Kab. Banggai (Luwuk)',
-    workOrStudy: 'Mahasiswa S1 Fakultas Teknik Sipil UNTAD',
-    startDate: '2025-09-01',
-    endDate: '2026-08-31',
-    rentType: 'Tahunan',
-    rentPrice: 10500000,
-    depositAmount: 500000,
-    status: 'Habis',
-    verificationStatus: 'Terverifikasi',
-    reportedBy: 'Pemilik',
-    notes: 'Masa sewa telah jatuh tempo per 31 Agustus 2026. Menunggu konfirmasi pemilik apakah dilanjutkan atau ganti penyewa baru.',
-    createdAt: '2025-09-01T10:00:00.000Z'
-  },
-  {
-    id: 'rent-tondo-04',
-    houseId: 'C8-11',
-    block: 'C8',
-    number: '11',
-    ownerName: 'Bpk. I Made Suardana',
-    ownerPhone: '081354667788',
-    ownerAddress: 'Desa Tolai, Kec. Torue, Kab. Parigi Moutong',
-    tenantName: 'Ahmad Fauzan, S.Kep., Ns.',
-    tenantPhone: '082291334455',
-    tenantNik: '7208061209930002',
-    tenantKkNumber: '7208062501210003',
-    occupantsCount: 2,
-    originCity: 'Kab. Parigi Moutong',
-    workOrStudy: 'Tenaga Kesehatan / Perawat RSUD Undata Palu',
-    startDate: '2026-03-01',
-    endDate: '2027-02-28',
-    rentType: 'Tahunan',
-    rentPrice: 11000000,
-    depositAmount: 500000,
-    status: 'Aktif',
-    verificationStatus: 'Terverifikasi',
-    reportedBy: 'Pengurus RT',
-    notes: 'Pasangan suami istri muda baru menikah. Sudah lapor diri ke Ketua RT dan aktif ronda malam.',
-    createdAt: '2026-03-01T11:00:00.000Z'
-  },
-  {
-    id: 'rent-tondo-05',
-    houseId: 'C9-04',
-    block: 'C9',
-    number: '04',
-    ownerName: 'Bpk. Ir. Baso Rahman',
-    ownerPhone: '0811450998',
-    ownerAddress: 'Jl. Tombolotutu No. 12, Talise, Palu',
-    tenantName: '-',
-    tenantPhone: '-',
-    occupantsCount: 0,
-    startDate: '2026-01-01',
-    endDate: '2026-12-31',
-    rentType: 'Tahunan',
-    rentPrice: 11000000,
-    status: 'Kosong',
-    verificationStatus: 'Terverifikasi',
-    reportedBy: 'Pemilik',
-    notes: 'Rumah kontrakan kosong siap huni. Pemilik menitipkan informasi sewa di papan pengumuman RT.',
-    createdAt: '2026-01-01T08:00:00.000Z'
-  },
-  {
-    id: 'rent-tondo-06',
-    houseId: 'C11-15',
-    block: 'C11',
-    number: '15',
-    ownerName: 'Ibu Hasnahwati',
-    ownerPhone: '085340119922',
-    ownerAddress: 'Desa Tinggede, Kec. Marawola, Kab. Sigi',
-    tenantName: 'Hendra Kurniawan',
-    tenantPhone: '082399887711',
-    tenantNik: '7202051411960001',
-    tenantKkNumber: '7202052003200002',
-    occupantsCount: 2,
-    originCity: 'Kab. Poso',
-    workOrStudy: 'Teknisi Jaringan Telekomunikasi Palu',
-    startDate: '2026-08-01',
-    endDate: '2027-07-31',
-    rentType: 'Tahunan',
-    rentPrice: 10000000,
-    status: 'Aktif',
-    verificationStatus: 'Menunggu Verifikasi',
-    reportedBy: 'Penyewa',
-    reporterName: 'Hendra Kurniawan',
-    reporterPhone: '082399887711',
-    notes: 'Lapor mandiri via aplikasi Teras Warga. Menunggu pemeriksaan berkas fisik KTP/KK oleh Pengurus RT.',
-    createdAt: '2026-08-02T14:15:00.000Z'
-  },
-  {
-    id: 'rent-tondo-07',
-    houseId: 'C12-07',
-    block: 'C12',
-    number: '07',
-    ownerName: 'Bpk. Mansyur Dg. Malewa',
-    ownerPhone: '081341002233',
-    ownerAddress: 'Jl. Sam Ratulangi, Kel. Besusu Barat, Palu',
-    tenantName: 'Ilham Saputra, S.T.',
-    tenantPhone: '085255664411',
-    tenantNik: '7204011003940003',
-    tenantKkNumber: '7204011205190001',
-    occupantsCount: 3,
-    originCity: 'Kab. Tolitoli',
-    workOrStudy: 'Konsultan Pengawas Rekonstruksi Pasca Bencana',
-    startDate: '2025-07-01',
-    endDate: '2026-06-30',
-    rentType: 'Tahunan',
-    rentPrice: 11500000,
-    status: 'Habis',
-    verificationStatus: 'Terverifikasi',
-    reportedBy: 'Pengurus RT',
-    notes: 'Masa sewa selesai. Penghuni telah mengembalikan kunci rumah ke pemilik.',
-    createdAt: '2025-07-01T09:00:00.000Z'
+export const getNormalizedHouseId = (h: Partial<House>): string => {
+  if (h.block && h.number) {
+    const num = h.number.toString().padStart(2, '0');
+    return `${h.block.toUpperCase()}-${num}`;
   }
-];
-
-export const INITIAL_RENTAL_CONTRACTS = REAL_RENTAL_CONTRACTS;
-
-const VALID_RT02_BLOCKS = ['C5', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12'];
-
-export const isObsoleteOrDummyRental = (r: any): boolean => {
-  if (!r) return true;
-  const houseId = (r.houseId || '').trim().toUpperCase();
-  if (!houseId) return true;
-
-  // Extract block prefix
-  const blockPart = (r.block || houseId.split('-')[0] || '').trim().toUpperCase();
-  if (!VALID_RT02_BLOCKS.includes(blockPart)) {
-    return true; // Outside RT 02 (e.g. B04, A02, D03, C08, etc.)
-  }
-
-  // Check known obsolete dummy markers
-  const owner = (r.ownerName || '').toLowerCase();
-  const address = (r.ownerAddress || '').toLowerCase();
-  const tenant = (r.tenantName || '').toLowerCase();
-
-  if (
-    address.includes('jakarta') || 
-    address.includes('melati') || 
-    address.includes('garuda') || 
-    owner.includes('bambang') || 
-    owner.includes('abdullah') ||
-    tenant.includes('budi santoso') || 
-    tenant.includes('siti aminah')
-  ) {
-    return true;
-  }
-
-  return false;
+  return (h.id || '').toUpperCase();
 };
 
 // Compute live dynamic status based on dates
 export const calculateEffectiveStatus = (r: RentalContract): 'Aktif' | 'Mendekati Habis' | 'Habis' | 'Kosong' | 'Pindah' => {
   if (r.status === 'Kosong' || r.status === 'Pindah') return r.status;
-  if (!r.endDate) return r.status;
+  if (!r.endDate) return r.status || 'Aktif';
 
   const now = new Date();
   const end = new Date(r.endDate);
@@ -281,11 +74,10 @@ interface RentalManagerProps {
 }
 
 export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => {
-  const [rentals, setRentals] = useState<RentalContract[]>(INITIAL_RENTAL_CONTRACTS);
+  const [dbRentals, setDbRentals] = useState<RentalContract[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [activeTab, setActiveTab] = useState<'contracts' | 'integration'>('contracts');
-  const [cleanedOnce, setCleanedOnce] = useState(false);
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -323,61 +115,89 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     notes: ''
   });
 
-  // Real-time subscription to rentalContracts collection with auto-cleanup & auto-seeding
+  // Real-time subscription to rentalContracts collection directly from Firestore
   useEffect(() => {
-    const unsub = subscribeToCollection('rentalContracts', async (data) => {
-      if (data && data.length > 0) {
-        // Filter out obsolete/dummy items
-        const obsoleteDocs = data.filter(isObsoleteOrDummyRental);
-        const validDocs = (data as RentalContract[]).filter(r => !isObsoleteOrDummyRental(r));
-
-        // Purge obsolete dummy documents from Firestore
-        if (obsoleteDocs.length > 0 && !cleanedOnce) {
-          setCleanedOnce(true);
-          console.warn(`[RentalManager] Menghapus ${obsoleteDocs.length} data kontrakan dummy usang dari database...`);
-          for (const obs of obsoleteDocs) {
-            if (obs.id) {
-              await deleteDocumentFromCollection('rentalContracts', obs.id);
-            }
-          }
-        }
-
-        // If no valid real docs, seed REAL_RENTAL_CONTRACTS and sync to houses
-        if (validDocs.length === 0) {
-          setRentals(REAL_RENTAL_CONTRACTS);
-          for (const item of REAL_RENTAL_CONTRACTS) {
-            await setDocumentInCollection('rentalContracts', item.id, item);
-            const eff = calculateEffectiveStatus(item);
-            await syncRentalWithHouse(item, eff === 'Kosong');
-          }
-        } else {
-          // Check if any authentic RT 02 contracts are missing from validDocs
-          const existingHouseIds = new Set(validDocs.map(r => r.houseId.toUpperCase()));
-          const missingReal = REAL_RENTAL_CONTRACTS.filter(r => !existingHouseIds.has(r.houseId.toUpperCase()));
-
-          if (missingReal.length > 0) {
-            for (const item of missingReal) {
-              await setDocumentInCollection('rentalContracts', item.id, item);
-              const eff = calculateEffectiveStatus(item);
-              await syncRentalWithHouse(item, eff === 'Kosong');
-            }
-            setRentals([...validDocs, ...missingReal]);
-          } else {
-            setRentals(validDocs);
-          }
-        }
+    const unsub = subscribeToCollection('rentalContracts', (data) => {
+      if (data && Array.isArray(data)) {
+        setDbRentals(data as RentalContract[]);
       } else {
-        // Initial empty collection: seed authentic real contracts and sync
-        setRentals(REAL_RENTAL_CONTRACTS);
-        for (const item of REAL_RENTAL_CONTRACTS) {
-          await setDocumentInCollection('rentalContracts', item.id, item);
-          const eff = calculateEffectiveStatus(item);
-          await syncRentalWithHouse(item, eff === 'Kosong');
-        }
+        setDbRentals([]);
       }
     });
     return () => unsub();
-  }, [cleanedOnce]);
+  }, []);
+
+  // Effective Houses directly from resident database (props)
+  const effectiveHouses = useMemo(() => {
+    return houses && houses.length > 0 ? houses : [];
+  }, [houses]);
+
+  // Houses that are marked as 'Sewa' or have a distinct owner name in citizen registry
+  const sewaHouses = useMemo(() => {
+    return effectiveHouses.filter((h) => {
+      const isSewa = h.residenceType === 'Sewa';
+      const hasOwner = Boolean(
+        h.ownerName && 
+        h.ownerName.trim() !== '' && 
+        h.ownerName.trim() !== '-' && 
+        h.headOfFamily && 
+        h.headOfFamily.trim() !== '-' &&
+        h.headOfFamily.trim().toLowerCase() !== h.ownerName.trim().toLowerCase()
+      );
+      return isSewa || hasOwner;
+    });
+  }, [effectiveHouses]);
+
+  // Unified rentals: merges formal contracts from Firestore with all live rental houses from citizen database
+  const rentals = useMemo(() => {
+    const list: RentalContract[] = [];
+    const seenHouseIds = new Set<string>();
+
+    // 1. Include formal contracts from rentalContracts collection
+    dbRentals.forEach((r) => {
+      const normId = r.houseId ? r.houseId.toUpperCase() : `${r.block}-${r.number}`.toUpperCase();
+      seenHouseIds.add(normId);
+      list.push({
+        ...r,
+        houseId: normId
+      });
+    });
+
+    // 2. Include all real houses from database where residenceType === 'Sewa' or has distinct owner
+    sewaHouses.forEach((h) => {
+      const normId = getNormalizedHouseId(h);
+      if (!seenHouseIds.has(normId)) {
+        seenHouseIds.add(normId);
+        list.push({
+          id: `house-db-${h.id || normId}`,
+          houseId: normId,
+          block: h.block || normId.split('-')[0] || 'C',
+          number: h.number || normId.split('-')[1] || '01',
+          ownerName: h.ownerName && h.ownerName !== '-' ? h.ownerName : 'Belum Dicatat',
+          ownerPhone: h.ownerPhone && h.ownerPhone !== '-' ? h.ownerPhone : '-',
+          ownerAddress: '',
+          tenantName: h.headOfFamily && h.headOfFamily !== '-' ? h.headOfFamily : '(Belum Ada Penghuni)',
+          tenantPhone: h.phone && h.phone !== '-' ? h.phone : '-',
+          tenantNik: h.nik || '',
+          tenantKkNumber: h.kkNumber || '',
+          occupantsCount: Number(h.occupants) || 1,
+          originCity: '',
+          workOrStudy: h.job || h.jobCategory || '',
+          startDate: h.joiningDate || h.createdAt?.split('T')[0] || '2026-01-01',
+          endDate: '2026-12-31',
+          rentType: 'Tahunan',
+          rentPrice: 0,
+          depositAmount: 0,
+          status: h.status === 'Empty' ? 'Kosong' : 'Aktif',
+          verificationStatus: h.isVerified ? 'Terverifikasi' : 'Terverifikasi',
+          reportedBy: 'Pengurus RT',
+          notes: h.specialNotes || 'Terhubung langsung dari Basis Data Kependudukan Warga RT 02'
+        });
+      }
+    });
+
+    return list;
+  }, [dbRentals, sewaHouses]);
 
   // KPIs
   const stats = useMemo(() => {
@@ -441,62 +261,6 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
 
   const [syncWithResidents, setSyncWithResidents] = useState(true);
 
-  // Effective Houses list (from props or standard RT 02 structure)
-  const effectiveHouses = useMemo(() => {
-    return houses && houses.length > 0 ? houses : generateHouses();
-  }, [houses]);
-
-  // Houses that are marked as 'Sewa' in citizen registry
-  const residentSewaHouses = useMemo(() => {
-    return effectiveHouses.filter((h) => h.residenceType === 'Sewa');
-  }, [effectiveHouses]);
-
-  // Batch sync all rental contracts to resident registry
-  const handleBatchSyncToResidents = async () => {
-    if (rentals.length === 0) {
-      toast.error('Tidak ada data kontrakan untuk disinkronkan.');
-      return;
-    }
-    toast.loading('Menyinkronkan data kontrakan ke Buku Kependudukan RT 02...', { id: 'sync-rentals' });
-    let successCount = 0;
-    for (const r of rentals) {
-      const eff = calculateEffectiveStatus(r);
-      const isVacant = eff === 'Kosong' || r.status === 'Kosong';
-      const ok = await syncRentalWithHouse(r, isVacant);
-      if (ok) successCount++;
-    }
-    toast.dismiss('sync-rentals');
-    toast.success(`Berhasil menyinkronkan ${successCount} rumah sewa ke Buku Induk Kependudukan Warga RT 02!`);
-  };
-
-  // Apply authentic RT 02 Huntap Tondo 2 data & sync directly
-  const handleApplyRealData = async () => {
-    if (!window.confirm('Muat ulang data real 7 rumah sewa & kontrakan RT 002 Huntap Tondo 2 dan bersihkan data dummy?')) return;
-    try {
-      toast.loading('Menerapkan data real RT 02 Huntap Tondo 2...', { id: 'seed-rentals' });
-
-      // Clean up any obsolete dummy contracts first
-      for (const r of rentals) {
-        if (isObsoleteOrDummyRental(r) && r.id) {
-          await deleteDocumentFromCollection('rentalContracts', r.id);
-        }
-      }
-
-      for (const item of REAL_RENTAL_CONTRACTS) {
-        await setDocumentInCollection('rentalContracts', item.id, item);
-        const eff = calculateEffectiveStatus(item);
-        await syncRentalWithHouse(item, eff === 'Kosong');
-      }
-      setRentals(REAL_RENTAL_CONTRACTS);
-      toast.dismiss('seed-rentals');
-      toast.success('Data real 7 kontrakan RT 02 Huntap Tondo 2 berhasil dimuat dan terintegrasi penuh!');
-    } catch (err) {
-      toast.dismiss('seed-rentals');
-      console.error(err);
-      toast.error('Gagal menerapkan data real ke database.');
-    }
-  };
-
   // Open Form for Adding New Rental
   const handleOpenAdd = (presetHouseId?: string) => {
     setEditingRental(null);
@@ -520,9 +284,9 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       startDate: new Date().toISOString().split('T')[0],
       endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
       rentType: 'Tahunan',
-      rentPrice: 11000000,
-      depositAmount: 1000000,
-      status: 'Aktif',
+      rentPrice: 0,
+      depositAmount: 0,
+      status: targetHouse?.status === 'Empty' ? 'Kosong' : 'Aktif',
       verificationStatus: 'Terverifikasi',
       notes: ''
     });
@@ -533,9 +297,90 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
   // Open Form for Editing
   const handleOpenEdit = (rental: RentalContract) => {
     setEditingRental(rental);
-    setFormData({ ...rental });
+    const targetHouse = effectiveHouses.find(h => getNormalizedHouseId(h) === rental.houseId?.toUpperCase() || h.id === rental.houseId);
+    setFormData({
+      ...rental,
+      ownerName: rental.ownerName && rental.ownerName !== 'Belum Dicatat' ? rental.ownerName : (targetHouse?.ownerName || ''),
+      ownerPhone: rental.ownerPhone && rental.ownerPhone !== '-' ? rental.ownerPhone : (targetHouse?.ownerPhone || ''),
+      tenantName: rental.tenantName && rental.tenantName !== '(Belum Ada Penghuni)' ? rental.tenantName : (targetHouse?.headOfFamily || ''),
+      tenantPhone: rental.tenantPhone && rental.tenantPhone !== '-' ? rental.tenantPhone : (targetHouse?.phone || ''),
+      tenantNik: rental.tenantNik || targetHouse?.nik || '',
+      tenantKkNumber: rental.tenantKkNumber || targetHouse?.kkNumber || '',
+      occupantsCount: rental.occupantsCount || targetHouse?.occupants || 1
+    });
     setSyncWithResidents(true);
     setIsModalOpen(true);
+  };
+
+  // Sync real rental houses from resident database to rental contracts collection
+  const handleSyncDbHouses = async () => {
+    if (sewaHouses.length === 0) {
+      toast.info('Tidak ada rumah berkategori Sewa yang ditemukan di database warga.');
+      return;
+    }
+    toast.loading(`Menyinkronkan ${sewaHouses.length} rumah sewa dari basis data kependudukan...`, { id: 'sync-db' });
+    let createdCount = 0;
+    try {
+      for (const h of sewaHouses) {
+        const normId = getNormalizedHouseId(h);
+        const existing = dbRentals.find(r => r.houseId?.toUpperCase() === normId);
+        if (!existing) {
+          const docId = `rent-${normId}`;
+          const newDoc: RentalContract = {
+            id: docId,
+            houseId: normId,
+            block: h.block || normId.split('-')[0] || 'C',
+            number: h.number || normId.split('-')[1] || '01',
+            ownerName: h.ownerName && h.ownerName !== '-' ? h.ownerName : 'Belum Dicatat',
+            ownerPhone: h.ownerPhone && h.ownerPhone !== '-' ? h.ownerPhone : '-',
+            ownerAddress: '',
+            tenantName: h.headOfFamily && h.headOfFamily !== '-' ? h.headOfFamily : '(Belum Ada Penghuni)',
+            tenantPhone: h.phone && h.phone !== '-' ? h.phone : '-',
+            tenantNik: h.nik || '',
+            tenantKkNumber: h.kkNumber || '',
+            occupantsCount: Number(h.occupants) || 1,
+            originCity: '',
+            workOrStudy: h.job || h.jobCategory || '',
+            startDate: h.joiningDate || h.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+            endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+            rentType: 'Tahunan',
+            rentPrice: 0,
+            depositAmount: 0,
+            status: h.status === 'Empty' ? 'Kosong' : 'Aktif',
+            verificationStatus: 'Terverifikasi',
+            reportedBy: 'Pengurus RT',
+            notes: h.specialNotes || 'Diimpor langsung dari Basis Data Kependudukan Warga RT 02',
+            createdAt: new Date().toISOString()
+          };
+          await setDocumentInCollection('rentalContracts', docId, newDoc);
+          createdCount++;
+        }
+      }
+      toast.dismiss('sync-db');
+      toast.success(`Berhasil menyinkronkan ${createdCount} rumah sewa real dari database warga ke buku kontrak formal!`);
+    } catch (err) {
+      toast.dismiss('sync-db');
+      console.error(err);
+      toast.error('Gagal menyinkronkan data.');
+    }
+  };
+
+  // Batch sync all rental contracts to resident registry
+  const handleBatchSyncToResidents = async () => {
+    if (rentals.length === 0) {
+      toast.error('Tidak ada data kontrakan untuk disinkronkan.');
+      return;
+    }
+    toast.loading('Menyinkronkan data kontrakan ke Buku Kependudukan RT 02...', { id: 'sync-rentals' });
+    let successCount = 0;
+    for (const r of rentals) {
+      const eff = calculateEffectiveStatus(r);
+      const isVacant = eff === 'Kosong' || r.status === 'Kosong';
+      const ok = await syncRentalWithHouse(r, isVacant);
+      if (ok) successCount++;
+    }
+    toast.dismiss('sync-rentals');
+    toast.success(`Berhasil menyinkronkan ${successCount} rumah sewa ke Buku Induk Kependudukan Warga RT 02!`);
   };
 
   // Save or Update Rental
@@ -546,28 +391,26 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       return;
     }
 
+    const normId = (formData.houseId || '').toUpperCase().trim();
+    const docId = editingRental?.id && !editingRental.id.startsWith('house-db-') 
+      ? editingRental.id 
+      : `rent-${normId}`;
+
     const payload: Partial<RentalContract> = {
       ...formData,
-      houseId: formData.houseId.toUpperCase(),
+      id: docId,
+      houseId: normId,
       updatedAt: new Date().toISOString()
     };
 
     try {
-      if (editingRental) {
-        await setDocumentInCollection('rentalContracts', editingRental.id, payload);
-        toast.success('Data rumah sewa berhasil diperbarui!');
-      } else {
-        const id = `rent-${Date.now()}`;
-        payload.id = id;
-        payload.createdAt = new Date().toISOString();
-        await setDocumentInCollection('rentalContracts', id, payload as RentalContract);
-        toast.success('Data rumah sewa baru berhasil ditambahkan!');
-      }
+      await setDocumentInCollection('rentalContracts', docId, payload);
+      toast.success(`Data kontrak rumah sewa ${normId} berhasil disimpan!`);
 
       if (syncWithResidents && payload.houseId) {
         const eff = calculateEffectiveStatus(payload as RentalContract);
         await syncRentalWithHouse(payload, eff === 'Kosong');
-        toast.success(`Data kependudukan rumah ${payload.houseId} otomatis disinkronkan ke daftar warga!`);
+        toast.success(`Data kependudukan rumah ${normId} otomatis disinkronkan ke daftar warga!`);
       }
 
       setIsModalOpen(false);
@@ -581,7 +424,10 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Yakin ingin menghapus catatan kontrakan ini dari arsip RT?')) return;
     try {
-      await deleteDocumentFromCollection('rentalContracts', id);
+      if (!id.startsWith('house-db-')) {
+        await deleteDocumentFromCollection('rentalContracts', id);
+      }
+      setDbRentals(prev => prev.filter(r => r.id !== id));
       toast.success('Catatan rumah sewa telah dihapus.');
     } catch (err) {
       console.error(err);
@@ -749,12 +595,12 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <button
-              onClick={handleApplyRealData}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 rounded-2xl text-[11px] font-black uppercase tracking-wider shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
-              title="Terapkan 7 data kontrak real RT 02 Huntap Tondo 2 dan sinkronkan ke database warga"
+              onClick={handleSyncDbHouses}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 rounded-2xl text-[11px] font-black uppercase tracking-wider shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+              title="Sinkronkan seluruh data rumah sewa dari basis data kependudukan RT 02 ke buku kontrak"
             >
               <Sparkles size={14} className="text-slate-950" />
-              <span>Muat Data Real RT 02</span>
+              <span>Sinkronkan Data Warga Real</span>
             </button>
 
             <button

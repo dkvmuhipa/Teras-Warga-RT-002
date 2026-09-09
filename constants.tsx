@@ -69,101 +69,8 @@ export const generateHouses = (): House[] => {
     { code: 'C12', start: 1, end: 15 },
   ];
 
-  // Data Real Rumah Sewa & Kontrakan RT 002 Huntap Tondo 2
-  const REAL_RENTAL_HOUSES: Record<string, Partial<House>> = {
-    'C10-05': {
-      headOfFamily: 'Wahyudi Pratama & Keluarga',
-      ownerName: 'Bpk. Rustam Effendi',
-      ownerPhone: '0821-9000-1122',
-      phone: '0812-4566-7890',
-      occupants: 3,
-      residenceType: 'Sewa',
-      status: 'Occupied',
-      jobCategory: 'Karyawan Swasta',
-      job: 'Staf BWS Sulawesi III',
-      religion: 'Islam',
-      nik: '7271012508900004',
-      kkNumber: '7271011502180002'
-    },
-    'C5-14': {
-      headOfFamily: 'Dr. Muhammad Ridwan, M.Si.',
-      ownerName: 'Bpk. H. Syarifudin Lamakarate',
-      ownerPhone: '0812-4211-8890',
-      phone: '0821-8877-6543',
-      occupants: 4,
-      residenceType: 'Sewa',
-      status: 'Occupied',
-      jobCategory: 'PNS',
-      job: 'Dosen FMIPA UNTAD',
-      religion: 'Islam',
-      nik: '7271031504820001',
-      kkNumber: '7271032008120005'
-    },
-    'C7-06': {
-      headOfFamily: 'Moh. Fikri Anshari & Rekan',
-      ownerName: 'Ibu Hj. Nurbaeti',
-      ownerPhone: '0852-4122-3344',
-      phone: '0853-9911-2288',
-      occupants: 3,
-      residenceType: 'Sewa',
-      status: 'Occupied',
-      jobCategory: 'Mahasiswa',
-      job: 'Mahasiswa Teknik Sipil UNTAD',
-      religion: 'Islam',
-      nik: '7201041806020003',
-      kkNumber: '7201040810190001'
-    },
-    'C8-11': {
-      headOfFamily: 'Ahmad Fauzan, S.Kep., Ns.',
-      ownerName: 'Bpk. I Made Suardana',
-      ownerPhone: '0813-5466-7788',
-      phone: '0822-9133-4455',
-      occupants: 2,
-      residenceType: 'Sewa',
-      status: 'Occupied',
-      jobCategory: 'PNS',
-      job: 'Perawat RSUD Undata Palu',
-      religion: 'Islam',
-      nik: '7208061209930002',
-      kkNumber: '7208062501210003'
-    },
-    'C9-04': {
-      headOfFamily: '-',
-      ownerName: 'Bpk. Ir. Baso Rahman',
-      ownerPhone: '0811-450-998',
-      phone: undefined,
-      occupants: 0,
-      residenceType: 'Sewa',
-      status: 'Empty'
-    },
-    'C11-15': {
-      headOfFamily: 'Hendra Kurniawan',
-      ownerName: 'Ibu Hasnahwati',
-      ownerPhone: '0853-4011-9922',
-      phone: '0823-9988-7711',
-      occupants: 2,
-      residenceType: 'Sewa',
-      status: 'Occupied',
-      jobCategory: 'Karyawan Swasta',
-      job: 'Teknisi Telkomsel Palu',
-      religion: 'Islam',
-      nik: '7202051411960001',
-      kkNumber: '7202052003200002'
-    },
-    'C12-07': {
-      headOfFamily: 'Ilham Saputra, S.T.',
-      ownerName: 'Bpk. Mansyur Dg. Malewa',
-      ownerPhone: '0813-4100-2233',
-      phone: '0852-5566-4411',
-      occupants: 3,
-      residenceType: 'Sewa',
-      status: 'Occupied',
-      jobCategory: 'Wiraswasta',
-      job: 'Konsultan Pengawas Rekonstruksi',
-      religion: 'Islam',
-      nik: '7204011003940003',
-      kkNumber: '7204011205190001'
-    },
+  // Data Khusus (Ketua RT 002)
+  const SPECIAL_HOUSES: Record<string, Partial<House>> = {
     'C10-08': {
       headOfFamily: 'Bpk. IRFAN ARIANTO',
       phone: '+62 859-6119-4621',
@@ -183,30 +90,30 @@ export const generateHouses = (): House[] => {
       const accessCode = `${config.code}-${number}-${randomSuffix}`;
       const getRandStatus = () => Math.random() > 0.3 ? PaymentStatus.PAID : (Math.random() > 0.5 ? PaymentStatus.PENDING : PaymentStatus.UNPAID);
 
-      const realRentalInfo = REAL_RENTAL_HOUSES[houseId];
-      if (realRentalInfo) {
+      const specialInfo = SPECIAL_HOUSES[houseId];
+      if (specialInfo) {
         houses.push({
           id: houseId,
           block: config.code,
           number: number,
-          occupants: realRentalInfo.occupants || 0,
-          status: realRentalInfo.status || 'Occupied',
-          residenceType: realRentalInfo.residenceType || 'Tetap',
-          headOfFamily: realRentalInfo.headOfFamily || '-',
-          ownerName: realRentalInfo.ownerName,
-          ownerPhone: realRentalInfo.ownerPhone,
+          occupants: specialInfo.occupants || 0,
+          status: specialInfo.status || 'Occupied',
+          residenceType: specialInfo.residenceType || 'Tetap',
+          headOfFamily: specialInfo.headOfFamily || '-',
+          ownerName: specialInfo.ownerName,
+          ownerPhone: specialInfo.ownerPhone,
           paymentStatusAir: PaymentStatus.PAID,
           paymentStatusSampah: PaymentStatus.PAID,
-          phone: realRentalInfo.phone,
+          phone: specialInfo.phone,
           accessCode: accessCode,
           education: 'S1',
-          jobCategory: realRentalInfo.jobCategory || 'Karyawan Swasta',
-          job: realRentalInfo.job,
-          religion: realRentalInfo.religion || 'Islam',
+          jobCategory: specialInfo.jobCategory || 'Karyawan Swasta',
+          job: specialInfo.job,
+          religion: specialInfo.religion || 'Islam',
           gender: 'Laki-laki',
-          vehicleCount: realRentalInfo.status === 'Empty' ? 0 : 2,
-          nik: realRentalInfo.nik,
-          kkNumber: realRentalInfo.kkNumber,
+          vehicleCount: 2,
+          nik: specialInfo.nik,
+          kkNumber: specialInfo.kkNumber,
           isVerified: true
         });
         continue;

@@ -335,6 +335,11 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Rental Contracts (Buku Kontrak & Rumah Sewa RT)
+    match /rentalContracts/{id} {
+      allow read, create, update, delete: if true;
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;
