@@ -788,7 +788,61 @@ export const compressImageIfPossible = async (file: File, maxDimension: number =
   }
 };
 
-export const uploadImageToStorage = async (file: File, path: string) => {
+/**
+ * Compresses an image file and converts it into a high-clarity, compact Base64 Data URL.
+ * Keeps resolution sharp for document verification (e.g. KTP, KK, receipts)
+ * while keeping size small (~35KB-70KB) to ensure flawless local persistence.
+ */
+export const compressImageToCompactDataUrl = (file: File, maxDimension: number = 1024, quality: number = 0.72): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || typeof FileReader === 'undefined') {
+      reject(new Error('Environment does not support FileReader'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => reject(new Error('Gagal memuat berkas gambar'));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('Gagal membaca berkas'));
+    reader.readAsDataURL(file);
+  });
+};
+
+export const uploadImageToStorage = async (file: File, path: string): Promise<string> => {
+  // 1. Attempt upload to serverless endpoint (/api/upload) if available
   try {
     const processedFile = await compressImageIfPossible(file);
     const formData = new FormData();
@@ -799,16 +853,24 @@ export const uploadImageToStorage = async (file: File, path: string) => {
       body: formData,
     });
     
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || "Upload failed");
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.url) {
+        return data.url;
+      }
     }
-    
-    const data = await response.json();
-    return data.url;
-  } catch (error) {
-    console.error("Cloudinary upload failed, using placeholder:", error);
-    return getPlaceholderImage(path.split('/')[0]);
+  } catch (apiError) {
+    console.warn("Direct upload endpoint not reachable, persisting compressed data URL locally:", apiError);
+  }
+
+  // 2. Guaranteed Preservation: Compress and save user's real image as Data URL
+  // NEVER replace user documents with dummy picsum placeholder images
+  try {
+    const compactDataUrl = await compressImageToCompactDataUrl(file, 1024, 0.72);
+    return compactDataUrl;
+  } catch (err: any) {
+    console.error("Failed to process image as compact data URL:", err);
+    throw new Error(err.message || "Gagal memproses berkas gambar. Pastikan format file adalah JPG, PNG, atau WEBP.");
   }
 };
 export const loginAdmin = (email: string, pass: string) => {
@@ -1059,17 +1121,22 @@ export const uploadFile = async (file: File, path: string): Promise<string> => {
       body: formData,
     });
     
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || "Upload failed");
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.url) {
+        return data.url;
+      }
     }
-    
-    const data = await response.json();
-    return data.url;
-  } catch (error) {
-    console.error("Upload failed:", error);
-    throw error;
+  } catch (netErr) {
+    console.warn("Direct upload endpoint not reachable in uploadFile:", netErr);
   }
+
+  // Fallback for image files
+  if (file.type.startsWith("image/")) {
+    return compressImageToCompactDataUrl(file, 1200, 0.75);
+  }
+
+  throw new Error("Gagal mengunggah berkas.");
 };
 
 // --- OFFICIAL LETTERS SERVICES ---

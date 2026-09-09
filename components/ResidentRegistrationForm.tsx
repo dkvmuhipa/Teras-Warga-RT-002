@@ -432,10 +432,26 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
       if (uploadType === 'file') {
         if (ktpFile) {
-          ktpUrl = await uploadImageToStorage(ktpFile, `registrations/ktp_${Date.now()}_${ktpFile.name}`);
+          try {
+            ktpUrl = await uploadImageToStorage(ktpFile, `registrations/ktp_${Date.now()}_${ktpFile.name}`);
+          } catch (err: any) {
+            toast.error("Gagal Memproses Foto KTP", {
+              description: "Foto KTP gagal diproses. Pastikan format file JPG, PNG, atau WEBP dan coba lagi."
+            });
+            setIsLoading(false);
+            return;
+          }
         }
         if (kkFile) {
-          kkUrl = await uploadImageToStorage(kkFile, `registrations/kk_${Date.now()}_${kkFile.name}`);
+          try {
+            kkUrl = await uploadImageToStorage(kkFile, `registrations/kk_${Date.now()}_${kkFile.name}`);
+          } catch (err: any) {
+            toast.error("Gagal Memproses Foto KK", {
+              description: "Foto KK gagal diproses. Pastikan format file JPG, PNG, atau WEBP dan coba lagi."
+            });
+            setIsLoading(false);
+            return;
+          }
         }
       }
 

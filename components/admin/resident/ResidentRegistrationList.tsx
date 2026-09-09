@@ -33,8 +33,43 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
   const [expandedRegId, setExpandedRegId] = useState<string | null>(null);
   
   // Immersive Image Lightbox/Viewer state
-  const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<{ 
+    url: string; 
+    title: string; 
+    isPlaceholder?: boolean; 
+    phone?: string; 
+    applicantName?: string;
+  } | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  const handleOpenDocInNewTab = (url: string) => {
+    if (url.startsWith('data:')) {
+      const win = window.open('');
+      if (win) {
+        win.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head><title>Pratinjau Dokumen</title></head>
+            <body style="margin:0;background:#090d16;display:flex;justify-content:center;align-items:center;min-height:100vh;">
+              <img src="${url}" style="max-width:96vw;max-height:96vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);" />
+            </body>
+          </html>
+        `);
+        win.document.close();
+      }
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleDownloadDoc = (url: string, title: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/[^a-zA-Z0-9_-]/g, '_')}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const toggleExpanded = (regId: string) => {
     setExpandedRegId(expandedRegId === regId ? null : regId);
@@ -219,6 +254,38 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
               <X size={18} />
             </button>
 
+            {/* Warning Banner if Document is a Dummy Placeholder */}
+            {lightboxImage.isPlaceholder && (
+              <div 
+                onClick={(e) => e.stopPropagation()}
+                className="mb-4 max-w-2xl w-full bg-amber-500/20 border border-amber-500/40 backdrop-blur-md rounded-2xl p-4 text-amber-200 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg"
+              >
+                <div className="flex items-center gap-3 text-left">
+                  <AlertTriangle size={24} className="text-amber-400 shrink-0" />
+                  <div>
+                    <strong className="block text-amber-300 font-bold text-sm">Dokumen Ini Gambar Dummy / Placeholder Acak</strong>
+                    <span className="text-[11px] text-amber-250 opacity-90 leading-relaxed">
+                      Pemohon gagal mengunggah dokumen fisik asli ke server saat mendaftar. Mohon jangan disetujui dahulu sebelum memverifikasi foto asli via WhatsApp.
+                    </span>
+                  </div>
+                </div>
+                {lightboxImage.phone && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(
+                        `https://wa.me/${lightboxImage.phone?.replace(/^0/, '62')}?text=${encodeURIComponent(`Halo Bapak/Ibu ${lightboxImage.applicantName || ''}, terkait pendaftaran warga di Teras Warga RT 002, foto KTP/KK Anda belum terunggah dengan jelas di sistem. Mohon kirimkan foto asli fisik KTP & KK via chat WhatsApp ini untuk verifikasi. Terima kasih!`)}`,
+                        '_blank'
+                      );
+                    }}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition-all active:scale-95"
+                  >
+                    <Phone size={13} /> Minta Foto via WA
+                  </button>
+                )}
+              </div>
+            )}
+
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -233,15 +300,20 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                 className="max-h-[75vh] object-contain rounded-xl"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <a 
-                  href={lightboxImage.url} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="px-4 py-2 bg-slate-900 hover:bg-black text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-1.5"
+              <div className="absolute bottom-4 right-4 flex items-center gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
+                <button 
+                  onClick={() => handleDownloadDoc(lightboxImage.url, lightboxImage.title)}
+                  className="px-3.5 py-2 bg-slate-900/90 hover:bg-black text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-1.5 transition-all"
+                  title="Unduh Berkas ke Komputer"
+                >
+                  <Download size={12} /> Unduh
+                </button>
+                <button 
+                  onClick={() => handleOpenDocInNewTab(lightboxImage.url)}
+                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-1.5 transition-all"
                 >
                   <ExternalLink size={12} /> Buka Tab Baru
-                </a>
+                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -487,69 +559,134 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
                           <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Dokumen Identitas Lampiran</label>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {/* KTP Card */}
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <FileText size={15} className="text-slate-500" />
-                                <div>
-                                  <h6 className="text-xs font-bold text-slate-800">KTP Kepala Keluarga</h6>
-                                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{reg.ktpUrl ? 'Tersedia' : 'Tidak Unggah'}</p>
-                                </div>
-                              </div>
-                              {reg.ktpUrl ? (
-                                <div className="flex gap-1.5">
-                                  <button 
-                                    onClick={() => setLightboxImage({ url: reg.ktpUrl!, title: `KTP - ${reg.headOfFamily}` })}
-                                    className="px-2 py-1 bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 border border-slate-200 text-slate-700 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1"
-                                  >
-                                    <Eye size={11} /> Pratinjau
-                                  </button>
-                                  <a 
-                                    href={reg.ktpUrl} 
-                                    target="_blank" 
-                                    rel="noreferrer" 
-                                    className="p-1 hover:bg-slate-100 hover:text-slate-800 bg-white border border-slate-200 rounded-lg text-slate-500 transition-all flex items-center"
-                                  >
-                                    <ExternalLink size={12} />
-                                  </a>
-                                </div>
-                              ) : (
-                                <span className="text-[8px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 border border-rose-100 rounded">Tidak Ada</span>
-                              )}
-                            </div>
+                          {(() => {
+                            const isKtpPlaceholder = !!reg.ktpUrl && reg.ktpUrl.includes('picsum.photos');
+                            const isKkPlaceholder = !!reg.kkUrl && reg.kkUrl.includes('picsum.photos');
 
-                            {/* KK Card */}
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <ClipboardList size={15} className="text-slate-500" />
-                                <div>
-                                  <h6 className="text-xs font-bold text-slate-800">Kartu Keluarga (KK)</h6>
-                                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{reg.kkUrl ? 'Tersedia' : 'Tidak Unggah'}</p>
+                            return (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {/* KTP Card */}
+                                <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                                  isKtpPlaceholder ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200/60'
+                                }`}>
+                                  <div className="flex items-center gap-2.5">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                      isKtpPlaceholder ? 'bg-amber-100 text-amber-600' : 'bg-white text-slate-500 border border-slate-200'
+                                    }`}>
+                                      <FileText size={16} />
+                                    </div>
+                                    <div>
+                                      <h6 className="text-xs font-bold text-slate-800">KTP Kepala Keluarga</h6>
+                                      <div className="mt-0.5">
+                                        {reg.ktpUrl ? (
+                                          isKtpPlaceholder ? (
+                                            <span className="text-[8px] font-black text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300 inline-flex items-center gap-1">
+                                              <AlertTriangle size={9} /> Gagal Unggah (Dummy)
+                                            </span>
+                                          ) : (
+                                            <span className="text-[9px] font-bold text-emerald-600 flex items-center gap-1">
+                                              <CheckCircle size={10} /> Dokumen Tersedia
+                                            </span>
+                                          )
+                                        ) : (
+                                          <span className="text-[8px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 border border-rose-100 rounded">
+                                            Tidak Ada
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {reg.ktpUrl ? (
+                                    <div className="flex gap-1.5">
+                                      <button 
+                                        onClick={() => setLightboxImage({ 
+                                          url: reg.ktpUrl!, 
+                                          title: `KTP - ${reg.headOfFamily}`,
+                                          isPlaceholder: isKtpPlaceholder,
+                                          phone: reg.phone,
+                                          applicantName: reg.headOfFamily
+                                        })}
+                                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 border shadow-xs ${
+                                          isKtpPlaceholder 
+                                            ? 'bg-amber-600 text-white hover:bg-amber-700 border-amber-700' 
+                                            : 'bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 border-slate-200 text-slate-700'
+                                        }`}
+                                      >
+                                        <Eye size={11} /> Pratinjau
+                                      </button>
+                                      <button 
+                                        onClick={() => handleOpenDocInNewTab(reg.ktpUrl!)}
+                                        className="p-1 hover:bg-slate-100 hover:text-slate-800 bg-white border border-slate-200 rounded-lg text-slate-500 transition-all flex items-center"
+                                        title="Buka Tab Baru"
+                                      >
+                                        <ExternalLink size={12} />
+                                      </button>
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                {/* KK Card */}
+                                <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                                  isKkPlaceholder ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200/60'
+                                }`}>
+                                  <div className="flex items-center gap-2.5">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                      isKkPlaceholder ? 'bg-amber-100 text-amber-600' : 'bg-white text-slate-500 border border-slate-200'
+                                    }`}>
+                                      <ClipboardList size={16} />
+                                    </div>
+                                    <div>
+                                      <h6 className="text-xs font-bold text-slate-800">Kartu Keluarga (KK)</h6>
+                                      <div className="mt-0.5">
+                                        {reg.kkUrl ? (
+                                          isKkPlaceholder ? (
+                                            <span className="text-[8px] font-black text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300 inline-flex items-center gap-1">
+                                              <AlertTriangle size={9} /> Gagal Unggah (Dummy)
+                                            </span>
+                                          ) : (
+                                            <span className="text-[9px] font-bold text-emerald-600 flex items-center gap-1">
+                                              <CheckCircle size={10} /> Dokumen Tersedia
+                                            </span>
+                                          )
+                                        ) : (
+                                          <span className="text-[8px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 border border-rose-100 rounded">
+                                            Tidak Ada
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {reg.kkUrl ? (
+                                    <div className="flex gap-1.5">
+                                      <button 
+                                        onClick={() => setLightboxImage({ 
+                                          url: reg.kkUrl!, 
+                                          title: `Kartu Keluarga - ${reg.headOfFamily}`,
+                                          isPlaceholder: isKkPlaceholder,
+                                          phone: reg.phone,
+                                          applicantName: reg.headOfFamily
+                                        })}
+                                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 border shadow-xs ${
+                                          isKkPlaceholder 
+                                            ? 'bg-amber-600 text-white hover:bg-amber-700 border-amber-700' 
+                                            : 'bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 border-slate-200 text-slate-700'
+                                        }`}
+                                      >
+                                        <Eye size={11} /> Pratinjau
+                                      </button>
+                                      <button 
+                                        onClick={() => handleOpenDocInNewTab(reg.kkUrl!)}
+                                        className="p-1 hover:bg-slate-100 hover:text-slate-800 bg-white border border-slate-200 rounded-lg text-slate-500 transition-all flex items-center"
+                                        title="Buka Tab Baru"
+                                      >
+                                        <ExternalLink size={12} />
+                                      </button>
+                                    </div>
+                                  ) : null}
                                 </div>
                               </div>
-                              {reg.kkUrl ? (
-                                <div className="flex gap-1.5">
-                                  <button 
-                                    onClick={() => setLightboxImage({ url: reg.kkUrl!, title: `Kartu Keluarga - ${reg.headOfFamily}` })}
-                                    className="px-2 py-1 bg-white hover:bg-slate-100 hover:text-indigo-600 hover:border-indigo-200 border border-slate-200 text-slate-700 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1"
-                                  >
-                                    <Eye size={11} /> Pratinjau
-                                  </button>
-                                  <a 
-                                    href={reg.kkUrl} 
-                                    target="_blank" 
-                                    rel="noreferrer" 
-                                    className="p-1 hover:bg-slate-100 hover:text-slate-800 bg-white border border-slate-200 rounded-lg text-slate-500 transition-all flex items-center"
-                                  >
-                                    <ExternalLink size={12} />
-                                  </a>
-                                </div>
-                              ) : (
-                                <span className="text-[8px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 border border-rose-100 rounded">Tidak Ada</span>
-                              )}
-                            </div>
-                          </div>
+                            );
+                          })()}
                         </div>
 
                         {/* 5. Responsive Verification Action Drawer */}
