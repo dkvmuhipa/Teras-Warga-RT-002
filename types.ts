@@ -1231,6 +1231,7 @@ export interface RentalContract {
   tenantNik?: string;
   tenantKkNumber?: string;
   occupantsCount: number; // Jumlah jiwa yang menempati
+  occupancyType?: 'Keluarga' | 'Individu' | 'Rumah Keluarga'; // NEW: Kategori Hunian (Keluarga, Individu/Kos, Rumah Kerabat)
   originCity?: string; // Kota / Daerah Asal
   workOrStudy?: string; // Pekerjaan / Tempat Bekerja / Kampus
   ktpUrl?: string;

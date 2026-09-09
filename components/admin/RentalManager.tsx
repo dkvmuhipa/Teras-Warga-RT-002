@@ -4,7 +4,7 @@ import {
   Plus, Filter, Download, Printer, ExternalLink, Share2, Eye, Edit, Trash2, 
   X, RefreshCw, MessageSquare, AlertCircle, ShieldCheck, MapPin, UserCheck, 
   Check, Building, HelpCircle, FileText, Send, Sparkles, Link2, CheckSquare,
-  ArrowRight, Shield, Database
+  ArrowRight, Shield, Database, User
 } from 'lucide-react';
 import { RentalContract, House } from '../../types';
 import { 
@@ -27,6 +27,22 @@ export const getNormalizedHouseId = (h: Partial<House>): string => {
   return (h.id || '').toUpperCase();
 };
 
+// Helper to determine occupancy category (Keluarga vs Individu/Kos vs Rumah Keluarga)
+export const getOccupancyType = (
+  rental?: Partial<RentalContract> | null,
+  house?: Partial<House> | null
+): 'Keluarga' | 'Individu' | 'Rumah Keluarga' => {
+  if (rental?.occupancyType) return rental.occupancyType;
+  if (house?.residenceType === 'Rumah Keluarga') return 'Rumah Keluarga';
+
+  const occupants = Number(rental?.occupantsCount ?? (house?.occupants ?? 1));
+  const hasFamilyMembers = Boolean(house?.familyMembers && house.familyMembers.length > 0);
+  const isMarried = house?.maritalStatus === 'Kawin';
+
+  if (occupants > 1 || hasFamilyMembers || isMarried) return 'Keluarga';
+  return 'Individu';
+};
+
 // Compute live dynamic status based on dates
 export const calculateEffectiveStatus = (r: RentalContract): 'Aktif' | 'Mendekati Habis' | 'Habis' | 'Kosong' | 'Pindah' => {
   if (r.status === 'Kosong' || r.status === 'Pindah') return r.status;
@@ -46,8 +62,9 @@ export const calculateEffectiveStatus = (r: RentalContract): 'Aktif' | 'Mendekat
 export const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVacant: boolean = false) => {
   if (!rental.houseId) return false;
   try {
+    const isRumahKeluarga = rental.occupancyType === 'Rumah Keluarga';
     const houseUpdates: Partial<House> = {
-      residenceType: 'Sewa',
+      residenceType: isRumahKeluarga ? 'Rumah Keluarga' : 'Sewa',
       ownerName: rental.ownerName || '',
       ownerPhone: rental.ownerPhone || '',
       status: isVacant || rental.status === 'Kosong' ? 'Empty' : 'Occupied',
@@ -77,6 +94,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
   const [dbRentals, setDbRentals] = useState<RentalContract[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [filterCategory, setFilterCategory] = useState<'ALL' | 'KELUARGA' | 'INDIVIDU' | 'RUMAH_KELUARGA'>('ALL');
   const [activeTab, setActiveTab] = useState<'contracts' | 'integration'>('contracts');
   
   // Modal states
@@ -103,6 +121,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     tenantNik: '',
     tenantKkNumber: '',
     occupantsCount: 1,
+    occupancyType: 'Individu',
     originCity: '',
     workOrStudy: '',
     startDate: new Date().toISOString().split('T')[0],
@@ -132,10 +151,11 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     return houses && houses.length > 0 ? houses : [];
   }, [houses]);
 
-  // Houses that are marked as 'Sewa' or have a distinct owner name in citizen registry
+  // Houses that are marked as 'Sewa', 'Rumah Keluarga', or have a distinct owner name in citizen registry
   const sewaHouses = useMemo(() => {
     return effectiveHouses.filter((h) => {
       const isSewa = h.residenceType === 'Sewa';
+      const isRumahKeluarga = h.residenceType === 'Rumah Keluarga';
       const hasOwner = Boolean(
         h.ownerName && 
         h.ownerName.trim() !== '' && 
@@ -144,7 +164,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
         h.headOfFamily.trim() !== '-' &&
         h.headOfFamily.trim().toLowerCase() !== h.ownerName.trim().toLowerCase()
       );
-      return isSewa || hasOwner;
+      return isSewa || isRumahKeluarga || hasOwner;
     });
   }, [effectiveHouses]);
 
@@ -160,17 +180,21 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     dbRentals.forEach((r) => {
       const normId = r.houseId ? r.houseId.toUpperCase() : `${r.block}-${r.number}`.toUpperCase();
       seenHouseIds.add(normId);
+      const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === normId || h.id === r.houseId);
+      const autoOcc = getOccupancyType(r, linkedH);
       list.push({
         ...r,
-        houseId: normId
+        houseId: normId,
+        occupancyType: r.occupancyType || autoOcc
       });
     });
 
-    // 2. Include all real houses from database where residenceType === 'Sewa' or has distinct owner
+    // 2. Include all real houses from database where residenceType === 'Sewa' or 'Rumah Keluarga' or has distinct owner
     sewaHouses.forEach((h) => {
       const normId = getNormalizedHouseId(h);
       if (!seenHouseIds.has(normId)) {
         seenHouseIds.add(normId);
+        const autoOcc = getOccupancyType({}, h);
         list.push({
           id: `house-db-${h.id || normId}`,
           houseId: normId,
@@ -184,6 +208,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
           tenantNik: h.nik || '',
           tenantKkNumber: h.kkNumber || '',
           occupantsCount: Number(h.occupants) || 1,
+          occupancyType: autoOcc,
           originCity: '',
           workOrStudy: h.job || h.jobCategory || '',
           startDate: h.joiningDate || h.createdAt?.split('T')[0] || '2026-01-01',
@@ -194,13 +219,13 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
           status: h.status === 'Empty' ? 'Kosong' : 'Aktif',
           verificationStatus: h.isVerified ? 'Terverifikasi' : 'Terverifikasi',
           reportedBy: 'Pengurus RT',
-          notes: h.specialNotes || 'Terhubung langsung dari Basis Data Kependudukan Warga RT 02'
+          notes: h.specialNotes || (h.residenceType === 'Rumah Keluarga' ? 'Rumah Keluarga / Ikut Saudara (Basis Data Warga)' : 'Terhubung langsung dari Basis Data Kependudukan Warga RT 02')
         });
       }
     });
 
     return list;
-  }, [dbRentals, sewaHouses]);
+  }, [dbRentals, sewaHouses, effectiveHouses]);
 
   // KPIs
   const stats = useMemo(() => {
@@ -211,9 +236,23 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     let expired = 0;
     let pendingVerification = 0;
     let vacant = 0;
+    let familyCount = 0;
+    let individualCount = 0;
+    let relativeHouseCount = 0;
 
     rentals.forEach((r) => {
       const effStatus = calculateEffectiveStatus(r);
+      const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === r.houseId?.toUpperCase() || h.id === r.houseId);
+      const occ = getOccupancyType(r, linkedH);
+
+      if (occ === 'Keluarga') {
+        familyCount++;
+      } else if (occ === 'Rumah Keluarga') {
+        relativeHouseCount++;
+      } else {
+        individualCount++;
+      }
+
       if (r.verificationStatus === 'Menunggu Verifikasi') {
         pendingVerification++;
       }
@@ -231,8 +270,19 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       }
     });
 
-    return { totalHouses, activeTenants, totalOccupants, expiringSoon, expired, pendingVerification, vacant };
-  }, [rentals]);
+    return { 
+      totalHouses, 
+      activeTenants, 
+      totalOccupants, 
+      expiringSoon, 
+      expired, 
+      pendingVerification, 
+      vacant,
+      familyCount,
+      individualCount,
+      relativeHouseCount
+    };
+  }, [rentals, effectiveHouses]);
 
   // Filtered List
   const filteredRentals = useMemo(() => {
@@ -250,17 +300,24 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
 
       if (!matchQuery) return false;
 
+      // Status Filter
       const effStatus = calculateEffectiveStatus(r);
-      if (filterStatus === 'ALL') return true;
-      if (filterStatus === 'PENDING') return r.verificationStatus === 'Menunggu Verifikasi';
-      if (filterStatus === 'AKTIF') return effStatus === 'Aktif';
-      if (filterStatus === 'EXPIRING') return effStatus === 'Mendekati Habis';
-      if (filterStatus === 'EXPIRED') return effStatus === 'Habis';
-      if (filterStatus === 'KOSONG') return effStatus === 'Kosong';
+      if (filterStatus === 'PENDING' && r.verificationStatus !== 'Menunggu Verifikasi') return false;
+      if (filterStatus === 'AKTIF' && effStatus !== 'Aktif') return false;
+      if (filterStatus === 'EXPIRING' && effStatus !== 'Mendekati Habis') return false;
+      if (filterStatus === 'EXPIRED' && effStatus !== 'Habis') return false;
+      if (filterStatus === 'KOSONG' && effStatus !== 'Kosong') return false;
+
+      // Category Filter (Keluarga vs Individu/Kos vs Rumah Kerabat)
+      const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === r.houseId?.toUpperCase() || h.id === r.houseId);
+      const occ = getOccupancyType(r, linkedH);
+      if (filterCategory === 'KELUARGA' && occ !== 'Keluarga') return false;
+      if (filterCategory === 'INDIVIDU' && occ !== 'Individu') return false;
+      if (filterCategory === 'RUMAH_KELUARGA' && occ !== 'Rumah Keluarga') return false;
 
       return true;
     });
-  }, [rentals, searchQuery, filterStatus]);
+  }, [rentals, searchQuery, filterStatus, filterCategory, effectiveHouses]);
 
   const [syncWithResidents, setSyncWithResidents] = useState(true);
 
@@ -269,6 +326,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     setEditingRental(null);
     const targetHouse = presetHouseId ? effectiveHouses.find(h => h.id === presetHouseId) : null;
     const parts = (presetHouseId || 'C10-01').split('-');
+    const defaultOcc = targetHouse ? getOccupancyType({}, targetHouse) : 'Individu';
     
     setFormData({
       houseId: presetHouseId || '',
@@ -282,6 +340,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       tenantNik: targetHouse?.nik || '',
       tenantKkNumber: targetHouse?.kkNumber || '',
       occupantsCount: targetHouse?.occupants || 1,
+      occupancyType: defaultOcc,
       originCity: '',
       workOrStudy: '',
       startDate: new Date().toISOString().split('T')[0],
@@ -301,6 +360,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
   const handleOpenEdit = (rental: RentalContract) => {
     setEditingRental(rental);
     const targetHouse = effectiveHouses.find(h => getNormalizedHouseId(h) === rental.houseId?.toUpperCase() || h.id === rental.houseId);
+    const resolvedOcc = getOccupancyType(rental, targetHouse);
     setFormData({
       ...rental,
       ownerName: rental.ownerName && rental.ownerName !== 'Belum Dicatat' ? rental.ownerName : (targetHouse?.ownerName || ''),
@@ -309,7 +369,8 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       tenantPhone: rental.tenantPhone && rental.tenantPhone !== '-' ? rental.tenantPhone : (targetHouse?.phone || ''),
       tenantNik: rental.tenantNik || targetHouse?.nik || '',
       tenantKkNumber: rental.tenantKkNumber || targetHouse?.kkNumber || '',
-      occupantsCount: rental.occupantsCount || targetHouse?.occupants || 1
+      occupantsCount: rental.occupantsCount || targetHouse?.occupants || 1,
+      occupancyType: rental.occupancyType || resolvedOcc
     });
     setSyncWithResidents(true);
     setIsModalOpen(true);
@@ -342,6 +403,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
             tenantNik: h.nik || '',
             tenantKkNumber: h.kkNumber || '',
             occupantsCount: Number(h.occupants) || 1,
+            occupancyType: getOccupancyType({}, h),
             originCity: '',
             workOrStudy: h.job || h.jobCategory || '',
             startDate: h.joiningDate || h.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
@@ -465,33 +527,38 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     }
 
     const headers = [
-      'No. Rumah', 'Blok', 'Nomor', 'Nama Pemilik', 'No HP Pemilik', 'Alamat Pemilik',
+      'No. Rumah', 'Blok', 'Nomor', 'Kategori Hunian', 'Nama Pemilik', 'No HP Pemilik', 'Alamat Pemilik',
       'Nama Penyewa', 'No HP Penyewa', 'NIK Penyewa', 'Jumlah Jiwa', 'Asal Daerah',
       'Pekerjaan/Kampus', 'Tgl Mulai Sewa', 'Tgl Akhir Sewa', 'Jenis Sewa', 'Biaya Sewa',
       'Status Kontrak', 'Verifikasi', 'Catatan'
     ];
 
-    const rows = filteredRentals.map((r) => [
-      `"${r.houseId}"`,
-      `"${r.block}"`,
-      `"${r.number}"`,
-      `"${r.ownerName}"`,
-      `"${r.ownerPhone}"`,
-      `"${r.ownerAddress || '-'}"`,
-      `"${r.tenantName || '-'}"`,
-      `"${r.tenantPhone || '-'}"`,
-      `"${r.tenantNik || '-'}"`,
-      r.occupantsCount || 0,
-      `"${r.originCity || '-'}"`,
-      `"${r.workOrStudy || '-'}"`,
-      `"${r.startDate}"`,
-      `"${r.endDate}"`,
-      `"${r.rentType}"`,
-      r.rentPrice || 0,
-      `"${calculateEffectiveStatus(r)}"`,
-      `"${r.verificationStatus}"`,
-      `"${(r.notes || '').replace(/"/g, '""')}"`
-    ]);
+    const rows = filteredRentals.map((r) => {
+      const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === r.houseId?.toUpperCase() || h.id === r.houseId);
+      const occType = getOccupancyType(r, linkedH);
+      return [
+        `"${r.houseId}"`,
+        `"${r.block}"`,
+        `"${r.number}"`,
+        `"${occType}"`,
+        `"${r.ownerName}"`,
+        `"${r.ownerPhone}"`,
+        `"${r.ownerAddress || '-'}"`,
+        `"${r.tenantName || '-'}"`,
+        `"${r.tenantPhone || '-'}"`,
+        `"${r.tenantNik || '-'}"`,
+        r.occupantsCount || 0,
+        `"${r.originCity || '-'}"`,
+        `"${r.workOrStudy || '-'}"`,
+        `"${r.startDate}"`,
+        `"${r.endDate}"`,
+        `"${r.rentType}"`,
+        r.rentPrice || 0,
+        `"${calculateEffectiveStatus(r)}"`,
+        `"${r.verificationStatus}"`,
+        `"${(r.notes || '').replace(/"/g, '""')}"`
+      ];
+    });
 
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
@@ -667,6 +734,51 @@ _Pengurus RT 002 Huntap Tondo 2_`;
             </span>
           </div>
         </div>
+
+        {/* Breakdown Komposisi Hunian: Keluarga vs Individu vs Rumah Kerabat */}
+        <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Komposisi Hunian:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setFilterCategory(filterCategory === 'KELUARGA' ? 'ALL' : 'KELUARGA')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
+                filterCategory === 'KELUARGA'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                  : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30'
+              }`}
+              title="Klik untuk filter hanya hunian keluarga"
+            >
+              <Users size={12} />
+              <span>👨‍👩‍👧 Dihuni Keluarga: {stats.familyCount} Unit</span>
+            </button>
+            <button
+              onClick={() => setFilterCategory(filterCategory === 'INDIVIDU' ? 'ALL' : 'INDIVIDU')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
+                filterCategory === 'INDIVIDU'
+                  ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30'
+              }`}
+              title="Klik untuk filter hanya hunian individu/kos"
+            >
+              <User size={12} />
+              <span>👤 Individu / Kos: {stats.individualCount} Unit</span>
+            </button>
+            <button
+              onClick={() => setFilterCategory(filterCategory === 'RUMAH_KELUARGA' ? 'ALL' : 'RUMAH_KELUARGA')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
+                filterCategory === 'RUMAH_KELUARGA'
+                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30'
+              }`}
+              title="Klik untuk filter hanya rumah kerabat / keluarga"
+            >
+              <Home size={12} />
+              <span>🏠 Rumah Kerabat: {stats.relativeHouseCount} Unit</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Navigation Tabs: Buku Kontrak vs Status Integrasi Data Warga */}
@@ -699,39 +811,68 @@ _Pengurus RT 002 Huntap Tondo 2_`;
       {activeTab === 'contracts' ? (
         <>
           {/* Filter & Search Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs">
-            <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                type="text"
-                placeholder="Cari rumah sewa (misal: C10-05, nama penyewa, nama pemilik, asal daerah, no WA)..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-              />
+          <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  type="text"
+                  placeholder="Cari rumah sewa (misal: C10-05, nama penyewa, nama pemilik, asal daerah, no WA)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                {[
+                  { id: 'ALL', label: 'Semua Status' },
+                  { id: 'AKTIF', label: '🟢 Aktif' },
+                  { id: 'EXPIRING', label: '🟡 Akan Habis' },
+                  { id: 'EXPIRED', label: '🔴 Jatuh Tempo' },
+                  { id: 'PENDING', label: '⏳ Lapor Baru' },
+                  { id: 'KOSONG', label: '⚪ Rumah Kosong' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setFilterStatus(tab.id)}
+                    className={`px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
+                      filterStatus === tab.id
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-              {[
-                { id: 'ALL', label: 'Semua Hunian' },
-                { id: 'AKTIF', label: '🟢 Aktif' },
-                { id: 'EXPIRING', label: '🟡 Akan Habis' },
-                { id: 'EXPIRED', label: '🔴 Jatuh Tempo' },
-                { id: 'PENDING', label: '⏳ Lapor Baru' },
-                { id: 'KOSONG', label: '⚪ Rumah Kosong' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setFilterStatus(tab.id)}
-                  className={`px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
-                    filterStatus === tab.id
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {/* Filter Kategori: Keluarga vs Individu vs Rumah Kerabat */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                Filter Kategori Hunian:
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {[
+                  { id: 'ALL', label: `Semua (${rentals.length})` },
+                  { id: 'KELUARGA', label: `👨‍👩‍👧 Dihuni Keluarga (${stats.familyCount})` },
+                  { id: 'INDIVIDU', label: `👤 Individu / Kos (${stats.individualCount})` },
+                  { id: 'RUMAH_KELUARGA', label: `🏠 Rumah Kerabat (${stats.relativeHouseCount})` },
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setFilterCategory(cat.id as any)}
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                      filterCategory === cat.id
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -781,8 +922,50 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                         </div>
                       </div>
 
+                      {/* Kategori Hunian Badge (Keluarga vs Individu/Kos vs Rumah Kerabat) */}
+                      {(() => {
+                        const occ = getOccupancyType(r, linkedHouse);
+                        if (occ === 'Rumah Keluarga') {
+                          return (
+                            <div className="mt-2.5 flex items-center justify-between px-3 py-1.5 bg-amber-50/90 rounded-xl border border-amber-200/80 text-[10px]">
+                              <span className="text-amber-800 font-bold flex items-center gap-1.5">
+                                <Home size={12} className="text-amber-600" />
+                                Kategori Hunian:
+                              </span>
+                              <span className="font-black text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                🏠 Rumah Kerabat / Keluarga
+                              </span>
+                            </div>
+                          );
+                        }
+                        if (occ === 'Keluarga') {
+                          return (
+                            <div className="mt-2.5 flex items-center justify-between px-3 py-1.5 bg-emerald-50/90 rounded-xl border border-emerald-200/80 text-[10px]">
+                              <span className="text-emerald-800 font-bold flex items-center gap-1.5">
+                                <Users size={12} className="text-emerald-600" />
+                                Kategori Hunian:
+                              </span>
+                              <span className="font-black text-emerald-900 bg-emerald-100/90 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                👨‍👩‍👧 Dihuni Keluarga ({r.occupantsCount || 1} Jiwa)
+                              </span>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div className="mt-2.5 flex items-center justify-between px-3 py-1.5 bg-blue-50/90 rounded-xl border border-blue-200/80 text-[10px]">
+                            <span className="text-blue-800 font-bold flex items-center gap-1.5">
+                              <User size={12} className="text-blue-600" />
+                              Kategori Hunian:
+                            </span>
+                            <span className="font-black text-blue-900 bg-blue-100/90 px-2 py-0.5 rounded-md flex items-center gap-1">
+                              👤 Individu / Bujang / Kos
+                            </span>
+                          </div>
+                        );
+                      })()}
+
                       {/* Resident Registry Sync Status Badge */}
-                      <div className="mt-2.5 flex items-center justify-between px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200/70 text-[10px]">
+                      <div className="mt-1.5 flex items-center justify-between px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200/70 text-[10px]">
                         <span className="text-slate-500 font-bold flex items-center gap-1.5">
                           <Link2 size={12} className={linkedHouse?.residenceType === 'Sewa' ? 'text-emerald-600' : 'text-amber-500'} />
                           Status Kependudukan:
@@ -791,8 +974,10 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                           {linkedHouse ? (
                             linkedHouse.residenceType === 'Sewa' ? (
                               <span className="text-emerald-700">✓ Terintegrasi (Kategori Sewa)</span>
+                            ) : linkedHouse.residenceType === 'Rumah Keluarga' ? (
+                              <span className="text-amber-700">✓ Tercatat (Rumah Keluarga)</span>
                             ) : (
-                              <span className="text-amber-700">Tercatat ({linkedHouse.residenceType || 'Tetap'})</span>
+                              <span className="text-indigo-700">Tercatat ({linkedHouse.residenceType || 'Tetap'})</span>
                             )
                           ) : (
                             <span className="text-slate-500">Unit Terdaftar di RT</span>
@@ -805,7 +990,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                         {/* Penyewa */}
                         <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100/80 space-y-1">
                           <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-1">
-                            <Users size={11} /> Penyewa Aktif:
+                            <Users size={11} /> Penyewa / Penghuni:
                           </span>
                           <p className="text-xs font-bold text-slate-900 truncate">
                             {r.tenantName || '(Belum Ada Penyewa)'}
@@ -813,6 +998,16 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                           <p className="text-[11px] text-slate-500 font-medium">
                             {r.occupantsCount ? `${r.occupantsCount} Jiwa Penghuni` : '-'}
                           </p>
+                          {linkedHouse?.familyMembers && linkedHouse.familyMembers.length > 0 && (
+                            <div className="pt-1 mt-1 border-t border-slate-200/60 text-[10px] text-slate-600">
+                              <span className="font-bold block text-slate-700">
+                                Anggota Keluarga ({linkedHouse.familyMembers.length}):
+                              </span>
+                              <span className="truncate block text-[9.5px] text-slate-500">
+                                {linkedHouse.familyMembers.map(m => `${m.name} (${m.relation || 'Anggota'})`).join(', ')}
+                              </span>
+                            </div>
+                          )}
                           {r.originCity && (
                             <p className="text-[10px] text-slate-400 font-medium truncate">
                               Asal: {r.originCity}
@@ -1006,6 +1201,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   <tr className="bg-slate-50 text-slate-700 text-[10px] font-black uppercase tracking-wider border-b border-slate-200">
                     <th className="p-3 text-center">No</th>
                     <th className="p-3">No. Rumah</th>
+                    <th className="p-3">Kategori Hunian</th>
                     <th className="p-3">Nama Penghuni (Warga)</th>
                     <th className="p-3">Kontak Penghuni</th>
                     <th className="p-3">Pemilik (Induk Semang)</th>
@@ -1017,6 +1213,8 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   {residentSewaHouses.map((h, i) => {
                     const normId = getNormalizedHouseId(h);
                     const matchContract = rentals.find(r => r.houseId?.toUpperCase() === normId.toUpperCase() || r.houseId === h.id);
+                    const occ = getOccupancyType(matchContract, h);
+
                     return (
                       <tr key={h.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="p-3 text-center font-bold text-slate-400">{i + 1}</td>
@@ -1024,6 +1222,24 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                           <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold">
                             {normId}
                           </span>
+                        </td>
+                        <td className="p-3">
+                          {occ === 'Rumah Keluarga' ? (
+                            <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
+                              <Home size={10} className="text-amber-600" />
+                              Rumah Kerabat
+                            </span>
+                          ) : occ === 'Keluarga' ? (
+                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-lg text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
+                              <Users size={10} className="text-emerald-600" />
+                              Keluarga ({h.occupants || 1} Jiwa)
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
+                              <User size={10} className="text-blue-600" />
+                              Individu / Kos
+                            </span>
+                          )}
                         </td>
                         <td className="p-3 font-bold text-slate-800">
                           {h.headOfFamily && h.headOfFamily !== '-' ? h.headOfFamily : <span className="text-slate-400 italic">Kosong / Belum Diisi</span>}
@@ -1230,6 +1446,32 @@ _Pengurus RT 002 Huntap Tondo 2_`;
             </h5>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Kategori Hunian Selector */}
+              <div className="space-y-1 sm:col-span-2">
+                <label className="text-[11px] font-bold text-slate-600">Kategori / Bentuk Hunian</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { id: 'Keluarga', label: '👨‍👩‍👧 Dihuni Keluarga', desc: 'Berkeluarga (KK & Istri/Anak/Anggota)' },
+                    { id: 'Individu', label: '👤 Individu / Kos', desc: 'Sendiri / Mahasiswa / Pekerja Bujang' },
+                    { id: 'Rumah Keluarga', label: '🏠 Rumah Kerabat', desc: 'Menempati rumah milik kerabat/ortu' },
+                  ].map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, occupancyType: cat.id as any }))}
+                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        (formData.occupancyType || 'Individu') === cat.id
+                          ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20 text-indigo-950 font-bold'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-medium'
+                      }`}
+                    >
+                      <div className="text-xs font-black">{cat.label}</div>
+                      <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">{cat.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-600">Nama Kepala Keluarga Penyewa</label>
                 <input
@@ -1270,7 +1512,14 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   type="number"
                   min={0}
                   value={formData.occupantsCount || 0}
-                  onChange={(e) => setFormData({ ...formData, occupantsCount: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const count = Number(e.target.value);
+                    setFormData(prev => ({
+                      ...prev,
+                      occupantsCount: count,
+                      occupancyType: count > 1 && prev.occupancyType === 'Individu' ? 'Keluarga' : prev.occupancyType
+                    }));
+                  }}
                   className="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                 />
               </div>
@@ -1522,6 +1771,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   <tr className="bg-slate-100 text-slate-800 text-[10px] font-black uppercase tracking-wider">
                     <th className="p-2 border border-slate-300 text-center">No</th>
                     <th className="p-2 border border-slate-300">Unit / Blok</th>
+                    <th className="p-2 border border-slate-300 text-center">Kategori</th>
                     <th className="p-2 border border-slate-300">Nama Pemilik</th>
                     <th className="p-2 border border-slate-300">Kontak Pemilik</th>
                     <th className="p-2 border border-slate-300">Nama Penyewa</th>
@@ -1533,10 +1783,15 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 <tbody>
                   {filteredRentals.map((r, i) => {
                     const eff = calculateEffectiveStatus(r);
+                    const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === r.houseId?.toUpperCase() || h.id === r.houseId);
+                    const occ = getOccupancyType(r, linkedH);
                     return (
                       <tr key={r.id} className="border-b border-slate-200">
                         <td className="p-2 border border-slate-300 text-center">{i + 1}</td>
                         <td className="p-2 border border-slate-300 font-bold">{r.houseId}</td>
+                        <td className="p-2 border border-slate-300 text-center font-bold text-[10px]">
+                          {occ === 'Rumah Keluarga' ? 'Kerabat' : occ}
+                        </td>
                         <td className="p-2 border border-slate-300">{r.ownerName}</td>
                         <td className="p-2 border border-slate-300">{r.ownerPhone}</td>
                         <td className="p-2 border border-slate-300 font-semibold">{r.tenantName || '-'}</td>
