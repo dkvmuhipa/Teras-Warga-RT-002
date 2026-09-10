@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Modal } from '../../ui/Modal';
 import { Button } from '../../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
   CreditCard, AlertCircle, Calendar, FileText, Shield, Send, History, Edit2, Heart, ShieldCheck,
-  Bike, Car
+  Bike, Car, CheckCircle2, Droplets, Trash2, ArrowRight, Wallet, QrCode, Building2, Receipt,
+  Sparkles, RefreshCw, AlertTriangle, BadgeCheck, Clock, Check, Info, Calculator, MessageSquare
 } from 'lucide-react';
 import { House, PaymentStatus, Role } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
 import { 
   getIndonesianMonthYear, 
   generateMonthOptions, 
-  isMonthMatch 
+  isMonthMatch,
+  INDONESIAN_MONTHS
 } from '../../../src/utils/dateUtils';
 import { checkNikDuplicate } from '../../../services/databaseService';
 
@@ -1668,6 +1670,21 @@ interface PaymentModalProps {
   getIndonesianMonthYear: (date: Date) => string;
 }
 
+// Helper to convert "Month Year" string to numeric sort key (year * 12 + monthIndex)
+const getMonthSortKey = (monthStr: string): number => {
+  if (!monthStr) return 0;
+  const parts = monthStr.trim().split(' ');
+  if (parts.length >= 2) {
+    const monthName = parts[0].toLowerCase();
+    const year = parseInt(parts[1], 10) || 2026;
+    const monthIdx = INDONESIAN_MONTHS.findIndex(m => m.toLowerCase() === monthName);
+    if (monthIdx !== -1) {
+      return year * 12 + monthIdx;
+    }
+  }
+  return 0;
+};
+
 export const PaymentModal: React.FC<PaymentModalProps> = ({
   isOpen,
   onClose,
@@ -1688,252 +1705,875 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   getIndonesianMonthYear
 }) => {
   const { getArrearsForHouse, settings } = useFinancial();
+
+  // Modern payment administration state
+  const [paymentMethod, setPaymentMethod] = useState<'Tunai' | 'Transfer Bank' | 'QRIS' | 'Saldo Kas'>('Tunai');
+  const [bankName, setBankName] = useState('BRI');
+  const [refNumber, setRefNumber] = useState('');
+  const [cashGiven, setCashGiven] = useState('');
+  const [monthFilterTab, setMonthFilterTab] = useState<'all' | 'arrears' | 'forward'>('all');
+  const [showManualAdd, setShowManualAdd] = useState(false);
+  const [manualMonthSelect, setManualMonthSelect] = useState('');
+  const [sendWaReceipt, setSendWaReceipt] = useState(true);
+
   if (!payHouse) return null;
 
+  const currentMonthStr = getIndonesianMonthYear(new Date());
   const arrears = getArrearsForHouse(payHouse);
   const airFee = settings?.airFee || 10000;
   const sampahFee = settings?.sampahFee || 10000;
   const unitFee = payType === 'Air' ? airFee : payType === 'Sampah' ? sampahFee : (airFee + sampahFee);
-  
-  const totalSuggested = targetMonths.length * unitFee;
+
+  // Generate candidate months (arrears + current month + next 11 future months)
+  const allCandidateMonths = useMemo(() => {
+    const set = new Set<string>();
+    arrears.forEach(m => set.add(m));
+    set.add(currentMonthStr);
+    for (let i = 1; i <= 11; i++) {
+      const d = new Date();
+      d.setDate(1);
+      d.setMonth(d.getMonth() + i);
+      set.add(getIndonesianMonthYear(d));
+    }
+    return Array.from(set).sort((a, b) => getMonthSortKey(a) - getMonthSortKey(b));
+  }, [arrears, currentMonthStr]);
+
+  // Synchronize months and amount
+  const updateMonths = (newMonths: string[], currentType: 'Air' | 'Sampah' | 'Both' = payType) => {
+    const sorted = [...newMonths].sort((a, b) => getMonthSortKey(a) - getMonthSortKey(b));
+    const fee = currentType === 'Air' ? airFee : currentType === 'Sampah' ? sampahFee : (airFee + sampahFee);
+    setTargetMonths(sorted);
+    setPayAmount((sorted.length * fee).toString());
+  };
 
   const toggleMonth = (month: string) => {
-    if (targetMonths.includes(month)) {
-      setTargetMonths(targetMonths.filter(m => m !== month));
+    let updated: string[];
+    if (targetMonths.some(m => isMonthMatch(m, month))) {
+      updated = targetMonths.filter(m => !isMonthMatch(m, month));
     } else {
-      setTargetMonths([...targetMonths, month].sort((a, b) => {
-        // Simple sort by approximate date logic or just leave it
-        return 0; 
-      }));
+      updated = [...targetMonths, month];
+    }
+    updateMonths(updated);
+  };
+
+  const handlePayTypeChange = (newType: 'Air' | 'Sampah' | 'Both') => {
+    setPayType(newType);
+    updateMonths(targetMonths, newType);
+  };
+
+  // Quick Preset Actions
+  const handleSelectAllArrears = () => {
+    if (arrears.length > 0) {
+      updateMonths(arrears);
+      toast.info(`Memilih seluruh ${arrears.length} bulan tunggakan.`);
+    } else {
+      toast.info('Tidak ada tunggakan iuran lampau.');
+    }
+  };
+
+  const handleSelectCurrentMonthOnly = () => {
+    updateMonths([currentMonthStr]);
+    toast.info(`Memilih bulan berjalan (${currentMonthStr}).`);
+  };
+
+  const handleSelectPackageMonths = (count: number) => {
+    // Start from first unpaid month (or current month if all paid)
+    const startIndex = allCandidateMonths.findIndex(m => arrears.includes(m) || isMonthMatch(m, currentMonthStr));
+    const start = startIndex >= 0 ? startIndex : 0;
+    const selected = allCandidateMonths.slice(start, start + count);
+    if (selected.length < count) {
+      const last = selected[selected.length - 1] || currentMonthStr;
+      const lastKey = getMonthSortKey(last);
+      const additional: string[] = [];
+      for (let i = 1; i <= count - selected.length; i++) {
+        const nextMonthIndex = (lastKey % 12) + i;
+        const nextYear = Math.floor((lastKey + i) / 12);
+        additional.push(`${INDONESIAN_MONTHS[nextMonthIndex % 12]} ${nextYear}`);
+      }
+      selected.push(...additional);
+    }
+    updateMonths(selected);
+    toast.info(`Memilih paket ${count} bulan.`);
+  };
+
+  // Calculations
+  const totalSuggested = targetMonths.length * unitFee;
+  const numPayAmount = parseInt(payAmount, 10) || 0;
+  const numCashGiven = parseInt(cashGiven, 10) || 0;
+  const cashChange = numCashGiven > numPayAmount ? numCashGiven - numPayAmount : 0;
+
+  // Filtered month list for matrix display
+  const displayedMonths = useMemo(() => {
+    if (monthFilterTab === 'arrears') {
+      return allCandidateMonths.filter(m => arrears.some(a => isMonthMatch(a, m)));
+    }
+    if (monthFilterTab === 'forward') {
+      return allCandidateMonths.filter(m => !arrears.some(a => isMonthMatch(a, m)));
+    }
+    return allCandidateMonths;
+  }, [allCandidateMonths, monthFilterTab, arrears]);
+
+  // Send WhatsApp confirmation receipt
+  const sendReceiptWhatsApp = () => {
+    if (!payHouse.phone || payHouse.phone === '-') {
+      toast.error('Nomor WhatsApp warga tidak terdaftar.');
+      return;
+    }
+    let targetPhone = payHouse.phone.replace(/[^0-9]/g, '');
+    if (targetPhone.startsWith('0')) targetPhone = '62' + targetPhone.substring(1);
+
+    const typeLabel = payType === 'Both' ? 'Paket Air Bersih & Sampah' : payType === 'Air' ? 'Iuran Air Bersih' : 'Iuran Pengelolaan Sampah';
+    const monthsLabel = targetMonths.length > 0 ? targetMonths.join(', ') : currentMonthStr;
+    const amountStr = numPayAmount.toLocaleString('id-ID');
+    const dateStr = payDate ? new Date(payDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const methodStr = paymentMethod === 'Transfer Bank' ? `Transfer Bank ${bankName}${refNumber ? ` (Ref: ${refNumber})` : ''}` : paymentMethod;
+
+    const message = 
+`*BUKTI PEMBAYARAN IURAN RESMI RT 002*
+_Kawasan Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore_
+━━━━━━━━━━━━━━━━━━━━━
+Kepada Yth:
+👤 *${payerName || payHouse.headOfFamily}*
+🏠 *Kavling: Blok ${payHouse.block}-${payHouse.number}*
+━━━━━━━━━━━━━━━━━━━━━
+Rincian Transaksi Pembayaran:
+• Layanan: *${typeLabel}*
+• Periode: *${monthsLabel}* (${targetMonths.length} Bulan)
+• Total Biaya: *Rp ${amountStr}*
+• Metode: *${methodStr}*
+• Tanggal: *${dateStr}*
+• Catatan: *${payNotes || 'Pembayaran iuran tervalidasi lunas'}*
+
+Status: *LUNAS & TERCATAT RESMI DI SISTEM RT 02*
+━━━━━━━━━━━━━━━━━━━━━
+Terima kasih atas kepedulian Bapak/Ibu dalam mendukung kelancaran fasilitas dan ketertiban lingkungan TERAS RT 002.
+
+_Salam Hormat,_
+*Pengurus RT 002 / RW 020 Huntap Tondo 2*`;
+
+    window.open(`https://api.whatsapp.com/send?phone=${targetPhone}&text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const onFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (targetMonths.length === 0) {
+      toast.error('Pilih minimal 1 bulan periode pembayaran.');
+      return;
+    }
+
+    // Embed payment method details into notes if not yet included
+    if (paymentMethod !== 'Tunai' && !payNotes.includes(paymentMethod)) {
+      const methodTag = `[${paymentMethod}${paymentMethod === 'Transfer Bank' ? ` ${bankName}` : ''}${refNumber ? ` Ref:${refNumber}` : ''}]`;
+      setPayNotes(payNotes ? `${methodTag} ${payNotes}` : methodTag);
+    }
+
+    handleSavePayment(e);
+
+    if (sendWaReceipt && payHouse.phone && payHouse.phone !== '-') {
+      setTimeout(() => {
+        toast.success('Pembayaran sukses disimpan! Klik di bawah untuk kirim tanda terima WA ke warga:', {
+          action: {
+            label: 'Kirim WA',
+            onClick: () => sendReceiptWhatsApp()
+          },
+          duration: 12000
+        });
+      }, 500);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Sistem Pembayaran Terpadu" maxWidth="max-w-5xl">
-      <div className="space-y-8 py-6">
-        {/* House Info Summary - Modern & Clean */}
-        <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm">
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-3xl font-bold font-mono shadow-lg">
-                {payHouse.block}-{payHouse.number}
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title="Sistem Pembayaran Terpadu RT 002" 
+      maxWidth="max-w-6xl"
+    >
+      <div className="space-y-6 py-2 text-left">
+        {/* Top Resident Profile Banner */}
+        <div className="bg-slate-50/90 rounded-2xl border border-slate-200/90 p-4 sm:p-5 relative overflow-hidden shadow-xs">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            {/* Identity */}
+            <div className="flex items-center gap-3.5 sm:gap-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-900 text-white rounded-2xl flex flex-col items-center justify-center font-mono shadow-md border border-slate-800 shrink-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">KAVLING</span>
+                <span className="text-base sm:text-lg font-black tracking-tight leading-none mt-0.5">{payHouse.block}-{payHouse.number}</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Profil Warga</p>
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              <div className="min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[9px] font-black uppercase tracking-wider border border-indigo-100">
+                    {payHouse.residenceType || 'Tetap'}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${
+                    payHouse.status === 'Occupied' ? 'bg-emerald-50 text-emerald-700 border-emerald-150' : 'bg-slate-100 text-slate-500 border-slate-200'
+                  }`}>
+                    {payHouse.status === 'Occupied' ? 'Dihuni' : 'Kosong'}
+                  </span>
+                  {payHouse.pbbStatus && (
+                    <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${
+                      payHouse.pbbStatus === 'Sudah Diambil' ? 'bg-blue-50 text-blue-700 border-blue-150' : 'bg-amber-50 text-amber-700 border-amber-150'
+                    }`}>
+                      SPPT PBB: {payHouse.pbbStatus}
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  {payHouse.headOfFamily}
-                  {payHouse.isVerified && <ShieldCheck size={20} className="text-emerald-500" />}
+                <h3 className="text-base sm:text-lg font-black text-slate-900 truncate flex items-center gap-1.5">
+                  {payHouse.headOfFamily || (payHouse.ownerName ? `Hunian: ${payHouse.ownerName}` : 'Rumah Kosong')}
+                  {payHouse.isVerified && <ShieldCheck size={16} className="text-emerald-500 shrink-0" />}
                 </h3>
-                <div className="flex gap-2 mt-2">
-                  <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Home size={12} /> {payHouse.residenceType || 'Warga'}
-                  </span>
-                  <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Activity size={12} /> {payHouse.status === 'Occupied' ? 'DIHUNI' : payHouse.status === 'Empty' ? 'KOSONG' : payHouse.status === 'Business' ? 'USAHA' : 'MENGUNJUNGI'}
-                  </span>
+                <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 font-medium">
+                  {payHouse.ownerName && payHouse.ownerName !== payHouse.headOfFamily && (
+                    <span>Pemilik: <strong className="text-slate-700">{payHouse.ownerName}</strong></span>
+                  )}
+                  <span>Penghuni: <strong className="text-slate-700">{payHouse.occupants || 1} Jiwa</strong></span>
+                  {payHouse.phone && payHouse.phone !== '-' && (
+                    <span className="flex items-center gap-1">
+                      <Phone size={11} className="text-slate-400" />
+                      <strong className="text-slate-700">{payHouse.phone}</strong>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          let p = payHouse.phone.replace(/[^0-9]/g, '');
+                          if (p.startsWith('0')) p = '62' + p.substring(1);
+                          window.open(`https://api.whatsapp.com/send?phone=${p}`, '_blank');
+                        }}
+                        className="text-[10px] text-emerald-600 hover:text-emerald-700 font-bold ml-1 inline-flex items-center gap-0.5 underline cursor-pointer"
+                      >
+                        <MessageSquare size={10} /> Chat WA
+                      </button>
+                    </span>
+                  )}
+                  {((payHouse.twoWheelCount || 0) + (payHouse.fourWheelCount || 0) > 0 || (payHouse.vehicleCount || 0) > 0) && (
+                    <span className="text-slate-600">
+                      Kendaraan: <strong className="text-amber-700">{payHouse.twoWheelCount || 0} Motor</strong> • <strong className="text-blue-700">{payHouse.fourWheelCount || 0} Mobil</strong>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
-            
-            <div className="text-center md:text-right bg-white p-6 rounded-2xl border border-slate-200 shadow-sm min-w-[240px]">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Status Tunggakan</p>
-              <div className={`text-2xl font-bold tracking-tight ${arrears.length === 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {arrears.length === 0 ? 'TERVALIDASI LUNAS' : `${arrears.length} Bulan Terhutang`}
+
+            {/* Arrears Badge Card */}
+            <div className={`p-3.5 sm:p-4 rounded-xl border flex flex-col items-start md:items-end justify-center shrink-0 min-w-[200px] ${
+              arrears.length === 0 
+                ? 'bg-emerald-50/90 border-emerald-200/80 text-emerald-900' 
+                : 'bg-rose-50/90 border-rose-200/80 text-rose-900'
+            }`}>
+              <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider mb-0.5">
+                {arrears.length === 0 ? (
+                  <>
+                    <CheckCircle2 size={13} className="text-emerald-600 stroke-[2.5]" />
+                    <span className="text-emerald-700">Tervalidasi Lunas</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle size={13} className="text-rose-600 stroke-[2.5]" />
+                    <span className="text-rose-700">Tunggakan Tertagih</span>
+                  </>
+                )}
               </div>
+              <div className="text-base sm:text-xl font-black tracking-tight">
+                {arrears.length === 0 ? 'Nihil Tunggakan' : `${arrears.length} Bulan Lampau`}
+              </div>
+              <p className="text-[10px] opacity-75 font-semibold mt-0.5">
+                {arrears.length === 0 
+                  ? 'Siap untuk pembayaran iuran bulan berjalan / di muka' 
+                  : `Estimasi Nilai: Rp ${(arrears.length * unitFee).toLocaleString('id-ID')}`}
+              </p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleSavePayment} className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-          {/* Left Column: Month Selection */}
-          <div className="xl:col-span-7 space-y-8">
-            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-900 text-white rounded-xl">
-                    <Calendar size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wider">Pilih Periode</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Pilih bulan yang akan dibayar</p>
-                  </div>
+        {/* Main 2-Column Responsive Layout */}
+        <form onSubmit={onFormSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* Left Column: Services & Period Selection (7 cols) */}
+          <div className="lg:col-span-7 space-y-5">
+            
+            {/* 1. Service Type Selector */}
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                  <Sparkles size={14} className="text-indigo-600" />
+                  1. Pilih Komponen Layanan Iuran
+                </label>
+                <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                  Tarif Aktif RT 02
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {[
+                  {
+                    id: 'Both' as const,
+                    title: 'Paket Lengkap',
+                    subtitle: 'Air Bersih & Sampah',
+                    fee: airFee + sampahFee,
+                    icon: Sparkles,
+                    color: 'indigo'
+                  },
+                  {
+                    id: 'Air' as const,
+                    title: 'Iuran Air Bersih',
+                    subtitle: 'Fasilitas Air RT',
+                    fee: airFee,
+                    icon: Droplets,
+                    color: 'sky'
+                  },
+                  {
+                    id: 'Sampah' as const,
+                    title: 'Iuran Sampah',
+                    subtitle: 'Kebersihan & Angkut',
+                    fee: sampahFee,
+                    icon: Trash2,
+                    color: 'emerald'
+                  }
+                ].map((item) => {
+                  const isSelected = payType === item.id;
+                  const IconComponent = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handlePayTypeChange(item.id)}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
+                        isSelected 
+                          ? 'bg-indigo-50/80 border-indigo-600 ring-2 ring-indigo-500/20 text-slate-900 shadow-sm' 
+                          : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 text-slate-600'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-4 h-4 bg-indigo-600 text-white rounded-full flex items-center justify-center">
+                          <Check size={10} strokeWidth={3} />
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <IconComponent size={13} className={isSelected ? 'text-indigo-600' : 'text-slate-400'} />
+                          <span className="text-xs font-black">{item.title}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-tight">{item.subtitle}</p>
+                      </div>
+                      <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">Tarif/Bulan</span>
+                        <span className="text-xs font-black text-indigo-700">Rp {item.fee.toLocaleString('id-ID')}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 2. Interactive Period Selector */}
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-100">
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                    <Calendar size={14} className="text-indigo-600" />
+                    2. Pilih Periode Pembayaran
+                  </h4>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                    Klik kartu bulan untuk memilih, atau gunakan tombol cepat di bawah
+                  </p>
                 </div>
+
                 {targetMonths.length > 0 && (
-                  <button 
+                  <button
                     type="button"
-                    onClick={() => setTargetMonths([])}
-                    className="text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100 transition-colors"
+                    onClick={() => updateMonths([])}
+                    className="text-[10px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/70 px-2.5 py-1 rounded-lg transition-colors cursor-pointer self-start sm:self-auto"
                   >
-                    Reset
+                    ✕ Bersihkan ({targetMonths.length})
                   </button>
                 )}
               </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {arrears.map((month) => {
-                  const isSelected = targetMonths.includes(month);
+
+              {/* Quick Preset Buttons Bar */}
+              <div className="space-y-1.5">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Pilihan Cepat:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {arrears.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleSelectAllArrears}
+                      className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1"
+                    >
+                      <AlertTriangle size={11} /> Semua Tunggakan ({arrears.length} Bln)
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleSelectCurrentMonthOnly}
+                    className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                  >
+                    📍 Bulan Ini ({currentMonthStr.split(' ')[0]})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPackageMonths(3)}
+                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                  >
+                    ⚡ Paket 3 Bulan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPackageMonths(6)}
+                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                  >
+                    ⚡ 6 Bulan (Semester)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPackageMonths(12)}
+                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                  >
+                    🌟 1 Tahun (12 Bulan)
+                  </button>
+                </div>
+              </div>
+
+              {/* Filter Tabs */}
+              <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 text-[10px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => setMonthFilterTab('all')}
+                  className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                    monthFilterTab === 'all' ? 'bg-white text-slate-900 shadow-xs font-black' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Semua Periode ({allCandidateMonths.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMonthFilterTab('arrears')}
+                  className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                    monthFilterTab === 'arrears' ? 'bg-white text-rose-700 shadow-xs font-black' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Tunggakan ({arrears.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMonthFilterTab('forward')}
+                  className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                    monthFilterTab === 'forward' ? 'bg-white text-indigo-700 shadow-xs font-black' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Bulan Berjalan &amp; Di Muka ({allCandidateMonths.length - arrears.length})
+                </button>
+              </div>
+
+              {/* Month Cards Matrix Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                {displayedMonths.map((month) => {
+                  const isSelected = targetMonths.some(m => isMonthMatch(m, month));
+                  const isArrear = arrears.some(a => isMonthMatch(a, month));
+                  const isCurrent = isMonthMatch(month, currentMonthStr);
+
                   return (
                     <button
                       key={month}
                       type="button"
                       onClick={() => toggleMonth(month)}
-                      className={`relative px-4 py-4 rounded-xl text-[12px] font-bold uppercase tracking-wider transition-all duration-200 flex flex-col items-center justify-center gap-1 border ${
-                        isSelected
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-black/10 scale-[1.02] z-10'
-                          : 'bg-slate-50 text-slate-400 border-slate-200 hover:border-slate-400 hover:bg-white hover:text-slate-600'
+                      className={`relative p-3 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-1.5 ${
+                        isSelected 
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20 scale-[1.01]'
+                          : isArrear 
+                          ? 'bg-rose-50/70 border-rose-200/90 text-rose-950 hover:bg-rose-100/70'
+                          : isCurrent 
+                          ? 'bg-indigo-50/50 border-indigo-200 text-indigo-950 hover:bg-indigo-100/50'
+                          : 'bg-slate-50/60 border-slate-200/80 text-slate-800 hover:bg-slate-100/70'
                       }`}
                     >
-                      {isSelected && (
-                        <div className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white rounded-full p-1 shadow-md">
-                          <CheckCircle size={12} />
+                      <div className="flex items-start justify-between gap-1">
+                        <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                          isSelected 
+                            ? 'bg-white/20 text-white' 
+                            : isArrear 
+                            ? 'bg-rose-100 text-rose-800' 
+                            : isCurrent 
+                            ? 'bg-indigo-100 text-indigo-800' 
+                            : 'bg-slate-200/70 text-slate-600'
+                        }`}>
+                          {isArrear ? 'Tunggakan' : isCurrent ? 'Bulan Ini' : 'Di Muka'}
+                        </span>
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                          isSelected ? 'bg-white text-indigo-600' : 'border border-slate-300'
+                        }`}>
+                          {isSelected && <Check size={10} strokeWidth={3} />}
                         </div>
-                      )}
-                      <span>{month}</span>
-                      <span className={`text-[9px] opacity-60 font-medium ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
-                        Rp {unitFee.toLocaleString()}
-                      </span>
+                      </div>
+
+                      <div>
+                        <p className={`text-xs font-black truncate leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                          {month}
+                        </p>
+                        <p className={`text-[10px] font-bold mt-0.5 ${isSelected ? 'text-white/80' : 'text-indigo-700'}`}>
+                          Rp {unitFee.toLocaleString('id-ID')}
+                        </p>
+                      </div>
                     </button>
                   );
                 })}
               </div>
-              
-              {arrears.length === 0 && (
-                <div className="py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                   <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                      <ShieldCheck size={24} />
-                   </div>
-                   <h4 className="text-sm font-bold text-slate-800 uppercase tracking-widest mb-1">TIDAK ADA TUNGGAKAN</h4>
-                   <p className="text-[11px] text-slate-400 max-w-xs mx-auto">Semua iuran telah terbayar hingga periode saat ini.</p>
-                </div>
-              )}
 
-              <div className="mt-8 pt-8 border-t border-slate-100">
-                <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Input Manual Periode:</p>
-                  <select 
-                    className="flex-1 bg-white p-3 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                    value={targetMonths[0] || ""}
-                    onChange={e => {
-                      if (e.target.value) setTargetMonths([e.target.value]);
-                    }}
+              {/* Manual Month Addition Toggle */}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowManualAdd(!showManualAdd)}
+                  className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{showManualAdd ? '▲ Sembunyikan Pemilih Manual' : '▼ Tambah Bulan Spesifik Lainnya'}</span>
+                </button>
+                <span className="text-[10px] font-black text-slate-500">
+                  {targetMonths.length} Bulan Terpilih
+                </span>
+              </div>
+
+              {showManualAdd && (
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-2">
+                  <select
+                    className="flex-1 bg-white p-2 rounded-lg text-xs font-bold text-slate-700 border border-slate-200 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    value={manualMonthSelect}
+                    onChange={(e) => setManualMonthSelect(e.target.value)}
                   >
-                    <option value="" disabled>Pilih Bulan Spesifik...</option>
-                    {generateMonthOptions(12, 60).map((m: string) => (
+                    <option value="">Pilih bulan dari daftar sistem...</option>
+                    {generateMonthOptions(24, 48).map((m: string) => (
                       <option key={m} value={m}>{m}</option>
                     ))}
                   </select>
+                  <button
+                    type="button"
+                    disabled={!manualMonthSelect}
+                    onClick={() => {
+                      if (manualMonthSelect) {
+                        toggleMonth(manualMonthSelect);
+                        setManualMonthSelect('');
+                        toast.success(`Bulan ${manualMonthSelect} ditambahkan ke pilihan.`);
+                      }
+                    }}
+                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    + Tambah
+                  </button>
                 </div>
-              </div>
+              )}
             </div>
+
           </div>
 
-          {/* Right Column: Bill Summary & Details */}
-          <div className="xl:col-span-5 space-y-8">
-            <div className="bg-slate-900 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden border border-white/5">
-              <div className="flex items-center gap-4 mb-8 pb-8 border-b border-white/10">
-                <div className="p-3 bg-indigo-600 rounded-xl">
-                  <FileText size={20} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold uppercase tracking-wider">Ringkasan Tagihan</h3>
-                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Iuran Bulanan RT 02</p>
-                </div>
-              </div>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/40 font-bold uppercase tracking-widest text-[9px]">Jenis Iuran</span>
-                  <select 
-                    required
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[11px] font-bold text-white outline-none focus:border-indigo-400 transition-all"
-                    value={payType} 
-                    onChange={e => {
-                      const newType = e.target.value as any;
-                      setPayType(newType);
-                      const nFee = newType === 'Air' ? airFee : newType === 'Sampah' ? sampahFee : (airFee + sampahFee);
-                      setPayAmount((targetMonths.length * nFee).toString());
-                    }}
-                  >
-                    <option value="Both" className="bg-slate-900">Paket (Air & Sampah)</option>
-                    <option value="Air" className="bg-slate-900">Hanya Air</option>
-                    <option value="Sampah" className="bg-slate-900">Hanya Sampah</option>
-                  </select>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/40 font-bold uppercase tracking-widest text-[9px]">Jumlah Bulan</span>
-                  <span className="font-mono font-bold text-indigo-400">{targetMonths.length} Bulan</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/40 font-bold uppercase tracking-widest text-[9px]">Tarif Satuan</span>
-                  <span className="font-bold text-white">Rp {unitFee.toLocaleString()}</span>
-                </div>
-                <div className="pt-6 border-t border-white/10">
-                  <div className="space-y-2">
-                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Total Sesuai Pilihan</p>
-                    <div className="flex items-center gap-2">
-                       <span className="text-xl font-bold text-white/50">Rp</span>
-                       <input 
-                         type="number"
-                         className="bg-transparent text-4xl font-bold text-white w-full border-b border-indigo-500/30 focus:border-indigo-500 outline-none transition-all tracking-tight"
-                         value={payAmount}
-                         onChange={e => setPayAmount(e.target.value)}
-                       />
-                    </div>
+          {/* Right Column: Invoice Summary, Payment Details & Submission (5 cols) */}
+          <div className="lg:col-span-5 space-y-5">
+            
+            {/* Invoice & Calculation Card */}
+            <div className="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4 relative overflow-hidden">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                    <Receipt size={14} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-wider">Ringkasan Tagihan</h4>
+                    <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest">Kwitansi Transaksi RT 02</p>
                   </div>
                 </div>
+                <span className="text-[10px] font-black px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded-md border border-indigo-400/30">
+                  {targetMonths.length} Bulan
+                </span>
               </div>
 
-              <div className="space-y-4 pt-6 border-t border-white/10">
-                 <div className="space-y-2">
-                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest">Nama Penyetor</label>
-                    <input 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm font-bold outline-none focus:border-indigo-400 transition-all placeholder:text-white/10"
-                      placeholder={`Default: ${payHouse.headOfFamily}`}
-                      value={payerName}
-                      onChange={e => setPayerName(e.target.value)}
-                    />
-                 </div>
-                 <div className="space-y-2">
-                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest">Waktu Pembayaran</label>
-                    <input 
-                      type="date"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm font-bold outline-none focus:border-indigo-400 transition-all font-mono"
-                      value={payDate ?? ''}
-                      onChange={e => setPayDate(e.target.value)}
-                    />
-                 </div>
-                 <div className="space-y-2">
-                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest">Catatan Tambahan</label>
-                    <textarea 
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm font-medium outline-none focus:border-indigo-400 transition-all placeholder:text-white/10 h-20 resize-none"
-                      placeholder="Tulis catatan jika ada..."
-                      value={payNotes ?? ''}
-                      onChange={e => setPayNotes(e.target.value)}
-                    />
-                 </div>
+              {/* Itemized Calculation */}
+              <div className="space-y-2 text-xs">
+                {(payType === 'Both' || payType === 'Air') && (
+                  <div className="flex items-center justify-between text-white/70">
+                    <span className="flex items-center gap-1.5 text-[11px]">
+                      <Droplets size={12} className="text-sky-400" /> Iuran Air Bersih ({targetMonths.length} bln)
+                    </span>
+                    <span className="font-bold text-white">
+                      Rp {(targetMonths.length * airFee).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                )}
+
+                {(payType === 'Both' || payType === 'Sampah') && (
+                  <div className="flex items-center justify-between text-white/70">
+                    <span className="flex items-center gap-1.5 text-[11px]">
+                      <Trash2 size={12} className="text-emerald-400" /> Iuran Sampah ({targetMonths.length} bln)
+                    </span>
+                    <span className="font-bold text-white">
+                      Rp {(targetMonths.length * sampahFee).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                )}
+
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+                  <span className="text-white/60 font-bold uppercase tracking-wider text-[10px]">Total Rekomendasi</span>
+                  <span className="text-sm font-black text-indigo-400">
+                    Rp {totalSuggested.toLocaleString('id-ID')}
+                  </span>
+                </div>
               </div>
+
+              {/* Editable Actual Payment Amount */}
+              <div className="pt-2 border-t border-white/10 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider">
+                    Nominal Disetor (Rp)
+                  </label>
+                  {numPayAmount !== totalSuggested && (
+                    <button
+                      type="button"
+                      onClick={() => setPayAmount(totalSuggested.toString())}
+                      className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                    >
+                      Gunakan Total Pas
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 font-bold text-sm">Rp</span>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={payAmount}
+                    onChange={(e) => setPayAmount(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-white/10 border border-white/20 rounded-xl text-lg font-black text-white outline-none focus:ring-2 focus:ring-indigo-400 transition-all font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Payment Method Selector */}
+              <div className="pt-2 border-t border-white/10 space-y-2">
+                <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider block">
+                  Metode Pembayaran
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { id: 'Tunai' as const, label: '💵 Tunai (Cash)' },
+                    { id: 'Transfer Bank' as const, label: '🏦 Transfer Bank' },
+                    { id: 'QRIS' as const, label: '📱 QRIS' },
+                    { id: 'Saldo Kas' as const, label: '🪙 Saldo Kas RT' },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setPaymentMethod(m.id)}
+                      className={`p-2 rounded-xl text-[11px] font-bold text-left transition-all border cursor-pointer ${
+                        paymentMethod === m.id
+                          ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm'
+                          : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Sub-inputs for Transfer Bank */}
+                {paymentMethod === 'Transfer Bank' && (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div>
+                      <label className="text-[9px] font-bold text-white/50 uppercase block mb-1">Bank Tujuan</label>
+                      <select
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                        className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-xs font-bold text-white outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer"
+                      >
+                        <option value="BRI" className="bg-slate-900">Bank BRI</option>
+                        <option value="BCA" className="bg-slate-900">Bank BCA</option>
+                        <option value="Mandiri" className="bg-slate-900">Bank Mandiri</option>
+                        <option value="BNI" className="bg-slate-900">Bank BNI</option>
+                        <option value="BSI" className="bg-slate-900">Bank BSI</option>
+                        <option value="Lainnya" className="bg-slate-900">Bank Lainnya</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-white/50 uppercase block mb-1">No. Ref / Pengirim</label>
+                      <input
+                        type="text"
+                        placeholder="Opsional (misal: 4819)"
+                        value={refNumber}
+                        onChange={(e) => setRefNumber(e.target.value)}
+                        className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-xs font-medium text-white outline-none focus:ring-1 focus:ring-indigo-400 placeholder:text-white/20"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-inputs for Cash (Uang Diterima & Kembalian) */}
+                {paymentMethod === 'Tunai' && (
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                        Kalkulator Kembalian Tunai
+                      </label>
+                      <span className="text-[10px] text-emerald-400 font-bold">
+                        {cashChange > 0 ? `Kembalian: Rp ${cashChange.toLocaleString('id-ID')}` : 'Uang Pas'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Nominal uang tunai..."
+                        value={cashGiven}
+                        onChange={(e) => setCashGiven(e.target.value)}
+                        className="flex-1 p-2 bg-white/10 border border-white/20 rounded-lg text-xs font-bold text-white outline-none focus:ring-1 focus:ring-indigo-400 placeholder:text-white/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setCashGiven(numPayAmount.toString())}
+                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
+                      >
+                        Pas
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCashGiven('50000')}
+                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
+                      >
+                        50rb
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCashGiven('100000')}
+                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
+                      >
+                        100rb
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Administrative Details: Payer & Date */}
+              <div className="pt-2 border-t border-white/10 space-y-3">
+                {/* Penyetor */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider">
+                      Nama Penyetor
+                    </label>
+                    <div className="flex gap-1">
+                      {payHouse.headOfFamily && (
+                        <button
+                          type="button"
+                          onClick={() => setPayerName(payHouse.headOfFamily)}
+                          className="text-[9px] text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                        >
+                          KK: {payHouse.headOfFamily.split(' ')[0]}
+                        </button>
+                      )}
+                      {payHouse.ownerName && payHouse.ownerName !== payHouse.headOfFamily && (
+                        <button
+                          type="button"
+                          onClick={() => setPayerName(payHouse.ownerName)}
+                          className="text-[9px] text-emerald-400 hover:text-emerald-300 underline cursor-pointer ml-1"
+                        >
+                          Pemilik
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder={`Nama penyetor (misal: ${payHouse.headOfFamily})`}
+                    value={payerName}
+                    onChange={(e) => setPayerName(e.target.value)}
+                    className="w-full p-2.5 bg-white/10 border border-white/20 rounded-xl text-xs font-bold text-white outline-none focus:ring-1 focus:ring-indigo-400 placeholder:text-white/20"
+                  />
+                </div>
+
+                {/* Tanggal Bayar */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider">
+                      Tanggal Pembayaran
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setPayDate(new Date().toISOString().split('T')[0])}
+                      className="text-[9px] text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                    >
+                      Set Hari Ini
+                    </button>
+                  </div>
+                  <input
+                    type="date"
+                    required
+                    value={payDate ?? ''}
+                    onChange={(e) => setPayDate(e.target.value)}
+                    className="w-full p-2.5 bg-white/10 border border-white/20 rounded-xl text-xs font-bold text-white outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                  />
+                </div>
+
+                {/* Catatan Transaksi */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider block">
+                    Catatan Khusus (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Titip pos ronda / lunas penuh"
+                    value={payNotes ?? ''}
+                    onChange={(e) => setPayNotes(e.target.value)}
+                    className="w-full p-2 bg-white/10 border border-white/20 rounded-xl text-xs font-medium text-white outline-none focus:ring-1 focus:ring-indigo-400 placeholder:text-white/20"
+                  />
+                </div>
+
+                {/* WhatsApp Receipt Toggle & Preview */}
+                {payHouse.phone && payHouse.phone !== '-' && (
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sendWaReceipt}
+                        onChange={(e) => setSendWaReceipt(e.target.checked)}
+                        className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      <span className="text-[11px] text-white/80 font-medium">
+                        Siapkan kirim nota WhatsApp
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={sendReceiptWhatsApp}
+                      className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer"
+                    >
+                      <MessageSquare size={11} /> Pratinjau Pesan
+                    </button>
+                  </div>
+                )}
+
+              </div>
+
             </div>
 
-            <div className="flex gap-4">
-              <button 
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3 pt-1">
+              <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold text-[12px] uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95"
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95"
               >
-                Batal
+                Batalkan
               </button>
-              <button 
+              <button
                 type="submit"
                 disabled={targetMonths.length === 0}
-                className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-[2] py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                 <CheckCircle size={20} /> Konfirmasi Bayar
+                <CheckCircle2 size={16} />
+                <span>Konfirmasi Bayar (Rp {numPayAmount.toLocaleString('id-ID')})</span>
               </button>
             </div>
+
           </div>
+
         </form>
       </div>
     </Modal>
@@ -1977,120 +2617,164 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
   if (!editingPayment) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Catatan Iuran`} maxWidth="max-w-5xl">
-      <div className="space-y-8 py-6">
+    <Modal isOpen={isOpen} onClose={onClose} title="Koreksi & Edit Catatan Iuran" maxWidth="max-w-3xl">
+      <div className="space-y-6 py-2 text-left">
         {/* Payment Headline - Modern & Clean */}
-        <div className="bg-slate-900 p-8 rounded-3xl text-white relative overflow-hidden group shadow-xl">
-           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-              <div className="flex items-center gap-6">
-                 <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl border border-white/20 font-bold font-mono">
-                    {editingPayment.block}-{editingPayment.number}
-                 </div>
-                 <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Koreksi Transaksi</p>
-                    <h3 className="text-2xl font-bold tracking-tight">{editingPayment.headOfFamily}</h3>
-                    <div className="flex items-center gap-3 mt-2">
-                       <span className="px-3 py-1 bg-indigo-600 text-white rounded-lg text-[9px] font-bold uppercase tracking-widest">{editingPayment.month}</span>
-                       <span className="text-[9px] text-white/30 font-bold uppercase tracking-widest border border-white/5 px-3 py-1 rounded-lg">ID: {editingPayment.id?.slice(-8).toUpperCase()}</span>
-                    </div>
-                 </div>
+        <div className="bg-slate-900 p-5 rounded-2xl text-white relative overflow-hidden group shadow-md border border-slate-800">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center font-mono border border-white/20">
+                <span className="text-[9px] font-bold text-white/60 uppercase">Kavling</span>
+                <span className="text-base font-black text-white leading-none mt-0.5">{editingPayment.block}-{editingPayment.number}</span>
               </div>
-              <div className="flex flex-col items-center md:items-end bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-                 <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Nominal Terdaftar</p>
-                 <div className="text-3xl font-bold tracking-tight text-white">
-                    Rp {parseInt(editingPayment.amount).toLocaleString('id-ID')}
-                 </div>
-              </div>
-           </div>
-        </div>
-
-        <form onSubmit={handleUpdatePayment} className="space-y-8">
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
-            <div className="flex items-center gap-4 mb-10">
-              <div className="p-3 bg-slate-100 text-slate-900 rounded-xl">
-                <Edit2 size={20} />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-800 uppercase tracking-wider">Detail Perubahan</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Sesuaikan parameter transaksi yang lama</p>
+              <div className="space-y-0.5">
+                <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Koreksi Transaksi Kas</p>
+                <h3 className="text-lg font-black tracking-tight text-white">{editingPayment.headOfFamily}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="px-2 py-0.5 bg-indigo-600 text-white rounded-md text-[9px] font-black uppercase tracking-wider">
+                    {editingPayment.month}
+                  </span>
+                  <span className="text-[9px] text-white/40 font-mono">
+                    ID: {editingPayment.id?.slice(-8).toUpperCase()}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-bold mb-2 text-slate-400 uppercase tracking-widest">Jenis Iuran <span className="text-rose-500">*</span></label>
-                <select 
+            <div className="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15 self-stretch sm:self-auto text-left sm:text-right">
+              <p className="text-[9px] font-bold text-white/50 uppercase tracking-wider">Nominal Awal Tercatat</p>
+              <div className="text-xl font-black tracking-tight text-emerald-400 font-mono">
+                Rp {parseInt(editingPayment.amount || 0).toLocaleString('id-ID')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Edit Form */}
+        <form onSubmit={handleUpdatePayment} className="space-y-5">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+              <Edit2 size={16} className="text-indigo-600" />
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                Parameter Revisi Pembayaran
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Jenis Iuran */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-700 block">
+                  Komponen Iuran <span className="text-rose-500">*</span>
+                </label>
+                <select
                   required
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
                   value={payType ?? 'Both'}
-                  onChange={e => setPayType(e.target.value as any)}
+                  onChange={(e) => setPayType(e.target.value as any)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                 >
-                  <option value="Both">Sepaket (Air & Sampah)</option>
+                  <option value="Both">Sepaket (Air &amp; Sampah)</option>
+                  <option value="Air">Hanya Air Bersih</option>
                   <option value="Sampah">Hanya Sampah</option>
-                  <option value="Air">Hanya Air</option>
                 </select>
               </div>
-              
-              <FormField 
-                label="Nominal Revisi (Rp)" 
-                type="number" 
-                required
-                value={payAmount} 
-                onChange={setPayAmount} 
-              />
 
-              <div>
-                <label className="block text-[10px] font-bold mb-2 text-slate-400 uppercase tracking-widest">Tanggal Perkoreksian <span className="text-rose-500">*</span></label>
-                <div className="flex gap-2">
-                  <input 
-                    type="date"
-                    required
-                    className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all focus:bg-white"
-                    value={payDate ?? ''}
-                    onChange={e => setPayDate(e.target.value)}
-                  />
-                  <button 
+              {/* Nominal Revisi */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-700 block">
+                  Nominal Revisi (Rp) <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  required
+                  value={payAmount}
+                  onChange={(e) => setPayAmount(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900 outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                />
+              </div>
+
+              {/* Tanggal Pembayaran */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-700">
+                    Tanggal Transaksi <span className="text-rose-500">*</span>
+                  </label>
+                  <button
                     type="button"
                     onClick={() => setPayDate(new Date().toISOString().split('T')[0])}
-                    className="px-4 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-bold text-[9px] uppercase tracking-widest transition-all shadow-sm"
+                    className="text-[9px] font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
                   >
                     Hari Ini
                   </button>
                 </div>
+                <input
+                  type="date"
+                  required
+                  value={payDate ?? ''}
+                  onChange={(e) => setPayDate(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                />
               </div>
 
-              <FormField 
-                label="Penyetor" 
-                placeholder={`Default: ${editingPayment.headOfFamily}`}
-                value={payerName} 
-                onChange={setPayerName} 
-              />
+              {/* Penyetor */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-700 block">
+                  Nama Penyetor
+                </label>
+                <input
+                  type="text"
+                  placeholder={`Default: ${editingPayment.headOfFamily}`}
+                  value={payerName}
+                  onChange={(e) => setPayerName(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
 
-              <div className="md:col-span-2">
-                <FormField 
-                  label="Log Perubahan" 
-                  placeholder="Alasan perubahan atau catatan tambahan..."
-                  multiline
-                  value={payNotes} 
-                  onChange={setPayNotes} 
+              {/* Catatan / Alasan Koreksi */}
+              <div className="sm:col-span-2 space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-700">
+                    Alasan Perubahan / Catatan Audit
+                  </label>
+                  <div className="flex gap-1">
+                    {['Koreksi Nominal', 'Koreksi Tanggal', 'Penyesuaian Komponen'].map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setPayNotes(payNotes ? `${payNotes}, ${tag}` : tag)}
+                        className="text-[9px] font-bold text-slate-500 hover:text-indigo-600 bg-slate-100 px-1.5 py-0.5 rounded cursor-pointer"
+                      >
+                        +{tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <textarea
+                  rows={2}
+                  placeholder="Jelaskan alasan perubahan catatan pembayaran..."
+                  value={payNotes ?? ''}
+                  onChange={(e) => setPayNotes(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button 
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold text-[12px] uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95"
+              className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95"
             >
               Batal
             </button>
-            <button 
-              type="submit" 
-              className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
+            <button
+              type="submit"
+              className="flex-[2] py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <CheckCircle size={20} /> Simpan Perubahan
+              <CheckCircle2 size={16} />
+              <span>Simpan Perubahan Transaksi</span>
             </button>
           </div>
         </form>
