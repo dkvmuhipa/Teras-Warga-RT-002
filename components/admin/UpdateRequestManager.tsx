@@ -18,7 +18,7 @@ import { UpdateRequest, House } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { updateRequestStatus, updateHouseData, logAction, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { updateRequestStatus, updateHouseData, logAction, handleFirestoreError, OperationType, setDocumentInCollection } from '../../services/databaseService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { FileUp, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -91,6 +91,43 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
       if (req.widowCount !== undefined) updatePayload.widowCount = req.widowCount;
 
       await updateHouseData(req.houseId, updatePayload);
+
+      // 1b. Auto-sync to rentalContracts if house is/becomes 'Sewa' or 'Rumah Keluarga'
+      const targetResidenceType = req.residenceType || house?.residenceType;
+      if (targetResidenceType === 'Sewa' || targetResidenceType === 'Rumah Keluarga') {
+        const normHouseId = house?.id || req.houseId;
+        const contractDocId = `rent-${normHouseId}`;
+        const isRumahKeluarga = targetResidenceType === 'Rumah Keluarga';
+        const motor = req.twoWheelCount !== undefined ? req.twoWheelCount : (house?.twoWheelCount || 0);
+        const mobil = req.fourWheelCount !== undefined ? req.fourWheelCount : (house?.fourWheelCount || 0);
+        const totalVehicles = (motor + mobil > 0) ? (motor + mobil) : (updatePayload.vehicleCount || house?.vehicleCount || 0);
+        const occCount = Number(req.occupants ?? house?.occupants ?? 1);
+
+        try {
+          await setDocumentInCollection('rentalContracts', contractDocId, {
+            id: contractDocId,
+            houseId: normHouseId,
+            block: house?.block || normHouseId.split('-')[0] || 'C10',
+            number: house?.number || normHouseId.split('-')[1] || '01',
+            ownerName: req.ownerName || house?.ownerName || (isRumahKeluarga ? 'Keluarga / Kerabat' : 'Perlu Konfirmasi Pemilik'),
+            ownerPhone: req.ownerPhone || house?.ownerPhone || '',
+            ownerAddress: house?.ownerAddress || `Blok ${house?.block || ''} No. ${house?.number || ''}`,
+            tenantName: req.headOfFamily || house?.headOfFamily || '-',
+            tenantPhone: req.phone || house?.phone || '',
+            occupantsCount: occCount,
+            occupancyType: isRumahKeluarga ? 'Rumah Keluarga' : (occCount > 1 ? 'Keluarga' : 'Individu'),
+            rentType: isRumahKeluarga ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
+            twoWheelCount: motor,
+            fourWheelCount: mobil,
+            vehicleCount: totalVehicles,
+            status: 'Aktif',
+            verificationStatus: 'Terverifikasi',
+            updatedAt: new Date().toISOString()
+          });
+        } catch (syncErr) {
+          console.warn('Failed to auto-sync rental contract in update request approval:', syncErr);
+        }
+      }
 
       // 2. Update the request status
       await updateRequestStatus(req.id, 'Disetujui', adminNote);

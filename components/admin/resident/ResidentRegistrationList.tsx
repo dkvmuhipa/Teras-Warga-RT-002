@@ -210,6 +210,9 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
       if (reg.residenceType === 'Sewa' || reg.residenceType === 'Rumah Keluarga') {
         const contractDocId = `rent-${houseId}`;
         const isRumahKeluarga = reg.residenceType === 'Rumah Keluarga';
+        const motor = reg.twoWheelCount || 0;
+        const mobil = reg.fourWheelCount || 0;
+        const totalVehicles = (motor + mobil > 0) ? (motor + mobil) : (reg.vehicleCount || 0);
 
         await setDocumentInCollection('rentalContracts', contractDocId, {
           id: contractDocId,
@@ -217,17 +220,20 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
           block: reg.block,
           number: reg.number,
           ownerName: resolvedOwner || (isRumahKeluarga ? 'Keluarga / Kerabat' : 'Perlu Konfirmasi Pemilik'),
-          ownerPhone: existingHouse?.ownerPhone || reg.phone,
-          ownerAddress: `Blok ${reg.block} No. ${reg.number}`,
+          ownerPhone: reg.ownerPhone || existingHouse?.ownerPhone || '',
+          ownerAddress: existingHouse?.ownerAddress || `Blok ${reg.block} No. ${reg.number}`,
           tenantName: reg.headOfFamily,
           tenantPhone: reg.phone,
           tenantNik: reg.nik || '',
-          occupancyType: isRumahKeluarga ? 'Rumah Keluarga' : 'Keluarga',
+          occupancyType: isRumahKeluarga ? 'Rumah Keluarga' : (Number(reg.occupants || 1) > 1 ? 'Keluarga' : 'Individu'),
           rentType: isRumahKeluarga ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
           rentPrice: 0,
+          twoWheelCount: motor,
+          fourWheelCount: mobil,
+          vehicleCount: totalVehicles,
           status: 'Aktif',
           startDate: reg.date ? reg.date.split('T')[0] : new Date().toISOString().split('T')[0],
-          endDate: isRumahKeluarga ? '-' : new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+          endDate: isRumahKeluarga ? '2099-12-31' : new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
           verificationStatus: 'Terverifikasi',
           occupantsCount: Number(reg.occupants) || 1,
           reportedBy: 'Penyewa',
@@ -235,8 +241,9 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
           reporterPhone: reg.phone,
           notes: isRumahKeluarga 
             ? 'Rumah Keluarga / Ikut Kerabat (Sinkronisasi Otomatis dari Pendaftaran Warga)' 
-            : 'Kontrak Sewa Keluarga (Sinkronisasi Otomatis dari Pendaftaran Warga)',
-          createdAt: new Date().toISOString()
+            : 'Kontrak Sewa (Sinkronisasi Otomatis dari Pendaftaran Warga)',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
       }
 

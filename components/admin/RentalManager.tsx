@@ -51,10 +51,11 @@ export const calculateEffectiveStatus = (r: RentalContract): 'Aktif' | 'Mendekat
   if (r.status === 'Kosong' || r.status === 'Pindah') return r.status;
   // Rumah Keluarga is non-commercial and does not have an expiring lease
   if (r.occupancyType === 'Rumah Keluarga' || r.rentType === 'Bukan Kontrak (Keluarga)') return 'Aktif';
-  if (!r.endDate) return r.status || 'Aktif';
+  if (!r.endDate || r.endDate === '-' || r.endDate === '2099-12-31') return r.status || 'Aktif';
 
   const now = new Date();
   const end = new Date(r.endDate);
+  if (isNaN(end.getTime())) return r.status || 'Aktif';
   const diffTime = end.getTime() - now.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -68,6 +69,10 @@ export const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVac
   if (!rental.houseId) return false;
   try {
     const isRumahKeluarga = rental.occupancyType === 'Rumah Keluarga' || targetHouse?.residenceType === 'Rumah Keluarga';
+    const motor = rental.twoWheelCount !== undefined ? rental.twoWheelCount : (targetHouse?.twoWheelCount || 0);
+    const mobil = rental.fourWheelCount !== undefined ? rental.fourWheelCount : (targetHouse?.fourWheelCount || 0);
+    const totalVehicles = (motor + mobil > 0) ? (motor + mobil) : (rental.vehicleCount !== undefined ? rental.vehicleCount : (targetHouse?.vehicleCount || 0));
+
     const houseUpdates: Partial<House> = {
       residenceType: isRumahKeluarga ? 'Rumah Keluarga' : 'Sewa',
       ownerName: rental.ownerName || '',
@@ -76,6 +81,9 @@ export const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVac
       headOfFamily: isVacant || rental.status === 'Kosong' ? '-' : (rental.tenantName || '-'),
       phone: isVacant || rental.status === 'Kosong' ? '' : (rental.tenantPhone || ''),
       occupants: isVacant || rental.status === 'Kosong' ? 0 : (Number(rental.occupantsCount) || 1),
+      twoWheelCount: motor,
+      fourWheelCount: mobil,
+      vehicleCount: totalVehicles,
     };
     if (rental.tenantNik) {
       houseUpdates.nik = rental.tenantNik;
@@ -128,6 +136,9 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     tenantKkNumber: '',
     occupantsCount: 1,
     occupancyType: 'Individu',
+    twoWheelCount: 0,
+    fourWheelCount: 0,
+    vehicleCount: 0,
     originCity: '',
     workOrStudy: '',
     startDate: new Date().toISOString().split('T')[0],
@@ -217,6 +228,11 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
         occupancyType: isRumahKel ? 'Rumah Keluarga' : autoOcc,
         rentType: isRumahKel ? 'Bukan Kontrak (Keluarga)' : r.rentType,
         rentPrice: isRumahKel ? 0 : (r.rentPrice || 0),
+        twoWheelCount: r.twoWheelCount ?? linkedH?.twoWheelCount ?? 0,
+        fourWheelCount: r.fourWheelCount ?? linkedH?.fourWheelCount ?? 0,
+        vehicleCount: (r.twoWheelCount ?? linkedH?.twoWheelCount ?? 0) + (r.fourWheelCount ?? linkedH?.fourWheelCount ?? 0) > 0 
+          ? (r.twoWheelCount ?? linkedH?.twoWheelCount ?? 0) + (r.fourWheelCount ?? linkedH?.fourWheelCount ?? 0)
+          : (r.vehicleCount ?? linkedH?.vehicleCount ?? 0),
         notes: r.notes || (isRumahKel ? 'Rumah Keluarga / Ikut Saudara (Basis Data Warga)' : undefined)
       });
     });
@@ -245,6 +261,9 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
           occupancyType: isRumahKel ? 'Rumah Keluarga' : autoOcc,
           originCity: '',
           workOrStudy: h.job || h.jobCategory || '',
+          twoWheelCount: h.twoWheelCount || 0,
+          fourWheelCount: h.fourWheelCount || 0,
+          vehicleCount: (h.twoWheelCount || 0) + (h.fourWheelCount || 0) > 0 ? (h.twoWheelCount || 0) + (h.fourWheelCount || 0) : (h.vehicleCount || 0),
           startDate: h.joiningDate || h.createdAt?.split('T')[0] || '2026-01-01',
           endDate: isRumahKel ? '2099-12-31' : '2026-12-31',
           rentType: isRumahKel ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
@@ -375,6 +394,9 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       tenantKkNumber: targetHouse?.kkNumber || '',
       occupantsCount: targetHouse?.occupants || 1,
       occupancyType: defaultOcc,
+      twoWheelCount: targetHouse?.twoWheelCount || 0,
+      fourWheelCount: targetHouse?.fourWheelCount || 0,
+      vehicleCount: (targetHouse?.twoWheelCount || 0) + (targetHouse?.fourWheelCount || 0) > 0 ? (targetHouse?.twoWheelCount || 0) + (targetHouse?.fourWheelCount || 0) : (targetHouse?.vehicleCount || 0),
       originCity: '',
       workOrStudy: '',
       startDate: new Date().toISOString().split('T')[0],
@@ -395,6 +417,10 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     setEditingRental(rental);
     const targetHouse = effectiveHouses.find(h => getNormalizedHouseId(h) === rental.houseId?.toUpperCase() || h.id === rental.houseId);
     const resolvedOcc = getOccupancyType(rental, targetHouse);
+    const motor = rental.twoWheelCount !== undefined ? rental.twoWheelCount : (targetHouse?.twoWheelCount || 0);
+    const mobil = rental.fourWheelCount !== undefined ? rental.fourWheelCount : (targetHouse?.fourWheelCount || 0);
+    const totalVehicles = (motor + mobil > 0) ? (motor + mobil) : (rental.vehicleCount !== undefined ? rental.vehicleCount : (targetHouse?.vehicleCount || 0));
+
     setFormData({
       ...rental,
       ownerName: rental.ownerName && rental.ownerName !== 'Belum Dicatat' ? rental.ownerName : (targetHouse?.ownerName || ''),
@@ -404,7 +430,10 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       tenantNik: rental.tenantNik || targetHouse?.nik || '',
       tenantKkNumber: rental.tenantKkNumber || targetHouse?.kkNumber || '',
       occupantsCount: rental.occupantsCount || targetHouse?.occupants || 1,
-      occupancyType: rental.occupancyType || resolvedOcc
+      occupancyType: rental.occupancyType || resolvedOcc,
+      twoWheelCount: motor,
+      fourWheelCount: mobil,
+      vehicleCount: totalVehicles
     });
     setSyncWithResidents(true);
     setIsModalOpen(true);
@@ -424,6 +453,10 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
         const existing = dbRentals.find(r => r.houseId?.toUpperCase() === normId);
         if (!existing) {
           const docId = `rent-${normId}`;
+          const motor = h.twoWheelCount || 0;
+          const mobil = h.fourWheelCount || 0;
+          const totalVehicles = (motor + mobil > 0) ? (motor + mobil) : (h.vehicleCount || 0);
+
           const newDoc: RentalContract = {
             id: docId,
             houseId: normId,
@@ -438,17 +471,20 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
             tenantKkNumber: h.kkNumber || '',
             occupantsCount: Number(h.occupants) || 1,
             occupancyType: getOccupancyType({}, h),
+            twoWheelCount: motor,
+            fourWheelCount: mobil,
+            vehicleCount: totalVehicles,
             originCity: '',
             workOrStudy: h.job || h.jobCategory || '',
             startDate: h.joiningDate || h.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
-            endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-            rentType: 'Tahunan',
+            endDate: (h.residenceType === 'Rumah Keluarga') ? '2099-12-31' : new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+            rentType: (h.residenceType === 'Rumah Keluarga') ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
             rentPrice: 0,
             depositAmount: 0,
             status: h.status === 'Empty' ? 'Kosong' : 'Aktif',
             verificationStatus: 'Terverifikasi',
             reportedBy: 'Pengurus RT',
-            notes: h.specialNotes || 'Diimpor langsung dari Basis Data Kependudukan Warga RT 02',
+            notes: h.specialNotes || (h.residenceType === 'Rumah Keluarga' ? 'Rumah Keluarga / Ikut Saudara (Basis Data Warga RT 02)' : 'Diimpor langsung dari Basis Data Kependudukan Warga RT 02'),
             createdAt: new Date().toISOString()
           };
           await setDocumentInCollection('rentalContracts', docId, newDoc);
@@ -564,7 +600,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
 
     const headers = [
       'No. Rumah', 'Blok', 'Nomor', 'Kategori Hunian', 'Nama Pemilik', 'No HP Pemilik', 'Alamat Pemilik',
-      'Nama Penyewa', 'No HP Penyewa', 'NIK Penyewa', 'Jumlah Jiwa', 'Asal Daerah',
+      'Nama Penyewa', 'No HP Penyewa', 'NIK Penyewa', 'Jumlah Jiwa', 'Motor (Roda 2)', 'Mobil (Roda 4)', 'Total Kendaraan', 'Asal Daerah',
       'Pekerjaan/Kampus', 'Tgl Mulai Sewa', 'Tgl Akhir Sewa', 'Jenis Sewa', 'Biaya Sewa',
       'Status Kontrak', 'Verifikasi', 'Catatan'
     ];
@@ -572,6 +608,10 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     const rows = filteredRentals.map((r) => {
       const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === r.houseId?.toUpperCase() || h.id === r.houseId);
       const occType = getOccupancyType(r, linkedH);
+      const motor = r.twoWheelCount ?? linkedH?.twoWheelCount ?? 0;
+      const mobil = r.fourWheelCount ?? linkedH?.fourWheelCount ?? 0;
+      const totalVehicles = (motor + mobil > 0) ? (motor + mobil) : (r.vehicleCount ?? linkedH?.vehicleCount ?? 0);
+
       return [
         `"${r.houseId}"`,
         `"${r.block}"`,
@@ -584,6 +624,9 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
         `"${r.tenantPhone || '-'}"`,
         `"${r.tenantNik || '-'}"`,
         r.occupantsCount || 0,
+        motor,
+        mobil,
+        totalVehicles,
         `"${r.originCity || '-'}"`,
         `"${r.workOrStudy || '-'}"`,
         `"${r.startDate}"`,
@@ -631,7 +674,9 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
     }
 
     let message = '';
-    const formattedEnd = new Date(r.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const formattedEnd = (r.endDate && r.endDate !== '-' && r.endDate !== '2099-12-31' && !isNaN(new Date(r.endDate).getTime()))
+      ? new Date(r.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'waktu yang disepakati bersama';
 
     if (waRecipientType === 'tenant') {
       if (waTemplateType === 'expiring') {
@@ -1069,6 +1114,31 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                               {r.workOrStudy}
                             </p>
                           )}
+
+                          {/* Info Kendaraan Terparkir Penyewa */}
+                          {(() => {
+                            const motor = r.twoWheelCount ?? linkedHouse?.twoWheelCount ?? 0;
+                            const mobil = r.fourWheelCount ?? linkedHouse?.fourWheelCount ?? 0;
+                            const total = (motor + mobil > 0) ? (motor + mobil) : (r.vehicleCount ?? linkedHouse?.vehicleCount ?? 0);
+                            if (total > 0) {
+                              return (
+                                <div className="pt-1.5 mt-1 border-t border-slate-200/60 flex flex-wrap items-center gap-1.5 text-[10px]">
+                                  <span className="font-bold text-slate-500 text-[9px] uppercase tracking-wider">Parkir:</span>
+                                  <span className="font-extrabold text-amber-800 bg-amber-50/90 border border-amber-200/80 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                                    🛵 {motor} Motor
+                                  </span>
+                                  <span className="font-extrabold text-blue-800 bg-blue-50/90 border border-blue-200/80 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                                    🚗 {mobil} Mobil
+                                  </span>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div className="pt-1 mt-1 border-t border-slate-200/60 text-[9.5px] text-slate-400 font-medium">
+                                🚲 Tidak ada kendaraan terparkir
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* Pemilik Rumah */}
@@ -1273,6 +1343,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                     <th className="p-3">Nama Penghuni (Warga)</th>
                     <th className="p-3">Kontak Penghuni</th>
                     <th className="p-3">Pemilik (Induk Semang)</th>
+                    <th className="p-3 text-center">Kendaraan</th>
                     <th className="p-3 text-center">Status Kontrak</th>
                     <th className="p-3 text-center">Aksi</th>
                   </tr>
@@ -1322,6 +1393,20 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                             </div>
                           ) : (
                             <span className="text-slate-400 italic">-</span>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          {((h.twoWheelCount || 0) + (h.fourWheelCount || 0) > 0 || (h.vehicleCount || 0) > 0) ? (
+                            <div className="inline-flex flex-col items-center gap-0.5 text-[10px] font-black">
+                              <span className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60">
+                                🛵 {h.twoWheelCount || 0} Motor
+                              </span>
+                              <span className="text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60">
+                                🚗 {h.fourWheelCount || 0} Mobil
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-[10px] font-medium">-</span>
                           )}
                         </td>
                         <td className="p-3 text-center">
@@ -1494,7 +1579,10 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                                 ...prev,
                                 tenantName: matched.headOfFamily,
                                 tenantPhone: matched.phone || '',
-                                occupantsCount: matched.occupants || 1
+                                occupantsCount: matched.occupants || 1,
+                                twoWheelCount: matched.twoWheelCount || 0,
+                                fourWheelCount: matched.fourWheelCount || 0,
+                                vehicleCount: (matched.twoWheelCount || 0) + (matched.fourWheelCount || 0) > 0 ? (matched.twoWheelCount || 0) + (matched.fourWheelCount || 0) : (matched.vehicleCount || 0)
                               }))}
                               className="px-2.5 py-1 bg-white hover:bg-emerald-100 text-emerald-800 rounded-lg text-[10px] font-bold border border-emerald-200 transition-all cursor-pointer"
                             >
@@ -1633,6 +1721,58 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   onChange={(e) => setFormData({ ...formData, workOrStudy: e.target.value })}
                   className="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                 />
+              </div>
+
+              {/* Kendaraan Terparkir Penyewa */}
+              <div className="sm:col-span-2 pt-3 border-t border-slate-200">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                    <span>🛵 Kendaraan Terparkir di Rumah Sewa</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                    Total: {(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0)} Unit Terparkir
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-wider text-amber-700 flex items-center gap-1">
+                      <span>🛵 Sepeda Motor (Roda 2)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.twoWheelCount ?? 0}
+                      onChange={(e) => {
+                        const count = Math.max(0, parseInt(e.target.value) || 0);
+                        setFormData(prev => ({
+                          ...prev,
+                          twoWheelCount: count,
+                          vehicleCount: count + (prev.fourWheelCount || 0)
+                        }));
+                      }}
+                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-wider text-blue-700 flex items-center gap-1">
+                      <span>🚗 Mobil Pribadi (Roda 4)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.fourWheelCount ?? 0}
+                      onChange={(e) => {
+                        const count = Math.max(0, parseInt(e.target.value) || 0);
+                        setFormData(prev => ({
+                          ...prev,
+                          fourWheelCount: count,
+                          vehicleCount: (prev.twoWheelCount || 0) + count
+                        }));
+                      }}
+                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1868,6 +2008,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                     <th className="p-2 border border-slate-300">Kontak Pemilik</th>
                     <th className="p-2 border border-slate-300">Nama Penyewa</th>
                     <th className="p-2 border border-slate-300 text-center">Jiwa</th>
+                    <th className="p-2 border border-slate-300 text-center">Kendaraan</th>
                     <th className="p-2 border border-slate-300">Masa Sewa</th>
                     <th className="p-2 border border-slate-300 text-center">Status</th>
                   </tr>
@@ -1888,8 +2029,18 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                         <td className="p-2 border border-slate-300">{r.ownerPhone}</td>
                         <td className="p-2 border border-slate-300 font-semibold">{r.tenantName || '-'}</td>
                         <td className="p-2 border border-slate-300 text-center">{r.occupantsCount || 0}</td>
+                        <td className="p-2 border border-slate-300 text-center text-[10px] font-bold">
+                          {(() => {
+                            const motor = r.twoWheelCount ?? linkedH?.twoWheelCount ?? 0;
+                            const mobil = r.fourWheelCount ?? linkedH?.fourWheelCount ?? 0;
+                            if (motor + mobil === 0) return '-';
+                            return `${motor > 0 ? `${motor} Mtr` : ''}${motor > 0 && mobil > 0 ? ' • ' : ''}${mobil > 0 ? `${mobil} Mbl` : ''}`;
+                          })()}
+                        </td>
                         <td className="p-2 border border-slate-300 text-[10px]">
-                          {new Date(r.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2-digit' })} - {new Date(r.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2-digit' })}
+                          {occ === 'Rumah Keluarga' || r.endDate === '2099-12-31' || !r.endDate || isNaN(new Date(r.endDate).getTime())
+                            ? 'Permanen / Keluarga'
+                            : `${new Date(r.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2-digit' })} - ${new Date(r.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2-digit' })}`}
                         </td>
                         <td className="p-2 border border-slate-300 text-center">
                           <span className="font-bold text-[10px]">{eff}</span>

@@ -1244,6 +1244,11 @@ export interface RentalContract {
   workOrStudy?: string; // Pekerjaan / Tempat Bekerja / Kampus
   ktpUrl?: string;
   kkUrl?: string;
+
+  // NEW: Kendaraan Terparkir Penyewa
+  twoWheelCount?: number; // Jumlah Sepeda Motor (Roda 2)
+  fourWheelCount?: number; // Jumlah Mobil Pribadi (Roda 4)
+  vehicleCount?: number; // Total Kendaraan Terparkir
   
   // Periode & Ketentuan Sewa
   startDate: string; // YYYY-MM-DD

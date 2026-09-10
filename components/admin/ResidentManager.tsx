@@ -1138,6 +1138,49 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         await logAction('Tambah Warga', `Tambah data warga baru di rumah ${houseId}`);
       }
 
+      // --- AUTO-SYNC KE BUKU KONTRAK SEWA (rentalContracts) JIKA SEWA ATAU RUMAH KELUARGA ---
+      if (data.residenceType === 'Sewa' || data.residenceType === 'Rumah Keluarga') {
+        const contractDocId = `rent-${houseId}`;
+        const isRumahKeluarga = data.residenceType === 'Rumah Keluarga';
+        const motor = data.twoWheelCount || 0;
+        const mobil = data.fourWheelCount || 0;
+        const totalVehicles = (motor + mobil > 0) ? (motor + mobil) : (data.vehicleCount || 0);
+        const occCount = Number(data.occupants || 1);
+
+        try {
+          await setDocumentInCollection('rentalContracts', contractDocId, {
+            id: contractDocId,
+            houseId: houseId,
+            block: data.block,
+            number: data.number,
+            ownerName: data.ownerName || (isRumahKeluarga ? 'Keluarga / Kerabat' : 'Belum Dicatat'),
+            ownerPhone: data.ownerPhone || '',
+            ownerAddress: `Blok ${data.block} No. ${data.number}`,
+            tenantName: data.headOfFamily && data.headOfFamily !== '-' ? data.headOfFamily : '(Belum Ada Penghuni)',
+            tenantPhone: data.phone || '',
+            tenantNik: data.nik || '',
+            tenantKkNumber: data.kkNumber || '',
+            occupantsCount: occCount,
+            occupancyType: isRumahKeluarga ? 'Rumah Keluarga' : (occCount > 1 ? 'Keluarga' : 'Individu'),
+            rentType: isRumahKeluarga ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
+            twoWheelCount: motor,
+            fourWheelCount: mobil,
+            vehicleCount: totalVehicles,
+            status: data.status === 'Empty' ? 'Kosong' : 'Aktif',
+            startDate: data.joiningDate ? data.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0],
+            endDate: isRumahKeluarga ? '2099-12-31' : new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+            verificationStatus: 'Terverifikasi',
+            reportedBy: 'Pengurus RT',
+            notes: isRumahKeluarga 
+              ? 'Rumah Keluarga / Ikut Saudara (Basis Data Warga RT 02)' 
+              : 'Kontrak Sewa (Basis Data Warga RT 02)',
+            updatedAt: new Date().toISOString()
+          });
+        } catch (syncErr) {
+          console.warn('Failed to auto-sync rental contract in handleSaveHouse:', syncErr);
+        }
+      }
+
       // --- AUTO GENERATE LOG MUTASI ---
       const logDate = data.joiningDate.split('T')[0];
       
