@@ -4,7 +4,8 @@ import { Button } from '../../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
-  CreditCard, AlertCircle, Calendar, FileText, Shield, Send, History, Edit2, Heart, ShieldCheck
+  CreditCard, AlertCircle, Calendar, FileText, Shield, Send, History, Edit2, Heart, ShieldCheck,
+  Bike, Car
 } from 'lucide-react';
 import { House, PaymentStatus, Role } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -482,28 +483,56 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           )}
                         </div>
 
-                        {formData.residenceType !== 'Tetap' && (
-                          <div className="col-span-2 p-3 bg-[#eef2ff] border border-indigo-200 rounded-xl space-y-3">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900">
-                              <AlertCircle size={14} className="text-indigo-600 shrink-0" />
-                              <span>Informasi Pemilik Rumah (Penghuni Status {formData.residenceType || 'Sewa'})</span>
+                        {formData.residenceType !== 'Tetap' && (() => {
+                          const matchedHouse = houses?.find(h => 
+                            (h.block || '').trim().toUpperCase() === (formData.block || '').trim().toUpperCase() &&
+                            ((h.number || '').trim().padStart(2, '0') === (formData.number || '').trim().padStart(2, '0') ||
+                             (h.number || '').trim() === (formData.number || '').trim() ||
+                             parseInt(h.number || '0', 10) === parseInt(formData.number || '0', 10))
+                          );
+                          const detectedOwner = matchedHouse?.ownerName && matchedHouse.ownerName.trim() !== '' && matchedHouse.ownerName.trim() !== '-'
+                            ? matchedHouse.ownerName
+                            : (matchedHouse?.residenceType === 'Tetap' ? matchedHouse.headOfFamily : null);
+                          const detectedPhone = matchedHouse?.ownerPhone || (matchedHouse?.residenceType === 'Tetap' ? matchedHouse.phone : null);
+
+                          return (
+                            <div className="col-span-2 p-3 bg-[#eef2ff] border border-indigo-200 rounded-xl space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900">
+                                  <AlertCircle size={14} className="text-indigo-600 shrink-0" />
+                                  <span>Informasi Pemilik Rumah (Penghuni Status {formData.residenceType || 'Sewa'})</span>
+                                </div>
+                                {detectedOwner && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setFormData({
+                                      ...formData, 
+                                      ownerName: detectedOwner, 
+                                      ownerPhone: detectedPhone || formData.ownerPhone || ''
+                                    })}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold transition-all shadow-xs cursor-pointer w-fit"
+                                  >
+                                    <span>Gunakan Data RT: {detectedOwner}</span>
+                                  </button>
+                                )}
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <FormField 
+                                  label="Nama Pemilik Rumah" 
+                                  placeholder="Nama pemilik asli..."
+                                  value={formData.ownerName} 
+                                  onChange={(v: any) => setFormData({...formData, ownerName: v})} 
+                                />
+                                <FormField 
+                                  label="Kontak Pemilik Rumah" 
+                                  placeholder="WA Pemilik..."
+                                  value={formData.ownerPhone} 
+                                  onChange={(v: any) => setFormData({...formData, ownerPhone: v})} 
+                                />
+                              </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <FormField 
-                                label="Nama Pemilik Rumah" 
-                                placeholder="Nama pemilik asli..."
-                                value={formData.ownerName} 
-                                onChange={(v: any) => setFormData({...formData, ownerName: v})} 
-                              />
-                              <FormField 
-                                label="Kontak Pemilik Rumah" 
-                                placeholder="WA Pemilik..."
-                                value={formData.ownerPhone} 
-                                onChange={(v: any) => setFormData({...formData, ownerPhone: v})} 
-                              />
-                            </div>
-                          </div>
-                        )}
+                          );
+                        })()}
 
                         <div className="col-span-2">
                           <FormField 
@@ -865,21 +894,69 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
                       </div>
                     </div>
-                    <div className="md:col-span-3">
-                      <FormField 
-                        label="Jumlah Kendaraan" 
-                        type="number"
-                        placeholder="0"
-                        value={formData.vehicleCount} 
-                        onChange={(v: any) => setFormData({...formData, vehicleCount: parseInt(v) || 0})} 
-                      />
+                    <div className="md:col-span-12 p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                          <Car size={14} className="text-indigo-600 shrink-0" />
+                          <span>Kepemilikan Kendaraan Warga</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-600 bg-white px-2.5 py-0.5 rounded-lg border border-slate-200 shadow-2xs">
+                          Total: {(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0)} Unit Terparkir
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                            <Bike size={13} className="text-amber-600" />
+                            <span>Sepeda Motor (Roda 2)</span>
+                          </label>
+                          <input 
+                            type="number" 
+                            min="0"
+                            placeholder="0"
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                            value={formData.twoWheelCount ?? 0}
+                            onChange={(e) => {
+                              const w2 = parseInt(e.target.value) || 0;
+                              const w4 = formData.fourWheelCount || 0;
+                              setFormData({
+                                ...formData,
+                                twoWheelCount: w2,
+                                vehicleCount: w2 + w4
+                              });
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                            <Car size={13} className="text-blue-600" />
+                            <span>Mobil Pribadi (Roda 4)</span>
+                          </label>
+                          <input 
+                            type="number" 
+                            min="0"
+                            placeholder="0"
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                            value={formData.fourWheelCount ?? 0}
+                            onChange={(e) => {
+                              const w4 = parseInt(e.target.value) || 0;
+                              const w2 = formData.twoWheelCount || 0;
+                              setFormData({
+                                ...formData,
+                                fourWheelCount: w4,
+                                vehicleCount: w2 + w4
+                              });
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     {/* 3. Cross-Field Smart Warning for Pra-Sejahtera vs Vehicles */}
-                    {formData.economicStatus === 'Pra-Sejahtera' && (formData.vehicleCount || 0) > 3 && (
+                    {formData.economicStatus === 'Pra-Sejahtera' && ((formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) > 3 || (formData.vehicleCount || 0) > 3) && (
                       <div className="md:col-span-12 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs font-bold text-amber-800">
                         <AlertCircle size={15} className="text-amber-600 shrink-0" />
-                        <span>💡 Catatan Verifikasi: Jumlah kendaraan ({formData.vehicleCount}) relatif tinggi untuk status Pra-Sejahtera. Mohon periksa kembali.</span>
+                        <span>💡 Catatan Verifikasi: Jumlah kendaraan ({(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) || formData.vehicleCount}) relatif tinggi untuk status Pra-Sejahtera. Mohon periksa kembali.</span>
                       </div>
                     )}
 

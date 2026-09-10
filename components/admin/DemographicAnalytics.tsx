@@ -77,6 +77,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
     const residenceTypes: Record<string, number> = {};
     
     let totalVehicles = 0;
+    let totalMotor = 0;
+    let totalMobil = 0;
     let totalSoul = 0;
     let totalPregnant = 0;
     let totalBabies = 0;
@@ -95,7 +97,11 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
 
     houses.forEach(h => {
       if (h && h.status === 'Occupied') {
-        totalVehicles += (h.vehicleCount || 0);
+        const w2 = h.twoWheelCount || 0;
+        const w4 = h.fourWheelCount || 0;
+        totalMotor += w2;
+        totalMobil += w4;
+        totalVehicles += (w2 + w4 > 0 ? w2 + w4 : (h.vehicleCount || 0));
         const occupantsCount = Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0));
         totalSoul += occupantsCount;
         
@@ -213,6 +219,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
       vaccinationStatuses,
       residenceTypes,
       totalVehicles,
+      totalMotor,
+      totalMobil,
       totalSoul,
       totalPregnant,
       totalBabies,
@@ -234,7 +242,7 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
   const { 
     allResidents, religions, educations, jobs, 
     economicStatuses, bpjsStatuses, vaccinationStatuses, residenceTypes,
-    totalVehicles, totalSoul, totalPregnant, totalBabies, 
+    totalVehicles, totalMotor, totalMobil, totalSoul, totalPregnant, totalBabies, 
     totalToddlers, totalChildren, totalTeenagers, totalAdults,
     totalElderly, totalWidows, totalDisability, totalOrphans, totalPKH, totalBLT, totalBansosLain, totalOccupied 
   } = stats;
@@ -413,7 +421,7 @@ Filter Wilayah: ${selectedBlock === 'ALL' ? 'Semua Blok (A - F)' : `Blok ${selec
    • Total KK Aktif: ${totalOccupied} KK
    • Total Jiwa Penduduk: ${totalSoul} Jiwa
    • Rata-rata Jiwa per KK: ${averageSoulPerKK} Jiwa/KK
-   • Total Kendaraan Warga: ${totalVehicles} Unit
+   • Total Kendaraan Warga: ${totalVehicles} Unit (${totalMotor} Motor, ${totalMobil} Mobil)
 
 2. KOMPOSISI JENIS KELAMIN (SEX RATIO):
    • Laki-laki: ${totalMale} Jiwa (${totalResidents > 0 ? ((totalMale / totalResidents) * 100).toFixed(1) : 0}%)
@@ -598,7 +606,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   sub: 'Tanggungan Posyandu', 
                   color: 'rose' 
                 },
-                { icon: Car, label: 'Total Kendaraan', value: totalVehicles, sub: 'Mobilitas Warga', color: 'indigo' }
+                { icon: Car, label: 'Total Kendaraan', value: totalVehicles, sub: `${totalMotor} Motor • ${totalMobil} Mobil`, color: 'indigo' }
               ].map((stat, i) => (
                 <motion.div 
                   key={stat.label}

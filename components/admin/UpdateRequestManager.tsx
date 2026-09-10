@@ -52,11 +52,45 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
       const houseLabel = house ? `Blok ${house.block}-${house.number}` : req.houseId;
 
       // 1. Update the house data
-      await updateHouseData(req.houseId, {
+      const updatePayload: any = {
         headOfFamily: req.headOfFamily,
         phone: req.phone,
         occupants: req.occupants
-      });
+      };
+      if (req.twoWheelCount !== undefined) updatePayload.twoWheelCount = req.twoWheelCount;
+      if (req.fourWheelCount !== undefined) updatePayload.fourWheelCount = req.fourWheelCount;
+      if (req.twoWheelCount !== undefined || req.fourWheelCount !== undefined) {
+        updatePayload.vehicleCount = (req.twoWheelCount || 0) + (req.fourWheelCount || 0);
+      } else if (req.vehicleCount !== undefined) {
+        updatePayload.vehicleCount = req.vehicleCount;
+      }
+      if (req.residenceType) updatePayload.residenceType = req.residenceType;
+      if (req.ownerName) updatePayload.ownerName = req.ownerName;
+      if (req.ownerPhone) updatePayload.ownerPhone = req.ownerPhone;
+      if (req.maritalStatus) updatePayload.maritalStatus = req.maritalStatus;
+      if (req.religion) updatePayload.religion = req.religion;
+      if (req.education) updatePayload.education = req.education;
+      if (req.job) updatePayload.job = req.job;
+      if (req.jobCategory) updatePayload.jobCategory = req.jobCategory;
+      if (req.bloodType) updatePayload.bloodType = req.bloodType;
+      if (req.addressKtp) updatePayload.addressKtp = req.addressKtp;
+      if (req.bpjsStatus) updatePayload.bpjsStatus = req.bpjsStatus;
+      if (req.familyMembers && req.familyMembers.length > 0) updatePayload.familyMembers = req.familyMembers;
+      if (req.isPKH !== undefined) updatePayload.isPKH = req.isPKH;
+      if (req.isBLT !== undefined) updatePayload.isBLT = req.isBLT;
+      if (req.isBPNT !== undefined) updatePayload.isBPNT = req.isBPNT;
+      if (req.isBansosLain !== undefined) updatePayload.isBansosLain = req.isBansosLain;
+      if (req.bansosLainName !== undefined) updatePayload.bansosLainName = req.bansosLainName;
+      if (req.pregnantCount !== undefined) updatePayload.pregnantCount = req.pregnantCount;
+      if (req.babyCount !== undefined) updatePayload.babyCount = req.babyCount;
+      if (req.toddlerCount !== undefined) updatePayload.toddlerCount = req.toddlerCount;
+      if (req.childCount !== undefined) updatePayload.childCount = req.childCount;
+      if (req.teenagerCount !== undefined) updatePayload.teenagerCount = req.teenagerCount;
+      if (req.adultCount !== undefined) updatePayload.adultCount = req.adultCount;
+      if (req.elderlyCount !== undefined) updatePayload.elderlyCount = req.elderlyCount;
+      if (req.widowCount !== undefined) updatePayload.widowCount = req.widowCount;
+
+      await updateHouseData(req.houseId, updatePayload);
 
       // 2. Update the request status
       await updateRequestStatus(req.id, 'Disetujui', adminNote);
@@ -290,6 +324,14 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                       <div className="flex justify-between"><span>Kepala Keluarga:</span> <span className="font-bold line-through">{house?.headOfFamily || '-'}</span></div>
                       <div className="flex justify-between"><span>No. HP / WA:</span> <span className="font-bold">{house?.phone || '-'}</span></div>
                       <div className="flex justify-between"><span>Jumlah Penghuni:</span> <span className="font-bold">{house?.occupants || 0} Jiwa</span></div>
+                      <div className="flex justify-between">
+                        <span>Kendaraan:</span> 
+                        <span className="font-bold">{house?.twoWheelCount || 0} Motor • {house?.fourWheelCount || 0} Mobil (Total {house?.vehicleCount || 0})</span>
+                      </div>
+                      <div className="flex justify-between"><span>Status Hunian:</span> <span className="font-bold">{house?.residenceType || 'Tetap'}</span></div>
+                      {house?.ownerName && house?.ownerName !== house?.headOfFamily && (
+                        <div className="flex justify-between"><span>Pemilik Rumah:</span> <span className="font-bold">{house.ownerName}</span></div>
+                      )}
                     </div>
                   );
                 })()}
@@ -307,6 +349,18 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                   <div className="flex justify-between"><span>Kepala Keluarga:</span> <span className="font-extrabold text-emerald-700">{selectedRequest.headOfFamily}</span></div>
                   <div className="flex justify-between"><span>No. HP / WA:</span> <span className="font-extrabold text-emerald-700">{selectedRequest.phone}</span></div>
                   <div className="flex justify-between"><span>Jumlah Penghuni:</span> <span className="font-extrabold text-emerald-700">{selectedRequest.occupants} Jiwa</span></div>
+                  <div className="flex justify-between">
+                    <span>Kendaraan:</span> 
+                    <span className="font-extrabold text-emerald-700">
+                      {selectedRequest.twoWheelCount ?? 0} Motor • {selectedRequest.fourWheelCount ?? 0} Mobil (Total {(selectedRequest.twoWheelCount || 0) + (selectedRequest.fourWheelCount || 0) || selectedRequest.vehicleCount || 0})
+                    </span>
+                  </div>
+                  {selectedRequest.residenceType && (
+                    <div className="flex justify-between"><span>Status Hunian:</span> <span className="font-extrabold text-emerald-700">{selectedRequest.residenceType}</span></div>
+                  )}
+                  {selectedRequest.ownerName && (
+                    <div className="flex justify-between"><span>Pemilik Rumah:</span> <span className="font-extrabold text-emerald-700">{selectedRequest.ownerName}</span></div>
+                  )}
                 </div>
               </div>
             </div>

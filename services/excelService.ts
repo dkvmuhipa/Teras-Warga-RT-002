@@ -75,6 +75,8 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
     { header: 'PENDIDIKAN', key: 'education', width: 20 },
     { header: 'PEKERJAAN', key: 'jobCategory', width: 25 },
     { header: 'JUMLAH KENDARAAN', key: 'vehicleCount', width: 20 },
+    { header: 'MOTOR (RODA 2)', key: 'twoWheelCount', width: 20 },
+    { header: 'MOBIL (RODA 4)', key: 'fourWheelCount', width: 20 },
     { header: 'JUMLAH IBU HAMIL', key: 'pregnantCount', width: 25 },
     { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
     { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
@@ -163,7 +165,9 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
       occupants: house.occupants || 0,
       education: house.education || '-',
       jobCategory: house.jobCategory || '-',
-      vehicleCount: house.vehicleCount || 0,
+      vehicleCount: (house.twoWheelCount || 0) + (house.fourWheelCount || 0) > 0 ? (house.twoWheelCount || 0) + (house.fourWheelCount || 0) : (house.vehicleCount || 0),
+      twoWheelCount: house.twoWheelCount || 0,
+      fourWheelCount: house.fourWheelCount || 0,
       pregnantCount: house.pregnantCount || 0,
       babyCount: house.babyCount || 0,
       toddlerCount: house.toddlerCount || 0,
@@ -451,7 +455,9 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
     { category: 'Total Penduduk (Jiwa)', value: totalJiwa, unit: 'Orang' },
     { category: 'Total Laki-laki', value: totalLaki, unit: 'Orang' },
     { category: 'Total Perempuan', value: totalPerempuan, unit: 'Orang' },
-    { category: 'Total Kendaraan', value: houses.reduce((acc, h) => acc + (h.vehicleCount || 0), 0), unit: 'Unit' },
+    { category: 'Total Kendaraan', value: houses.reduce((acc, h) => acc + ((h.twoWheelCount || 0) + (h.fourWheelCount || 0) > 0 ? (h.twoWheelCount || 0) + (h.fourWheelCount || 0) : (h.vehicleCount || 0)), 0), unit: 'Unit' },
+    { category: 'Sepeda Motor (Roda 2)', value: houses.reduce((acc, h) => acc + (h.twoWheelCount || 0), 0), unit: 'Unit' },
+    { category: 'Mobil Pribadi (Roda 4)', value: houses.reduce((acc, h) => acc + (h.fourWheelCount || 0), 0), unit: 'Unit' },
     { category: 'Total Ibu Hamil', value: houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0), unit: 'Orang' },
     { category: 'Total Bayi (0-11 bln)', value: houses.reduce((acc, h) => acc + (h.babyCount || 0), 0), unit: 'Orang' },
     { category: 'Total Balita (1-5 thn)', value: houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0), unit: 'Orang' },
@@ -500,6 +506,8 @@ export const generateExcelTemplate = async () => {
     { header: 'PENDIDIKAN', key: 'education', width: 20 },
     { header: 'PEKERJAAN', key: 'jobCategory', width: 25 },
     { header: 'JUMLAH KENDARAAN', key: 'vehicleCount', width: 20 },
+    { header: 'MOTOR (RODA 2)', key: 'twoWheelCount', width: 20 },
+    { header: 'MOBIL (RODA 4)', key: 'fourWheelCount', width: 20 },
     { header: 'JUMLAH IBU HAMIL', key: 'pregnantCount', width: 25 },
     { header: 'JUMLAH BAYI (0-11 bln)', key: 'babyCount', width: 25 },
     { header: 'JUMLAH BALITA (1-5 thn)', key: 'toddlerCount', width: 25 },
@@ -552,6 +560,8 @@ export const generateExcelTemplate = async () => {
     education: 'S1',
     jobCategory: 'Karyawan Swasta',
     vehicleCount: 2,
+    twoWheelCount: 1,
+    fourWheelCount: 1,
     pregnantCount: 0,
     babyCount: 0,
     toddlerCount: 1,
@@ -598,6 +608,7 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
   if (!worksheet) return [];
 
   let isOldFormat = false;
+  const headerMap: Record<string, number> = {};
 
   worksheet.eachRow((row, rowNumber) => {
     // Skip header row and detect format
@@ -605,47 +616,64 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       if (row.getCell(1).text?.toString().trim().toUpperCase() === 'NO') {
         isOldFormat = true;
       }
+      row.eachCell((cell, colNumber) => {
+        const text = cell.text?.toString().trim().toUpperCase();
+        if (text) {
+          headerMap[text] = colNumber;
+        }
+      });
       return;
     }
     
     // Check if it's the example row or empty
     const offset = isOldFormat ? 1 : 0;
-    const block = row.getCell(1 + offset).text?.toString().trim();
-    const number = row.getCell(2 + offset).text?.toString().trim();
-    const headOfFamily = row.getCell(3 + offset).text?.toString().trim() || '-';
+    const getColIndex = (keyword: string, fallback: number): number => {
+      const match = Object.keys(headerMap).find(k => k.includes(keyword));
+      return match ? headerMap[match] : fallback;
+    };
+
+    const block = row.getCell(getColIndex('BLOK', 1 + offset)).text?.toString().trim();
+    const number = row.getCell(getColIndex('NOMOR', 2 + offset)).text?.toString().trim();
+    const headOfFamily = row.getCell(getColIndex('KEPALA KELUARGA', 3 + offset)).text?.toString().trim() || '-';
 
     // If block is empty or looks like an instruction row, skip
     if (!block || !number || block.startsWith('PETUNJUK') || block.match(/^\d+\./)) return;
 
-    const genderRaw = row.getCell(4 + offset).text?.trim() || undefined;
-    const birthDate = row.getCell(5 + offset).text?.trim() || undefined;
-    const religion = row.getCell(6 + offset).text?.trim() || undefined;
-    const ownerName = row.getCell(7 + offset).text?.trim() || undefined;
-    const ownerPhone = row.getCell(8 + offset).text?.trim() || undefined;
-    const phone = row.getCell(9 + offset).text?.trim() || undefined;
-    const statusRaw = row.getCell(10 + offset).text?.trim() || undefined;
-    const residenceTypeRaw = row.getCell(11 + offset).text?.trim() || undefined;
-    const occupantsRaw = row.getCell(12 + offset).value;
-    const education = row.getCell(13 + offset).text?.trim() || undefined;
-    const jobCategory = row.getCell(14 + offset).text?.trim() || undefined;
-    const vehicleCountRaw = row.getCell(15 + offset).value;
-    const pregnantCountRaw = row.getCell(16 + offset).value;
-    const babyCountRaw = row.getCell(17 + offset).value;
-    const toddlerCountRaw = row.getCell(18 + offset).value;
-    const teenagerCountRaw = row.getCell(19 + offset).value;
-    const adultCountRaw = row.getCell(20 + offset).value;
-    const elderlyCountRaw = row.getCell(21 + offset).value;
-    const childCountRaw = row.getCell(22 + offset).value;
-    const widowCountRaw = row.getCell(23 + offset).value;
-    const economicStatus = row.getCell(24 + offset).text?.trim() || undefined;
-    const isBPNTRaw = row.getCell(25 + offset).text?.trim() || undefined;
-    const isDisabilityRaw = row.getCell(26 + offset).text?.trim() || undefined;
-    const disabilityCountRaw = row.getCell(27 + offset).value;
-    const isOrphanRaw = row.getCell(28 + offset).text?.trim() || undefined;
-    const orphanCountRaw = row.getCell(29 + offset).value;
-    const paymentStatusAirRaw = row.getCell(30 + offset).text?.trim() || undefined;
-    const paymentStatusSampahRaw = row.getCell(31 + offset).text?.trim() || undefined;
-    const accessCode = row.getCell(32 + offset).text?.trim() || undefined;
+    const genderRaw = row.getCell(getColIndex('KELAMIN', 4 + offset)).text?.trim() || undefined;
+    const birthDate = row.getCell(getColIndex('LAHIR', 5 + offset)).text?.trim() || undefined;
+    const religion = row.getCell(getColIndex('AGAMA', 6 + offset)).text?.trim() || undefined;
+    const ownerName = row.getCell(getColIndex('NAMA PEMILIK', 7 + offset)).text?.trim() || undefined;
+    const ownerPhone = row.getCell(getColIndex('KONTAK PEMILIK', 8 + offset)).text?.trim() || undefined;
+    const phone = row.getCell(getColIndex('TELEPON', 9 + offset)).text?.trim() || undefined;
+    const statusRaw = row.getCell(getColIndex('STATUS HUNIAN', 10 + offset)).text?.trim() || undefined;
+    const residenceTypeRaw = row.getCell(getColIndex('KEPENGHUNIAN', 11 + offset)).text?.trim() || undefined;
+    const occupantsRaw = row.getCell(getColIndex('PENGHUNI', 12 + offset)).value;
+    const education = row.getCell(getColIndex('PENDIDIKAN', 13 + offset)).text?.trim() || undefined;
+    const jobCategory = row.getCell(getColIndex('PEKERJAAN', 14 + offset)).text?.trim() || undefined;
+    const vehicleCountRaw = row.getCell(getColIndex('JUMLAH KENDARAAN', 15 + offset)).value;
+    
+    const motorCol = Object.keys(headerMap).find(k => k.includes('MOTOR'));
+    const mobilCol = Object.keys(headerMap).find(k => k.includes('MOBIL'));
+    const twoWheelCountRaw = motorCol ? row.getCell(headerMap[motorCol]).value : undefined;
+    const fourWheelCountRaw = mobilCol ? row.getCell(headerMap[mobilCol]).value : undefined;
+
+    const pregnantCountRaw = row.getCell(getColIndex('HAMIL', 16 + offset)).value;
+    const babyCountRaw = row.getCell(getColIndex('BAYI', 17 + offset)).value;
+    const toddlerCountRaw = row.getCell(getColIndex('BALITA', 18 + offset)).value;
+    const teenagerCountRaw = row.getCell(getColIndex('REMAJA', 19 + offset)).value;
+    const adultCountRaw = row.getCell(getColIndex('DEWASA', 20 + offset)).value;
+    const elderlyCountRaw = row.getCell(getColIndex('LANSIA', 21 + offset)).value;
+    const childCountRaw = row.getCell(getColIndex('ANAK', 22 + offset)).value;
+    const widowCountRaw = row.getCell(getColIndex('JANDA', 23 + offset)).value;
+    const economicStatus = row.getCell(getColIndex('EKONOMI', 24 + offset)).text?.trim() || undefined;
+    const isBPNTRaw = row.getCell(getColIndex('BPNT', 25 + offset)).text?.trim() || undefined;
+    const isDisabilityRaw = row.getCell(getColIndex('DISABILITAS (YA', 26 + offset)).text?.trim() || undefined;
+    const disabilityCountRaw = row.getCell(getColIndex('JUMLAH DISABILITAS', 27 + offset)).value;
+    const isOrphanRaw = row.getCell(getColIndex('YATIM/PIATU (YA', 28 + offset)).text?.trim() || undefined;
+    const orphanCountRaw = row.getCell(getColIndex('JUMLAH YATIM/PIATU', 29 + offset)).value;
+    const paymentStatusAirRaw = row.getCell(getColIndex('AIR', 30 + offset)).text?.trim() || undefined;
+    const paymentStatusSampahRaw = row.getCell(getColIndex('SAMPAH', 31 + offset)).text?.trim() || undefined;
+    const accessCode = row.getCell(getColIndex('AKSES', 32 + offset)).text?.trim() || undefined;
 
     // Map gender
     let gender: 'Laki-laki' | 'Perempuan' | undefined = undefined;
@@ -690,7 +718,13 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       ...(residenceType !== undefined && { residenceType }),
       ...(education !== undefined && { education }),
       ...(jobCategory !== undefined && { jobCategory }),
-      ...(vehicleCountRaw !== null && vehicleCountRaw !== undefined && vehicleCountRaw !== '' && { vehicleCount: Number(vehicleCountRaw) }),
+      ...(vehicleCountRaw !== null && vehicleCountRaw !== undefined && vehicleCountRaw !== '' 
+        ? { vehicleCount: Number(vehicleCountRaw) } 
+        : (twoWheelCountRaw !== undefined || fourWheelCountRaw !== undefined 
+          ? { vehicleCount: Number(twoWheelCountRaw || 0) + Number(fourWheelCountRaw || 0) } 
+          : {})),
+      ...(twoWheelCountRaw !== null && twoWheelCountRaw !== undefined && twoWheelCountRaw !== '' && { twoWheelCount: Number(twoWheelCountRaw) }),
+      ...(fourWheelCountRaw !== null && fourWheelCountRaw !== undefined && fourWheelCountRaw !== '' && { fourWheelCount: Number(fourWheelCountRaw) }),
       ...(pregnantCountRaw !== null && pregnantCountRaw !== undefined && pregnantCountRaw !== '' && { pregnantCount: Number(pregnantCountRaw) }),
       ...(babyCountRaw !== null && babyCountRaw !== undefined && babyCountRaw !== '' && { babyCount: Number(babyCountRaw) }),
       ...(toddlerCountRaw !== null && toddlerCountRaw !== undefined && toddlerCountRaw !== '' && { toddlerCount: Number(toddlerCountRaw) }),

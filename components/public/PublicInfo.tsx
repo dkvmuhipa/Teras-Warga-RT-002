@@ -63,12 +63,19 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
 
     const tetapCount = houses.filter(h => h.residenceType === 'Tetap').length;
     const sewaCount = houses.filter(h => h.residenceType === 'Sewa').length;
+    const rumahKeluargaCount = houses.filter(h => h.residenceType === 'Rumah Keluarga').length;
 
     const pregnantTotal = houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0);
     const babyTotal = houses.reduce((acc, h) => acc + (h.babyCount || 0), 0);
     const toddlerTotal = houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0);
     const elderlyTotal = houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0);
-    const vehicleTotal = houses.reduce((acc, h) => acc + (h.vehicleCount || 0), 0);
+    const motorTotal = houses.reduce((acc, h) => acc + (h.twoWheelCount || 0), 0);
+    const mobilTotal = houses.reduce((acc, h) => acc + (h.fourWheelCount || 0), 0);
+    const vehicleTotal = houses.reduce((acc, h) => {
+        const w2 = h.twoWheelCount || 0;
+        const w4 = h.fourWheelCount || 0;
+        return acc + (w2 + w4 > 0 ? w2 + w4 : (h.vehicleCount || 0));
+    }, 0);
     const pkhTotal = houses.filter(h => h.isPKH).length;
     const bltTotal = houses.filter(h => h.isBLT).length;
     const bansosTotal = houses.filter(h => h.isPKH || h.isBLT || h.isBansosLain).length;
@@ -1003,6 +1010,10 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                     <span className="text-xs font-bold text-slate-600">Sewa / Kontrakan</span>
                                     <span className="text-xs font-black text-amber-600">{sewaCount}</span>
                                 </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-slate-600">Rumah Keluarga</span>
+                                    <span className="text-xs font-black text-emerald-600">{rumahKeluargaCount}</span>
+                                </div>
                             </div>
                         </div>
 
@@ -1068,6 +1079,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 <div>
                                     <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Total Kendaraan</p>
                                     <p className="text-lg font-black text-slate-700">{vehicleTotal} <span className="text-[10px] font-normal text-slate-400">Unit</span></p>
+                                    <p className="text-[9px] font-bold text-slate-400 mt-0.5">{motorTotal} Motor • {mobilTotal} Mobil</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Status Keamanan</p>

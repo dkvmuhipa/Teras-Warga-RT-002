@@ -411,6 +411,10 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     addressKtp: '',
     bpjsStatus: 'Tidak Ada' as any,
     vehicleCount: 0,
+    twoWheelCount: 0,
+    fourWheelCount: 0,
+    ownerName: '',
+    ownerPhone: '',
     isPKH: false,
     isBLT: false,
     isBPNT: false,
@@ -487,7 +491,11 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         nationality: currentHouse.nationality || 'WNI',
         addressKtp: currentHouse.addressKtp || '',
         bpjsStatus: currentHouse.bpjsStatus || 'Tidak Ada',
-        vehicleCount: currentHouse.vehicleCount || 0,
+        vehicleCount: (currentHouse.twoWheelCount || 0) + (currentHouse.fourWheelCount || 0) > 0 ? (currentHouse.twoWheelCount || 0) + (currentHouse.fourWheelCount || 0) : (currentHouse.vehicleCount || 0),
+        twoWheelCount: currentHouse.twoWheelCount ?? 0,
+        fourWheelCount: currentHouse.fourWheelCount ?? 0,
+        ownerName: currentHouse.ownerName || '',
+        ownerPhone: currentHouse.ownerPhone || '',
         isPKH: currentHouse.isPKH || false,
         isBLT: currentHouse.isBLT || false,
         isBPNT: currentHouse.isBPNT || false,
@@ -994,7 +1002,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 </div>
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Anggota & Kendaraan</h4>
                 <p className="text-xl font-black text-slate-800">
-                  {currentHouse?.occupants || 0} Jiwa • {currentHouse?.vehicleCount || 0} Kendaraan
+                  {currentHouse?.occupants || 0} Jiwa • {(currentHouse?.twoWheelCount || 0) + (currentHouse?.fourWheelCount || 0) > 0 ? `${currentHouse?.twoWheelCount || 0} Motor • ${currentHouse?.fourWheelCount || 0} Mobil` : `${currentHouse?.vehicleCount || 0} Kendaraan`}
                 </p>
                 <p className="text-[11px] text-slate-450 font-semibold mt-1">
                   Klik untuk pembaruan profil KK →
@@ -2431,8 +2439,38 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.occupants} onChange={e => setUpdateForm({...updateForm, occupants: parseInt(e.target.value) || 0})} />
                       </div>
                       <div>
-                        <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Jumlah Kendaraan</label>
-                        <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.vehicleCount} onChange={e => setUpdateForm({...updateForm, vehicleCount: parseInt(e.target.value) || 0})} />
+                        <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Motor (Roda 2)</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" 
+                          value={updateForm.twoWheelCount ?? 0} 
+                          onChange={e => {
+                            const w2 = parseInt(e.target.value) || 0;
+                            setUpdateForm({
+                              ...updateForm, 
+                              twoWheelCount: w2, 
+                              vehicleCount: w2 + (updateForm.fourWheelCount || 0)
+                            });
+                          }} 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Mobil (Roda 4)</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" 
+                          value={updateForm.fourWheelCount ?? 0} 
+                          onChange={e => {
+                            const w4 = parseInt(e.target.value) || 0;
+                            setUpdateForm({
+                              ...updateForm, 
+                              fourWheelCount: w4, 
+                              vehicleCount: (updateForm.twoWheelCount || 0) + w4
+                            });
+                          }} 
+                        />
                       </div>
                       <div>
                         <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Ibu Hamil</label>

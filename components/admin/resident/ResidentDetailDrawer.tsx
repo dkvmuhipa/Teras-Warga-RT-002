@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { 
   X, Phone, MapPin, FileText, CreditCard, DollarSign, 
   LayoutList, Droplets, Trash2, Users, Activity, Shield, User,
-  ShieldCheck, Calendar, AlertCircle, Printer
+  ShieldCheck, Calendar, AlertCircle, Printer, Home, Bike, Car, Key
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -196,6 +196,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 <div className="grid grid-cols-2 gap-4">
                   <DetailItem icon={<Phone size={13} />} label="Nomor WA / Telp" value={selectedResident.phone || 'N/A'} isUrgent={!!selectedResident.phone} />
                   <DetailItem icon={<MapPin size={13} />} label="Alamat Blok / No" value={`Blok ${selectedResident.block} No. ${selectedResident.number}`} />
+                  <DetailItem icon={<Home size={13} />} label="Status Hunian" value={selectedResident.residenceType || 'Tetap'} />
                   <DetailItem 
                     icon={<FileText size={13} />} 
                     label="Status PBB" 
@@ -205,6 +206,30 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <DetailItem icon={<FileText size={13} />} label="Nomor NIK" value={selectedResident.nik || '-'} isMain />
                   <DetailItem icon={<Users size={13} />} label="Nomor KK" value={selectedResident.kkNumber || '-'} isMain />
                   <DetailItem icon={<Calendar size={13} />} label="Bergabung Pada" value={selectedResident.joiningDate ? selectedResident.joiningDate.split('T')[0] : '-'} />
+                  {selectedResident.residenceType !== 'Tetap' && (
+                    <DetailItem icon={<Key size={13} />} label="Pemilik Rumah" value={`${selectedResident.ownerName || '-'}${selectedResident.ownerPhone ? ` (${selectedResident.ownerPhone})` : ''}`} />
+                  )}
+                </div>
+
+                {/* Kendaraan Terparkir Breakdown */}
+                <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    <Car size={13} className="text-slate-400" />
+                    <span>Kendaraan Terparkir:</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-md text-[11px] font-bold">
+                      <Bike size={11} className="text-amber-600" />
+                      {selectedResident.twoWheelCount || 0} Motor
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-[11px] font-bold">
+                      <Car size={11} className="text-blue-600" />
+                      {selectedResident.fourWheelCount || 0} Mobil
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-semibold pl-0.5">
+                      ({(selectedResident.twoWheelCount || 0) + (selectedResident.fourWheelCount || 0) > 0 ? (selectedResident.twoWheelCount || 0) + (selectedResident.fourWheelCount || 0) : (selectedResident.vehicleCount || 0)} unit)
+                    </span>
+                  </div>
                 </div>
               </section>
 

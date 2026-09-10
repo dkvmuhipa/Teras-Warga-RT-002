@@ -62,6 +62,7 @@ import {
   deletePopulationReportFromDb,
   markPopulationLogsAsGenerated,
   unmarkPopulationLogsAsGenerated,
+  setDocumentInCollection,
   logAction,
   handleFirestoreError,
   OperationType
@@ -217,6 +218,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     education: '',
     jobCategory: '',
     vehicleCount: 0,
+    twoWheelCount: 0,
+    fourWheelCount: 0,
     pregnantCount: 0,
     babyCount: 0,
     toddlerCount: 0,
@@ -820,6 +823,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       education: '',
       jobCategory: '',
       vehicleCount: 0,
+      twoWheelCount: 0,
+      fourWheelCount: 0,
       pregnantCount: 0,
       babyCount: 0,
       toddlerCount: 0,
@@ -1038,7 +1043,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       job: house.job || '',
       education: house.education || '',
       jobCategory: house.jobCategory || '',
-      vehicleCount: house.vehicleCount || 0,
+      vehicleCount: (house.twoWheelCount || 0) + (house.fourWheelCount || 0) > 0 ? (house.twoWheelCount || 0) + (house.fourWheelCount || 0) : (house.vehicleCount || 0),
+      twoWheelCount: house.twoWheelCount ?? 0,
+      fourWheelCount: house.fourWheelCount ?? 0,
       rondaExempt: house.rondaExempt || false,
       pregnantCount: house.pregnantCount || 0,
       babyCount: house.babyCount || 0,
@@ -1159,6 +1166,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             familyCount: data.occupants || 1,
             familyMembers: data.familyMembers || [],
             residenceType: data.residenceType || 'Tetap',
+            ownerName: data.ownerName || '-',
+            twoWheelCount: data.twoWheelCount || 0,
+            fourWheelCount: data.fourWheelCount || 0,
+            vehicleCount: (data.twoWheelCount || 0) + (data.fourWheelCount || 0) > 0 ? (data.twoWheelCount || 0) + (data.fourWheelCount || 0) : (data.vehicleCount || 0),
             religion: data.religion || '-',
             vulnerability: vulnerability,
             kkNumber: data.kkNumber || '-',
@@ -1183,6 +1194,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               familyCount: data.occupants || 1,
               familyMembers: data.familyMembers || [],
               residenceType: data.residenceType || 'Tetap',
+              ownerName: data.ownerName || '-',
+              twoWheelCount: data.twoWheelCount || 0,
+              fourWheelCount: data.fourWheelCount || 0,
+              vehicleCount: (data.twoWheelCount || 0) + (data.fourWheelCount || 0) > 0 ? (data.twoWheelCount || 0) + (data.fourWheelCount || 0) : (data.vehicleCount || 0),
               religion: data.religion || '-',
               vulnerability: vulnerability,
               kkNumber: data.kkNumber || '-',
@@ -1254,6 +1269,29 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             });
           }
         }
+      }
+
+      // Auto-sync to rentalContracts if residenceType is 'Sewa' or 'Rumah Keluarga'
+      if (data.residenceType === 'Sewa' || data.residenceType === 'Rumah Keluarga') {
+        const contractDocId = `rent-${houseId}`;
+        const isRumahKeluarga = data.residenceType === 'Rumah Keluarga';
+        await setDocumentInCollection('rentalContracts', contractDocId, {
+          id: contractDocId,
+          houseId: houseId,
+          block: data.block,
+          number: data.number,
+          ownerName: data.ownerName || (isRumahKeluarga ? 'Keluarga / Kerabat' : 'Perlu Konfirmasi Pemilik'),
+          ownerPhone: data.ownerPhone || data.phone,
+          tenantName: data.headOfFamily,
+          tenantPhone: data.phone,
+          rentType: isRumahKeluarga ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
+          occupancyType: isRumahKeluarga ? 'Rumah Keluarga' : ((data.occupants || 1) > 1 ? 'Keluarga' : 'Individu'),
+          occupantsCount: data.occupants || 1,
+          status: 'Aktif',
+          startDate: data.joiningDate ? data.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0],
+          endDate: isRumahKeluarga ? '2099-12-31' : '',
+          updatedAt: new Date().toISOString()
+        });
       }
 
       setIsModalOpen(false);

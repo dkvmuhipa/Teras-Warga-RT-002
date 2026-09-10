@@ -3735,23 +3735,36 @@ export const generateDemographicAnalyticsReportPDF = async (
   let y = 70;
 
   // Executive Summary Cards
-  const drawCard = (x: number, y: number, w: number, h: number, title: string, data: string, color: [number, number, number]) => {
+  const drawCard = (x: number, y: number, w: number, h: number, title: string, data: string, color: [number, number, number], sub?: string) => {
     doc.setFillColor(color[0], color[1], color[2]);
     doc.roundedRect(x, y, w, h, 3, 3, 'F');
     doc.setTextColor(255);
     doc.setFontSize(8);
     doc.setFont("times", "normal");
-    doc.text(title, x + (w / 2), y + 7, { align: "center" });
-    doc.setFontSize(14);
+    doc.text(title, x + (w / 2), y + 6, { align: "center" });
+    doc.setFontSize(13);
     doc.setFont("times", "bold");
-    doc.text(data, x + (w / 2), y + 17, { align: "center" });
+    doc.text(data, x + (w / 2), y + (sub ? 14 : 17), { align: "center" });
+    if (sub) {
+      doc.setFontSize(7.5);
+      doc.setFont("times", "normal");
+      doc.text(sub, x + (w / 2), y + 20, { align: "center" });
+    }
     doc.setTextColor(0);
   };
 
   const cardW = (contentWidth - 10) / 3;
   drawCard(margin, y, cardW, 25, "TOTAL SELURUH JIWA", totalSoul.toString(), [79, 70, 229]);
   drawCard(margin + cardW + 5, y, cardW, 25, "RUMAH TANGGA AKTIF", totalOccupied.toString(), [16, 185, 129]);
-  drawCard(margin + (cardW * 2) + 10, y, cardW, 25, "KENDARAAN WARGA", houses.reduce((acc, h) => acc + (h.vehicleCount || 0), 0).toString(), [245, 158, 11]);
+
+  const pdfMotor = houses.reduce((acc, h) => acc + (h.twoWheelCount || 0), 0);
+  const pdfMobil = houses.reduce((acc, h) => acc + (h.fourWheelCount || 0), 0);
+  const pdfVehicles = houses.reduce((acc, h) => {
+    const w2 = h.twoWheelCount || 0;
+    const w4 = h.fourWheelCount || 0;
+    return acc + (w2 + w4 > 0 ? w2 + w4 : (h.vehicleCount || 0));
+  }, 0);
+  drawCard(margin + (cardW * 2) + 10, y, cardW, 25, "KENDARAAN WARGA", `${pdfVehicles} Unit`, [245, 158, 11], `${pdfMotor} Motor • ${pdfMobil} Mobil`);
 
   y += 35;
 

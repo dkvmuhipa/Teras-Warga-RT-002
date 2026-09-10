@@ -1037,6 +1037,11 @@ export interface UpdateRequest {
   addressKtp?: string;
   bpjsStatus?: 'PPU' | 'PBPU' | 'PBI' | 'Tidak Ada';
   vehicleCount?: number;
+  twoWheelCount?: number;
+  fourWheelCount?: number;
+  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
+  ownerName?: string;
+  ownerPhone?: string;
   
   // Social Assistance
   isPKH?: boolean;
