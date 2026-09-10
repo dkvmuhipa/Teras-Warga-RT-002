@@ -8,7 +8,7 @@ import {
 import { ResidentRegistration, PaymentStatus, House } from '../../../types';
 import { toast } from 'sonner';
 import { useConfirm } from '../../../context/ConfirmContext';
-import { formatHouseId, handleFirestoreError, OperationType, logAction } from '../../../services/databaseService';
+import { formatHouseId, handleFirestoreError, OperationType, logAction, setDocumentInCollection } from '../../../services/databaseService';
 import { sendWhatsAppViaGateway } from '../../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -153,8 +153,41 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
       
       // 2. Update registration status to approved
       await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Approved' });
-      
-      // 3. Add to population logs (Log Mutasi)
+
+      // 2b. Auto-sync to rentalContracts if residenceType is 'Sewa' or 'Rumah Keluarga'
+      // This eliminates the need for residents to report twice!
+      if (reg.residenceType === 'Sewa' || reg.residenceType === 'Rumah Keluarga') {
+        const contractDocId = `rent-${houseId}`;
+        const isRumahKeluarga = reg.residenceType === 'Rumah Keluarga';
+
+        await setDocumentInCollection('rentalContracts', contractDocId, {
+          id: contractDocId,
+          houseId: houseId,
+          block: reg.block,
+          number: reg.number,
+          ownerName: reg.ownerName || reg.headOfFamily,
+          ownerPhone: reg.phone,
+          ownerAddress: `Blok ${reg.block} No. ${reg.number}`,
+          tenantName: reg.headOfFamily,
+          tenantPhone: reg.phone,
+          tenantNik: reg.nik || '',
+          occupancyType: isRumahKeluarga ? 'Rumah Keluarga' : 'Keluarga',
+          rentType: isRumahKeluarga ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
+          rentPrice: 0,
+          status: 'Aktif',
+          startDate: reg.date ? reg.date.split('T')[0] : new Date().toISOString().split('T')[0],
+          endDate: isRumahKeluarga ? '-' : new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+          verificationStatus: 'Terverifikasi',
+          occupantsCount: Number(reg.occupants) || 1,
+          reportedBy: 'Penyewa',
+          reporterName: reg.headOfFamily,
+          reporterPhone: reg.phone,
+          notes: isRumahKeluarga 
+            ? 'Rumah Keluarga / Ikut Kerabat (Sinkronisasi Otomatis dari Pendaftaran Warga)' 
+            : 'Kontrak Sewa Keluarga (Sinkronisasi Otomatis dari Pendaftaran Warga)',
+          createdAt: new Date().toISOString()
+        });
+      }
       if (addPopulationLogToDb) {
         await addPopulationLogToDb({
           id: Date.now().toString(),

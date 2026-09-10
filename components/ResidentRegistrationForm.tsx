@@ -983,6 +983,39 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   </div>
                 </div>
 
+                {/* Info & Input Pemilik untuk Status Sewa / Rumah Keluarga */}
+                {(formData.residenceType === 'Sewa' || formData.residenceType === 'Rumah Keluarga') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="p-4 bg-indigo-50/70 border border-indigo-200/80 rounded-2xl space-y-3"
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <Sparkles size={16} className="text-indigo-600 shrink-0 mt-0.5" />
+                      <div className="text-[11px] leading-relaxed">
+                        <strong className="text-indigo-950 block font-bold">Otomatis Terhubung ke Buku Kontrak Sewa RT</strong>
+                        <span className="text-indigo-800/85">
+                          Anda <strong>tidak perlu lagi mengisi formulir &quot;Lapor Sewa&quot;</strong> terpisah. Data sewa akan otomatis tersinkronisasi saat pendaftaran Anda disetujui pengurus RT.
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-1 border-t border-indigo-100">
+                      <label className="text-[10px] font-black text-indigo-950 uppercase tracking-widest block ml-1">
+                        Nama Pemilik Rumah Asli {formData.residenceType === 'Sewa' ? '(Induk Semang)' : '(Kerabat)'}
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Bapak Irfan / Ibu Hj. Aminah (Opsional)"
+                        value={formData.ownerName || ''}
+                        onChange={e => setFormData({ ...formData, ownerName: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border border-indigo-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-2xs"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Jumlah Anggota & Kendaraan */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">

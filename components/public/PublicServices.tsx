@@ -2569,7 +2569,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             </div>
 
             {/* Informative Banner */}
-            <div className="mb-8 p-5 bg-gradient-to-r from-teal-50 to-emerald-50/70 border border-teal-200/70 rounded-[2rem] flex items-start gap-4 shadow-xs">
+            <div className="mb-4 p-5 bg-gradient-to-r from-teal-50 to-emerald-50/70 border border-teal-200/70 rounded-[2rem] flex items-start gap-4 shadow-xs">
               <div className="p-2.5 bg-white text-teal-600 rounded-xl shadow-xs shrink-0">
                 <ShieldCheck size={20} />
               </div>
@@ -2581,6 +2581,30 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   Sesuai Peraturan Lingkungan RT 002 Huntap Tondo 2 (BAB I Ketentuan Hunian), setiap penyewa baru atau pemilik yang menyewakan rumah wajib melaporkan identitas dan masa kontrak ke pengurus RT demi keamanan dan ketertiban lingkungan.
                 </p>
               </div>
+            </div>
+
+            {/* Quick Notice: Warga Berkeluarga yang Sudah Daftar Warga Tidak Perlu Lapor Ulang */}
+            <div className="mb-8 p-4.5 bg-gradient-to-r from-sky-50 to-indigo-50/60 border border-sky-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-2xs">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-sky-600 text-white rounded-xl shadow-xs shrink-0">
+                  <Info size={18} />
+                </div>
+                <div>
+                  <span className="font-black text-sky-950 uppercase tracking-wider block text-[11px]">
+                    Keluarga Pengontrak yang Sudah Mengisi &quot;Daftar Warga&quot;?
+                  </span>
+                  <p className="text-sky-800/90 text-[11px] font-medium mt-0.5 leading-relaxed">
+                    Anda <strong>tidak perlu mengisi formulir ini lagi</strong>. Saat pendaftaran warga Anda disetujui pengurus RT, data kontrak hunian sewa Anda otomatis tercatat di sistem RT.
+                  </p>
+                </div>
+              </div>
+              <a 
+                href="/register" 
+                className="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-[11px] font-bold shrink-0 transition-all shadow-xs flex items-center gap-1.5"
+              >
+                <span>Daftar Warga</span>
+                <ArrowRight size={12} />
+              </a>
             </div>
 
             <form onSubmit={handleSubmitRental} className="space-y-6">
