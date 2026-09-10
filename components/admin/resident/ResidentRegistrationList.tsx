@@ -671,8 +671,15 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          const greeting = encodeURIComponent(`Halo Bapak/Ibu ${reg.headOfFamily}, saya pengurus RT 002 Huntap Tondo 2 terkait permohonan pendaftaran warga baru Anda di Kavling Blok ${reg.block}-${reg.number}...`);
-                          window.open(`https://wa.me/${reg.phone.replace(/^0/, '62')}?text=${greeting}`, '_blank');
+                          const cleanName = (reg.headOfFamily || '').trim();
+                          const cleanPhone = (reg.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
+                          const greeting = encodeURIComponent(
+                            `Halo Bapak/Ibu *${cleanName}*,\n\n` +
+                            `Salam hormat dari Pengurus RT 002 Huntap Tondo 2.\n` +
+                            `Terkait permohonan pendaftaran warga baru Anda di Kavling *Blok ${reg.block}-${reg.number}*, kami dari pengurus RT ingin mengonfirmasi dan memverifikasi kelengkapan berkas pendaftaran Anda.\n\n` +
+                            `Apakah ada waktu untuk kami konfirmasi singkat? Terima kasih atas kerja samanya. 🙏`
+                          );
+                          window.open(`https://wa.me/${cleanPhone}?text=${greeting}`, '_blank');
                         }}
                         className="p-2 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-emerald-600 rounded-xl transition-all active:scale-95 shadow-2xs"
                         title="Hubungi via WhatsApp"
@@ -1149,8 +1156,10 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                       <span>Minta foto asli fisik KTP langsung ke pemohon:</span>
                                       <button
                                         onClick={() => {
-                                          const msg = encodeURIComponent(`Halo Bpk/Ibu ${reg.headOfFamily}, mohon kirimkan foto asli fisik KTP Anda melalui WhatsApp ini untuk verifikasi pendaftaran warga di RT 002 Huntap Tondo 2. Terima kasih!`);
-                                          window.open(`https://wa.me/${reg.phone.replace(/^0/, '62')}?text=${msg}`, '_blank');
+                                          const cleanName = (reg.headOfFamily || '').trim();
+                                          const cleanPhone = (reg.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
+                                          const msg = encodeURIComponent(`Halo Bapak/Ibu *${cleanName}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nMohon kirimkan foto asli fisik KTP Anda melalui chat WhatsApp ini untuk keperluan verifikasi pendaftaran warga di Blok *${reg.block}-${reg.number}*.\n\nTerima kasih atas kerja samanya! 🙏`);
+                                          window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
                                         }}
                                         className="text-[10px] font-black text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 transition-all flex items-center gap-1"
                                       >
@@ -1238,8 +1247,10 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                       <span>Minta foto asli fisik KK langsung ke pemohon:</span>
                                       <button
                                         onClick={() => {
-                                          const msg = encodeURIComponent(`Halo Bpk/Ibu ${reg.headOfFamily}, mohon kirimkan foto asli fisik Kartu Keluarga (KK) Anda melalui WhatsApp ini untuk verifikasi pendaftaran warga di RT 002 Huntap Tondo 2. Terima kasih!`);
-                                          window.open(`https://wa.me/${reg.phone.replace(/^0/, '62')}?text=${msg}`, '_blank');
+                                          const cleanName = (reg.headOfFamily || '').trim();
+                                          const cleanPhone = (reg.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
+                                          const msg = encodeURIComponent(`Halo Bapak/Ibu *${cleanName}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nMohon kirimkan foto asli fisik Kartu Keluarga (KK) Anda melalui chat WhatsApp ini untuk keperluan verifikasi pendaftaran warga di Blok *${reg.block}-${reg.number}*.\n\nTerima kasih atas kerja samanya! 🙏`);
+                                          window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
                                         }}
                                         className="text-[10px] font-black text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 transition-all flex items-center gap-1"
                                       >
@@ -1270,8 +1281,15 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const greeting = encodeURIComponent(`Halo Bapak/Ibu ${reg.headOfFamily}, kami dari Pengurus RT 002 ingin mengonfirmasi pendaftaran warga baru Anda di Blok ${reg.block}-${reg.number}...`);
-                                  window.open(`https://wa.me/${reg.phone.replace(/^0/, '62')}?text=${greeting}`, '_blank');
+                                  const cleanName = (reg.headOfFamily || '').trim();
+                                  const cleanPhone = (reg.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
+                                  const greeting = encodeURIComponent(
+                                    `Halo Bapak/Ibu *${cleanName}*,\n\n` +
+                                    `Salam hormat dari Pengurus RT 002 Huntap Tondo 2.\n` +
+                                    `Sehubungan dengan permohonan pendaftaran warga baru Anda di Kavling *Blok ${reg.block}-${reg.number}*, kami ingin mengonfirmasi kelengkapan data kependudukan sebelum berkas disetujui dan diterbitkan secara resmi ke database RT.\n\n` +
+                                    `Mohon konfirmasinya ya Bapak/Ibu. Terima kasih atas kerja samanya! 🙏`
+                                  );
+                                  window.open(`https://wa.me/${cleanPhone}?text=${greeting}`, '_blank');
                                 }}
                                 className="px-4 py-2.5 border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                               >
