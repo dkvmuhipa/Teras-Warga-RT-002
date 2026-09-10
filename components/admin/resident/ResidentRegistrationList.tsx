@@ -362,10 +362,10 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      window.open(
-                        `https://wa.me/${lightboxImage.phone?.replace(/^0/, '62')}?text=${encodeURIComponent(`Halo Bapak/Ibu ${lightboxImage.applicantName || ''}, terkait pendaftaran warga di Teras Warga RT 002, foto KTP/KK Anda belum terunggah dengan jelas di sistem. Mohon kirimkan foto asli fisik KTP & KK via chat WhatsApp ini untuk verifikasi. Terima kasih!`)}`,
-                        '_blank'
-                      );
+                      const cleanApplicant = (lightboxImage.applicantName || '').trim();
+                      const cleanPhone = (lightboxImage.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
+                      const text = encodeURIComponent(`Halo Bapak/Ibu *${cleanApplicant}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nTerkait pendaftaran warga baru Anda di sistem Teras Warga RT 002, foto berkas identitas (KTP/KK) Anda belum terunggah dengan jelas di sistem.\n\nMohon bantuannya untuk mengirimkan foto asli fisik KTP & KK via chat WhatsApp ini untuk keperluan validasi kependudukan. Terima kasih atas kerja samanya! 🙏`);
+                      window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
                     }}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition-all active:scale-95"
                   >
