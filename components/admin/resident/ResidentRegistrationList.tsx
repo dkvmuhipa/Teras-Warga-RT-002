@@ -4,7 +4,7 @@ import {
   GraduationCap, Briefcase, Calendar, ShieldCheck, MapPin, FileText, 
   Info, CheckCircle, Search, Baby, Smile, Accessibility, ExternalLink,
   ClipboardList, AlertTriangle, Building, LayoutGrid, Download, Printer,
-  Copy, Clock, Sparkles, CheckCheck, UserCheck, XCircle, Shield, Car,
+  Copy, Clock, Sparkles, CheckCheck, UserCheck, XCircle, Shield, Car, Bike,
   AlertCircle, MessageSquare, ArrowUpRight, HelpCircle, FileCheck, Hash
 } from 'lucide-react';
 import { ResidentRegistration, PaymentStatus, House } from '../../../types';
@@ -20,6 +20,7 @@ interface ResidentRegistrationListProps {
   updateResidentRegistrationInDb: (id: string, data: Partial<ResidentRegistration>) => Promise<void>;
   addHouse: (house: any) => Promise<void>;
   addPopulationLogToDb?: (log: any) => Promise<void>;
+  houses?: House[];
 }
 
 export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> = ({
@@ -28,6 +29,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
   updateResidentRegistrationInDb,
   addHouse,
   addPopulationLogToDb,
+  houses = [],
 }) => {
   const confirm = useConfirm();
   const [localSearch, setLocalSearch] = useState('');
@@ -137,12 +139,23 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
     try {
       // 1. Add to houses database
       const houseId = formatHouseId(`${reg.block}-${reg.number}`);
+      const existingHouse = houses?.find(h => 
+        (h.block || '').trim().toUpperCase() === (reg.block || '').trim().toUpperCase() &&
+        ((h.number || '').trim().padStart(2, '0') === (reg.number || '').trim().padStart(2, '0') ||
+         (h.number || '').trim() === (reg.number || '').trim() ||
+         parseInt(h.number || '0', 10) === parseInt(reg.number || '0', 10))
+      );
+      const hasExplicitOwner = !!(reg.ownerName && reg.ownerName.trim() !== '' && reg.ownerName.trim() !== '-' && reg.ownerName !== reg.headOfFamily);
+      const houseDbOwner = existingHouse?.ownerName && existingHouse.ownerName.trim() !== '' && existingHouse.ownerName.trim() !== '-' ? existingHouse.ownerName : null;
+      const resolvedOwner = hasExplicitOwner ? reg.ownerName : (houseDbOwner || (reg.residenceType === 'Tetap' ? reg.headOfFamily : ''));
+
       await addHouse({
         id: houseId,
         headOfFamily: reg.headOfFamily,
         gender: reg.gender,
         birthDate: reg.birthDate,
-        ownerName: reg.ownerName || (reg.residenceType === 'Tetap' ? reg.headOfFamily : ''),
+        ownerName: resolvedOwner || (reg.residenceType === 'Tetap' ? reg.headOfFamily : (existingHouse?.ownerName || '')),
+        ownerPhone: existingHouse?.ownerPhone || reg.phone,
         block: reg.block,
         number: reg.number,
         phone: reg.phone,
@@ -151,7 +164,9 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
         occupants: reg.occupants || 1,
         education: reg.education || '',
         jobCategory: reg.jobCategory || '',
-        vehicleCount: reg.vehicleCount || 0,
+        vehicleCount: (reg.twoWheelCount || 0) + (reg.fourWheelCount || 0) > 0
+          ? (reg.twoWheelCount || 0) + (reg.fourWheelCount || 0)
+          : (reg.vehicleCount || 0),
         twoWheelCount: reg.twoWheelCount || 0,
         fourWheelCount: reg.fourWheelCount || 0,
         pregnantCount: reg.pregnantCount || 0,
@@ -186,7 +201,10 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
       } as any);
       
       // 2. Update registration status to approved
-      await updateResidentRegistrationInDb(reg.id, { approvalStatus: 'Approved' });
+      await updateResidentRegistrationInDb(reg.id, { 
+        approvalStatus: 'Approved',
+        ownerName: resolvedOwner || reg.ownerName
+      });
 
       // 2b. Auto-sync to rentalContracts if residenceType is 'Sewa' or 'Rumah Keluarga'
       if (reg.residenceType === 'Sewa' || reg.residenceType === 'Rumah Keluarga') {
@@ -198,8 +216,8 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
           houseId: houseId,
           block: reg.block,
           number: reg.number,
-          ownerName: reg.ownerName || (isRumahKeluarga ? 'Keluarga / Kerabat' : 'Perlu Konfirmasi Pemilik'),
-          ownerPhone: reg.phone,
+          ownerName: resolvedOwner || (isRumahKeluarga ? 'Keluarga / Kerabat' : 'Perlu Konfirmasi Pemilik'),
+          ownerPhone: existingHouse?.ownerPhone || reg.phone,
           ownerAddress: `Blok ${reg.block} No. ${reg.number}`,
           tenantName: reg.headOfFamily,
           tenantPhone: reg.phone,
@@ -239,6 +257,9 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
             familyCount: reg.occupants || 1,
             familyMembers: reg.familyMembers || [],
             residenceType: reg.residenceType || 'Tetap',
+            ownerName: resolvedOwner || '-',
+            twoWheelCount: reg.twoWheelCount || 0,
+            fourWheelCount: reg.fourWheelCount || 0,
             religion: reg.religion || '-',
             kkNumber: reg.kkNumber || '-',
             jobCategory: reg.jobCategory || '-',
@@ -615,6 +636,28 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             </span>
                           </>
                         )}
+                        {((reg.twoWheelCount || 0) + (reg.fourWheelCount || 0) > 0 || (reg.vehicleCount && reg.vehicleCount > 0)) && (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <span className="inline-flex items-center gap-1.5 text-slate-600 font-bold text-[11px]">
+                              {(reg.twoWheelCount && reg.twoWheelCount > 0) && (
+                                <span className="inline-flex items-center gap-1 text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
+                                  <Bike size={11} className="text-amber-600" /> {reg.twoWheelCount} Motor
+                                </span>
+                              )}
+                              {(reg.fourWheelCount && reg.fourWheelCount > 0) && (
+                                <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 text-[10px]">
+                                  <Car size={11} className="text-blue-600" /> {reg.fourWheelCount} Mobil
+                                </span>
+                              )}
+                              {!reg.twoWheelCount && !reg.fourWheelCount && reg.vehicleCount && (
+                                <span className="inline-flex items-center gap-1 text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-[10px]">
+                                  <Car size={11} className="text-slate-500" /> {reg.vehicleCount} Kendaraan
+                                </span>
+                              )}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -804,30 +847,69 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">
                                 {reg.residenceType === 'Sewa' ? 'Pemilik Asli (Induk Semang)' : reg.residenceType === 'Rumah Keluarga' ? 'Pemilik (Keluarga)' : 'Pemilik Rumah'}
                               </span>
-                              {reg.residenceType === 'Sewa' ? (
-                                reg.ownerName && reg.ownerName !== reg.headOfFamily ? (
-                                  <span className="block text-xs font-bold text-slate-900 mt-0.5">{reg.ownerName}</span>
-                                ) : (
-                                  <span className="block text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 mt-1">
-                                    Belum Diisi (Perlu Konfirmasi)
-                                  </span>
-                                )
-                              ) : (
-                                <span className="block text-xs font-bold text-slate-900 mt-0.5">
-                                  {reg.ownerName || reg.headOfFamily}
-                                </span>
-                              )}
+                              {(() => {
+                                const existingHouse = houses?.find(h => 
+                                  (h.block || '').trim().toUpperCase() === (reg.block || '').trim().toUpperCase() &&
+                                  ((h.number || '').trim().padStart(2, '0') === (reg.number || '').trim().padStart(2, '0') ||
+                                   (h.number || '').trim() === (reg.number || '').trim() ||
+                                   parseInt(h.number || '0', 10) === parseInt(reg.number || '0', 10))
+                                );
+                                const hasExplicitOwner = !!(reg.ownerName && reg.ownerName.trim() !== '' && reg.ownerName.trim() !== '-' && reg.ownerName !== reg.headOfFamily);
+                                const houseDbOwner = existingHouse?.ownerName && existingHouse.ownerName.trim() !== '' && existingHouse.ownerName.trim() !== '-' ? existingHouse.ownerName : null;
+                                const resolvedOwner = hasExplicitOwner ? reg.ownerName : (houseDbOwner || (reg.residenceType === 'Tetap' ? reg.headOfFamily : ''));
+
+                                if (reg.residenceType === 'Sewa' || reg.residenceType === 'Rumah Keluarga') {
+                                  if (resolvedOwner) {
+                                    return (
+                                      <div className="mt-0.5 space-y-1">
+                                        <span className="block text-xs font-black text-slate-900">{resolvedOwner}</span>
+                                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                                          hasExplicitOwner 
+                                            ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                                            : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        }`}>
+                                          <CheckCheck size={11} />
+                                          {hasExplicitOwner ? 'Input Formulir' : 'Data Database RT'}
+                                        </span>
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <span className="inline-block text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 mt-1">
+                                      Belum Terdata (Perlu Konfirmasi)
+                                    </span>
+                                  );
+                                }
+                                return (
+                                  <div className="mt-0.5">
+                                    <span className="block text-xs font-black text-slate-900">
+                                      {reg.headOfFamily}
+                                    </span>
+                                    <span className="text-[9px] text-teal-700 font-bold block mt-0.5">Hak Milik Pribadi</span>
+                                  </div>
+                                );
+                              })()}
                             </div>
 
                             {/* Kepemilikan Kendaraan */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Kendaraan Terparkir</span>
-                              <span className="block text-xs font-bold text-slate-900 mt-0.5 flex items-center gap-1.5">
-                                <Car size={13} className="text-slate-500" />
-                                {reg.vehicleCount || (Number(reg.twoWheelCount || 0) + Number(reg.fourWheelCount || 0))} Unit Total
+                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                                Kendaraan Terparkir
                               </span>
-                              <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
-                                Motor: {reg.twoWheelCount || 0} • Mobil: {reg.fourWheelCount || 0}
+                              <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold">
+                                  <Bike size={13} className="text-amber-600" />
+                                  {reg.twoWheelCount || 0} Motor
+                                </span>
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold">
+                                  <Car size={13} className="text-blue-600" />
+                                  {reg.fourWheelCount || 0} Mobil
+                                </span>
+                              </div>
+                              <span className="text-[9px] text-slate-400 font-semibold block mt-1">
+                                {(reg.twoWheelCount || 0) + (reg.fourWheelCount || 0) > 0 
+                                  ? `Total: ${(reg.twoWheelCount || 0) + (reg.fourWheelCount || 0)} Unit Kendaraan` 
+                                  : (reg.vehicleCount ? `${reg.vehicleCount} Unit Kendaraan` : 'Tidak Ada Kendaraan')}
                               </span>
                             </div>
                           </div>

@@ -95,6 +95,8 @@ export interface House {
   job?: string; // NEW: Pekerjaan Spesifik
   religion?: string;
   vehicleCount?: number;
+  twoWheelCount?: number; // Jumlah Sepeda Motor (Roda 2)
+  fourWheelCount?: number; // Jumlah Mobil (Roda 4)
   
   // New Identity Fields
   nik?: string; // NEW: NIK Kepala Keluarga
@@ -184,8 +186,9 @@ export interface ResidentRegistration {
   kkNumber?: string;
   education?: string;
   jobCategory?: string;
-  religion?: string;
   vehicleCount?: number;
+  twoWheelCount?: number;
+  fourWheelCount?: number;
   pregnantCount?: number;
   babyCount?: number;
   toddlerCount?: number;

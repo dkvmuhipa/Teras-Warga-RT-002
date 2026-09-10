@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, Home, Phone, Users, Send, CheckCircle, ArrowLeft, Plus, Trash2, 
-  GraduationCap, Briefcase, Car, Baby, Heart, Accessibility, Smile, 
+  GraduationCap, Briefcase, Car, Bike, Baby, Heart, Accessibility, Smile, 
   FileText, Camera, ShieldCheck, MapPin, Calendar, Check, AlertCircle, Info,
   ShieldAlert, Search, Sparkles, Building, Lock, CheckSquare, Eye, ExternalLink,
   Shield, CheckCheck, HelpCircle, X, Clock
@@ -256,10 +256,20 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
       return;
     }
 
+    const matched = loadedHouses.find(h => 
+      (h.block || '').trim().toUpperCase() === selectedBlock.toUpperCase() &&
+      ((h.number || '').trim().padStart(2, '0') === unitNumber.padStart(2, '0') ||
+       (h.number || '').trim() === unitNumber ||
+       parseInt(h.number || '0', 10) === parseInt(unitNumber, 10))
+    );
+
+    const detectedOwner = (matched?.ownerName && matched.ownerName !== '-') ? matched.ownerName : '';
+
     setFormData(prev => ({
       ...prev,
       block: selectedBlock,
-      number: unitNumber
+      number: unitNumber,
+      ownerName: (prev.residenceType !== 'Tetap' && detectedOwner) ? detectedOwner : prev.ownerName
     }));
 
     if (validationErrors.block || validationErrors.number) {
@@ -267,9 +277,32 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     }
 
     toast.success(`Unit Dipilih: Blok ${selectedBlock} No. ${unitNumber}`, {
-      description: 'Unit tersedia dan siap didaftarkan sebagai hunian baru.'
+      description: detectedOwner 
+        ? `Unit tersedia. Terdata pemilik asli: Bpk/Ibu ${detectedOwner}.`
+        : 'Unit tersedia dan siap didaftarkan sebagai hunian baru.'
     });
   };
+
+  // Auto-detect existing house in database RT 002 for current block and unit
+  const matchedHouse = useMemo(() => {
+    if (!formData.block || !formData.number) return null;
+    const numClean = formData.number.trim().padStart(2, '0');
+    return loadedHouses.find(h => 
+      (h.block || '').trim().toUpperCase() === formData.block.trim().toUpperCase() &&
+      ((h.number || '').trim().padStart(2, '0') === numClean ||
+       (h.number || '').trim() === formData.number.trim() ||
+       parseInt(h.number || '0', 10) === parseInt(formData.number.trim(), 10))
+    );
+  }, [formData.block, formData.number, loadedHouses]);
+
+  // Pre-fill ownerName when residenceType is Sewa or Rumah Keluarga if existing owner is detected
+  useEffect(() => {
+    if (matchedHouse?.ownerName && matchedHouse.ownerName !== '-' && (formData.residenceType === 'Sewa' || formData.residenceType === 'Rumah Keluarga')) {
+      if (!formData.ownerName) {
+        setFormData(prev => ({ ...prev, ownerName: matchedHouse.ownerName || '' }));
+      }
+    }
+  }, [matchedHouse, formData.residenceType]);
 
   const addFamilyMember = () => {
     setFormData(prev => {
@@ -488,6 +521,22 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     setFormData({ ...formData, [field]: Math.max(min, val - 1) });
   };
 
+  const updateVehicleCount = (type: 'twoWheel' | 'fourWheel', delta: number) => {
+    setFormData(prev => {
+      const current2W = prev.twoWheelCount || 0;
+      const current4W = prev.fourWheelCount || 0;
+      const new2W = type === 'twoWheel' ? Math.max(0, current2W + delta) : current2W;
+      const new4W = type === 'fourWheel' ? Math.max(0, current4W + delta) : current4W;
+
+      return {
+        ...prev,
+        twoWheelCount: new2W,
+        fourWheelCount: new4W,
+        vehicleCount: new2W + new4W
+      };
+    });
+  };
+
   const isLastStep = currentStep === STEPS.length - 1;
 
   if (isSubmitted) {
@@ -503,7 +552,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         <p className="text-slate-500 text-xs md:text-sm leading-relaxed mt-3 mb-6">
           Terima kasih. Berkas pendaftaran warga baru untuk <strong>Blok {formData.block} No. {formData.number}</strong> telah sukses tersimpan di sistem pengurus <strong>RT 002 / RW 020 Kelurahan Tondo</strong>. Pengurus RT akan memverifikasi berkas dan menghubungi nomor WhatsApp Anda (<strong>{formData.phone}</strong>).
         </p>
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 mb-8 text-left text-xs space-y-1.5">
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 mb-8 text-left text-xs space-y-2">
           <div className="flex justify-between">
             <span className="text-slate-400 font-bold">Kepala Keluarga:</span>
             <span className="font-black text-slate-800">{formData.headOfFamily}</span>
@@ -513,8 +562,26 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             <span className="font-black text-emerald-700">Blok {formData.block} No. {formData.number}</span>
           </div>
           <div className="flex justify-between">
+            <span className="text-slate-400 font-bold">Status Hunian:</span>
+            <span className="font-black text-slate-800">
+              {formData.residenceType === 'Sewa' 
+                ? `Sewa / Kontrak (Pemilik: ${formData.ownerName || 'Tercatat di RT'})` 
+                : formData.residenceType === 'Rumah Keluarga' 
+                  ? `Rumah Kerabat (Pemilik: ${formData.ownerName || 'Keluarga'})` 
+                  : 'Milik Sendiri'}
+            </span>
+          </div>
+          <div className="flex justify-between">
             <span className="text-slate-400 font-bold">Total Penghuni:</span>
-            <span className="font-black text-slate-800">{formData.occupants} Orang</span>
+            <span className="font-black text-slate-800">{formData.occupants} Jiwa</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400 font-bold">Inventaris Kendaraan:</span>
+            <span className="font-black text-indigo-700">
+              {(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) > 0 
+                ? `${formData.twoWheelCount || 0} Motor • ${formData.fourWheelCount || 0} Mobil` 
+                : 'Tidak Ada Kendaraan'}
+            </span>
           </div>
         </div>
         <Button onClick={onClose} variant="primary" className="w-full py-4 text-xs font-black tracking-widest uppercase shadow-md">
@@ -1001,62 +1068,175 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 pt-1 border-t border-indigo-100">
-                      <label className="text-[10px] font-black text-indigo-950 uppercase tracking-widest block ml-1">
-                        Nama Pemilik Rumah Asli {formData.residenceType === 'Sewa' ? '(Induk Semang)' : '(Kerabat)'}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: Bapak Irfan / Ibu Hj. Aminah (Opsional)"
-                        value={formData.ownerName || ''}
-                        onChange={e => setFormData({ ...formData, ownerName: e.target.value })}
-                        className="w-full px-4 py-3 bg-white border border-indigo-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-2xs"
-                      />
+                    <div className="space-y-2 pt-2 border-t border-indigo-100">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-black text-indigo-950 uppercase tracking-widest block ml-1">
+                          Nama Pemilik Rumah Asli {formData.residenceType === 'Sewa' ? '(Induk Semang)' : '(Kerabat)'}
+                        </label>
+                        {matchedHouse?.ownerName && matchedHouse.ownerName !== '-' && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-200">
+                            <CheckCheck size={12} /> Terdata di RT: {matchedHouse.ownerName}
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder={matchedHouse?.ownerName && matchedHouse.ownerName !== '-' ? `Pemilik: ${matchedHouse.ownerName}` : "Contoh: Bapak Irfan / Ibu Hj. Aminah (Opsional)"}
+                          value={formData.ownerName || ''}
+                          onChange={e => setFormData({ ...formData, ownerName: e.target.value })}
+                          className="w-full px-4 py-3 bg-white border border-indigo-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-2xs"
+                        />
+                        {matchedHouse?.ownerName && matchedHouse.ownerName !== '-' && formData.ownerName !== matchedHouse.ownerName && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, ownerName: matchedHouse.ownerName || '' })}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-[10px] font-black text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors cursor-pointer"
+                          >
+                            Gunakan Data RT
+                          </button>
+                        )}
+                      </div>
+                      {matchedHouse?.ownerName && matchedHouse.ownerName !== '-' ? (
+                        <p className="text-[10px] text-emerald-700 font-medium ml-1">
+                          ✓ Nama pemilik asli terdeteksi otomatis dari database kavling RT 002. Anda dapat mengubahnya jika rumah sudah berpindah kepemilikan.
+                        </p>
+                      ) : (
+                        <p className="text-[10px] text-slate-500 font-medium ml-1">
+                          Mohon cantumkan nama pemilik asli rumah hunian ini untuk validasi dan kelengkapan administrasi RT.
+                        </p>
+                      )}
                     </div>
                   </motion.div>
                 )}
 
-                {/* Jumlah Anggota & Kendaraan */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jumlah Anggota Keluarga <span className="text-rose-500">*</span></label>
-                    <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-2xl">
-                      <button
-                        type="button"
-                        onClick={() => decrementValue('occupants', 1)}
-                        className="w-10 h-10 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center font-bold text-lg cursor-pointer active:scale-95"
-                      >
-                        -
-                      </button>
-                      <span className="font-black text-slate-900 text-sm">{formData.occupants} Orang</span>
-                      <button
-                        type="button"
-                        onClick={() => incrementValue('occupants')}
-                        className="w-10 h-10 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center font-bold text-lg cursor-pointer active:scale-95"
-                      >
-                        +
-                      </button>
+                {/* Jumlah Anggota Keluarga */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Jumlah Anggota Keluarga yang Tinggal <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                    <button
+                      type="button"
+                      onClick={() => decrementValue('occupants', 1)}
+                      className="w-10 h-10 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center font-bold text-lg cursor-pointer active:scale-95"
+                    >
+                      -
+                    </button>
+                    <div className="text-center">
+                      <span className="font-black text-slate-900 text-sm block">{formData.occupants} Jiwa</span>
+                      <span className="text-[10px] text-slate-400 font-medium">Termasuk Kepala Keluarga</span>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => incrementValue('occupants')}
+                      className="w-10 h-10 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center font-bold text-lg cursor-pointer active:scale-95"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Klasifikasi Kendaraan Warga (Motor & Mobil) */}
+                <div className="space-y-2.5 p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-indigo-100 text-indigo-700 rounded-lg">
+                        <Car size={15} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                          Inventaris Kendaraan Penghuni
+                        </h4>
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          Klasifikasi jenis kendaraan untuk ketertiban lahan parkir RT 002
+                        </p>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                      Total: {(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0)} Unit
+                    </span>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jumlah Kendaraan (Motor/Mobil)</label>
-                    <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-2xl">
-                      <button
-                        type="button"
-                        onClick={() => decrementValue('vehicleCount')}
-                        className="w-10 h-10 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center font-bold text-lg cursor-pointer active:scale-95"
-                      >
-                        -
-                      </button>
-                      <span className="font-black text-slate-900 text-sm">{formData.vehicleCount} Unit</span>
-                      <button
-                        type="button"
-                        onClick={() => incrementValue('vehicleCount')}
-                        className="w-10 h-10 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center font-bold text-lg cursor-pointer active:scale-95"
-                      >
-                        +
-                      </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {/* Sepeda Motor (Roda 2) */}
+                    <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2.5 shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center">
+                            <Bike size={16} />
+                          </div>
+                          <div>
+                            <span className="text-xs font-black text-slate-900 block">Sepeda Motor</span>
+                            <span className="text-[9px] text-slate-400 font-medium">Roda 2 (Matic/Sport/Listrik)</span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                          {formData.twoWheelCount || 0} Unit
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => updateVehicleCount('twoWheel', -1)}
+                          className="flex-1 h-9 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center justify-center font-black text-sm transition-all cursor-pointer active:scale-95"
+                          title="Kurangi motor"
+                        >
+                          -
+                        </button>
+                        <span className="w-12 text-center font-black text-slate-800 text-sm">
+                          {formData.twoWheelCount || 0}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateVehicleCount('twoWheel', 1)}
+                          className="flex-1 h-9 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 border border-amber-200 text-amber-800 rounded-lg flex items-center justify-center font-black text-sm transition-all cursor-pointer active:scale-95"
+                          title="Tambah motor"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Mobil (Roda 4) */}
+                    <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2.5 shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center">
+                            <Car size={16} />
+                          </div>
+                          <div>
+                            <span className="text-xs font-black text-slate-900 block">Mobil Pribadi</span>
+                            <span className="text-[9px] text-slate-400 font-medium">Roda 4 (Sedan/SUV/Pickup)</span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                          {formData.fourWheelCount || 0} Unit
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => updateVehicleCount('fourWheel', -1)}
+                          className="flex-1 h-9 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center justify-center font-black text-sm transition-all cursor-pointer active:scale-95"
+                          title="Kurangi mobil"
+                        >
+                          -
+                        </button>
+                        <span className="w-12 text-center font-black text-slate-800 text-sm">
+                          {formData.fourWheelCount || 0}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateVehicleCount('fourWheel', 1)}
+                          className="flex-1 h-9 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border border-blue-200 text-blue-800 rounded-lg flex items-center justify-center font-black text-sm transition-all cursor-pointer active:scale-95"
+                          title="Tambah mobil"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1773,7 +1953,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     <span className="text-[9px] font-bold text-slate-400">Pastikan Data Sudah Benar</span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                     <div className="p-3 bg-white rounded-xl border border-slate-200/60">
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Alamat Hunian</span>
                       <span className="font-black text-slate-900 text-sm">Blok {formData.block} No. {formData.number}</span>
@@ -1790,8 +1970,28 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     </div>
 
                     <div className="p-3 bg-white rounded-xl border border-slate-200/60">
+                      <span className="text-[9px] font-bold text-slate-400 block uppercase">Hak &amp; Pemilik Hunian</span>
+                      <span className="font-black text-slate-900 truncate block">
+                        {formData.residenceType === 'Sewa' 
+                          ? `Sewa (${formData.ownerName || 'Pemilik RT'})` 
+                          : formData.residenceType === 'Rumah Keluarga' 
+                            ? `Keluarga (${formData.ownerName || 'Kerabat'})` 
+                            : 'Milik Pribadi'}
+                      </span>
+                    </div>
+
+                    <div className="p-3 bg-white rounded-xl border border-slate-200/60">
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Total Anggota</span>
                       <span className="font-black text-slate-900">{formData.occupants} Jiwa</span>
+                    </div>
+
+                    <div className="p-3 bg-white rounded-xl border border-slate-200/60">
+                      <span className="text-[9px] font-bold text-slate-400 block uppercase">Kendaraan Terparkir</span>
+                      <span className="font-black text-indigo-700">
+                        {(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) > 0
+                          ? `${formData.twoWheelCount || 0} Motor • ${formData.fourWheelCount || 0} Mobil`
+                          : 'Tidak Ada'}
+                      </span>
                     </div>
                   </div>
                 </div>

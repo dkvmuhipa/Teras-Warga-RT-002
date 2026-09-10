@@ -1866,6 +1866,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             updateResidentRegistrationInDb={updateResidentRegistrationInDb}
             addHouse={addHouse}
             addPopulationLogToDb={addPopulationLogToDb}
+            houses={houses}
           />
         ) : viewMode === 'mutations' ? (
            <PopulationReportManager 
