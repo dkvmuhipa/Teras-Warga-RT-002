@@ -163,7 +163,10 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
             {/* Quick Actions Tray */}
             <div className="grid grid-cols-2 gap-3">
               <button 
-                onClick={() => openPayModal(selectedResident)}
+                onClick={() => {
+                  onClose();
+                  openPayModal(selectedResident);
+                }}
                 className="p-4 bg-white border border-slate-200 hover:border-indigo-300 rounded-xl shadow-xs transition-all text-center group"
               >
                 <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-xs">

@@ -1009,6 +1009,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   };
 
   const openPayModal = (house: House) => {
+    setIsDrawerOpen(false);
     setPayHouse(house);
     setPayerName(house.headOfFamily || '');
     const arrears = getArrearsForHouse(house);

@@ -9,9 +9,18 @@ interface ModalProps {
   children: React.ReactNode;
   maxWidth?: string;
   stickyHeader?: React.ReactNode;
+  zIndex?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md', stickyHeader }) => {
+export const Modal: React.FC<ModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  title, 
+  children, 
+  maxWidth = 'max-w-md', 
+  stickyHeader,
+  zIndex = 'z-[200]'
+}) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -20,10 +29,10 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${zIndex}`}
             onClick={onClose}
           />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div className={`fixed inset-0 ${zIndex} flex items-center justify-center p-4 pointer-events-none`}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
