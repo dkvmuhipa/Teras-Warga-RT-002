@@ -19,133 +19,7 @@ import {
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 
-export const INITIAL_MEETING_MINUTES: MeetingMinute[] = [
-  {
-    id: 'notula-2026-01',
-    title: 'Musyawarah Warga Awal Tahun 2026: Evaluasi Siskamling, Iuran, & Ketertiban Lingkungan',
-    meetingType: 'Musyawarah Warga',
-    date: '2026-01-18',
-    time: '20:00 - 22:30 WITA',
-    location: 'Pos Serbaguna RT 002 / RW 020 Huntap Tondo 2',
-    leader: 'Irfan (Ketua RT 002)',
-    notetaker: 'Sekretaris RT 002',
-    attendeesCount: 54,
-    agenda: [
-      'Evaluasi pos siskamling malam & kehadiran jadwal ronda',
-      'Penyesuaian waktu gembok portal malam jalur utama Huntap',
-      'Laporan realisasi kas RT tahun 2025 dan penetapan iuran 2026',
-      'Penertiban parkir kendaraan bermotor di badan jalan lorong'
-    ],
-    summary: 'Rapat dihadiri oleh 54 Kepala Keluarga dari total 120 unit hunian aktif. Ketua RT memaparkan laporan evaluasi keamanan bahwa selama triwulan akhir 2025 kondisi lingkungan kondusif berkat patroli rutin. Musyawarah berlangsung musyawarah mufakat mengenai pengetatan portal malam demi kenyamanan istirahat warga.',
-    decisions: [
-      {
-        id: 'dec-1',
-        title: 'Penetapan Jam Gembok Portal Malam',
-        description: 'Portal jalan utama lingkungan RT 002 resmi digembok mulai pukul 23.00 WITA hingga 05.00 WITA. Warga atau tamu yang pulang di atas jam 23.00 wajib melapor melalui pos jaga satpam siskamling.',
-        category: 'Keamanan',
-        status: 'Aktif',
-        effectiveDate: '2026-02-01'
-      },
-      {
-        id: 'dec-2',
-        title: 'Ketertiban Parkir di Jalan Lorong',
-        description: 'Dilarang memarkir mobil secara menginap di badan jalan lorong yang memiliki lebar kurang dari 4 meter agar tidak menghalangi armada darurat (Ambulans & Damkar). Tamu menginap wajib parkir di kantong parkir lapangan fasum.',
-        category: 'Ketertiban & Sosial',
-        status: 'Aktif',
-        effectiveDate: '2026-02-01'
-      },
-      {
-        id: 'dec-3',
-        title: 'Iuran Sampah dan Keamanan Tetap Stabil',
-        description: 'Disepakati iuran kebersihan sampah tetap sebesar Rp 20.000/bulan dan iuran sosial/keamanan Rp 15.000/bulan, dibayarkan paling lambat tanggal 10 setiap bulannya melalui bendahara RT atau transfer QRIS.',
-        category: 'Keuangan & Iuran',
-        status: 'Aktif',
-        effectiveDate: '2026-02-01'
-      }
-    ],
-    status: 'Disahkan'
-  },
-  {
-    id: 'notula-2026-02',
-    title: 'Rapat Koordinasi Pengurus: Penataan Jalur Pipa Air PDAM & Kebersihan Drainase Huntap',
-    meetingType: 'Rapat Pengurus',
-    date: '2026-02-15',
-    time: '20:15 - 22:00 WITA',
-    location: 'Sekretariat RT 002 Huntap Tondo 2',
-    leader: 'Irfan (Ketua RT 002)',
-    notetaker: 'Seksi Pembangunan & Fasum',
-    attendeesCount: 12,
-    agenda: [
-      'Pembersihan endapan sedimen tandon air penampungan atas',
-      'Skema tarif air mandiri RT Rp 3.500/m³ untuk kelebihan kuota PDAM',
-      'Jadwal gotong royong massal pembersihan sedimen drainase perbukitan jelang musim hujan'
-    ],
-    summary: 'Rapat koordinasi bersama seluruh jajaran pengurus RT (Ketua, Sekretaris, Bendahara, Seksi Keamanan, dan Seksi Fasum). Ditemukan adanya kebocoran pipa sekunder di Blok C yang mengakibatkan tekanan air mengecil di blok ujung.',
-    decisions: [
-      {
-        id: 'dec-4',
-        title: 'Jadwal Pembersihan Berkala Tandon Fasum',
-        description: 'Pembersihan tandon booster air lingkungan dijadwalkan setiap hari Minggu pertama per 2 bulan. Pengurus akan mengumumkan di grup WhatsApp H-2 sebelum pengurasan agar warga menampung air terlebih dahulu.',
-        category: 'Fasum & Pembangunan',
-        status: 'Aktif',
-        effectiveDate: '2026-03-01'
-      },
-      {
-        id: 'dec-5',
-        title: 'Kewajiban Pengamanan Tutup Tandon Pribadi',
-        description: 'Seluruh warga wajib memastikan tutup tandon air di rumah masing-masing tertutup rapat dan diberi bubuk abate/dibersihkan guna mencegah jentik nyamuk demam berdarah di kawasan perbukitan.',
-        category: 'Kebersihan',
-        status: 'Aktif',
-        effectiveDate: '2026-03-01'
-      }
-    ],
-    status: 'Disahkan'
-  },
-  {
-    id: 'notula-2026-03',
-    title: 'Musyawarah Warga: Aturan Penyelenggaraan Hajatan Tenda & Etika Hewan Peliharaan',
-    meetingType: 'Musyawarah Warga',
-    date: '2026-03-08',
-    time: '19:45 - 22:15 WITA',
-    location: 'Pos Serbaguna RT 002 Huntap Tondo 2',
-    leader: 'Irfan (Ketua RT 002)',
-    notetaker: 'Sekretaris RT 002',
-    attendeesCount: 48,
-    agenda: [
-      'Prosedur izin mendirikan tenda hajatan di jalan umum',
-      'Batasan desibel dan jam operasional pengeras suara (sound system)',
-      'Penertiban hewan peliharaan (kucing/anjing) agar tidak mengotori teras tetangga'
-    ],
-    summary: 'Musyawarah diadakan menanggapi masukan warga terkait penutupan lorong saat acara keluarga. Diputuskan solusi jalan tengah yang tetap menghormati hajatan warga sekaligus menjaga hak akses pengguna jalan lain.',
-    decisions: [
-      {
-        id: 'dec-6',
-        title: 'Wajib Lapor H-7 Pemasangan Tenda Hajatan',
-        description: 'Warga yang akan menyelenggarakan pernikahan, aqiqah, atau tahlilan dengan tenda menutup separuh badan jalan wajib berkoordinasi ke RT minimal H-7 untuk penyiapan rambu pengalihan arus jalan lorong tetangga.',
-        category: 'Ketertiban & Sosial',
-        status: 'Aktif',
-        effectiveDate: '2026-03-15'
-      },
-      {
-        id: 'dec-7',
-        title: 'Batas Akhir Musik & Sound System Pukul 23.59 WITA',
-        description: 'Aktivitas pengeras suara musik hajatan maksimal diizinkan hingga pukul 23.59 WITA demi menghormati hak istirahat malam tetangga dan anak-anak sekolah.',
-        category: 'Ketertiban & Sosial',
-        status: 'Aktif',
-        effectiveDate: '2026-03-15'
-      },
-      {
-        id: 'dec-8',
-        title: 'Tanggung Jawab Pemilik Hewan Peliharaan',
-        description: 'Pemilik hewan peliharaan wajib menjaga kebersihan pekarangan, mengikat/mengandangkan hewan di luar rumah, serta bertanggung jawab penuh membersihkan kotoran jika berada di fasilitas umum lingkungan.',
-        category: 'Ketertiban & Sosial',
-        status: 'Aktif',
-        effectiveDate: '2026-03-15'
-      }
-    ],
-    status: 'Disahkan'
-  }
-];
+export const INITIAL_MEETING_MINUTES: MeetingMinute[] = [];
 
 export const MeetingMinutesManager: React.FC = () => {
   const confirm = useConfirm();
@@ -182,14 +56,18 @@ export const MeetingMinutesManager: React.FC = () => {
     status: 'Disahkan'
   });
 
-  // Subscribe to Firebase collection
+  // Subscribe to Firebase collection in real-time
   useEffect(() => {
     const unsub = subscribeToCollection('meetingMinutes', (data) => {
-      if (data && data.length > 0) {
-        setMinutes(data as MeetingMinute[]);
+      if (data && Array.isArray(data)) {
+        const sorted = [...(data as MeetingMinute[])].sort((a, b) => {
+          const dateA = new Date(a.date || 0).getTime();
+          const dateB = new Date(b.date || 0).getTime();
+          return dateB - dateA;
+        });
+        setMinutes(sorted);
       } else {
-        // Use initial preset minutes
-        setMinutes(INITIAL_MEETING_MINUTES);
+        setMinutes([]);
       }
       setLoading(false);
     });
@@ -601,6 +479,24 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
               </div>
             </div>
           ))
+        ) : minutes.length === 0 ? (
+          <div className="p-12 text-center bg-white rounded-3xl border border-dashed border-slate-200 shadow-2xs">
+            <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-amber-200/60 shadow-xs">
+              <BookOpen size={28} />
+            </div>
+            <h4 className="font-black text-slate-800 text-base font-serif">Belum Ada Notula Musyawarah Real-Time</h4>
+            <p className="text-xs text-slate-500 mt-1.5 max-w-md mx-auto leading-relaxed">
+              Basis data notula musyawarah saat ini masih kosong. Silakan catat hasil musyawarah atau rapat warga RT 02 untuk dipublikasikan langsung secara transparan kepada warga.
+            </p>
+            <button
+              type="button"
+              onClick={handleOpenAdd}
+              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-amber-600/20 active:scale-95 cursor-pointer"
+            >
+              <Plus size={15} />
+              <span>Buat Notula Musyawarah Pertama</span>
+            </button>
+          </div>
         ) : (
           <div className="p-12 text-center bg-white rounded-3xl border border-slate-200">
             <BookOpen size={40} className="text-slate-300 mx-auto mb-3" />

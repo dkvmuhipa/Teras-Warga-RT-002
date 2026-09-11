@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check, Printer, Download, BookOpen, Hammer, Zap, Clock, MapPin, CheckSquare, Bookmark, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -6,7 +6,6 @@ import { generateRulesPDF, generateAllRulesPDF } from '../../services/pdfService
 import { toast } from 'sonner';
 import { MeetingMinute } from '../../types';
 import { subscribeToCollection } from '../../services/databaseService';
-import { INITIAL_MEETING_MINUTES } from '../admin/MeetingMinutesManager';
 import { Modal } from '../ui/Modal';
 
 interface PublicRulesProps {
@@ -23,8 +22,9 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
   const [expandedRules, setExpandedRules] = useState<Record<string, boolean>>({});
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
   
-  // Meeting Minutes States
-  const [minutes, setMinutes] = useState<MeetingMinute[]>(INITIAL_MEETING_MINUTES);
+  // Meeting Minutes States (Real-Time from Firestore)
+  const [minutes, setMinutes] = useState<MeetingMinute[]>([]);
+  const [isMinutesLoading, setIsMinutesLoading] = useState<boolean>(true);
   const [minutesSearch, setMinutesSearch] = useState('');
   const [selectedMinuteForPrint, setSelectedMinuteForPrint] = useState<MeetingMinute | null>(null);
 
@@ -36,11 +36,18 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
 
   useEffect(() => {
     const unsub = subscribeToCollection('meetingMinutes', (data) => {
-      if (data && data.length > 0) {
-        setMinutes(data as MeetingMinute[]);
+      if (data && Array.isArray(data)) {
+        // Urutkan musyawarah dari tanggal terbaru ke terlama
+        const sorted = [...(data as MeetingMinute[])].sort((a, b) => {
+          const dateA = new Date(a.date || 0).getTime();
+          const dateB = new Date(b.date || 0).getTime();
+          return dateB - dateA;
+        });
+        setMinutes(sorted);
       } else {
-        setMinutes(INITIAL_MEETING_MINUTES);
+        setMinutes([]);
       }
+      setIsMinutesLoading(false);
     });
     return () => unsub();
   }, []);
@@ -609,17 +616,29 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
   };
 
-  const filteredMinutesForPublic = minutes.filter((m) => {
+  const totalDecisions = useMemo(() => {
+    return minutes.reduce((acc, m) => acc + (m.decisions?.length || 0), 0);
+  }, [minutes]);
+
+  const isAllApproved = useMemo(() => {
+    return minutes.length > 0 && minutes.every(m => m.status === 'Disahkan');
+  }, [minutes]);
+
+  const filteredMinutesForPublic = useMemo(() => {
     const q = minutesSearch.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      m.title.toLowerCase().includes(q) ||
-      m.meetingType.toLowerCase().includes(q) ||
-      m.summary.toLowerCase().includes(q) ||
-      m.agenda.some(a => a.toLowerCase().includes(q)) ||
-      m.decisions.some(d => d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q) || d.category.toLowerCase().includes(q))
-    );
-  });
+    if (!q) return minutes;
+    return minutes.filter((m) => {
+      return (
+        (m.title && m.title.toLowerCase().includes(q)) ||
+        (m.meetingType && m.meetingType.toLowerCase().includes(q)) ||
+        (m.summary && m.summary.toLowerCase().includes(q)) ||
+        (m.leader && m.leader.toLowerCase().includes(q)) ||
+        (m.location && m.location.toLowerCase().includes(q)) ||
+        (m.agenda && m.agenda.some(a => a.toLowerCase().includes(q))) ||
+        (m.decisions && m.decisions.some(d => (d.title && d.title.toLowerCase().includes(q)) || (d.description && d.description.toLowerCase().includes(q)) || (d.category && d.category.toLowerCase().includes(q))))
+      );
+    });
+  }, [minutes, minutesSearch]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -672,8 +691,14 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
           >
             <BookOpen size={16} className={mainTab === 'minutes' ? 'text-indigo-600' : ''} />
             <span>Buku Notula &amp; Kesepakatan</span>
-            <span className="px-2 py-0.5 bg-amber-100 text-amber-900 text-[10px] font-black rounded-lg">
-              {minutes.length} Sidang
+            <span className={`px-2 py-0.5 text-[10px] font-black rounded-lg transition-colors ${
+              isMinutesLoading 
+                ? 'bg-slate-100 text-slate-400 animate-pulse'
+                : minutes.length > 0 
+                  ? 'bg-amber-100 text-amber-900' 
+                  : 'bg-slate-100 text-slate-500'
+            }`}>
+              {isMinutesLoading ? '...' : `${minutes.length} Sidang`}
             </span>
           </button>
         </div>
@@ -1209,17 +1234,27 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mt-6">
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-center">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Musyawarah</span>
-                <span className="text-xl font-black text-slate-800 mt-0.5 block">{minutes.length} Sidang</span>
+                <span className="text-xl font-black text-slate-800 mt-0.5 block">
+                  {isMinutesLoading ? '...' : `${minutes.length} Sidang`}
+                </span>
               </div>
               <div className="p-3.5 bg-amber-50/50 rounded-2xl border border-amber-100 text-center">
                 <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Aturan Disepakati</span>
                 <span className="text-xl font-black text-amber-900 mt-0.5 block">
-                  {minutes.reduce((acc, m) => acc + (m.decisions?.length || 0), 0)} Kesepakatan
+                  {isMinutesLoading ? '...' : `${totalDecisions} Kesepakatan`}
                 </span>
               </div>
-              <div className="p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-center col-span-2 sm:col-span-1">
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Status Legitimasi</span>
-                <span className="text-xl font-black text-emerald-900 mt-0.5 block">Kuorum Sah</span>
+              <div className={`p-3.5 rounded-2xl border text-center col-span-2 sm:col-span-1 ${
+                minutes.length > 0
+                  ? 'bg-emerald-50/50 border-emerald-100 text-emerald-900'
+                  : 'bg-slate-50 border-slate-100 text-slate-600'
+              }`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider block ${
+                  minutes.length > 0 ? 'text-emerald-700' : 'text-slate-400'
+                }`}>Status Legitimasi</span>
+                <span className="text-xl font-black mt-0.5 block">
+                  {isMinutesLoading ? '...' : minutes.length > 0 ? (isAllApproved ? 'Kuorum Sah' : 'Sebagian Sah') : 'Belum Ada Sidang'}
+                </span>
               </div>
             </div>
           </div>
@@ -1249,7 +1284,29 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
 
           {/* Minutes Cards List */}
           <div className="space-y-6">
-            {filteredMinutesForPublic.length > 0 ? (
+            {isMinutesLoading ? (
+              <div className="p-12 text-center bg-slate-50/80 rounded-3xl border border-slate-150 shadow-2xs">
+                <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-xs font-bold text-slate-700">Menghubungkan ke Arsip Notula Real-Time...</p>
+                <p className="text-[11px] text-slate-400 mt-1 font-medium">Mengambil dokumen resmi musyawarah dari basis data RT 02</p>
+              </div>
+            ) : minutes.length === 0 ? (
+              <div className="p-10 md:p-14 text-center bg-gradient-to-b from-slate-50/80 to-white rounded-3xl border border-dashed border-slate-200 shadow-2xs">
+                <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-200/60 shadow-xs">
+                  <BookOpen size={30} strokeWidth={2.2} />
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/70 text-amber-900 text-[10px] font-black uppercase tracking-wider mb-2">
+                  Arsip Notula Belum Diterbitkan
+                </span>
+                <h4 className="font-bold text-slate-900 text-base md:text-lg font-serif">Belum Ada Notula Musyawarah Resmi</h4>
+                <p className="text-xs text-slate-500 mt-2 max-w-md mx-auto leading-relaxed">
+                  Seluruh risalah rapat warga, berita acara musyawarah mufakat, dan keputusan resmi RT 02 Huntap Tondo 2 akan dipublikasikan secara langsung di sini secara real-time setelah sidang resmi disahkan oleh Pengurus RT.
+                </p>
+                <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">
+                  <span>💡 Pengurus RT dapat mencatat &amp; mempublikasikan notula baru melalui menu <b>Notula Musyawarah</b> di Dashboard Pengurus.</span>
+                </div>
+              </div>
+            ) : filteredMinutesForPublic.length > 0 ? (
               filteredMinutesForPublic.map((m) => (
                 <motion.div
                   key={m.id}

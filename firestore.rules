@@ -340,6 +340,11 @@ service cloud.firestore {
       allow read, create, update, delete: if true;
     }
 
+    // Meeting Minutes (Buku Notula & Kesepakatan Musyawarah RT 02)
+    match /meetingMinutes/{id} {
+      allow read, create, update, delete: if true;
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;
