@@ -1023,7 +1023,11 @@ export const deepSanitize = (data: any, seen = new WeakSet(), depth = 0): any =>
 };
 
 // --- GENERIC SUBSCRIBE ---
-export const subscribeToCollection = (colName: string, callback: (data: any[]) => void) => {
+export const subscribeToCollection = (
+  colName: string, 
+  callback: (data: any[]) => void, 
+  onError?: (error: any) => void
+) => {
   if (!isFirebaseConfigured || !db) {
     console.warn(`Firebase not configured, skipping subscription to ${colName}`);
     return () => {};
@@ -1036,7 +1040,12 @@ export const subscribeToCollection = (colName: string, callback: (data: any[]) =
     }));
     callback(data);
   }, (error) => {
-    handleFirestoreError(error, OperationType.LIST, colName);
+    if (onError) {
+      onError(error);
+    } else {
+      console.warn(`Firestore subscription warning on ${colName}:`, error?.message || error);
+      callback([]);
+    }
   });
 };
 

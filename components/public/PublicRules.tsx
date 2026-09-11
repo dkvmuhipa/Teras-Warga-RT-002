@@ -48,6 +48,10 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
         setMinutes([]);
       }
       setIsMinutesLoading(false);
+    }, (err) => {
+      console.warn("Koleksi meetingMinutes belum dapat diakses:", err?.message || err);
+      setMinutes([]);
+      setIsMinutesLoading(false);
     });
     return () => unsub();
   }, []);

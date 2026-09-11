@@ -70,6 +70,10 @@ export const MeetingMinutesManager: React.FC = () => {
         setMinutes([]);
       }
       setLoading(false);
+    }, (err) => {
+      console.warn("Koleksi meetingMinutes belum dapat diakses di admin:", err?.message || err);
+      setMinutes([]);
+      setLoading(false);
     });
 
     return () => unsub();
