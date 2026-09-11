@@ -317,6 +317,12 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
               onClick={() => {
                 setSelectedHouseId('');
                 localStorage.removeItem('resident_house_id');
+                localStorage.removeItem('resident_name');
+                localStorage.removeItem('resident_location');
+                sessionStorage.removeItem('resident_house_id');
+                sessionStorage.removeItem('resident_name');
+                sessionStorage.removeItem('resident_location');
+                toast.info('Sesi hunian Bank Sampah telah dibersihkan.');
               }}
               className="flex-1 md:flex-none px-5 py-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/80 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 backdrop-blur-md"
             >

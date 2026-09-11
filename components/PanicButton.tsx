@@ -201,7 +201,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartRef = useRef<number>(0);
 
-  const residentHouseId = localStorage.getItem('resident_house_id');
+  const residentHouseId = sessionStorage.getItem('resident_house_id') || localStorage.getItem('resident_house_id');
   const isIdentified = !!residentHouseId;
 
   // Sync to active alerts
@@ -209,7 +209,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
     const unsubscribe = subscribeToActivePanicAlerts((data) => {
       setActiveAlerts(data as PanicAlert[]);
       
-      const myHouseId = localStorage.getItem('resident_house_id');
+      const myHouseId = sessionStorage.getItem('resident_house_id') || localStorage.getItem('resident_house_id');
       const latestAlert = data[data.length - 1];
       
       if (latestAlert && latestAlert.houseId !== myHouseId && latestAlert.status === 'Active') {
@@ -348,7 +348,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
     const houseId = residentHouseId || 'Unknown';
     const house = houses.find(h => h.id === houseId);
     
-    const residentName = house ? house.headOfFamily : (localStorage.getItem('resident_name') || 'Warga');
+    const residentName = house ? house.headOfFamily : (sessionStorage.getItem('resident_name') || localStorage.getItem('resident_name') || 'Warga');
     
     // Encode the chosen crisis category inside the location string for robust transit
     let categorySuffix = '[Keamanan 🚨]';
@@ -357,7 +357,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
     if (selectedCategory === 'Bencana') categorySuffix = '[Bencana 🌊]';
     if (selectedCategory === 'Testing') categorySuffix = '[Simulasi 🔔]';
 
-    const locationBase = house ? `Blok ${house.block}-${house.number}` : (localStorage.getItem('resident_location') || houseId);
+    const locationBase = house ? `Blok ${house.block}-${house.number}` : (sessionStorage.getItem('resident_location') || localStorage.getItem('resident_location') || houseId);
     const encodedLocation = `${locationBase} ${categorySuffix}`;
 
     // Layout representation mapping coord
@@ -651,7 +651,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
                     </span>
                   </div>
                   <span className="text-[9px] font-semibold text-slate-500 font-mono">
-                    {localStorage.getItem('resident_location') || 'Blok C5 / Default'}
+                    {sessionStorage.getItem('resident_location') || localStorage.getItem('resident_location') || 'Blok C5 / Default'}
                   </span>
                 </div>
 

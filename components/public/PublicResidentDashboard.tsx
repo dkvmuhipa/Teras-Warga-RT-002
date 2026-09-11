@@ -93,7 +93,10 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as any;
 
-  const [selectedHouseId, setSelectedHouseId] = useState<string>(localStorage.getItem('resident_house_id') || '');
+  const [selectedHouseId, setSelectedHouseId] = useState<string>(
+    sessionStorage.getItem('resident_house_id') || localStorage.getItem('resident_house_id') || ''
+  );
+  const [rememberSession, setRememberSession] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isOutageModalOpen, setIsOutageModalOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
@@ -239,7 +242,14 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   }, []);
 
   useEffect(() => {
-    if (!selectedHouseId) return;
+    if (!selectedHouseId) {
+      setGuestReports([]);
+      setUpdateRequests([]);
+      setReports([]);
+      setLetters([]);
+      setHouseWaterReadings([]);
+      return;
+    }
     
     const unsubGuests = subscribeToHouseGuestReports(selectedHouseId, setGuestReports);
     const unsubUpdates = subscribeToHouseUpdateRequests(selectedHouseId, setUpdateRequests);
@@ -372,12 +382,30 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     if (isValid) {
       const house = houses.find(h => h.id === tempHouseId);
       setSelectedHouseId(tempHouseId);
-      localStorage.setItem('resident_house_id', tempHouseId);
-      localStorage.setItem('resident_name', house ? house.headOfFamily : 'Warga');
-      localStorage.setItem('resident_location', house ? `Blok ${house.block}-${house.number}` : `Blok ${tempHouseId}`);
+
+      const resName = house ? house.headOfFamily : 'Warga';
+      const resLoc = house ? `Blok ${house.block}-${house.number}` : `Blok ${tempHouseId}`;
+
+      if (rememberSession) {
+        localStorage.setItem('resident_house_id', tempHouseId);
+        localStorage.setItem('resident_name', resName);
+        localStorage.setItem('resident_location', resLoc);
+      } else {
+        sessionStorage.setItem('resident_house_id', tempHouseId);
+        sessionStorage.setItem('resident_name', resName);
+        sessionStorage.setItem('resident_location', resLoc);
+        // Clear any old permanent localStorage keys
+        localStorage.removeItem('resident_house_id');
+        localStorage.removeItem('resident_name');
+        localStorage.removeItem('resident_location');
+      }
+
       setIsPinModalOpen(false);
       setPinInput('');
       setPinError(false);
+      toast.success(`Selamat datang, ${resName}!`, {
+        description: `Berhasil masuk ke portal hunian ${resLoc}.`
+      });
     } else {
       setPinError(true);
       setTimeout(() => setPinError(false), 2000);
@@ -385,8 +413,82 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   };
 
   const handleLogout = () => {
+    // 1. Reset all house identifier & input states
     setSelectedHouseId('');
+    setTempHouseId('');
+    setPinInput('');
+    setPinError(false);
+
+    // 2. Clear all resident specific in-memory data
+    setGuestReports([]);
+    setUpdateRequests([]);
+    setReports([]);
+    setLetters([]);
+    setHouseWaterReadings([]);
+    setShowFullNiks({});
+    setSelectedRequest(null);
+    setWaterPhoto('');
+    setWaterInputReading('');
+    setIsUpdateModalOpen(false);
+    setIsReportModalOpen(false);
+    setIsIuranModalOpen(false);
+    setIsWaterModalOpen(false);
+    setActiveTab('eid');
+
+    // 3. Purge all storage keys from both localStorage and sessionStorage
     localStorage.removeItem('resident_house_id');
+    localStorage.removeItem('resident_name');
+    localStorage.removeItem('resident_location');
+    sessionStorage.removeItem('resident_house_id');
+    sessionStorage.removeItem('resident_name');
+    sessionStorage.removeItem('resident_location');
+
+    // 4. Reset update form state
+    setUpdateForm({
+      headOfFamily: '',
+      gender: 'Laki-laki',
+      birthPlace: '',
+      birthDate: '',
+      phone: '',
+      occupants: 0,
+      residenceType: 'Tetap',
+      nik: '',
+      kkNumber: '',
+      maritalStatus: 'Belum Kawin',
+      religion: '',
+      education: '',
+      job: '',
+      jobCategory: '',
+      bloodType: '-',
+      nationality: 'WNI',
+      addressKtp: '',
+      bpjsStatus: 'Tidak Ada',
+      vehicleCount: 0,
+      twoWheelCount: 0,
+      fourWheelCount: 0,
+      ownerName: '',
+      ownerPhone: '',
+      isPKH: false,
+      isBLT: false,
+      isBPNT: false,
+      isBansosLain: false,
+      bansosLainName: '',
+      economicStatus: 'Sejahtera',
+      pregnantCount: 0,
+      babyCount: 0,
+      toddlerCount: 0,
+      teenagerCount: 0,
+      adultCount: 0,
+      elderlyCount: 0,
+      widowCount: 0,
+      childCount: 0,
+      familyMembers: [],
+      reason: ''
+    });
+
+    toast.success('Sesi portal warga telah keluar.', {
+      description: 'Seluruh data hunian dan profil Anda telah dibersihkan secara aman dari perangkat ini.'
+    });
   };
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -793,6 +895,22 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 <ArrowLeft size={18} />
               </button>
             </div>
+
+            {/* Remember Session Option */}
+            <label className="flex items-start gap-2.5 p-3 bg-slate-50 border border-slate-200/80 rounded-2xl cursor-pointer select-none text-left hover:bg-slate-100/60 transition-colors">
+              <input 
+                type="checkbox"
+                checked={rememberSession}
+                onChange={(e) => setRememberSession(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+              />
+              <span className="text-[11px] font-semibold text-slate-700 leading-snug">
+                Ingat sesi di perangkat ini
+                <span className="text-[10px] text-slate-400 block font-normal mt-0.5">
+                  Jangan dicentang jika menggunakan perangkat publik/bersama. Data akan otomatis terhapus saat Anda keluar sesi atau menutup browser.
+                </span>
+              </span>
+            </label>
 
             <Button type="submit" className="w-full py-4.5 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 cursor-pointer font-black text-xs uppercase tracking-widest">
               Verifikasi & Masuk <ChevronRight size={16} />
