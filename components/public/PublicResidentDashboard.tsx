@@ -56,10 +56,17 @@ import {
   ExternalLink,
   Printer,
   Bell,
-  Share2
+  Share2,
+  Wallet
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
+import { 
+  getHouseWasteFee, 
+  getHouseWasteTier, 
+  DEFAULT_SAMPAH_TIERS, 
+  WATER_PROVIDER_NAME 
+} from '../../constants';
 import { House, GuestReport, UpdateRequest, PaymentStatus, Report, LetterRequest, InventoryItem, CommunitySkill, UtilityOutage, WaterMeterReading, WaterUtilitySettings } from '../../types';
 import { Card } from '../ui/Card';
 import { Modal } from '../ui/Modal';
@@ -153,6 +160,14 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   
   // Data Privacy & Security Toggles
   const [showFullNiks, setShowFullNiks] = useState<Record<string, boolean>>({});
+  const [copiedBank, setCopiedBank] = useState<string | null>(null);
+
+  const handleCopyAccount = (bankName: string, accNumber: string) => {
+    navigator.clipboard.writeText(accNumber.replace(/[^0-9]/g, ''));
+    setCopiedBank(bankName);
+    toast.success(`Nomor rekening ${bankName} berhasil disalin!`);
+    setTimeout(() => setCopiedBank(null), 2500);
+  };
   
   const toggleNikVisibility = (id: string) => {
     setShowFullNiks(prev => ({
@@ -216,9 +231,14 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     : currentPoints >= 100 ? { name: 'Warga Aktif Silver', color: 'from-slate-300 to-slate-400 text-slate-900', badge: '🥈 Silver' }
     : { name: 'Warga Rukun Bronze', color: 'from-amber-700 to-amber-900 text-white', badge: '🥉 Bronze' };
 
-  const airFee = settings?.airFee || 10000;
-  const sampahFee = settings?.sampahFee || 5000;
-  const totalFee = airFee + sampahFee;
+  const airFee = settings?.airFee !== undefined ? Number(settings.airFee) : 0;
+  const currentHouseWasteTier = getHouseWasteTier(currentHouse);
+  const sampahFee = getHouseWasteFee(currentHouse, settings?.sampahTiers);
+  const totalBaseFee = airFee + sampahFee;
+  const unpaidAirFee = isPaidAir ? 0 : airFee;
+  const unpaidSampahFee = isPaidSampah ? 0 : sampahFee;
+  const totalRemainingFee = unpaidAirFee + unpaidSampahFee;
+  const totalFee = totalBaseFee;
 
   // Modern Greeting Helper
   const getGreeting = () => {
@@ -1228,10 +1248,10 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 </div>
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Iuran Kas RT ({currentMonth})</h4>
                 <p className="text-xl font-black text-slate-800">
-                  {isAllPaid ? 'Lunas Terbayar' : `Rp ${totalFee.toLocaleString('id-ID')}`}
+                  {isAllPaid ? 'Lunas Terbayar' : `Rp ${totalRemainingFee.toLocaleString('id-ID')}`}
                 </p>
-                <p className="text-[11px] text-slate-500 font-semibold mt-1">
-                  Air Rp {airFee.toLocaleString('id-ID')} • Sampah Rp {sampahFee.toLocaleString('id-ID')}
+                <p className="text-[11px] text-slate-500 font-semibold mt-1 truncate">
+                  Sampah ({currentHouseWasteTier}): Rp {sampahFee.toLocaleString('id-ID')} {airFee > 0 ? `• Air Rp ${airFee.toLocaleString('id-ID')}` : '• Air PDAM Palu'}
                 </p>
                 <p className="text-[10px] text-indigo-600 font-bold mt-2 flex items-center gap-1">
                   Rincian &amp; Konfirmasi Bayar →
@@ -3881,56 +3901,236 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       </Modal>
 
       {/* Iuran Detail Modal */}
-      <Modal isOpen={isIuranModalOpen} onClose={() => setIsIuranModalOpen(false)} title="Rincian Tagihan Iuran">
-        <div className="p-6 space-y-6">
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-center">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Tagihan {currentMonth}</p>
-            <h3 className="text-3xl font-black text-slate-900">Rp {totalFee.toLocaleString('id-ID')}</h3>
-            <p className="text-[10px] font-bold text-rose-500 mt-2 uppercase tracking-widest">Jatuh Tempo: Tgl 20 {currentMonth}</p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Trash2 size={16} /></div>
-                <span className="text-sm font-bold text-slate-700">Retribusi Sampah</span>
+      <Modal isOpen={isIuranModalOpen} onClose={() => setIsIuranModalOpen(false)} title="Rincian & Status Tagihan Iuran Warga" maxWidth="max-w-xl">
+        <div className="p-6 space-y-5">
+          {/* Header Card Status Pelunasan */}
+          {isAllPaid ? (
+            <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 p-5 sm:p-6 rounded-3xl text-white shadow-xl shadow-emerald-500/10 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-36 h-36 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
+              <div className="flex items-center justify-between relative z-10">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-wider mb-2">
+                    <CheckCircle2 size={13} className="text-emerald-200" />
+                    <span>Status: Lunas Terbayar</span>
+                  </div>
+                  <p className="text-xs text-emerald-100 font-semibold">Periode {currentMonth} • Blok {currentHouse?.block}-{currentHouse?.number}</p>
+                  <h3 className="text-3xl font-black mt-1">Rp 0</h3>
+                  <p className="text-[11px] text-emerald-100/90 mt-1.5 font-medium leading-relaxed">
+                    Semua kewajiban iuran lingkungan bulan ini telah terverifikasi lunas. Terima kasih atas partisipasi aktif Bapak/Ibu!
+                  </p>
+                </div>
+                <div className="hidden sm:flex flex-col items-center justify-center p-3.5 bg-white/15 backdrop-blur-md rounded-2xl border border-white/20">
+                  <ShieldCheck size={36} className="text-white" />
+                  <span className="text-[9px] font-black uppercase tracking-wider mt-1 text-emerald-100">Terverifikasi</span>
+                </div>
               </div>
-              <span className="text-sm font-black text-slate-900">Rp {sampahFee.toLocaleString('id-ID')}</span>
             </div>
-            <div className="flex justify-between items-center py-3 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Droplets size={16} /></div>
-                <span className="text-sm font-bold text-slate-700">Iuran Air Bersih</span>
+          ) : (
+            <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-5 sm:p-6 rounded-3xl text-white shadow-xl shadow-indigo-500/10 relative overflow-hidden border border-indigo-900/50">
+              <div className="absolute top-0 right-0 w-44 h-44 bg-indigo-500/10 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none" />
+              <div className="flex items-center justify-between relative z-10">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[10px] font-black uppercase tracking-wider mb-2">
+                    <Clock size={13} />
+                    <span>Menunggu Pembayaran</span>
+                  </div>
+                  <p className="text-xs text-indigo-200 font-semibold">Periode {currentMonth} • Blok {currentHouse?.block}-{currentHouse?.number}</p>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <h3 className="text-3xl font-black tracking-tight">Rp {totalRemainingFee.toLocaleString('id-ID')}</h3>
+                    {totalRemainingFee < totalFee && (
+                      <span className="text-xs text-slate-400 line-through">Rp {totalFee.toLocaleString('id-ID')}</span>
+                    )}
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-lg text-[10px] font-bold">
+                    <AlertCircle size={12} />
+                    <span>Jatuh Tempo: Tgl 20 {currentMonth}</span>
+                  </div>
+                </div>
+                <div className="hidden sm:flex flex-col items-center justify-center p-3.5 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
+                  <Wallet size={36} className="text-indigo-400" />
+                  <span className="text-[9px] font-black uppercase tracking-wider mt-1 text-slate-300">Tagihan Aktif</span>
+                </div>
               </div>
-              <span className="text-sm font-black text-slate-900">Rp {airFee.toLocaleString('id-ID')}</span>
             </div>
-          </div>
+          )}
 
-          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
-            <h4 className="text-[10px] font-black text-amber-900 uppercase tracking-widest mb-2 flex items-center gap-2">
-              <Info size={12} /> Cara Pembayaran
+          {/* Rincian Komponen Iuran Sesuai Aturan Terbaru */}
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider px-1">
+              Rincian Item &amp; Regulasi Lingkungan
             </h4>
-            <ul className="text-xs text-amber-800 space-y-2 font-medium">
-              <li className="flex gap-2">
-                <span className="font-black">1.</span>
-                <span>Pembayaran dapat dilakukan secara tunai kepada Pengurus RT.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="font-black">2.</span>
-                <span>Hubungi Pengurus RT melalui WhatsApp untuk koordinasi atau konfirmasi pembayaran.</span>
-              </li>
-            </ul>
+
+            {/* Komponen Retribusi Sampah TPS3R */}
+            <div className="p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors rounded-2xl border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl mt-0.5">
+                  <Trash2 size={18} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-black text-slate-800">Retribusi Sampah TPS3R</span>
+                    <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md text-[10px] font-bold">
+                      Kategori: {currentHouseWasteTier}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                    Armada TPS3R Huntap Tondo 2 • Pengangkutan sampah terjadwal
+                  </p>
+                </div>
+              </div>
+              <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/50">
+                <span className="text-sm font-black text-slate-900">Rp {sampahFee.toLocaleString('id-ID')}</span>
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md mt-1 ${
+                  isPaidSampah ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                }`}>
+                  {isPaidSampah ? 'Lunas Terbayar' : 'Belum Bayar'}
+                </span>
+              </div>
+            </div>
+
+            {/* Komponen Air Bersih PDAM Kota Palu */}
+            <div className="p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors rounded-2xl border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 bg-sky-100 text-sky-700 rounded-xl mt-0.5">
+                  <Droplets size={18} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-black text-slate-800">Air Bersih ({WATER_PROVIDER_NAME})</span>
+                    <span className="px-2 py-0.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-md text-[10px] font-bold">
+                      Sistem Meter Mandiri
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                    {airFee > 0 
+                      ? 'Iuran pemeliharaan pipa / pengelolaan air lingkungan RT' 
+                      : 'Resmi dikelola PDAM Kota Palu (Tarif Rp 35.000 / 10 m³). Pembayaran langsung via PDAM / loket mitra.'}
+                  </p>
+                  {currentWaterReading ? (
+                    <div className="inline-flex items-center gap-1.5 mt-1.5 px-2 py-0.5 bg-sky-50 border border-sky-100 rounded text-[10px] font-bold text-sky-800">
+                      <CheckCircle2 size={11} className="text-sky-600" />
+                      <span>Meteran Terlapor: {currentWaterReading.currentReading} m³ (Pakai: {currentWaterReading.usage} m³)</span>
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      💡 Catat meter air mandiri tiap akhir bulan via menu Catat Meter PDAM di dashboard.
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/50">
+                <span className="text-sm font-black text-slate-900">
+                  {airFee > 0 ? `Rp ${airFee.toLocaleString('id-ID')}` : 'Mandiri'}
+                </span>
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md mt-1 ${
+                  airFee === 0 
+                    ? 'bg-sky-100 text-sky-700' 
+                    : isPaidAir 
+                      ? 'bg-emerald-100 text-emerald-700' 
+                      : 'bg-amber-100 text-amber-700'
+                }`}>
+                  {airFee === 0 ? 'Loket PDAM' : isPaidAir ? 'Lunas Terbayar' : 'Belum Bayar'}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
-            <Button onClick={() => setIsIuranModalOpen(false)} variant="outline" className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest">
+          {/* Rekening Resmi Kas RT & Panduan Pembayaran */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <CreditCard size={14} className="text-slate-500" /> Rekening Resmi Kas RT 002
+              </h4>
+              <span className="text-[10px] text-slate-400 font-medium">Transfer &amp; Tunai</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* BSI */}
+              <div className="p-3.5 bg-emerald-50/60 hover:bg-emerald-50 transition-colors border border-emerald-200/80 rounded-2xl relative group">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-black text-emerald-950 uppercase">Bank Syariah Indonesia (BSI)</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyAccount('BSI', '7215984120')}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-white shadow-sm border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded-lg text-[10px] font-black transition-all active:scale-95"
+                  >
+                    {copiedBank === 'BSI' ? <Check size={11} /> : <Copy size={11} />}
+                    <span>{copiedBank === 'BSI' ? 'Tersalin' : 'Salin'}</span>
+                  </button>
+                </div>
+                <p className="font-mono text-base font-black text-slate-800 tracking-wider">7215-984-120</p>
+                <p className="text-[10px] text-slate-500 font-semibold mt-0.5">a.n. KAS RT 002 HUNTAP TONDO 2</p>
+              </div>
+
+              {/* Mandiri */}
+              <div className="p-3.5 bg-indigo-50/60 hover:bg-indigo-50 transition-colors border border-indigo-200/80 rounded-2xl relative group">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-black text-indigo-950 uppercase">Bank Mandiri</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyAccount('Mandiri', '1510018924102')}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-white shadow-sm border border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white rounded-lg text-[10px] font-black transition-all active:scale-95"
+                  >
+                    {copiedBank === 'Mandiri' ? <Check size={11} /> : <Copy size={11} />}
+                    <span>{copiedBank === 'Mandiri' ? 'Tersalin' : 'Salin'}</span>
+                  </button>
+                </div>
+                <p className="font-mono text-base font-black text-slate-800 tracking-wider">151-00-1892410-2</p>
+                <p className="text-[10px] text-slate-500 font-semibold mt-0.5">a.n. KAS RT 002 HUNTAP TONDO 2</p>
+              </div>
+            </div>
+
+            {/* Petunjuk Pembayaran */}
+            <div className="p-3.5 bg-amber-50/80 rounded-2xl border border-amber-200/70 text-xs text-amber-900 space-y-1.5">
+              <div className="flex items-center gap-1.5 font-black text-[11px] text-amber-950 uppercase tracking-wide">
+                <Info size={13} className="text-amber-700" />
+                <span>Petunjuk Pembayaran &amp; Verifikasi</span>
+              </div>
+              <ul className="text-[11.5px] text-amber-900/90 space-y-1 font-medium pl-4 list-disc">
+                <li><strong>Transfer Bank:</strong> Beri keterangan transfer: <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-[10px] font-bold">IURAN {currentHouse?.block}-{currentHouse?.number}</code>.</li>
+                <li><strong>Tunai:</strong> Pembayaran tunai dapat diserahkan langsung kepada Bendahara RT 002 atau Ketua RT.</li>
+                <li>Setelah melakukan pembayaran, mohon klik tombol WhatsApp di bawah untuk konfirmasi pelunasan agar status tercatat real-time.</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+            <Button onClick={() => setIsIuranModalOpen(false)} variant="outline" className="sm:w-28 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider">
               Tutup
             </Button>
-            <Button 
-              onClick={() => window.open(`https://wa.me/6285961194621?text=Halo%20Pengurus%20RT%2002%2C%20saya%20ingin%20konfirmasi%20pembayaran%20iuran%20rumah%20${currentHouse?.block}-${currentHouse?.number}`, '_blank')}
-              className="flex-[2] py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-100"
+            <Button
+              type="button"
+              onClick={() => window.print()}
+              variant="outline"
+              className="sm:w-36 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider border-slate-200 hover:bg-slate-100 flex items-center justify-center gap-2"
             >
-              Konfirmasi Bayar (WA)
+              <Printer size={15} />
+              <span>Cetak Bukti</span>
+            </Button>
+            <Button 
+              onClick={() => {
+                const message = `Halo Pengurus / Bendahara RT 002 Huntap Tondo 2,
+
+Saya ingin konfirmasi pembayaran iuran lingkungan:
+• Periode: ${currentMonth}
+• Hunian: Blok ${currentHouse?.block}-${currentHouse?.number}
+• Nama Warga: ${currentHouse?.residentName || 'Warga'}
+• Retribusi Sampah TPS3R (${currentHouseWasteTier}): Rp ${sampahFee.toLocaleString('id-ID')}
+${airFee > 0 ? `• Iuran Air: Rp ${airFee.toLocaleString('id-ID')}\n` : ''}• Status: ${isAllPaid ? 'Sudah Lunas' : 'Konfirmasi Pembayaran'}
+• Nominal: Rp ${(totalRemainingFee > 0 ? totalRemainingFee : totalFee).toLocaleString('id-ID')}
+
+Mohon bantuan pengecekan dan verifikasi status. Terima kasih!`;
+                window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(message)}`, '_blank');
+              }}
+              className={`flex-1 py-3.5 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95 ${
+                isAllPaid 
+                  ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' 
+                  : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20'
+              }`}
+            >
+              <Send size={15} />
+              <span>{isAllPaid ? 'Kirim Bukti ke Bendahara (WA)' : 'Konfirmasi Bayar via WA'}</span>
             </Button>
           </div>
         </div>
