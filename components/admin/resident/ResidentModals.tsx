@@ -17,6 +17,13 @@ import {
   INDONESIAN_MONTHS
 } from '../../../src/utils/dateUtils';
 import { checkNikDuplicate } from '../../../services/databaseService';
+import { 
+  DEFAULT_SAMPAH_TIERS, 
+  getHouseWasteTier, 
+  getHouseWasteFee, 
+  WATER_PROVIDER_NAME, 
+  WATER_MANAGED_BY 
+} from '../../../constants';
 
 import { toast } from 'sonner';
 
@@ -862,7 +869,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     <div className="md:col-span-6">
                       <FormField 
                         label="Profesi Spesifik" 
-                        placeholder="Contoh: Arsitek"
+                        placeholder="Contoh: Guru / Perawat / Wirausaha"
                         value={formData.job} 
                         onChange={(v: any) => setFormData({...formData, job: v})} 
                       />
@@ -881,9 +888,10 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 economicStatus: val as any,
                                 isPKH: true,
                                 isBLT: true,
-                                isBPNT: true
+                                isBPNT: true,
+                                wasteTier: 'PKH'
                               });
-                              toast.info('Rekomendasi Bansos (PKH, BLT, BPNT) otomatis diaktifkan untuk status Pra-Sejahtera.');
+                              toast.info('Status Pra-Sejahtera: Keringanan bansos & retribusi sampah PKH (Rp 10.000) otomatis diaktifkan.');
                             } else {
                               setFormData({...formData, economicStatus: val as any});
                             }
@@ -892,6 +900,24 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           <option value="Pra-Sejahtera">Pra-Sejahtera (Subsidi)</option>
                           <option value="Sejahtera">Sejahtera</option>
                           <option value="Mampu">Mampu / Mandiri</option>
+                        </select>
+                        <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
+                      </div>
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                        Retribusi Sampah TPS3R <span className="text-[10px] text-indigo-600 font-bold">(Kota Palu)</span>
+                      </label>
+                      <div className="relative">
+                        <select 
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer" 
+                          value={formData.wasteTier ?? ''} 
+                          onChange={e => setFormData({...formData, wasteTier: e.target.value ? (e.target.value as any) : undefined})}
+                        >
+                          <option value="">Otomatis (Berdasarkan PKH/Profesi)</option>
+                          <option value="Umum">Umum (Rp 20.000 / bln)</option>
+                          <option value="PKH">PKH (Rp 10.000 / bln)</option>
+                          <option value="PNS">PNS / ASN (Rp 35.000 / bln)</option>
                         </select>
                         <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
                       </div>
@@ -1718,11 +1744,34 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   if (!payHouse) return null;
 
+  // Auto-detect tier based on PKH status or job category
+  const detectedTier = useMemo(() => getHouseWasteTier(payHouse), [payHouse]);
+  const [wasteTier, setWasteTier] = useState<'Umum' | 'PKH' | 'PNS'>(detectedTier);
+
+  React.useEffect(() => {
+    if (payHouse) {
+      setWasteTier(getHouseWasteTier(payHouse));
+    }
+  }, [payHouse]);
+
   const currentMonthStr = getIndonesianMonthYear(new Date());
   const arrears = getArrearsForHouse(payHouse);
-  const airFee = settings?.airFee || 10000;
-  const sampahFee = settings?.sampahFee || 10000;
-  const unitFee = payType === 'Air' ? airFee : payType === 'Sampah' ? sampahFee : (airFee + sampahFee);
+
+  // Tarif Retribusi Sampah TPS3R Mandiri Huntap Tondo 2 (Aturan Kota Palu)
+  const customTiers = settings?.sampahTiers || DEFAULT_SAMPAH_TIERS;
+  const currentWasteFee = wasteTier === 'PKH' 
+    ? (customTiers.pkh || 10000) 
+    : wasteTier === 'PNS' 
+      ? (customTiers.pns || 35000) 
+      : (customTiers.umum || 20000);
+
+  // Pengelolaan Air Bersih kini resmi oleh PDAM Kota Palu (skema titip tagihan atau meteran PDAM)
+  const airFee = settings?.airFee || 0; 
+  const unitFee = payType === 'Air' 
+    ? (airFee || 35000) 
+    : payType === 'Sampah' 
+      ? currentWasteFee 
+      : (currentWasteFee + (airFee || 0));
 
   // Generate candidate months (arrears + current month + next 11 future months)
   const allCandidateMonths = useMemo(() => {
@@ -1739,9 +1788,22 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   }, [arrears, currentMonthStr]);
 
   // Synchronize months and amount
-  const updateMonths = (newMonths: string[], currentType: 'Air' | 'Sampah' | 'Both' = payType) => {
+  const updateMonths = (
+    newMonths: string[], 
+    currentType: 'Air' | 'Sampah' | 'Both' = payType,
+    currentTier: 'Umum' | 'PKH' | 'PNS' = wasteTier
+  ) => {
     const sorted = [...newMonths].sort((a, b) => getMonthSortKey(a) - getMonthSortKey(b));
-    const fee = currentType === 'Air' ? airFee : currentType === 'Sampah' ? sampahFee : (airFee + sampahFee);
+    const tierFee = currentTier === 'PKH' 
+      ? (customTiers.pkh || 10000) 
+      : currentTier === 'PNS' 
+        ? (customTiers.pns || 35000) 
+        : (customTiers.umum || 20000);
+    const fee = currentType === 'Air' 
+      ? (airFee || 35000) 
+      : currentType === 'Sampah' 
+        ? tierFee 
+        : (tierFee + (airFee || 0));
     setTargetMonths(sorted);
     setPayAmount((sorted.length * fee).toString());
   };
@@ -1753,18 +1815,23 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     } else {
       updated = [...targetMonths, month];
     }
-    updateMonths(updated);
+    updateMonths(updated, payType, wasteTier);
   };
 
   const handlePayTypeChange = (newType: 'Air' | 'Sampah' | 'Both') => {
     setPayType(newType);
-    updateMonths(targetMonths, newType);
+    updateMonths(targetMonths, newType, wasteTier);
+  };
+
+  const handleWasteTierChange = (newTier: 'Umum' | 'PKH' | 'PNS') => {
+    setWasteTier(newTier);
+    updateMonths(targetMonths, payType, newTier);
   };
 
   // Quick Preset Actions
   const handleSelectAllArrears = () => {
     if (arrears.length > 0) {
-      updateMonths(arrears);
+      updateMonths(arrears, payType, wasteTier);
       toast.info(`Memilih seluruh ${arrears.length} bulan tunggakan.`);
     } else {
       toast.info('Tidak ada tunggakan iuran lampau.');
@@ -1772,7 +1839,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const handleSelectCurrentMonthOnly = () => {
-    updateMonths([currentMonthStr]);
+    updateMonths([currentMonthStr], payType, wasteTier);
     toast.info(`Memilih bulan berjalan (${currentMonthStr}).`);
   };
 
@@ -1792,7 +1859,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       }
       selected.push(...additional);
     }
-    updateMonths(selected);
+    updateMonths(selected, payType, wasteTier);
     toast.info(`Memilih paket ${count} bulan.`);
   };
 
@@ -1822,15 +1889,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     let targetPhone = payHouse.phone.replace(/[^0-9]/g, '');
     if (targetPhone.startsWith('0')) targetPhone = '62' + targetPhone.substring(1);
 
-    const typeLabel = payType === 'Both' ? 'Paket Air Bersih & Sampah' : payType === 'Air' ? 'Iuran Air Bersih' : 'Iuran Pengelolaan Sampah';
+    const typeLabel = payType === 'Both' 
+      ? 'Paket Retribusi Sampah TPS3R & Air PDAM' 
+      : payType === 'Air' 
+        ? 'Air Bersih PDAM Kota Palu' 
+        : `Retribusi Sampah TPS3R Mandiri Huntap Tondo 2 (${wasteTier})`;
     const monthsLabel = targetMonths.length > 0 ? targetMonths.join(', ') : currentMonthStr;
     const amountStr = numPayAmount.toLocaleString('id-ID');
     const dateStr = payDate ? new Date(payDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const methodStr = paymentMethod === 'Transfer Bank' ? `Transfer Bank ${bankName}${refNumber ? ` (Ref: ${refNumber})` : ''}` : paymentMethod;
 
     const message = 
-`*BUKTI PEMBAYARAN IURAN RESMI RT 002*
-_Kawasan Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore_
+`*BUKTI PEMBAYARAN IURAN & RETRIBUSI RT 002*
+_Kawasan Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu_
 ━━━━━━━━━━━━━━━━━━━━━
 Kepada Yth:
 👤 *${payerName || payHouse.headOfFamily}*
@@ -1838,15 +1909,17 @@ Kepada Yth:
 ━━━━━━━━━━━━━━━━━━━━━
 Rincian Transaksi Pembayaran:
 • Layanan: *${typeLabel}*
+• Kategori Sampah: *TPS3R ${wasteTier} (Rp ${currentWasteFee.toLocaleString('id-ID')}/bln)*
+• Status Air Bersih: *Dikelola Resmi oleh PDAM Kota Palu*
 • Periode: *${monthsLabel}* (${targetMonths.length} Bulan)
 • Total Biaya: *Rp ${amountStr}*
 • Metode: *${methodStr}*
 • Tanggal: *${dateStr}*
-• Catatan: *${payNotes || 'Pembayaran iuran tervalidasi lunas'}*
+• Catatan: *${payNotes || 'Retribusi tervalidasi lunas'}*
 
 Status: *LUNAS & TERCATAT RESMI DI SISTEM RT 02*
 ━━━━━━━━━━━━━━━━━━━━━
-Terima kasih atas kepedulian Bapak/Ibu dalam mendukung kelancaran fasilitas dan ketertiban lingkungan TERAS RT 002.
+_Tarif retribusi sampah TPS3R mengacu pada aturan resmi Kota Palu untuk unit pengelolaan mandiri Huntap Tondo 2 (Umum Rp 20rb, PKH Rp 10rb, PNS Rp 35rb)._
 
 _Salam Hormat,_
 *Pengurus RT 002 / RW 020 Huntap Tondo 2*`;
@@ -1908,6 +1981,12 @@ _Salam Hormat,_
                     payHouse.status === 'Occupied' ? 'bg-emerald-50 text-emerald-700 border-emerald-150' : 'bg-slate-100 text-slate-500 border-slate-200'
                   }`}>
                     {payHouse.status === 'Occupied' ? 'Dihuni' : 'Kosong'}
+                  </span>
+                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-md text-[9px] font-black uppercase tracking-wider border border-emerald-200">
+                    ♻️ TPS3R: {wasteTier} (Rp {currentWasteFee.toLocaleString('id-ID')})
+                  </span>
+                  <span className="px-2 py-0.5 bg-sky-50 text-sky-800 rounded-md text-[9px] font-bold uppercase tracking-wider border border-sky-200">
+                    💧 PDAM Palu
                   </span>
                   {payHouse.pbbStatus && (
                     <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${
@@ -1997,35 +2076,38 @@ _Salam Hormat,_
                   1. Pilih Komponen Layanan Iuran
                 </label>
                 <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-                  Tarif Aktif RT 02
+                  TPS3R & PDAM
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {[
                   {
-                    id: 'Both' as const,
-                    title: 'Paket Lengkap',
-                    subtitle: 'Air Bersih & Sampah',
-                    fee: airFee + sampahFee,
-                    icon: Sparkles,
-                    color: 'indigo'
+                    id: 'Sampah' as const,
+                    title: 'Retribusi Sampah',
+                    subtitle: 'TPS3R Mandiri Huntap Tondo 2',
+                    fee: currentWasteFee,
+                    icon: Trash2,
+                    color: 'emerald',
+                    badge: `Tier ${wasteTier}`
                   },
                   {
                     id: 'Air' as const,
-                    title: 'Iuran Air Bersih',
-                    subtitle: 'Fasilitas Air RT',
-                    fee: airFee,
+                    title: 'Air Bersih (PDAM)',
+                    subtitle: 'Dikelola Resmi PDAM Palu',
+                    fee: airFee || 35000,
                     icon: Droplets,
-                    color: 'sky'
+                    color: 'sky',
+                    badge: 'PDAM Palu'
                   },
                   {
-                    id: 'Sampah' as const,
-                    title: 'Iuran Sampah',
-                    subtitle: 'Kebersihan & Angkut',
-                    fee: sampahFee,
-                    icon: Trash2,
-                    color: 'emerald'
+                    id: 'Both' as const,
+                    title: 'Paket Terpadu',
+                    subtitle: 'Sampah TPS3R + PDAM',
+                    fee: currentWasteFee + (airFee || 0),
+                    icon: Sparkles,
+                    color: 'indigo',
+                    badge: 'Terpadu'
                   }
                 ].map((item) => {
                   const isSelected = payType === item.id;
@@ -2054,12 +2136,102 @@ _Salam Hormat,_
                         <p className="text-[10px] text-slate-500 leading-tight">{item.subtitle}</p>
                       </div>
                       <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">Tarif/Bulan</span>
-                        <span className="text-xs font-black text-indigo-700">Rp {item.fee.toLocaleString('id-ID')}</span>
+                        <span className="text-[8px] font-black uppercase text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
+                          {item.badge}
+                        </span>
+                        <span className="text-xs font-black text-slate-900">Rp {item.fee.toLocaleString('id-ID')}</span>
                       </div>
                     </button>
                   );
                 })}
+              </div>
+
+              {/* TPS3R Waste Tier Selector (Aturan Retribusi Sampah Kota Palu) */}
+              <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 flex items-center gap-1">
+                      <Trash2 size={12} className="text-emerald-600" />
+                      Tarif Retribusi Sampah TPS3R (Aturan Kota Palu)
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                    {detectedTier === 'PKH' ? '⭐ Terdeteksi PKH' : detectedTier === 'PNS' ? '⭐ Terdeteksi ASN / PNS' : '⭐ Terdeteksi Warga Umum'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    {
+                      tier: 'Umum' as const,
+                      title: 'Warga Umum',
+                      fee: customTiers.umum || 20000,
+                      desc: 'Masyarakat umum, swasta, wiraswasta',
+                      badge: 'Standar'
+                    },
+                    {
+                      tier: 'PKH' as const,
+                      title: 'Penerima PKH',
+                      fee: customTiers.pkh || 10000,
+                      desc: 'Warga prasejahtera / penerima PKH',
+                      badge: 'Subsidi'
+                    },
+                    {
+                      tier: 'PNS' as const,
+                      title: 'ASN / PNS',
+                      fee: customTiers.pns || 35000,
+                      desc: 'Pegawai Negeri Sipil Kota Palu',
+                      badge: 'Regulasi ASN'
+                    }
+                  ].map((item) => {
+                    const isTierSelected = wasteTier === item.tier;
+                    return (
+                      <button
+                        key={item.tier}
+                        type="button"
+                        onClick={() => handleWasteTierChange(item.tier)}
+                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                          isTierSelected
+                            ? 'bg-emerald-50/90 border-emerald-600 ring-2 ring-emerald-500/20 shadow-xs'
+                            : 'bg-white border-slate-200 hover:border-emerald-300 hover:bg-slate-50/60'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={`text-xs font-black ${isTierSelected ? 'text-emerald-950 font-bold' : 'text-slate-800'}`}>
+                            {item.title}
+                          </span>
+                          <span className={`text-[8px] font-black uppercase px-1.5 py-0.2 rounded ${
+                            isTierSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        </div>
+                        <div className="text-xs font-black text-emerald-700 my-1">
+                          Rp {item.fee.toLocaleString('id-ID')} <span className="text-[9px] font-normal text-slate-500">/ bln</span>
+                        </div>
+                        <p className="text-[9px] text-slate-400 leading-tight truncate">
+                          {item.desc}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* PDAM Notice Alert */}
+              <div className="p-3 bg-sky-50/80 border border-sky-200/80 rounded-xl flex items-center justify-between text-xs text-sky-950">
+                <div className="flex items-center gap-2">
+                  <Droplets size={16} className="text-sky-600 shrink-0" />
+                  <div>
+                    <span className="font-bold text-[11px]">Air Bersih Dikelola Resmi oleh PDAM Kota Palu</span>
+                    <p className="text-[10px] text-sky-800 leading-tight mt-0.5">
+                      Pencatatan meteran mandiri dan pembayaran tagihan air mengacu pada skema resmi PDAM.
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[9px] font-black text-sky-700 bg-white px-2 py-0.5 rounded border border-sky-200 shrink-0">
+                  PDAM Palu
+                </span>
               </div>
             </div>
 
@@ -2286,10 +2458,21 @@ _Salam Hormat,_
 
               {/* Itemized Calculation */}
               <div className="space-y-2 text-xs">
-                {(payType === 'Both' || payType === 'Air') && (
-                  <div className="flex items-center justify-between text-white/70">
+                {(payType === 'Both' || payType === 'Sampah') && (
+                  <div className="flex items-center justify-between text-white/80">
                     <span className="flex items-center gap-1.5 text-[11px]">
-                      <Droplets size={12} className="text-sky-400" /> Iuran Air Bersih ({targetMonths.length} bln)
+                      <Trash2 size={12} className="text-emerald-400" /> Retribusi TPS3R ({wasteTier}) • {targetMonths.length} bln
+                    </span>
+                    <span className="font-bold text-white">
+                      Rp {(targetMonths.length * currentWasteFee).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                )}
+
+                {(payType === 'Both' || payType === 'Air') && (
+                  <div className="flex items-center justify-between text-white/80">
+                    <span className="flex items-center gap-1.5 text-[11px]">
+                      <Droplets size={12} className="text-sky-400" /> Air Bersih PDAM • {targetMonths.length} bln
                     </span>
                     <span className="font-bold text-white">
                       Rp {(targetMonths.length * airFee).toLocaleString('id-ID')}
@@ -2297,22 +2480,21 @@ _Salam Hormat,_
                   </div>
                 )}
 
-                {(payType === 'Both' || payType === 'Sampah') && (
-                  <div className="flex items-center justify-between text-white/70">
-                    <span className="flex items-center gap-1.5 text-[11px]">
-                      <Trash2 size={12} className="text-emerald-400" /> Iuran Sampah ({targetMonths.length} bln)
-                    </span>
-                    <span className="font-bold text-white">
-                      Rp {(targetMonths.length * sampahFee).toLocaleString('id-ID')}
-                    </span>
-                  </div>
-                )}
-
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-                  <span className="text-white/60 font-bold uppercase tracking-wider text-[10px]">Total Rekomendasi</span>
-                  <span className="text-sm font-black text-indigo-400">
+                  <span className="text-white/60 font-bold uppercase tracking-wider text-[10px]">Total Tagihan</span>
+                  <span className="text-sm font-black text-emerald-400">
                     Rp {totalSuggested.toLocaleString('id-ID')}
                   </span>
+                </div>
+
+                <div className="p-2.5 bg-white/5 rounded-xl border border-white/10 text-[9px] text-white/70 space-y-0.5">
+                  <p className="flex items-center gap-1 font-bold text-white/90">
+                    <ShieldCheck size={11} className="text-emerald-400" />
+                    Aturan Retribusi Sampah Kota Palu (TPS3R Huntap 2)
+                  </p>
+                  <p className="leading-relaxed opacity-80">
+                    Kategori {wasteTier}: Rp {currentWasteFee.toLocaleString('id-ID')}/bln. Utilitas air bersih dikelola langsung oleh PDAM Kota Palu.
+                  </p>
                 </div>
               </div>
 
@@ -2672,9 +2854,9 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
                   onChange={(e) => setPayType(e.target.value as any)}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                 >
-                  <option value="Both">Sepaket (Air &amp; Sampah)</option>
-                  <option value="Air">Hanya Air Bersih</option>
-                  <option value="Sampah">Hanya Sampah</option>
+                  <option value="Sampah">Retribusi Sampah (TPS3R Mandiri Huntap 2)</option>
+                  <option value="Air">Air Bersih (PDAM Kota Palu)</option>
+                  <option value="Both">Paket Terpadu (Sampah TPS3R &amp; PDAM)</option>
                 </select>
               </div>
 

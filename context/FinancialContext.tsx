@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
 import { House, CashFlow, Bill, PaymentStatus } from '../types';
 import { getIndonesianMonthYear, isMonthMatch } from '../src/utils/dateUtils';
+import { getHouseWasteFee, DEFAULT_SAMPAH_TIERS, SampahTiers } from '../constants';
 
 interface FinancialContextType {
   iuranPayments: any[];
@@ -44,6 +45,7 @@ interface FinancialContextType {
     cleanestScore?: number;
     cleanestMonth?: string;
     cleanestRankings?: Array<{ rank: number; block: string; score: number; status: string }>;
+    sampahTiers?: SampahTiers;
   };
   isMonthMatch: (monthA: string, monthB: string) => boolean;
 }
@@ -60,9 +62,10 @@ export const FinancialProvider: React.FC<{
 }> = ({ children, houses, iuranPayments, cashFlow, bills, settings }) => {
   const [selectedMonth, setSelectedMonth] = useState(getIndonesianMonthYear(new Date()));
 
-  const airFee = settings?.airFee || 10000;
-  const sampahFee = settings?.sampahFee || 10000;
-  const combinedFee = airFee + sampahFee;
+  const airFee = settings?.airFee !== undefined ? settings.airFee : 0;
+  const sampahTiers = settings?.sampahTiers || DEFAULT_SAMPAH_TIERS;
+  const defaultSampahFee = settings?.sampahFee || sampahTiers.umum || 20000;
+  const combinedFee = airFee + defaultSampahFee;
 
   const getPaymentStatus = (house: House, type: 'Air' | 'Sampah', month: string = selectedMonth) => {
     const payment = iuranPayments.find(p => {
@@ -143,18 +146,22 @@ export const FinancialProvider: React.FC<{
     const paidHousesCount = new Set(currentMonthPayments.map(p => p.houseId)).size;
     const participationRate = occupiedHousesList.length > 0 ? Math.round((paidHousesCount / occupiedHousesList.length) * 100) : 0;
     const unpaidHousesCount = occupiedHousesList.length - paidHousesCount;
-    const estimatedReceivables = unpaidHousesCount * combinedFee;
+    const estimatedReceivables = occupiedHousesList
+      .filter(h => !paidHousesCount || !currentMonthPayments.some(p => p.houseId === h.id))
+      .reduce((acc, h) => acc + (airFee + getHouseWasteFee(h, sampahTiers)), 0);
 
     const totalArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h).length, 0);
-    const totalArrearsAmount = totalArrearsMonths * (combinedFee / 2); // This is still a bit tricky if only one is unpaid, but let's use the combined logic below
     
-    // Better calculation for arrears
+    // Accurate calculation for arrears
     const airArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h, 'Air').length, 0);
     const airArrearsAmount = airArrearsMonths * airFee;
     const airArrearsHouseCount = occupiedHousesList.filter(h => getArrearsForHouse(h, 'Air').length > 0).length;
 
     const sampahArrearsMonths = occupiedHousesList.reduce((acc, h) => acc + getArrearsForHouse(h, 'Sampah').length, 0);
-    const sampahArrearsAmount = sampahArrearsMonths * sampahFee;
+    const sampahArrearsAmount = occupiedHousesList.reduce((acc, h) => {
+      const arrearsCount = getArrearsForHouse(h, 'Sampah').length;
+      return acc + (arrearsCount * getHouseWasteFee(h, sampahTiers));
+    }, 0);
     const sampahArrearsHouseCount = occupiedHousesList.filter(h => getArrearsForHouse(h, 'Sampah').length > 0).length;
 
     const combinedTotalArrearsAmount = airArrearsAmount + sampahArrearsAmount;
@@ -162,22 +169,24 @@ export const FinancialProvider: React.FC<{
 
     // Air specific
     const airPayments = currentMonthPayments.filter(p => p.type === 'Air' || p.type === 'Both');
-    const airCollected = airPayments.reduce((acc, p) => acc + (p.type === 'Both' ? (p.amount * (airFee / combinedFee)) : p.amount), 0);
+    const airCollected = airPayments.reduce((acc, p) => acc + (p.type === 'Both' ? (p.amount * (airFee / (combinedFee || 1))) : p.amount), 0);
     const airPaidHouses = new Set(airPayments.map(p => p.houseId));
     const airUnpaidCount = occupiedHousesList.length - airPaidHouses.size;
     const airEstimatedReceivables = airUnpaidCount * airFee;
 
     // Sampah specific
     const sampahPayments = currentMonthPayments.filter(p => p.type === 'Sampah' || p.type === 'Both');
-    const sampahCollected = sampahPayments.reduce((acc, p) => acc + (p.type === 'Both' ? (p.amount * (sampahFee / combinedFee)) : p.amount), 0);
+    const sampahCollected = sampahPayments.reduce((acc, p) => acc + (p.type === 'Both' ? (p.amount * (defaultSampahFee / (combinedFee || 1))) : p.amount), 0);
     const sampahPaidHouses = new Set(sampahPayments.map(p => p.houseId));
     const sampahUnpaidCount = occupiedHousesList.length - sampahPaidHouses.size;
-    const sampahEstimatedReceivables = sampahUnpaidCount * sampahFee;
+    const sampahEstimatedReceivables = occupiedHousesList
+      .filter(h => !sampahPaidHouses.has(h.id))
+      .reduce((acc, h) => acc + getHouseWasteFee(h, sampahTiers), 0);
 
     const fullyPaidHousesCount = occupiedHousesList.filter(h => {
       const airStatus = getPaymentStatus(h, 'Air', selectedMonth);
       const sampahStatus = getPaymentStatus(h, 'Sampah', selectedMonth);
-      return airStatus === PaymentStatus.PAID && sampahStatus === PaymentStatus.PAID;
+      return (airFee > 0 ? airStatus === PaymentStatus.PAID : true) && sampahStatus === PaymentStatus.PAID;
     }).length;
 
     return {
@@ -219,7 +228,7 @@ export const FinancialProvider: React.FC<{
       getPaymentStatus,
       getArrearsForHouse,
       summaries,
-      settings: { airFee, sampahFee },
+      settings: { airFee, sampahFee: defaultSampahFee, sampahTiers },
       isMonthMatch
     }}>
       {children}

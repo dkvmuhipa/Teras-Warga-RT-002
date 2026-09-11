@@ -8,8 +8,49 @@ export const FULL_RT_NAME = `${RT_NAME} ${RW_NAME}`;
 export const ADMIN_ROLE = "Admin Utama";
 export const ADMIN_TITLE = "Ketua RT 02";
 export const ADMIN_EMAIL = "admin@teras.id";
-export const DEFAULT_DUES_AMOUNT = 25000;
+export const DEFAULT_DUES_AMOUNT = 20000;
 export const CURRENCY_SYMBOL = "Rp";
+
+// --- TARIF RETRIBUSI SAMPAH TPS3R MANDIRI HUNTAP TONDO 2 (ATURAN KOTA PALU) ---
+export interface SampahTiers {
+  umum: number; // Rp 20.000 (Warga Umum)
+  pkh: number;  // Rp 10.000 (Penerima PKH)
+  pns: number;  // Rp 35.000 (PNS / ASN Kota Palu)
+}
+
+export const DEFAULT_SAMPAH_TIERS: SampahTiers = {
+  umum: 20000,
+  pkh: 10000,
+  pns: 35000,
+};
+
+// Pengelolaan Air Bersih Resmi oleh PDAM Kota Palu
+export const WATER_PROVIDER_NAME = "PDAM Kota Palu";
+export const WATER_MANAGED_BY = "PDAM"; // Air dikelola langsung oleh PDAM Kota Palu
+export const WATER_BASE_FEE = 35000;    // Tarif dasar PDAM Rp 35.000 / 10 m³ pertama
+
+/**
+ * Mendapatkan kategori tarif retribusi sampah (Umum, PKH, atau PNS) untuk sebuah rumah/warga
+ */
+export const getHouseWasteTier = (house?: Partial<House> | null): 'Umum' | 'PKH' | 'PNS' => {
+  if (!house) return 'Umum';
+  if (house.wasteTier) return house.wasteTier;
+  if (house.isPKH) return 'PKH';
+  const jobLower = `${house.jobCategory || ''} ${house.job || ''}`.toLowerCase();
+  if (/pns|asn|pegawai negeri|aparatur sipil/i.test(jobLower)) return 'PNS';
+  return 'Umum';
+};
+
+/**
+ * Mendapatkan nominal tarif retribusi sampah per bulan berdasarkan kategori rumah/warga
+ */
+export const getHouseWasteFee = (house?: Partial<House> | null, customTiers?: Partial<SampahTiers> | null): number => {
+  const tier = getHouseWasteTier(house);
+  const tiers = { ...DEFAULT_SAMPAH_TIERS, ...customTiers };
+  if (tier === 'PKH') return tiers.pkh;
+  if (tier === 'PNS') return tiers.pns;
+  return tiers.umum;
+};
 
 // Updated Address per Letter Reference
 export const RT_ADDRESS = "Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu";

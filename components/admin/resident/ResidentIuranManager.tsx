@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useConfirm } from '../../../context/ConfirmContext';
 import { handleFirestoreError, OperationType, addIuranPaymentToDb } from '../../../services/databaseService';
 import { generateIuranReportExcel, generateIuranBatchTemplateExcel, parseIuranBatchExcel } from '../../../services/excelService';
+import { getHouseWasteFee, getHouseWasteTier } from '../../../constants';
 
 interface ResidentIuranManagerProps {
   houses: House[];
@@ -111,9 +112,11 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
     return occupiedHousesList
       .map(h => {
         const arrears = getArrearsForHouse(h, filterType === 'All' ? undefined : filterType as 'Air' | 'Sampah');
+        const wasteFee = getHouseWasteFee(h, settings?.sampahTiers);
+        const airFee = settings?.airFee || 0;
         const totalAmount = arrears.length * (
-          filterType === 'All' ? (settings.airFee + settings.sampahFee) : 
-          filterType === 'Air' ? settings.airFee : settings.sampahFee
+          filterType === 'All' ? (airFee + wasteFee) : 
+          filterType === 'Air' ? airFee : wasteFee
         );
         return { house: h, arrears, totalAmount };
       })

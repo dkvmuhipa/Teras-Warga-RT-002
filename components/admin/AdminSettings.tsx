@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { User, Lock, Eye, EyeOff, Database, Download, Upload, AlertTriangle, Trash, Wallet, ShieldCheck, CheckCircle2, MessageSquare, Radio, RefreshCw, Key, ShieldAlert } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, Database, Download, Upload, AlertTriangle, Trash, Wallet, ShieldCheck, CheckCircle2, MessageSquare, Radio, RefreshCw, Key, ShieldAlert, Droplets, Trash2 } from 'lucide-react';
 import { updatePassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { House, Announcement, CashFlow, Official, Report, LetterRequest, RondaSchedule, InventoryItem, UMKM, RondaCheckLog, AppNotification } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { seedDatabase, deepSanitize, safeJsonStringify, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { DEFAULT_SAMPAH_TIERS, WATER_PROVIDER_NAME } from '../../constants';
 import { toast } from 'sonner';
 import { useConfirm, usePrompt } from '../../context/ConfirmContext';
 
@@ -38,9 +39,11 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  // Fee Settings State
-  const [airFee, setAirFee] = React.useState(settings?.airFee || 10000);
-  const [sampahFee, setSampahFee] = React.useState(settings?.sampahFee || 5000);
+  // Fee Settings State (TPS3R Mandiri Huntap Tondo 2 & PDAM)
+  const [airFee, setAirFee] = React.useState(settings?.airFee ?? 0);
+  const [sampahUmum, setSampahUmum] = React.useState(settings?.sampahTiers?.umum ?? (settings?.sampahFee || DEFAULT_SAMPAH_TIERS.umum));
+  const [sampahPkh, setSampahPkh] = React.useState(settings?.sampahTiers?.pkh ?? DEFAULT_SAMPAH_TIERS.pkh);
+  const [sampahPns, setSampahPns] = React.useState(settings?.sampahTiers?.pns ?? DEFAULT_SAMPAH_TIERS.pns);
 
   // Cleanliness Settings State
   const [cleanestBlock, setCleanestBlock] = React.useState(settings?.cleanestBlock || 'BLOK C5 (Kavling 1-12)');
@@ -64,8 +67,14 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 
   React.useEffect(() => {
     if (settings) {
-      setAirFee(settings.airFee);
-      setSampahFee(settings.sampahFee);
+      if (settings.airFee !== undefined) setAirFee(settings.airFee);
+      if (settings.sampahTiers) {
+        setSampahUmum(settings.sampahTiers.umum ?? DEFAULT_SAMPAH_TIERS.umum);
+        setSampahPkh(settings.sampahTiers.pkh ?? DEFAULT_SAMPAH_TIERS.pkh);
+        setSampahPns(settings.sampahTiers.pns ?? DEFAULT_SAMPAH_TIERS.pns);
+      } else if (settings.sampahFee) {
+        setSampahUmum(settings.sampahFee);
+      }
       if (settings.cleanestBlock) setCleanestBlock(settings.cleanestBlock);
       if (settings.cleanestScore) setCleanestScore(settings.cleanestScore);
       if (settings.cleanestMonth) setCleanestMonth(settings.cleanestMonth);
@@ -99,11 +108,16 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       await onUpdateSettings({
         ...settings,
         airFee: Number(airFee),
-        sampahFee: Number(sampahFee)
+        sampahFee: Number(sampahUmum),
+        sampahTiers: {
+          umum: Number(sampahUmum),
+          pkh: Number(sampahPkh),
+          pns: Number(sampahPns)
+        }
       });
-      toast.success('Tarif iuran berhasil diperbarui!');
+      toast.success('Tarif retribusi sampah TPS3R (Aturan Palu) & utilitas air berhasil diperbarui!');
     } catch (error) {
-      toast.error('Gagal memperbarui tarif iuran.');
+      toast.error('Gagal memperbarui tarif.');
     }
   };
 
@@ -387,66 +401,150 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       {activeTab === 'fees' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7">
-            <Card title="Tarif Iuran Bulanan Warga" icon={Wallet} className="border-slate-200/80 rounded-[2.5rem] p-6 md:p-8">
+            <Card title="Konfigurasi Tarif Retribusi TPS3R & Air Bersih" icon={Wallet} className="border-slate-200/80 rounded-[2.5rem] p-6 md:p-8">
               <p className="text-xs text-slate-500 font-semibold mb-6 leading-relaxed">
-                Nominal tarif iuran Air dan Sampah yang ditentukan di sini akan berlaku secara otomatis untuk penagihan bulanan seluruh warga.
+                Retribusi persampahan dikelola mandiri oleh unit <strong>TPS3R Kawasan Huntap Tondo 2</strong> dengan 3 kategori tarif resmi berdasarkan Peraturan Retribusi Sampah Kota Palu. Pengelolaan air bersih dikelola secara resmi oleh <strong>PDAM Kota Palu</strong>.
               </p>
+              
               <form onSubmit={handleUpdateFees} className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Iuran Kebersihan & Sampah (Rp)</label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
-                      <input 
-                        type="number"
-                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-                        value={sampahFee}
-                        onChange={(e) => setSampahFee(e.target.value)}
-                      />
+                {/* Bagian 1: Retribusi Sampah TPS3R */}
+                <div className="p-5 bg-emerald-50/50 border border-emerald-200/80 rounded-2xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-emerald-200/60 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <Trash2 size={16} className="text-emerald-700" />
+                      <span className="text-xs font-black uppercase tracking-wider text-emerald-950">
+                        Tarif Retribusi Sampah TPS3R (Aturan Kota Palu)
+                      </span>
                     </div>
+                    <span className="text-[9px] font-black uppercase px-2 py-0.5 bg-emerald-600 text-white rounded-md">
+                      Huntap Tondo 2
+                    </span>
                   </div>
-                  <div>
-                    <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Iuran Air Bersih (Rp)</label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
-                      <input 
-                        type="number"
-                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
-                        value={airFee}
-                        onChange={(e) => setAirFee(e.target.value)}
-                      />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-black mb-1 text-slate-700 uppercase tracking-widest">
+                        Warga Umum (Rp)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
+                        <input 
+                          type="number"
+                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-800 focus:border-emerald-500 outline-none transition-all font-mono"
+                          value={sampahUmum}
+                          onChange={(e) => setSampahUmum(Number(e.target.value))}
+                        />
+                      </div>
+                      <p className="text-[9px] text-slate-400 mt-1">Standar Warga</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black mb-1 text-slate-700 uppercase tracking-widest">
+                        Penerima PKH (Rp)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
+                        <input 
+                          type="number"
+                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-800 focus:border-emerald-500 outline-none transition-all font-mono"
+                          value={sampahPkh}
+                          onChange={(e) => setSampahPkh(Number(e.target.value))}
+                        />
+                      </div>
+                      <p className="text-[9px] text-slate-400 mt-1">Subsidi Bansos</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black mb-1 text-slate-700 uppercase tracking-widest">
+                        ASN / PNS (Rp)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
+                        <input 
+                          type="number"
+                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-800 focus:border-emerald-500 outline-none transition-all font-mono"
+                          value={sampahPns}
+                          onChange={(e) => setSampahPns(Number(e.target.value))}
+                        />
+                      </div>
+                      <p className="text-[9px] text-slate-400 mt-1">Pegawai Negeri</p>
                     </div>
                   </div>
                 </div>
+
+                {/* Bagian 2: Utilitas Air Bersih PDAM */}
+                <div className="p-5 bg-sky-50/50 border border-sky-200/80 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between border-b border-sky-200/60 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Droplets size={16} className="text-sky-700" />
+                      <span className="text-xs font-black uppercase tracking-wider text-sky-950">
+                        Pengelolaan Air Bersih PDAM Kota Palu
+                      </span>
+                    </div>
+                    <span className="text-[9px] font-black uppercase px-2 py-0.5 bg-sky-600 text-white rounded-md">
+                      PDAM Palu
+                    </span>
+                  </div>
+                  
+                  <p className="text-[11px] text-sky-900 leading-relaxed">
+                    Saat ini fasilitas air bersih telah resmi dikelola oleh <strong>PDAM Kota Palu</strong> dengan skema pencatatan meteran mandiri (tarif dasar Rp 35.000 / 10 m³ pertama).
+                  </p>
+
+                  <div>
+                    <label className="block text-[10px] font-black mb-1.5 text-slate-700 uppercase tracking-widest">
+                      Tarif Titip / Cadangan Iuran Air RT (Rp, Opsional)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
+                      <input 
+                        type="number"
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-800 focus:border-sky-500 outline-none transition-all font-mono"
+                        value={airFee}
+                        onChange={(e) => setAirFee(Number(e.target.value))}
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">Diisi 0 jika warga membayar tagihan PDAM secara langsung ke loket/rekening PDAM.</p>
+                  </div>
+                </div>
+
                 <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20">
-                  Simpan Tarif Iuran Bulanan
+                  Simpan Konfigurasi Tarif Lingkungan
                 </Button>
               </form>
             </Card>
           </div>
 
-          <div className="lg:col-span-5">
-            <div className="bg-indigo-900 rounded-[2.5rem] p-6 text-white border border-indigo-800 shadow-xl space-y-4">
+          <div className="lg:col-span-5 space-y-4">
+            <div className="bg-indigo-950 rounded-[2.5rem] p-6 text-white border border-indigo-900 shadow-xl space-y-4">
               <div className="flex items-center gap-3 border-b border-indigo-800 pb-3">
-                <Wallet className="text-indigo-400" size={24} />
+                <Wallet className="text-emerald-400" size={24} />
                 <div>
-                  <h4 className="font-black text-base">Kalkulasi Otomatis Penagihan</h4>
-                  <p className="text-[10px] font-mono text-indigo-300 uppercase">SISTEM KAS TERAS RT</p>
+                  <h4 className="font-black text-base">Matriks Tarif Resmi Lingkungan</h4>
+                  <p className="text-[10px] font-mono text-indigo-300 uppercase">TPS3R HUNTAP TONDO 2 & PDAM</p>
                 </div>
               </div>
-              <div className="p-4 bg-indigo-950/60 rounded-2xl border border-indigo-800/80 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-indigo-300">Total Iuran Sampah:</span>
-                  <span className="font-bold">Rp {Number(sampahFee).toLocaleString()} / KK</span>
+              
+              <div className="p-4 bg-indigo-900/60 rounded-2xl border border-indigo-800/80 space-y-2.5 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-indigo-200">Retribusi Sampah (Umum):</span>
+                  <span className="font-bold text-white font-mono">Rp {Number(sampahUmum).toLocaleString()} / KK</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-indigo-300">Total Iuran Air:</span>
-                  <span className="font-bold">Rp {Number(airFee).toLocaleString()} / KK</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-indigo-200">Retribusi Sampah (PKH):</span>
+                  <span className="font-bold text-emerald-400 font-mono">Rp {Number(sampahPkh).toLocaleString()} / KK</span>
                 </div>
-                <div className="pt-2 border-t border-indigo-800/60 flex justify-between font-black text-sm text-emerald-400">
-                  <span>Total Pengeluaran Standard:</span>
-                  <span>Rp {(Number(sampahFee) + Number(airFee)).toLocaleString()} / KK</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-indigo-200">Retribusi Sampah (PNS):</span>
+                  <span className="font-bold text-amber-300 font-mono">Rp {Number(sampahPns).toLocaleString()} / KK</span>
                 </div>
+                <div className="pt-2 border-t border-indigo-800/60 flex justify-between items-center">
+                  <span className="text-sky-300">Air Bersih (PDAM):</span>
+                  <span className="font-bold text-sky-400">Dikelola PDAM Palu</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-emerald-950/40 rounded-xl border border-emerald-800/40 text-[10px] text-emerald-200 leading-relaxed">
+                🏛️ <strong>Dasar Regulasi:</strong> Penetapan tarif retribusi persampahan ini disesuaikan dengan aturan retribusi sampah Pemerintah Kota Palu untuk unit pengelolaan TPS3R mandiri di lingkungan Huntap Tondo 2.
               </div>
             </div>
           </div>

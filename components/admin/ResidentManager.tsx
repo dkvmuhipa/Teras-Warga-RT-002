@@ -23,6 +23,7 @@ import { UpdateRequestManager } from './UpdateRequestManager';
 import { GuestManager } from './GuestManager';
 import { HealthManagement } from './HealthManagement';
 import { OfficialManagement } from './OfficialManagement';
+import { getHouseWasteTier, getHouseWasteFee } from '../../constants';
 import { 
   Search, Filter, Grid, List, UserPlus, Download, Upload, 
   Trash2, Edit2, MoreHorizontal, CheckCircle, XCircle, AlertCircle, Droplets, Trash,
@@ -176,8 +177,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   } = summaries;
 
   const [payHouse, setPayHouse] = useState<House | null>(null);
-  const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Both');
-  const [payAmount, setPayAmount] = useState('10000');
+  const [payType, setPayType] = useState<'Air' | 'Sampah' | 'Both'>('Sampah');
+  const [payAmount, setPayAmount] = useState('20000');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
   const [payNotes, setPayNotes] = useState('');
   const [payerName, setPayerName] = useState('');
@@ -185,9 +186,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const occupiedHousesList = houses.filter(h => h.status === 'Occupied');
 
   useEffect(() => {
-    if (payType === 'Both') setPayAmount('20000');
-    else setPayAmount('10000');
-  }, [payType]);
+    if (payHouse) {
+      const wasteFee = getHouseWasteFee(payHouse, settings?.sampahTiers);
+      const airFee = settings?.airFee || 0;
+      if (payType === 'Sampah') setPayAmount(wasteFee.toString());
+      else if (payType === 'Air') setPayAmount((airFee || 35000).toString());
+      else setPayAmount((wasteFee + airFee).toString());
+    }
+  }, [payType, payHouse, settings]);
   const [editingHouseId, setEditingHouseId] = useState<string | null>(null);
   const [activeFormTab, setActiveFormTab] = useState<'basic' | 'demographics' | 'family'>('basic');
   
@@ -918,12 +924,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         // Sync with Bills
         const existingBill = bills.find(b => b.houseId === payHouse.id && b.month === monthStr);
         const newItems = [];
+        const houseWasteTier = getHouseWasteTier(payHouse);
+        const houseWasteFee = getHouseWasteFee(payHouse, settings?.sampahTiers);
+        const wastePortion = payType === 'Both' ? Math.min(amountPerMonth, houseWasteFee) : (payType === 'Sampah' ? amountPerMonth : 0);
+        const airPortion = payType === 'Both' ? Math.max(0, amountPerMonth - wastePortion) : (payType === 'Air' ? amountPerMonth : 0);
+
         if (payType === 'Air' || payType === 'Both') {
           newItems.push({
             id: Math.random().toString(36).substr(2, 9),
-            name: 'Iuran Air',
-            amount: payType === 'Both' ? amountPerMonth / 2 : amountPerMonth,
-            manager: 'RT 02',
+            name: 'Air Bersih (PDAM Kota Palu)',
+            amount: airPortion,
+            manager: 'PDAM Kota Palu',
             status: 'Paid' as const,
             paymentDate: new Date(payDate).toISOString()
           });
@@ -931,9 +942,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         if (payType === 'Sampah' || payType === 'Both') {
           newItems.push({
             id: Math.random().toString(36).substr(2, 9),
-            name: 'Iuran Sampah',
-            amount: payType === 'Both' ? amountPerMonth / 2 : amountPerMonth,
-            manager: 'RT 02',
+            name: `Retribusi Sampah TPS3R (${houseWasteTier})`,
+            amount: wastePortion,
+            manager: 'TPS3R Mandiri Huntap 2',
             status: 'Paid' as const,
             paymentDate: new Date(payDate).toISOString()
           });

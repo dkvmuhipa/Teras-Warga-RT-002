@@ -135,6 +135,9 @@ export interface House {
   isBansosLain?: boolean;
   bansosLainName?: string;
   
+  // Retribusi Sampah TPS3R Mandiri Huntap Tondo 2 (Aturan Kota Palu)
+  wasteTier?: 'Umum' | 'PKH' | 'PNS'; // Umum (20rb), PKH (10rb), PNS (35rb)
+  
   // Vulnerable Groups & Economic Status
   isDisability?: boolean;
   disabilityCount?: number;
@@ -202,6 +205,7 @@ export interface ResidentRegistration {
   isBPNT?: boolean;
   isBansosLain?: boolean;
   bansosLainName?: string;
+  wasteTier?: 'Umum' | 'PKH' | 'PNS';
   isDisability?: boolean;
   isOrphan?: boolean;
   ktpUrl?: string;
@@ -1049,6 +1053,7 @@ export interface UpdateRequest {
   isBPNT?: boolean;
   isBansosLain?: boolean;
   bansosLainName?: string;
+  wasteTier?: 'Umum' | 'PKH' | 'PNS';
   economicStatus?: 'Pra-Sejahtera' | 'Sejahtera' | 'Mampu';
 
   // Demographic Counts
