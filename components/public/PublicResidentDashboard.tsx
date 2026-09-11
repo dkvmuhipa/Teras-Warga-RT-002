@@ -49,7 +49,14 @@ import {
   Zap,
   Hammer,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  Sun,
+  Moon,
+  Copy,
+  ExternalLink,
+  Printer,
+  Bell,
+  Share2
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
@@ -212,6 +219,22 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const airFee = settings?.airFee || 10000;
   const sampahFee = settings?.sampahFee || 5000;
   const totalFee = airFee + sampahFee;
+
+  // Modern Greeting Helper
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 4 && hour < 11) return { text: 'Selamat Pagi', icon: Sun, color: 'text-amber-400 bg-amber-500/10 border-amber-400/20' };
+    if (hour >= 11 && hour < 15) return { text: 'Selamat Siang', icon: Sun, color: 'text-amber-300 bg-amber-500/10 border-amber-300/20' };
+    if (hour >= 15 && hour < 18) return { text: 'Selamat Sore', icon: Sun, color: 'text-orange-400 bg-orange-500/10 border-orange-400/20' };
+    return { text: 'Selamat Malam', icon: Moon, color: 'text-indigo-300 bg-indigo-500/10 border-indigo-400/20' };
+  };
+  const greeting = getGreeting();
+  const GreetingIcon = greeting.icon;
+
+  const pendingLettersCount = letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length;
+  const activeReportsCount = reports.filter(r => r.status !== 'Selesai').length;
+  const maleCount = currentHouse?.familyMembers?.filter((m: any) => m.gender === 'Laki-laki').length || (currentHouse?.gender === 'Laki-laki' ? 1 : 0);
+  const femaleCount = currentHouse?.familyMembers?.filter((m: any) => m.gender === 'Perempuan').length || (currentHouse?.gender === 'Perempuan' ? 1 : 0);
 
   useEffect(() => {
     const unsubPdfConfig = subscribeToPdfConfig(setPdfConfig);
@@ -923,60 +946,225 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 mb-24 text-left">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white border border-slate-100/80 p-6 md:p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-2 h-full bg-indigo-600" />
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-50/50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-            <User size={26} />
-          </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-0.5">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-                {selectedHouseId ? 'Dashboard Portal Warga' : 'Pusat Jasa & Layanan Warga'}
-              </h2>
-              {selectedHouseId && (
-                <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-indigo-100">
-                  Blok {currentHouse?.block}-{currentHouse?.number}
-                </span>
+      {/* Modern Civic Hero Header */}
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-slate-800/80 p-6 md:p-8 text-white shadow-xl shadow-indigo-950/20 mb-6">
+        {/* Ambient Glows */}
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex items-start md:items-center gap-4">
+            {/* Avatar Initials / Icon */}
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-500/25 border border-white/20 shrink-0">
+              {currentHouse?.headOfFamily ? (
+                currentHouse.headOfFamily.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
+              ) : (
+                <User size={28} />
               )}
             </div>
-            <p className="text-slate-400 text-xs font-semibold">
-              {selectedHouseId ? (
-                <>Selamat datang, Bpk/Ibu <span className="text-slate-700 font-extrabold">{currentHouse?.headOfFamily}</span>.</>
-              ) : (
-                <>Akses publik direktori keahlian warga dan papan informasi pemadaman PLN/PDAM RT 02.</>
+
+            <div className="space-y-1">
+              {/* Contextual Greeting & Date */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${greeting.color}`}>
+                  <GreetingIcon size={12} />
+                  <span>{greeting.text}</span>
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+
+              {/* Title & House Block */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                  {currentHouse?.headOfFamily ? currentHouse.headOfFamily : (selectedHouseId ? 'Warga RT 02' : 'Portal Layanan Warga')}
+                </h2>
+                {selectedHouseId && (
+                  <span className="px-3 py-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-xl text-xs font-black uppercase tracking-widest text-indigo-200 border border-white/15">
+                    Blok {currentHouse?.block}-{currentHouse?.number}
+                  </span>
+                )}
+              </div>
+
+              {/* Status Pills */}
+              {selectedHouseId && (
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-semibold">
+                    <Home size={12} className="text-indigo-400" />
+                    <span>Status: <strong>{currentHouse?.residenceType || 'Tetap'}</strong></span>
+                  </span>
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg border text-[11px] font-semibold ${
+                    currentHouse?.isVerified 
+                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' 
+                      : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                  }`}>
+                    <CheckCircle size={12} />
+                    <span>{currentHouse?.isVerified ? 'Data KK Terverifikasi' : 'Perlu Verifikasi KK'}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-semibold">
+                    <Shield size={12} className="text-sky-400" />
+                    <span>{currentHouse?.rondaExempt ? 'Bebas Ronda Siskamling' : 'Wajib Ronda Aktif'}</span>
+                  </span>
+                </div>
               )}
-            </p>
+            </div>
+          </div>
+
+          {/* Sesi Controls */}
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end pt-2 md:pt-0 border-t border-white/10 md:border-t-0">
+            {selectedHouseId ? (
+              <button 
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-white/10 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/40 border border-white/15 transition-all cursor-pointer text-slate-300"
+                title="Keluar dari sesi warga"
+              >
+                <LogOut size={14} /> <span>Keluar Sesi</span>
+              </button>
+            ) : (
+              <button 
+                onClick={() => setActiveTab('eid')}
+                className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+              >
+                <QrCode size={14} /> Masuk Portal Warga (PIN)
+              </button>
+            )}
           </div>
         </div>
-        {selectedHouseId ? (
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-5 py-3 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-slate-200/60 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 hover:shadow-sm transition-all cursor-pointer"
-          >
-            <LogOut size={14} /> Keluar Sesi
-          </button>
-        ) : (
-          <button 
-            onClick={() => setActiveTab('eid')}
-            className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
-          >
-            <QrCode size={14} /> Masuk Portal Warga (PIN)
-          </button>
-        )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 bg-slate-100/80 p-1.5 border border-slate-200/50 rounded-3xl mb-8 overflow-x-auto no-scrollbar">
+      {/* Quick Action Command Hub */}
+      {selectedHouseId && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+              <Sparkles size={13} className="text-indigo-600" /> Pintasan Aksi Cepat Warga
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">Layanan mandiri instan</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <button
+              onClick={() => setActiveTab('water')}
+              className="p-3.5 rounded-2xl bg-white hover:bg-blue-50/50 border border-slate-200/80 hover:border-blue-300 hover:shadow-md transition-all text-left group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <Droplets size={18} />
+              </div>
+              <p className="text-xs font-black text-slate-800">Catat Meter</p>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Air Mandiri m³</p>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('letters')}
+              className="p-3.5 rounded-2xl bg-white hover:bg-indigo-50/50 border border-slate-200/80 hover:border-indigo-300 hover:shadow-md transition-all text-left group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <FileText size={18} />
+              </div>
+              <p className="text-xs font-black text-slate-800">Surat Pengantar</p>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Permohonan RT</p>
+            </button>
+
+            <button
+              onClick={() => setIsReportModalOpen(true)}
+              className="p-3.5 rounded-2xl bg-white hover:bg-rose-50/50 border border-slate-200/80 hover:border-rose-300 hover:shadow-md transition-all text-left group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <AlertTriangle size={18} />
+              </div>
+              <p className="text-xs font-black text-slate-800">Lapor Aduan</p>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Fasilitas/Warga</p>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('guests')}
+              className="p-3.5 rounded-2xl bg-white hover:bg-amber-50/50 border border-slate-200/80 hover:border-amber-300 hover:shadow-md transition-all text-left group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <Users size={18} />
+              </div>
+              <p className="text-xs font-black text-slate-800">Lapor Tamu</p>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Wajib 1x24 Jam</p>
+            </button>
+
+            <button
+              onClick={() => setIsIuranModalOpen(true)}
+              className="p-3.5 rounded-2xl bg-white hover:bg-emerald-50/50 border border-slate-200/80 hover:border-emerald-300 hover:shadow-md transition-all text-left group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <CreditCard size={18} />
+              </div>
+              <p className="text-xs font-black text-slate-800">Rincian Iuran</p>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Sampah & Air RT</p>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('eid')}
+              className="p-3.5 rounded-2xl bg-white hover:bg-purple-50/50 border border-slate-200/80 hover:border-purple-300 hover:shadow-md transition-all text-left group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <QrCode size={18} />
+              </div>
+              <p className="text-xs font-black text-slate-800">Kartu E-ID</p>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Cetak & Unduh</p>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tabs with Dynamic Badges */}
+      <div className="flex items-center gap-2 bg-slate-100/90 p-1.5 border border-slate-200/60 rounded-3xl mb-8 overflow-x-auto no-scrollbar">
         {[
-          { id: 'eid', label: 'E-ID Warga', shortLabel: 'E-ID', icon: QrCode },
-          { id: 'water', label: 'Meter Air Mandiri', shortLabel: 'Air Bersih', icon: Droplets },
-          { id: 'points', label: 'Poin & Teladan', shortLabel: 'Poin', icon: Trophy },
-          { id: 'letters', label: 'Status Surat', shortLabel: 'Surat', icon: FileText },
-          { id: 'update', label: 'Update Data', shortLabel: 'Update', icon: FileEdit },
-          { id: 'guests', label: 'Log Tamu', shortLabel: 'Tamu', icon: History },
-          { id: 'reports', label: 'Laporan', shortLabel: 'Aduan', icon: AlertTriangle }
+          { id: 'eid', label: 'E-ID & Profil', shortLabel: 'E-ID', icon: QrCode, badge: null, badgeColor: '' },
+          { 
+            id: 'water', 
+            label: 'Meter Air Mandiri', 
+            shortLabel: 'Air Bersih', 
+            icon: Droplets, 
+            badge: currentWaterReading ? '✓ Tercatat' : 'Catat',
+            badgeColor: currentWaterReading ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800 animate-pulse'
+          },
+          { 
+            id: 'points', 
+            label: 'Poin & Teladan', 
+            shortLabel: 'Poin', 
+            icon: Trophy, 
+            badge: `${currentPoints} Pts`,
+            badgeColor: 'bg-amber-100 text-amber-900'
+          },
+          { 
+            id: 'letters', 
+            label: 'Status Surat', 
+            shortLabel: 'Surat', 
+            icon: FileText, 
+            badge: pendingLettersCount > 0 ? `${pendingLettersCount}` : null,
+            badgeColor: 'bg-indigo-600 text-white'
+          },
+          { 
+            id: 'update', 
+            label: 'Pembaruan Data KK', 
+            shortLabel: 'Update KK', 
+            icon: FileEdit, 
+            badge: currentHouse?.isVerified ? '✓ Sah' : 'Update',
+            badgeColor: currentHouse?.isVerified ? 'bg-slate-200/70 text-slate-700' : 'bg-amber-100 text-amber-800'
+          },
+          { 
+            id: 'guests', 
+            label: 'Log Tamu Menginap', 
+            shortLabel: 'Tamu', 
+            icon: History, 
+            badge: guestReports.length > 0 ? `${guestReports.length}` : null,
+            badgeColor: 'bg-slate-200 text-slate-700'
+          },
+          { 
+            id: 'reports', 
+            label: 'Aduan & Masalah', 
+            shortLabel: 'Aduan', 
+            icon: AlertTriangle, 
+            badge: activeReportsCount > 0 ? `${activeReportsCount}` : null,
+            badgeColor: 'bg-rose-600 text-white'
+          }
         ].map((tab) => {
           const isSelected = activeTab === tab.id;
           return (
@@ -984,15 +1172,20 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               key={tab.id}
               whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-5 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
                 isSelected 
-                ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/30 font-black' 
-                : 'text-slate-400 hover:text-slate-600 font-semibold'
+                ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/40 font-black' 
+                : 'text-slate-500 hover:text-slate-800 font-semibold'
               }`}
             >
               <tab.icon size={15} className={isSelected ? 'text-indigo-600' : 'text-slate-400'} />
               <span className="hidden md:inline">{tab.label}</span>
               <span className="inline md:hidden">{tab.shortLabel}</span>
+              {tab.badge && (
+                <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tight ${tab.badgeColor || 'bg-slate-200 text-slate-600'}`}>
+                  {tab.badge}
+                </span>
+              )}
             </motion.button>
           );
         })}
@@ -1015,8 +1208,8 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                 onClick={() => setIsIuranModalOpen(true)}
                 className={`p-6 rounded-[2rem] border cursor-pointer transition-all ${
                   isAllPaid 
-                    ? 'bg-emerald-50/45 border-emerald-100/75 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/20' 
-                    : (isMandatory ? 'bg-rose-50/45 border-rose-100/75 hover:border-rose-200 hover:shadow-lg hover:shadow-rose-100/20' : 'bg-amber-50/45 border-amber-100/75 hover:border-amber-200 hover:shadow-lg hover:shadow-amber-100/20')
+                    ? 'bg-gradient-to-br from-emerald-50/70 via-teal-50/40 to-white border-emerald-200/80 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-100/30' 
+                    : (isMandatory ? 'bg-gradient-to-br from-rose-50/70 via-red-50/40 to-white border-rose-200/80 hover:border-rose-300 hover:shadow-lg hover:shadow-rose-100/30' : 'bg-gradient-to-br from-amber-50/70 via-orange-50/40 to-white border-amber-200/80 hover:border-amber-300 hover:shadow-lg hover:shadow-amber-100/30')
                 }`}
               >
                 <div className="flex justify-between items-start mb-4">
@@ -1030,15 +1223,18 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                       ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' 
                       : (isMandatory ? 'bg-rose-500/20 text-rose-700 border-rose-500/30' : 'bg-amber-500/20 text-amber-700 border-amber-500/30')
                   }`}>
-                    {isAllPaid ? 'Lunas' : (isMandatory ? 'Wajib Bayar' : 'Tagihan Baru')}
+                    {isAllPaid ? '✓ Lunas' : (isMandatory ? '⚠ Lewat Tempo' : 'Tagihan Baru')}
                   </span>
                 </div>
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Status Keuangan ({currentMonth})</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Iuran Kas RT ({currentMonth})</h4>
                 <p className="text-xl font-black text-slate-800">
-                  {isAllPaid ? 'Iuran Lunas' : `Rp ${totalFee.toLocaleString('id-ID')}`}
+                  {isAllPaid ? 'Lunas Terbayar' : `Rp ${totalFee.toLocaleString('id-ID')}`}
                 </p>
-                <p className="text-[11px] text-slate-450 font-semibold mt-1 flex items-center gap-1">
-                  Klik untuk rincian iuran bulanan →
+                <p className="text-[11px] text-slate-500 font-semibold mt-1">
+                  Air Rp {airFee.toLocaleString('id-ID')} • Sampah Rp {sampahFee.toLocaleString('id-ID')}
+                </p>
+                <p className="text-[10px] text-indigo-600 font-bold mt-2 flex items-center gap-1">
+                  Rincian &amp; Konfirmasi Bayar →
                 </p>
               </motion.div>
 
@@ -1046,7 +1242,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               <motion.div 
                 whileHover={{ y: -3 }}
                 onClick={() => setActiveTab('water')}
-                className="p-6 rounded-[2rem] bg-gradient-to-br from-cyan-50/60 via-blue-50/40 to-white border border-cyan-100/80 hover:border-cyan-200 hover:shadow-lg hover:shadow-cyan-100/30 cursor-pointer transition-all"
+                className="p-6 rounded-[2rem] bg-gradient-to-br from-cyan-50/70 via-blue-50/40 to-white border border-cyan-200/80 hover:border-cyan-300 hover:shadow-lg hover:shadow-cyan-100/30 cursor-pointer transition-all"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-3 bg-cyan-500/10 text-cyan-600 rounded-2xl">
@@ -1059,14 +1255,17 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                           : 'bg-amber-500/20 text-amber-700 border-amber-500/30')
                       : 'bg-rose-500/20 text-rose-700 border-rose-500/30'
                   }`}>
-                    {currentWaterReading ? currentWaterReading.status : 'Belum Catat'}
+                    {currentWaterReading ? (currentWaterReading.status === 'Terverifikasi' ? '✓ Sah' : 'Menunggu') : 'Belum Catat'}
                   </span>
                 </div>
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Meter Air Bersih</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Meter Air Mandiri</h4>
                 <p className="text-xl font-black text-slate-800">
-                  {currentWaterReading ? `${currentWaterReading.usage} m³ • Rp ${currentWaterReading.totalAmount.toLocaleString('id-ID')}` : 'Catat Mandiri'}
+                  {currentWaterReading ? `${currentWaterReading.usage} m³ • Rp ${currentWaterReading.totalAmount.toLocaleString('id-ID')}` : 'Catat Pemakaian'}
                 </p>
-                <p className="text-[11px] text-cyan-700 font-semibold mt-1 flex items-center gap-1">
+                <p className="text-[11px] text-slate-500 font-semibold mt-1">
+                  {currentWaterReading ? `Angka: ${currentWaterReading.reading} m³ (${waterUtilityConfig.providerName || 'PDAM'})` : `Batas input: Tgl ${waterUtilityConfig.readingDueDate || 20} ${currentMonth}`}
+                </p>
+                <p className="text-[10px] text-cyan-700 font-bold mt-2 flex items-center gap-1">
                   Buka Portal Meter Air →
                 </p>
               </motion.div>
@@ -1075,32 +1274,34 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               <motion.div 
                 whileHover={{ y: -3 }}
                 onClick={() => {
-                  const pendingLetters = letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length;
-                  if (pendingLetters > 0) setActiveTab('letters');
+                  if (pendingLettersCount > 0) setActiveTab('letters');
                   else setActiveTab('reports');
                 }}
-                className="p-6 rounded-[2rem] bg-white border border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50/30 cursor-pointer transition-all"
+                className="p-6 rounded-[2rem] bg-gradient-to-br from-indigo-50/40 via-violet-50/20 to-white border border-slate-200/80 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100/20 cursor-pointer transition-all"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
                     <FileText size={20} />
                   </div>
-                  {letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length + reports.filter(r => r.status !== 'Selesai').length > 0 ? (
+                  {pendingLettersCount + activeReportsCount > 0 ? (
                     <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-widest border border-indigo-200">
-                      Ada Aktivitas
+                      {pendingLettersCount + activeReportsCount} Berkas Aktif
                     </span>
                   ) : (
                     <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-xl text-[9px] font-black uppercase tracking-widest border border-slate-200">
-                      Kondusif
+                      Semua Beres
                     </span>
                   )}
                 </div>
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Administrasi & Aduan</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Administrasi &amp; Aduan</h4>
                 <p className="text-xl font-black text-slate-800">
-                  {letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length} Surat • {reports.filter(r => r.status !== 'Selesai').length} Aduan
+                  {pendingLettersCount} Surat • {activeReportsCount} Aduan
                 </p>
-                <p className="text-[11px] text-slate-450 font-semibold mt-1">
-                  Klik untuk lacak perkembangan berkas →
+                <p className="text-[11px] text-slate-500 font-semibold mt-1">
+                  Total {letters.length} Pengantar diajukan • {reports.length} Laporan
+                </p>
+                <p className="text-[10px] text-indigo-600 font-bold mt-2 flex items-center gap-1">
+                  Lacak Perkembangan Berkas →
                 </p>
               </motion.div>
 
@@ -1108,86 +1309,109 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               <motion.div 
                 whileHover={{ y: -3 }}
                 onClick={() => setActiveTab('update')}
-                className="p-6 rounded-[2rem] bg-white border border-slate-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-50/30 cursor-pointer transition-all"
+                className="p-6 rounded-[2rem] bg-gradient-to-br from-emerald-50/40 via-teal-50/20 to-white border border-slate-200/80 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-100/20 cursor-pointer transition-all"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
                     <Users size={20} />
                   </div>
-                  <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-[9px] font-black uppercase tracking-widest border border-emerald-100">
-                    Mandiri
+                  <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-[9px] font-black uppercase tracking-widest border border-emerald-200/60">
+                    {currentHouse?.isVerified ? '✓ Valid' : 'Cek KK'}
                   </span>
                 </div>
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Anggota & Kendaraan</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Anggota KK &amp; Armada</h4>
                 <p className="text-xl font-black text-slate-800">
-                  {currentHouse?.occupants || 0} Jiwa • {(currentHouse?.twoWheelCount || 0) + (currentHouse?.fourWheelCount || 0) > 0 ? `${currentHouse?.twoWheelCount || 0} Motor • ${currentHouse?.fourWheelCount || 0} Mobil` : `${currentHouse?.vehicleCount || 0} Kendaraan`}
+                  {currentHouse?.occupants || 0} Jiwa ({maleCount} L / {femaleCount} P)
                 </p>
-                <p className="text-[11px] text-slate-450 font-semibold mt-1">
-                  Klik untuk pembaruan profil KK →
+                <p className="text-[11px] text-slate-500 font-semibold mt-1 truncate">
+                  {(currentHouse?.twoWheelCount || 0) + (currentHouse?.fourWheelCount || 0) > 0 
+                    ? `${currentHouse?.twoWheelCount || 0} Motor • ${currentHouse?.fourWheelCount || 0} Mobil` 
+                    : `${currentHouse?.vehicleCount || 0} Kendaraan terdaftar`}
+                </p>
+                <p className="text-[10px] text-emerald-700 font-bold mt-2 flex items-center gap-1">
+                  Pembaruan Data Mandiri →
                 </p>
               </motion.div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-              {/* E-ID Card */}
+              {/* E-ID Smart Card */}
               <div className="lg:col-span-2">
                 <motion.div 
                   whileHover={{ y: -4, scale: 1.005 }}
-                  className="relative group overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-700 to-slate-950 text-white border border-indigo-400/40 hover:border-indigo-300 shadow-[0_20px_60px_rgba(79,70,229,0.25)] rounded-[2.5rem] p-0 min-h-[360px] transition-all id-card-printable relative"
+                  className="relative group overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white border border-indigo-400/40 hover:border-indigo-300 shadow-[0_25px_60px_rgba(79,70,229,0.3)] rounded-[2.5rem] p-0 min-h-[380px] transition-all id-card-printable relative"
                 >
                   {/* Holographic Sheen Animated Light Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                   
                   {/* Decorative Elements */}
-                  <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-400/15 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-400/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/15 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-500/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
                   
                   <div className="relative h-full flex flex-col p-8 md:p-12 justify-between">
-                    <div className="flex justify-between items-start mb-8">
+                    {/* Card Top Row: EMV Chip & Hologram Seal */}
+                    <div className="flex justify-between items-start mb-6">
                       <div>
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 rounded-full text-[9px] font-black uppercase tracking-wider mb-2 backdrop-blur-md border border-white/20">
-                          <CheckCircle size={10} className="text-emerald-400" />
-                          <span>E-ID RESMI • TERAS RT 02</span>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-wider mb-2.5 backdrop-blur-md border border-white/20 text-cyan-200">
+                          <ShieldCheck size={12} className="text-emerald-400" />
+                          <span>E-ID RESMI • HUNTAP TONDO 2</span>
                         </div>
-                        <h3 className="text-xl md:text-2xl font-black tracking-tighter uppercase whitespace-nowrap">Kartu Warga Digital</h3>
-                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] opacity-60">Rukun Tetangga 002 / RW 020 • Tondo</p>
+                        <h3 className="text-xl md:text-2xl font-black tracking-tight uppercase whitespace-nowrap">Kartu Warga Digital</h3>
+                        <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.25em] text-indigo-300/80">Rukun Tetangga 002 / RW 020 • Tondo</p>
                       </div>
-                      <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shrink-0 shadow-lg">
-                        <Home size={32} className="text-white/90" />
+
+                      <div className="flex items-center gap-3">
+                        {/* Gold EMV Chip Simulation */}
+                        <div className="w-12 h-9 rounded-md bg-gradient-to-tr from-amber-300 via-yellow-200 to-amber-400 border border-amber-300/80 shadow-md relative overflow-hidden flex items-center justify-center shrink-0">
+                          <div className="w-full h-[1px] bg-amber-700/40 absolute top-1/2 -translate-y-1/2" />
+                          <div className="h-full w-[1px] bg-amber-700/40 absolute left-1/3" />
+                          <div className="h-full w-[1px] bg-amber-700/40 absolute right-1/3" />
+                          <div className="w-4 h-3 rounded-xs border border-amber-700/50 bg-amber-300/40 z-10" />
+                        </div>
+
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shrink-0 shadow-lg">
+                          <Home size={28} className="text-white/90" />
+                        </div>
                       </div>
                     </div>
 
+                    {/* Card Middle: Citizen Details */}
                     <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-8 mt-auto">
-                      <div className="space-y-4 md:space-y-5 text-left w-full md:w-auto">
+                      <div className="space-y-4 text-left w-full md:w-auto">
                         <div>
-                          <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-0.5">Kepala Keluarga / Penghuni Utama</p>
+                          <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-0.5">Kepala Keluarga / Penghuni Utama</p>
                           <p className="text-2xl md:text-3.5xl font-black tracking-tight text-white">{currentHouse?.headOfFamily}</p>
+                          <p className="text-[10px] font-mono text-slate-400 mt-0.5">
+                            NIK: {formatSensitiveNik(currentHouse?.nik || '', !!showFullNiks['nik'])}
+                          </p>
                         </div>
-                        <div className="flex flex-wrap gap-4 md:gap-10">
+
+                        <div className="flex flex-wrap gap-4 md:gap-8">
                           <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">ID Hunian</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-1">ID Hunian</p>
                             <span 
                               onClick={() => currentHouse?.id && handleCopyToClipboard(currentHouse.id, 'houseId')}
                               className="text-lg md:text-xl font-black hover:text-indigo-200 hover:underline cursor-pointer flex items-center gap-1.5 text-amber-300"
+                              title="Klik untuk salin ID Rumah"
                             >
                               Blok {currentHouse?.block}-{currentHouse?.number}
                             </span>
                           </div>
                           <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Status Iuran ({currentMonth})</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-1">Status Iuran ({currentMonth})</p>
                             <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                               isAllPaid 
                               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
                               : (isMandatory ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30')
                             }`}>
-                              {isAllPaid ? 'Lunas' : (isMandatory ? 'Wajib Bayar' : 'Tagihan Baru')}
+                              {isAllPaid ? '✓ Lunas' : (isMandatory ? '⚠ Wajib Bayar' : 'Tagihan Baru')}
                             </span>
                           </div>
                           <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Poin Keaktifan</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-1">Poin Keaktifan</p>
                             <span 
                               onClick={() => setActiveTab('points')}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-white/20 text-amber-300 border-white/30 cursor-pointer hover:bg-white/30 transition-all"
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-white/15 text-amber-300 border-white/20 cursor-pointer hover:bg-white/25 transition-all"
                             >
                               <Sparkles size={11} /> {currentPoints} Pts ({citizenTier.badge})
                             </span>
@@ -1195,6 +1419,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                         </div>
                       </div>
 
+                      {/* Barcode & Security Stamp */}
                       <div className="bg-white p-3.5 rounded-2xl shadow-2xl self-start md:self-auto flex-shrink-0 animate-fade-in text-center">
                         <QRCodeSVG 
                           value={`RESIDENT:${selectedHouseId}`} 
@@ -1211,21 +1436,91 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                             includeMargin={false}
                           />
                         </div>
-                        <p className="text-[8px] font-black tracking-widest uppercase text-slate-400 mt-2">Scan Barcode</p>
+                        <p className="text-[8px] font-black tracking-widest uppercase text-slate-500 mt-2">Scan QR Warga</p>
                       </div>
                     </div>
                   </div>
                 </motion.div>
 
-                {/* E-ID Card Action Button */}
-                <div className="flex items-center gap-3 mt-4">
+                {/* E-ID Card Action Buttons */}
+                <div className="flex flex-wrap items-center gap-3 mt-4">
                   <Button
                     onClick={() => {
                       window.print();
                     }}
                     className="py-3 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer"
                   >
-                    <Download size={15} /> Cetak / Unduh E-ID Digital
+                    <Printer size={15} /> Cetak Kartu Warga Fisik
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 1012;
+                        canvas.height = 638;
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) throw new Error('Canvas context not available');
+
+                        ctx.beginPath();
+                        if (ctx.roundRect) ctx.roundRect(0, 0, 1012, 638, 48);
+                        else ctx.rect(0, 0, 1012, 638);
+                        ctx.clip();
+
+                        const gradient = ctx.createLinearGradient(0, 0, 1012, 638);
+                        gradient.addColorStop(0, '#1e1b4b');
+                        gradient.addColorStop(0.5, '#312e81');
+                        gradient.addColorStop(1, '#0f172a');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, 1012, 638);
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = '900 36px system-ui, -apple-system, sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.fillText('KARTU WARGA DIGITAL', 80, 150);
+
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                        ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
+                        ctx.fillText('RUKUN TETANGGA 002 / RW 020 • TONDO', 80, 185);
+
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                        ctx.font = '900 12px system-ui, -apple-system, sans-serif';
+                        ctx.fillText('NAMA KEPALA KELUARGA / PENGHUNI', 80, 290);
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = '900 38px system-ui, -apple-system, sans-serif';
+                        ctx.fillText((currentHouse?.headOfFamily || 'Warga RT 02').toUpperCase(), 80, 345);
+
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                        ctx.font = '900 12px system-ui, -apple-system, sans-serif';
+                        ctx.fillText('NOMOR HUNIAN AKTIF', 80, 435);
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = '900 28px system-ui, -apple-system, sans-serif';
+                        ctx.fillText(`BLOK ${currentHouse?.block}-${currentHouse?.number}`, 80, 480);
+
+                        const qrCanvas = document.getElementById('resident-qrcode-canvas') as HTMLCanvasElement;
+                        if (qrCanvas) {
+                          ctx.fillStyle = '#ffffff';
+                          if (ctx.roundRect) ctx.roundRect(660, 140, 272, 318, 32);
+                          else ctx.rect(660, 140, 272, 318);
+                          ctx.fill();
+                          ctx.drawImage(qrCanvas, 696, 172, 200, 200);
+                        }
+
+                        const dataUrl = canvas.toDataURL('image/png');
+                        const link = document.createElement('a');
+                        link.download = `E-ID_RT02_Blok_${currentHouse?.block || 'RT'}_${currentHouse?.number || '02'}.png`;
+                        link.href = dataUrl;
+                        link.click();
+                        toast.success('Kartu E-ID Berhasil Diunduh!');
+                      } catch (e) {
+                        toast.error('Gagal mengunduh kartu E-ID');
+                      }
+                    }}
+                    className="py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 border-slate-200 hover:bg-slate-50 cursor-pointer"
+                  >
+                    <Download size={15} /> Unduh Gambar PNG
                   </Button>
                 </div>
               </div>
@@ -1606,14 +1901,41 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-50">
                 <div>
                   <h3 className="text-lg font-black text-slate-800">Anggota Keluarga Terdaftar</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">Daftar anggota keluarga penghuni yang terdaftar resmi pada database rukun tetangga.</p>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">Daftar resmi penghuni rumah yang tercatat pada database kependudukan RT 002.</p>
                 </div>
-                <button 
-                  onClick={() => setActiveTab('update')}
-                  className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
-                >
-                  Edit KK Mandiri →
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-xl text-xs font-black">
+                    {currentHouse?.occupants || currentHouse?.familyMembers?.length || 1} Jiwa Terdaftar
+                  </span>
+                  <button 
+                    onClick={() => setActiveTab('update')}
+                    className="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+                  >
+                    Edit KK Mandiri →
+                  </button>
+                </div>
+              </div>
+
+              {/* Demographic Summary Pills */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Jiwa</span>
+                  <span className="text-lg font-black text-slate-800 mt-0.5 block">{currentHouse?.occupants || 0} Orang</span>
+                </div>
+                <div className="p-3 bg-blue-50/50 rounded-2xl border border-blue-100 text-center">
+                  <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">Laki-Laki</span>
+                  <span className="text-lg font-black text-blue-900 mt-0.5 block">{maleCount} Jiwa</span>
+                </div>
+                <div className="p-3 bg-pink-50/50 rounded-2xl border border-pink-100 text-center">
+                  <span className="text-[10px] font-bold text-pink-700 uppercase tracking-wider block">Perempuan</span>
+                  <span className="text-lg font-black text-pink-900 mt-0.5 block">{femaleCount} Jiwa</span>
+                </div>
+                <div className="p-3 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-center">
+                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Verifikasi RT</span>
+                  <span className="text-lg font-black text-emerald-900 mt-0.5 block">
+                    {currentHouse?.isVerified ? 'Tervalidasi' : 'Belum'}
+                  </span>
+                </div>
               </div>
 
               {currentHouse?.familyMembers && currentHouse.familyMembers.length > 0 ? (
@@ -1621,31 +1943,66 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   {currentHouse.familyMembers.map((member: any, index: number) => {
                     const isMale = member.gender === 'Laki-laki';
                     return (
-                      <div key={index} className="p-4 bg-slate-50/50 hover:bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3.5 transition-all">
-                        <div className={`p-2.5 rounded-xl shrink-0 ${isMale ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}`}>
-                          <User size={18} />
+                      <div key={index} className="p-4 bg-slate-50/60 hover:bg-slate-50 rounded-2xl border border-slate-100/90 flex items-start gap-3.5 transition-all shadow-xs">
+                        <div className={`p-3 rounded-2xl shrink-0 ${isMale ? 'bg-blue-100/70 text-blue-700' : 'bg-pink-100/70 text-pink-700'}`}>
+                          <User size={20} />
                         </div>
-                        <div className="flex-1 space-y-1 overflow-hidden">
-                          <h4 className="font-extrabold text-slate-800 text-sm truncate">{member.name || '-' }</h4>
-                          <p className="text-[10px] bg-slate-200/60 text-slate-500 font-black px-2 py-0.5 rounded w-fit uppercase tracking-wider">{member.relation || 'Anggota'}</p>
+                        <div className="flex-1 space-y-1.5 overflow-hidden">
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="font-extrabold text-slate-800 text-sm truncate">{member.name || '-' }</h4>
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                              member.relation === 'Kepala Keluarga' 
+                                ? 'bg-indigo-100 text-indigo-800' 
+                                : member.relation === 'Istri' 
+                                  ? 'bg-pink-100 text-pink-800' 
+                                  : member.relation === 'Anak' 
+                                    ? 'bg-emerald-100 text-emerald-800' 
+                                    : 'bg-slate-200/80 text-slate-700'
+                            }`}>
+                              {member.relation || 'Anggota'}
+                            </span>
+                          </div>
+
                           <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-semibold">
                             <span>NIK:</span>
-                            <span className="font-mono text-slate-500">
+                            <span className="font-mono text-slate-600 font-bold">
                               {formatSensitiveNik(member.nik, !!showFullNiks[`member-${index}`])}
                             </span>
                             {member.nik && (
                               <button 
                                 onClick={() => toggleNikVisibility(`member-${index}`)}
-                                className="p-0.5 hover:bg-slate-200/50 rounded text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center justify-center cursor-pointer"
+                                className="p-0.5 hover:bg-slate-200/60 rounded text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center justify-center cursor-pointer"
                                 title={showFullNiks[`member-${index}`] ? "Sembunyikan NIK" : "Tampilkan NIK"}
                               >
                                 {showFullNiks[`member-${index}`] ? <EyeOff size={12} /> : <Eye size={12} />}
                               </button>
                             )}
                           </div>
-                          {member.birthDate && (
-                            <p className="text-[10px] text-slate-400 font-medium font-mono">{member.birthDate}</p>
-                          )}
+
+                          <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[10px] text-slate-500 font-medium">
+                            {member.birthDate && (
+                              <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-slate-100">
+                                <Calendar size={10} className="text-slate-400" />
+                                {member.birthDate}
+                              </span>
+                            )}
+                            {member.job && (
+                              <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-slate-100 truncate max-w-[130px]">
+                                <Briefcase size={10} className="text-slate-400" />
+                                {member.job}
+                              </span>
+                            )}
+                            {member.bpjsStatus && (
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border ${
+                                member.bpjsStatus.toLowerCase().includes('aktif') 
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+                                  : 'bg-slate-100 text-slate-600 border-slate-200'
+                              }`}>
+                                <Activity size={10} />
+                                {member.bpjsStatus}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -3739,7 +4096,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                       <span className="bg-white/20 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded">RT 002</span>
                     </div>
                     <h4 className="text-xl font-black tracking-tight text-white">
-                      Rumah {activeHouse?.id}
+                      Rumah Blok {currentHouse?.block}-{currentHouse?.number}
                     </h4>
                   </div>
                 </div>
