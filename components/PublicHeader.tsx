@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, ChevronDown, LayoutGrid, Wallet, Users, Info, Download, X, Smartphone, Sparkles, HelpCircle,
-  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, Package, ShieldAlert, UserPlus, Menu, Wrench, Zap, MapPin
+  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, Package, ShieldAlert, UserPlus, Menu, Wrench, Zap, MapPin, Building, History
 } from 'lucide-react';
 import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
@@ -36,12 +36,14 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       label: 'Layanan',
       icon: LayoutGrid,
       columns: 2,
-      width: 'w-[480px] sm:w-[540px]',
+      width: 'w-[500px] sm:w-[560px]',
       items: [
         { path: '/services?tab=surat', label: 'Persuratan', desc: 'Pengisian form surat pengantar RT kilat', icon: FileText, color: 'text-indigo-600 bg-indigo-50/70 border-indigo-150' },
         { path: '/services?tab=tamu', label: 'Lapor Tamu 24 Jam', desc: 'Pelaporan tamu menginap & keberadaan', icon: ShieldAlert, color: 'text-amber-600 bg-amber-50/70 border-amber-150' },
+        { path: '/services?tab=lapor', label: 'Aduan & Aspirasi', desc: 'Keluhan fasilitas, lingkungan & ketertiban', icon: AlertTriangle, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
         { path: '/services?tab=mutasi', label: 'Mutasi Warga', desc: 'Pendataan lapor pindah, lahir & duka', icon: UserPlus, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
-        { path: '/dokumen', label: 'Arsip Dokumen', desc: 'Berita acara, regulasi, & draf surat kosong', icon: Download, color: 'text-blue-600 bg-blue-50/70 border-blue-150' },
+        { path: '/services?tab=sewa', label: 'Lapor Sewa & Kontrak', desc: 'Registrasi penghuni baru & pemilik rumah', icon: Building, color: 'text-purple-600 bg-purple-50/70 border-purple-150' },
+        { path: '/services?tab=history', label: 'Cek Status & Berkas', desc: 'Lacak proses nomor resi surat & unduh PDF', icon: History, color: 'text-sky-600 bg-sky-50/70 border-sky-150' },
       ]
     },
     {
@@ -68,6 +70,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
         { path: '/peta', label: 'Peta Wilayah & Mitigasi', desc: 'Denah blok hunian, jalur evakuasi & live BMKG', icon: MapPin, color: 'text-rose-600 bg-rose-50/70 border-rose-150' },
         { path: '/faq', label: 'E-FAQ RT', desc: 'Solusi mandiri kebingungan harian warga', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/70 border-violet-150' },
         { path: '/kegiatan', label: 'Jadwal Agenda', desc: 'Jadwal kerja bakti, ronda & posyandu', icon: Calendar, color: 'text-emerald-600 bg-emerald-50/70 border-emerald-150' },
+        { path: '/dokumen', label: 'Arsip Dokumen', desc: 'Berita acara, regulasi, & draf surat kosong', icon: Download, color: 'text-blue-600 bg-blue-50/70 border-blue-150' },
       ]
     }
   ];

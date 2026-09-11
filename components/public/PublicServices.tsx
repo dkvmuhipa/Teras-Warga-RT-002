@@ -23,12 +23,13 @@ interface PublicServicesProps {
 
 export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, houses = [] }) => {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'lapor' ? 'lapor' : 
-                     searchParams.get('tab') === 'tamu' ? 'tamu' : 
-                     searchParams.get('tab') === 'sewa' ? 'sewa' : 'surat';
+  const tabParam = searchParams.get('tab');
+  const initialTab = (tabParam && ['surat', 'lapor', 'tamu', 'mutasi', 'sewa', 'history'].includes(tabParam))
+    ? (tabParam as 'surat' | 'lapor' | 'tamu' | 'mutasi' | 'sewa' | 'history')
+    : 'surat';
   const initialHouseId = searchParams.get('houseId') || '';
   
-  const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'tamu' | 'mutasi' | 'sewa' | 'history'>(initialTab as any);
+  const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'tamu' | 'mutasi' | 'sewa' | 'history'>(initialTab);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [statusSearchId, setStatusSearchId] = useState('');
   const [searchResult, setSearchResult] = useState<any>(null);
@@ -277,7 +278,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       setTimeout(() => {
         handleSearchById(id);
       }, 100);
-    } else if (tab === 'lapor' || tab === 'tamu' || tab === 'surat' || tab === 'mutasi' || tab === 'history') {
+    } else if (tab && ['surat', 'lapor', 'tamu', 'mutasi', 'sewa', 'history'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [searchParams]);
