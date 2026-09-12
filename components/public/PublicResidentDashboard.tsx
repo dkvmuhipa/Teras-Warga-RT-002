@@ -160,14 +160,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   
   // Data Privacy & Security Toggles
   const [showFullNiks, setShowFullNiks] = useState<Record<string, boolean>>({});
-  const [copiedBank, setCopiedBank] = useState<string | null>(null);
-
-  const handleCopyAccount = (bankName: string, accNumber: string) => {
-    navigator.clipboard.writeText(accNumber.replace(/[^0-9]/g, ''));
-    setCopiedBank(bankName);
-    toast.success(`Nomor rekening ${bankName} berhasil disalin!`);
-    setTimeout(() => setCopiedBank(null), 2500);
-  };
   
   const toggleNikVisibility = (id: string) => {
     setShowFullNiks(prev => ({
@@ -4035,62 +4027,54 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             </div>
           </div>
 
-          {/* Rekening Resmi Kas RT & Panduan Pembayaran */}
+          {/* Tata Cara Pembayaran Kas RT 002 */}
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <CreditCard size={14} className="text-slate-500" /> Rekening Resmi Kas RT 002
+                <Wallet size={14} className="text-slate-500" /> Tata Cara &amp; Metode Pembayaran
               </h4>
-              <span className="text-[10px] text-slate-400 font-medium">Transfer &amp; Tunai</span>
+              <span className="text-[10px] font-black px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full uppercase tracking-wider">
+                Pembayaran Tunai (Cash)
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {/* BSI */}
-              <div className="p-3.5 bg-emerald-50/60 hover:bg-emerald-50 transition-colors border border-emerald-200/80 rounded-2xl relative group">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-black text-emerald-950 uppercase">Bank Syariah Indonesia (BSI)</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyAccount('BSI', '7215984120')}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-white shadow-sm border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded-lg text-[10px] font-black transition-all active:scale-95"
-                  >
-                    {copiedBank === 'BSI' ? <Check size={11} /> : <Copy size={11} />}
-                    <span>{copiedBank === 'BSI' ? 'Tersalin' : 'Salin'}</span>
-                  </button>
-                </div>
-                <p className="font-mono text-base font-black text-slate-800 tracking-wider">7215-984-120</p>
-                <p className="text-[10px] text-slate-500 font-semibold mt-0.5">a.n. KAS RT 002 HUNTAP TONDO 2</p>
+            {/* Opsi Tunai ke Bendahara */}
+            <div className="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-start gap-3.5">
+              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-600/20 shrink-0 mt-0.5">
+                <Wallet size={20} />
               </div>
-
-              {/* Mandiri */}
-              <div className="p-3.5 bg-indigo-50/60 hover:bg-indigo-50 transition-colors border border-indigo-200/80 rounded-2xl relative group">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-black text-indigo-950 uppercase">Bank Mandiri</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyAccount('Mandiri', '1510018924102')}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-white shadow-sm border border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white rounded-lg text-[10px] font-black transition-all active:scale-95"
-                  >
-                    {copiedBank === 'Mandiri' ? <Check size={11} /> : <Copy size={11} />}
-                    <span>{copiedBank === 'Mandiri' ? 'Tersalin' : 'Salin'}</span>
-                  </button>
-                </div>
-                <p className="font-mono text-base font-black text-slate-800 tracking-wider">151-00-1892410-2</p>
-                <p className="text-[10px] text-slate-500 font-semibold mt-0.5">a.n. KAS RT 002 HUNTAP TONDO 2</p>
+              <div className="space-y-1">
+                <h5 className="text-xs font-black text-emerald-950 uppercase tracking-wide flex items-center gap-2">
+                  <span>Pembayaran Tunai ke Bendahara RT 002</span>
+                </h5>
+                <p className="text-xs text-emerald-900/90 leading-relaxed font-medium">
+                  Iuran bulanan diserahkan langsung secara tunai kepada <strong>Bendahara RT 002</strong> atau <strong>Ketua RT</strong> di Sekretariat / Pos Ronda RT 002 Huntap Tondo 2.
+                </p>
               </div>
             </div>
 
-            {/* Petunjuk Pembayaran */}
+            {/* Pemberitahuan Rekening Bank */}
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-start gap-3">
+              <div className="p-2 bg-slate-200/70 text-slate-600 rounded-xl shrink-0 mt-0.5">
+                <Info size={16} />
+              </div>
+              <div className="space-y-0.5 text-xs text-slate-600">
+                <p className="font-bold text-slate-800">Informasi Rekening Bank Kas RT</p>
+                <p className="text-[11.5px] leading-relaxed">
+                  Saat ini rekening kas resmi RT 002 belum tersedia / belum dibuka. Seluruh transaksi iuran lingkungan dikelola secara tunai dan dibukukan langsung ke sistem pencatatan kas RT 002.
+                </p>
+              </div>
+            </div>
+
+            {/* Petunjuk Koordinasi */}
             <div className="p-3.5 bg-amber-50/80 rounded-2xl border border-amber-200/70 text-xs text-amber-900 space-y-1.5">
               <div className="flex items-center gap-1.5 font-black text-[11px] text-amber-950 uppercase tracking-wide">
-                <Info size={13} className="text-amber-700" />
-                <span>Petunjuk Pembayaran &amp; Verifikasi</span>
+                <Phone size={13} className="text-amber-700" />
+                <span>Koordinasi Penyerahan &amp; Konfirmasi Pembayaran</span>
               </div>
-              <ul className="text-[11.5px] text-amber-900/90 space-y-1 font-medium pl-4 list-disc">
-                <li><strong>Transfer Bank:</strong> Beri keterangan transfer: <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-[10px] font-bold">IURAN {currentHouse?.block}-{currentHouse?.number}</code>.</li>
-                <li><strong>Tunai:</strong> Pembayaran tunai dapat diserahkan langsung kepada Bendahara RT 002 atau Ketua RT.</li>
-                <li>Setelah melakukan pembayaran, mohon klik tombol WhatsApp di bawah untuk konfirmasi pelunasan agar status tercatat real-time.</li>
-              </ul>
+              <p className="text-[11.5px] text-amber-900/90 space-y-1 font-medium leading-relaxed">
+                Untuk janjian penyerahan iuran atau konfirmasi setelah pembayaran tunai dilakukan, silakan hubungi <strong>Bendahara RT 002</strong> via WhatsApp agar status di dashboard segera diperbarui menjadi Lunas.
+              </p>
             </div>
           </div>
 
@@ -4112,15 +4096,16 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
               onClick={() => {
                 const message = `Halo Pengurus / Bendahara RT 002 Huntap Tondo 2,
 
-Saya ingin konfirmasi pembayaran iuran lingkungan:
+Saya ingin konfirmasi / koordinasi pembayaran iuran lingkungan:
 • Periode: ${currentMonth}
 • Hunian: Blok ${currentHouse?.block}-${currentHouse?.number}
 • Nama Warga: ${currentHouse?.residentName || 'Warga'}
 • Retribusi Sampah TPS3R (${currentHouseWasteTier}): Rp ${sampahFee.toLocaleString('id-ID')}
-${airFee > 0 ? `• Iuran Air: Rp ${airFee.toLocaleString('id-ID')}\n` : ''}• Status: ${isAllPaid ? 'Sudah Lunas' : 'Konfirmasi Pembayaran'}
+${airFee > 0 ? `• Iuran Air: Rp ${airFee.toLocaleString('id-ID')}\n` : ''}• Metode Pembayaran: Tunai (Cash)
 • Nominal: Rp ${(totalRemainingFee > 0 ? totalRemainingFee : totalFee).toLocaleString('id-ID')}
+• Status: ${isAllPaid ? 'Sudah Lunas Terbayar' : 'Ingin Menyerahkan Iuran / Konfirmasi'}
 
-Mohon bantuan pengecekan dan verifikasi status. Terima kasih!`;
+Mohon informasi waktu penyerahan atau bantuan verifikasi pencatatan status iuran. Terima kasih!`;
                 window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(message)}`, '_blank');
               }}
               className={`flex-1 py-3.5 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95 ${
@@ -4130,7 +4115,7 @@ Mohon bantuan pengecekan dan verifikasi status. Terima kasih!`;
               }`}
             >
               <Send size={15} />
-              <span>{isAllPaid ? 'Kirim Bukti ke Bendahara (WA)' : 'Konfirmasi Bayar via WA'}</span>
+              <span>{isAllPaid ? 'Hubungi Bendahara RT (WA)' : 'Konfirmasi / Janjian Bayar (WA)'}</span>
             </Button>
           </div>
         </div>
