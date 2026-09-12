@@ -1238,8 +1238,103 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="space-y-8"
+            className="space-y-6"
           >
+            {/* 1. Water Meter Action Reminder Banner */}
+            {!currentWaterReading && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-white/10"
+              >
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white shrink-0 border border-white/20 shadow-inner">
+                    <Droplets size={24} className="text-sky-200 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[9px] font-black uppercase tracking-wider mb-1">
+                      <Sparkles size={11} className="text-amber-300" />
+                      <span>Pengingat Pencatatan Mandiri</span>
+                    </div>
+                    <h5 className="text-sm sm:text-base font-black text-white tracking-tight">
+                      Meteran Air PDAM Periode {currentMonth} Belum Dilaporkan
+                    </h5>
+                    <p className="text-xs text-sky-100/90 mt-0.5 font-medium leading-relaxed">
+                      Stand meteran air bulan ini belum dicatat. Mohon laporkan angka &amp; foto fisik meteran sebelum tanggal <strong>{waterUtilityConfig.readingDueDate || 20} {currentMonth}</strong>.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setIsWaterModalOpen(true)}
+                  className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-sky-50 text-blue-900 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-black/10 shrink-0 transition-transform active:scale-95 flex items-center justify-center gap-1.5"
+                >
+                  <span>Catat Meter Sekarang</span>
+                  <span>→</span>
+                </Button>
+              </motion.div>
+            )}
+
+            {/* 2. Approved Letter Notification Banner */}
+            {(() => {
+              const approvedLetter = letters.find(l => l.status === 'Disetujui' || l.status === 'Approved');
+              if (approvedLetter) {
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-xl shadow-emerald-600/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-white/10"
+                  >
+                    <div className="flex items-start sm:items-center gap-3.5">
+                      <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white shrink-0 border border-white/20 shadow-inner">
+                        <CheckCircle2 size={24} className="text-emerald-200" />
+                      </div>
+                      <div>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[9px] font-black uppercase tracking-wider mb-1">
+                          <Check size={11} className="text-emerald-200 stroke-[3]" />
+                          <span>Surat Pengantar Siap Diunduh</span>
+                        </div>
+                        <h5 className="text-sm sm:text-base font-black text-white tracking-tight">
+                          {approvedLetter.type} Telah Disetujui Ketua RT
+                        </h5>
+                        <p className="text-xs text-emerald-100/90 mt-0.5 font-medium leading-relaxed">
+                          No. Registrasi: <strong className="font-mono bg-black/20 px-1.5 py-0.5 rounded">{approvedLetter.letterNumber || '-'}</strong> • Dilengkapi sandi QR autentikasi resmi RT 002.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex w-full sm:w-auto items-center gap-2">
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await generateSuratPengantar(approvedLetter, pdfConfig, false);
+                            toast.success('Surat Pengantar resmi berhasil diunduh!');
+                          } catch (err) {
+                            console.error(err);
+                            toast.error('Gagal mengunduh berkas PDF Surat Pengantar.');
+                          }
+                        }}
+                        className="flex-1 sm:flex-initial px-5 py-3 bg-white hover:bg-emerald-50 text-emerald-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-black/10 shrink-0 transition-transform active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <Download size={15} />
+                        <span>Unduh PDF</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => setActiveTab('letters')}
+                        variant="outline"
+                        className="px-3.5 py-3 bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-2xl text-xs font-bold transition-all"
+                        title="Lihat Rincian Timeline"
+                      >
+                        <Clock size={15} />
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              }
+              return null;
+            })()}
+
             {/* Bento Grid Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
               {/* Card 1: Iuran */}
@@ -2616,12 +2711,33 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                           </div>
                         </div>
 
+                        {/* Action Toolbar */}
+                        {isPending && (
+                          <div className="mt-5 pt-4 border-t border-slate-100">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const msg = `Halo Ketua RT 002, saya ingin menanyakan status permohonan surat pengantar:
+• Jenis Surat: ${letter.type}
+• Pemohon: ${letter.applicantName || currentHouse?.residentName || 'Warga'} (Blok ${currentHouse?.block}-${currentHouse?.number})
+• Tanggal Pengajuan: ${formattedDate}
+Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
+                                window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(msg)}`, '_blank');
+                              }}
+                              className="w-full py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-indigo-200 transition-all cursor-pointer"
+                            >
+                              <Phone size={14} /> Tanya Ketua RT via WhatsApp
+                            </button>
+                          </div>
+                        )}
+
                         {/* Download PDF Section */}
                         {isApproved && (
-                          <div className="mt-5 pt-4 border-t border-slate-100">
+                          <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
                             <Button 
                               onClick={async () => {
                                 try {
+                                  toast.info('Menyiapkan berkas PDF resmi...');
                                   await generateSuratPengantar(letter, pdfConfig, false);
                                   toast.success('Surat Pengantar berhasil diunduh!');
                                 } catch (error) {
@@ -2629,10 +2745,24 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                                   toast.error('Gagal mengunduh Surat Pengantar PDF.');
                                 }
                               }}
-                              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/15 animate-bounce-short"
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/15"
                             >
                               <Download size={14} /> Unduh Surat Pengantar Resmi (PDF)
                             </Button>
+                            {letter.letterNumber && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(letter.letterNumber);
+                                  toast.success('Nomor surat berhasil disalin!');
+                                }}
+                                className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                                title="Salin Nomor Surat"
+                              >
+                                <Copy size={13} />
+                                <span>Salin No</span>
+                              </button>
+                            )}
                           </div>
                         )}
                       </Card>
@@ -3064,9 +3194,27 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                                   type="text" 
                                   className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
                                   value={member.nik || ''}
-                                  onChange={e => updateFamilyMember(index, 'nik', e.target.value)}
+                                  onChange={e => updateFamilyMember(index, 'nik', e.target.value.replace(/\D/g, ''))}
                                   placeholder="16 digit NIK"
+                                  maxLength={16}
                                 />
+                                {member.nik && member.nik.length === 16 && (() => {
+                                  const dup = checkNikDuplicate(member.nik, selectedHouseId, houses);
+                                  if (dup.isDuplicate) {
+                                    return (
+                                      <p className="text-[9px] font-bold text-rose-600 mt-1 flex items-center gap-1">
+                                        <AlertCircle size={10} className="shrink-0" />
+                                        NIK sudah terdaftar di Blok {dup.houseId} ({dup.residentName})
+                                      </p>
+                                    );
+                                  }
+                                  return (
+                                    <p className="text-[9px] font-bold text-emerald-600 mt-1 flex items-center gap-1">
+                                      <Check size={10} className="shrink-0 stroke-[3]" />
+                                      NIK valid &amp; belum terdaftar
+                                    </p>
+                                  );
+                                })()}
                               </div>
                               <div>
                                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hubungan</label>

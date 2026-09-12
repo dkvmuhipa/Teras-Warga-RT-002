@@ -353,6 +353,22 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         {formData.nik && formData.nik.length !== 16 && (
                           <p className="text-[10px] text-amber-600 font-bold mt-1 ml-1">NIK harus 16 digit angka ({formData.nik.length}/16)</p>
                         )}
+                        {formData.nik && formData.nik.length === 16 && (() => {
+                          const dup = checkNikDuplicate(formData.nik, editingHouseId || undefined, houses);
+                          if (dup.isDuplicate) {
+                            return (
+                              <div className="mt-1.5 p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2 text-[11px] font-bold text-rose-700 leading-tight">
+                                <AlertCircle size={15} className="text-rose-600 shrink-0 mt-0.5" />
+                                <span>⚠️ NIK ini sudah terdaftar atas nama <strong>{dup.residentName}</strong> ({dup.role}) di Unit {dup.houseId}.</span>
+                              </div>
+                            );
+                          }
+                          return (
+                            <p className="text-[10px] text-emerald-600 font-bold mt-1 ml-1 flex items-center gap-1">
+                              <Check size={11} className="stroke-[3]" /> NIK valid &amp; belum terdaftar di unit lain.
+                            </p>
+                          );
+                        })()}
                       </div>
                       <div className="md:col-span-6">
                         <FormField 
@@ -366,6 +382,23 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         {formData.kkNumber && formData.kkNumber.length !== 16 && (
                           <p className="text-[10px] text-amber-600 font-bold mt-1 ml-1">No. KK harus 16 digit angka ({formData.kkNumber.length}/16)</p>
                         )}
+                        {formData.kkNumber && formData.kkNumber.length === 16 && (() => {
+                          const cleanKk = formData.kkNumber.trim();
+                          const dupKk = houses.find((h: any) => h.id !== editingHouseId && (h.kkNumber || '').replace(/\D/g, '') === cleanKk);
+                          if (dupKk) {
+                            return (
+                              <div className="mt-1.5 p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2 text-[11px] font-bold text-amber-800 leading-tight">
+                                <AlertCircle size={15} className="text-amber-600 shrink-0 mt-0.5" />
+                                <span>⚠️ No. KK ini sudah terdaftar pada hunian Blok {dupKk.block}-{dupKk.number} ({dupKk.headOfFamily || 'Warga'}).</span>
+                              </div>
+                            );
+                          }
+                          return (
+                            <p className="text-[10px] text-emerald-600 font-bold mt-1 ml-1 flex items-center gap-1">
+                              <Check size={11} className="stroke-[3]" /> No. KK valid &amp; unik.
+                            </p>
+                          );
+                        })()}
                       </div>
 
                        <div className="md:col-span-6">
@@ -1488,6 +1521,43 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               }}
                               maxLength={16}
                             />
+                            {member.nik && member.nik.length !== 16 && (
+                              <p className="text-[10px] text-amber-600 font-bold mt-1 ml-1">NIK harus 16 digit angka ({member.nik.length}/16)</p>
+                            )}
+                            {member.nik && member.nik.length === 16 && (() => {
+                              const cleanHeadNik = (formData.nik || '').replace(/\D/g, '');
+                              if (cleanHeadNik && member.nik === cleanHeadNik) {
+                                return (
+                                  <div className="mt-1 p-2 bg-rose-50 border border-rose-200 rounded-lg text-[10px] font-bold text-rose-700 flex items-center gap-1.5">
+                                    <AlertCircle size={13} className="shrink-0 text-rose-600" />
+                                    <span>⚠️ NIK sama dengan NIK Kepala Keluarga!</span>
+                                  </div>
+                                );
+                              }
+                              const dupOther = formData.familyMembers.find((m: any, i: number) => i !== idx && m.nik === member.nik);
+                              if (dupOther) {
+                                return (
+                                  <div className="mt-1 p-2 bg-rose-50 border border-rose-200 rounded-lg text-[10px] font-bold text-rose-700 flex items-center gap-1.5">
+                                    <AlertCircle size={13} className="shrink-0 text-rose-600" />
+                                    <span>⚠️ NIK ganda dengan Anggota #{formData.familyMembers.indexOf(dupOther) + 1}!</span>
+                                  </div>
+                                );
+                              }
+                              const dup = checkNikDuplicate(member.nik, editingHouseId || undefined, houses);
+                              if (dup.isDuplicate) {
+                                return (
+                                  <div className="mt-1 p-2 bg-rose-50 border border-rose-200 rounded-lg text-[10px] font-bold text-rose-700 flex items-center gap-1.5">
+                                    <AlertCircle size={13} className="shrink-0 text-rose-600" />
+                                    <span>⚠️ NIK sudah terdaftar di Unit {dup.houseId} ({dup.residentName})!</span>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <p className="text-[10px] text-emerald-600 font-bold mt-1 ml-1 flex items-center gap-1">
+                                  <Check size={11} className="stroke-[3]" /> NIK valid &amp; unik.
+                                </p>
+                              );
+                            })()}
                             <FormField 
                               label="Tanggal Lahir" 
                               showAsterisk
