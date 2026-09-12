@@ -1303,7 +1303,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   {currentWaterReading ? `${currentWaterReading.usage} m³ • Rp ${currentWaterReading.totalAmount.toLocaleString('id-ID')}` : 'Catat Pemakaian'}
                 </p>
                 <p className="text-[11px] text-slate-500 font-semibold mt-1">
-                  {currentWaterReading ? `Angka: ${currentWaterReading.reading} m³ (${waterUtilityConfig.providerName || 'PDAM'})` : `Batas input: Tgl ${waterUtilityConfig.readingDueDate || 20} ${currentMonth}`}
+                  {currentWaterReading ? `Angka: ${currentWaterReading.currentReading} m³ (${waterUtilityConfig.providerName || 'PDAM'})` : `Batas input: Tgl ${waterUtilityConfig.readingDueDate || 20} ${currentMonth}`}
                 </p>
                 <p className="text-[10px] text-cyan-700 font-bold mt-2 flex items-center gap-1">
                   Buka Portal Meter Air →
