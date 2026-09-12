@@ -939,11 +939,11 @@ ${sched || "- Giliran ronda bergantian di pos ronda keamanan"}
     
     // 5. Iuran & Monthly Contribution Info
     if (q.includes('iuran') || q.includes('bayar') || q.includes('biaya') || q.includes('tunggakan') || q.includes('tarif') || q.includes('jumlah iuran') || q.includes('kas')) {
-      return `💰 *Informasi Iuran Bulanan RT 02:*
+      return `💰 *Informasi Iuran Lingkungan RT 02:*
 
-- **Nominal Iuran:** **Rp 25.000 / Bulan** per Kepala Keluarga (KK).
-- **Alokasi Dana:** Iuran wajib ini digunakan penuh untuk pemeliharaan keamanan lingkungan (ronda/poskamling) serta biaya operasional pengangkutan bak sampah lingkungan.
-- **Metode Pembayaran:** Dapat dibayarkan secara langsung melalui **Bendahara RT 02** atau ditransfer ke rekening resmi kas RT.`;
+- **Retribusi Sampah TPS3R:** Berjenjang sesuai kategori hunian (Umum: Rp 20.000, PKH: Rp 10.000, PNS/ASN: Rp 35.000).
+- **Fasilitas Air Bersih:** Dikelola langsung secara mandiri melalui PDAM Kota Palu dengan sistem pencatatan meter.
+- **Metode Pembayaran Kas RT:** Dibayarkan secara tunai langsung kepada **Bendahara RT 02** di Sekretariat / Pos Ronda RT 002.`;
     }
     
     // 6. Trash Schedule Info

@@ -57,7 +57,8 @@ import {
   Printer,
   Bell,
   Share2,
-  Wallet
+  Wallet,
+  Receipt
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
@@ -90,7 +91,7 @@ import {
   checkNikDuplicate
 } from '../../services/databaseService';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { generateSuratPengantar } from '../../services/pdfService';
+import { generateSuratPengantar, generateIuranReceiptPDF } from '../../services/pdfService';
 import { NotificationToggle } from '../PushNotificationManager';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -177,7 +178,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     return nik.length > 4 ? `${nik.slice(0, 2)}******${nik.slice(-2)}` : '******';
   };
   
-  const { getPaymentStatus, settings } = useFinancial();
+  const { getPaymentStatus, settings, iuranPayments } = useFinancial();
   const currentHouse = houses.find(h => h.id === selectedHouseId);
 
   const currentMonth = getIndonesianMonthYear(new Date());
@@ -231,6 +232,33 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   const unpaidSampahFee = isPaidSampah ? 0 : sampahFee;
   const totalRemainingFee = unpaidAirFee + unpaidSampahFee;
   const totalFee = totalBaseFee;
+
+  // Handle Download Kwitansi PDF Resmi
+  const handleDownloadReceipt = () => {
+    if (!currentHouse) return;
+    const existingPayment = iuranPayments?.find(
+      (p: any) => p.houseId === currentHouse.id && (p.month === currentMonth || p.period === currentMonth)
+    );
+
+    const paymentData = existingPayment || {
+      id: `KAS-${currentHouse.block}${currentHouse.number}-${Date.now().toString().slice(-6)}`,
+      headOfFamily: currentHouse.headOfFamily || currentHouse.residentName || 'Warga RT 002',
+      block: currentHouse.block,
+      number: currentHouse.number,
+      type: airFee > 0 ? 'Both' : 'Sampah',
+      month: currentMonth,
+      date: new Date().toISOString(),
+      amount: totalFee
+    };
+
+    try {
+      generateIuranReceiptPDF(paymentData, pdfConfig);
+      toast.success('Kwitansi resmi iuran berhasil diunduh!');
+    } catch (err) {
+      console.error('Error generating receipt PDF:', err);
+      toast.error('Gagal mengunduh kwitansi PDF.');
+    }
+  };
 
   // Modern Greeting Helper
   const getGreeting = () => {
@@ -4080,14 +4108,24 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
-            <Button onClick={() => setIsIuranModalOpen(false)} variant="outline" className="sm:w-28 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider">
+            <Button onClick={() => setIsIuranModalOpen(false)} variant="outline" className="sm:w-24 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider">
               Tutup
             </Button>
+            {isAllPaid && (
+              <Button
+                type="button"
+                onClick={handleDownloadReceipt}
+                className="py-3.5 px-4 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-md shadow-teal-600/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <Receipt size={15} />
+                <span>Kwitansi PDF</span>
+              </Button>
+            )}
             <Button
               type="button"
               onClick={() => window.print()}
               variant="outline"
-              className="sm:w-36 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider border-slate-200 hover:bg-slate-100 flex items-center justify-center gap-2"
+              className="sm:w-32 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider border-slate-200 hover:bg-slate-100 flex items-center justify-center gap-2"
             >
               <Printer size={15} />
               <span>Cetak Bukti</span>

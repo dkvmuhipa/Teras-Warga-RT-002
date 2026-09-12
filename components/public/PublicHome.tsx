@@ -710,9 +710,14 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                   <div className="p-2 bg-blue-500/20 rounded-xl text-blue-400">
                     <Droplets size={16} />
                   </div>
-                  <span className="text-xs font-bold text-slate-200">Tarif Air</span>
+                  <div>
+                    <span className="text-xs font-bold text-slate-200">Fasilitas Air Bersih</span>
+                    <p className="text-[10px] text-slate-400">Sistem Meter Mandiri</p>
+                  </div>
                 </div>
-                <span className="text-xs font-black text-white">Rp {financialSettings.airFee.toLocaleString('id-ID')}</span>
+                <span className="text-xs font-black text-white">
+                  {financialSettings.airFee > 0 ? `Rp ${financialSettings.airFee.toLocaleString('id-ID')}` : 'PDAM (Mandiri)'}
+                </span>
               </div>
 
               <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-2xl border border-white/10">
@@ -720,9 +725,14 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                   <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400">
                     <ShoppingCart size={16} />
                   </div>
-                  <span className="text-xs font-bold text-slate-200">Tarif Sampah</span>
+                  <div>
+                    <span className="text-xs font-bold text-slate-200">Retribusi Sampah TPS3R</span>
+                    <p className="text-[10px] text-slate-400">Berjenjang Sesuai Kategori</p>
+                  </div>
                 </div>
-                <span className="text-xs font-black text-white">Rp {financialSettings.sampahFee.toLocaleString('id-ID')}</span>
+                <span className="text-xs font-black text-white">
+                  {financialSettings.sampahFee ? `Rp ${financialSettings.sampahFee.toLocaleString('id-ID')}` : 'Rp 20.000'}
+                </span>
               </div>
               
               {/* Info Transparansi Tambahan */}
