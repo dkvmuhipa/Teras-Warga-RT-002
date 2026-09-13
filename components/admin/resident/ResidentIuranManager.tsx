@@ -774,7 +774,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                           <button 
                             onClick={() => {
                               const typeLabel = filterType === 'All' ? 'Air & Sampah' : 'Iuran ' + filterType;
-                              const msg = `Halo Bapak/Ibu ${house.headOfFamily} (Blok ${house.block}-${house.number}),\n\nMohon maaf mengganggu ketenangannya, kami ingin menginformasikan rincian tunggakan iuran ${typeLabel} untuk rumah Bapak/Ibu:\n\n📅 *Total:* ${arrears.length} Bulan\n📝 *Periode:* ${arrears.join(', ')}\n💰 *Total Nominal:* Rp ${totalAmount.toLocaleString()}\n\nMohon bantuannya untuk segera melakukan penyelesaian iuran demi kelancaran operasional RT. Pembayaran bisa dilakukan melalui pengurus atau transfer.\n\nTerima kasih atas pengertiannya. 🙏`;
+                              const msg = `Halo Bapak/Ibu ${house.headOfFamily} (Blok ${house.block}-${house.number}),\n\nMohon maaf mengganggu ketenangannya, kami ingin menginformasikan rincian tunggakan iuran ${typeLabel} untuk rumah Bapak/Ibu:\n\n📅 *Total:* ${arrears.length} Bulan\n📝 *Periode:* ${arrears.join(', ')}\n💰 *Total Nominal:* Rp ${totalAmount.toLocaleString()}\n\nMohon bantuannya untuk segera melakukan penyelesaian iuran demi kelancaran operasional RT. Pembayaran dapat diserahkan secara tunai langsung ke Bendahara RT 002 / Pos Ronda. Bukti kwitansi resmi PDF akan langsung diterbitkan.\n\nTerima kasih atas pengertian dan kerjasamanya. 🙏`;
                               onSendWhatsApp(house, msg);
                             }}
                             className="px-4 py-3.5 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-100 transition-all active:scale-95 border border-emerald-100"

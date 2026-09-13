@@ -1011,7 +1011,7 @@ Rincian Kewajiban:
 - *Rincian:* ${dataContext?.itemsDetail || 'Iuran rutin bulanan'}
 - *Total Tunggakan:* *Rp ${totalAmountStr}*
 
-💳 Pembayaran dapat diserahkan langsung ke Bendahara RT atau via transfer rekening resmi RT 02.
+💵 Pembayaran dapat diserahkan langsung secara tunai ke Bendahara RT 002 (Pos Ronda/Rumah Bendahara). Bukti kwitansi resmi berformat PDF akan langsung diterbitkan.
 
 Mari bersama kita kuatkan silaturahmi dan ketertiban lingkungan demi kedaulatan RT 02 yang harmonis. Atas partisipasi nyata Bapak/Ibu, kami ucapkan terima kasih banyak.
 
@@ -1163,7 +1163,7 @@ Salam hangat rukun warga,
         Tunggakan Periode: ${dataContext?.unpaidMonths || ''}
         Total Tunggakan: Rp ${Number(dataContext?.totalAmount || 0).toLocaleString('id-ID')}
         Rincian tunggakan: ${dataContext?.itemsDetail || 'Iuran rutin'}
-        Metode Pembayaran: Transfer Rekening RT atau Bendahara RT
+        Metode Pembayaran: Tunai langsung ke Bendahara RT 002 (Kwitansi Resmi PDF terbit)
         
         Gaya bahasa/Suasana: ${tone || 'Formal'}
         Format: Teks siap kirim di WhatsApp. DILARANG menggunakan karakter double asterik (**) atau format Markdown berat. Gunakan bullet points, baris baru, dan susunan emoji yang sopan, ramah, tertata rapi, dan meyakinkan agar warga segera melunasi iurannya secara proaktif.`;

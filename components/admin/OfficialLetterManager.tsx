@@ -174,7 +174,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
         type: 'Pemberitahuan',
         subject: 'Pemberitahuan Pembayaran Iuran Kebersihan & Pengelolaan Air PDAM',
         recipient: 'Seluruh Kepala Keluarga RT 002 / RW 020',
-        content: '<p>Dengan hormat,</p><p>Disampaikan kepada seluruh warga RT 002 / RW 020 Kelurahan Tondo perihal pembayaran iuran bulanan kebersihan lingkungan serta tagihan air PDAM (tarif dasar Rp35.000 / 10 m³ pertama).</p><p>Pembayaran dapat dilakukan melalui transfer kas RT atau disetorkan langsung ke bendahara RT sebelum tanggal 10 setiap bulannya. Status lunas dapat dicek secara transparan di aplikasi Teras Warga.</p><p>Atas kerjasama dan kedisiplinan bapak/ibu warga dalam mendukung kelancaran operasional fasilitas lingkungan, kami ucapkan terima kasih.</p>'
+        content: '<p>Dengan hormat,</p><p>Disampaikan kepada seluruh warga RT 002 / RW 020 Kelurahan Tondo perihal pembayaran iuran bulanan kebersihan lingkungan serta tagihan air PDAM (tarif dasar Rp35.000 / 10 m³ pertama).</p><p>Pembayaran dapat disetorkan langsung secara tunai ke bendahara RT 002 sebelum tanggal 10 setiap bulannya. Status lunas dapat dicek secara transparan di aplikasi Teras Warga.</p><p>Atas kerjasama dan kedisiplinan bapak/ibu warga dalam mendukung kelancaran operasional fasilitas lingkungan, kami ucapkan terima kasih.</p>'
       }));
       toast.success('Template Iuran & Air PDAM diterapkan');
     }

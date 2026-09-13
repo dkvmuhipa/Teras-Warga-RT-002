@@ -370,8 +370,8 @@ export const MOCK_FAQ: FAQItem[] = [
   { 
     id: '11', 
     category: 'iuran',
-    question: 'Apakah pembayaran iuran RT 02 bisa ditransfer secara non-tunai?', 
-    answer: 'Tentu saja! Demi mendukung digitalisasi keuangan, warga dapat melakukan transfer iuran bulanan ke rekening resmi Bank Mandiri/BSI RT 02 yang tercantum pada menu Keuangan, lalu mengunggah bukti transfer melalui fitur "Lapor Bayar Iuran" di aplikasi. Pembayaran otomatis akan diverifikasi oleh Bendahara RT dalam waktu 1x24 jam dan status rumah Anda akan langsung berubah menjadi "Lunas" berwarna hijau di beranda.' 
+    question: 'Bagaimana metode pembayaran iuran bulanan RT 02?', 
+    answer: 'Saat ini pembayaran iuran bulanan warga RT 02 dilayani secara tunai langsung kepada Bendahara RT 002 atau melalui petugas pos ronda/pertemuan warga, karena rekening kas RT saat ini belum dibuka. Setiap pembayaran tunai yang diserahkan akan langsung dicatat oleh bendahara ke sistem aplikasi dan warga dapat mencetak Kwitansi Resmi berformat PDF ber-Kop RT 002.' 
   },
   { 
     id: '12', 

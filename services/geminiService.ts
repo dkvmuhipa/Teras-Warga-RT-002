@@ -191,7 +191,7 @@ const getClientRitFallbackAnswer = (question: string, systemInstruction: string)
   }
 
   if (q.includes('iuran') || q.includes('bayar') || q.includes('kas')) {
-    return "💰 **Iuran Bulanan Warga RT 02:**\nIuran rutin sebesar **Rp 25.000/bulan** (Keamanan + Kebersihan Sampah). Pembayaran dapat diserahkan ke Bendahara RT atau ditransfer via Kas Digital di menu *Info Kas*.";
+    return "💰 **Iuran Bulanan Warga RT 02:**\nIuran rutin sebesar **Rp 25.000/bulan** (Keamanan + Kebersihan Sampah). Pembayaran diserahkan secara tunai langsung ke Bendahara RT 002 (karena rekening kas RT saat ini belum ada). Kwitansi resmi ber-PDF dapat langsung diunduh setelah dicatat.";
   }
 
   if (q.includes('sampah') || q.includes('angkut') || q.includes('truk')) {

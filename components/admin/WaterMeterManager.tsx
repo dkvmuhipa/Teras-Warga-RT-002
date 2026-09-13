@@ -492,7 +492,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       text += `Mohon segera melakukan catat meter mandiri lewat Aplikasi Portal Warga RT 002 sebelum batas tanggal ${waterSettings.readingDueDate}.\n\n`;
     }
 
-    text += `Pembayaran dapat dilakukan bersamaan dengan Iuran Bulanan RT via transfer Bank/QRIS atau tunai ke Bendahara RT 002.\n`;
+    text += `Pembayaran dapat diserahkan langsung secara tunai ke Bendahara RT 002 (Pos Ronda / Rumah Bendahara).\n`;
     text += `Terima kasih atas kerja samanya menjaga kelancaran pasokan air bersih lingkungan kita.\n\n`;
     text += `_Pengurus RT 002 / RW 020 Kelurahan Tondo_`;
 
