@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check, Printer, Download, BookOpen, Hammer, Zap, Clock, MapPin, CheckSquare, Bookmark, MessageCircle } from 'lucide-react';
+import { Shield, FileText, Users, Home, AlertTriangle, Trash2, Calendar, Smartphone, Scale, Briefcase, ChevronDown, ChevronUp, Heart, Leaf, Car, ArrowLeft, Search, X, Share2, Copy, Check, Printer, Download, BookOpen, Hammer, Zap, Clock, MapPin, CheckSquare, Bookmark, MessageCircle, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { generateRulesPDF, generateAllRulesPDF } from '../../services/pdfService';
