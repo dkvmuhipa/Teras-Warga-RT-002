@@ -28,6 +28,25 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
   const [minutesSearch, setMinutesSearch] = useState('');
   const [selectedMinuteForPrint, setSelectedMinuteForPrint] = useState<MeetingMinute | null>(null);
 
+  const highlightMatch = (text: string, query: string) => {
+    if (!query || !query.trim()) return text;
+    const escaped = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === query.trim().toLowerCase() ? (
+            <mark key={i} className="bg-amber-300 text-slate-950 font-black rounded-xs px-1">
+              {part}
+            </mark>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
+  };
+
   useEffect(() => {
     if (tabFromUrl === 'minutes') {
       setMainTab('minutes');
@@ -759,6 +778,47 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
             )}
           </div>
 
+          {/* Quick Keyword Suggestion Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1">
+              <Sparkles size={12} className="text-amber-500 shrink-0" />
+              <span>Topik Cepat:</span>
+            </span>
+            {[
+              { label: '🚗 Parkir Kendaraan', query: 'parkir' },
+              { label: '🌙 Jam Malam & Tamu', query: 'tamu' },
+              { label: '🗑️ Pilah Sampah TPS3R', query: 'sampah' },
+              { label: '⚡ Batas Kecepatan 15 km/h', query: 'kecepatan' },
+              { label: '🐾 Hewan Peliharaan', query: 'hewan' },
+              { label: '💰 Iuran Lingkungan', query: 'iuran' },
+              { label: '🔊 Keramaian & Hajatan', query: 'keramaian' },
+              { label: '👮 Ronda Siskamling', query: 'ronda' }
+            ].map((pill) => {
+              const isSelected = searchTerm.toLowerCase() === pill.query.toLowerCase();
+              return (
+                <button
+                  key={pill.query}
+                  type="button"
+                  onClick={() => {
+                    if (isSelected) {
+                      setSearchTerm('');
+                    } else {
+                      setSearchTerm(pill.query);
+                      setSelectedCategory('all');
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border select-none ${
+                    isSelected
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm font-black'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200/80 shadow-2xs hover:border-slate-300'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Categories & Action Bar */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
             {/* Category tabs */}
@@ -906,7 +966,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                               <h3 className={`text-sm md:text-base font-medium leading-snug transition-colors duration-300 font-serif ${
                                 isOpen ? 'text-indigo-900 font-bold' : 'text-slate-800 group-hover:text-indigo-650'
                               }`}>
-                                Peraturan Ketua RT 02 Huntap Tondo 2 {rule.nomorSurat} tentang {rule.title}
+                                Peraturan Ketua RT 02 Huntap Tondo 2 {rule.nomorSurat} tentang {highlightMatch(rule.title, searchTerm)}
                               </h3>
                             </div>
                             <div className="flex flex-wrap items-center gap-2 mt-1.5 px-1">
@@ -1141,7 +1201,9 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                 <div className="space-y-4 font-serif text-left pt-2">
                                   <div className="bg-white/95 rounded-2xl border border-slate-200/95 p-5 md:p-6 space-y-5 shadow-sm">
                                     <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
-                                      <h6 className="font-extrabold text-indigo-950 text-xs md:text-sm uppercase tracking-[0.2em] font-serif">PASAL 1 — {rule.title.toUpperCase()}</h6>
+                                      <h6 className="font-extrabold text-indigo-950 text-xs md:text-sm uppercase tracking-[0.2em] font-serif">
+                                        PASAL 1 — {highlightMatch(rule.title.toUpperCase(), searchTerm)}
+                                      </h6>
                                       <span className="text-[9px] md:text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-150 uppercase tracking-widest leading-none">Salinan Dokumen</span>
                                     </div>
                                     
@@ -1154,7 +1216,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                           <div className="text-xs md:text-sm text-slate-700 leading-relaxed text-justify space-y-1 flex-1 font-serif">
                                             <p className="font-semibold text-slate-700">
                                               {idx === 0 && <span className="font-extrabold text-slate-900 tracking-wider mr-2 uppercase">MEMUTUSKAN:</span>}
-                                              {item}
+                                              {highlightMatch(item, searchTerm)}
                                             </p>
                                           </div>
                                         </div>
@@ -1430,11 +1492,11 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                             </div>
 
                             <h4 className="font-bold text-xs md:text-sm text-slate-900 font-serif">
-                              {idx + 1}. {dec.title}
+                              {idx + 1}. {highlightMatch(dec.title, minutesSearch)}
                             </h4>
 
                             <p className="text-xs text-slate-600 leading-relaxed font-sans pl-3 border-l-2 border-indigo-200">
-                              {dec.description}
+                              {highlightMatch(dec.description, minutesSearch)}
                             </p>
                           </div>
                         ))}

@@ -18,6 +18,8 @@ import { useFinancial } from '../../context/FinancialContext';
 import { toast } from 'sonner';
 import { SmartImage } from '../SmartImage';
 import { UtilityOutageTrackerModal } from './UtilityOutageTrackerModal';
+import { generateCashFlowReportPDF } from '../../services/pdfService';
+import { DEFAULT_PDF_CONFIG } from '../../constants';
 
 interface PublicInfoProps {
   officials: Official[];
@@ -106,6 +108,32 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
     }));
 
     const COLORS = ['#6366f1', '#f43f5e', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
+
+    const totalExpenseSum = pieData.reduce((acc, curr) => acc + curr.value, 0) || 1;
+    const expenseBreakdown = pieData.map((entry, index) => ({
+        ...entry,
+        percentage: Math.round((entry.value / totalExpenseSum) * 100),
+        color: COLORS[index % COLORS.length]
+    })).sort((a, b) => b.value - a.value);
+
+    const [isDownloadingCashReport, setIsDownloadingCashReport] = useState(false);
+    const handleDownloadCashReport = async () => {
+        try {
+            setIsDownloadingCashReport(true);
+            const toastId = toast.loading("Menyiapkan dokumen rekap kas RT...");
+            const config = JSON.parse(localStorage.getItem('pdf_config') || 'null') || DEFAULT_PDF_CONFIG;
+            await generateCashFlowReportPDF(cashFlow, selectedMonth, config);
+            toast.dismiss(toastId);
+            toast.success("Laporan Kas RT Berhasil Diunduh!", {
+                description: `Periode: ${selectedMonth}`
+            });
+        } catch (err) {
+            console.error("Gagal cetak rekap kas:", err);
+            toast.error("Gagal mengunduh laporan arus kas.");
+        } finally {
+            setIsDownloadingCashReport(false);
+        }
+    };
 
     // Monthly Trend Data
     const monthlyTrend = cashFlow.reduce((acc: any, curr) => {
@@ -849,42 +877,89 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                         <p className="text-slate-300 font-medium text-xs md:text-sm mt-1">Laporan arus kas publik real-time &amp; pertanggungjawaban bendahara RT 02</p>
                     </div>
 
-                    <span className="px-4 py-2 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm shrink-0">
-                        <Sparkles size={13} className="text-emerald-400 animate-spin-slow" /> AUDIT TRANSPARAN 100%
-                    </span>
+                    <div className="flex flex-wrap items-center gap-3 shrink-0">
+                        <button
+                            onClick={handleDownloadCashReport}
+                            disabled={isDownloadingCashReport}
+                            className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 border border-white/20 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                        >
+                            <Receipt size={14} className="text-emerald-400" />
+                            <span>{isDownloadingCashReport ? 'Menyiapkan...' : 'Unduh Rekap Kas PDF'}</span>
+                        </button>
+                        <span className="px-4 py-2.5 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm shrink-0">
+                            <Sparkles size={13} className="text-emerald-400 animate-spin-slow" /> AUDIT TRANSPARAN 100%
+                        </span>
+                    </div>
                 </div>
 
                 <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                        <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Alokasi Pengeluaran</h3>
-                        <div className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip 
-                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                        formatter={(value: number) => `Rp ${value.toLocaleString()}`}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
+                    <div className="bg-slate-50 p-6 sm:p-8 rounded-[2rem] border border-slate-100 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                                    <Target size={16} className="text-indigo-600" />
+                                    Alokasi Pengeluaran Kas
+                                </h3>
+                                <span className="text-[11px] font-bold text-slate-400">
+                                    Total: <strong className="text-slate-900 font-black">Rp {totalExpenseSum.toLocaleString('id-ID')}</strong>
+                                </span>
+                            </div>
+
+                            <div className="h-[220px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={pieData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={55}
+                                            outerRadius={75}
+                                            paddingAngle={4}
+                                            dataKey="value"
+                                        >
+                                            {pieData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            formatter={(value: number) => `Rp ${value.toLocaleString('id-ID')}`}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 mt-4">
-                            {pieData.map((entry, index) => (
-                                <div key={entry.name} className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                                    <span className="text-[10px] font-bold text-slate-600 truncate">{entry.name}</span>
+
+                        {/* Interactive Progress Bar Breakdown */}
+                        <div className="space-y-2.5 mt-4 pt-4 border-t border-slate-200/70">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                                Rincian Persentase Alokasi Riil
+                            </p>
+                            {expenseBreakdown.map((item, idx) => (
+                                <div key={idx} className="space-y-1">
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="font-bold text-slate-700 flex items-center gap-2">
+                                            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                                            <span className="truncate max-w-[180px] sm:max-w-none">{item.name}</span>
+                                        </span>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className="font-black text-slate-900">
+                                                Rp {item.value.toLocaleString('id-ID')}
+                                            </span>
+                                            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black text-white" style={{ backgroundColor: item.color }}>
+                                                {item.percentage}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full rounded-full transition-all duration-700" 
+                                            style={{ 
+                                                width: `${Math.min(100, Math.max(5, item.percentage))}%`, 
+                                                backgroundColor: item.color 
+                                            }} 
+                                        />
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -1359,6 +1434,29 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                                     {member}
                                                 </span>
                                             ))}
+                                        </div>
+                                    )}
+
+                                    {isToday && (
+                                        <div className="mt-3 pt-3 border-t border-indigo-100 flex flex-wrap items-center justify-between gap-2">
+                                            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                                Regu Siaga Malam Ini
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const secOfficer = officials.find(o => o.role.toLowerCase().includes('keamanan')) || officials[0];
+                                                    const phone = (secOfficer?.phone || '6285961194621').replace(/\D/g, '').replace(/^0/, '62');
+                                                    const text = encodeURIComponent(`Halo Tim Ronda RT 02 (Malam ${schedule.day}), saya warga RT 02 ingin berkoordinasi: `);
+                                                    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+                                                }}
+                                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                                            >
+                                                <MessageSquare size={12} />
+                                                <span>Hubungi Pos Ronda</span>
+                                            </button>
                                         </div>
                                     )}
                                 </div>

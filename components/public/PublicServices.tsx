@@ -371,6 +371,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   };
 
   const [reportPhoto, setReportPhoto] = useState<string | null>(null);
+  const [isSubmittingLetter, setIsSubmittingLetter] = useState(false);
+  const [checkedRequirements, setCheckedRequirements] = useState<Record<string, boolean>>({});
+  const [lastLetterSubmissionTime, setLastLetterSubmissionTime] = useState<number>(0);
 
   const estimatedTimes: Record<string, string> = {
     'Surat Pengantar': '1x24 Jam',
@@ -504,11 +507,23 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
   const handleSubmitSurat = async (e?: React.FormEvent | React.MouseEvent) => { 
     if (e) e.preventDefault(); 
+    if (isSubmittingLetter) return;
+
+    const now = Date.now();
+    if (now - lastLetterSubmissionTime < 15000) {
+      toast.warning("Pengajuan Sedang Diproses", {
+        description: "Mohon tunggu sejenak, permohonan Anda sedang disimpan ke sistem rukun tetangga."
+      });
+      return;
+    }
+
+    setIsSubmittingLetter(true);
     try {
       // Re-validate All Steps
       if (!applicantName.trim() || !nik.trim() || !/^\d{16}$/.test(nik.trim()) || !familyHeadName.trim() || !birthPlace.trim() || !birthDate || !nationality.trim() || !job.trim() || !addressKtp.trim() || (!isSameAddress && !currentAddress.trim())) {
         toast.error("Validasi Gagal", { description: "Tolong lengkapi semua data identitas diri di Step 1 dengan benar." });
         setLetterStep(1);
+        setIsSubmittingLetter(false);
         return;
       }
       const cleanPhone = phone.trim().replace(/[^0-9+]/g, '');
@@ -599,6 +614,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
         duration: 10000
       });
       
+      setLastLetterSubmissionTime(Date.now());
       // Reset form
       setApplicantName(''); setNik(''); setFamilyHeadName(''); setBirthPlace(''); setBirthDate(''); setJob(''); setAddressKtp(''); setHouseId(''); setPurposeDetail(''); setAccessCode('');
       setNationality('Indonesia'); setMaritalStatus('Kawin'); setPhone(''); setEmail(''); setCustomRequestType('');
@@ -606,6 +622,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, "letters");
       toast.error("Gagal mengajukan surat.");
+    } finally {
+      setIsSubmittingLetter(false);
     }
   };
 
@@ -1467,28 +1485,91 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       </div>
                     )}
 
-                    {/* Letter Physical Requirements Banner */}
+                    {/* Letter Physical Requirements & Smart Interactive Checklist */}
                     {letterRequirements[requestType] && (
                       <motion.div 
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] gap-4"
+                        className="p-6 bg-gradient-to-br from-indigo-50/70 via-slate-50 to-emerald-50/40 border-2 border-indigo-100 rounded-[2rem] space-y-4 shadow-xs"
                       >
-                        <div className="flex items-center gap-2 mb-3">
-                          <Flag size={14} className="text-slate-700" />
-                          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Persyaratan Berkas Fisik (Wajib Dibawa)</h4>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100/80 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-xs">
+                              <CheckCircle2 size={16} />
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                                Checklist Mandiri Persyaratan Berkas
+                              </h4>
+                              <p className="text-[10px] text-slate-500 font-medium">
+                                Centang berkas yang sudah Anda siapkan sebelum permohonan diproses
+                              </p>
+                            </div>
+                          </div>
+                          {/* Readiness badge */}
+                          {(() => {
+                            const reqs = letterRequirements[requestType];
+                            const readyCount = reqs.filter(r => checkedRequirements[`${requestType}-${r}`]).length;
+                            const isAllReady = readyCount === reqs.length;
+                            return (
+                              <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider self-start sm:self-auto flex items-center gap-1.5 shadow-xs transition-all ${
+                                isAllReady 
+                                  ? 'bg-emerald-500 text-white shadow-emerald-500/20' 
+                                  : 'bg-amber-100 text-amber-900 border border-amber-300'
+                              }`}>
+                                <span>{readyCount}/{reqs.length} Berkas Siap</span>
+                                {isAllReady && <span>✓</span>}
+                              </span>
+                            );
+                          })()}
                         </div>
-                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {letterRequirements[requestType].map((req, i) => (
-                            <li key={i} className="flex items-start gap-2.5 text-xs font-bold text-slate-600">
-                              <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full mt-1.5 shrink-0" />
-                              <span>{req}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <p className="mt-4 pt-3 border-t border-slate-100 text-[9px] text-slate-400 font-medium italic">
-                          * Serahkan atau berikan berkas fisik di atas saat Anda akan mengambil berkas cetak di kediaman RT.
-                        </p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                          {letterRequirements[requestType].map((req, i) => {
+                            const key = `${requestType}-${req}`;
+                            const isChecked = !!checkedRequirements[key];
+                            return (
+                              <label 
+                                key={i} 
+                                className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                                  isChecked 
+                                    ? 'bg-emerald-50/90 border-emerald-300 text-slate-900 shadow-xs ring-1 ring-emerald-400/20' 
+                                    : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                                }`}
+                              >
+                                <input 
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    setCheckedRequirements(prev => ({
+                                      ...prev,
+                                      [key]: e.target.checked
+                                    }));
+                                  }}
+                                  className="mt-0.5 h-4 w-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0 accent-indigo-600"
+                                />
+                                <div className="space-y-0.5">
+                                  <span className={`text-xs font-bold block ${isChecked ? 'text-emerald-950 font-black' : 'text-slate-800'}`}>
+                                    {req}
+                                  </span>
+                                  <span className="text-[9px] text-slate-400 font-medium block">
+                                    {isChecked ? 'Sudah disiapkan' : 'Klik kotak untuk menandai siap'}
+                                  </span>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-indigo-100/60 text-[10px] text-slate-500 font-medium">
+                          <span className="flex items-center gap-1.5 text-indigo-700 font-bold">
+                            <Clock size={12} className="text-indigo-600" />
+                            <span>Estimasi Verifikasi RT: <strong className="text-slate-900 font-black">{estimatedTimes[requestType] || '1x24 Jam'}</strong></span>
+                          </span>
+                          <span className="italic text-slate-400 text-[9px]">
+                            * Serahkan berkas fisik asli saat verifikasi/pengambilan dokumen cetak di kediaman RT
+                          </span>
+                        </div>
                       </motion.div>
                     )}
 
@@ -1627,10 +1708,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <Button 
                         type="submit" 
                         size="lg" 
+                        disabled={isSubmittingLetter}
                         onClick={handleSubmitSurat}
-                        className="w-full sm:w-auto px-12 py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl shadow-indigo-600/35 hover:shadow-indigo-600/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center"
+                        className="w-full sm:w-auto px-12 py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl shadow-indigo-600/35 hover:shadow-indigo-600/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                       >
-                        <Send size={15} strokeWidth={2.5} className="mr-2" /> Kirim Pengajuan Surat
+                        {isSubmittingLetter ? (
+                          <>
+                            <RefreshCw size={15} className="mr-2 animate-spin" /> Sedang Mengirim...
+                          </>
+                        ) : (
+                          <>
+                            <Send size={15} strokeWidth={2.5} className="mr-2" /> Kirim Pengajuan Surat
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
