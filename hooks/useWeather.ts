@@ -64,14 +64,14 @@ export const useWeather = () => {
             }
             
             const aqi = Math.round(aqiData?.current?.us_aqi ?? 25);
-            let aqiLabel = 'Bagus';
+            let aqiLabel = 'Baik';
             let aqiColor = 'text-emerald-400';
             
-            if (aqi > 300) { aqiLabel = 'Berbahaya'; aqiColor = 'text-rose-700'; }
-            else if (aqi > 200) { aqiLabel = 'Sangat Buruk'; aqiColor = 'text-purple-500'; }
-            else if (aqi > 150) { aqiLabel = 'Tidak Sehat'; aqiColor = 'text-rose-500'; }
-            else if (aqi > 100) { aqiLabel = 'Sensitif'; aqiColor = 'text-orange-500'; }
-            else if (aqi > 50) { aqiLabel = 'Sedang'; aqiColor = 'text-yellow-400'; }
+            if (aqi > 300) { aqiLabel = 'Berbahaya'; aqiColor = 'text-purple-700'; }
+            else if (aqi > 200) { aqiLabel = 'Sangat Tidak Sehat'; aqiColor = 'text-rose-600'; }
+            else if (aqi > 100) { aqiLabel = 'Tidak Sehat'; aqiColor = 'text-amber-500'; }
+            else if (aqi > 50) { aqiLabel = 'Sedang'; aqiColor = 'text-sky-400'; }
+            else { aqiLabel = 'Baik'; aqiColor = 'text-emerald-400'; }
 
             const code = weatherData?.current?.weather_code ?? 0;
             let condition = 'Cerah';
@@ -100,7 +100,7 @@ export const useWeather = () => {
             } else if (isExtremeHeat) {
                 alertMessage = `Suhu Terik Ekstrem (${temp}°C, Terasa ${apparentTemp}°C). Pastikan cukup hidrasi & hindari sengatan panas langsung.`;
             } else if (isHighPollution) {
-                alertMessage = `Indeks Udara Sensitif (AQI ${aqi}). Gunakan masker jika beraktivitas di luar rumah.`;
+                alertMessage = `Kualitas Udara Kurang Sehat (ISPU ${aqi}). Gunakan masker jika beraktivitas di luar rumah.`;
             }
 
             setWeather({

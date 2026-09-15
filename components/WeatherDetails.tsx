@@ -9,17 +9,17 @@ export const WeatherDetails = () => {
     if (loading || !weather) return null;
 
     const getHealthAdvice = (aqi: number) => {
-        if (aqi <= 50) return "Kualitas udara sangat baik. Cocok untuk aktivitas luar ruangan dan olahraga.";
-        if (aqi <= 100) return "Kualitas udara sedang. Kelompok sensitif sebaiknya mengurangi aktivitas fisik yang lama di luar ruangan.";
-        if (aqi <= 150) return "Udara kurang sehat bagi kelompok sensitif. Gunakan masker jika berada di luar ruangan dalam waktu lama.";
-        if (aqi <= 200) return "Udara tidak sehat. Kurangi aktivitas luar ruangan. Gunakan masker medis jika harus keluar.";
-        return "Udara sangat berbahaya! Tetap di dalam ruangan dan gunakan pemurni udara jika ada.";
+        if (aqi <= 50) return "Kualitas udara Baik. Sangat ideal untuk aktivitas luar ruangan dan olahraga bagi seluruh warga.";
+        if (aqi <= 100) return "Kualitas udara Sedang. Masih aman untuk beraktivitas, kelompok sensitif disarankan membatasi aktivitas berat di luar.";
+        if (aqi <= 200) return "Kualitas udara Tidak Sehat. Gunakan masker saat beraktivitas di luar ruangan dan batasi paparan udara terbuka.";
+        if (aqi <= 300) return "Kualitas udara Sangat Tidak Sehat. Hindari aktivitas fisik di luar ruangan dan tutup ventilasi bila debu meningkat.";
+        return "Kualitas udara Berbahaya! Seluruh warga disarankan beraktivitas di dalam ruangan.";
     };
 
     const getAqiStatusIcon = (aqi: number) => {
         if (aqi <= 50) return <CheckCircle2 className="text-emerald-500" size={24} />;
-        if (aqi <= 100) return <Info className="text-yellow-500" size={24} />;
-        if (aqi <= 150) return <AlertCircle className="text-orange-500" size={24} />;
+        if (aqi <= 100) return <Info className="text-sky-500" size={24} />;
+        if (aqi <= 200) return <AlertCircle className="text-amber-500" size={24} />;
         return <ShieldAlert className="text-rose-500" size={24} />;
     };
 
@@ -37,7 +37,7 @@ export const WeatherDetails = () => {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-1">Environmental Intelligence</p>
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Kualitas Udara & Kesehatan</h3>
+                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Kualitas Udara & Kesehatan (ISPU)</h3>
                         </div>
                         <div className="p-4 bg-slate-50 rounded-2xl">
                             {getAqiStatusIcon(weather.aqi)}
@@ -50,7 +50,7 @@ export const WeatherDetails = () => {
                                 <span className={`text-7xl font-black tracking-tighter ${weather.aqiColor}`}>{weather.aqi}</span>
                                 <div className="pb-2">
                                     <p className={`text-sm font-black uppercase tracking-widest ${weather.aqiColor}`}>{weather.aqiLabel}</p>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">US AQI Index</p>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ISPU (Standar KLHK RI)</p>
                                 </div>
                             </div>
                             

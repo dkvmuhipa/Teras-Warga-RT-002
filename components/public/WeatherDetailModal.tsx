@@ -56,7 +56,7 @@ export const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({
     } else if (weather.isExtremeHeat) {
       alertNote = `\n🔥 *PERINGATAN PANAS TERIK*: Suhu mencapai ${weather.temp}°C (Terasa ${weather.apparentTemp}°C). Jaga hidrasi & batasi aktivitas terik matahari!`;
     } else if (weather.isHighPollution) {
-      alertNote = `\n😷 *WASPADA KUALITAS UDARA*: AQI ${weather.aqi} (Sensitif). Disarankan gunakan masker saat keluar rumah.`;
+      alertNote = `\n😷 *WASPADA KUALITAS UDARA*: ISPU ${weather.aqi} (${weather.aqiLabel}). Disarankan gunakan masker saat keluar rumah.`;
     }
 
     const message = 
@@ -68,7 +68,7 @@ _Pembaruan Terkini: ${weather.lastUpdated || 'Hari ini'}_
 💨 *Angin*: ${weather.windSpeed} km/h (Hembusan: ${weather.windGusts} km/h)
 💧 *Kelembaban*: ${weather.humidity}%
 ☀️ *Indeks UV*: ${weather.uvIndex} (${uvInfo.label})
-🌿 *Kualitas Udara (AQI)*: ${weather.aqi} - ${weather.aqiLabel}
+🌿 *Kualitas Udara (ISPU)*: ${weather.aqi} - ${weather.aqiLabel} (Standar KLHK RI)
 🌫️ *Partikel Debu*: PM2.5: ${weather.pm2_5} µg/m³ | PM10: ${weather.pm10} µg/m³
 ☁️ *Kondisi*: ${weather.condition}${alertNote}
 
@@ -163,11 +163,11 @@ _Pembaruan Terkini: ${weather.lastUpdated || 'Hari ini'}_
                 {getWeatherIcon(weather?.weatherCode)}
               </div>
               <div className="text-left border-l border-white/15 pl-4 space-y-0.5">
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-300">Indeks Udara</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-slate-300">Indeks Udara (ISPU)</p>
                 <p className="text-base font-black text-emerald-400">
-                  AQI {weather?.aqi || '--'} <span className="text-xs font-bold text-slate-200">({weather?.aqiLabel || 'Baik'})</span>
+                  ISPU {weather?.aqi || '--'} <span className="text-xs font-bold text-slate-200">({weather?.aqiLabel || 'Baik'})</span>
                 </p>
-                <p className="text-[10px] text-slate-300">PM2.5: {weather?.pm2_5 || 0} µg/m³</p>
+                <p className="text-[10px] text-slate-300">PM2.5: {weather?.pm2_5 || 0} µg/m³ • Standar KLHK</p>
               </div>
             </div>
           </div>
@@ -260,29 +260,31 @@ _Pembaruan Terkini: ${weather.lastUpdated || 'Hari ini'}_
           </div>
         </div>
 
-        {/* AQI Progress Scale Bar */}
+        {/* ISPU Progress Scale Bar (Standar KLHK RI) */}
         <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="font-black text-slate-800 flex items-center gap-1.5">
               <Sparkles size={14} className="text-amber-500" />
-              Skala Indeks Kualitas Udara (US AQI)
+              Indeks Standar Pencemar Udara (ISPU - KLHK RI)
             </span>
             <span className={`font-black text-xs px-2 py-0.5 rounded-md ${
               (weather?.aqi || 0) <= 50 ? 'bg-emerald-100 text-emerald-800' :
-              (weather?.aqi || 0) <= 100 ? 'bg-yellow-100 text-yellow-800' :
-              (weather?.aqi || 0) <= 150 ? 'bg-orange-100 text-orange-800' : 'bg-rose-100 text-rose-800'
+              (weather?.aqi || 0) <= 100 ? 'bg-sky-100 text-sky-800' :
+              (weather?.aqi || 0) <= 200 ? 'bg-amber-100 text-amber-800' :
+              (weather?.aqi || 0) <= 300 ? 'bg-rose-100 text-rose-800' : 'bg-purple-100 text-purple-800'
             }`}>
-              Nilai: {weather?.aqi || 0} - {weather?.aqiLabel || 'Bagus'}
+              ISPU: {weather?.aqi || 0} - {weather?.aqiLabel || 'Baik'}
             </span>
           </div>
 
-          <div className="w-full h-3 rounded-full bg-gradient-to-r from-emerald-500 via-yellow-400 via-orange-500 to-rose-600 relative overflow-hidden shadow-inner" />
+          <div className="w-full h-3 rounded-full bg-gradient-to-r from-emerald-500 via-sky-400 via-amber-500 via-rose-600 to-purple-800 relative overflow-hidden shadow-inner" />
 
           <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wider pt-0.5">
             <span className="text-emerald-600">0-50 Baik</span>
-            <span className="text-yellow-600">51-100 Sedang</span>
-            <span className="text-orange-600">101-150 Sensitif</span>
-            <span className="text-rose-600">151+ Berbahaya</span>
+            <span className="text-sky-600">51-100 Sedang</span>
+            <span className="text-amber-600">101-200 Tdk Sehat</span>
+            <span className="text-rose-600">201-300 S.Tdk Sehat</span>
+            <span className="text-purple-700">300+ Bahaya</span>
           </div>
         </div>
 

@@ -211,7 +211,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                       whileHover={{ scale: 1.1, rotate: 6 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       className="p-4 bg-slate-900 hover:bg-slate-800 text-amber-400 rounded-3xl shadow-lg border border-slate-800 shrink-0 cursor-pointer transition-colors"
-                      title="Buka Stasiun Cuaca & AQI Huntap"
+                      title="Buka Stasiun Cuaca & ISPU Huntap"
                     >
                       {getWeatherIcon(weather?.weatherCode)}
                     </motion.button>
@@ -222,7 +222,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                         className="flex items-center gap-1.5 px-3 py-1 bg-amber-50/80 hover:bg-amber-100/80 rounded-xl border border-amber-200/70 shrink-0 shadow-2xs cursor-pointer transition-colors"
                       >
                         <Activity size={12} className="text-amber-600" />
-                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-900">AQI {weather.aqi}</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-900">ISPU {weather.aqi}</span>
                       </button>
                     )}
                   </div>
