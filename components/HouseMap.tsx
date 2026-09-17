@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert, STBMRecord } from '../types';
-import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert, STBMRecord, BMKGQuakeData } from '../types';
+import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight, AlertCircle, CheckCircle2, Radio, HeartPulse, LifeBuoy } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId, isHouseTrulyOccupied, subscribeToSTBMRecords, saveSTBMRecord } from '../services/databaseService';
 import { useFinancial } from '../context/FinancialContext';
+import { fetchLatestBMKGQuake, isPaluRegionQuake } from '../services/bmkgService';
 
 interface HouseMapProps {
   houses: House[];
@@ -989,7 +990,9 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const totalWidow = houses.reduce((acc, h) => acc + (h.widowCount || 0), 0);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeLayers, setActiveLayers] = useState<string[]>(['Security', 'Social', 'Financial', 'Facility', 'STBM']);
+  const [activeLayers, setActiveLayers] = useState<string[]>(['Security', 'Social', 'Financial', 'Facility', 'STBM', 'Evakuasi']);
+  const [bmkgQuake, setBmkgQuake] = useState<BMKGQuakeData | null>(null);
+  const [safetyChecked, setSafetyChecked] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<MapPoint | null>(null);
   const [activeCctv, setActiveCctv] = useState<MapPoint | null>(null);
@@ -1203,7 +1206,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                   { id: 'Social', label: 'Sosial', desc: 'Status Mudik, Tamu, Isoman' },
                   { id: 'Financial', label: 'Keuangan', desc: 'Status Iuran Sampah' },
                   { id: 'Facility', label: 'Fasilitas', desc: 'Masjid, Lapangan, Balai' },
-                  { id: 'STBM', label: 'Sanitasi & STBM', desc: 'ODF & Biotank Sehat' }
+                  { id: 'STBM', label: 'Sanitasi & STBM', desc: 'ODF & Biotank Sehat' },
+                  { id: 'Evakuasi', label: 'Jalur Evakuasi Gempa', desc: 'Titik Kumpul & Mitigasi Tondo' }
                 ].map(layer => (
                   <label key={layer.id} className={`flex flex-col gap-1 p-3 rounded-xl cursor-pointer transition-all border ${activeLayers.includes(layer.id) ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
                     <div className="flex items-center gap-3">
@@ -1593,6 +1597,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                   if (point.type === 'Security' && !activeLayers.includes('Security')) return null;
                                   if (point.type === 'Trash' && !activeLayers.includes('Social')) return null;
                                   if (point.type === 'Facility' && !activeLayers.includes('Facility')) return null;
+                                  if ((point.type === 'AssemblyPoint' || point.type === 'EvacuationRoute') && !activeLayers.includes('Evakuasi')) return null;
                               }
 
                               return (

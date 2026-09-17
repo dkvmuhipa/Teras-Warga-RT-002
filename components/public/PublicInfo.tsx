@@ -626,10 +626,16 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {featuredUMKM.map(item => (
                             <div key={item.id} className="group cursor-pointer">
-                                <div className="aspect-square rounded-3xl overflow-hidden mb-3 border border-slate-100 shadow-xs group-hover:shadow-lg group-hover:scale-102 transition-all duration-300">
+                                <div className="aspect-square rounded-3xl overflow-hidden mb-3 border border-slate-100 shadow-xs group-hover:shadow-lg group-hover:scale-102 transition-all duration-300 relative">
                                     <SmartImage src={item.image} alt={item.name} className="w-full h-full object-cover" width={400} />
+                                    {item.deliveryAvailable && (
+                                        <span className="absolute top-2 left-2 bg-emerald-600/90 text-white text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-sm backdrop-blur-xs">
+                                            Antar Tetangga
+                                        </span>
+                                    )}
                                 </div>
                                 <h4 className="font-black text-slate-900 text-sm truncate group-hover:text-indigo-600 transition-colors leading-tight">{item.name}</h4>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{item.category}</p>
                             </div>
                         ))}
                     </div>

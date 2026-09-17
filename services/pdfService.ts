@@ -5071,3 +5071,141 @@ export const generateAllRulesPDF = async (allRules: Array<{ title: string; nomor
     doc.save(`Buku_Himpunan_Peraturan_Lengkap_RT02.pdf`);
     toast.success(`Buku Himpunan Seluruh Peraturan RT 02 (${allRules.length} BAB PDF) dengan Logo, Stempel & TTD Resmi berhasil diunduh!`);
 };
+
+// --- E-KWITANSI DIGITAL RESMI PEMBAYARAN KAS RT 02 (A5) ---
+export const generateDigitalReceiptPDF = async (
+  receiptData: {
+    invoiceNo: string;
+    residentName: string;
+    houseId: string;
+    amount: number;
+    paymentType: string;
+    date: string;
+    paymentMethod: string;
+    notes?: string;
+  },
+  config: PdfConfig
+) => {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a5'
+  });
+
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+  const margin = 12;
+  const contentWidth = pageWidth - (margin * 2);
+
+  // Border & Ambient Frame
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(margin, margin, contentWidth, pageHeight - (margin * 2), 4, 4);
+
+  // Header Box
+  doc.setFillColor(30, 41, 59);
+  doc.rect(margin, margin, contentWidth, 22, 'F');
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("KAS TERAS WARGA RT 02 / RW 020", pageWidth / 2, margin + 8, { align: "center" });
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text("Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu, Sulawesi Tengah", pageWidth / 2, margin + 13, { align: "center" });
+  doc.setFontSize(7.5);
+  doc.text("BUKTI PEMBAYARAN IURAN & KWITANSI ELEKTRONIK RESMI", pageWidth / 2, margin + 18, { align: "center" });
+
+  let y = margin + 32;
+
+  // Title Box
+  doc.setTextColor(15, 23, 42);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("KWITANSI PEMBAYARAN", pageWidth / 2, y, { align: "center" });
+  y += 5;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Nomor Transaksi: ${receiptData.invoiceNo}`, pageWidth / 2, y, { align: "center" });
+  y += 8;
+
+  // Details Table Box
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(margin + 4, y, contentWidth - 8, 48, 3, 3, 'FD');
+
+  const labelX = margin + 8;
+  const valX = margin + 45;
+  let rowY = y + 7;
+
+  const rows = [
+    { label: "Telah Terima Dari", val: `: ${receiptData.residentName}` },
+    { label: "Kavling / Unit", val: `: Blok ${receiptData.houseId}` },
+    { label: "Jenis Iuran", val: `: ${receiptData.paymentType}` },
+    { label: "Metode Bayar", val: `: ${receiptData.paymentMethod} (QRIS / Kas Bank)` },
+    { label: "Waktu Transaksi", val: `: ${receiptData.date}` },
+    { label: "Status Verifikasi", val: `: LUNAS & TERCATAT DI BUKU KAS RT` },
+  ];
+
+  rows.forEach((r, idx) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(71, 85, 105);
+    doc.text(r.label, labelX, rowY);
+
+    doc.setFont("helvetica", idx === 5 ? "bold" : "normal");
+    doc.setTextColor(idx === 5 ? 16 : 15, idx === 5 ? 185 : 23, idx === 5 ? 129 : 42);
+    doc.text(r.val, valX, rowY);
+    rowY += 6.5;
+  });
+
+  y += 56;
+
+  // Nominal Box
+  doc.setFillColor(238, 242, 255);
+  doc.setDrawColor(199, 210, 254);
+  doc.roundedRect(margin + 4, y, contentWidth - 8, 16, 3, 3, 'FD');
+
+  doc.setTextColor(67, 56, 202);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("JUMLAH TERBILANG:", margin + 8, y + 6);
+  doc.setFontSize(12);
+  doc.text(`Rp ${receiptData.amount.toLocaleString('id-ID')},-`, margin + 8, y + 12);
+
+  y += 24;
+
+  // Signature / Verification Stamps
+  const sigY = y + 4;
+  doc.setFontSize(7.5);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Kota Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, contentWidth - 25, sigY);
+  doc.text("Bendahara Kas RT 02,", contentWidth - 25, sigY + 4);
+
+  // Digital Seal Circle
+  doc.setDrawColor(79, 70, 229);
+  doc.circle(contentWidth - 25, sigY + 16, 9);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.setTextColor(79, 70, 229);
+  doc.text("KAS RT 02", contentWidth - 25, sigY + 15, { align: "center" });
+  doc.text("VERIFIED", contentWidth - 25, sigY + 18, { align: "center" });
+
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text(config.rtTreasurer || "BENDAHARA RT 02", contentWidth - 25, sigY + 28, { align: "center" });
+
+  // Security Verification Notice
+  doc.setFontSize(6.5);
+  doc.setFont("helvetica", "italic");
+  doc.setTextColor(148, 163, 184);
+  doc.text("Dokumen ini diterbitkan secara elektronik oleh Sistem Teras Warga RT 02 dan sah tanpa tanda tangan basah.", margin + 4, pageHeight - margin - 4);
+
+  doc.save(`Kwitansi_Kas_RT02_${receiptData.invoiceNo}.pdf`);
+  toast.success(`E-Kwitansi Resmi Kas RT (${receiptData.invoiceNo}) berhasil diunduh!`);
+};
+

@@ -1,3 +1,8 @@
+import { QRISPaymentModal } from '../finance/QRISPaymentModal';
+import { CivicScoreBadge } from '../community/CivicScoreBadge';
+import { CitizenVotingHub } from '../community/CitizenVotingHub';
+import { generateDigitalReceiptPDF } from '../../services/pdfService';
+import { Vote } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { 
   User, 
@@ -640,6 +645,8 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isIuranModalOpen, setIsIuranModalOpen] = useState(false);
+  const [isQRISModalOpen, setIsQRISModalOpen] = useState(false);
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [selectedReportDetail, setSelectedReportDetail] = useState<Report | null>(null);
   const [reportForm, setReportForm] = useState({
@@ -1112,6 +1119,28 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       </div>
 
       {/* Quick Action Command Hub */}
+      {selectedHouseId && (
+        <div className="mb-4 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 text-white p-4 rounded-3xl border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-500/20 text-indigo-300 rounded-2xl border border-indigo-400/30">
+              <Vote size={22} className="animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-indigo-500 text-white">E-Voting RT 02</span>
+                <span className="text-xs font-bold text-white">1 KK = 1 Hak Suara Sah</span>
+              </div>
+              <p className="text-[11px] text-indigo-200 mt-0.5">Musyawarah digital penentuan keputusan lingkungan Huntap Tondo 2.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsVotingModalOpen(true)}
+            className="px-4 py-2 bg-white text-indigo-950 font-black rounded-xl text-xs uppercase tracking-wider hover:bg-indigo-50 transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+          >
+            Buka Bilik Suara →
+          </button>
+        </div>
+      )}
       {selectedHouseId && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3 px-1">

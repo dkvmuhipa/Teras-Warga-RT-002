@@ -1,3 +1,5 @@
+import { CitizenVotingHub } from '../community/CitizenVotingHub';
+import { Vote } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Calendar, MapPin, Users, Trash2, Edit3, CheckCircle2, 
@@ -27,6 +29,7 @@ export const MeetingMinutesManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('ALL');
+  const [activeMainTab, setActiveMainTab] = useState<'minutes' | 'voting'>('minutes');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [selectedMinute, setSelectedMinute] = useState<MeetingMinute | null>(null);
@@ -292,7 +295,11 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
+      {activeMainTab === 'voting' ? (
+        <CitizenVotingHub isAdmin={true} currentHouseId="ADMIN" />
+      ) : (
+        <>
+        {/* Filter & Search Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -509,6 +516,8 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
           </div>
         )}
       </div>
+      </>
+      )}
 
       {/* MODAL: Form Tambah / Edit Notula */}
       <Modal

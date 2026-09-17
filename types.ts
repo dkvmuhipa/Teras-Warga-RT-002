@@ -430,6 +430,9 @@ export interface UMKM {
   featuredProduct?: string;
   menuItems?: UMKMMenuItem[]; // Catalog of items with prices for Cart
   reviews?: UMKMReview[];
+  serviceType?: 'Kuliner' | 'Barang / Warung' | 'Jasa & Keahlian' | 'Hasil Kebun';
+  deliveryAvailable?: boolean;
+  orderViaWhatsApp?: boolean;
   socialMedia?: {
     platform: 'Instagram' | 'Facebook' | 'TikTok';
     url: string;
@@ -1298,3 +1301,64 @@ export interface STBMRecord {
   updatedAt: string;
   updatedBy?: string;
 }
+
+// --- E-VOTING & MUSYAWARAH DIGITAL WARGA (1 KK = 1 SUARA) ---
+export interface PollOption {
+  id: string;
+  text: string;
+  votes: number;
+}
+
+export interface VoteSubmission {
+  id: string;
+  pollId: string;
+  houseId: string; // Blok-Nomor (misal C5-09)
+  voterName: string;
+  optionId: string;
+  timestamp: string;
+}
+
+export interface CitizenPoll {
+  id: string;
+  title: string;
+  description: string;
+  category: 'Aturan RT' | 'Keuangan & Iuran' | 'Renovasi Fasilitas' | 'Kegiatan Warga' | 'Pemilihan Pengurus';
+  options: PollOption[];
+  startDate: string;
+  endDate: string;
+  status: 'Aktif' | 'Ditutup';
+  totalVotes: number;
+  eligibleVotersCount: number; // Total KK di RT (129 KK)
+  createdAt: string;
+  createdBy: string;
+}
+
+// --- BMKG LIVE FEED & SIAGA GEMPA HUNTAP TONDO 2 ---
+export interface BMKGQuakeData {
+  Tanggal: string;
+  Jam: string;
+  DateTime: string;
+  Coordinates: string;
+  Lintang: string;
+  Bujur: string;
+  Magnitude: string;
+  Kedalaman: string;
+  Wilayah: string;
+  Potensi: string;
+  Dirasakan: string;
+  Shakemap: string;
+}
+
+// --- GAMIFIKASI WARGA TELADAN (CIVIC SCORE) ---
+export interface CivicScoreRecord {
+  houseId: string;
+  headOfFamily: string;
+  score: number; // 0 - 100
+  tier: 'Teladan Utama' | 'Aktif Berdaya' | 'Partisipatif' | 'Warga Baru';
+  badges: string[];
+  duesScore: number;
+  rondaScore: number;
+  stbmScore: number;
+  activityScore: number;
+}
+

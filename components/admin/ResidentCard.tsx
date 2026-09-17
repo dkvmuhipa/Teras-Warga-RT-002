@@ -1,3 +1,4 @@
+import { CivicScoreBadge } from '../community/CivicScoreBadge';
 import React from 'react';
 import { House, PaymentStatus, Bill } from '../../types';
 import { 
@@ -106,6 +107,11 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                 {house.ownerName && house.ownerName !== house.headOfFamily ? `Pemilik: ${house.ownerName}` : `Keluarga RT 02`}
               </p>
               
+              {/* Civic Score Honor Badge */}
+              <div className="mt-2.5">
+                <CivicScoreBadge house={house} size="sm" showDetails={false} />
+              </div>
+
               {/* Status Pill Badges */}
               <div className="flex flex-wrap items-center gap-1.5 mt-2">
                 <span className="px-2.5 py-0.5 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-2xs border border-slate-800">
