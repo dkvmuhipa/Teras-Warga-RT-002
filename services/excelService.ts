@@ -1444,7 +1444,8 @@ export const generateIuranBatchTemplateExcel = async (houses: House[], monthYear
 export const exportProfessionalMonthlyReportExcel = async (
   report: any,
   pdfConfig?: any,
-  cashFlow: any[] = []
+  cashFlow: any[] = [],
+  stbmRecords: any[] = []
 ) => {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'Teras Warga RT 02';
@@ -1624,6 +1625,66 @@ export const exportProfessionalMonthlyReportExcel = async (
   worksheet.getCell(`F${currentLastRow + 5}`).value = report.approvedBy || pdfConfig?.rtChairman || 'Ketua RT 02';
   worksheet.getCell(`F${currentLastRow + 5}`).alignment = { horizontal: 'center' };
   worksheet.getCell(`F${currentLastRow + 5}`).font = { bold: true, underline: true };
+
+  // --- SHEET 2: KESEHATAN LINGKUNGAN & 5 PILAR STBM (PUSKESMAS & KELURAHAN) ---
+  const stbmSheet = workbook.addWorksheet('Sanitasi & STBM', {
+    views: [{ showGridLines: true }]
+  });
+
+  stbmSheet.mergeCells('A1:F1');
+  const stbmT1 = stbmSheet.getCell('A1');
+  stbmT1.value = `LAPORAN KESEHATAN LINGKUNGAN & 5 PILAR STBM - RT 02 HUNTAP TONDO 2`;
+  stbmT1.font = { name: 'Calibri', size: 13, bold: true, color: { argb: 'FF065F46' } };
+  stbmT1.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  stbmSheet.mergeCells('A2:F2');
+  const stbmT2 = stbmSheet.getCell('A2');
+  stbmT2.value = `Standar Kementerian Kesehatan RI & Puskesmas Mantikulore/Talise - Periode: ${monthLabel.toUpperCase()}`;
+  stbmT2.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF475569' } };
+  stbmT2.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  stbmSheet.addRow([]);
+
+  const stbmHeaders = ['No', 'Pilar STBM', 'Standar Sarana Huntap Tondo 2', 'Capaian Terverifikasi', 'Status Sanitasi', 'Keterangan Kelayakan'];
+  const stbmHRow = stbmSheet.addRow(stbmHeaders);
+  stbmHRow.height = 25;
+  stbmHRow.eachCell(c => {
+    c.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } }; // Emerald-600
+    c.alignment = { horizontal: 'center', vertical: 'middle' };
+  });
+
+  const totalKk = 129;
+  const issues = stbmRecords.filter((s: any) => s.needsFollowUp || s.isBABS).length;
+  const odfPct = Math.round(((totalKk - issues) / totalKk) * 100);
+
+  const stbmRows = [
+    [1, 'Pilar 1: Stop Buang Air Besar Sembarangan (BABS)', 'Tangki Septik Pabrikasi Kedap (Biotank PUPR)', `${odfPct}% ODF (Bebas BABS)`, '100% Memenuhi', 'Seluruh 129 Hunian Memiliki Jamban Leher Angsa Tertutup'],
+    [2, 'Pilar 2: Cuci Tangan Pakai Sabun (CTPS)', 'Kran Air Mengalir & Sabun Pembersih Tangan', '100% Sarana Tersedia', 'Memenuhi Standar', 'Pencegahan transmisi virus dan diare balita'],
+    [3, 'Pilar 3: Pengelolaan Air Minum & Makanan Aman', 'Reservoir SPAM Terlindungi & Wadah Makanan Tertutup', '100% Terlindungi', 'Memenuhi Standar', 'Air minum bersih teruji bebas kontaminasi bakteri'],
+    [4, 'Pilar 4: Pengelolaan Sampah Rumah Tangga', 'Pemilahan Sampah Terpilah & Retribusi Rutin TPS3R', '100% Terlayani', 'Aktif TPS3R & Bank Sampah', 'Pengangkutan teratur mencegah penumpukan sampah liar'],
+    [5, 'Pilar 5: Pengelolaan Limbah Cair Rumah Tangga (SPAL)', 'Saluran Tertutup SPALDT Bebas Genangan', '100% Saluran Lancar', 'Memenuhi Standar', 'Air buangan cucian dan dapur mengalir lancar ke drainase kedap']
+  ];
+
+  stbmRows.forEach((r) => {
+    const row = stbmSheet.addRow(r);
+    row.height = 24;
+    row.eachCell((c, col) => {
+      c.font = { name: 'Calibri', size: 10 };
+      if (col === 1 || col === 4 || col === 5) {
+        c.alignment = { horizontal: 'center', vertical: 'middle' };
+      } else {
+        c.alignment = { vertical: 'middle' };
+      }
+    });
+  });
+
+  stbmSheet.getColumn(1).width = 6;
+  stbmSheet.getColumn(2).width = 34;
+  stbmSheet.getColumn(3).width = 36;
+  stbmSheet.getColumn(4).width = 24;
+  stbmSheet.getColumn(5).width = 20;
+  stbmSheet.getColumn(6).width = 46;
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });

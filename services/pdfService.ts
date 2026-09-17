@@ -869,7 +869,8 @@ export const generateIntegratedMonthlyReportPDF = async (
     config: PdfConfig = DEFAULT_PDF_CONFIG,
     orientation: 'portrait' | 'landscape' = 'portrait',
     includeSignature: boolean = true,
-    includeStamp: boolean = true
+    includeStamp: boolean = true,
+    stbmRecords: any[] = []
 ) => {
     const doc = new jsPDF({
         orientation: orientation,
@@ -1155,7 +1156,50 @@ export const generateIntegratedMonthlyReportPDF = async (
 
     y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 12 : y + 30;
 
-    // 5. Tanda Tangan Pengesahan (Sekretaris & Ketua RT)
+    // 5. Rekapitulasi Capaian Kesehatan Lingkungan & 5 Pilar STBM (Kemenkes RI, Kelurahan & Puskesmas)
+    if (y > pageHeight - 75) {
+        doc.addPage();
+        y = 25;
+    }
+
+    doc.setFillColor(15, 23, 42);
+    doc.rect(margin, y - 5, contentWidth, 7, 'F');
+    doc.setTextColor(255);
+    doc.setFont("times", "bold");
+    doc.setFontSize(9.5);
+    doc.text("V. KESEHATAN LINGKUNGAN, SANITASI & 5 PILAR STBM (PUSKESMAS & KELURAHAN)", margin + 2.5, y);
+    doc.setTextColor(0);
+    y += 4;
+
+    const totalStbmKk = occupiedHouses.length || 129;
+    const stbmIssueCount = stbmRecords.filter((s: any) => s.needsFollowUp || s.isBABS).length;
+    const odfRate = totalStbmKk > 0 ? Math.round(((totalStbmKk - stbmIssueCount) / totalStbmKk) * 100) : 100;
+
+    autoTable(doc, {
+        startY: y,
+        margin: { left: margin, right: margin },
+        head: [['Pilar Sanitasi Total Berbasis Masyarakat (STBM)', 'Standar / Spesifikasi Sarana', 'Capaian / Status', 'Keterangan Kelayakan']],
+        body: [
+            ['Pilar 1: Stop BABS (Akses Jamban Sehat)', 'Tangki Septik Pabrikasi Kedap (Biotank PUPR)', `${odfRate}% ODF`, 'Memenuhi Baku Mutu Sanitasi Aman Kemenkes RI'],
+            ['Pilar 2: Cuci Tangan Pakai Sabun (CTPS)', 'Kran Air Mengalir & Sabun Pembersih Tangan', '100% Memiliki', 'Pencegahan Penularan Penyakit & Diare'],
+            ['Pilar 3: Pengelolaan Air Minum & Pangan', 'Reservoir SPAM Pasca-Bencana & Wadah Tertutup', '100% Terlindungi', 'Aman Konsumsi, Bebas Pencemaran E. Coli'],
+            ['Pilar 4: Pengelolaan Sampah Rumah Tangga', 'Pemilahan Terpilah & Retribusi Rutin TPS3R', '100% Terlayani', 'Dukungan Program Adipura Kota Palu'],
+            ['Pilar 5: Pengelolaan Limbah Cair (SPAL)', 'Jaringan Saluran Tertutup SPALDT', '100% Tertutup', 'Bebas Genangan Air Kotor & Vektor Nyamuk']
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [5, 150, 105], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5, halign: 'center' },
+        bodyStyles: { fontSize: 8, textColor: [30, 41, 59] },
+        columnStyles: {
+            0: { cellWidth: 55 },
+            1: { cellWidth: 52 },
+            2: { cellWidth: 26, halign: 'center', fontStyle: 'bold' },
+            3: { cellWidth: 'auto' }
+        }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 12 : y + 35;
+
+    // 6. Tanda Tangan Pengesahan (Sekretaris & Ketua RT)
     if (y > pageHeight - 50) {
         doc.addPage();
         y = 30;

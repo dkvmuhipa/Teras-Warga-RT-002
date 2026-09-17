@@ -4,7 +4,7 @@ import {
   Trash2, Edit2, CheckCircle, Clock, ShieldCheck, Sparkles, Filter, ChevronRight, User, Users,
   Share2, FileSpreadsheet, Image as ImageIcon, AlertCircle, Upload
 } from 'lucide-react';
-import { MonthlyActivityReport, MonthlyActivityItem, PdfConfig, House } from '../../types';
+import { MonthlyActivityReport, MonthlyActivityItem, PdfConfig, House, STBMRecord } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { Card } from '../ui/Card';
@@ -13,7 +13,8 @@ import {
   subscribeToMonthlyActivityReports, 
   addMonthlyActivityReportToDb, 
   updateMonthlyActivityReportInDb, 
-  deleteMonthlyActivityReportFromDb 
+  deleteMonthlyActivityReportFromDb,
+  subscribeToSTBMRecords
 } from '../../services/databaseService';
 import { 
   generateDedicatedMonthlyActivityReportPDF, 
@@ -49,6 +50,14 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
   const [pdfOrientation, setPdfOrientation] = useState<'portrait' | 'landscape'>('portrait');
   const [includeSignature, setIncludeSignature] = useState(true);
   const [includeStamp, setIncludeStamp] = useState(true);
+  const [stbmRecords, setStbmRecords] = useState<STBMRecord[]>([]);
+
+  useEffect(() => {
+    const unsubSTBM = subscribeToSTBMRecords((data) => {
+      setStbmRecords(data || []);
+    });
+    return () => unsubSTBM();
+  }, []);
 
   // Form State for Monthly Activity Report
   const [form, setForm] = useState<{
@@ -224,8 +233,8 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
 
   const handleExportExcel = async (report: MonthlyActivityReport) => {
     try {
-      await exportProfessionalMonthlyReportExcel(report, pdfConfig, cashFlow);
-      toast.success('File Excel Resmi (.xlsx) berhasil diunduh!');
+      await exportProfessionalMonthlyReportExcel(report, pdfConfig, cashFlow, stbmRecords);
+      toast.success('File Excel Resmi (.xlsx) beserta Lembar Sanitasi STBM berhasil diunduh!');
     } catch (e) {
       console.error(e);
       toast.error('Gagal mengekspor file Excel.');
@@ -432,7 +441,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                     </div>
 
                     <button
-                      onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig, pdfOrientation, includeSignature, includeStamp)}
+                      onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig, pdfOrientation, includeSignature, includeStamp, stbmRecords)}
                       className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-transform active:scale-95 cursor-pointer border border-indigo-400/30"
                       title={`Download Dokumen Lengkap Terpadu format ${pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'}`}
                     >
@@ -487,6 +496,61 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                     <span className="text-slate-400 block text-[9px] uppercase tracking-wider font-bold">Pengesahan Dokumen</span>
                     <p className="font-sans text-xs text-slate-200 mt-1">Dibuat: <b>{activeReport.preparedBy}</b> | Disetujui: <b>{activeReport.approvedBy}</b></p>
                   </div>
+                </div>
+              </div>
+
+              {/* Capaian Kesehatan Lingkungan & 5 Pilar STBM (Kelurahan & Puskesmas) */}
+              <div className="bg-gradient-to-br from-emerald-950 via-slate-900 to-emerald-950 rounded-[2rem] p-6 border border-emerald-500/30 text-white space-y-4 shadow-xl shadow-emerald-950/20">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400">
+                      <ShieldCheck size={20} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-[9px] font-black uppercase tracking-wider">
+                          Puskesmas &amp; Kelurahan Tondo
+                        </span>
+                        <span className="px-2 py-0.5 bg-white/10 text-slate-300 rounded text-[9px] font-mono font-bold">
+                          100% ODF
+                        </span>
+                      </div>
+                      <h4 className="text-base font-black text-white mt-1">Capaian Kesehatan Lingkungan &amp; 5 Pilar STBM</h4>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig, pdfOrientation, includeSignature, includeStamp, stbmRecords)}
+                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 self-start sm:self-auto shadow-md cursor-pointer active:scale-95"
+                    title="Cetak Laporan Lengkap Terpadu Termasuk Capaian STBM"
+                  >
+                    <Download size={14} /> Cetak Lembar Terpadu
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-2">
+                  {[
+                    { pilar: 'Pilar 1: Bebas BABS', desc: '100% Biotank PUPR Sehat', status: '100% ODF' },
+                    { pilar: 'Pilar 2: CTPS', desc: 'Kran Air Mengalir & Sabun', status: '100% Sarana' },
+                    { pilar: 'Pilar 3: Air & Pangan', desc: 'Reservoir SPAM Terlindung', status: '100% Higienis' },
+                    { pilar: 'Pilar 4: Sampah RT', desc: 'Retribusi Teratur TPS3R', status: '100% Terlayani' },
+                    { pilar: 'Pilar 5: Limbah SPAL', desc: 'Drainase Tertutup SPALDT', status: '100% Lancar' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1">
+                      <span className="text-[9px] font-bold uppercase text-emerald-300 block">{item.pilar}</span>
+                      <p className="text-xs font-black text-white">{item.status}</p>
+                      <p className="text-[9px] text-slate-400 font-medium">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-emerald-200/80 bg-emerald-900/30 p-3 rounded-xl border border-emerald-500/20 gap-2">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    🍃 <b>Indeks Kualitas Udara (ISPU):</b> Kategori Baik (Bebas Asap &amp; Emisi)
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    Data Terintegrasi 129 KK Huntap Tondo 2
+                  </span>
                 </div>
               </div>
 

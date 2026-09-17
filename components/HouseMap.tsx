@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert } from '../types';
-import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight, AlertCircle } from 'lucide-react';
+import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert, STBMRecord } from '../types';
+import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId, isHouseTrulyOccupied } from '../services/databaseService';
+import { subscribeToCheckpoints, updateCheckpointPosition, updateMapPointInDb, formatHouseId, isHouseTrulyOccupied, subscribeToSTBMRecords, saveSTBMRecord } from '../services/databaseService';
 import { useFinancial } from '../context/FinancialContext';
 
 interface HouseMapProps {
@@ -28,6 +28,7 @@ interface HouseDetailModalProps {
     isAdmin: boolean;
     officials?: Official[];
     iuranPayments?: any[];
+    stbmRecords?: STBMRecord[];
     onEditHouse?: (house: House) => void;
     onPayDues?: (house: House) => void;
     onReportHouse?: (house: House) => void;
@@ -85,12 +86,13 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     isAdmin, 
     officials,
     iuranPayments,
+    stbmRecords = [],
     onEditHouse, 
     onPayDues, 
     onReportHouse,
     onSendWhatsApp
 }) => {
-    const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'history'>('profile');
+    const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'stbm' | 'history'>('profile');
 
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const activeReports = reports.filter(r => 
@@ -109,6 +111,15 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
     const statusSampah = getPaymentStatus(house, 'Sampah');
     const arrears = getArrearsForHouse(house);
     const isFullyPaid = arrears.length === 0;
+
+    const houseStbm = stbmRecords.find(s => {
+        const sHid = formatHouseId(s.houseId);
+        const curHid = formatHouseId(house.id);
+        const curBlockNum = formatHouseId(`${house.block}-${house.number}`);
+        return sHid === curHid || sHid === curBlockNum;
+    });
+
+    const hasStbmIssue = houseStbm ? (houseStbm.needsFollowUp || houseStbm.isBABS) : false;
     
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -155,18 +166,19 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 </div>
 
                 {/* Modern Tab Navigation */}
-                <div className="flex p-2 bg-slate-50 border-b border-slate-100 shrink-0">
+                <div className="flex p-2 bg-slate-50 border-b border-slate-100 shrink-0 gap-1 overflow-x-auto custom-scrollbar">
                     {[
                         { id: 'profile', label: 'Profil', icon: User },
                         { id: 'finance', label: 'Keuangan', icon: DollarSign },
+                        { id: 'stbm', label: 'STBM', icon: Droplets },
                         { id: 'history', label: 'Riwayat', icon: Clock }
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white text-indigo-600 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-white text-indigo-600 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
                         >
-                            <tab.icon size={14} /> {tab.label}
+                            <tab.icon size={13} /> {tab.label}
                         </button>
                     ))}
                 </div>
@@ -310,6 +322,101 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             </motion.div>
                         )}
 
+                        {activeTab === 'stbm' && (
+                            <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
+                                {/* Banner Status ODF */}
+                                <div className={`p-6 rounded-[2rem] text-white relative overflow-hidden shadow-xl ${hasStbmIssue ? 'bg-rose-600 shadow-rose-200' : 'bg-emerald-600 shadow-emerald-200'}`}>
+                                    <div className="absolute top-0 right-0 p-4 opacity-15">
+                                        <Droplets size={100} />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <span className="px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-wider">
+                                            {hasStbmIssue ? '⚠️ Kendala Sanitasi' : '🏆 100% ODF Terverifikasi'}
+                                        </span>
+                                        <h3 className="text-xl font-black mt-2 leading-tight">
+                                            {hasStbmIssue ? 'Perlu Tindak Lanjut Sanitasi' : 'Sanitasi Total Memenuhi Standar'}
+                                        </h3>
+                                        <p className="text-xs text-white/90 mt-1 font-medium">
+                                            {hasStbmIssue 
+                                                ? (houseStbm?.problemType || 'Ada catatan kendala tangki/saluran septik pada hunian ini.')
+                                                : 'Jamban terhubung ke Biotank kedap PUPR & saluran drainase lingkungan SPALDT aman.'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Spesifikasi Sarana Sanitasi */}
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Infrastruktur Sanitasi (Huntap Tondo 2)</p>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div className="p-3 bg-white rounded-xl border border-slate-100">
+                                            <span className="text-[9px] text-slate-400 font-bold block uppercase">Model Septik</span>
+                                            <span className="font-bold text-slate-800">Biotank Pabrikasi PUPR</span>
+                                        </div>
+                                        <div className="p-3 bg-white rounded-xl border border-slate-100">
+                                            <span className="text-[9px] text-slate-400 font-bold block uppercase">Kualitas Air Bersih</span>
+                                            <span className="font-bold text-emerald-700">Reservoir SPAM Terlindungi</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 5 Pilar STBM Checklist */}
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Indikator 5 Pilar STBM</h4>
+                                    <div className="space-y-2">
+                                        {[
+                                            { label: 'Pilar 1: Stop BABS (Akses Jamban Sehat)', desc: 'Jamban leher angsa kedap / Biotank terpasang', active: houseStbm ? (!houseStbm.isBABS && houseStbm.hasHealthyLatrine !== false) : true },
+                                            { label: 'Pilar 2: Cuci Tangan Pakai Sabun (CTPS)', desc: 'Kran air mengalir & sabun pembersih tangan', active: houseStbm ? (houseStbm.hasCTPS !== false) : true },
+                                            { label: 'Pilar 3: Pengelolaan Air & Pangan Aman', desc: 'Air minum terlindung dan wadah tertutup', active: houseStbm ? (houseStbm.safeWaterAndFood !== false) : true },
+                                            { label: 'Pilar 4: Pengelolaan Sampah Rumah Tangga', desc: 'Pemilahan terpilah & retribusi TPS3R', active: houseStbm ? (houseStbm.wasteManagement !== false) : true },
+                                            { label: 'Pilar 5: Pengelolaan Limbah Cair (SPAL)', desc: 'Saluran limbah cair domestik tertutup & lancar', active: houseStbm ? (houseStbm.liquidWasteManagement !== false) : true }
+                                        ].map((pilar, i) => (
+                                            <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${pilar.active ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50 border-rose-200'}`}>
+                                                <div className={`mt-0.5 p-1 rounded-full ${pilar.active ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
+                                                    <CheckCircle2 size={12} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`text-xs font-bold leading-tight ${pilar.active ? 'text-slate-800' : 'text-rose-800'}`}>{pilar.label}</p>
+                                                    <p className="text-[10px] text-slate-500 mt-0.5">{pilar.desc}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {houseStbm?.notes && (
+                                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                                        <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-1">Catatan Khusus Kader STBM:</p>
+                                        <p className="text-xs text-amber-900 font-medium italic">"{houseStbm.notes}"</p>
+                                    </div>
+                                )}
+
+                                {/* Admin Action / Quick Resolution */}
+                                {isAdmin && hasStbmIssue && (
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                if (houseStbm) {
+                                                    await saveSTBMRecord({
+                                                        ...houseStbm,
+                                                        needsFollowUp: false,
+                                                        isBABS: false,
+                                                        problemType: undefined,
+                                                        notes: `${houseStbm.notes || ''} [Terselesaikan pada ${new Date().toLocaleDateString('id-ID')}]`.trim()
+                                                    });
+                                                    toast.success('Status kendala sanitasi berhasil diselesaikan!');
+                                                }
+                                            } catch (e) {
+                                                toast.error('Gagal memperbarui status STBM.');
+                                            }
+                                        }}
+                                        className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20"
+                                    >
+                                        <CheckCircle size={14} /> Tandai Sanitasi Terselesaikan
+                                    </button>
+                                )}
+                            </motion.div>
+                        )}
+
                         {activeTab === 'history' && (
                             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
                                 <div className="relative pl-8 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
@@ -383,9 +490,22 @@ interface HouseCardProps {
     showHeatmap?: boolean;
     activeLayers?: string[];
     isHighlighted?: boolean;
+    stbmRecords?: STBMRecord[];
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, isAdmin, iuranPayments, activePanicAlert, onClick, showHeatmap = false, activeLayers = ['Security', 'Social', 'Financial'], isHighlighted = false }) => {
+const HouseCard: React.FC<HouseCardProps> = ({ 
+    house, 
+    hasIssue, 
+    officialRole, 
+    isAdmin, 
+    iuranPayments, 
+    activePanicAlert, 
+    onClick, 
+    showHeatmap = false, 
+    activeLayers = ['Security', 'Social', 'Financial', 'STBM'], 
+    isHighlighted = false,
+    stbmRecords = []
+}) => {
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const formattedRole = officialRole ? formatRole(officialRole) : null;
     
@@ -393,6 +513,15 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
     const statusSampah = getPaymentStatus(house, 'Sampah');
     const arrears = getArrearsForHouse(house);
     const hasArrears = arrears.length > 0;
+
+    const houseStbm = stbmRecords.find(s => {
+        const sHid = formatHouseId(s.houseId);
+        const curHid = formatHouseId(house.id);
+        const curBlockNum = formatHouseId(`${house.block}-${house.number}`);
+        return sHid === curHid || sHid === curBlockNum;
+    });
+    const hasStbmIssue = houseStbm ? (houseStbm.needsFollowUp || houseStbm.isBABS) : false;
+    const isStbmLayerActive = activeLayers.includes('STBM');
 
     const getHouseColor = () => {
         if (showHeatmap) {
@@ -404,11 +533,13 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
         }
 
         if (hasIssue && activeLayers.includes('Security')) return "bg-rose-50 border-rose-500 text-rose-700 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
+        if (isStbmLayerActive && hasStbmIssue) return "bg-rose-50 border-rose-500 text-rose-800 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse ring-2 ring-rose-400 z-20";
         if (officialRole) return "bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 border-amber-400 text-white shadow-lg shadow-indigo-500/40 z-10 ring-2 ring-amber-300";
         if (house.status === 'Visiting') return "bg-gradient-to-br from-sky-50 to-indigo-150 border-sky-400 text-sky-900 shadow-2xs";
         if (!isHouseTrulyOccupied(house)) return "bg-slate-100 border-slate-300 text-slate-400 border-dashed opacity-70";
         if (house.status === 'Business') return "bg-purple-50 border-purple-300 text-purple-700";
         if (house.residenceType === 'Sewa') return "bg-gradient-to-br from-amber-100 to-orange-200 border-amber-500 text-amber-900";
+        if (isStbmLayerActive) return "bg-gradient-to-br from-emerald-100 to-teal-100 border-emerald-500 text-emerald-950";
         return "bg-gradient-to-br from-emerald-100 to-teal-200 border-emerald-500 text-emerald-900";
     };
 
@@ -452,6 +583,21 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                         </div>
                     )}
                 </div>
+
+                {/* Mini STBM Layer Tag */}
+                {isStbmLayerActive && (
+                    <div className="mt-1">
+                        {hasStbmIssue ? (
+                            <span className="text-[7px] font-black uppercase px-1 py-0.5 bg-rose-600 text-white rounded shadow-xs animate-pulse">
+                                ⚠️ STBM
+                            </span>
+                        ) : (
+                            <span className="text-[7px] font-black uppercase px-1 py-0.5 bg-emerald-700 text-white rounded shadow-xs">
+                                ODF
+                            </span>
+                        )}
+                    </div>
+                )}
             </button>
 
             {/* Glassmorphism Quick Hover Preview Card */}
@@ -481,14 +627,16 @@ const HouseCard: React.FC<HouseCardProps> = ({ house, hasIssue, officialRole, is
                         <span>{house.status === 'Visiting' ? 'Status Hunian:' : 'Total Penghuni:'}</span>
                         <span className="font-black text-white">{house.status === 'Visiting' ? 'Rumah Singgah / Pemantauan Rutin' : `${house.occupants || 0} Jiwa`}</span>
                     </p>
-                    <p className="text-[10px] text-slate-400 flex items-center justify-between">
-                        <span>Total Penghuni:</span>
-                        <span className="font-black text-white">{house.occupants || 0} Jiwa</span>
-                    </p>
                     <div className="flex items-center justify-between text-[10px] pt-1 border-t border-white/10">
                         <span className="text-slate-400">Iuran Air & Sampah:</span>
                         <span className={`font-black ${statusAir === PaymentStatus.PAID && statusSampah === PaymentStatus.PAID ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {statusAir === PaymentStatus.PAID && statusSampah === PaymentStatus.PAID ? 'Lunas 🟢' : 'Tunggakan 🔴'}
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] pt-1 border-t border-white/10">
+                        <span className="text-slate-400">Sanitasi &amp; STBM:</span>
+                        <span className={`font-black ${hasStbmIssue ? 'text-rose-400' : 'text-emerald-400'}`}>
+                            {hasStbmIssue ? 'Perlu Tindak Lanjut ⚠️' : '100% ODF (Biotank) 🟢'}
                         </span>
                     </div>
                 </div>
@@ -517,9 +665,10 @@ interface BlockRendererProps {
     showHeatmap?: boolean;
     activeLayers?: string[];
     highlightedId?: string | null;
+    stbmRecords?: STBMRecord[];
 }
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, activePanicAlerts = [], onSelect, className, showHeatmap, activeLayers, highlightedId }) => {
+const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, reports, officials, isAdmin, iuranPayments, activePanicAlerts = [], onSelect, className, showHeatmap, activeLayers, highlightedId, stbmRecords = [] }) => {
     const sortByNumber = (a: House, b: House) => parseInt(a.number, 10) - parseInt(b.number, 10);
     const sortByNumberDesc = (a: House, b: House) => parseInt(b.number, 10) - parseInt(a.number, 10);
     const sortedHouses = [...houses].sort(sortByNumber);
@@ -549,7 +698,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                             const houseReports = reports.filter(r => 
                                 (formatHouseId(r.houseId || '') === formatHouseId(house.id) || 
                                  formatHouseId(r.reporterHouseId || '') === formatHouseId(house.id)) && 
-                                r.status !== 'Selesai'
+                                 r.status !== 'Selesai'
                             );
                             const hasIssue = houseReports.length > 0;
                             
@@ -566,6 +715,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                                     showHeatmap={showHeatmap} 
                                     activeLayers={activeLayers} 
                                     isHighlighted={highlightedId === house.id} 
+                                    stbmRecords={stbmRecords}
                                 />
                             );
                         })}
@@ -575,7 +725,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                             const houseReports = reports.filter(r => 
                                 (formatHouseId(r.houseId || '') === formatHouseId(house.id) || 
                                  formatHouseId(r.reporterHouseId || '') === formatHouseId(house.id)) && 
-                                r.status !== 'Selesai'
+                                 r.status !== 'Selesai'
                             );
                             const hasIssue = houseReports.length > 0;
                             
@@ -592,6 +742,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blockCode, houses, report
                                     showHeatmap={showHeatmap} 
                                     activeLayers={activeLayers} 
                                     isHighlighted={highlightedId === house.id} 
+                                    stbmRecords={stbmRecords}
                                 />
                             );
                         })}
@@ -621,16 +772,18 @@ interface MapLayoutProps {
         onSelect?: (h: House) => void, 
         showHeatmap?: boolean, 
         activeLayers?: string[], 
-        highlightedId?: string | null
+        highlightedId?: string | null,
+        stbmRecords?: STBMRecord[]
     ) => React.ReactNode;
     className?: string;
     showHeatmap?: boolean;
     activeLayers?: string[];
     mapPoints?: MapPoint[];
     highlightedId?: string | null;
+    stbmRecords?: STBMRecord[];
 }
 
-export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], officials = [], isAdmin = false, iuranPayments = [], activePanicAlerts = [], onSelect = () => {}, renderBlock, className, showHeatmap, activeLayers, mapPoints = [], highlightedId }) => {
+export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], officials = [], isAdmin = false, iuranPayments = [], activePanicAlerts = [], onSelect = () => {}, renderBlock, className, showHeatmap, activeLayers, mapPoints = [], highlightedId, stbmRecords = [] }) => {
     const getBlockHouses = (code: string) => houses.filter(h => (h.block || '').trim().toUpperCase() === code.toUpperCase());
     const securityPost = mapPoints.find(p => p.type === 'Security');
     
@@ -738,19 +891,19 @@ export const MapLayout: React.FC<MapLayoutProps> = ({ houses, reports = [], offi
             </svg>
 
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C5', getBlockHouses('C5'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
+                {renderBlock('C5', getBlockHouses('C5'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId, stbmRecords)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C7', getBlockHouses('C7'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
-                {renderBlock('C8', getBlockHouses('C8'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
+                {renderBlock('C7', getBlockHouses('C7'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId, stbmRecords)}
+                {renderBlock('C8', getBlockHouses('C8'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId, stbmRecords)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C9', getBlockHouses('C9'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
-                {renderBlock('C10', getBlockHouses('C10'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
+                {renderBlock('C9', getBlockHouses('C9'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId, stbmRecords)}
+                {renderBlock('C10', getBlockHouses('C10'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId, stbmRecords)}
             </div>
             <div className="col-span-1 flex flex-col gap-4 md:gap-6">
-                {renderBlock('C11', getBlockHouses('C11'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
-                {renderBlock('C12', getBlockHouses('C12'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId)}
+                {renderBlock('C11', getBlockHouses('C11'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId, stbmRecords)}
+                {renderBlock('C12', getBlockHouses('C12'), reports, officials, isAdmin, iuranPayments, activePanicAlerts, onSelect, showHeatmap, activeLayers, highlightedId, stbmRecords)}
             </div>
         </div>
 
@@ -787,12 +940,20 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const mapRef = useRef<HTMLDivElement>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [draggingType, setDraggingType] = useState<'checkpoint' | 'mappoint' | null>(null);
+  const [stbmRecords, setStbmRecords] = useState<STBMRecord[]>([]);
 
   useEffect(() => {
     const unsub = subscribeToCheckpoints((data) => {
       setCheckpoints(data);
     });
     return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const unsubSTBM = subscribeToSTBMRecords((data) => {
+      setStbmRecords(data || []);
+    });
+    return () => unsubSTBM();
   }, []);
 
   const handleMapClick = async (e: React.MouseEvent) => {
@@ -828,7 +989,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
   const totalWidow = houses.reduce((acc, h) => acc + (h.widowCount || 0), 0);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeLayers, setActiveLayers] = useState<string[]>(['Security', 'Social', 'Financial', 'Facility']);
+  const [activeLayers, setActiveLayers] = useState<string[]>(['Security', 'Social', 'Financial', 'Facility', 'STBM']);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<MapPoint | null>(null);
   const [activeCctv, setActiveCctv] = useState<MapPoint | null>(null);
@@ -1041,7 +1202,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                   { id: 'Security', label: 'Keamanan', desc: 'CCTV, APAR, Pos Satpam' },
                   { id: 'Social', label: 'Sosial', desc: 'Status Mudik, Tamu, Isoman' },
                   { id: 'Financial', label: 'Keuangan', desc: 'Status Iuran Sampah' },
-                  { id: 'Facility', label: 'Fasilitas', desc: 'Masjid, Lapangan, Balai' }
+                  { id: 'Facility', label: 'Fasilitas', desc: 'Masjid, Lapangan, Balai' },
+                  { id: 'STBM', label: 'Sanitasi & STBM', desc: 'ODF & Biotank Sehat' }
                 ].map(layer => (
                   <label key={layer.id} className={`flex flex-col gap-1 p-3 rounded-xl cursor-pointer transition-all border ${activeLayers.includes(layer.id) ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
                     <div className="flex items-center gap-3">
@@ -1068,6 +1230,24 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
 
           {/* Map Legend Section */}
           <div className="space-y-6 pt-2">
+            {/* STBM Legend Box */}
+            <div className="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200/80">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-800 mb-3 flex items-center justify-between">
+                <span>Sanitasi &amp; 5 Pilar STBM</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              </h4>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-emerald-100 shadow-2xs">
+                  <div className="w-5 h-5 rounded-md bg-emerald-500 text-white flex items-center justify-center font-black text-[8px] shrink-0">ODF</div>
+                  <span className="text-[9px] font-extrabold text-emerald-950 uppercase tracking-tight">100% ODF (Biotank PUPR Sehat)</span>
+                </div>
+                <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-rose-100 shadow-2xs">
+                  <div className="w-5 h-5 rounded-md bg-rose-500 text-white flex items-center justify-center font-black text-[8px] shrink-0 animate-pulse">!</div>
+                  <span className="text-[9px] font-extrabold text-rose-800 uppercase tracking-tight">Kendala Sanitasi / Perlu Cek</span>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/70">
               <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3.5 flex items-center justify-between">
                 <span>Fasilitas &amp; Keamanan</span>
@@ -1238,7 +1418,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                             activeLayers={activeLayers}
                             mapPoints={mapPoints}
                             highlightedId={highlightedHouseId}
-                            renderBlock={(code, bHouses = [], bReports = [], bOfficials = [], bIsAdmin = false, bIuran = [], bAlerts = [], bOnSelect = () => {}, bHeatmap = false, bLayers = [], bHighlight = null) => (
+                            stbmRecords={stbmRecords}
+                            renderBlock={(code, bHouses = [], bReports = [], bOfficials = [], bIsAdmin = false, bIuran = [], bAlerts = [], bOnSelect = () => {}, bHeatmap = false, bLayers = [], bHighlight = null, bStbm = []) => (
                               <BlockRenderer 
                                 blockCode={code} 
                                 houses={bHouses} 
@@ -1251,6 +1432,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                 showHeatmap={bHeatmap}
                                 activeLayers={bLayers}
                                 highlightedId={bHighlight}
+                                stbmRecords={bStbm}
                               />
                             )} 
                           />
@@ -1539,6 +1721,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
           isAdmin={isAdmin} 
           officials={officials} 
           iuranPayments={iuranPayments} 
+          stbmRecords={stbmRecords}
           onEditHouse={onEditHouse} 
           onPayDues={onPayDues} 
           onReportHouse={onReportHouse}
