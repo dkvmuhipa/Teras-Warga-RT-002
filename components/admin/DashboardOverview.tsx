@@ -228,20 +228,28 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       animate="visible"
       className="space-y-8"
     >
-      {/* Executive Hero Banner */}
-      <motion.div variants={itemVariants} className="relative overflow-hidden bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 rounded-[2.5rem] p-6 md:p-10 text-white shadow-xl border border-indigo-700/30">
-        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Executive Aurora Command Center Hero Banner */}
+      <motion.div 
+        variants={itemVariants} 
+        className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 rounded-[2.5rem] p-6 md:p-10 text-white shadow-2xl shadow-indigo-950/40 border border-indigo-500/25"
+      >
+        {/* Ambient Specular Light Cones */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none animate-pulse-slow"></div>
+        <div className="absolute -bottom-20 left-1/4 w-80 h-80 bg-violet-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
+          <div className="space-y-3 max-w-2xl">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md">
-                Pusat Kendali Executive
+              <span className="bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md shadow-2xs">
+                Pusat Kendali Eksekutif
               </span>
-              <span className="bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md">
+              <span className="bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                Sistem Aktif
+                Operasional 100% Aktif
+              </span>
+              <span className="hidden sm:inline-flex bg-white/10 border border-white/15 text-slate-300 text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md">
+                Huntap Tondo 2 • RT 02 / RW 020
               </span>
             </div>
 
@@ -261,31 +269,31 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               );
             })()}
 
-            <p className="text-indigo-200/90 font-medium text-xs md:text-sm leading-relaxed">
-              Semua sistem administrasi warga, keuangan kas, hingga pemantauan keamanan berjalan dengan optimal secara terpadu.
+            <p className="text-indigo-200/80 font-medium text-xs md:text-sm leading-relaxed max-w-xl">
+              Pusat orkestrasi administrasi kependudukan, tata kelola kas terdesentralisasi, evaluasi sanitasi 5 pilar STBM, serta pengawasan keamanan lingkungan warga.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <Button 
               onClick={handleGenerateSummary} 
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs py-3 px-5 rounded-2xl shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all flex items-center gap-2"
+              className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-xs py-3 px-5 rounded-2xl shadow-xl shadow-indigo-600/35 border border-indigo-300/30 transition-all flex items-center gap-2"
             >
               <Sparkles size={16} className="text-amber-300 animate-spin-slow" /> 
-              <span>{isAiLoading ? 'Memproses AI...' : 'Ringkasan AI'}</span>
+              <span>{isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}</span>
             </Button>
             
             <button 
               onClick={handleExportData} 
-              className="flex items-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 rounded-2xl text-xs font-bold text-white transition-all shadow-sm"
+              className="flex items-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 rounded-2xl text-xs font-bold text-white transition-all shadow-sm hover:shadow active:scale-[0.98]"
             >
               <Download size={15} />
-              <span>Ekspor JSON</span>
+              <span>Ekspor Ringkasan</span>
             </button>
             
             <button 
               onClick={() => onTabChange('residents')} 
-              className="flex items-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl text-xs font-black transition-all shadow-lg shadow-emerald-500/30 border border-emerald-400/30"
+              className="flex items-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl text-xs font-black transition-all shadow-lg shadow-emerald-500/30 border border-emerald-400/30 active:scale-[0.98]"
             >
               <Plus size={15} />
               <span>Tambah Warga</span>
@@ -294,16 +302,36 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       </motion.div>
 
+      {/* Titanium AI Strategic Advisor Card */}
       {aiSummary && (
-        <div className="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-xl border border-indigo-800/40 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <h4 className="font-bold text-sm md:text-base lg:text-lg mb-3 md:mb-4 text-indigo-300 flex items-center gap-2">
-            <Sparkles size={18} className="text-amber-400 animate-pulse" /> Ringkasan Kecerdasan AI:
-          </h4>
-          <div className="prose prose-invert max-w-none text-[10px] md:text-xs lg:text-sm leading-relaxed whitespace-pre-wrap opacity-95">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-2xl shadow-indigo-950/40 border border-indigo-500/30 relative overflow-hidden font-sans"
+        >
+          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="flex items-center justify-between gap-4 mb-4 border-b border-indigo-900/60 pb-3">
+            <h4 className="font-black text-sm md:text-base lg:text-lg text-indigo-200 flex items-center gap-2.5">
+              <div className="p-2 bg-indigo-500/20 border border-indigo-400/30 rounded-xl text-amber-300">
+                <Sparkles size={18} className="animate-pulse" />
+              </div>
+              <span>Intelligence Advisor (Gemini AI RT02)</span>
+            </h4>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(aiSummary);
+                toast.success('Ringkasan AI berhasil disalin ke clipboard!');
+              }}
+              className="text-[11px] font-bold text-indigo-300 hover:text-white bg-indigo-900/50 hover:bg-indigo-800/80 border border-indigo-500/30 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5"
+            >
+              <Share2 size={13} />
+              <span>Salin Ringkasan</span>
+            </button>
+          </div>
+          <div className="prose prose-invert max-w-none text-xs md:text-sm leading-relaxed whitespace-pre-wrap opacity-90 text-indigo-100/90 font-medium">
             {aiSummary}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Layanan Warga Terpadu Grid */}
@@ -624,22 +652,22 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
         {/* Warga Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-2xs hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-300 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
           <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4 md:mb-6">
-              <div className="p-3 md:p-3.5 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+              <div className="p-3 md:p-3.5 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-2xs">
                 <Users size={20} className="md:w-6 md:h-6" />
               </div>
               <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Demografi</span>
             </div>
             <div className="space-y-1">
               <div className="flex items-baseline gap-1 md:gap-2">
-                <h3 className="text-2xl md:text-4xl font-black text-slate-900">{totalResidents}</h3>
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-mono">{totalResidents}</h3>
                 <span className="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase">Jiwa</span>
               </div>
               <div className="flex items-baseline gap-1 md:gap-2">
-                <h3 className="text-lg md:text-xl font-extrabold text-indigo-600">{occupiedHouses}</h3>
+                <h3 className="text-base md:text-lg font-black text-indigo-600 font-mono">{occupiedHouses}</h3>
                 <span className="text-[10px] md:text-xs font-bold text-slate-400">KK Terdaftar</span>
               </div>
             </div>
@@ -651,17 +679,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </motion.div>
 
         {/* Keuangan Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-2xs hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-300 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
           <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4 md:mb-6">
-              <div className="p-3 md:p-3.5 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+              <div className="p-3 md:p-3.5 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-2xs">
                 <DollarSign size={20} className="md:w-6 md:h-6" />
               </div>
               <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Saldo Kas</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-4xl font-black text-slate-900">Rp{(balance / 1000000).toFixed(1)}jt</h3>
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-mono">Rp{(balance / 1000000).toFixed(1)}jt</h3>
             </div>
             <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px]">
               <span className="text-emerald-600 font-extrabold flex items-center gap-0.5"><TrendingUp size={12} /> +{(income / 1000000).toFixed(1)}jt</span>
@@ -671,17 +699,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </motion.div>
 
         {/* Laporan Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-rose-500/10 hover:border-rose-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('services')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-2xs hover:shadow-xl hover:shadow-rose-500/10 hover:border-rose-300 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('services')}>
           <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-colors"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4 md:mb-6">
-              <div className="p-3 md:p-3.5 bg-rose-50 text-rose-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+              <div className="p-3 md:p-3.5 bg-rose-50 text-rose-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-2xs">
                 <AlertTriangle size={20} className="md:w-6 md:h-6" />
               </div>
               <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-rose-700 bg-rose-50 border border-rose-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Aduan Warga</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-4xl font-black text-slate-900">{newReports}</h3>
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-mono">{newReports}</h3>
               <span className="text-[10px] md:text-xs font-extrabold text-rose-600 uppercase">Perlu Tindakan</span>
             </div>
             <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-rose-500">
@@ -692,17 +720,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </motion.div>
 
         {/* Tamu Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('guests')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-2xs hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-300 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('guests')}>
           <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4 md:mb-6">
-              <div className="p-3 md:p-3.5 bg-amber-50 text-amber-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+              <div className="p-3 md:p-3.5 bg-amber-50 text-amber-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-2xs">
                 <ShieldAlert size={20} className="md:w-6 md:h-6" />
               </div>
               <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Log Tamu</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-4xl font-black text-slate-900">{activeGuests}</h3>
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-mono">{activeGuests}</h3>
               <span className="text-[10px] md:text-xs font-extrabold text-amber-600 uppercase">Tamu Aktif</span>
             </div>
             <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-amber-600">
@@ -713,18 +741,25 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </motion.div>
 
         {/* Retribusi Sampah Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-200 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200/80 shadow-2xs hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-300 transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
           <div className="absolute -right-4 -top-4 w-24 md:w-32 h-24 md:h-32 bg-sky-500/5 rounded-full blur-2xl group-hover:bg-sky-500/10 transition-colors"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4 md:mb-6">
-              <div className="p-3 md:p-3.5 bg-sky-50 text-sky-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-sm">
+              <div className="p-3 md:p-3.5 bg-sky-50 text-sky-600 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform shadow-2xs">
                 <Trash2 size={20} className="md:w-6 md:h-6" />
               </div>
               <span className="hidden xs:block text-[9px] md:text-[10px] font-black text-sky-700 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full uppercase tracking-wider">Iuran Retribusi</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-4xl font-black text-slate-900">{wastePaymentPercentage}%</h3>
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-mono">{wastePaymentPercentage}%</h3>
               <span className="text-[10px] md:text-xs font-extrabold text-sky-600 uppercase">Tercapai</span>
+            </div>
+            {/* Visual Progress Bar */}
+            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden mt-2">
+              <div 
+                className="bg-gradient-to-r from-sky-500 to-indigo-600 h-full rounded-full transition-all duration-500" 
+                style={{ width: `${Math.min(wastePaymentPercentage, 100)}%` }} 
+              />
             </div>
             <div className="mt-3 md:mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-sky-600">
               <span>{paidWasteCount} dari {totalOccupiedHouses} Rumah</span>
@@ -738,7 +773,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Chart Section */}
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6 md:space-y-8">
-          <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/80 shadow-sm">
+          <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-200/80 shadow-2xs">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-base md:text-xl font-black text-slate-900 tracking-tight">Arus Kas RT</h3>
@@ -751,18 +786,26 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorCashDoc" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4}/>
+                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 700}} />
                   <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 700}} tickFormatter={(v) => `Rp${v/1000}k`} />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: '1px solid #cbd5e1', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.08)' }}
-                    labelStyle={{ fontWeight: 800, color: '#0f172a', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                    contentStyle={{ 
+                      borderRadius: '1.25rem', 
+                      border: '1px solid rgba(255,255,255,0.1)', 
+                      backgroundColor: 'rgba(15, 23, 42, 0.95)', 
+                      backdropFilter: 'blur(16px)', 
+                      color: '#fff', 
+                      boxShadow: '0 20px 30px -10px rgba(0, 0, 0, 0.4)' 
+                    }}
+                    itemStyle={{ color: '#a5b4fc', fontSize: '12px', fontWeight: 'bold' }}
+                    labelStyle={{ fontWeight: 900, color: '#e2e8f0', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}
                   />
-                  <Area type="monotone" dataKey="amount" stroke="#4f46e5" strokeWidth={3} fill="url(#colorCashDoc)" />
+                  <Area type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={3} fill="url(#colorCashDoc)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

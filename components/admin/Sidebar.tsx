@@ -258,18 +258,19 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
           x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 768 ? -290 : 0)
         }}
         className={`
-          fixed top-0 left-0 z-50 h-full bg-white text-slate-700 border-r border-slate-200
-          md:static flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)]
+          fixed top-0 left-0 z-50 h-full bg-white/95 backdrop-blur-2xl text-slate-700 border-r border-slate-200/80
+          md:static flex flex-col shadow-[4px_0_30px_rgba(0,0,0,0.03)] select-none
         `}
       >
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header */}
-          <div className={`p-6 border-b border-slate-100 flex items-center ${isCollapsed ? 'justify-center' : 'gap-4'}`}>
+          <div className={`p-5 md:p-6 border-b border-slate-100/90 flex items-center ${isCollapsed ? 'justify-center' : 'gap-4'}`}>
             <Logo showText={!isCollapsed} imageSize={isCollapsed ? "h-8" : "h-9"} />
             {!isCollapsed && (
               <button 
                 onClick={() => setIsOpen(false)} 
-                className="ml-auto md:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-50 transition-colors"
+                className="ml-auto md:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+                aria-label="Tutup Sidebar"
               >
                 <X size={18} />
               </button>
@@ -278,26 +279,26 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
           {/* Quick Search (Only when not collapsed) */}
           {!isCollapsed && (
-            <div className="px-5 mt-6 mb-2">
+            <div className="px-4 mt-5 mb-2">
               <div className="relative group/search">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/search:text-indigo-600 transition-colors" size={16} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/search:text-indigo-600 transition-colors" size={15} />
                 <input 
                   ref={searchInputRef}
                   type="text" 
-                  placeholder="Cari menu admin... (/)" 
+                  placeholder="Cari modul... (Tekan /)" 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl py-2.5 pl-10 pr-8 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-400 text-slate-700"
+                  className="w-full bg-slate-50/80 hover:bg-slate-100/70 border border-slate-200/80 rounded-2xl py-2 pl-9 pr-8 text-xs font-bold focus:outline-none focus:ring-3 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder:text-slate-400 text-slate-700"
                 />
                 {searchTerm ? (
                   <button 
                     onClick={() => setSearchTerm('')} 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1 rounded-full transition-colors"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 p-1 rounded-full transition-colors"
                   >
-                    <X size={12} className="stroke-[3px]" />
+                    <X size={11} className="stroke-[3px]" />
                   </button>
                 ) : (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400 bg-slate-200/60 px-1.5 py-0.5 rounded border border-slate-300 select-none hidden group-focus-within/search:hidden sm:block">
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 bg-white px-1.5 py-0.5 rounded-md border border-slate-200 select-none hidden group-focus-within/search:hidden sm:block shadow-2xs">
                     /
                   </span>
                 )}
@@ -306,24 +307,24 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto pt-2 pb-6 px-4 space-y-6 custom-scrollbar scrollbar-hide">
+          <nav className="flex-1 overflow-y-auto pt-2 pb-6 px-3.5 space-y-5 custom-scrollbar scrollbar-hide">
             {filteredNavGroups.map((group) => (
-              <div key={group.title} className="space-y-1.5">
+              <div key={group.title} className="space-y-1">
                 {!isCollapsed ? (
                   <button 
                     onClick={() => toggleGroup(group.title)}
-                    className="w-full flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-3 hover:text-indigo-600 transition-colors"
+                    className="w-full flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest my-2 px-3 hover:text-indigo-600 transition-colors"
                   >
                     <span>{group.title}</span>
                     <motion.div
                       animate={{ rotate: expandedGroups.includes(group.title) ? 0 : -90 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.18 }}
                     >
                       <ChevronLeft size={12} className="stroke-[3px]" />
                     </motion.div>
                   </button>
                 ) : (
-                  <div className="h-px bg-slate-100 my-4 mx-2" />
+                  <div className="h-px bg-slate-100 my-3 mx-2" />
                 )}
                 
                 <AnimatePresence initial={false}>
@@ -332,7 +333,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                       initial={isCollapsed ? false : { height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden space-y-1.5"
+                      className="overflow-hidden space-y-1"
                     >
                       {group.items.map(item => {
                         const isMainDashboard = item.id === 'overview';
@@ -349,36 +350,43 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                             title={isCollapsed ? `${item.label}${pendingCount > 0 ? ` (${pendingCount} tertunda)` : ''}` : ''}
                             className={`
                               w-full flex items-center gap-3 rounded-2xl transition-all duration-200 font-bold text-xs group relative overflow-hidden
-                              ${isCollapsed ? 'justify-center p-3.5' : 'px-4 py-3'}
+                              ${isCollapsed ? 'justify-center p-3' : 'px-3.5 py-2.5'}
                               ${isActive 
-                                ? 'bg-indigo-50/80 text-indigo-700 shadow-sm border border-indigo-100/50' 
-                                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent'
+                                ? 'bg-gradient-to-r from-indigo-50/90 to-violet-50/70 text-indigo-700 shadow-2xs border border-indigo-200/70 font-black' 
+                                : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 border border-transparent hover:translate-x-0.5'
                               }
                             `}
                           >
                             <div className="relative shrink-0 flex items-center justify-center">
-                              <item.icon size={18} className={`transition-transform duration-300 ${isActive ? 'text-indigo-600 scale-110' : 'text-slate-400 group-hover:scale-110 group-hover:text-indigo-500'}`} />
+                              <item.icon 
+                                size={17} 
+                                className={`transition-all duration-300 ${
+                                  isActive 
+                                    ? 'text-indigo-600 scale-110 stroke-[2.4px]' 
+                                    : 'text-slate-400 group-hover:scale-110 group-hover:text-indigo-600 stroke-[2px]'
+                                }`} 
+                              />
                               
                               {/* Pulsing notification dot for collapsed mode */}
                               {isCollapsed && pendingCount > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 border border-white"></span>
                                 </span>
                               )}
                             </div>
 
                             {!isCollapsed && (
-                              <span className="truncate text-left flex-1">{renderHighlightedLabel(item.label)}</span>
+                              <span className="truncate text-left flex-1 tracking-tight">{renderHighlightedLabel(item.label)}</span>
                             )}
                             
                             {/* Detailed dynamic badge for expanded mode */}
                             {!isCollapsed && pendingCount > 0 && (
                               <span className={`
-                                ml-auto text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm border
+                                ml-auto text-[9px] font-black px-2 py-0.5 rounded-full shadow-2xs border
                                 ${item.id === 'guests' || item.id === 'facilities'
-                                  ? 'bg-rose-100 text-rose-700 border-rose-200' 
-                                  : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                                  ? 'bg-rose-50 text-rose-700 border-rose-200' 
+                                  : 'bg-indigo-50 text-indigo-700 border-indigo-200'
                                 }
                               `}>
                                 {pendingCount}
@@ -388,8 +396,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                             {isActive && !isCollapsed && (
                               <motion.div 
                                 layoutId="activeTabIndicator"
-                                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-indigo-600"
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-gradient-to-b from-indigo-600 to-violet-600 shadow-sm shadow-indigo-500/50"
+                                transition={{ type: "spring", stiffness: 350, damping: 32 }}
                               />
                             )}
                           </button>
@@ -403,38 +411,38 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
           </nav>
 
           {/* Collapse Toggle (Desktop Only) */}
-          <div className="hidden md:block px-4 py-2 border-t border-slate-100 bg-slate-50/50">
+          <div className="hidden md:block px-3.5 py-2 border-t border-slate-100 bg-slate-50/60">
             <button 
               onClick={toggleCollapse}
-              className="w-full flex items-center justify-center py-3 rounded-2xl bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-all border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow active:scale-[0.98]"
+              className="w-full flex items-center justify-center py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-all border border-slate-200 hover:border-slate-300 shadow-2xs active:scale-[0.98]"
             >
-              {isCollapsed ? <ChevronRight size={18} /> : <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"><ChevronLeft size={16} /> Sembunyikan</div>}
+              {isCollapsed ? <ChevronRight size={17} /> : <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest"><ChevronLeft size={15} /> Sembunyikan</div>}
             </button>
           </div>
 
-          {/* Footer / Logout */}
-          <div className="p-4 bg-slate-50 border-t border-slate-200/60">
-            <div className={`flex flex-col gap-3 ${isCollapsed ? 'items-center' : ''}`}>
+          {/* Footer / Role Information & Logout */}
+          <div className="p-3.5 bg-slate-50/70 border-t border-slate-200/70">
+            <div className={`flex flex-col gap-2.5 ${isCollapsed ? 'items-center' : ''}`}>
               {!isCollapsed && (
-                <div className="bg-white rounded-[1.25rem] p-3.5 border border-slate-200 shadow-sm flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm border shadow-sm ${roleInfo.bg}`}>
+                <div className="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-2xs flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs border shadow-2xs ${roleInfo.bg}`}>
                     {roleInfo.short}
                   </div>
                   <div className="overflow-hidden">
-                    <p className="text-xs font-black text-slate-800 truncate leading-tight mb-0.5">{roleInfo.full}</p>
-                    <p className="text-[10px] font-bold text-slate-500 tracking-wide">Wilayah RT 02 / 020</p>
+                    <p className="text-xs font-black text-slate-900 truncate leading-tight mb-0.5">{roleInfo.full}</p>
+                    <p className="text-[10px] font-bold text-slate-400 tracking-wide">Wilayah RT 02 / 020</p>
                   </div>
                 </div>
               )}
               <button 
                 onClick={onLogout}
                 className={`
-                  flex items-center gap-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wider transition-all duration-300 group
-                  ${isCollapsed ? 'p-3 justify-center bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100' : 'w-full px-4 py-3 bg-white text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 shadow-sm'}
+                  flex items-center gap-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-200 group
+                  ${isCollapsed ? 'p-2.5 justify-center bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100' : 'w-full px-3.5 py-2.5 bg-white text-rose-600 hover:bg-rose-50 border border-slate-200/80 hover:border-rose-200 shadow-2xs'}
                 `}
                 title={isCollapsed ? 'Keluar' : ''}
               >
-                <LogOut size={16} className="shrink-0 group-hover:scale-110 transition-transform" />
+                <LogOut size={15} className="shrink-0 group-hover:scale-110 transition-transform" />
                 {!isCollapsed && <span>Keluar Sistem</span>}
               </button>
             </div>
