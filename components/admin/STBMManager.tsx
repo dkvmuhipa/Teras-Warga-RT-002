@@ -269,7 +269,7 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
               Pendataan 5 Pilar STBM
             </h1>
             <p className="text-emerald-100 text-sm max-w-2xl leading-relaxed">
-              Formulir pendataan Rumah Tangga Sanitasi Total Berbasis Masyarakat (STBM) untuk RT 002/RW 015 Huntap Tondo 2. Pemantauan stop BABS, cuci tangan pakai sabun, PAMM-RT, pemilahan sampah, dan pengolahan limbah cair.
+              Formulir pendataan Rumah Tangga Sanitasi Total Berbasis Masyarakat (STBM) untuk RT 002/RW 020 Huntap Tondo 2. Pemantauan stop BABS, cuci tangan pakai sabun, PAMM-RT, pemilahan sampah, dan pengolahan limbah cair.
             </p>
           </div>
 

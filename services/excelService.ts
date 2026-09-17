@@ -1690,7 +1690,7 @@ export const parseIuranBatchExcel = async (file: File): Promise<Array<{
  */
 export const exportSTBMReportExcel = async (
   records: STBMRecord[],
-  rtRwText: string = 'RT 002/RW015 KELURAHAN TONDO'
+  rtRwText: string = 'RT 002/RW 020 KELURAHAN TONDO'
 ) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('5 Pilar STBM', {
