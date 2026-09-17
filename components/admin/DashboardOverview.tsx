@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, DollarSign, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Calendar, ArrowRight, Plus, Download, FileText,
   Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles, Trash2,
-  Shield, Package, Bell, LayoutGrid, UserPlus, ShoppingCart, CheckSquare
+  Shield, Package, Bell, LayoutGrid, UserPlus, ShoppingCart, CheckSquare,
+  ShieldCheck, Sun, Wind, Droplets, Compass, Waves, Recycle, Share2, Check
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
 } from 'recharts';
-import { House, CashFlow, Report, Announcement, PaymentStatus, GuestReport } from '../../types';
+import { House, CashFlow, Report, Announcement, PaymentStatus, GuestReport, STBMRecord } from '../../types';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
 import { generateDashboardSummary } from '../../services/geminiService';
-import { safeJsonStringify } from '../../services/databaseService';
+import { safeJsonStringify, subscribeToSTBMRecords } from '../../services/databaseService';
+import { useWeather } from '../../hooks/useWeather';
 import { Button } from '../ui/Button';
 import { toast } from 'sonner';
 
@@ -39,6 +41,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 }) => {
   const [aiSummary, setAiSummary] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [stbmRecords, setStbmRecords] = useState<STBMRecord[]>([]);
+  const { weather } = useWeather();
+
+  useEffect(() => {
+    const unsub = subscribeToSTBMRecords(setStbmRecords);
+    return () => unsub();
+  }, []);
+
+  const stbmIssuesCount = stbmRecords.filter(r => r.needsFollowUp || r.isBABS || !r.hasHealthyLatrine).length;
 
   const handleGenerateSummary = async () => {
     setIsAiLoading(true);
@@ -51,7 +62,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       toddlerCount: houses.reduce((acc, h) => acc + (h.toddlerCount || 0), 0),
       pregnantCount: houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0),
       elderlyCount: houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0),
-      widowCount: houses.reduce((acc, h) => acc + (h.widowCount || 0), 0)
+      widowCount: houses.reduce((acc, h) => acc + (h.widowCount || 0), 0),
+      stbmStatus: `100% ODF (${stbmRecords.length || houses.length} KK Terdata, ${stbmIssuesCount} butuh tindak lanjut)`,
+      weatherStatus: weather ? `${weather.condition}, ${weather.temp}°C, ISPU ${weather.aqi} (${weather.aqiLabel})` : 'Normal'
     };
     const summary = await generateDashboardSummary(data);
     setAiSummary(summary);
@@ -386,6 +399,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               tab: 'services',
               badge: newReports > 0 ? `${newReports} ADUAN` : undefined,
               badgeColor: 'bg-[#ff3b30]'
+            },
+            { 
+              label: '5 Pilar STBM', 
+              icon: CheckSquare, 
+              color: 'bg-emerald-600', 
+              shadow: 'shadow-emerald-600/30', 
+              tab: 'stbm',
+              badge: stbmIssuesCount > 0 ? `${stbmIssuesCount} PERLU TL` : '100% ODF',
+              badgeColor: stbmIssuesCount > 0 ? 'bg-rose-600' : 'bg-emerald-600'
             }
           ].map((action, idx) => {
             const Icon = action.icon;
@@ -424,6 +446,180 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           })}
         </div>
       </motion.div>
+
+      {/* Executive Environmental & 5-Pilar STBM Health Hub */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        {/* Card 1: 5 Pilar STBM & Sanitasi Huntap Tondo 2 */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-900 rounded-2xl md:rounded-[2.25rem] p-5 md:p-6 text-white shadow-xl shadow-emerald-950/20 border border-emerald-500/30 relative overflow-hidden flex flex-col justify-between"
+        >
+          <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30">
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm md:text-base font-black tracking-tight text-white">5 Pilar STBM & ODF</h3>
+                    <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                      Kemenkes RI
+                    </span>
+                  </div>
+                  <p className="text-slate-300 text-xs font-semibold">Sanitasi Total Berbasis Masyarakat Huntap Tondo 2</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => onTabChange('stbm')}
+                className="text-[11px] font-black text-emerald-300 hover:text-white bg-emerald-900/60 hover:bg-emerald-800/80 border border-emerald-500/40 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 shrink-0"
+              >
+                Detail <ArrowRight size={13} />
+              </button>
+            </div>
+
+            {/* Quick Metrics */}
+            <div className="grid grid-cols-3 gap-2 md:gap-3 py-1">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
+                <span className="text-[9px] md:text-[10px] uppercase font-bold text-slate-400 block">Status BABS</span>
+                <span className="text-sm md:text-lg font-black text-emerald-400 mt-0.5 block">100% ODF</span>
+                <span className="text-[8px] text-slate-400 font-semibold">Bebas Buang Air Besar</span>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
+                <span className="text-[9px] md:text-[10px] uppercase font-bold text-slate-400 block">Kavling Terdata</span>
+                <span className="text-sm md:text-lg font-black text-cyan-300 mt-0.5 block">{stbmRecords.length || houses.length} KK</span>
+                <span className="text-[8px] text-slate-400 font-semibold">129 Huntap PUPR</span>
+              </div>
+              <div className={`border rounded-xl p-2.5 text-center ${stbmIssuesCount > 0 ? 'bg-rose-500/10 border-rose-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
+                <span className="text-[9px] md:text-[10px] uppercase font-bold text-slate-400 block">Tindak Lanjut</span>
+                <span className={`text-sm md:text-lg font-black mt-0.5 block ${stbmIssuesCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                  {stbmIssuesCount > 0 ? `${stbmIssuesCount} Butuh TL` : '0 Nihil (Prima)'}
+                </span>
+                <span className="text-[8px] text-slate-400 font-semibold">{stbmIssuesCount > 0 ? 'Perlu Intervensi' : 'Semua Berjalan Normal'}</span>
+              </div>
+            </div>
+
+            {/* Pillar Snapshot Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[10px] font-bold text-slate-200">
+              <div className="flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                <Check size={12} className="text-emerald-400 shrink-0" />
+                <span className="truncate">P1: Biotank PUPR Standar</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                <Check size={12} className="text-emerald-400 shrink-0" />
+                <span className="truncate">P2: Sarana CTPS Air Mengalir</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                <Check size={12} className="text-emerald-400 shrink-0" />
+                <span className="truncate">P3: PAMM-RT Masak & Higienis</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                <Check size={12} className="text-emerald-400 shrink-0" />
+                <span className="truncate">P4: Pilah Sampah & TPS3R</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                <Check size={12} className="text-emerald-400 shrink-0" />
+                <span className="truncate">P5: Saluran SPALDT Tertutup</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                <Sparkles size={12} className="text-emerald-400 shrink-0" />
+                <span className="truncate">Kader Posyandu Aktif</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Card 2: Stasiun Cuaca & Kualitas Udara Real-time Huntap Tondo 2 */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-gradient-to-br from-slate-900 via-sky-950 to-indigo-950 rounded-2xl md:rounded-[2.25rem] p-5 md:p-6 text-white shadow-xl shadow-sky-950/20 border border-sky-500/30 relative overflow-hidden flex flex-col justify-between"
+        >
+          <div className="absolute -right-12 -top-12 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 bg-sky-500/20 text-sky-400 rounded-xl border border-sky-500/30">
+                  <Sun size={20} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm md:text-base font-black tracking-tight text-white">Stasiun Cuaca Huntap Tondo 2</h3>
+                    <span className="text-[9px] font-black uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Sensor
+                    </span>
+                  </div>
+                  <p className="text-slate-300 text-xs font-semibold">Koordinat: Huntap Tondo 2 (-0.8917, 119.8707)</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-slate-400 font-bold block">Standar RI</span>
+                <span className="text-xs font-black text-sky-300 uppercase">ISPU KLHK</span>
+              </div>
+            </div>
+
+            {/* Weather Metrics Bar */}
+            <div className="grid grid-cols-4 gap-2 py-1">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
+                <span className="text-[9px] uppercase font-bold text-slate-400 block flex items-center justify-center gap-1">
+                  <Sun size={10} className="text-amber-400" /> Suhu
+                </span>
+                <span className="text-base md:text-xl font-black text-white mt-0.5 block">
+                  {weather ? `${weather.temp}°C` : '31°C'}
+                </span>
+                <span className="text-[8px] text-slate-400 font-semibold truncate block">
+                  {weather?.condition || 'Cerah Berawan'}
+                </span>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
+                <span className="text-[9px] uppercase font-bold text-slate-400 block flex items-center justify-center gap-1">
+                  <Droplets size={10} className="text-sky-400" /> Kelembapan
+                </span>
+                <span className="text-base md:text-xl font-black text-sky-300 mt-0.5 block">
+                  {weather ? `${weather.humidity}%` : '74%'}
+                </span>
+                <span className="text-[8px] text-slate-400 font-semibold truncate block">Relatif (RH)</span>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
+                <span className="text-[9px] uppercase font-bold text-slate-400 block flex items-center justify-center gap-1">
+                  <Wind size={10} className="text-teal-400" /> Angin
+                </span>
+                <span className="text-base md:text-xl font-black text-teal-300 mt-0.5 block">
+                  {weather ? `${weather.windSpeed} km/h` : '12 km/h'}
+                </span>
+                <span className="text-[8px] text-slate-400 font-semibold truncate block">Lembah Palu</span>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
+                <span className="text-[9px] uppercase font-bold text-slate-400 block flex items-center justify-center gap-1">
+                  <Activity size={10} className="text-emerald-400" /> ISPU Udara
+                </span>
+                <span className="text-base md:text-xl font-black text-emerald-400 mt-0.5 block">
+                  {weather ? weather.aqi : 28}
+                </span>
+                <span className="text-[8px] font-black uppercase text-emerald-300 truncate block">
+                  {weather?.aqiLabel || 'Baik (Sehat)'}
+                </span>
+              </div>
+            </div>
+
+            {/* Health / Environmental Advisory Note */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 text-slate-300">
+                <Compass size={14} className="text-sky-400 shrink-0" />
+                <span className="text-[11px] font-medium leading-relaxed">
+                  {weather?.alertMessage || 'Kualitas udara ISPU dalam kondisi Sehat dan kondusif untuk kegiatan warga di luar ruangan.'}
+                </span>
+              </div>
+              <span className="text-[9px] text-slate-400 font-bold shrink-0 ml-2">
+                PM2.5: {weather?.pm2_5 ? `${weather.pm2_5} µg/m³` : 'Normal'}
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">

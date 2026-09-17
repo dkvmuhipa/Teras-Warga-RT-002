@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   X, Phone, MapPin, FileText, CreditCard, DollarSign, 
   LayoutList, Droplets, Trash2, Users, Activity, Shield, User,
-  ShieldCheck, Calendar, AlertCircle, Printer, Home, Bike, Car, Key
+  ShieldCheck, Calendar, AlertCircle, Printer, Home, Bike, Car, Key,
+  CheckSquare, Waves, Recycle, Sparkles, MessageCircle, ExternalLink,
+  Check, AlertTriangle
 } from 'lucide-react';
-import { House, PaymentStatus } from '../../../types';
+import { House, PaymentStatus, STBMRecord } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
+import { subscribeToSTBMRecords, saveSTBMRecord } from '../../../services/databaseService';
+import { toast } from 'sonner';
 import { KartuKeluargaModal } from './KartuKeluargaModal';
 
 interface ResidentDetailDrawerProps {
@@ -32,6 +36,71 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
 }) => {
   const { getPaymentStatus, getArrearsForHouse } = useFinancial();
   const [isKkModalOpen, setIsKkModalOpen] = useState(false);
+  const [stbmRecord, setStbmRecord] = useState<STBMRecord | null>(null);
+  const [isSavingSTBM, setIsSavingSTBM] = useState(false);
+
+  // Subscribe to real-time STBM records for this specific house
+  useEffect(() => {
+    if (!selectedResident) return;
+    const unsub = subscribeToSTBMRecords((records) => {
+      const found = records.find(r => r.houseId === selectedResident.id || r.id === `stbm_${selectedResident.id}`);
+      if (found) {
+        setStbmRecord(found);
+      } else {
+        // Default standard for Huntap Tondo 2
+        setStbmRecord({
+          id: `stbm_${selectedResident.id}`,
+          houseId: selectedResident.id,
+          block: selectedResident.block,
+          number: selectedResident.number,
+          headOfFamily: selectedResident.headOfFamily,
+          occupants: selectedResident.occupants || 1,
+          hasHealthyLatrine: true,
+          isBABS: false,
+          hasCTPS: true,
+          safeWaterAndFood: true,
+          wasteManagement: true,
+          liquidWasteManagement: true,
+          hasCleanWaterAccess: true,
+          hasSTBMTriggering: true,
+          needsFollowUp: false,
+          problemType: '',
+          notes: ''
+        });
+      }
+    });
+    return () => unsub();
+  }, [selectedResident]);
+
+  const handleToggleSTBM = async (field: keyof STBMRecord) => {
+    if (!stbmRecord || !selectedResident) return;
+    setIsSavingSTBM(true);
+    const updated: STBMRecord = {
+      ...stbmRecord,
+      [field]: !stbmRecord[field],
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      await saveSTBMRecord(updated);
+      setStbmRecord(updated);
+      toast.success(`Status sanitasi kavling ${selectedResident.block}-${selectedResident.number} diperbarui.`);
+    } catch (e) {
+      toast.error('Gagal memperbarui status sanitasi.');
+    } finally {
+      setIsSavingSTBM(false);
+    }
+  };
+
+  const handleContactWhatsAppSanitasi = () => {
+    if (!selectedResident?.phone) {
+      toast.error('Nomor telepon warga belum terdaftar.');
+      return;
+    }
+    const cleanPhone = selectedResident.phone.replace(/[^0-9]/g, '');
+    const phoneWithCountry = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
+    const message = `Halo Bapak/Ibu ${selectedResident.headOfFamily} (Kavling Blok ${selectedResident.block} No. ${selectedResident.number}), kami dari Pengurus RT 002 / RW 020 Huntap Tondo 2 ingin berkoordinasi terkait pemeliharaan sanitasi lingkungan: "${stbmRecord?.problemType || 'Pemeriksaan sarana sanitasi'}". Kapan waktu luang yang tepat untuk kami tinjau bersama kader kesehatan? Terima kasih.`;
+    window.open(`https://api.whatsapp.com/send?phone=${phoneWithCountry}&text=${encodeURIComponent(message)}`, '_blank');
+  };
 
   if (!isOpen || !selectedResident) return null;
 
@@ -372,6 +441,165 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     </div>
                   )}
                 </div>
+              </section>
+
+              {/* Group: Profil Sanitasi & 5 Pilar STBM (Kawasan Huntap Tondo 2) */}
+              <section className="bg-white p-5 rounded-xl border border-emerald-200/90 shadow-xs relative overflow-hidden">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 bg-emerald-600 rounded-full"></div>
+                    <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <CheckSquare size={13} className="text-emerald-600" />
+                      Profil Sanitasi (5 Pilar STBM)
+                    </h4>
+                  </div>
+                  <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                    {stbmRecord && !stbmRecord.isBABS && stbmRecord.hasHealthyLatrine ? '100% ODF Sehat' : 'Perlu Pantau'}
+                  </span>
+                </div>
+
+                <p className="text-[10.5px] text-slate-500 mb-3.5 leading-relaxed font-medium">
+                  Status kepatuhan sanitasi hunian tetap merujuk Permenkes No. 3/2014 & infrastruktur PUPR:
+                </p>
+
+                {/* 5 Pilar Grid Items */}
+                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                  {/* Pilar 1: Biotank */}
+                  <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">1. Jamban Sehat</p>
+                      <p className="text-xs font-extrabold text-slate-800">Biotank PUPR</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSTBM('hasHealthyLatrine')}
+                      disabled={isSavingSTBM}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        stbmRecord?.hasHealthyLatrine ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {stbmRecord?.hasHealthyLatrine ? 'Ya' : 'Tidak'}
+                    </button>
+                  </div>
+
+                  {/* Bebas BABS */}
+                  <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">Bebas BABS</p>
+                      <p className="text-xs font-extrabold text-slate-800">Status ODF</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSTBM('isBABS')}
+                      disabled={isSavingSTBM}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        stbmRecord?.isBABS ? 'bg-rose-600 text-white' : 'bg-emerald-100 text-emerald-800'
+                      }`}
+                    >
+                      {stbmRecord?.isBABS ? 'BABS ⚠️' : 'Bebas ✓'}
+                    </button>
+                  </div>
+
+                  {/* Pilar 2: CTPS */}
+                  <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">2. Cuci Tangan</p>
+                      <p className="text-xs font-extrabold text-slate-800">Sarana CTPS</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSTBM('hasCTPS')}
+                      disabled={isSavingSTBM}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        stbmRecord?.hasCTPS ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {stbmRecord?.hasCTPS ? 'Ya' : 'Tidak'}
+                    </button>
+                  </div>
+
+                  {/* Pilar 3: PAMM-RT */}
+                  <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">3. Air & Makanan</p>
+                      <p className="text-xs font-extrabold text-slate-800">PAMM-RT Aman</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSTBM('safeWaterAndFood')}
+                      disabled={isSavingSTBM}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        stbmRecord?.safeWaterAndFood ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {stbmRecord?.safeWaterAndFood ? 'Ya' : 'Tidak'}
+                    </button>
+                  </div>
+
+                  {/* Pilar 4: TPS3R */}
+                  <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">4. Pilah Sampah</p>
+                      <p className="text-xs font-extrabold text-slate-800">Layanan TPS3R</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSTBM('wasteManagement')}
+                      disabled={isSavingSTBM}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        stbmRecord?.wasteManagement ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {stbmRecord?.wasteManagement ? 'Ya' : 'Tidak'}
+                    </button>
+                  </div>
+
+                  {/* Pilar 5: SPALDT */}
+                  <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">5. Limbah Cair</p>
+                      <p className="text-xs font-extrabold text-slate-800">Pipa SPALDT</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSTBM('liquidWasteManagement')}
+                      disabled={isSavingSTBM}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        stbmRecord?.liquidWasteManagement ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {stbmRecord?.liquidWasteManagement ? 'Ya' : 'Tidak'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Status Tindak Lanjut & Action */}
+                {stbmRecord?.needsFollowUp || stbmRecord?.problemType ? (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-2 mt-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-rose-700 font-bold text-xs">
+                        <AlertTriangle size={14} className="shrink-0 text-rose-600" />
+                        <span>Kendala Sanitasi: {stbmRecord.problemType || 'Perlu perbaikan'}</span>
+                      </div>
+                    </div>
+                    {selectedResident.phone && (
+                      <button
+                        onClick={handleContactWhatsAppSanitasi}
+                        className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      >
+                        <MessageCircle size={13} />
+                        <span>Koordinasi via WhatsApp Warga</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-2.5 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center justify-between text-xs text-emerald-900 font-semibold">
+                    <span className="flex items-center gap-1.5 text-[11px]">
+                      <ShieldCheck size={14} className="text-emerald-600" />
+                      Kavling Terverifikasi Sanitasi Sehat
+                    </span>
+                    <button
+                      onClick={() => handleToggleSTBM('needsFollowUp')}
+                      className="text-[10px] text-slate-500 hover:text-slate-800 underline cursor-pointer"
+                    >
+                      Tandai Masalah
+                    </button>
+                  </div>
+                )}
               </section>
 
               {/* Group: Ronda & Catatan Khusus */}
