@@ -281,6 +281,16 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       },
       badge: '24 JAM',
       badgeColor: 'bg-[#991b1b]'
+    },
+    { 
+      label: '5 Pilar STBM', 
+      category: 'community' as ServiceCategory,
+      icon: CheckSquare, 
+      color: 'bg-[#10b981]', 
+      shadow: 'shadow-[#10b981]/30', 
+      link: '/health?tab=stbm',
+      badge: '100% ODF',
+      badgeColor: 'bg-[#059669]'
     }
   ], []);
 

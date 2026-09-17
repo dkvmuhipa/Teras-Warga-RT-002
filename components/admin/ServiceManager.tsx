@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw, Phone, Hash, Briefcase, BookOpen, Heart, Mail, CreditCard, UserCheck, MapPin, Info, Calendar, ChevronRight, ClipboardList, Users, Flag, Download } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, Eye, MessageCircle, Sparkles, Trash2, Printer, Settings, Plus, Save, User, Home, Upload, Image as ImageIcon, Archive, RefreshCw, Phone, Hash, Briefcase, BookOpen, Heart, Mail, CreditCard, UserCheck, MapPin, Info, Calendar, ChevronRight, ClipboardList, Users, Flag, Download, CheckSquare } from 'lucide-react';
 import { LetterRequest, Report, PdfConfig, OfficialLetter, House } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb, subscribeToOfficialLetters } from '../../services/databaseService';
+import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb, subscribeToOfficialLetters, saveSTBMRecord } from '../../services/databaseService';
 import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar, generateIncidentReportPDF } from '../../services/pdfService';
@@ -3246,6 +3246,54 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <p className="text-[10px] text-slate-400">RT 002 / RW 020 Tondo</p>
                   </div>
                 </div>
+                {/* Cross-Module Integration: Sync with 5 Pilar STBM & Sanitasi */}
+                {reporterHouse && (
+                  <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2.5 bg-emerald-600 text-white rounded-xl shrink-0 shadow-xs">
+                        <CheckSquare size={18} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-emerald-950">Sinkronisasi 5 Pilar STBM Kavling</p>
+                        <p className="text-[10px] text-emerald-700 font-semibold leading-relaxed">
+                          Tandai status tindak lanjut sanitasi pada kavling Blok {reporterHouse.block}-{reporterHouse.number} ({reporterHouse.headOfFamily})
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await saveSTBMRecord({
+                            id: `stbm_${reporterHouse.id}`,
+                            houseId: reporterHouse.id,
+                            block: reporterHouse.block,
+                            number: reporterHouse.number,
+                            headOfFamily: reporterHouse.headOfFamily,
+                            occupants: reporterHouse.occupants || 1,
+                            hasHealthyLatrine: true,
+                            isBABS: false,
+                            hasCTPS: true,
+                            safeWaterAndFood: true,
+                            wasteManagement: true,
+                            liquidWasteManagement: true,
+                            hasCleanWaterAccess: true,
+                            hasSTBMTriggering: true,
+                            needsFollowUp: true,
+                            problemType: selectedReport.description.slice(0, 80),
+                            notes: `Diperbarui otomatis dari Pengaduan Warga (ID: ${selectedReport.id})`
+                          });
+                          toast.success(`Kavling Blok ${reporterHouse.block}-${reporterHouse.number} ditandai butuh tindak lanjut pada Buku 5 Pilar STBM!`);
+                        } catch (e) {
+                          toast.error('Gagal memperbarui status STBM.');
+                        }
+                      }}
+                      className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0 transition-all shadow-sm cursor-pointer active:scale-95 text-center"
+                    >
+                      Tandai di Buku STBM
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}

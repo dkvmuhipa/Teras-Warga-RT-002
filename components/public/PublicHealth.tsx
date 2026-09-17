@@ -1,14 +1,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Heart, Search, ArrowLeft, Calendar, User, Scale, Ruler, Activity, Thermometer, Info, ShieldCheck, TrendingUp, Droplets, Zap, Beaker } from 'lucide-react';
+import { 
+  Heart, Search, ArrowLeft, Calendar, User, Scale, Ruler, Activity, 
+  Thermometer, Info, ShieldCheck, TrendingUp, Droplets, Zap, Beaker,
+  CheckSquare, Waves, Recycle, Sparkles, Check, Phone, ArrowRight, AlertTriangle
+} from 'lucide-react';
 import { HealthRecord } from '../../types';
 import { subscribeToHealthRecords } from '../../services/databaseService';
 import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export const PublicHealth: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeMainTab, setActiveMainTab] = useState<'posyandu' | 'stbm'>(tabParam === 'stbm' ? 'stbm' : 'posyandu');
+
+  useEffect(() => {
+    if (tabParam === 'stbm') {
+      setActiveMainTab('stbm');
+    }
+  }, [tabParam]);
+
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -113,8 +127,11 @@ export const PublicHealth: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9] mb-6"
             >
-              Posyandu <br/>
-              <span className="text-emerald-400 italic font-serif">Digital</span>
+              {activeMainTab === 'stbm' ? (
+                <>Sanitasi <br/><span className="text-emerald-400 italic font-serif">5 Pilar STBM</span></>
+              ) : (
+                <>Posyandu <br/><span className="text-emerald-400 italic font-serif">Digital</span></>
+              )}
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -122,38 +139,284 @@ export const PublicHealth: React.FC = () => {
               transition={{ delay: 0.1 }}
               className="text-slate-400 text-lg font-medium leading-relaxed max-w-md"
             >
-              Akses rekam medis keluarga Anda secara mandiri, transparan, dan aman dalam satu genggaman.
+              {activeMainTab === 'stbm'
+                ? 'Standar Sanitasi Total Berbasis Masyarakat Kemenkes RI di Huntap Tondo 2. Pemukiman Sehat 100% ODF Bebas BABS.'
+                : 'Akses rekam medis keluarga Anda secara mandiri, transparan, dan aman dalam satu genggaman.'}
             </motion.p>
+
+            {/* Main Tabs: Posyandu vs STBM */}
+            <div className="flex flex-wrap items-center gap-2.5 p-1.5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 w-fit mt-6">
+              <button
+                onClick={() => {
+                  setActiveMainTab('posyandu');
+                  setSearchParams({});
+                }}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                  activeMainTab === 'posyandu'
+                    ? 'bg-white text-slate-900 shadow-md'
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                <Heart size={15} className={activeMainTab === 'posyandu' ? 'text-rose-500' : ''} />
+                <span>Posyandu Digital</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveMainTab('stbm');
+                  setSearchParams({ tab: 'stbm' });
+                }}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                  activeMainTab === 'stbm'
+                    ? 'bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/30'
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                <CheckSquare size={15} className={activeMainTab === 'stbm' ? 'text-slate-950' : ''} />
+                <span>5 Pilar STBM & ODF</span>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-950/40 text-emerald-200 border border-emerald-400/40 font-black">
+                  100% ODF
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 -mt-20 relative z-20 space-y-12">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {[
-            { label: 'Total', value: stats.total, icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' },
-            { label: 'Bayi/Balita', value: stats.bayi, icon: Heart, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'Remaja', value: stats.remaja, icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-            { label: 'Dewasa', value: stats.dewasa, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { label: 'Ibu Hamil', value: stats.ibuHamil, icon: Heart, color: 'text-rose-600', bg: 'bg-rose-50' },
-            { label: 'Lansia', value: stats.lansia, icon: User, color: 'text-amber-600', bg: 'bg-amber-50' },
-          ].map((stat, i) => (
-            <motion.div
-              key={i}
+        {activeMainTab === 'stbm' ? (
+          /* STBM 5 PILAR SECTION */
+          <div className="space-y-8">
+            {/* Executive ODF Banner */}
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white/80 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white shadow-xl shadow-slate-200/40"
+              className="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-900 rounded-[3rem] p-8 md:p-12 text-white border border-emerald-500/30 shadow-2xl shadow-emerald-950/30 relative overflow-hidden"
             >
-              <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-4 shadow-inner`}>
-                <stat.icon size={20} />
+              <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
+                      <ShieldCheck size={14} className="text-emerald-400" />
+                      Sertifikasi ODF Kemenkes RI
+                    </span>
+                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/10 text-slate-300 border border-white/10">
+                      129 Huntap PUPR
+                    </span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white">
+                    Huntap Tondo 2: Kawasan Percontohan 100% ODF
+                  </h2>
+                  <p className="text-sm md:text-base text-slate-300 font-medium max-w-2xl leading-relaxed">
+                    Setiap unit hunian tetap (Huntap) di RT 002 / RW 020 Kelurahan Tondo telah dilengkapi tangki septik biotank pabrikan standar Kementerian PUPR dan terintegrasi dengan 5 Pilar Sanitasi Total Berbasis Masyarakat.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
+                  <Link
+                    to="/resident?tab=stbm"
+                    className="px-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <span>Cek Kavling Saya</span>
+                    <ArrowRight size={15} />
+                  </Link>
+                  <a
+                    href="https://api.whatsapp.com/send?phone=6285961194621&text=Halo%20Pengurus%20RT%20002%2C%20saya%20ingin%20konsultasi%20pemeliharaan%20sanitasi%20STBM%20Huntap%20Tondo%202"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-black uppercase tracking-wider border border-white/20 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Phone size={15} className="text-emerald-400" />
+                    <span>Kontak Kader Posyandu</span>
+                  </a>
+                </div>
               </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-              <p className="text-2xl font-black text-slate-900 tracking-tight">{stat.value}</p>
+
+              {/* 4 Pilar Metrik Lingkungan */}
+              <div className="mt-8 pt-8 border-t border-white/10 grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Status Bebas BABS</span>
+                  <span className="text-xl md:text-2xl font-black text-emerald-400 mt-1 block">100% ODF</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">Nihil Buang Air Terbuka</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Jamban Sehat Biotank</span>
+                  <span className="text-xl md:text-2xl font-black text-cyan-300 mt-1 block">129 Unit</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">Standar Kedap PUPR</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Akses Air Minum</span>
+                  <span className="text-xl md:text-2xl font-black text-teal-300 mt-1 block">PDAM Palu</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">Meter Mandiri Digital</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Pengelolaan Sampah</span>
+                  <span className="text-xl md:text-2xl font-black text-emerald-300 mt-1 block">TPS3R Aktif</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">Retribusi Terjadwal</span>
+                </div>
+              </div>
             </motion.div>
-          ))}
-        </div>
+
+            {/* Detailed 5 Pillars Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Pilar 1 */}
+              <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-wider border border-emerald-200/60">
+                      Pilar 1 STBM
+                    </span>
+                    <span className="flex items-center gap-1 text-xs font-black text-emerald-600">
+                      <Check size={16} /> 100% ODF
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900">Stop Buang Air Besar Sembarangan (BABS)</h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Setiap rumah tangga menggunakan jamban leher angsa dengan penampungan biotank septik kedap air standar pabrikan yang tidak mencemari air tanah pemukiman.
+                  </p>
+                </div>
+                <div className="p-3.5 bg-emerald-50/70 rounded-2xl text-xs font-bold text-emerald-800 flex items-center gap-2.5 border border-emerald-100">
+                  <ShieldCheck size={18} className="text-emerald-600 shrink-0" />
+                  <span>Jamban Kloset Leher Angsa + Biotank</span>
+                </div>
+              </div>
+
+              {/* Pilar 2 */}
+              <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase tracking-wider border border-blue-200/60">
+                      Pilar 2 STBM
+                    </span>
+                    <span className="flex items-center gap-1 text-xs font-black text-blue-600">
+                      <Check size={16} /> Aktif
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900">Cuci Tangan Pakai Sabun (CTPS)</h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Pemberdayaan kebiasaan cuci tangan menggunakan sabun pada air mengalir di 5 waktu kritis: sebelum makan, sebelum menyusui/menyiapkan pangan, setelah buang air, dan setelah memegang hewan.
+                  </p>
+                </div>
+                <div className="p-3.5 bg-blue-50/70 rounded-2xl text-xs font-bold text-blue-800 flex items-center gap-2.5 border border-blue-100">
+                  <Droplets size={18} className="text-blue-600 shrink-0" />
+                  <span>Sarana CTPS Air Mengalir + Sabun</span>
+                </div>
+              </div>
+
+              {/* Pilar 3 */}
+              <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-wider border border-amber-200/60">
+                      Pilar 3 STBM
+                    </span>
+                    <span className="flex items-center gap-1 text-xs font-black text-amber-600">
+                      <Check size={16} /> Higienis
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900">Pengelolaan Air Minum & Pangan Rumah Tangga</h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Air minum selalu dimasak sampai mendidih atau menggunakan filter air terstandar, serta makanan keluarga disimpan di wadah tertutup bebas dari kontaminasi lalat.
+                  </p>
+                </div>
+                <div className="p-3.5 bg-amber-50/70 rounded-2xl text-xs font-bold text-amber-800 flex items-center gap-2.5 border border-amber-100">
+                  <ShieldCheck size={18} className="text-amber-600 shrink-0" />
+                  <span>Air Masak Mendidih & Wadah Tertutup</span>
+                </div>
+              </div>
+
+              {/* Pilar 4 */}
+              <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 bg-teal-50 text-teal-700 rounded-xl text-[10px] font-black uppercase tracking-wider border border-teal-200/60">
+                      Pilar 4 STBM
+                    </span>
+                    <span className="flex items-center gap-1 text-xs font-black text-teal-600">
+                      <Check size={16} /> TPS3R
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900">Pengelolaan Sampah Rumah Tangga (TPS3R)</h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Penerapan pilah sampah dari rumah (organik, anorganik, residu), larangan membakar sampah, dan pemanfaatan bank sampah digital RT 002.
+                  </p>
+                </div>
+                <div className="p-3.5 bg-teal-50/70 rounded-2xl text-xs font-bold text-teal-800 flex items-center gap-2.5 border border-teal-100">
+                  <Recycle size={18} className="text-teal-600 shrink-0" />
+                  <span>Pilah Sampah + Pengangkutan Terjadwal</span>
+                </div>
+              </div>
+
+              {/* Pilar 5 */}
+              <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 bg-violet-50 text-violet-700 rounded-xl text-[10px] font-black uppercase tracking-wider border border-violet-200/60">
+                      Pilar 5 STBM
+                    </span>
+                    <span className="flex items-center gap-1 text-xs font-black text-violet-600">
+                      <Check size={16} /> Terkoneksi
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900">Pengelolaan Limbah Cair Rumah Tangga (SPALDT)</h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Pembuangan air limbah non-kakus (greywater) melalui pipa tertutup langsung ke saluran drainase induk Huntap tanpa adanya genangan berbau atau jentik nyamuk.
+                  </p>
+                </div>
+                <div className="p-3.5 bg-violet-50/70 rounded-2xl text-xs font-bold text-violet-800 flex items-center gap-2.5 border border-violet-100">
+                  <Waves size={18} className="text-violet-600 shrink-0" />
+                  <span>Saluran Tertutup Tanpa Genangan</span>
+                </div>
+              </div>
+
+              {/* Edukasi Biotank PUPR */}
+              <div className="bg-slate-900 text-white rounded-[2.5rem] p-8 border border-slate-800 shadow-xl flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <span className="px-3 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-[10px] font-black uppercase tracking-wider border border-amber-500/30">
+                    Petunjuk Teknis
+                  </span>
+                  <h3 className="text-lg font-black text-white">Pemeliharaan Biotank Huntap</h3>
+                  <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                    Biotank mengandalkan bakteri pengurai alami. Jangan memasukkan deterjen keras berlebihan, bahan kimia keras, minyak goreng, atau pembalut ke dalam kloset.
+                  </p>
+                </div>
+                <div className="p-3.5 bg-white/10 rounded-2xl text-xs font-bold text-slate-200 flex items-center gap-2.5">
+                  <Sparkles size={18} className="text-amber-400 shrink-0" />
+                  <span>Rawat Fasilitas Hunian Pasca Bencana</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* POSYANDU DIGITAL SECTION */
+          <>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[
+                { label: 'Total', value: stats.total, icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50' },
+                { label: 'Bayi/Balita', value: stats.bayi, icon: Heart, color: 'text-blue-600', bg: 'bg-blue-50' },
+                { label: 'Remaja', value: stats.remaja, icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                { label: 'Dewasa', value: stats.dewasa, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                { label: 'Ibu Hamil', value: stats.ibuHamil, icon: Heart, color: 'text-rose-600', bg: 'bg-rose-50' },
+                { label: 'Lansia', value: stats.lansia, icon: User, color: 'text-amber-600', bg: 'bg-amber-50' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-white/80 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white shadow-xl shadow-slate-200/40"
+                >
+                  <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-4 shadow-inner`}>
+                    <stat.icon size={20} />
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <p className="text-2xl font-black text-slate-900 tracking-tight">{stat.value}</p>
+                </motion.div>
+              ))}
+            </div>
 
         {/* Search & Filter Section */}
         <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-2xl shadow-slate-200/30 relative overflow-hidden">
@@ -381,6 +644,8 @@ export const PublicHealth: React.FC = () => {
             )}
           </AnimatePresence>
         </div>
+      </>
+    )}
       </div>
     </div>
   );
