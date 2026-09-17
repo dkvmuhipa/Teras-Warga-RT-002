@@ -345,6 +345,12 @@ service cloud.firestore {
       allow read, create, update, delete: if true;
     }
 
+    // STBM Records (5 Pilar Sanitasi Total Berbasis Masyarakat)
+    match /stbm_records/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;
