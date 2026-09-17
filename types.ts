@@ -1043,7 +1043,6 @@ export interface UpdateRequest {
   vehicleCount?: number;
   twoWheelCount?: number;
   fourWheelCount?: number;
-  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
   ownerName?: string;
   ownerPhone?: string;
   
@@ -1268,10 +1267,34 @@ export interface RentalContract {
   
   // Pelapor jika diajukan via portal publik
   reportedBy?: 'Pemilik' | 'Penyewa' | 'Pengurus RT';
-  reporterName?: string;
-  reporterPhone?: string;
-  
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// --- PENDATAAN RUMAH TANGGA 5 PILAR STBM (SANITASI TOTAL BERBASIS MASYARAKAT) ---
+export interface STBMRecord {
+  id: string; // misal: stbm_C5-01
+  houseId: string; // ID rumah, misal: C5-01
+  block: string;
+  number: string;
+  headOfFamily: string;
+  occupants: number;
+  
+  // 5 Pilar STBM & Indikator Sanitasi (Boolean: Ya / Tidak)
+  hasHealthyLatrine: boolean;     // Pilar 1: Akses Jamban Sehat
+  isBABS: boolean;                 // BABS (Buang Air Besar Sembarangan)
+  hasCTPS: boolean;                // Pilar 2: Cuci Tangan Pakai Sabun (air mengalir)
+  safeWaterAndFood: boolean;       // Pilar 3: Pengelolaan Air Minum & Makanan Aman
+  wasteManagement: boolean;        // Pilar 4: Pengelolaan / Pemilahan Sampah Rumah Tangga
+  liquidWasteManagement: boolean;  // Pilar 5: Pengelolaan Limbah Cair Rumah Tangga (SPAL)
+  hasCleanWaterAccess: boolean;    // Akses Air Bersih (PDAM / Sumur Terlindungi)
+  hasSTBMTriggering: boolean;      // Pemicuan STBM
+  needsFollowUp: boolean;          // Perlu Tindak Lanjut
+  
+  // Catatan Khusus
+  problemType?: string;            // Jenis Masalah (misal: "Tangki septik rembes", "SPAL mampet")
+  notes?: string;                  // Keterangan (Ket.)
+  updatedAt: string;
+  updatedBy?: string;
 }

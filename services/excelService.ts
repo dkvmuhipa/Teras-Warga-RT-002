@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { House, PaymentStatus } from '../types';
+import { House, PaymentStatus, STBMRecord } from '../types';
 
 export const naturalSortBlockAndNumber = (
   blockA: string | undefined | null,
@@ -1683,5 +1683,142 @@ export const parseIuranBatchExcel = async (file: File): Promise<Array<{
 
   return results;
 };
+
+/**
+ * EXPORT EXCEL RESMI - FORMULIR PENDATAAN RUMAH TANGGA 5 PILAR STBM
+ * Sesuai format baku dari Dinas Kesehatan / Kelurahan Tondo (14 Kolom, Header Hijau Lembut #C6E0B4)
+ */
+export const exportSTBMReportExcel = async (
+  records: STBMRecord[],
+  rtRwText: string = 'RT 002/RW015 KELURAHAN TONDO'
+) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('5 Pilar STBM', {
+    views: [{ showGridLines: true }]
+  });
+
+  // Urutkan data berdasarkan Blok dan Nomor kavling secara natural
+  const sorted = [...records].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
+
+  // 1. JUDUL LAPORAN (Row 1 & 2)
+  worksheet.mergeCells('A1:N1');
+  const titleRow1 = worksheet.getCell('A1');
+  titleRow1.value = 'FORMULIR PENDATAAN RUMAH TANGGA - 5 PILAR STBM';
+  titleRow1.font = { name: 'Calibri', size: 13, bold: true, color: { argb: 'FF595959' } };
+  titleRow1.alignment = { vertical: 'middle', horizontal: 'center' };
+  titleRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } }; // Soft Peach
+
+  worksheet.mergeCells('A2:N2');
+  const titleRow2 = worksheet.getCell('A2');
+  titleRow2.value = rtRwText.toUpperCase();
+  titleRow2.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF595959' } };
+  titleRow2.alignment = { vertical: 'middle', horizontal: 'center' };
+  titleRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
+
+  worksheet.getRow(1).height = 28;
+  worksheet.getRow(2).height = 22;
+
+  // 2. HEADER TABEL (Row 3) - 14 Kolom Resmi
+  const headers = [
+    { text: 'No.', width: 6 },
+    { text: 'Nama Kepala Keluarga', width: 34 },
+    { text: 'Jumlah Anggota KK', width: 16 },
+    { text: 'Jamban Sehat (Ya/Tidak)', width: 18 },
+    { text: 'BABS (Ya/Tidak)', width: 16 },
+    { text: 'CTPS (Ya/Tidak)', width: 16 },
+    { text: 'Air Minum dan Makanan Aman (Ya/Tidak)', width: 24 },
+    { text: 'Pilah/Kelola Sampah (Ya/Tidak)', width: 22 },
+    { text: 'Kelola Limbah Cair (Ya/Tidak)', width: 20 },
+    { text: 'Akses Air Bersih (Ya/Tidak)', width: 18 },
+    { text: 'Pemicuan STBM (Ya/Tidak)', width: 18 },
+    { text: 'Perlu Tindak Lanjut (Ya/Tidak)', width: 20 },
+    { text: 'Jenis Masalah', width: 26 },
+    { text: 'Ket.', width: 22 }
+  ];
+
+  const headerRow = worksheet.getRow(3);
+  headerRow.height = 36;
+
+  headers.forEach((h, idx) => {
+    const cell = headerRow.getCell(idx + 1);
+    cell.value = h.text;
+    cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF000000' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6E0B4' } }; // Soft Sage/Pastel Green
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF808080' } },
+      left: { style: 'thin', color: { argb: 'FF808080' } },
+      bottom: { style: 'thin', color: { argb: 'FF808080' } },
+      right: { style: 'thin', color: { argb: 'FF808080' } }
+    };
+    worksheet.getColumn(idx + 1).width = h.width;
+  });
+
+  // 3. BARIS DATA
+  sorted.forEach((rec, index) => {
+    const rowNum = index + 4;
+    const row = worksheet.getRow(rowNum);
+    row.height = 24;
+
+    const rowData = [
+      index + 1,
+      rec.headOfFamily ? `${rec.headOfFamily.toUpperCase()} (${rec.block}-${rec.number})` : `Blok ${rec.block}-${rec.number} (Kosong)`,
+      rec.occupants || 0,
+      rec.hasHealthyLatrine ? 'Ya' : 'Tidak',
+      rec.isBABS ? 'Ya' : 'Tidak',
+      rec.hasCTPS ? 'Ya' : 'Tidak',
+      rec.safeWaterAndFood ? 'Ya' : 'Tidak',
+      rec.wasteManagement ? 'Ya' : 'Tidak',
+      rec.liquidWasteManagement ? 'Ya' : 'Tidak',
+      rec.hasCleanWaterAccess ? 'Ya' : 'Tidak',
+      rec.hasSTBMTriggering ? 'Ya' : 'Tidak',
+      rec.needsFollowUp ? 'Ya' : 'Tidak',
+      rec.problemType || '-',
+      rec.notes || '-'
+    ];
+
+    rowData.forEach((val, cIdx) => {
+      const cell = row.getCell(cIdx + 1);
+      cell.value = val;
+      cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF262626' } };
+      
+      // Border tipis
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFD4D4D4' } },
+        left: { style: 'thin', color: { argb: 'FFD4D4D4' } },
+        bottom: { style: 'thin', color: { argb: 'FFD4D4D4' } },
+        right: { style: 'thin', color: { argb: 'FFD4D4D4' } }
+      };
+
+      // Alignment khusus
+      if (cIdx === 0) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      } else if (cIdx === 1) {
+        cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      } else if (cIdx === 12 || cIdx === 13) {
+        cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      } else {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      }
+
+      // Highlight jika ada masalah atau butuh tindak lanjut
+      if (cIdx === 11 && val === 'Ya') {
+        cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFC00000' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
+      }
+      if (cIdx === 4 && val === 'Ya') { // BABS = Ya (Buruk)
+        cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFC00000' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
+      }
+    });
+  });
+
+  // Export buffer & download
+  const buffer = await workbook.xlsx.writeBuffer();
+  const dateStr = new Date().toISOString().split('T')[0];
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Formulir_5_Pilar_STBM_RT02_${dateStr}.xlsx`);
+};
+
 
 

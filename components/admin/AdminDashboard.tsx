@@ -41,11 +41,12 @@ const ReportManager = React.lazy(() => import('./ReportManager').then(m => ({ de
 const WaterMeterManager = React.lazy(() => import('./WaterMeterManager').then(m => ({ default: m.WaterMeterManager })));
 const MeetingMinutesManager = React.lazy(() => import('./MeetingMinutesManager').then(m => ({ default: m.MeetingMinutesManager })));
 const RentalManager = React.lazy(() => import('./RentalManager').then(m => ({ default: m.RentalManager })));
+const STBMManager = React.lazy(() => import('./STBMManager').then(m => ({ default: m.STBMManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle,
-  LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid, BookOpen, Building
+  LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid, BookOpen, Building, CheckSquare
 } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 import { toast } from 'sonner';
@@ -108,6 +109,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'residents', icon: Users, label: 'Data Warga', desc: 'Database KK & data penduduk', color: 'bg-emerald-50 text-emerald-600 border-emerald-100/60 hover:bg-emerald-100/50' },
     { id: 'rentals', icon: Building, label: 'Rumah Sewa & Kontrakan', desc: 'Buku registrasi & monitoring hunian sewa RT', color: 'bg-teal-50 text-teal-700 border-teal-100/60 hover:bg-teal-100/50' },
     { id: 'health', icon: Activity, label: 'Posyandu Digital', desc: 'Pemantauan kesehatan & lansia', color: 'bg-teal-50 text-teal-600 border-teal-100/60 hover:bg-teal-100/50' },
+    { id: 'stbm', icon: CheckSquare, label: '5 Pilar STBM', desc: 'Pendataan sanitasi total berbasis masyarakat RT', color: 'bg-emerald-50 text-emerald-700 border-emerald-100/60 hover:bg-emerald-100/50' },
     { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan', desc: 'Pengelolaan keuangan & iuran warga', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
     { id: 'services', icon: FileText, label: 'Pusat Persuratan', desc: 'Surat pengantar warga, surat resmi RT, & surat masuk', color: 'bg-violet-50 text-violet-600 border-violet-100/60 hover:bg-violet-100/50' },
     { id: 'meeting-minutes', icon: BookOpen, label: 'Notula Musyawarah', desc: 'Buku notula & kesepakatan rapat warga', color: 'bg-amber-50 text-amber-700 border-amber-100/60 hover:bg-amber-100/50' },
@@ -134,7 +136,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (role === Role.SECRETARY) {
       const allowed = [
         'overview', 'analytics', 'residents', 'rentals',
-        'health', 'officials', 'services', 'meeting-minutes', 'reports-warga', 'documents', 'activities', 
+        'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-warga', 'documents', 'activities', 
         'assets', 'content', 'audit', 'notifications', 'settings'
       ];
       return allowed.includes(item.id);
@@ -368,6 +370,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <DocumentManager documents={documents} />;
       case 'rentals':
         return <RentalManager houses={houses} />;
+      case 'stbm':
+        return <STBMManager houses={houses} />;
       case 'meeting-minutes':
         return <MeetingMinutesManager />;
       case 'activities':

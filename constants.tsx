@@ -123,6 +123,8 @@ export const generateHouses = (): House[] => {
     }
   };
 
+  const houses: House[] = [];
+
   blockConfig.forEach(config => {
     for (let i = config.start; i <= config.end; i++) {
       const number = i < 10 ? `0${i}` : `${i}`;

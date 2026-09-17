@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert, AlertTriangle,
-  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen, Building
+  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen, Building, CheckSquare
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
@@ -114,6 +114,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'residents', icon: Users, label: 'Data Warga' },
         { id: 'rentals', icon: Building, label: 'Rumah Sewa & Kontrakan' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
+        { id: 'stbm', icon: CheckSquare, label: '5 Pilar STBM' },
         { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
       ] 
     },
@@ -162,7 +163,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       } else if (role === Role.SECRETARY) {
         isAllowed = [
           'overview', 'analytics', 'residents', 'rentals',
-          'health', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
+          'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       }

@@ -35,7 +35,7 @@ import {
   signOut, 
   updatePassword
 } from "firebase/auth";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, WaterMeterReading, WaterUtilitySettings } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, WaterMeterReading, WaterUtilitySettings, STBMRecord } from "../types";
 import { toast } from "sonner";
 
 export { OperationType, isFirebaseConfigured };
@@ -4022,4 +4022,103 @@ export const checkNikDuplicate = (
   }
 
   return { isDuplicate: false };
+};
+
+// --- 5 PILAR STBM DATA SERVICE ---
+export const STBM_COL = "stbm_records";
+
+export const subscribeToSTBMRecords = (callback: (records: STBMRecord[]) => void) => {
+  if (!db) {
+    const cached = localStorage.getItem("rt02_stbm_records");
+    if (cached) {
+      try {
+        callback(JSON.parse(cached));
+      } catch (e) {}
+    }
+    return () => {};
+  }
+
+  const q = query(collection(db, STBM_COL));
+  return onSnapshot(q, (snapshot) => {
+    const records = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as STBMRecord[];
+    try {
+      localStorage.setItem("rt02_stbm_records", JSON.stringify(records));
+    } catch (e) {}
+    callback(records);
+  }, (error) => {
+    console.warn("STBM Firestore sync error, using local fallback:", error);
+    const cached = localStorage.getItem("rt02_stbm_records");
+    if (cached) {
+      try {
+        callback(JSON.parse(cached));
+      } catch (e) {}
+    }
+  });
+};
+
+export const saveSTBMRecord = async (record: STBMRecord) => {
+  const docId = record.id || `stbm_${record.houseId}`;
+  const cleanData = deepSanitize({
+    ...record,
+    id: docId,
+    updatedAt: new Date().toISOString()
+  });
+
+  // Update local cache immediately
+  try {
+    const cached = localStorage.getItem("rt02_stbm_records");
+    const list: STBMRecord[] = cached ? JSON.parse(cached) : [];
+    const idx = list.findIndex(r => r.id === docId || r.houseId === record.houseId);
+    if (idx >= 0) {
+      list[idx] = cleanData;
+    } else {
+      list.push(cleanData);
+    }
+    localStorage.setItem("rt02_stbm_records", JSON.stringify(list));
+  } catch (e) {}
+
+  if (!db) return;
+  try {
+    await setDoc(doc(db, STBM_COL, docId), cleanData, { merge: true });
+  } catch (error) {
+    console.error("Error saving STBM record to Firestore:", error);
+    handleFirestoreError(error, OperationType.UPDATE, `${STBM_COL}/${docId}`);
+  }
+};
+
+export const batchSaveSTBMRecords = async (records: STBMRecord[]) => {
+  const cleanList = records.map(r => {
+    const docId = r.id || `stbm_${r.houseId}`;
+    return deepSanitize({
+      ...r,
+      id: docId,
+      updatedAt: new Date().toISOString()
+    }) as STBMRecord;
+  });
+
+  // Save to local cache
+  try {
+    const cached = localStorage.getItem("rt02_stbm_records");
+    const list: STBMRecord[] = cached ? JSON.parse(cached) : [];
+    const map = new Map<string, STBMRecord>();
+    list.forEach(item => map.set(item.houseId, item));
+    cleanList.forEach(item => map.set(item.houseId, item));
+    const merged = Array.from(map.values());
+    localStorage.setItem("rt02_stbm_records", JSON.stringify(merged));
+  } catch (e) {}
+
+  if (!db) return;
+  try {
+    const batch = writeBatch(db);
+    cleanList.forEach(rec => {
+      const docRef = doc(db, STBM_COL, rec.id);
+      batch.set(docRef, rec, { merge: true });
+    });
+    await batch.commit();
+  } catch (error) {
+    console.error("Error batch saving STBM records:", error);
+  }
 };
