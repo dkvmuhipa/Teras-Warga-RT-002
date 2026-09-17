@@ -1813,6 +1813,15 @@ export const exportSTBMReportExcel = async (
     });
   });
 
+  // Catatan Teknis Infrastruktur Sanitasi Kawasan Huntap Tondo 2
+  const noteRowNum = sorted.length + 5;
+  worksheet.mergeCells(`A${noteRowNum}:N${noteRowNum}`);
+  const noteCell = worksheet.getCell(`A${noteRowNum}`);
+  noteCell.value = '* Catatan Teknis Kawasan Huntap Tondo 2: Pengelolaan air limbah menggunakan SPALDT (Sistem Pengolahan Air Limbah Domestik Terpusat) dan sanitasi individual Biotank modern. Kebutuhan air bersih didukung jaringan perpipaan SPAM / PDAM Kota Palu, dan persampahan dilayani secara mandiri oleh TPS3R kawasan.';
+  noteCell.font = { name: 'Calibri', size: 9, italic: true, color: { argb: 'FF595959' } };
+  noteCell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+  worksheet.getRow(noteRowNum).height = 30;
+
   // Export buffer & download
   const buffer = await workbook.xlsx.writeBuffer();
   const dateStr = new Date().toISOString().split('T')[0];

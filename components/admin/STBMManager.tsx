@@ -188,9 +188,9 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
   // Mass Auto-Fill with Huntap Standard
   const handleAutoFillHuntap = async () => {
     const isConfirmed = await confirm({
-      title: 'Setel Standar Huntap Tondo 2?',
-      message: 'Tindakan ini akan mengisi/mereset seluruh kavling hunian dengan standar sanitasi Huntap (Jamban Sehat: Ya, BABS: Tidak, CTPS: Ya, Kelola Sampah TPS3R: Ya, Air PDAM: Ya, dll). Data catatan masalah khusus yang sudah ada tidak akan hilang.',
-      confirmLabel: 'Ya, Terapkan Standar',
+      title: 'Setel Standar Sanitasi Huntap Tondo 2?',
+      message: 'Tindakan ini akan menerapkan profil sanitasi baku kawasan Huntap Tondo 2 untuk semua kavling:\n• Jamban Sehat Biotank Modern (Ya)\n• Bebas BABS (Tidak)\n• Sarana CTPS (Ya)\n• Air Minum & Makanan Aman PAMM-RT (Ya)\n• Pengelolaan Sampah Kawasan Mandiri TPS3R (Ya)\n• Saluran Air Limbah Terpusat SPALDT (Ya)\n• Jaringan Air Bersih SPAM / PDAM (Ya)\n• Sosialisasi STBM (Ya)\n\nCatatan masalah khusus yang sudah tercatat sebelumnya tidak akan terhapus.',
+      confirmLabel: 'Ya, Terapkan Standar Huntap',
       isDanger: false
     });
 
@@ -291,6 +291,69 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
               <Download className="w-4 h-4 text-emerald-700" />
               Unduh Excel Resmi (14 Kolom)
             </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Profil Sanitasi Kawasan Huntap Tondo 2 */}
+      <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-50 border border-emerald-200/80 rounded-2xl p-4 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-emerald-600 text-white rounded-xl mt-0.5 shadow-sm">
+            <Info className="w-5 h-5" />
+          </div>
+          <div className="space-y-2 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h4 className="text-xs sm:text-sm font-bold text-emerald-950">
+                Profil Infrastruktur Sanitasi Kawasan Huntap Tondo 2
+              </h4>
+              <span className="text-[10px] font-semibold bg-emerald-200/70 text-emerald-900 px-2.5 py-0.5 rounded-full">
+                Standar KemenPUPR & Dinkes
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Kawasan Huntap Tondo 2 dirancang dengan sistem sanitasi modern terintegrasi yang menjadi acuan pengisian formulir 5 Pilar STBM:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+              <div className="bg-white/90 p-2.5 rounded-xl border border-emerald-100 shadow-xs">
+                <div className="text-[11px] font-bold text-emerald-900 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  Biotank (Jamban Sehat)
+                </div>
+                <div className="text-[10px] text-slate-600 mt-0.5">
+                  Tangki septik modern individual/kelompok dengan biofiltrasi higienis standar PUPR.
+                </div>
+              </div>
+
+              <div className="bg-white/90 p-2.5 rounded-xl border border-teal-100 shadow-xs">
+                <div className="text-[11px] font-bold text-teal-900 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                  SPALDT (Limbah Cair)
+                </div>
+                <div className="text-[10px] text-slate-600 mt-0.5">
+                  Sistem Pengolahan Air Limbah Domestik Terpusat pipa tertutup ramah lingkungan.
+                </div>
+              </div>
+
+              <div className="bg-white/90 p-2.5 rounded-xl border border-sky-100 shadow-xs">
+                <div className="text-[11px] font-bold text-sky-900 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-sky-600" />
+                  SPAM (Air Bersih PDAM)
+                </div>
+                <div className="text-[10px] text-slate-600 mt-0.5">
+                  Sistem Penyediaan Air Minum perpipaan untuk kebutuhan MCK dan sanitasi warga.
+                </div>
+              </div>
+
+              <div className="bg-white/90 p-2.5 rounded-xl border border-amber-100 shadow-xs">
+                <div className="text-[11px] font-bold text-amber-900 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
+                  TPS3R (Kelola Sampah)
+                </div>
+                <div className="text-[10px] text-slate-600 mt-0.5">
+                  Infrastruktur persampahan kawasan mandiri (Reuse, Reduce, Recycle).
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -794,7 +857,7 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
               />
               <div className="flex flex-wrap gap-1 mt-1">
-                {['Septik tank bocor/rembes', 'SPAL tersumbat', 'Aliran PDAM macet', 'Belum memilah sampah'].map((preset) => (
+                {['Biotank penuh / meluap', 'Pipa SPALDT tersumbat/bocor', 'Bak kontrol rusak', 'Aliran SPAM/PDAM macet', 'Belum pilah sampah organik/anorganik'].map((preset) => (
                   <button
                     key={preset}
                     type="button"
