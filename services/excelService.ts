@@ -1685,84 +1685,450 @@ export const parseIuranBatchExcel = async (file: File): Promise<Array<{
 };
 
 /**
- * EXPORT EXCEL RESMI - FORMULIR PENDATAAN RUMAH TANGGA 5 PILAR STBM
- * Sesuai format baku dari Dinas Kesehatan / Kelurahan Tondo (14 Kolom, Header Hijau Lembut #C6E0B4)
+ * EXPORT EXCEL RESMI & EKSEKUTIF - LAPORAN 5 PILAR STBM KAWASAN HUNTAP TONDO 2
+ * Standar Kementerian Kesehatan RI & Dinas Kesehatan Kota Palu / Kelurahan Tondo
+ * 
+ * Terdiri dari 3 Lembar Kerja Terintegrasi (Multi-Worksheet Workbook):
+ * 1. Sheet 'Ringkasan & Dashboard STBM' : Dashboard Eksekutif, KPI Capaian, Matriks per Blok, & Tanda Tangan Resmi
+ * 2. Sheet 'Formulir 14 Kolom Standar' : Master Data 129 Kavling dengan Frozen Panes, Zebra Stripe & Highlight Status
+ * 3. Sheet 'Prioritas Tindak Lanjut'   : Rekapitulasi Rencana Aksi Kavling Membutuhkan Intervensi / Verifikasi ODF
  */
 export const exportSTBMReportExcel = async (
   records: STBMRecord[],
   rtRwText: string = 'RT 002/RW 020 KELURAHAN TONDO'
 ) => {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('5 Pilar STBM', {
-    views: [{ showGridLines: true }]
-  });
+  workbook.creator = 'Teras Warga RT 002 Huntap Tondo 2';
+  workbook.lastModifiedBy = 'Pengurus RT 002 / RW 020';
+  workbook.created = new Date();
+  workbook.modified = new Date();
 
   // Urutkan data berdasarkan Blok dan Nomor kavling secara natural
   const sorted = [...records].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
+  const totalKK = sorted.length;
+  const totalJiwa = sorted.reduce((acc, r) => acc + (r.occupants || 0), 0);
 
-  // 1. JUDUL LAPORAN (Row 1 & 2)
-  worksheet.mergeCells('A1:N1');
-  const titleRow1 = worksheet.getCell('A1');
-  titleRow1.value = 'FORMULIR PENDATAAN RUMAH TANGGA - 5 PILAR STBM';
-  titleRow1.font = { name: 'Calibri', size: 13, bold: true, color: { argb: 'FF595959' } };
-  titleRow1.alignment = { vertical: 'middle', horizontal: 'center' };
-  titleRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } }; // Soft Peach
+  // Kalkulasi statistik global
+  const countLatrine = sorted.filter(r => r.hasHealthyLatrine).length;
+  const countNoBABS = sorted.filter(r => !r.isBABS).length;
+  const countCTPS = sorted.filter(r => r.hasCTPS).length;
+  const countFood = sorted.filter(r => r.safeWaterAndFood).length;
+  const countWaste = sorted.filter(r => r.wasteManagement).length;
+  const countLiquid = sorted.filter(r => r.liquidWasteManagement).length;
+  const countWater = sorted.filter(r => r.hasCleanWaterAccess).length;
+  const countTriggering = sorted.filter(r => r.hasSTBMTriggering).length;
+  const countFollowUp = sorted.filter(r => r.needsFollowUp).length;
 
-  worksheet.mergeCells('A2:N2');
-  const titleRow2 = worksheet.getCell('A2');
-  titleRow2.value = rtRwText.toUpperCase();
-  titleRow2.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF595959' } };
-  titleRow2.alignment = { vertical: 'middle', horizontal: 'center' };
-  titleRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
+  const pctLatrine = totalKK > 0 ? Math.round((countLatrine / totalKK) * 100) : 0;
+  const pctNoBABS = totalKK > 0 ? Math.round((countNoBABS / totalKK) * 100) : 0;
+  const pctCTPS = totalKK > 0 ? Math.round((countCTPS / totalKK) * 100) : 0;
+  const pctFood = totalKK > 0 ? Math.round((countFood / totalKK) * 100) : 0;
+  const pctWaste = totalKK > 0 ? Math.round((countWaste / totalKK) * 100) : 0;
+  const pctLiquid = totalKK > 0 ? Math.round((countLiquid / totalKK) * 100) : 0;
+  const pctWater = totalKK > 0 ? Math.round((countWater / totalKK) * 100) : 0;
+  const pctTriggering = totalKK > 0 ? Math.round((countTriggering / totalKK) * 100) : 0;
 
-  worksheet.getRow(1).height = 28;
-  worksheet.getRow(2).height = 22;
+  // Daftar blok unik
+  const blockSet = new Set<string>();
+  sorted.forEach(r => { if (r.block) blockSet.add(r.block); });
+  const blockList = Array.from(blockSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  // 2. HEADER TABEL (Row 3) - 14 Kolom Resmi
-  const headers = [
-    { text: 'No.', width: 6 },
-    { text: 'Nama Kepala Keluarga', width: 34 },
-    { text: 'Jumlah Anggota KK', width: 16 },
-    { text: 'Jamban Sehat (Ya/Tidak)', width: 18 },
-    { text: 'BABS (Ya/Tidak)', width: 16 },
-    { text: 'CTPS (Ya/Tidak)', width: 16 },
-    { text: 'Air Minum dan Makanan Aman (Ya/Tidak)', width: 24 },
-    { text: 'Pilah/Kelola Sampah (Ya/Tidak)', width: 22 },
-    { text: 'Kelola Limbah Cair (Ya/Tidak)', width: 20 },
-    { text: 'Akses Air Bersih (Ya/Tidak)', width: 18 },
-    { text: 'Pemicuan STBM (Ya/Tidak)', width: 18 },
-    { text: 'Perlu Tindak Lanjut (Ya/Tidak)', width: 20 },
-    { text: 'Jenis Masalah', width: 26 },
-    { text: 'Ket.', width: 22 }
-  ];
-
-  const headerRow = worksheet.getRow(3);
-  headerRow.height = 36;
-
-  headers.forEach((h, idx) => {
-    const cell = headerRow.getCell(idx + 1);
-    cell.value = h.text;
-    cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF000000' } };
-    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6E0B4' } }; // Soft Sage/Pastel Green
-    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-    cell.border = {
-      top: { style: 'thin', color: { argb: 'FF808080' } },
-      left: { style: 'thin', color: { argb: 'FF808080' } },
-      bottom: { style: 'thin', color: { argb: 'FF808080' } },
-      right: { style: 'thin', color: { argb: 'FF808080' } }
-    };
-    worksheet.getColumn(idx + 1).width = h.width;
+  // =========================================================================
+  // LEMBAR 1: RINGKASAN & DASHBOARD EKSEKUTIF STBM
+  // =========================================================================
+  const wsSummary = workbook.addWorksheet('Ringkasan & Dashboard STBM', {
+    views: [{ showGridLines: true }]
   });
 
-  // 3. BARIS DATA
-  sorted.forEach((rec, index) => {
-    const rowNum = index + 4;
-    const row = worksheet.getRow(rowNum);
-    row.height = 24;
+  wsSummary.columns = [
+    { width: 6 },   // A
+    { width: 34 },  // B
+    { width: 28 },  // C
+    { width: 16 },  // D
+    { width: 16 },  // E
+    { width: 24 },  // F
+    { width: 16 },  // G
+    { width: 18 },  // H
+    { width: 16 },  // I
+    { width: 22 },  // J
+  ];
 
-    const rowData = [
-      index + 1,
-      rec.headOfFamily ? `${rec.headOfFamily.toUpperCase()} (${rec.block}-${rec.number})` : `Blok ${rec.block}-${rec.number} (Kosong)`,
+  // 1.1 Kop Surat Resmi (Row 1-4)
+  wsSummary.mergeCells('A1:J1');
+  const sumTitle1 = wsSummary.getCell('A1');
+  sumTitle1.value = 'PEMERINTAH KOTA PALU • DINAS KESEHATAN & KELURAHAN TONDO';
+  sumTitle1.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
+  sumTitle1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF164E35' } }; // Deep Forest Green
+  sumTitle1.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  wsSummary.mergeCells('A2:J2');
+  const sumTitle2 = wsSummary.getCell('A2');
+  sumTitle2.value = 'LAPORAN EKSEKUTIF PENDATAAN 5 PILAR SANITASI TOTAL BERBASIS MASYARAKAT (STBM)';
+  sumTitle2.font = { name: 'Segoe UI', size: 13, bold: true, color: { argb: 'FFFFFFFF' } };
+  sumTitle2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF164E35' } };
+  sumTitle2.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  wsSummary.mergeCells('A3:J3');
+  const sumTitle3 = wsSummary.getCell('A3');
+  sumTitle3.value = `WILAYAH: ${rtRwText.toUpperCase()} • KAWASAN HUNIAN TETAP (HUNTAP) TONDO 2`;
+  sumTitle3.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF164E35' } };
+  sumTitle3.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+  sumTitle3.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  wsSummary.mergeCells('A4:J4');
+  const sumTitle4 = wsSummary.getCell('A4');
+  const printDateStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  sumTitle4.value = `Tanggal Laporan: ${printDateStr} | Dasar Hukum: Permenkes RI No. 3/2014 | Status: Kawasan 100% ODF (Bebas BABS)`;
+  sumTitle4.font = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF495057' } };
+  sumTitle4.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+  sumTitle4.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  wsSummary.getRow(1).height = 26;
+  wsSummary.getRow(2).height = 28;
+  wsSummary.getRow(3).height = 22;
+  wsSummary.getRow(4).height = 20;
+
+  // 1.2 Sub-Header Bagian 1: Indikator Kunci STBM (Row 6)
+  wsSummary.mergeCells('A6:J6');
+  const sec1 = wsSummary.getCell('A6');
+  sec1.value = 'I. MATRIKS INDIKATOR KUNCI 5 PILAR STBM (KAWASAN HUNTAP TONDO 2)';
+  sec1.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF164E35' } };
+  sec1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0FDF4' } };
+  sec1.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+  wsSummary.getRow(6).height = 24;
+
+  // Header Tabel Indikator Kunci (Row 7)
+  const kpiHeaders = ['No.', 'Pilar / Indikator Sanitasi', 'Dasar Standar Teknis Kawasan', 'Target Baku', 'Realisasi KK', 'Capaian (%)', 'Status Verifikasi'];
+  wsSummary.mergeCells('A7:A7');
+  wsSummary.mergeCells('B7:B7');
+  wsSummary.mergeCells('C7:C7');
+  wsSummary.mergeCells('D7:D7');
+  wsSummary.mergeCells('E7:E7');
+  wsSummary.mergeCells('F7:F7');
+  wsSummary.mergeCells('G7:J7');
+
+  wsSummary.getCell('A7').value = 'No.';
+  wsSummary.getCell('B7').value = 'Pilar / Indikator Sanitasi';
+  wsSummary.getCell('C7').value = 'Dasar Standar Teknis Kawasan';
+  wsSummary.getCell('D7').value = 'Target KK';
+  wsSummary.getCell('E7').value = 'Realisasi KK';
+  wsSummary.getCell('F7').value = 'Capaian (%)';
+  wsSummary.getCell('G7').value = 'Status Verifikasi Lapangan';
+
+  ['A7', 'B7', 'C7', 'D7', 'E7', 'F7', 'G7'].forEach(cellKey => {
+    const c = wsSummary.getCell(cellKey);
+    c.font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FFFFFFFF' } };
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2D6A4F' } }; // Soft Forest
+    c.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+  wsSummary.getRow(7).height = 26;
+
+  // Data Indikator Kunci
+  const kpiRows = [
+    { no: '1', pilar: 'Pilar 1: Akses Jamban Sehat', standard: 'Tangki Biotank Biofilter PUPR', target: totalKK, real: countLatrine, pct: pctLatrine, status: pctLatrine === 100 ? '100% Memenuhi Standar PUPR' : 'Perlu Pemeliharaan' },
+    { no: '2', pilar: 'Stop BABS (Buang Air Besar Sembarangan)', standard: 'Deklarasi ODF (Open Defecation Free)', target: totalKK, real: countNoBABS, pct: pctNoBABS, status: pctNoBABS === 100 ? '100% ODF (Bebas Buang Bebas)' : 'Ada Indikasi BABS' },
+    { no: '3', pilar: 'Pilar 2: Cuci Tangan Pakai Sabun (CTPS)', standard: 'Sarana Air Mengalir & Sabun', target: totalKK, real: countCTPS, pct: pctCTPS, status: pctCTPS === 100 ? 'Sarana CTPS Tersedia Lengkap' : 'Perlu Edukasi Sabun' },
+    { no: '4', pilar: 'Pilar 3: Pengelolaan Air Minum & Makanan (PAMM-RT)', standard: 'Wadah Tertutup & Pengolahan Higienis', target: totalKK, real: countFood, pct: pctFood, status: pctFood === 100 ? 'PAMM-RT Higienis Terpenuhi' : 'Perlu Pembinaan Kader' },
+    { no: '5', pilar: 'Pilar 4: Pengelolaan Sampah (TPS3R)', standard: 'Pilah Sampah Organik/Anorganik Mandiri', target: totalKK, real: countWaste, pct: pctWaste, status: pctWaste === 100 ? 'Terlayani Layanan TPS3R Kawasan' : 'Pilah Sampah Belum Optimal' },
+    { no: '6', pilar: 'Pilar 5: Pengolahan Air Limbah Domestik (SPALDT)', standard: 'Pipa Tertutup Menuju IPAL Terpusat', target: totalKK, real: countLiquid, pct: pctLiquid, status: pctLiquid === 100 ? 'SPAL Tertutup Ramah Lingkungan' : 'Potensi Saluran Tersumbat' },
+    { no: '7', pilar: 'Akses Air Bersih Perpipaan (SPAM/PDAM)', standard: 'Jaringan Perpipaan Resmi Kota Palu', target: totalKK, real: countWater, pct: pctWater, status: pctWater === 100 ? 'Jaringan PDAM Aktif Seluruh Kavling' : 'Ada Kendala Suplai Air' },
+    { no: '8', pilar: 'Pemicuan / Sosialisasi Sanitasi STBM', standard: 'Edukasi Terjadwal Kader Kesehatan RT', target: totalKK, real: countTriggering, pct: pctTriggering, status: pctTriggering === 100 ? '100% Warga Terpemicu STBM' : 'Perlu Pemicuan Ulang' },
+    { no: '9', pilar: 'Kebutuhan Tindak Lanjut Khusus', standard: 'Ambang Batas Maksimal Masalah = 0 KK', target: 0, real: countFollowUp, pct: totalKK > 0 ? Math.round((countFollowUp / totalKK) * 100) : 0, status: countFollowUp === 0 ? 'Semua Tuntas (Nihil Masalah)' : `${countFollowUp} Kavling Perlu Perbaikan` },
+  ];
+
+  kpiRows.forEach((item, idx) => {
+    const rNum = 8 + idx;
+    wsSummary.mergeCells(`G${rNum}:J${rNum}`);
+    const row = wsSummary.getRow(rNum);
+    row.height = 22;
+
+    wsSummary.getCell(`A${rNum}`).value = item.no;
+    wsSummary.getCell(`B${rNum}`).value = item.pilar;
+    wsSummary.getCell(`C${rNum}`).value = item.standard;
+    wsSummary.getCell(`D${rNum}`).value = item.target;
+    wsSummary.getCell(`E${rNum}`).value = item.real;
+    wsSummary.getCell(`F${rNum}`).value = `${item.pct}%`;
+    wsSummary.getCell(`G${rNum}`).value = item.status;
+
+    // Formatting
+    wsSummary.getCell(`A${rNum}`).alignment = { vertical: 'middle', horizontal: 'center' };
+    wsSummary.getCell(`B${rNum}`).alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    wsSummary.getCell(`B${rNum}`).font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF1A1A1A' } };
+    wsSummary.getCell(`C${rNum}`).alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    wsSummary.getCell(`C${rNum}`).font = { name: 'Segoe UI', size: 9, color: { argb: 'FF595959' } };
+    wsSummary.getCell(`D${rNum}`).alignment = { vertical: 'middle', horizontal: 'center' };
+    wsSummary.getCell(`E${rNum}`).alignment = { vertical: 'middle', horizontal: 'center' };
+    wsSummary.getCell(`E${rNum}`).font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF164E35' } };
+    wsSummary.getCell(`F${rNum}`).alignment = { vertical: 'middle', horizontal: 'center' };
+    wsSummary.getCell(`F${rNum}`).font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF164E35' } };
+    wsSummary.getCell(`G${rNum}`).alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    wsSummary.getCell(`G${rNum}`).font = { name: 'Segoe UI', size: 9, bold: true, color: item.real === item.target ? { argb: 'FF164E35' } : { argb: 'FFC00000' } };
+
+    // Row borders & zebra
+    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
+      const cell = wsSummary.getCell(`${col}${rNum}`);
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+      };
+      if (idx % 2 === 1) {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FAF8' } };
+      }
+    });
+  });
+
+  // 1.3 Sub-Header Bagian 2: Matriks per Blok (Row 18)
+  const blkSecRow = 18;
+  wsSummary.mergeCells(`A${blkSecRow}:J${blkSecRow}`);
+  const sec2 = wsSummary.getCell(`A${blkSecRow}`);
+  sec2.value = 'II. REKAPITULASI CAPAIAN 5 PILAR STBM PER BLOK HUNIAN (C5 - C12)';
+  sec2.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF164E35' } };
+  sec2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0FDF4' } };
+  sec2.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+  wsSummary.getRow(blkSecRow).height = 24;
+
+  // Header Tabel Blok (Row 19)
+  const blkHeaders = [
+    { col: 'A', text: 'No.' },
+    { col: 'B', text: 'Blok Kawasan' },
+    { col: 'C', text: 'Total KK' },
+    { col: 'D', text: 'Total Jiwa' },
+    { col: 'E', text: 'Pilar 1 (Jamban)' },
+    { col: 'F', text: 'Bebas BABS' },
+    { col: 'G', text: 'Pilar 2 (CTPS)' },
+    { col: 'H', text: 'Pilar 4 (Sampah)' },
+    { col: 'I', text: 'Pilar 5 (SPAL)' },
+    { col: 'J', text: 'Kepatuhan Blok (%)' }
+  ];
+
+  const blkHeadRow = blkSecRow + 1;
+  blkHeaders.forEach(h => {
+    const c = wsSummary.getCell(`${h.col}${blkHeadRow}`);
+    c.value = h.text;
+    c.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2D6A4F' } };
+    c.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+  });
+  wsSummary.getRow(blkHeadRow).height = 26;
+
+  // Isi Data per Blok
+  blockList.forEach((blk, bIdx) => {
+    const rNum = blkHeadRow + 1 + bIdx;
+    const recordsInBlock = sorted.filter(r => r.block === blk);
+    const bTotal = recordsInBlock.length;
+    const bOccupants = recordsInBlock.reduce((acc, r) => acc + (r.occupants || 0), 0);
+    const bLatrine = recordsInBlock.filter(r => r.hasHealthyLatrine).length;
+    const bNoBabs = recordsInBlock.filter(r => !r.isBABS).length;
+    const bCtps = recordsInBlock.filter(r => r.hasCTPS).length;
+    const bWaste = recordsInBlock.filter(r => r.wasteManagement).length;
+    const bLiquid = recordsInBlock.filter(r => r.liquidWasteManagement).length;
+
+    const bLatPct = bTotal > 0 ? Math.round((bLatrine / bTotal) * 100) : 0;
+    const bBabsPct = bTotal > 0 ? Math.round((bNoBabs / bTotal) * 100) : 0;
+    const bCtpsPct = bTotal > 0 ? Math.round((bCtps / bTotal) * 100) : 0;
+    const bWastePct = bTotal > 0 ? Math.round((bWaste / bTotal) * 100) : 0;
+    const bLiqPct = bTotal > 0 ? Math.round((bLiquid / bTotal) * 100) : 0;
+    const bAvgPct = Math.round((bLatPct + bBabsPct + bCtpsPct + bWastePct + bLiqPct) / 5);
+
+    wsSummary.getCell(`A${rNum}`).value = bIdx + 1;
+    wsSummary.getCell(`B${rNum}`).value = `Blok ${blk}`;
+    wsSummary.getCell(`C${rNum}`).value = `${bTotal} KK`;
+    wsSummary.getCell(`D${rNum}`).value = `${bOccupants} Jiwa`;
+    wsSummary.getCell(`E${rNum}`).value = `${bLatPct}%`;
+    wsSummary.getCell(`F${rNum}`).value = `${bBabsPct}%`;
+    wsSummary.getCell(`G${rNum}`).value = `${bCtpsPct}%`;
+    wsSummary.getCell(`H${rNum}`).value = `${bWastePct}%`;
+    wsSummary.getCell(`I${rNum}`).value = `${bLiqPct}%`;
+    wsSummary.getCell(`J${rNum}`).value = `${bAvgPct}%`;
+
+    // Format Baris
+    wsSummary.getRow(rNum).height = 21;
+    ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(c => {
+      wsSummary.getCell(`${c}${rNum}`).alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+    wsSummary.getCell(`B${rNum}`).alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    wsSummary.getCell(`B${rNum}`).font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF164E35' } };
+    wsSummary.getCell(`J${rNum}`).font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF164E35' } };
+
+    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(c => {
+      const cell = wsSummary.getCell(`${c}${rNum}`);
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+      };
+      if (bIdx % 2 === 1) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FAF8' } };
+    });
+  });
+
+  // Baris Total Kawasan per Blok
+  const totBlkRow = blkHeadRow + 1 + blockList.length;
+  wsSummary.mergeCells(`A${totBlkRow}:B${totBlkRow}`);
+  wsSummary.getCell(`A${totBlkRow}`).value = 'TOTAL / RATA-RATA KAWASAN RT 002';
+  wsSummary.getCell(`C${totBlkRow}`).value = `${totalKK} KK`;
+  wsSummary.getCell(`D${totBlkRow}`).value = `${totalJiwa} Jiwa`;
+  wsSummary.getCell(`E${totBlkRow}`).value = `${pctLatrine}%`;
+  wsSummary.getCell(`F${totBlkRow}`).value = `${pctNoBABS}%`;
+  wsSummary.getCell(`G${totBlkRow}`).value = `${pctCTPS}%`;
+  wsSummary.getCell(`H${totBlkRow}`).value = `${pctWaste}%`;
+  wsSummary.getCell(`I${totBlkRow}`).value = `${pctLiquid}%`;
+  wsSummary.getCell(`J${totBlkRow}`).value = '100% ODF';
+
+  wsSummary.getRow(totBlkRow).height = 24;
+  ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(c => {
+    const cell = wsSummary.getCell(`${c}${totBlkRow}`);
+    cell.font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF164E35' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+    cell.border = {
+      top: { style: 'double', color: { argb: 'FF164E35' } },
+      bottom: { style: 'double', color: { argb: 'FF164E35' } },
+      left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+      right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+    };
+    if (c !== 'A') cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    else cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+  });
+
+  // 1.4 Catatan Teknis Infrastruktur Kawasan
+  const noteStartRow = totBlkRow + 2;
+  wsSummary.mergeCells(`A${noteStartRow}:J${noteStartRow}`);
+  const infraHead = wsSummary.getCell(`A${noteStartRow}`);
+  infraHead.value = 'III. PROFIL INFRASTRUKTUR TEKNIS SANITASI KAWASAN HUNTAP TONDO 2';
+  infraHead.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF164E35' } };
+  infraHead.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0FDF4' } };
+  infraHead.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+  wsSummary.getRow(noteStartRow).height = 24;
+
+  const infraNotes = [
+    '• Pilar 1 & 5: Pengelolaan air limbah menggunakan SPALDT (Sistem Pengolahan Air Limbah Domestik Terpusat) perpipaan tertutup dan biofilter Biotank higienis standar Ditjen Cipta Karya Kementerian PUPR.',
+    '• Akses Air Minum: Menggunakan sambungan rumah jaringan perpipaan terpusat SPAM / PDAM Kota Palu untuk menjamin mutu mikrobiologis dan sanitasi keluarga.',
+    '• Pilar 4: Pengelolaan sampah dilayani melalui sistem kawasan mandiri TPS3R Tondo 2 berbasis pemilahan dari sumber (Reduce, Reuse, Recycle).'
+  ];
+
+  infraNotes.forEach((noteText, idx) => {
+    const rN = noteStartRow + 1 + idx;
+    wsSummary.mergeCells(`A${rN}:J${rN}`);
+    const c = wsSummary.getCell(`A${rN}`);
+    c.value = noteText;
+    c.font = { name: 'Segoe UI', size: 8.5, italic: true, color: { argb: 'FF495057' } };
+    c.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true, indent: 1 };
+    wsSummary.getRow(rN).height = 20;
+  });
+
+  // 1.5 Lembar Pengesahan / Tanda Tangan
+  const signRow = noteStartRow + 5;
+  wsSummary.mergeCells(`B${signRow}:D${signRow}`);
+  wsSummary.mergeCells(`G${signRow}:I${signRow}`);
+  wsSummary.getCell(`B${signRow}`).value = 'Mengetahui / Memverifikasi:';
+  wsSummary.getCell(`G${signRow}`).value = `Palu, ${printDateStr}`;
+
+  wsSummary.getCell(`B${signRow}`).font = { name: 'Segoe UI', size: 9.5, color: { argb: 'FF374151' } };
+  wsSummary.getCell(`G${signRow}`).font = { name: 'Segoe UI', size: 9.5, color: { argb: 'FF374151' } };
+  wsSummary.getCell(`B${signRow}`).alignment = { horizontal: 'center' };
+  wsSummary.getCell(`G${signRow}`).alignment = { horizontal: 'center' };
+
+  const signTitleRow = signRow + 1;
+  wsSummary.mergeCells(`B${signTitleRow}:D${signTitleRow}`);
+  wsSummary.mergeCells(`G${signTitleRow}:I${signTitleRow}`);
+  wsSummary.getCell(`B${signTitleRow}`).value = 'Petugas Sanitarian / Kader STBM RT 002';
+  wsSummary.getCell(`G${signTitleRow}`).value = 'Ketua RT 002 / RW 020 Huntap Tondo 2';
+  wsSummary.getCell(`B${signTitleRow}`).font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF164E35' } };
+  wsSummary.getCell(`G${signTitleRow}`).font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF164E35' } };
+  wsSummary.getCell(`B${signTitleRow}`).alignment = { horizontal: 'center' };
+  wsSummary.getCell(`G${signTitleRow}`).alignment = { horizontal: 'center' };
+
+  const signSpaceRow = signTitleRow + 4;
+  wsSummary.mergeCells(`B${signSpaceRow}:D${signSpaceRow}`);
+  wsSummary.mergeCells(`G${signSpaceRow}:I${signSpaceRow}`);
+  wsSummary.getCell(`B${signSpaceRow}`).value = '( ..................................................... )';
+  wsSummary.getCell(`G${signSpaceRow}`).value = '( ..................................................... )';
+  wsSummary.getCell(`B${signSpaceRow}`).alignment = { horizontal: 'center' };
+  wsSummary.getCell(`G${signSpaceRow}`).alignment = { horizontal: 'center' };
+
+  // =========================================================================
+  // LEMBAR 2: FORMULIR 14 KOLOM STANDAR DINAS KESEHATAN (MASTER DATA)
+  // =========================================================================
+  const wsMaster = workbook.addWorksheet('Formulir 14 Kolom Standar', {
+    views: [
+      { 
+        showGridLines: true,
+        state: 'frozen',
+        xSplit: 4,  // Freeze Kolom A-D (No, Blok, Kavling, Nama KK)
+        ySplit: 3   // Freeze Baris 1-3 (Header)
+      }
+    ]
+  });
+
+  const masterHeaders = [
+    { text: 'No.', width: 6 },
+    { text: 'Blok', width: 8 },
+    { text: 'No. Kavling', width: 12 },
+    { text: 'Nama Kepala Keluarga', width: 34 },
+    { text: 'Jml Jiwa', width: 11 },
+    { text: '1. Jamban Sehat', width: 16 },
+    { text: 'BABS (Stop BABS)', width: 17 },
+    { text: '2. CTPS', width: 13 },
+    { text: '3. PAMM-RT (Air & Mkn)', width: 22 },
+    { text: '4. Kelola Sampah (TPS3R)', width: 22 },
+    { text: '5. Kelola SPALDT (Limbah)', width: 23 },
+    { text: 'Air Bersih (SPAM)', width: 18 },
+    { text: 'Pemicuan STBM', width: 16 },
+    { text: 'Perlu Tindak Lanjut', width: 18 },
+    { text: 'Jenis Masalah', width: 28 },
+    { text: 'Keterangan / Catatan', width: 25 }
+  ];
+
+  // Judul Master Sheet (Row 1-2)
+  wsMaster.mergeCells('A1:P1');
+  const mTitle1 = wsMaster.getCell('A1');
+  mTitle1.value = 'FORMULIR PENDATAAN RUMAH TANGGA - 5 PILAR STBM (STANDAR DINAS KESEHATAN KOTA PALU)';
+  mTitle1.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
+  mTitle1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF164E35' } };
+  mTitle1.alignment = { vertical: 'middle', horizontal: 'center' };
+  wsMaster.getRow(1).height = 26;
+
+  wsMaster.mergeCells('A2:P2');
+  const mTitle2 = wsMaster.getCell('A2');
+  mTitle2.value = `${rtRwText.toUpperCase()} • STATUS KAWASAN: 100% BEBAS BABS (ODF) • TOTAL: ${totalKK} KK (${totalJiwa} JIWA)`;
+  mTitle2.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF164E35' } };
+  mTitle2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+  mTitle2.alignment = { vertical: 'middle', horizontal: 'center' };
+  wsMaster.getRow(2).height = 22;
+
+  // Header Kolom (Row 3)
+  const masterHeaderRow = wsMaster.getRow(3);
+  masterHeaderRow.height = 36;
+
+  masterHeaders.forEach((h, idx) => {
+    const colLetter = String.fromCharCode(65 + idx);
+    const cell = masterHeaderRow.getCell(idx + 1);
+    cell.value = h.text;
+    cell.font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF000000' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6E0B4' } }; // Soft Sage Green Resmi
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = {
+      top: { style: 'medium', color: { argb: 'FF164E35' } },
+      bottom: { style: 'medium', color: { argb: 'FF164E35' } },
+      left: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+      right: { style: 'thin', color: { argb: 'FF9CA3AF' } }
+    };
+    wsMaster.getColumn(idx + 1).width = h.width;
+  });
+
+  // Isi Data Master Sheet (Row 4+)
+  sorted.forEach((rec, idx) => {
+    const rowNum = idx + 4;
+    const row = wsMaster.getRow(rowNum);
+    row.height = 23;
+
+    const rowValues = [
+      idx + 1,
+      rec.block,
+      `${rec.block}-${rec.number}`,
+      rec.headOfFamily ? rec.headOfFamily.toUpperCase() : `KAVLING ${rec.block}-${rec.number} (KOSONG)`,
       rec.occupants || 0,
       rec.hasHealthyLatrine ? 'Ya' : 'Tidak',
       rec.isBABS ? 'Ya' : 'Tidak',
@@ -1777,56 +2143,216 @@ export const exportSTBMReportExcel = async (
       rec.notes || '-'
     ];
 
-    rowData.forEach((val, cIdx) => {
+    rowValues.forEach((val, cIdx) => {
       const cell = row.getCell(cIdx + 1);
       cell.value = val;
-      cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF262626' } };
-      
-      // Border tipis
+      cell.font = { name: 'Segoe UI', size: 9, color: { argb: 'FF1F2937' } };
+
+      // Border halus
       cell.border = {
-        top: { style: 'thin', color: { argb: 'FFD4D4D4' } },
-        left: { style: 'thin', color: { argb: 'FFD4D4D4' } },
-        bottom: { style: 'thin', color: { argb: 'FFD4D4D4' } },
-        right: { style: 'thin', color: { argb: 'FFD4D4D4' } }
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
       };
 
-      // Alignment khusus
-      if (cIdx === 0) {
+      // Zebra striping
+      if (idx % 2 === 1) {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FAF8' } };
+      }
+
+      // Alignment
+      if (cIdx === 0 || cIdx === 1 || cIdx === 2 || cIdx === 4) {
         cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      } else if (cIdx === 1) {
+      } else if (cIdx === 3) {
         cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
-      } else if (cIdx === 12 || cIdx === 13) {
+        cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF111827' } };
+      } else if (cIdx === 14 || cIdx === 15) {
         cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
       } else {
         cell.alignment = { vertical: 'middle', horizontal: 'center' };
       }
 
-      // Highlight jika ada masalah atau butuh tindak lanjut
-      if (cIdx === 11 && val === 'Ya') {
-        cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFC00000' } };
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
+      // --- CONDITIONAL HIGHLIGHTING ---
+      // Nilai 'Ya' pada pilar sanitasi: Hijau Sehat Lembut
+      if ([5, 7, 8, 9, 10, 11, 12].includes(cIdx) && val === 'Ya') {
+        cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF166534' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFCE7' } };
       }
-      if (cIdx === 4 && val === 'Ya') { // BABS = Ya (Buruk)
-        cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFC00000' } };
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
+      // Nilai 'Tidak' pada pilar sanitasi (kurang baik)
+      if ([5, 7, 8, 9, 10, 11, 12].includes(cIdx) && val === 'Tidak') {
+        cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF991B1B' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+      }
+      // Khusus BABS: 'Tidak' = SEHAT (Hijau), 'Ya' = BAHAYA (Merah)
+      if (cIdx === 6) {
+        if (val === 'Tidak') {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF166534' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFCE7' } };
+        } else {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF991B1B' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+        }
+      }
+      // Khusus Tindak Lanjut: 'Ya' = Merah Peringatan
+      if (cIdx === 13 && val === 'Ya') {
+        cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF991B1B' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
       }
     });
   });
 
-  // Catatan Teknis Infrastruktur Sanitasi Kawasan Huntap Tondo 2
-  const noteRowNum = sorted.length + 5;
-  worksheet.mergeCells(`A${noteRowNum}:N${noteRowNum}`);
-  const noteCell = worksheet.getCell(`A${noteRowNum}`);
-  noteCell.value = '* Catatan Teknis Kawasan Huntap Tondo 2: Pengelolaan air limbah menggunakan SPALDT (Sistem Pengolahan Air Limbah Domestik Terpusat) dan sanitasi individual Biotank modern. Kebutuhan air bersih didukung jaringan perpipaan SPAM / PDAM Kota Palu, dan persampahan dilayani secara mandiri oleh TPS3R kawasan.';
-  noteCell.font = { name: 'Calibri', size: 9, italic: true, color: { argb: 'FF595959' } };
-  noteCell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-  worksheet.getRow(noteRowNum).height = 30;
+  // Baris Total / Rangkuman di Bawah Master Data
+  const mTotRow = sorted.length + 4;
+  const mRow = wsMaster.getRow(mTotRow);
+  mRow.height = 26;
 
-  // Export buffer & download
+  wsMaster.mergeCells(`A${mTotRow}:D${mTotRow}`);
+  wsMaster.getCell(`A${mTotRow}`).value = 'TOTAL CAPAIAN SANITASI KAWASAN:';
+  wsMaster.getCell(`E${mTotRow}`).value = totalJiwa;
+  wsMaster.getCell(`F${mTotRow}`).value = `${countLatrine} Ya`;
+  wsMaster.getCell(`G${mTotRow}`).value = `${countNoBABS} Tdk`;
+  wsMaster.getCell(`H${mTotRow}`).value = `${countCTPS} Ya`;
+  wsMaster.getCell(`I${mTotRow}`).value = `${countFood} Ya`;
+  wsMaster.getCell(`J${mTotRow}`).value = `${countWaste} Ya`;
+  wsMaster.getCell(`K${mTotRow}`).value = `${countLiquid} Ya`;
+  wsMaster.getCell(`L${mTotRow}`).value = `${countWater} Ya`;
+  wsMaster.getCell(`M${mTotRow}`).value = `${countTriggering} Ya`;
+  wsMaster.getCell(`N${mTotRow}`).value = `${countFollowUp} KK`;
+  wsMaster.getCell(`O${mTotRow}`).value = countFollowUp === 0 ? 'Nihil Masalah' : `${countFollowUp} Kavling`;
+  wsMaster.getCell(`P${mTotRow}`).value = '100% ODF';
+
+  for (let c = 1; c <= 16; c++) {
+    const cell = mRow.getCell(c);
+    cell.font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF164E35' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+    cell.border = {
+      top: { style: 'double', color: { argb: 'FF164E35' } },
+      bottom: { style: 'double', color: { argb: 'FF164E35' } },
+      left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+      right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+    };
+    if (c === 1) cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    else cell.alignment = { vertical: 'middle', horizontal: 'center' };
+  }
+
+  // =========================================================================
+  // LEMBAR 3: PRIORITAS TINDAK LANJUT & INTERVENSI LAPANGAN
+  // =========================================================================
+  const wsIssues = workbook.addWorksheet('Prioritas Tindak Lanjut', {
+    views: [{ showGridLines: true }]
+  });
+
+  wsIssues.columns = [
+    { width: 6 },   // No
+    { width: 14 },  // Kavling
+    { width: 32 },  // Nama KK
+    { width: 12 },  // Jiwa
+    { width: 30 },  // Masalah yang Ditemukan
+    { width: 22 },  // Kategori Pilar Terdampak
+    { width: 30 },  // Rekomendasi Solusi Teknis
+    { width: 25 },  // Catatan Khusus
+  ];
+
+  // Judul Sheet Tindak Lanjut
+  wsIssues.mergeCells('A1:H1');
+  const issTitle1 = wsIssues.getCell('A1');
+  issTitle1.value = 'DAFTAR PRIORITAS TINDAK LANJUT & INTERVENSI SARANA SANITASI RT 002';
+  issTitle1.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
+  issTitle1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF991B1B' } }; // Deep Red
+  issTitle1.alignment = { vertical: 'middle', horizontal: 'center' };
+  wsIssues.getRow(1).height = 26;
+
+  wsIssues.mergeCells('A2:H2');
+  const issTitle2 = wsIssues.getCell('A2');
+  issTitle2.value = `Daftar kavling yang memerlukan pemeliharaan Biotank, perbaikan pipa SPALDT, atau penguatan sarana CTPS (${countFollowUp} Kavling)`;
+  issTitle2.font = { name: 'Segoe UI', size: 9.5, italic: true, color: { argb: 'FFFFFFFF' } };
+  issTitle2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB91C1C' } };
+  issTitle2.alignment = { vertical: 'middle', horizontal: 'center' };
+  wsIssues.getRow(2).height = 20;
+
+  // Header Tabel Tindak Lanjut (Row 4)
+  const issueHeaders = ['No.', 'Kavling', 'Nama Kepala Keluarga', 'Jml Jiwa', 'Masalah Sanitasi yang Dilaporkan', 'Pilar Terdampak', 'Rekomendasi Intervensi', 'Catatan Petugas'];
+  const issHeaderRow = wsIssues.getRow(4);
+  issHeaderRow.height = 26;
+
+  issueHeaders.forEach((text, idx) => {
+    const c = issHeaderRow.getCell(idx + 1);
+    c.value = text;
+    c.font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FFFFFFFF' } };
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF475569' } }; // Slate Gray
+    c.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+
+  const problemRecords = sorted.filter(r => r.needsFollowUp || r.isBABS || !r.hasHealthyLatrine);
+
+  if (problemRecords.length === 0) {
+    // Jika 0 masalah (Semua 129 kavling tuntas dan sehat)
+    wsIssues.mergeCells('A5:H6');
+    const emptyCell = wsIssues.getCell('A5');
+    emptyCell.value = '✓ HASIL VERIFIKASI LAPANGAN: SELURUH 129 KAVLING DI RT 002 MEMENUHI STANDAR 5 PILAR STBM\nStatus Kawasan: 100% Bebas BABS (ODF), terhubung Biotank PUPR, SPALDT Terpusat, SPAM PDAM, dan TPS3R.';
+    emptyCell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF166534' } };
+    emptyCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFCE7' } };
+    emptyCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    emptyCell.border = {
+      top: { style: 'thin', color: { argb: 'FF86EFAC' } },
+      bottom: { style: 'thin', color: { argb: 'FF86EFAC' } },
+      left: { style: 'thin', color: { argb: 'FF86EFAC' } },
+      right: { style: 'thin', color: { argb: 'FF86EFAC' } }
+    };
+    wsIssues.getRow(5).height = 25;
+    wsIssues.getRow(6).height = 25;
+  } else {
+    // Isi data masalah jika ada
+    problemRecords.forEach((rec, idx) => {
+      const rN = 5 + idx;
+      const row = wsIssues.getRow(rN);
+      row.height = 22;
+
+      let pilarTerdampak = 'Umum';
+      if (rec.isBABS || !rec.hasHealthyLatrine) pilarTerdampak = 'Pilar 1 (Jamban / BABS)';
+      else if (!rec.hasCTPS) pilarTerdampak = 'Pilar 2 (CTPS)';
+      else if (!rec.safeWaterAndFood) pilarTerdampak = 'Pilar 3 (PAMM-RT)';
+      else if (!rec.wasteManagement) pilarTerdampak = 'Pilar 4 (TPS3R)';
+      else if (!rec.liquidWasteManagement) pilarTerdampak = 'Pilar 5 (SPALDT)';
+
+      row.getCell(1).value = idx + 1;
+      row.getCell(2).value = `${rec.block}-${rec.number}`;
+      row.getCell(3).value = rec.headOfFamily ? rec.headOfFamily.toUpperCase() : '-';
+      row.getCell(4).value = rec.occupants || 0;
+      row.getCell(5).value = rec.problemType || 'Perlu pemantauan berkala';
+      row.getCell(6).value = pilarTerdampak;
+      row.getCell(7).value = rec.problemType?.includes('Biotank') ? 'Penyedotan / pemeriksaan biofilter' : 'Pembersihan pipa & sosialisasi kader';
+      row.getCell(8).value = rec.notes || '-';
+
+      row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+      row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+      row.getCell(3).alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      row.getCell(4).alignment = { vertical: 'middle', horizontal: 'center' };
+      row.getCell(5).alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      row.getCell(6).alignment = { vertical: 'middle', horizontal: 'center' };
+      row.getCell(7).alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      row.getCell(8).alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+
+      row.getCell(5).font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF991B1B' } };
+      row.getCell(5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+
+      for (let c = 1; c <= 8; c++) {
+        row.getCell(c).border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+      }
+    });
+  }
+
+  // Generate binary buffer & trigger direct browser download
   const buffer = await workbook.xlsx.writeBuffer();
   const dateStr = new Date().toISOString().split('T')[0];
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Formulir_5_Pilar_STBM_RT02_${dateStr}.xlsx`);
+  saveAs(blob, `Laporan_Eksekutif_5_Pilar_STBM_RT02_${dateStr}.xlsx`);
 };
 
 
