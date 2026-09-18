@@ -97,6 +97,13 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
 }) => {
     const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'stbm' | 'history'>('profile');
     const [isQrisModalOpen, setIsQrisModalOpen] = useState(false);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = 0;
+        }
+    }, [house.id, activeTab]);
 
     const { getPaymentStatus, getArrearsForHouse } = useFinancial();
     const activeReports = reports.filter(r => 
@@ -245,21 +252,29 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                     </div>
 
                     {/* Header Bottom Kavling Info */}
-                    <div className="relative z-10 flex items-end justify-between gap-2 pt-2">
-                        <div>
-                            <div className="text-[10px] font-bold text-emerald-300/90 tracking-widest uppercase mb-0.5 flex items-center gap-1">
+                    <div className="relative z-10 flex items-end justify-between gap-2 pt-1">
+                        <div className="min-w-0 flex-1">
+                            <div className="text-[10px] font-bold text-emerald-300/90 tracking-widest uppercase mb-1 flex items-center gap-1">
                                 <MapPin size={10} /> RT 002 / RW 020 • HUNTAP TONDO 2
                             </div>
-                            <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-none text-white drop-shadow-md">
-                                {house.block}-{house.number}
-                            </h2>
+                            <div className="flex items-baseline gap-2 flex-wrap">
+                                <h2 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-white drop-shadow-md">
+                                    {house.block}-{house.number}
+                                </h2>
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/15 backdrop-blur-md border border-white/15 text-white shadow-xs">
+                                    <User size={12} className="text-emerald-300 shrink-0" />
+                                    <span className="text-xs font-black truncate max-w-[140px] sm:max-w-[220px]">
+                                        {house.headOfFamily || 'Belum Terdata'}
+                                    </span>
+                                </div>
+                            </div>
                             <div className="flex items-center gap-2 mt-1.5">
-                                <span className="text-[10px] font-mono tracking-wider text-white/75 bg-white/10 px-2 py-0.5 rounded backdrop-blur-xs">
+                                <span className="text-[9px] font-mono tracking-wider text-white/75 bg-white/10 px-2 py-0.5 rounded backdrop-blur-xs">
                                     ID: {house.id.slice(0, 8).toUpperCase()}
                                 </span>
                                 <button
                                     onClick={handleCopyKavling}
-                                    className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-white/10 hover:bg-white/20 text-white/90 rounded transition-colors"
+                                    className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 bg-white/10 hover:bg-white/20 text-white/90 rounded transition-colors cursor-pointer"
                                     title="Salin Info Kavling"
                                 >
                                     <Copy size={10} /> Salin
@@ -267,15 +282,26 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             </div>
                         </div>
 
-                        {/* QRIS Quick Payment Icon */}
-                        <button
-                            onClick={() => setIsQrisModalOpen(true)}
-                            className="p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-white shadow-lg transition-all active:scale-95 flex flex-col items-center gap-0.5 group shrink-0"
-                            title="Tampilkan QRIS Pembayaran Iuran"
-                        >
-                            <QrCode size={18} className="group-hover:scale-110 transition-transform" />
-                            <span className="text-[8px] font-black uppercase tracking-wider text-emerald-300">QRIS</span>
-                        </button>
+                        {/* Header Action Button */}
+                        {house.phone ? (
+                            <button
+                                onClick={handleWhatsAppChat}
+                                className="p-2.5 rounded-2xl bg-emerald-500/25 hover:bg-emerald-500/40 backdrop-blur-md border border-emerald-400/40 text-emerald-300 shadow-lg transition-all active:scale-95 flex flex-col items-center gap-0.5 group shrink-0 cursor-pointer"
+                                title="Chat WhatsApp Penghuni"
+                            >
+                                <MessageCircle size={18} className="group-hover:scale-110 text-emerald-400 transition-transform" />
+                                <span className="text-[8px] font-black uppercase tracking-wider text-emerald-300">Chat WA</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => setIsQrisModalOpen(true)}
+                                className="p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-white shadow-lg transition-all active:scale-95 flex flex-col items-center gap-0.5 group shrink-0 cursor-pointer"
+                                title="Tampilkan QRIS Pembayaran Iuran"
+                            >
+                                <QrCode size={18} className="group-hover:scale-110 transition-transform" />
+                                <span className="text-[8px] font-black uppercase tracking-wider text-emerald-300">QRIS</span>
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -318,7 +344,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                     </div>
 
                     {/* Content Section */}
-                    <div className="overflow-y-auto custom-scrollbar flex-1 bg-white p-5 space-y-4">
+                    <div ref={scrollContainerRef} className="overflow-y-auto custom-scrollbar flex-1 bg-white p-4 sm:p-5 space-y-3.5 sm:space-y-4">
                         {activeTab === 'profile' && (
                             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                                 {/* Emergency Alert Banner if any */}
@@ -482,7 +508,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                             <span>Pekerjaan / Bidang</span>
                                         </div>
                                         <div className="text-xs font-bold text-slate-900 mt-1 truncate">
-                                            {house.jobCategory || 'Wiraswasta / Pekerja'}
+                                            {house.jobCategory && house.jobCategory.trim() !== '-' ? house.jobCategory : 'Belum Diisi'}
                                         </div>
                                     </div>
 
@@ -539,6 +565,38 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                         </div>
                                     </div>
                                 ) : null}
+
+                                {/* Anggota Keluarga Terdata */}
+                                {house.familyMembers && house.familyMembers.length > 0 && (
+                                    <div className="space-y-2 pt-1">
+                                        <div className="flex items-center justify-between px-1">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                                                <Users size={12} className="text-indigo-500" />
+                                                <span>Anggota Keluarga ({house.familyMembers.length} Orang)</span>
+                                            </h4>
+                                        </div>
+                                        <div className="bg-slate-50/90 rounded-2xl p-2.5 border border-slate-200/80 space-y-1.5">
+                                            {house.familyMembers.map((member, idx) => (
+                                                <div key={idx} className="bg-white p-2.5 rounded-xl border border-slate-100 flex items-center justify-between gap-2 shadow-2xs">
+                                                    <div className="flex items-center gap-2.5 min-w-0">
+                                                        <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 font-black text-xs flex items-center justify-center shrink-0">
+                                                            {member.name ? member.name.charAt(0).toUpperCase() : idx + 1}
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-black text-slate-800 truncate">{member.name}</p>
+                                                            <p className="text-[10px] text-slate-400 font-bold">{member.relationship || 'Keluarga'}</p>
+                                                        </div>
+                                                    </div>
+                                                    {member.gender && (
+                                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 shrink-0">
+                                                            {member.gender}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Profil Pengurus if available */}
                                 {officialData && (
@@ -815,14 +873,26 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
 
 // --- Sub-components for Detail Modal ---
 
-const VulnerabilityBadge = ({ icon: Icon, label, count, color }: { icon: any, label: string, count: number, color: string }) => (
-    <div className={`flex items-center gap-2 px-3 py-2 bg-white rounded-2xl shadow-sm border border-${color}-100`}>
-        <div className={`p-1.5 bg-${color}-50 text-${color}-500 rounded-lg`}>
-            <Icon size={14} fill={color === 'rose' ? 'currentColor' : 'none'} />
+const VulnerabilityBadge = ({ icon: Icon, label, count, color }: { icon: any, label: string, count: number, color: string }) => {
+    const colorStyles: Record<string, { bg: string, border: string, text: string, iconBg: string, iconColor: string }> = {
+        rose: { bg: 'bg-rose-50/80', border: 'border-rose-200', text: 'text-rose-900', iconBg: 'bg-rose-500', iconColor: 'text-white' },
+        blue: { bg: 'bg-sky-50/80', border: 'border-sky-200', text: 'text-sky-900', iconBg: 'bg-sky-500', iconColor: 'text-white' },
+        amber: { bg: 'bg-amber-50/80', border: 'border-amber-200', text: 'text-amber-900', iconBg: 'bg-amber-500', iconColor: 'text-white' },
+        indigo: { bg: 'bg-indigo-50/80', border: 'border-indigo-200', text: 'text-indigo-900', iconBg: 'bg-indigo-500', iconColor: 'text-white' },
+        purple: { bg: 'bg-purple-50/80', border: 'border-purple-200', text: 'text-purple-900', iconBg: 'bg-purple-500', iconColor: 'text-white' },
+        slate: { bg: 'bg-slate-50/80', border: 'border-slate-200', text: 'text-slate-900', iconBg: 'bg-slate-500', iconColor: 'text-white' },
+    };
+    const c = colorStyles[color] || colorStyles.slate;
+
+    return (
+        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${c.bg} ${c.border} shadow-2xs`}>
+            <div className={`p-1 rounded-lg ${c.iconBg} ${c.iconColor}`}>
+                <Icon size={13} fill={color === 'rose' ? 'currentColor' : 'none'} />
+            </div>
+            <span className={`text-[11px] font-black ${c.text}`}>{count} {label}</span>
         </div>
-        <span className="text-[10px] font-black text-slate-700">{count} {label}</span>
-    </div>
-);
+    );
+};
 
 const HistoryItem = ({ icon: Icon, title, desc, date, color }: { icon: any, title: string, desc: string, date: string, color: string }) => (
     <div className="relative">
