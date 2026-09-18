@@ -138,12 +138,15 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
         toast.success('Info kavling berhasil disalin!');
     };
 
+    const cleanPhone = house.phone ? house.phone.replace(/\D/g, '') : '';
+    const hasValidPhone = cleanPhone.length >= 8;
+
     const handleWhatsAppChat = () => {
-        if (!house.phone) {
+        if (!hasValidPhone) {
             toast.error('Nomor telepon warga belum terdaftar.');
             return;
         }
-        const clean = house.phone.replace(/\D/g, '').replace(/^0/, '62');
+        const clean = cleanPhone.replace(/^0/, '62');
         const text = encodeURIComponent(`Halo Bapak/Ibu ${house.headOfFamily || ''} (Warga Kavling ${house.block}-${house.number} RT 002/RW 020 Huntap Tondo 2), kami dari Pengurus RT ingin menginformasikan...`);
         window.open(`https://wa.me/${clean}?text=${text}`, '_blank');
     };
@@ -163,15 +166,15 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 30 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-white w-full max-w-sm sm:max-w-md md:max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-white/20 flex flex-col max-h-[92dvh] sm:max-h-[90vh]"
+                className="bg-white w-full max-w-sm sm:max-w-md md:max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-white/20 flex flex-col h-[88dvh] sm:h-auto sm:max-h-[88vh]"
             >
                 {/* Mobile Drag Indicator */}
-                <div className="sm:hidden w-full pt-2.5 pb-1 flex justify-center bg-slate-950/40 absolute top-0 left-0 right-0 z-30 pointer-events-none">
-                    <div className="w-12 h-1 bg-white/40 rounded-full" />
+                <div className="sm:hidden w-full pt-2.5 pb-1 flex justify-center bg-transparent absolute top-0 left-0 right-0 z-30 pointer-events-none">
+                    <div className="w-12 h-1.5 bg-white/40 rounded-full" />
                 </div>
 
                 {/* Modern Digital Twin Cyber/Blueprint Header */}
-                <div className={`relative min-h-[175px] sm:min-h-[190px] pt-6 sm:pt-5 pb-4 px-5 sm:px-6 shrink-0 overflow-hidden flex flex-col justify-between ${
+                <div className={`relative min-h-[170px] sm:min-h-[185px] pt-6 sm:pt-5 pb-4 px-5 sm:px-6 shrink-0 overflow-hidden flex flex-col justify-between ${
                     !isSafe ? 'bg-gradient-to-br from-rose-950 via-rose-900 to-slate-950' :
                     officialData ? 'bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950' :
                     house.status === 'Business' ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900' :
@@ -257,18 +260,12 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             <div className="text-[10px] font-bold text-emerald-300/90 tracking-widest uppercase mb-1 flex items-center gap-1">
                                 <MapPin size={10} /> RT 002 / RW 020 • HUNTAP TONDO 2
                             </div>
-                            <div className="flex items-baseline gap-2 flex-wrap">
+                            <div className="flex items-baseline gap-2">
                                 <h2 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-white drop-shadow-md">
                                     {house.block}-{house.number}
                                 </h2>
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/15 backdrop-blur-md border border-white/15 text-white shadow-xs">
-                                    <User size={12} className="text-emerald-300 shrink-0" />
-                                    <span className="text-xs font-black truncate max-w-[140px] sm:max-w-[220px]">
-                                        {house.headOfFamily || 'Belum Terdata'}
-                                    </span>
-                                </div>
                             </div>
-                            <div className="flex items-center gap-2 mt-1.5">
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                                 <span className="text-[9px] font-mono tracking-wider text-white/75 bg-white/10 px-2 py-0.5 rounded backdrop-blur-xs">
                                     ID: {house.id.slice(0, 8).toUpperCase()}
                                 </span>
@@ -283,7 +280,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                         </div>
 
                         {/* Header Action Button */}
-                        {house.phone ? (
+                        {hasValidPhone ? (
                             <button
                                 onClick={handleWhatsAppChat}
                                 className="p-2.5 rounded-2xl bg-emerald-500/25 hover:bg-emerald-500/40 backdrop-blur-md border border-emerald-400/40 text-emerald-300 shadow-lg transition-all active:scale-95 flex flex-col items-center gap-0.5 group shrink-0 cursor-pointer"
@@ -320,16 +317,16 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id as any)}
-                                        className={`relative flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all ${
+                                        className={`relative flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold transition-all min-w-0 ${
                                             isActive 
                                                 ? 'bg-white text-indigo-700 shadow-sm' 
                                                 : 'text-slate-600 hover:text-slate-900'
                                         }`}
                                     >
-                                        <Icon size={13} className={isActive ? 'text-indigo-600' : 'text-slate-400'} />
-                                        <span>{tab.label}</span>
+                                        <Icon size={13} className={`shrink-0 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                                        <span className="truncate">{tab.label}</span>
                                         {tab.badge && (
-                                            <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-black ${
+                                            <span className={`text-[9px] px-1 sm:px-1.5 py-0.2 rounded-full font-black shrink-0 ${
                                                 tab.badge === '⚠️' ? 'bg-rose-100 text-rose-700' :
                                                 tab.badge === '✓' ? 'bg-emerald-100 text-emerald-700' :
                                                 'bg-rose-500 text-white'
@@ -344,7 +341,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                     </div>
 
                     {/* Content Section */}
-                    <div ref={scrollContainerRef} className="overflow-y-auto custom-scrollbar flex-1 bg-white p-4 sm:p-5 space-y-3.5 sm:space-y-4">
+                    <div ref={scrollContainerRef} className="overflow-y-auto overscroll-contain custom-scrollbar flex-1 min-h-0 bg-white p-4 sm:p-5 space-y-3.5 sm:space-y-4 pb-12 sm:pb-6">
                         {activeTab === 'profile' && (
                             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                                 {/* Emergency Alert Banner if any */}
@@ -385,18 +382,18 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
 
                                             {/* Quick Contact Bar */}
                                             <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                                {house.phone ? (
+                                                {hasValidPhone ? (
                                                     <>
                                                         <button
                                                             onClick={handleWhatsAppChat}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200 text-xs font-bold transition-all active:scale-95 shadow-2xs"
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer"
                                                         >
                                                             <MessageCircle size={13} className="text-emerald-600" />
                                                             <span>WhatsApp</span>
                                                         </button>
 
                                                         <a
-                                                            href={`tel:${house.phone}`}
+                                                            href={`tel:${cleanPhone}`}
                                                             className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-bold transition-all"
                                                         >
                                                             <Phone size={11} className="text-slate-500" />
