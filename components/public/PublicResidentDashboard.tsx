@@ -1470,18 +1470,24 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                     <Droplets size={20} />
                   </div>
                   <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
-                    currentWaterReading 
-                      ? (currentWaterReading.status === 'Terverifikasi' 
-                          ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' 
-                          : 'bg-amber-500/20 text-amber-700 border-amber-500/30')
-                      : 'bg-rose-500/20 text-rose-700 border-rose-500/30'
+                    (currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
+                      ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 animate-pulse'
+                      : currentWaterReading 
+                        ? (currentWaterReading.status === 'Terverifikasi' 
+                            ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' 
+                            : 'bg-amber-500/20 text-amber-700 border-amber-500/30')
+                        : 'bg-rose-500/20 text-rose-700 border-rose-500/30'
                   }`}>
-                    {currentWaterReading ? (currentWaterReading.status === 'Terverifikasi' ? '✓ Sah' : 'Menunggu') : 'Belum Catat'}
+                    {(currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
+                      ? 'Belum Ada Meteran'
+                      : currentWaterReading ? (currentWaterReading.status === 'Terverifikasi' ? '✓ Sah' : 'Menunggu') : 'Belum Catat'}
                   </span>
                 </div>
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Meter Air Mandiri</h4>
                 <p className="text-xl font-black text-slate-800">
-                  {currentWaterReading ? `${currentWaterReading.usage} m³ • Rp ${currentWaterReading.totalAmount.toLocaleString('id-ID')}` : 'Catat Pemakaian'}
+                  {(currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
+                    ? 'Menunggu PDAM'
+                    : currentWaterReading ? `${currentWaterReading.usage} m³ • Rp ${currentWaterReading.totalAmount.toLocaleString('id-ID')}` : 'Catat Pemakaian'}
                 </p>
                 <p className="text-[11px] text-slate-500 font-semibold mt-1">
                   {currentWaterReading ? `Angka: ${currentWaterReading.currentReading} m³ (${waterUtilityConfig.providerName || 'PDAM'})` : `Batas input: Tgl ${waterUtilityConfig.readingDueDate || 20} ${currentMonth}`}
@@ -2380,6 +2386,40 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             exit={{ opacity: 0, y: -20 }}
             className="space-y-6 text-left"
           >
+            {/* Notice jika rumah belum terpasang meteran PDAM */}
+            {(currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang' && (
+              <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border-2 border-rose-200 shadow-sm text-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="p-3 bg-rose-500 text-white rounded-2xl shrink-0 shadow-md shadow-rose-500/20">
+                    <Droplets size={22} className="animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-600 text-white">
+                        Status: Belum Terpasang Meteran
+                      </span>
+                      <span className="text-xs font-bold text-slate-600">Perumda Air Minum Kota Palu</span>
+                    </div>
+                    <h4 className="font-black text-slate-900 text-sm">Hunian Anda Terdata Dalam Antrean Pemasangan Meteran Baru</h4>
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                      Rumah Anda telah dicatat oleh Pengurus RT 002 Huntap Tondo 2 dalam berkas usulan pemasangan resmi ke PDAM Kota Palu. Anda tidak perlu menginput angka kubikasi bulanan sampai unit meteran fisik resmi terpasang.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = encodeURIComponent(`Halo Pengurus RT 002, saya dari Blok ${currentHouse?.block}-${currentHouse?.number} ingin konfirmasi terkait status meteran PDAM di rumah kami.`);
+                    window.open(`https://wa.me/?text=${text}`, '_blank');
+                  }}
+                  className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all active:scale-95 whitespace-nowrap cursor-pointer"
+                >
+                  Hubungi Pengurus RT
+                </button>
+              </div>
+            )}
+
             {/* Hero Header Air Bersih */}
             <div className="relative overflow-hidden bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-800 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl">
               <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl -translate-y-12 translate-x-12 pointer-events-none" />

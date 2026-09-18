@@ -161,6 +161,13 @@ export interface House {
   isInitialData?: boolean; // NEW: Flag for initial sync
   useManualDemographics?: boolean; // NEW: Allow manual override of auto counts
 
+  // PDAM Meter Installation & Tracking (Kota Palu)
+  pdamStatus?: 'Terpasang' | 'Belum Terpasang' | 'Dalam Proses Pengajuan' | 'Bermasalah / Rusak';
+  pdamMeterNumber?: string;       // No. ID Pelanggan / No. Seri Meteran Fisik PDAM
+  pdamInstallDate?: string;       // Tanggal Pemasangan Fisik (YYYY-MM-DD)
+  pdamSubmissionDate?: string;    // Tanggal Diajukan ke PDAM (YYYY-MM-DD)
+  pdamNotes?: string;             // Catatan Teknis (kondisi pipa, stop kran, dll.)
+
   // Family Members
   familyMembers?: {
     id?: string;

@@ -275,6 +275,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     value={selectedResident.pbbStatus || 'Belum Diambil'} 
                     isUrgent={selectedResident.pbbStatus !== 'Sudah Diambil'} 
                   />
+                  <DetailItem 
+                    icon={<Droplets size={13} className="text-blue-500" />} 
+                    label="Meteran PDAM Palu" 
+                    value={`${selectedResident.pdamStatus || 'Terpasang'}${selectedResident.pdamMeterNumber ? ` (ID: ${selectedResident.pdamMeterNumber})` : ''}`} 
+                    isUrgent={(selectedResident.pdamStatus || 'Terpasang') === 'Belum Terpasang'} 
+                  />
                   <DetailItem icon={<FileText size={13} />} label="Nomor NIK" value={selectedResident.nik || '-'} isMain />
                   <DetailItem icon={<Users size={13} />} label="Nomor KK" value={selectedResident.kkNumber || '-'} isMain />
                   <DetailItem icon={<Calendar size={13} />} label="Bergabung Pada" value={selectedResident.joiningDate ? selectedResident.joiningDate.split('T')[0] : '-'} />

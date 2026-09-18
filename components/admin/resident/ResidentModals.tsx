@@ -625,7 +625,61 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                        </div>
                     </div>
 
-                    {/* Contact & Access Card */}
+                    {/* Seksi Status Meteran PDAM Kota Palu */}
+                     <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
+                        <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
+                          <div className="w-8 h-8 bg-blue-50 border border-blue-200 rounded-lg flex-shrink-0 flex items-center justify-center text-blue-600">
+                            <Droplets size={14} />
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-bold text-slate-800">Instalasi Air &amp; Meteran PDAM</h3>
+                            <p className="text-[10px] text-slate-400">Status sambungan meteran resmi PDAM Kota Palu</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Meteran Hunian</label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {[
+                                { id: 'Terpasang', label: 'Terpasang', color: 'blue' },
+                                { id: 'Belum Terpasang', label: 'Belum Terpasang', color: 'rose' },
+                                { id: 'Dalam Proses Pengajuan', label: 'Pengajuan', color: 'amber' },
+                                { id: 'Bermasalah / Rusak', label: 'Rusak', color: 'purple' },
+                              ].map(item => (
+                                <button
+                                  key={item.id}
+                                  type="button"
+                                  onClick={() => setFormData({ ...formData, pdamStatus: item.id as any })}
+                                  className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${
+                                    (formData.pdamStatus || 'Terpasang') === item.id
+                                      ? 'bg-blue-50 border-blue-500 text-blue-800 ring-1 ring-blue-500/30'
+                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  {item.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <FormField 
+                            label="Nomor ID / Seri Meteran PDAM (Opsional)" 
+                            placeholder="Contoh: PLU-2026-XXXX"
+                            value={formData.pdamMeterNumber || ''} 
+                            onChange={(v: any) => setFormData({...formData, pdamMeterNumber: v})} 
+                          />
+
+                          <FormField 
+                            label="Catatan Teknis Pipa / Kendala Lapangan" 
+                            placeholder="Misal: Pipa cabang siap belum ada meter, kran rusak..."
+                            value={formData.pdamNotes || ''} 
+                            onChange={(v: any) => setFormData({...formData, pdamNotes: v})} 
+                          />
+                        </div>
+                     </div>
+
+                     {/* Contact & Access Card */}
                     <div className="lg:col-span-5 flex flex-col gap-5">
                        {/* Contact Info block */}
                        <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs flex-1">

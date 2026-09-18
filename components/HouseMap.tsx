@@ -380,6 +380,20 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                                 {house.headOfFamily || '(Belum Terdata)'}
                                             </h3>
 
+                                            {/* PDAM Meter Status Pill */}
+                                            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${
+                                                    (house.pdamStatus || 'Terpasang') === 'Terpasang'
+                                                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                                        : (house.pdamStatus || 'Terpasang') === 'Belum Terpasang'
+                                                        ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 animate-pulse'
+                                                        : 'bg-amber-50 text-amber-700 border-amber-300'
+                                                }`}>
+                                                    <Droplets size={11} />
+                                                    PDAM: {house.pdamStatus || 'Terpasang'}{house.pdamMeterNumber ? ` (#${house.pdamMeterNumber})` : ''}
+                                                </span>
+                                            </div>
+
                                             {/* Quick Contact Bar */}
                                             <div className="flex items-center gap-2 mt-2 flex-wrap">
                                                 {hasValidPhone ? (

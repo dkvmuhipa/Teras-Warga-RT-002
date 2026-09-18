@@ -5209,3 +5209,195 @@ export const generateDigitalReceiptPDF = async (
   toast.success(`E-Kwitansi Resmi Kas RT (${receiptData.invoiceNo}) berhasil diunduh!`);
 };
 
+// ==========================================
+// DOKUMEN PERMOHONAN KOLEKTIF PEMASANGAN METERAN PDAM KOTA PALU
+// ==========================================
+export const generatePDAMInstallationReportPDF = async (
+  houses: House[],
+  filterType: 'Semua' | 'Belum Terpasang' | 'Dalam Proses Pengajuan' = 'Belum Terpasang',
+  customConfig?: PdfConfig
+) => {
+  const config = customConfig || DEFAULT_PDF_CONFIG;
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 15;
+  let y = margin;
+
+  // Filter target houses
+  const targetHouses = houses.filter(h => {
+    const status = h.pdamStatus || 'Terpasang';
+    if (filterType === 'Belum Terpasang') return status === 'Belum Terpasang';
+    if (filterType === 'Dalam Proses Pengajuan') return status === 'Dalam Proses Pengajuan';
+    return true;
+  });
+
+  // 1. Kop Surat Resmi RT 02
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(15, 23, 42);
+  doc.text((config.kopLine1 || "RUKUN TETANGGA 02 / RUKUN WARGA 020").toUpperCase(), pageWidth / 2, y + 2, { align: "center" });
+
+  doc.setFontSize(11);
+  doc.setTextColor(30, 41, 59);
+  doc.text((config.kopLine2 || "PERUMAHAN HUNTAP TONDO 2 KOTA PALU").toUpperCase(), pageWidth / 2, y + 7, { align: "center" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(71, 85, 105);
+  doc.text(config.kopLine3 || "Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu, Sulawesi Tengah 94119", pageWidth / 2, y + 12, { align: "center" });
+  doc.text("Email: rt02rw020.huntaptondo2@gmail.com | Kanal Resmi Warga: Teras Warga RT 02", pageWidth / 2, y + 16, { align: "center" });
+
+  // Double Line Separator
+  y += 19;
+  doc.setDrawColor(15, 23, 42);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, pageWidth - margin, y);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y + 1.2, pageWidth - margin, y + 1.2);
+
+  y += 8;
+
+  // 2. Metadata Surat Dinas
+  const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+  const currentMonthRoman = romanMonths[new Date().getMonth()];
+  const currentYear = new Date().getFullYear();
+  const letterNo = `048/RT-02/TONDO-II/PDAM/${currentMonthRoman}/${currentYear}`;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(15, 23, 42);
+
+  doc.text(`Nomor     : ${letterNo}`, margin, y);
+  doc.text(`Lampiran  : 1 (Satu) Berkas Rekapitulasi`, margin, y + 4.5);
+  doc.text(`Perihal     : Permohonan Pemasangan Baru Unit Meteran Air PDAM`, margin, y + 9);
+
+  const dateStr = `Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  doc.text(dateStr, pageWidth - margin, y, { align: "right" });
+
+  y += 16;
+
+  // Kepada Yth
+  doc.setFont("helvetica", "bold");
+  doc.text("Kepada Yth.", margin, y);
+  doc.setFont("helvetica", "normal");
+  doc.text("Direktur Utama / Bagian Hubungan Langganan", margin, y + 4.5);
+  doc.text("Perumda Air Minum (PDAM) Kota Palu", margin, y + 9);
+  doc.text("di Tempat", margin, y + 13.5);
+
+  y += 20;
+
+  // Paragraf Pengantar
+  doc.text("Dengan hormat,", margin, y);
+  y += 4.5;
+  const introText = `Sehubungan dengan proses pemenuhan sarana air bersih dan penataan utilitas warga di Perumahan Huntap Tondo 2, kami selaku Pengurus RT 002 / RW 020 Kelurahan Tondo mengajukan permohonan pemasangan baru unit meteran air PDAM secara kolektif bagi warga hunian yang hingga saat ini belum terpasang meteran resmi.`;
+  const splitIntro = doc.splitTextToSize(introText, pageWidth - (margin * 2));
+  doc.text(splitIntro, margin, y);
+  y += (splitIntro.length * 4.2) + 3;
+
+  doc.text(`Adapun daftar nama kepala keluarga dan lokasi hunian warga yang diusulkan adalah sebagai berikut:`, margin, y);
+  y += 5;
+
+  // 3. Tabel Data Usulan Pemasangan
+  const tableData = targetHouses.map((h, i) => [
+    (i + 1).toString(),
+    `Blok ${h.block}-${h.number}`,
+    h.headOfFamily && h.headOfFamily !== '-' ? h.headOfFamily : (h.ownerName || 'Hunian Warga'),
+    h.nik ? h.nik : '-',
+    h.phone || '-',
+    h.residenceType || (h.status === 'Occupied' ? 'Dihuni Tetap' : h.status),
+    h.pdamStatus || 'Belum Terpasang',
+    h.pdamNotes || 'Menunggu sambungan meteran baru'
+  ]);
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: margin, right: margin },
+    head: [['No', 'Blok/No', 'Kepala Keluarga', 'NIK', 'No. WhatsApp', 'Kepenghunian', 'Status PDAM', 'Catatan / Kondisi Pipa']],
+    body: tableData.length > 0 ? tableData : [['-', '-', 'Tidak ada data rumah pada kategori ini', '-', '-', '-', '-', '-']],
+    theme: 'grid',
+    styles: {
+      fontSize: 7.5,
+      cellPadding: 2,
+      textColor: [15, 23, 42],
+      lineColor: [203, 213, 225],
+      lineWidth: 0.2
+    },
+    headStyles: {
+      fillColor: [30, 58, 138],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      halign: 'center'
+    },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 8 },
+      1: { halign: 'center', fontStyle: 'bold', cellWidth: 20 },
+      2: { cellWidth: 38 },
+      3: { cellWidth: 26, halign: 'center' },
+      4: { cellWidth: 24, halign: 'center' },
+      5: { cellWidth: 22, halign: 'center' },
+      6: { halign: 'center', cellWidth: 22 },
+      7: { cellWidth: 'auto' }
+    }
+  });
+
+  y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 6 : y + 30;
+
+  // 4. Catatan & Penutup
+  if (y > pageHeight - 55) {
+    doc.addPage();
+    y = 25;
+  }
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+  doc.text(`Total Hunian Belum Terpasang yang Diajukan: ${targetHouses.length} Rumah.`, margin, y);
+  y += 4.5;
+  const closingText = `Demikian surat permohonan ini kami sampaikan, besar harapan kami pihak PDAM Kota Palu dapat segera menjadwalkan survei teknis dan realisasi pemasangan meteran demi ketertiban serta kenyamanan warga dalam mengakses air bersih. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.`;
+  const splitClosing = doc.splitTextToSize(closingText, pageWidth - (margin * 2));
+  doc.text(splitClosing, margin, y);
+  y += (splitClosing.length * 4.2) + 8;
+
+  // 5. Kolom Tanda Tangan Pengurus (Ketua RT & Koordinator Utilitas/Air)
+  if (y > pageHeight - 45) {
+    doc.addPage();
+    y = 25;
+  }
+
+  const sigColWidth = 65;
+  const sigLeftX = margin + 10;
+  const sigRightX = pageWidth - margin - sigColWidth;
+
+  doc.setFontSize(8.5);
+  doc.text("Pengelola Utilitas & Air Bersih,", sigLeftX, y);
+  doc.text("Ketua RT 002 / RW 020,", sigRightX, y);
+
+  y += 20;
+  doc.setFont("helvetica", "bold");
+  doc.text("SEKSI UTILITAS AIR RT 02", sigLeftX, y);
+  doc.text(config.rtLeader || "KETUA RT 002", sigRightX, y);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Huntap Tondo 2 Palu", sigLeftX, y + 4);
+  doc.text("Huntap Tondo 2 Palu", sigRightX, y + 4);
+
+  // Footer / Watermark
+  doc.setFontSize(6.5);
+  doc.setFont("helvetica", "italic");
+  doc.setTextColor(148, 163, 184);
+  doc.text(`Dicetak melalui Sistem Informasi Teras Warga RT 02 Huntap Tondo 2 pada ${new Date().toLocaleString('id-ID')}`, margin, pageHeight - 8);
+
+  const filename = `Surat_Permohonan_Meteran_PDAM_RT02_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(filename);
+  toast.success(`Dokumen resmi permohonan PDAM (${targetHouses.length} rumah) berhasil diunduh!`);
+};
+
+

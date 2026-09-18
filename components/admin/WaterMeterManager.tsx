@@ -1,3 +1,5 @@
+import { generatePDAMInstallationReportPDF } from '../../services/pdfService';
+import { updateHouseData } from '../../services/databaseService';
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Droplets, Search, Filter, Plus, CheckCircle2, Clock, 
@@ -40,7 +42,22 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
 
-  const [activeTab, setActiveTab] = useState<'recap' | 'batch' | 'verification' | 'settings'>('recap');
+  const [activeTab, setActiveTab] = useState<'recap' | 'batch' | 'verification' | 'settings' | 'installation'>('recap');
+  
+  // PDAM Installation Tracking States
+  const [pdamStatusFilter, setPdamStatusFilter] = useState<'all' | 'Belum Terpasang' | 'Terpasang' | 'Dalam Proses Pengajuan' | 'Bermasalah / Rusak'>('all');
+  const [pdamBlockFilter, setPdamBlockFilter] = useState<string>('all');
+  const [pdamSearchQuery, setPdamSearchQuery] = useState<string>('');
+  const [editingPdamHouse, setEditingPdamHouse] = useState<House | null>(null);
+  const [isPdamModalOpen, setIsPdamModalOpen] = useState(false);
+  const [pdamForm, setPdamForm] = useState({
+    status: 'Belum Terpasang' as House['pdamStatus'],
+    meterNumber: '',
+    notes: '',
+    installDate: '',
+    submissionDate: ''
+  });
+  const [isSavingPdam, setIsSavingPdam] = useState(false);
   const [readings, setReadings] = useState<WaterMeterReading[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -199,6 +216,99 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       totalBilled
     };
   }, [houses, readings]);
+
+  // PDAM Installation Metrics & Summary
+  const pdamStats = useMemo(() => {
+    let installed = 0;
+    let notInstalled = 0;
+    let inProgress = 0;
+    let broken = 0;
+
+    houses.forEach(h => {
+      const s = h.pdamStatus || 'Terpasang';
+      if (s === 'Belum Terpasang') notInstalled++;
+      else if (s === 'Dalam Proses Pengajuan') inProgress++;
+      else if (s === 'Bermasalah / Rusak') broken++;
+      else installed++;
+    });
+
+    return {
+      total: houses.length,
+      installed,
+      notInstalled,
+      inProgress,
+      broken,
+      installedPercentage: Math.round((installed / (houses.length || 1)) * 100)
+    };
+  }, [houses]);
+
+  // Filtered houses for PDAM installation tracking
+  const filteredPdamHouses = useMemo(() => {
+    return houses.filter(h => {
+      const currentStatus = h.pdamStatus || 'Terpasang';
+      if (pdamStatusFilter !== 'all' && currentStatus !== pdamStatusFilter) return false;
+      if (pdamBlockFilter !== 'all' && h.block?.toUpperCase() !== pdamBlockFilter) return false;
+      if (pdamSearchQuery.trim()) {
+        const q = pdamSearchQuery.toLowerCase();
+        const id = `${h.block}-${h.number}`.toLowerCase();
+        const name = (h.headOfFamily || '').toLowerCase();
+        const meter = (h.pdamMeterNumber || '').toLowerCase();
+        const notes = (h.pdamNotes || '').toLowerCase();
+        if (!id.includes(q) && !name.includes(q) && !meter.includes(q) && !notes.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [houses, pdamStatusFilter, pdamBlockFilter, pdamSearchQuery]);
+
+  const handleOpenPdamModal = (house: House) => {
+    setEditingPdamHouse(house);
+    setPdamForm({
+      status: house.pdamStatus || 'Belum Terpasang',
+      meterNumber: house.pdamMeterNumber || '',
+      notes: house.pdamNotes || '',
+      installDate: house.pdamInstallDate || '',
+      submissionDate: house.pdamSubmissionDate || ''
+    });
+    setIsPdamModalOpen(true);
+  };
+
+  const handleSavePdamModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPdamHouse) return;
+    setIsSavingPdam(true);
+    try {
+      await updateHouseData(editingPdamHouse.id, {
+        pdamStatus: pdamForm.status,
+        pdamMeterNumber: pdamForm.meterNumber,
+        pdamNotes: pdamForm.notes,
+        pdamInstallDate: pdamForm.installDate,
+        pdamSubmissionDate: pdamForm.submissionDate
+      });
+      toast.success(`Status meteran PDAM rumah Blok ${editingPdamHouse.block}-${editingPdamHouse.number} berhasil diperbarui!`);
+      setIsPdamModalOpen(false);
+    } catch (err: any) {
+      toast.error('Gagal memperbarui status PDAM: ' + err.message);
+    } finally {
+      setIsSavingPdam(false);
+    }
+  };
+
+  const handleQuickPdamStatus = async (house: House, newStatus: House['pdamStatus']) => {
+    try {
+      await updateHouseData(house.id, { pdamStatus: newStatus });
+      toast.success(`Blok ${house.block}-${house.number} diubah menjadi "${newStatus}"`);
+    } catch (err: any) {
+      toast.error('Gagal memperbarui status: ' + err.message);
+    }
+  };
+
+  const handleCopyPDAMWhatsApp = () => {
+    const uninstalled = houses.filter(h => (h.pdamStatus || 'Terpasang') === 'Belum Terpasang');
+    const lines = uninstalled.map((h, i) => `${i + 1}. Blok ${h.block}-${h.number} - ${h.headOfFamily || 'Warga'} (HP: ${h.phone || '-'})`);
+    const message = `Halo Pelayanan Pelanggan PDAM Kota Palu,\n\nKami dari Pengurus RT 002 / RW 020 Perumahan Huntap Tondo 2 ingin mengajukan koordinasi permohonan pemasangan baru unit meteran air bagi ${uninstalled.length} rumah warga kami yang saat ini BELUM TERPASANG:\n\n${lines.join('\n')}\n\nMohon arahan dan penjadwalan survei lapangan dari tim teknis PDAM Kota Palu. Terima kasih.\n\nPengurus RT 002 Huntap Tondo 2`;
+    navigator.clipboard.writeText(message);
+    toast.success('Draf pengajuan WhatsApp ke PDAM Kota Palu berhasil disalin!');
+  };
 
   // Initialize batch inputs when switching to batch tab or changing batch block
   useEffect(() => {
@@ -707,6 +817,23 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           {kpi.pendingCount > 0 && (
             <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-white rounded-full">
               {kpi.pendingCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('installation')}
+          className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm rounded-xl transition-colors whitespace-nowrap ${
+            activeTab === 'installation'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <AlertCircle className="w-4 h-4 text-amber-400" />
+          <span>Pendataan Meteran PDAM</span>
+          {pdamStats.notInstalled > 0 && (
+            <span className="px-2 py-0.5 text-[10px] font-black bg-rose-500 text-white rounded-full">
+              {pdamStats.notInstalled} Belum Ada
             </span>
           )}
         </button>
@@ -1380,6 +1507,404 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
             </div>
           </div>
         </Card>
+      )}
+
+      {/* TAB CONTENT: 5. PENDATAAN STATUS METERAN PDAM */}
+      {activeTab === 'installation' && (
+        <div className="space-y-6">
+          {/* Header Action Banner */}
+          <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white p-6 rounded-3xl shadow-xl border border-blue-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-blue-500/20 text-cyan-400 border border-blue-500/30 rounded-2xl shrink-0">
+                <Droplets size={28} className="animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500 text-slate-950">
+                    Utilitas Lingkungan
+                  </span>
+                  <span className="text-xs text-slate-300 font-bold">
+                    PDAM Kota Palu • Huntap Tondo 2
+                  </span>
+                </div>
+                <h3 className="text-lg font-black text-white tracking-tight">
+                  Pendataan &amp; Monitoring Instalasi Meteran PDAM
+                </h3>
+                <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                  Pantau seluruh rumah yang belum terpasang meteran, sudah terpasang, atau dalam proses pengajuan kolektif RT 02 ke pihak Perumda Air Minum Kota Palu.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+              <button
+                type="button"
+                onClick={() => generatePDAMInstallationReportPDF(houses, 'Belum Terpasang')}
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-900/30 transition-all cursor-pointer active:scale-95"
+              >
+                <Download size={14} />
+                <span>Cetak PDF Permohonan</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyPDAMWhatsApp}
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                title="Salin daftar rumah belum terpasang untuk dikirim ke petugas PDAM via WA"
+              >
+                <Send size={14} className="text-cyan-300" />
+                <span>Salin Draf WA</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Metric KPI Cards for PDAM */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="p-5 border-rose-200/80 bg-gradient-to-br from-rose-50/60 to-white shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-rose-700 uppercase tracking-wider">Belum Terpasang</span>
+                <div className="p-2 rounded-xl bg-rose-100 text-rose-600 font-bold text-xs">
+                  Prioritas
+                </div>
+              </div>
+              <div className="mt-2.5">
+                <div className="text-3xl font-black text-rose-600">
+                  {pdamStats.notInstalled} <span className="text-sm font-semibold text-slate-500">Rumah</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                  Perlu pengajuan meteran baru
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-5 border-amber-200/80 bg-gradient-to-br from-amber-50/60 to-white shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">Dalam Pengajuan</span>
+                <div className="p-2 rounded-xl bg-amber-100 text-amber-600 font-bold text-xs">
+                  Proses
+                </div>
+              </div>
+              <div className="mt-2.5">
+                <div className="text-3xl font-black text-amber-600">
+                  {pdamStats.inProgress} <span className="text-sm font-semibold text-slate-500">Rumah</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                  Menunggu survei &amp; pemasangan
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-5 border-blue-200/80 bg-gradient-to-br from-blue-50/60 to-white shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Sudah Terpasang</span>
+                <div className="p-2 rounded-xl bg-blue-100 text-blue-600 font-bold text-xs">
+                  Aktif
+                </div>
+              </div>
+              <div className="mt-2.5">
+                <div className="text-3xl font-black text-blue-600">
+                  {pdamStats.installed} <span className="text-sm font-semibold text-slate-500">({pdamStats.installedPercentage}%)</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                  Tercatat &amp; memiliki meteran
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-5 border-slate-200 bg-white shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Meteran Bermasalah</span>
+                <div className="p-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs">
+                  Teknis
+                </div>
+              </div>
+              <div className="mt-2.5">
+                <div className="text-3xl font-black text-slate-700">
+                  {pdamStats.broken} <span className="text-sm font-semibold text-slate-500">Rumah</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                  Bocor, pecah, atau buram
+                </p>
+              </div>
+            </Card>
+          </div>
+
+          {/* Filter Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input
+                type="text"
+                placeholder="Cari kepala keluarga, nomor rumah, no. meteran, atau catatan pipa..."
+                value={pdamSearchQuery}
+                onChange={(e) => setPdamSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Block Filter */}
+              <select
+                value={pdamBlockFilter}
+                onChange={(e) => setPdamBlockFilter(e.target.value)}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none cursor-pointer"
+              >
+                <option value="all">Semua Blok</option>
+                {blocks.map(b => (
+                  <option key={b} value={b}>Blok {b}</option>
+                ))}
+              </select>
+
+              {/* Status Filter */}
+              <select
+                value={pdamStatusFilter}
+                onChange={(e) => setPdamStatusFilter(e.target.value as any)}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none cursor-pointer"
+              >
+                <option value="all">Semua Status Meteran</option>
+                <option value="Belum Terpasang">Belum Terpasang ({pdamStats.notInstalled})</option>
+                <option value="Dalam Proses Pengajuan">Dalam Pengajuan ({pdamStats.inProgress})</option>
+                <option value="Terpasang">Sudah Terpasang ({pdamStats.installed})</option>
+                <option value="Bermasalah / Rusak">Bermasalah / Rusak ({pdamStats.broken})</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Interactive Table */}
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                    <th className="py-3.5 px-4">Rumah</th>
+                    <th className="py-3.5 px-4">Kepala Keluarga</th>
+                    <th className="py-3.5 px-4">Status Meteran PDAM</th>
+                    <th className="py-3.5 px-4">No. Seri / ID Meter</th>
+                    <th className="py-3.5 px-4">Catatan Teknis / Pipa</th>
+                    <th className="py-3.5 px-4 text-center">Aksi Cepat</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredPdamHouses.length > 0 ? (
+                    filteredPdamHouses.map((house) => {
+                      const status = house.pdamStatus || 'Terpasang';
+                      const isUninstalled = status === 'Belum Terpasang';
+                      const isProgress = status === 'Dalam Proses Pengajuan';
+
+                      return (
+                        <tr 
+                          key={house.id} 
+                          className={`hover:bg-slate-50/80 transition-colors ${isUninstalled ? 'bg-rose-50/20' : isProgress ? 'bg-amber-50/20' : ''}`}
+                        >
+                          <td className="py-3.5 px-4 font-black text-slate-800 whitespace-nowrap">
+                            <span className="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono text-[11px] shadow-xs">
+                              Blok {house.block}-{house.number}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-slate-800">{house.headOfFamily && house.headOfFamily !== '-' ? house.headOfFamily : (house.ownerName || 'Hunian Warga')}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">{house.phone ? `WA: ${house.phone}` : 'No. HP belum tercatat'} • {house.residenceType || house.status}</div>
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl font-black text-[10px] uppercase tracking-wide border ${
+                              status === 'Terpasang' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                              status === 'Belum Terpasang' ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 animate-pulse' :
+                              status === 'Dalam Proses Pengajuan' ? 'bg-amber-50 text-amber-700 border-amber-300' :
+                              'bg-purple-50 text-purple-700 border-purple-200'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                status === 'Terpasang' ? 'bg-blue-500' :
+                                status === 'Belum Terpasang' ? 'bg-rose-500' :
+                                status === 'Dalam Proses Pengajuan' ? 'bg-amber-500' :
+                                'bg-purple-500'
+                              }`} />
+                              {status}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-slate-600 whitespace-nowrap">
+                            {house.pdamMeterNumber || (isUninstalled ? <span className="text-slate-300 italic">- Belum Ada -</span> : <span className="text-slate-400 italic">Belum Dicatat</span>)}
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-500 max-w-xs truncate">
+                            {house.pdamNotes || <span className="text-slate-300 italic">Tidak ada catatan</span>}
+                          </td>
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1.5">
+                              {isUninstalled ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickPdamStatus(house, 'Dalam Proses Pengajuan')}
+                                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-all cursor-pointer"
+                                  title="Tandai sedang diajukan ke PDAM"
+                                >
+                                  Tandai Diajukan
+                                </button>
+                              ) : isProgress ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickPdamStatus(house, 'Terpasang')}
+                                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-all cursor-pointer"
+                                  title="Tandai sudah dipasang oleh PDAM"
+                                >
+                                  Tandai Terpasang
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickPdamStatus(house, 'Belum Terpasang')}
+                                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-all cursor-pointer"
+                                  title="Tandai belum terpasang meteran"
+                                >
+                                  Set Belum Pasang
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPdamModal(house)}
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer"
+                                title="Edit Detail Meteran & Catatan Lapangan"
+                              >
+                                <Edit2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-slate-400">
+                        Tidak ada data rumah yang cocok dengan filter.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT STATUS METERAN PDAM DETAIL */}
+      {isPdamModalOpen && editingPdamHouse && (
+        <Modal
+          isOpen={isPdamModalOpen}
+          onClose={() => setIsPdamModalOpen(false)}
+          title={`Pendataan Meteran PDAM: Blok ${editingPdamHouse.block}-${editingPdamHouse.number}`}
+          maxWidth="max-w-lg"
+        >
+          <form onSubmit={handleSavePdamModal} className="space-y-4 p-1 text-left">
+            <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-200/80 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-600">Hunian Target</span>
+                <h4 className="font-bold text-slate-800 text-sm">Blok {editingPdamHouse.block}-{editingPdamHouse.number}</h4>
+                <p className="text-xs text-slate-500">{editingPdamHouse.headOfFamily || 'Hunian Warga'}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-slate-400 block font-semibold">Kategori</span>
+                <span className="text-xs font-bold text-slate-700">{editingPdamHouse.residenceType || 'Tetap'}</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Status Instalasi Meteran PDAM *
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'Belum Terpasang', label: 'Belum Terpasang', desc: 'Perlu meteran baru' },
+                  { id: 'Dalam Proses Pengajuan', label: 'Dalam Pengajuan', desc: 'Menunggu survei/unit' },
+                  { id: 'Terpasang', label: 'Sudah Terpasang', desc: 'Fisik meteran ada' },
+                  { id: 'Bermasalah / Rusak', label: 'Bermasalah / Rusak', desc: 'Bocor, pecah, dll.' },
+                ].map(item => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setPdamForm(prev => ({ ...prev, status: item.id as any }))}
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      pdamForm.status === item.id
+                        ? 'border-blue-600 bg-blue-50/80 text-blue-900 ring-2 ring-blue-500/20 shadow-xs'
+                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+                    }`}
+                  >
+                    <div className="text-xs font-bold">{item.label}</div>
+                    <div className="text-[10px] text-slate-400">{item.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Nomor Seri / ID Pelanggan PDAM (Jika Ada)
+              </label>
+              <input
+                type="text"
+                placeholder="Contoh: PLU-2026-08892 atau nomor fisik meter"
+                value={pdamForm.meterNumber}
+                onChange={(e) => setPdamForm(prev => ({ ...prev, meterNumber: e.target.value }))}
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tgl Permohonan / Usulan
+                </label>
+                <input
+                  type="date"
+                  value={pdamForm.submissionDate}
+                  onChange={(e) => setPdamForm(prev => ({ ...prev, submissionDate: e.target.value }))}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tgl Realisasi Pasang
+                </label>
+                <input
+                  type="date"
+                  value={pdamForm.installDate}
+                  onChange={(e) => setPdamForm(prev => ({ ...prev, installDate: e.target.value }))}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Catatan Teknis Lapangan (Pipa / Kran)
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Misal: Pipa cabang siap namun kran belum ada, atau menunggu sambungan pipa induk depan blok..."
+                value={pdamForm.notes}
+                onChange={(e) => setPdamForm(prev => ({ ...prev, notes: e.target.value }))}
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsPdamModalOpen(false)}
+                className="rounded-xl text-xs"
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSavingPdam}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
+              >
+                {isSavingPdam ? 'Menyimpan...' : 'Simpan Data PDAM'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       {/* MODAL: SINGLE EDIT / INPUT METER */}
