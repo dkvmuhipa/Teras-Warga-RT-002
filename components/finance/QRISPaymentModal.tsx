@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
@@ -84,9 +85,9 @@ export const QRISPaymentModal: React.FC<QRISPaymentModalProps> = ({
     }, 800);
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-slate-950/70 backdrop-blur-md font-sans">
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 overflow-y-auto bg-slate-950/80 backdrop-blur-md font-sans">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -244,4 +245,10 @@ export const QRISPaymentModal: React.FC<QRISPaymentModalProps> = ({
       </div>
     </AnimatePresence>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+
+  return modalContent;
 };

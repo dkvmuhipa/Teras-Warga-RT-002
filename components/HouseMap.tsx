@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { House, PaymentStatus, Report, Official, Checkpoint, MapPoint, PatrolSession, PanicAlert, STBMRecord, BMKGQuakeData } from '../types';
 import { Home, Map as MapIcon, MapPin, Store, X, AlertTriangle, User, Edit, DollarSign, ShieldAlert, ChevronRight, Info, CheckCircle, ShieldCheck, Star, Baby, Heart, Accessibility, Smile, Users, GraduationCap, Key, Briefcase as BriefcaseIcon, Phone, MessageCircle, Droplets, Trash2, Settings2, Save, Move, Shield, Lightbulb, Video, Trash, Navigation, Bell, Search, MousePointer2, VideoOff, Activity, Clock, Filter, Flame, CreditCard, Compass, Thermometer, UserPlus, Printer, Download, ArrowRight, AlertCircle, CheckCircle2, Radio, HeartPulse, LifeBuoy, Copy, QrCode, Share2, Sparkles, Check, Building } from 'lucide-react';
 import { domToPng } from 'modern-screenshot';
@@ -140,136 +141,147 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
         window.open(`https://wa.me/${clean}?text=${text}`, '_blank');
     };
     
-    return (
+    const modalContent = (
         <>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
-                <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity" onClick={onClose}></div>
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.92, y: 24 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.92, y: 24 }}
-                    transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-                    className="bg-white w-full max-w-sm sm:max-w-md md:max-w-lg rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-white/20 flex flex-col max-h-[92vh]"
-                >
-                    {/* Modern Digital Twin Cyber/Blueprint Header */}
-                    <div className={`relative h-48 sm:h-52 shrink-0 overflow-hidden ${
-                        !isSafe ? 'bg-gradient-to-br from-rose-950 via-rose-900 to-slate-950' :
-                        officialData ? 'bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950' :
-                        house.status === 'Business' ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900' :
-                        house.status === 'Visiting' ? 'bg-gradient-to-br from-slate-950 via-sky-950 to-slate-900' :
-                        !isHouseTrulyOccupied(house) ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-zinc-900' :
-                        'bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950'
-                    }`}>
-                        {/* SVG Vector Tech Grid */}
-                        <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <pattern id={`tech-grid-${house.id}`} width="26" height="26" patternUnits="userSpaceOnUse">
-                                    <path d="M 26 0 L 0 0 0 26" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" />
-                                    <circle cx="26" cy="26" r="1.5" fill="rgba(255,255,255,0.3)" />
-                                </pattern>
-                            </defs>
-                            <rect width="100%" height="100%" fill={`url(#tech-grid-${house.id})`} />
-                        </svg>
+            <div className="fixed inset-0 z-[9999] flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 pointer-events-auto">
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" 
+                onClick={onClose} 
+            />
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                className="bg-white w-full max-w-sm sm:max-w-md md:max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden ring-1 ring-white/20 flex flex-col max-h-[92dvh] sm:max-h-[90vh]"
+            >
+                {/* Mobile Drag Indicator */}
+                <div className="sm:hidden w-full pt-2.5 pb-1 flex justify-center bg-slate-950/40 absolute top-0 left-0 right-0 z-30 pointer-events-none">
+                    <div className="w-12 h-1 bg-white/40 rounded-full" />
+                </div>
 
-                        {/* Ambient Glow Orbs */}
-                        <div className="absolute -top-12 -left-12 w-48 h-48 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute -bottom-10 -right-10 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+                {/* Modern Digital Twin Cyber/Blueprint Header */}
+                <div className={`relative min-h-[175px] sm:min-h-[190px] pt-6 sm:pt-5 pb-4 px-5 sm:px-6 shrink-0 overflow-hidden flex flex-col justify-between ${
+                    !isSafe ? 'bg-gradient-to-br from-rose-950 via-rose-900 to-slate-950' :
+                    officialData ? 'bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950' :
+                    house.status === 'Business' ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900' :
+                    house.status === 'Visiting' ? 'bg-gradient-to-br from-slate-950 via-sky-950 to-slate-900' :
+                    !isHouseTrulyOccupied(house) ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-zinc-900' :
+                    'bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950'
+                }`}>
+                    {/* SVG Vector Tech Grid */}
+                    <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id={`tech-grid-${house.id}`} width="26" height="26" patternUnits="userSpaceOnUse">
+                                <path d="M 26 0 L 0 0 0 26" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" />
+                                <circle cx="26" cy="26" r="1.5" fill="rgba(255,255,255,0.3)" />
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill={`url(#tech-grid-${house.id})`} />
+                    </svg>
 
-                        {/* House Real Photo if available */}
-                        {house.housePhotoUrl && (
-                            <div className="absolute inset-0">
-                                <img 
-                                    src={house.housePhotoUrl} 
-                                    alt="Foto Rumah" 
-                                    className="w-full h-full object-cover opacity-60"
-                                    referrerPolicy="no-referrer"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
-                            </div>
-                        )}
+                    {/* Ambient Glow Orbs */}
+                    <div className="absolute -top-12 -left-12 w-48 h-48 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute -bottom-10 -right-10 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
 
-                        {/* Header Top Controls */}
-                        <div className="absolute top-4 left-5 right-4 z-20 flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                                {/* Live Pulsing Status Badge */}
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-black/40 backdrop-blur-md border border-white/15 text-white shadow-sm">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                                            !isHouseTrulyOccupied(house) ? 'bg-slate-400' :
-                                            house.status === 'Business' ? 'bg-purple-400' :
-                                            house.status === 'Visiting' ? 'bg-sky-400' : 'bg-emerald-400'
-                                        }`}></span>
-                                        <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                                            !isHouseTrulyOccupied(house) ? 'bg-slate-400' :
-                                            house.status === 'Business' ? 'bg-purple-400' :
-                                            house.status === 'Visiting' ? 'bg-sky-400' : 'bg-emerald-400'
-                                        }`}></span>
-                                    </span>
-                                    {!isHouseTrulyOccupied(house) ? 'Kosong' : 
-                                     house.status === 'Business' ? 'Usaha' : 
-                                     house.status === 'Visiting' ? 'Rutin Singgah' : 'Dihuni'}
-                                </div>
+                    {/* House Real Photo if available */}
+                    {house.housePhotoUrl && (
+                        <div className="absolute inset-0">
+                            <img 
+                                src={house.housePhotoUrl} 
+                                alt="Foto Rumah" 
+                                className="w-full h-full object-cover opacity-60"
+                                referrerPolicy="no-referrer"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+                        </div>
+                    )}
 
-                                {/* Architecture Chip */}
-                                <span className="px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wide uppercase bg-white/10 backdrop-blur-md border border-white/15 text-white/90">
-                                    Risha 36/108 PUPR
+                    {/* Header Top Controls */}
+                    <div className="relative z-20 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            {/* Live Pulsing Status Badge */}
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-black/40 backdrop-blur-md border border-white/15 text-white shadow-sm">
+                                <span className="relative flex h-2 w-2">
+                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                                        !isHouseTrulyOccupied(house) ? 'bg-slate-400' :
+                                        house.status === 'Business' ? 'bg-purple-400' :
+                                        house.status === 'Visiting' ? 'bg-sky-400' : 'bg-emerald-400'
+                                    }`}></span>
+                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                                        !isHouseTrulyOccupied(house) ? 'bg-slate-400' :
+                                        house.status === 'Business' ? 'bg-purple-400' :
+                                        house.status === 'Visiting' ? 'bg-sky-400' : 'bg-emerald-400'
+                                    }`}></span>
                                 </span>
-
-                                {officialData && (
-                                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-500/80 backdrop-blur-md border border-indigo-400/30 text-white flex items-center gap-1">
-                                        <Star size={10} fill="currentColor" /> Pengurus RT
-                                    </span>
-                                )}
+                                {!isHouseTrulyOccupied(house) ? 'Kosong' : 
+                                 house.status === 'Business' ? 'Usaha' : 
+                                 house.status === 'Visiting' ? 'Rutin Singgah' : 'Dihuni'}
                             </div>
 
-                            {/* Close Button */}
-                            <button 
-                                onClick={onClose} 
-                                className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all backdrop-blur-md border border-white/20 shadow-lg active:scale-95"
-                                title="Tutup"
-                            >
-                                <X size={18} />
-                            </button>
+                            {/* Architecture Chip */}
+                            <span className="px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wide uppercase bg-white/10 backdrop-blur-md border border-white/15 text-white/90 flex items-center gap-1">
+                                <Building size={10} className="text-white/70" /> RISHA T-36
+                            </span>
+
+                            {officialData && (
+                                <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-500/80 backdrop-blur-md border border-indigo-400/30 text-white flex items-center gap-1">
+                                    <Star size={10} fill="currentColor" /> Pengurus RT
+                                </span>
+                            )}
                         </div>
 
-                        {/* Header Bottom Kavling Info */}
-                        <div className="absolute bottom-4 left-6 right-6 text-white z-10 flex items-end justify-between">
-                            <div>
-                                <div className="text-[10px] font-bold text-emerald-300/90 tracking-widest uppercase mb-0.5">
-                                    RT 002 / RW 020 • HUNTAP TONDO 2
-                                </div>
-                                <h2 className="text-5xl sm:text-6xl font-black tracking-tight leading-none text-white drop-shadow-md">
-                                    {house.block}-{house.number}
-                                </h2>
-                                <div className="flex items-center gap-2 mt-1.5">
-                                    <span className="text-[10px] font-mono tracking-wider text-white/75 bg-white/10 px-2 py-0.5 rounded backdrop-blur-xs">
-                                        ID: {house.id.slice(0, 8).toUpperCase()}
-                                    </span>
-                                    <button
-                                        onClick={handleCopyKavling}
-                                        className="p-1 text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
-                                        title="Salin Info Kavling"
-                                    >
-                                        <Copy size={12} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* QRIS Quick Payment Icon */}
-                            <button
-                                onClick={() => setIsQrisModalOpen(true)}
-                                className="p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-white shadow-lg transition-all active:scale-95 flex flex-col items-center gap-0.5"
-                                title="Tampilkan QRIS Pembayaran Iuran"
-                            >
-                                <QrCode size={18} />
-                                <span className="text-[8px] font-black uppercase tracking-wider">QRIS</span>
-                            </button>
-                        </div>
+                        {/* Close Button */}
+                        <button 
+                            onClick={onClose} 
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/15 hover:bg-white/25 active:scale-90 text-white flex items-center justify-center backdrop-blur-md border border-white/25 shadow-lg transition-all cursor-pointer"
+                            title="Tutup"
+                        >
+                            <X size={18} />
+                        </button>
                     </div>
 
-                    {/* Modern Glassmorphic Segmented Tabs */}
-                    <div className="p-2.5 bg-slate-100/90 border-b border-slate-200/80 shrink-0">
-                        <div className="grid grid-cols-4 gap-1 p-1 bg-slate-200/70 rounded-2xl">
+                    {/* Header Bottom Kavling Info */}
+                    <div className="relative z-10 flex items-end justify-between gap-2 pt-2">
+                        <div>
+                            <div className="text-[10px] font-bold text-emerald-300/90 tracking-widest uppercase mb-0.5 flex items-center gap-1">
+                                <MapPin size={10} /> RT 002 / RW 020 • HUNTAP TONDO 2
+                            </div>
+                            <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-none text-white drop-shadow-md">
+                                {house.block}-{house.number}
+                            </h2>
+                            <div className="flex items-center gap-2 mt-1.5">
+                                <span className="text-[10px] font-mono tracking-wider text-white/75 bg-white/10 px-2 py-0.5 rounded backdrop-blur-xs">
+                                    ID: {house.id.slice(0, 8).toUpperCase()}
+                                </span>
+                                <button
+                                    onClick={handleCopyKavling}
+                                    className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-white/10 hover:bg-white/20 text-white/90 rounded transition-colors"
+                                    title="Salin Info Kavling"
+                                >
+                                    <Copy size={10} /> Salin
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* QRIS Quick Payment Icon */}
+                        <button
+                            onClick={() => setIsQrisModalOpen(true)}
+                            className="p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-white shadow-lg transition-all active:scale-95 flex flex-col items-center gap-0.5 group shrink-0"
+                            title="Tampilkan QRIS Pembayaran Iuran"
+                        >
+                            <QrCode size={18} className="group-hover:scale-110 transition-transform" />
+                            <span className="text-[8px] font-black uppercase tracking-wider text-emerald-300">QRIS</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Modern Glassmorphic Segmented Tabs */}
+                <div className="p-2 sm:p-2.5 bg-slate-100/90 border-b border-slate-200/80 shrink-0">
+                    <div className="grid grid-cols-4 gap-1 p-1 bg-slate-200/70 rounded-2xl">
                             {[
                                 { id: 'profile', label: 'Profil', icon: User },
                                 { id: 'finance', label: 'Keuangan', icon: CreditCard, badge: arrears.length > 0 ? `${arrears.length}` : undefined },
@@ -325,11 +337,11 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                 )}
 
                                 {/* Main Resident Profile Card */}
-                                <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs relative overflow-hidden">
+                                <div className="bg-gradient-to-br from-slate-50 via-white to-indigo-50/20 rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs relative overflow-hidden">
                                     <div className="flex items-start gap-3.5 sm:gap-4">
                                         {/* Avatar with initial */}
-                                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
-                                            {house.headOfFamily ? house.headOfFamily.charAt(0).toUpperCase() : <Home size={24} />}
+                                        <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-black text-xl sm:text-2xl shadow-md shrink-0 ring-4 ring-indigo-50">
+                                            {house.headOfFamily ? house.headOfFamily.charAt(0).toUpperCase() : <Home size={22} />}
                                         </div>
 
                                         <div className="flex-1 min-w-0">
@@ -341,17 +353,17 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                                     {house.residenceType || 'Rumah Keluarga'}
                                                 </span>
                                             </div>
-                                            <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl truncate mt-1">
+                                            <h3 className="font-black text-slate-900 text-base sm:text-xl truncate mt-1">
                                                 {house.headOfFamily || '(Belum Terdata)'}
                                             </h3>
 
                                             {/* Quick Contact Bar */}
-                                            <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                                            <div className="flex items-center gap-2 mt-2 flex-wrap">
                                                 {house.phone ? (
                                                     <>
                                                         <button
                                                             onClick={handleWhatsAppChat}
-                                                            className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200 text-xs font-bold transition-all active:scale-95 shadow-2xs"
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200 text-xs font-bold transition-all active:scale-95 shadow-2xs"
                                                         >
                                                             <MessageCircle size={13} className="text-emerald-600" />
                                                             <span>WhatsApp</span>
@@ -366,7 +378,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                                         </a>
                                                     </>
                                                 ) : (
-                                                    <span className="text-[11px] text-slate-400 italic">Nomor kontak belum terdaftar</span>
+                                                    <span className="text-[11px] text-slate-400 italic">Kontak telepon belum terdaftar</span>
                                                 )}
                                             </div>
                                         </div>
@@ -375,51 +387,79 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
 
                                 {/* 4 Live Utility & Sanitation Chips */}
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="p-3 bg-sky-50/70 border border-sky-100 rounded-xl flex items-center gap-2.5">
-                                        <div className="p-2 bg-sky-500 text-white rounded-lg shadow-2xs">
-                                            <Droplets size={14} />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <div className="text-[9px] font-bold text-sky-800 uppercase tracking-tight">Air SPAM / PDAM</div>
-                                            <div className="text-xs font-extrabold text-slate-800 truncate">
-                                                {statusAir === PaymentStatus.PAID ? 'Lunas / Lancar' : 'Ada Tunggakan'}
+                                    <div className="p-2.5 sm:p-3 bg-sky-50/80 border border-sky-100 rounded-2xl flex flex-col justify-between gap-1.5">
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <div className="p-1.5 bg-sky-500 text-white rounded-lg shadow-2xs shrink-0">
+                                                <Droplets size={13} />
                                             </div>
+                                            <span className="text-[9px] font-black text-sky-900 uppercase tracking-tight truncate">Air SPAM</span>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-0.5">
+                                            <span className="text-[10px] text-slate-500 font-bold">PDAM</span>
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                                statusAir === PaymentStatus.PAID 
+                                                    ? 'bg-emerald-100 text-emerald-800' 
+                                                    : 'bg-rose-100 text-rose-800'
+                                            }`}>
+                                                {statusAir === PaymentStatus.PAID ? 'Lancar' : 'Menunggak'}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl flex items-center gap-2.5">
-                                        <div className="p-2 bg-emerald-500 text-white rounded-lg shadow-2xs">
-                                            <CheckCircle2 size={14} />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <div className="text-[9px] font-bold text-emerald-800 uppercase tracking-tight">Sanitasi SPALDT</div>
-                                            <div className="text-xs font-extrabold text-slate-800 truncate">
-                                                {hasStbmIssue ? 'Perlu Cek' : 'Biotank Normal'}
+                                    <div className="p-2.5 sm:p-3 bg-emerald-50/80 border border-emerald-100 rounded-2xl flex flex-col justify-between gap-1.5">
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <div className="p-1.5 bg-emerald-500 text-white rounded-lg shadow-2xs shrink-0">
+                                                <CheckCircle2 size={13} />
                                             </div>
+                                            <span className="text-[9px] font-black text-emerald-900 uppercase tracking-tight truncate">Sanitasi</span>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-0.5">
+                                            <span className="text-[10px] text-slate-500 font-bold">Biotank</span>
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                                hasStbmIssue 
+                                                    ? 'bg-rose-100 text-rose-800' 
+                                                    : 'bg-emerald-100 text-emerald-800'
+                                            }`}>
+                                                {hasStbmIssue ? 'Perlu Cek' : 'Normal'}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    <div className="p-3 bg-amber-50/70 border border-amber-100 rounded-xl flex items-center gap-2.5">
-                                        <div className="p-2 bg-amber-500 text-white rounded-lg shadow-2xs">
-                                            <Trash2 size={14} />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <div className="text-[9px] font-bold text-amber-800 uppercase tracking-tight">Sampah TPS3R</div>
-                                            <div className="text-xs font-extrabold text-slate-800 truncate">
-                                                {statusSampah === PaymentStatus.PAID ? 'Terlayani Baik' : 'Ada Tagihan'}
+                                    <div className="p-2.5 sm:p-3 bg-amber-50/80 border border-amber-100 rounded-2xl flex flex-col justify-between gap-1.5">
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <div className="p-1.5 bg-amber-500 text-white rounded-lg shadow-2xs shrink-0">
+                                                <Trash2 size={13} />
                                             </div>
+                                            <span className="text-[9px] font-black text-amber-900 uppercase tracking-tight truncate">Sampah</span>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-0.5">
+                                            <span className="text-[10px] text-slate-500 font-bold">TPS3R</span>
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                                statusSampah === PaymentStatus.PAID 
+                                                    ? 'bg-emerald-100 text-emerald-800' 
+                                                    : 'bg-amber-100 text-amber-800'
+                                            }`}>
+                                                {statusSampah === PaymentStatus.PAID ? 'Terkelola' : 'Ada Tagihan'}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl flex items-center gap-2.5">
-                                        <div className="p-2 bg-indigo-500 text-white rounded-lg shadow-2xs">
-                                            <ShieldCheck size={14} />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <div className="text-[9px] font-bold text-indigo-800 uppercase tracking-tight">Kondisi Hunian</div>
-                                            <div className="text-xs font-extrabold text-slate-800 truncate">
-                                                {isSafe ? 'Lingkungan Aman' : 'Ada Laporan'}
+                                    <div className="p-2.5 sm:p-3 bg-indigo-50/80 border border-indigo-100 rounded-2xl flex flex-col justify-between gap-1.5">
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <div className="p-1.5 bg-indigo-500 text-white rounded-lg shadow-2xs shrink-0">
+                                                <ShieldCheck size={13} />
                                             </div>
+                                            <span className="text-[9px] font-black text-indigo-900 uppercase tracking-tight truncate">Lingkungan</span>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-0.5">
+                                            <span className="text-[10px] text-slate-500 font-bold">Keamanan</span>
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                                isSafe 
+                                                    ? 'bg-indigo-100 text-indigo-800' 
+                                                    : 'bg-rose-100 text-rose-800'
+                                            }`}>
+                                                {isSafe ? 'Aman' : 'Laporan'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -712,35 +752,35 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                     </div>
 
                     {/* Modern Footer Actions */}
-                    <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 shrink-0">
+                    <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-100 shrink-0">
                         {isAdmin ? (
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
                                 <button 
                                     onClick={() => { onClose(); onEditHouse?.(house); }} 
-                                    className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95"
+                                    className="flex items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer"
                                 >
-                                    <Edit size={16}/> Edit Data
+                                    <Edit size={16}/> <span>Edit Data</span>
                                 </button>
                                 <button 
                                     onClick={() => { onClose(); onPayDues?.(house); }} 
-                                    className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95"
+                                    className="flex items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer"
                                 >
-                                    <DollarSign size={16}/> Kelola Iuran
+                                    <DollarSign size={16}/> <span>Kelola Iuran</span>
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                                 <button 
                                     onClick={() => { onClose(); onReportHouse?.(house); }} 
-                                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-rose-200 active:scale-95 transition-all"
+                                    className="w-full flex items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-rose-200 active:scale-95 transition-all cursor-pointer"
                                 >
-                                    <ShieldAlert size={18}/> Lapor Masalah
+                                    <ShieldAlert size={16}/> <span>Lapor Masalah</span>
                                 </button>
                                 <button
                                     onClick={() => setIsQrisModalOpen(true)}
-                                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all"
+                                    className="w-full flex items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all cursor-pointer"
                                 >
-                                    <QrCode size={18}/> Bayar QRIS
+                                    <QrCode size={16} className="text-emerald-400"/> <span>Bayar QRIS</span>
                                 </button>
                             </div>
                         )}
@@ -765,6 +805,12 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
             />
         </>
     );
+
+    if (typeof document !== 'undefined') {
+        return createPortal(modalContent, document.body);
+    }
+
+    return modalContent;
 };
 
 // --- Sub-components for Detail Modal ---
@@ -2052,8 +2098,8 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
       )}
       
       {/* CCTV Modal */}
-      {activeCctv && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+      {activeCctv && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md pointer-events-auto">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -2153,12 +2199,13 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
               </div>
             </div>
           </motion.div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Facility Info Modal */}
-      {selectedFacility && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+      {selectedFacility && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm pointer-events-auto">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -2200,14 +2247,15 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
             </div>
             <div className="p-6 bg-slate-50 border-t border-slate-200">
               <button 
-                onClick={() => setSelectedFacility(null)}
+                onClick={() => setSelectedFacility(null)} 
                 className="w-full bg-slate-800 text-white py-3 rounded-xl font-black uppercase tracking-widest hover:bg-slate-700 transition-all shadow-lg"
               >
                 Tutup Informasi
               </button>
             </div>
           </motion.div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
