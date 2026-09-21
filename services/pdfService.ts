@@ -5229,13 +5229,19 @@ export const generatePDAMInstallationReportPDF = async (
   const margin = 15;
   let y = margin;
 
-  // Filter target houses
-  const targetHouses = houses.filter(h => {
-    const status = h.pdamStatus || 'Terpasang';
-    if (filterType === 'Belum Terpasang') return status === 'Belum Terpasang';
-    if (filterType === 'Dalam Proses Pengajuan') return status === 'Dalam Proses Pengajuan';
-    return true;
-  });
+  // Filter target houses and sort naturally from C5, C7, C8... by house number
+  const targetHouses = houses
+    .filter(h => {
+      const status = h.pdamStatus || 'Terpasang';
+      if (filterType === 'Belum Terpasang') return status === 'Belum Terpasang';
+      if (filterType === 'Dalam Proses Pengajuan') return status === 'Dalam Proses Pengajuan';
+      return true;
+    })
+    .sort((a, b) => {
+      const blockComp = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true, sensitivity: 'base' });
+      if (blockComp !== 0) return blockComp;
+      return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true, sensitivity: 'base' });
+    });
 
   // 1. Kop Surat Resmi RT 02
   doc.setFont("helvetica", "bold");

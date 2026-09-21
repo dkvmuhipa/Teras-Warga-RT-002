@@ -81,7 +81,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
   const [isSavingSettings, setIsSavingSettings] = useState<boolean>(false);
 
   // Batch Recording State
-  const [batchBlock, setBatchBlock] = useState<string>('A');
+  const [batchBlock, setBatchBlock] = useState<string>('C5');
   const [batchInputs, setBatchInputs] = useState<Record<string, { currentReading: number; prevReading: number }>>({});
   const [isSavingBatch, setIsSavingBatch] = useState<boolean>(false);
 
@@ -143,18 +143,24 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     return map;
   }, [readings]);
 
-  // List of distinct blocks from houses
+  // List of distinct blocks from houses, sorted naturally from C5 onwards
   const blocks = useMemo(() => {
     const set = new Set<string>();
     houses.forEach(h => {
       if (h.block) set.add(h.block.toUpperCase());
     });
-    return Array.from(set).sort();
+    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
   }, [houses]);
 
-  // Merge houses with readings
+  // Merge houses with readings, sorted naturally starting from C5 (C5, C7, C8... by house number)
   const mergedHouseData = useMemo(() => {
-    return houses.map(house => {
+    const sortedHouses = [...houses].sort((a, b) => {
+      const blockComp = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true, sensitivity: 'base' });
+      if (blockComp !== 0) return blockComp;
+      return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true, sensitivity: 'base' });
+    });
+
+    return sortedHouses.map(house => {
       const houseId = `${house.block}-${house.number}`;
       const reading = readingsMap.get(houseId) || readingsMap.get(`${house.block}${house.number}`);
       return {
@@ -257,6 +263,11 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         if (!id.includes(q) && !name.includes(q) && !meter.includes(q) && !notes.includes(q)) return false;
       }
       return true;
+    })
+    .sort((a, b) => {
+      const blockComp = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true, sensitivity: 'base' });
+      if (blockComp !== 0) return blockComp;
+      return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true, sensitivity: 'base' });
     });
   }, [houses, pdamStatusFilter, pdamBlockFilter, pdamSearchQuery]);
 
@@ -303,7 +314,13 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
   };
 
   const handleCopyPDAMWhatsApp = () => {
-    const uninstalled = houses.filter(h => (h.pdamStatus || 'Terpasang') === 'Belum Terpasang');
+    const uninstalled = houses
+      .filter(h => (h.pdamStatus || 'Terpasang') === 'Belum Terpasang')
+      .sort((a, b) => {
+        const blockComp = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true, sensitivity: 'base' });
+        if (blockComp !== 0) return blockComp;
+        return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true, sensitivity: 'base' });
+      });
     const lines = uninstalled.map((h, i) => `${i + 1}. Blok ${h.block}-${h.number} - ${h.headOfFamily || 'Warga'} (HP: ${h.phone || '-'})`);
     const message = `Halo Pelayanan Pelanggan PDAM Kota Palu,\n\nKami dari Pengurus RT 002 / RW 020 Perumahan Huntap Tondo 2 ingin mengajukan koordinasi permohonan pemasangan baru unit meteran air bagi ${uninstalled.length} rumah warga kami yang saat ini BELUM TERPASANG:\n\n${lines.join('\n')}\n\nMohon arahan dan penjadwalan survei lapangan dari tim teknis PDAM Kota Palu. Terima kasih.\n\nPengurus RT 002 Huntap Tondo 2`;
     navigator.clipboard.writeText(message);
